@@ -1,0 +1,136 @@
+#include "lcd_driver.h"
+#include "lcd_config.h"
+#include "device/gpio.h"
+
+/* 测试屏幕好坏开这个宏 */
+/* #define USE_TEST_MODE     //推纯色 */
+
+#if TCFG_LCD_RGB_480x272
+
+#define LCD_DEV_SAMPLE  SAMP_YUV420
+
+static void lcd_480x272_backctrl(void *_data, u8 on)
+{
+    const struct lcd_platform_data *data = (const struct lcd_platform_data *)_data;
+    if (on) {
+        gpio_direction_output(data->lcd_io.backlight, data->lcd_io.backlight_value);
+    } else {
+        gpio_direction_output(data->lcd_io.backlight, !data->lcd_io.backlight_value);
+    }
+}
+
+static int lcd_480x272_init(void *_data)
+{
+    printf("lcd 480x272 8bits init ...\n");
+
+    return 0;
+}
+
+
+REGISTER_IMD_DEVICE_BEGIN(lcd_480x272_dev) = {
+    .info = {
+#ifdef USE_TEST_MODE
+        .test_mode 	     = true,
+#else
+        .test_mode 	     = false,
+#endif
+        .test_mode_color = 0xff0000,
+        .bg_color    	 = 0x00ff00,
+        .xres 			 = LCD_W,
+        .yres 			 = LCD_H,
+        .target_xres     = LCD_W,
+        .target_yres     = LCD_H,
+        .sample          = LCD_DEV_SAMPLE,
+        .format          = FORMAT_RGB888,
+        .interlaced_1st_filed = EVEN_FILED,
+        .interlaced_mode = INTERLACED_NONE,
+        .len 			 = LEN_256,
+        .rotate = ROTATE_0,
+        .adjust = {
+            .r_gain = 1.0,
+            .g_gain = 1.0,
+            .b_gain = 1.0,
+            .bright_gain = 1.0,
+            .contrast_gain = 1.0,
+            .saturation_gain = 1.0,
+            .mean = 128,
+            .angle = 0,
+            .mode = 0,
+        },
+
+        .in_swap        = false, //输入数据大小端
+        .out_swap       = false, //输出数据大小端
+        .in_fmt         = TCFG_LCD_RGB_INPUT_FORMAT,//LCD_IN_YUV422,
+        .out_fmt        = LCD_OUT_RGB888,
+        .dither_en      = false, //使能dither 0低位截断 1dither
+        .in_bt601       = false, //yuv422输入 转换0 bt601, 1 bt709
+        .out_bt601      = false, //yuv422输出 转换0 bt601, 1 bt709
+    },
+
+    .data_out_mode  = MODE_LE,//RGB565模式生效 RGB888调节swap
+
+    .dclk_set 		= CLK_EN,
+    .sync0_set      = SIGNAL_DEN | CLK_EN,
+    .sync1_set      = SIGNAL_VSYNC | CLK_NEGATIVE | CLK_EN,
+    .sync2_set      = SIGNAL_HSYNC | CLK_EN,
+
+    .set_io_hd      = TCFG_LCD_RGB_IO_HD_LEVEL,
+    .lcd_group      = PORT_GROUP_AA,//接口固定勿动
+#if TCFG_LCD_RGB_24BIT_ENABLE
+    .ncycle         = CYCLE_ONE,
+    .data_width     = PORT_24BITS,
+#else
+    .ncycle         = CYCLE_THREE,
+    .data_width     = PORT_8BITS,
+#endif
+    .clk_cfg        = PLL2_CLK_192M | DIVA_5 | DIVB_8,
+    .dclk_cfg       = DPI_CLK_STD_48M | DIVA_1 | DIVB_2,
+    .timing = {
+//下面的时间均指多少个时钟周期 调整de 或者行间隔可以调屏的大概效果
+#if TCFG_LCD_RGB_24BIT_ENABLE
+//小屏24bit测试可以
+#define  HBP					5     //行同步信号后肩 单位：clk
+#define  HFP					5     //行同步信号前肩 单位：clk
+#define  HSPW					950   //水平信号宽度   单位：clk
+#define  VSPW					2     //垂直信号宽度   单位：行
+#define  VBP        			4     //帧同步信号后肩 单位：行
+#define  VFP					82    //帧同步信号前肩 单位：行
+#else
+#define  HBP					10     //行同步信号后肩 单位：clk
+#define  HFP					10     //行同步信号前肩 单位：clk
+#define  HSPW					280    //水平信号宽度   单位：clk
+#define  VSPW					2      //垂直信号宽度   单位：行
+#define  VBP        			8      //帧同步信号后肩 单位：行
+#define  VFP					8      //帧同步信号前肩 单位：行
+#endif
+
+#if TCFG_LCD_RGB_24BIT_ENABLE
+        //以下信号均为高有效1 以下为固定公式勿动
+        .hori_total				= 480 * 1 + HBP + HFP + HSPW, //行总长 : 行像素*3 + 行同步信号后肩 + 行同步信号前肩 + 水平信号宽度
+        .hori_sync				= 480 * 1 + HBP + HFP, 		//行同步时间:  行像素*3 + 行同步信号后肩 + 行同步信号前肩
+#else //8bit
+        //以下信号均为高有效1 以下为固定公式勿动
+        .hori_total				= 480 * 3 + HBP + HFP + HSPW, //行总长 : 行像素*3 + 行同步信号后肩 + 行同步信号前肩 + 水平信号宽度
+        .hori_sync				= 480 * 3 + HBP + HFP, 		//行同步时间:  行像素*3 + 行同步信号后肩 + 行同步信号前肩?
+#endif
+        .hori_back_porth		= HBP,							//行同步信号后肩 (+HSPW?)
+        .vert_total				= VSPW + VBP + 272 + VFP, 	//帧总长: 垂直信号宽度 + 帧同步信号后肩 + 像素高 + 帧同步信号后肩
+        .vert_sync				= VSPW,							//帧于帧之间间隔多少个行中断:?
+        .vert_back_porth_odd	= VBP + VSPW, 					//帧信号开始的时候经过多少个行中断开始de: 帧同步信号后肩 +  水平信号宽度
+        .hori_pixel				= 480,//像素宽   480*3 = 1440
+        .vert_pixel				= 272,//像素高
+        .vert_back_porth_even	= 0,//推隔行数据才需要配置
+    },
+},
+REGISTER_IMD_DEVICE_END()
+
+REGISTER_LCD_DEVICE_DRIVE(lcd_dev)  = {
+    .logo       = "lcd_480x272",
+    .type       = LCD_RGB,
+    .init       = lcd_480x272_init,
+    .dev        = &lcd_480x272_dev,
+    .bl_ctrl    = lcd_480x272_backctrl,
+};
+
+#endif
+
