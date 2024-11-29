@@ -1,7 +1,7 @@
 /*Generate Code, Do NOT Edit!*/
 #include "lvgl.h"
-#include "gui_guider.h"
-#include "gui_timelines.h"
+#include "../gui_guider.h"
+#include "./gui_timelines.h"
 #include <stdio.h>
 
 //Init Timelines

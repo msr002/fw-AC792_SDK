@@ -655,4 +655,3 @@ void custom_init(lv_ui *ui)
 {
 
 }
-

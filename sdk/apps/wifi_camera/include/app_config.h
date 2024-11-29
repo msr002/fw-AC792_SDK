@@ -778,7 +778,9 @@
 //                                  LCD配置                                        //
 //*********************************************************************************//
 #if TCFG_LCD_ENABLE
+#ifdef CONFIG_UI_ENABLE
 #define USE_LVGL_V8_UI_DEMO
+#endif
 /* LV_DISP_UI_FB_NUM: LVGL UI绘制的FB帧显存个数 */
 /* 0:表示 LVGL UI直接在LCD显存上绘制,不需要额外的帧buffer (使用于UI刷新要求不高的方案)
  * 1:表示 LVGL UI 单独申请1块帧buffer
@@ -800,12 +802,12 @@
 
 //描述当前SDK能够兼容的UI项目模板最低版本
 #define COMPATIBLE_UI_PRJ_TEMPLATE_VERSION_MIN_MAJOR 1
-#define COMPATIBLE_UI_PRJ_TEMPLATE_VERSION_MIN_MINOR 2
+#define COMPATIBLE_UI_PRJ_TEMPLATE_VERSION_MIN_MINOR 3
 #define COMPATIBLE_UI_PRJ_TEMPLATE_VERSION_MIN_PATCH 0
 
 //描述当前SDK能够兼容的UI项目模板最高版本
 #define COMPATIBLE_UI_PRJ_TEMPLATE_VERSION_MAX_MAJOR 1
-#define COMPATIBLE_UI_PRJ_TEMPLATE_VERSION_MAX_MINOR 2
+#define COMPATIBLE_UI_PRJ_TEMPLATE_VERSION_MAX_MINOR 3
 #define COMPATIBLE_UI_PRJ_TEMPLATE_VERSION_MAX_PATCH 1
 
 

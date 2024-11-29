@@ -36,6 +36,7 @@ struct video_dec_hdl {
     u8 ff_fr_times;
     u8 fname[MAX_FILE_NAME_LEN];
     u8 need_move;
+    u8 volume;
     char cur_path[MAX_FILE_NAME_LEN];
     int wait;
     int timer;

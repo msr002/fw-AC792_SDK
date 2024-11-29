@@ -15,7 +15,6 @@ extern uint8_t lock_all_flag;
 extern void delete_file(uint8_t data);
 extern void lock_flie(uint8_t file_num, uint8_t lock);
 extern void exit_dec_setting_menu(void);
-extern void carnum_utf8_to_gb2312(const uint8_t *utf_8, uint8_t *gb2312_data, int selected_index);
 #if !LV_USE_GUIBUILDER_SIMULATOR
 extern void exit_sys_setting_menu(void);
 #endif
@@ -24,7 +23,6 @@ int cur_mode = 0;
 #endif
 
 
-extern bool update_date;
 #include "../../custom/custom.h"
 void events_init(lv_ui *ui)
 {
@@ -65,7 +63,11 @@ static void usb_slave_btn_pc_cam_event_handler(lv_event_t *e)
         {
             lv_obj_t *dest = ui->usb_slave_view_btnlist;
 #if !LV_USE_GUIBUILDER_SIMULATOR
+#ifdef CONFIG_VIDEO_IQ_TOOLS_ENABLE
+            usb_start(TCFG_USB_DEBUG_ID, MASSSTORAGE_CLASS | UVC_CLASS | CDC_CLASS);
+#else
             usb_start(TCFG_USB_DEBUG_ID, UVC_CLASS);
+#endif
 #endif
         }
         lv_obj_clear_flag(guider_ui.usb_slave_img_icon_pccam, LV_OBJ_FLAG_HIDDEN);
@@ -161,7 +163,7 @@ static void video_rec_view_scan_event_handler(lv_event_t *e)
 #endif
             }
         }
-        if (*key == LV_KEY_RIGHT) {
+        if (*key == LV_KEY_RIGHT || *key == LV_KEY_BACKSPACE) {
             gui_scr_t *screen = gui_scr_get(GUI_SCREEN_VIDEO_PHOTO);
             if (screen == NULL) {
                 screen = gui_scr_create(GUI_SCREEN_VIDEO_PHOTO, "video_photo", guider_ui.video_photo, (gui_scr_setup_cb_t)setup_scr_video_photo, (gui_scr_unload_cb_t)unload_scr_video_photo);
@@ -749,7 +751,6 @@ static void video_rec_view_submenu_event_handler(lv_event_t *e)
             lv_obj_t *dest = ui->video_rec_view_submenu;
             printf(">>>>return rec menu\n");
             int flag = 0;
-            unsigned char *carnumber_cn =  lvgl_module_msg_get_ptr(GUI_MODEL_VIDEO_REC_MSG_ID_CAR_NUNBER, 16);//车牌
 
             //更新菜单设置项
             switch (rec_subpage_data.now_subpage) {
@@ -955,23 +956,7 @@ static void video_rec_view_submenu_event_handler(lv_event_t *e)
                 break;
                 case SUBPAGE_FUNKEY4: {
                     printf("enter SUBPAGE_CARNUM SUBPAGE_FUNKEY4\n");
-                    lv_dropdown_get_selected_str(ui->video_rec_ddlist_1, carnumber_cn, 4);
-                    lv_dropdown_get_selected_str(ui->video_rec_ddlist_2, &carnumber_cn[3], 2);
-                    lv_dropdown_get_selected_str(ui->video_rec_ddlist_3, &carnumber_cn[4], 2);
-                    lv_dropdown_get_selected_str(ui->video_rec_ddlist_4, &carnumber_cn[5], 2);
-                    lv_dropdown_get_selected_str(ui->video_rec_ddlist_5, &carnumber_cn[6], 2);
-                    lv_dropdown_get_selected_str(ui->video_rec_ddlist_6, &carnumber_cn[7], 2);
-                    lv_dropdown_get_selected_str(ui->video_rec_ddlist_7, &carnumber_cn[8], 2);
-                    printf("[chili] %s carnumber_cn:%s   \n", __func__, carnumber_cn);
-                    lvgl_module_msg_send_ptr(carnumber_cn, 0);
-                    int  selected_idx = lv_dropdown_get_selected(ui->video_rec_ddlist_1);
-                    db_update("proc", selected_idx);
-                    unsigned char gb2312Data[16] = {0};
-                    carnum_utf8_to_gb2312((uint8_t *)carnumber_cn, (uint8_t *)gb2312Data, selected_idx);
-                    uint32_t *carnum_p = gb2312Data;
-                    db_update("cna", carnum_p[0]);
-                    db_update("cnb", carnum_p[1]);
-                    // printf("p0: %x, p1: %x, p2: %x\n", );
+                    set_carnum();
                 }
                 break;
                 default:
@@ -1163,13 +1148,18 @@ static void video_rec_view_carnum_event_handler(lv_event_t *e)
     break;
     case LV_EVENT_KEY: {
         uint32_t *key = lv_event_get_param(e);
-        if (*key == LV_KEY_HOME || *key == LV_KEY_LEFT || *key == LV_KEY_RIGHT) {
+        if (*key == LV_KEY_HOME || *key == LV_KEY_LEFT) {
             lv_obj_add_flag(guider_ui.video_rec_view_submenu, LV_OBJ_FLAG_HIDDEN);
         }
-        if (*key == LV_KEY_HOME || *key == LV_KEY_LEFT || *key == LV_KEY_RIGHT) {
+        if (*key == LV_KEY_HOME || *key == LV_KEY_LEFT) {
             //custom code video_rec_view_submenu
             {
                 lv_obj_t *dest = ui->video_rec_view_submenu;
+                if (rec_subpage_data.now_subpage == SUBPAGE_CARNUM) {
+                    printf("--->key menu set car num<---\n");
+                    set_carnum();
+                }
+
                 //添加菜单设置项到组内，因为在进入子菜单时从组内移出了
                 lv_obj_t *menu_obj = NULL;
                 uint32_t menu_cnt = lv_obj_get_child_cnt(ui->video_rec_view_menu);
@@ -1254,6 +1244,8 @@ static void sys_prompt_img_warn_event_handler(lv_event_t *e)
             }
             if (guider_ui.sys_prompt_del == false && lv_obj_is_valid(guider_ui.sys_prompt)) {
                 lv_obj_add_flag(guider_ui.sys_prompt, LV_OBJ_FLAG_HIDDEN);
+                unload_scr_sys_prompt(&guider_ui);
+                lv_obj_clean(guider_ui.sys_prompt);
             }
 
         }
@@ -1698,7 +1690,6 @@ static void sys_setting_view_submenu_event_handler(lv_event_t *e)
             lv_obj_t *dest = ui->sys_setting_view_submenu;
 
             int format_err;
-            char time_buf[8] = {0};
 
             //更新菜单设置项
             switch (my_sysmenu_subpage.now_subpage) {
@@ -1775,32 +1766,7 @@ static void sys_setting_view_submenu_event_handler(lv_event_t *e)
                 i18n_refresh_all_texts();
                 break;
             case SUBPAGE_DATA:
-                printf(">>>set rtc time\n");
-                lv_dropdown_get_selected_str(ui->sys_setting_ddlist_year, &time_buf, 5);
-                printf("year: %s\n", time_buf);
-                db_update("datey", atoi(time_buf));
-                memset(time_buf, 0, sizeof(time_buf));
-                lv_dropdown_get_selected_str(ui->sys_setting_ddlist_month, &time_buf, 3);
-                printf("month: %s\n", time_buf);
-                db_update("datem", atoi(time_buf));
-                memset(time_buf, 0, sizeof(time_buf));
-                lv_dropdown_get_selected_str(ui->sys_setting_ddlist_day, &time_buf, 3);
-                printf("day: %s\n", time_buf);
-                db_update("dated", atoi(time_buf));
-                memset(time_buf, 0, sizeof(time_buf));
-                lv_dropdown_get_selected_str(ui->sys_setting_ddlist_hour, &time_buf, 3);
-                printf("hour: %s\n", time_buf);
-                db_update("dateh", atoi(time_buf));
-                memset(time_buf, 0, sizeof(time_buf));
-                lv_dropdown_get_selected_str(ui->sys_setting_ddlist_min, &time_buf, 3);
-                printf("min: %s\n", time_buf);
-                db_update("datemi", atoi(time_buf));
-                memset(time_buf, 0, sizeof(time_buf));
-                lv_dropdown_get_selected_str(ui->sys_setting_ddlist_sec, &time_buf, 3);
-                printf("sec: %s\n", time_buf);
-                db_update("dates", atoi(time_buf));
-
-                update_date = true;
+                set_rtc_time();
                 break;
             case SUBPAGE_TVSYSTEM:
                 switch (subpage_cur_btn) {
@@ -1999,13 +1965,19 @@ static void sys_setting_view_time_mun_event_handler(lv_event_t *e)
     break;
     case LV_EVENT_KEY: {
         uint32_t *key = lv_event_get_param(e);
-        if (*key == LV_KEY_LEFT || *key == LV_KEY_HOME || *key == LV_KEY_RIGHT) {
+        if (*key == LV_KEY_LEFT || *key == LV_KEY_HOME) {
             lv_obj_add_flag(guider_ui.sys_setting_view_submenu, LV_OBJ_FLAG_HIDDEN);
         }
-        if (*key == LV_KEY_LEFT || *key == LV_KEY_HOME || *key == LV_KEY_RIGHT) {
+        if (*key == LV_KEY_LEFT || *key == LV_KEY_HOME) {
             //custom code sys_setting_view_submenu
             {
                 lv_obj_t *dest = ui->sys_setting_view_submenu;
+
+                if (my_sysmenu_subpage.now_subpage == SUBPAGE_DATA) {
+                    printf("--->key menu set time<---\n");
+                    set_rtc_time();
+                }
+
                 //添加菜单设置项到组内，因为在进入子菜单时从组内移出了
                 lv_obj_t *menu_obj = NULL;
                 uint32_t menu_cnt = lv_obj_get_child_cnt(ui->sys_setting_view_menu);
@@ -2077,7 +2049,7 @@ static void video_photo_view_scan_event_handler(lv_event_t *e)
     switch (code) {
     case LV_EVENT_KEY: {
         uint32_t *key = lv_event_get_param(e);
-        if (*key == LV_KEY_RIGHT) {
+        if (*key == LV_KEY_RIGHT || *key == LV_KEY_BACKSPACE) {
             gui_scr_t *screen = gui_scr_get(GUI_SCREEN_VIDEO_DIR);
             if (screen == NULL) {
                 screen = gui_scr_create(GUI_SCREEN_VIDEO_DIR, "video_dir", guider_ui.video_dir, (gui_scr_setup_cb_t)setup_scr_video_dir, (gui_scr_unload_cb_t)unload_scr_video_dir);
@@ -3981,8 +3953,8 @@ static void sys_popwin_btn_1_event_handler(lv_event_t *e)
             lv_obj_t *dest = ui->sys_popwin;
             if (guider_ui.sys_popwin_del == false && lv_obj_is_valid(guider_ui.sys_popwin)) {
                 lv_obj_add_flag(guider_ui.sys_popwin, LV_OBJ_FLAG_HIDDEN);
-                /*unload_scr_sys_popwin(&guider_ui);*/
-                /*lv_obj_del(guider_ui.sys_popwin);*/
+                unload_scr_sys_popwin(&guider_ui);
+                lv_obj_clean(guider_ui.sys_popwin);
                 gui_msg_init_ui();
                 gui_msg_init_events();
                 delete_gui_timelines();
@@ -4008,8 +3980,8 @@ static void sys_popwin_btn_2_event_handler(lv_event_t *e)
             video_dec_edit_files(del);
             if (guider_ui.sys_popwin_del == false && lv_obj_is_valid(guider_ui.sys_popwin)) {
                 lv_obj_add_flag(guider_ui.sys_popwin, LV_OBJ_FLAG_HIDDEN);
-                /*unload_scr_sys_popwin(&guider_ui);*/
-                /*lv_obj_del(guider_ui.sys_popwin);*/
+                unload_scr_sys_popwin(&guider_ui);
+                lv_obj_clean(guider_ui.sys_popwin);
                 gui_msg_init_ui();
                 gui_msg_init_events();
                 delete_gui_timelines();

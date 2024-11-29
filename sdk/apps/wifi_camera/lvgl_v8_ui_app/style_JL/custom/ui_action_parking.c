@@ -43,9 +43,10 @@ void parking_page_show(int arg)
         lv_obj_add_flag(guider_ui.video_rec, LV_OBJ_FLAG_HIDDEN);
     }
     if (guider_ui.car_parking_del == false && lv_obj_is_valid(guider_ui.car_parking)) {
-        lv_obj_clear_flag(guider_ui.car_parking, LV_OBJ_FLAG_HIDDEN);
+        //  lv_obj_clear_flag(guider_ui.car_parking, LV_OBJ_FLAG_HIDDEN);
     } else {
         setup_scr_car_parking(&guider_ui);
+        lv_obj_clear_flag(guider_ui.car_parking, LV_OBJ_FLAG_HIDDEN);
         //顶层页面没有screen_load_start等事件，所以把页面色彩和透明度转换在这里做修改
 #if LV_DISP_UI_FB_NUM
         lv_obj_set_style_bg_opa(guider_ui.car_parking, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -69,6 +70,9 @@ void parking_page_hide(int arg)
     printf("[chili]: %s %d\n", __func__, __LINE__);
     if (guider_ui.car_parking_del == false && lv_obj_is_valid(guider_ui.car_parking)) {
         lv_obj_add_flag(guider_ui.car_parking, LV_OBJ_FLAG_HIDDEN);
+        unload_scr_car_parking(&guider_ui);
+        lv_obj_clean(guider_ui.car_parking);
+
     }
     if (guider_ui.video_rec_del == false && lv_obj_is_valid(guider_ui.video_rec)) {
         lv_obj_clear_flag(guider_ui.video_rec, LV_OBJ_FLAG_HIDDEN);

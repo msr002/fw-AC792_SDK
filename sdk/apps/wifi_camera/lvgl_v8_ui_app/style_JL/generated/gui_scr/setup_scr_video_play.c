@@ -126,11 +126,11 @@ lv_obj_t *setup_scr_video_play(lv_ui *ui)
     lv_obj_add_flag(ui->video_play_imgbtn_pause, LV_OBJ_FLAG_EVENT_BUBBLE);
     lv_group_add_obj(def_group, ui->video_play_imgbtn_pause);
 #if LV_USE_GUIBUILDER_SIMULATOR
-    lv_imgbtn_set_src(ui->video_play_imgbtn_pause, LV_IMGBTN_STATE_RELEASED, NULL, "A:\\wl83\\wifi_video_master\\ui_prj\\dvr_800x480\\import\\image\\video_play.png", NULL);
-    lv_imgbtn_set_src(ui->video_play_imgbtn_pause, LV_IMGBTN_STATE_CHECKED_RELEASED, NULL, "A:\\wl83\\wifi_video_master\\ui_prj\\dvr_800x480\\import\\image\\video_pause.png", NULL);
+    lv_imgbtn_set_src(ui->video_play_imgbtn_pause, LV_IMGBTN_STATE_RELEASED, NULL, "A:\\1111\\ac792\\ui_prj\\dvr_800x480\\import\\image\\video_play.png", NULL);
+    lv_imgbtn_set_src(ui->video_play_imgbtn_pause, LV_IMGBTN_STATE_CHECKED_RELEASED, NULL, "A:\\1111\\ac792\\ui_prj\\dvr_800x480\\import\\image\\video_pause.png", NULL);
 #else
-    lv_imgbtn_set_src(ui->video_play_imgbtn_pause, LV_IMGBTN_STATE_RELEASED, NULL, "mnt/sdfile/EXT_RESERVED/uipackres/ui/56000051.rle", NULL);
-    lv_imgbtn_set_src(ui->video_play_imgbtn_pause, LV_IMGBTN_STATE_CHECKED_RELEASED, NULL, "mnt/sdfile/EXT_RESERVED/uipackres/ui/56000052.rle", NULL);
+    lv_imgbtn_set_src(ui->video_play_imgbtn_pause, LV_IMGBTN_STATE_RELEASED, NULL, "mnt/sdfile/EXT_RESERVED/uipackres/ui/56000052.rle", NULL);
+    lv_imgbtn_set_src(ui->video_play_imgbtn_pause, LV_IMGBTN_STATE_CHECKED_RELEASED, NULL, "mnt/sdfile/EXT_RESERVED/uipackres/ui/56000053.rle", NULL);
 #endif
     lv_obj_add_flag(ui->video_play_imgbtn_pause, LV_OBJ_FLAG_CHECKABLE);
     ui->video_play_imgbtn_pause_label = lv_label_create(ui->video_play_imgbtn_pause);
@@ -200,11 +200,11 @@ lv_obj_t *setup_scr_video_play(lv_ui *ui)
     lv_obj_add_flag(ui->video_play_imgbtn_loud, LV_OBJ_FLAG_EVENT_BUBBLE);
     lv_group_add_obj(def_group, ui->video_play_imgbtn_loud);
 #if LV_USE_GUIBUILDER_SIMULATOR
-    lv_imgbtn_set_src(ui->video_play_imgbtn_loud, LV_IMGBTN_STATE_RELEASED, NULL, "A:\\wl83\\wifi_video_master\\ui_prj\\dvr_800x480\\import\\image\\volumeLouder_solid_1.png", NULL);
-    lv_imgbtn_set_src(ui->video_play_imgbtn_loud, LV_IMGBTN_STATE_CHECKED_RELEASED, NULL, "A:\\wl83\\wifi_video_master\\ui_prj\\dvr_800x480\\import\\image\\volumeMute_solid_1.png", NULL);
+    lv_imgbtn_set_src(ui->video_play_imgbtn_loud, LV_IMGBTN_STATE_RELEASED, NULL, "A:\\1111\\ac792\\ui_prj\\dvr_800x480\\import\\image\\volumeLouder_solid_1.png", NULL);
+    lv_imgbtn_set_src(ui->video_play_imgbtn_loud, LV_IMGBTN_STATE_CHECKED_RELEASED, NULL, "A:\\1111\\ac792\\ui_prj\\dvr_800x480\\import\\image\\volumeMute_solid_1.png", NULL);
 #else
-    lv_imgbtn_set_src(ui->video_play_imgbtn_loud, LV_IMGBTN_STATE_RELEASED, NULL, "mnt/sdfile/EXT_RESERVED/uipackres/ui/56000053.rle", NULL);
-    lv_imgbtn_set_src(ui->video_play_imgbtn_loud, LV_IMGBTN_STATE_CHECKED_RELEASED, NULL, "mnt/sdfile/EXT_RESERVED/uipackres/ui/56000054.rle", NULL);
+    lv_imgbtn_set_src(ui->video_play_imgbtn_loud, LV_IMGBTN_STATE_RELEASED, NULL, "mnt/sdfile/EXT_RESERVED/uipackres/ui/56000054.rle", NULL);
+    lv_imgbtn_set_src(ui->video_play_imgbtn_loud, LV_IMGBTN_STATE_CHECKED_RELEASED, NULL, "mnt/sdfile/EXT_RESERVED/uipackres/ui/56000055.rle", NULL);
 #endif
     lv_obj_add_flag(ui->video_play_imgbtn_loud, LV_OBJ_FLAG_CHECKABLE);
     ui->video_play_imgbtn_loud_label = lv_label_create(ui->video_play_imgbtn_loud);
@@ -403,15 +403,15 @@ lv_obj_t *setup_scr_video_play(lv_ui *ui)
     lv_obj_set_scrollbar_mode(ui->video_play_imgbtn_1, LV_SCROLLBAR_MODE_OFF);
     lv_group_add_obj(def_group, ui->video_play_imgbtn_1);
 #if LV_USE_GUIBUILDER_SIMULATOR
-    lv_imgbtn_set_src(ui->video_play_imgbtn_1, LV_IMGBTN_STATE_RELEASED, NULL, "A:\\wl83\\wifi_video_master\\ui_prj\\dvr_800x480\\import\\image\\PHOTO.png", NULL);
-    lv_imgbtn_set_src(ui->video_play_imgbtn_1, LV_IMGBTN_STATE_PRESSED, NULL, "A:\\wl83\\wifi_video_master\\ui_prj\\dvr_800x480\\import\\image\\photo_on.png", NULL);
-    lv_imgbtn_set_src(ui->video_play_imgbtn_1, LV_IMGBTN_STATE_CHECKED_RELEASED, NULL, "A:\\wl83\\wifi_video_master\\ui_prj\\dvr_800x480\\import\\image\\PHOTO.png", NULL);
-    lv_imgbtn_set_src(ui->video_play_imgbtn_1, LV_IMGBTN_STATE_CHECKED_PRESSED, NULL, "A:\\wl83\\wifi_video_master\\ui_prj\\dvr_800x480\\import\\image\\photo_on.png", NULL);
+    lv_imgbtn_set_src(ui->video_play_imgbtn_1, LV_IMGBTN_STATE_RELEASED, NULL, "A:\\1111\\ac792\\ui_prj\\dvr_800x480\\import\\image\\PHOTO.png", NULL);
+    lv_imgbtn_set_src(ui->video_play_imgbtn_1, LV_IMGBTN_STATE_PRESSED, NULL, "A:\\1111\\ac792\\ui_prj\\dvr_800x480\\import\\image\\photo_on.png", NULL);
+    lv_imgbtn_set_src(ui->video_play_imgbtn_1, LV_IMGBTN_STATE_CHECKED_RELEASED, NULL, "A:\\1111\\ac792\\ui_prj\\dvr_800x480\\import\\image\\PHOTO.png", NULL);
+    lv_imgbtn_set_src(ui->video_play_imgbtn_1, LV_IMGBTN_STATE_CHECKED_PRESSED, NULL, "A:\\1111\\ac792\\ui_prj\\dvr_800x480\\import\\image\\photo_on.png", NULL);
 #else
-    lv_imgbtn_set_src(ui->video_play_imgbtn_1, LV_IMGBTN_STATE_RELEASED, NULL, "mnt/sdfile/EXT_RESERVED/uipackres/ui/56000055.rle", NULL);
-    lv_imgbtn_set_src(ui->video_play_imgbtn_1, LV_IMGBTN_STATE_PRESSED, NULL, "mnt/sdfile/EXT_RESERVED/uipackres/ui/56000056.rle", NULL);
-    lv_imgbtn_set_src(ui->video_play_imgbtn_1, LV_IMGBTN_STATE_CHECKED_RELEASED, NULL, "mnt/sdfile/EXT_RESERVED/uipackres/ui/56000055.rle", NULL);
-    lv_imgbtn_set_src(ui->video_play_imgbtn_1, LV_IMGBTN_STATE_CHECKED_PRESSED, NULL, "mnt/sdfile/EXT_RESERVED/uipackres/ui/56000056.rle", NULL);
+    lv_imgbtn_set_src(ui->video_play_imgbtn_1, LV_IMGBTN_STATE_RELEASED, NULL, "mnt/sdfile/EXT_RESERVED/uipackres/ui/56000056.rle", NULL);
+    lv_imgbtn_set_src(ui->video_play_imgbtn_1, LV_IMGBTN_STATE_PRESSED, NULL, "mnt/sdfile/EXT_RESERVED/uipackres/ui/56000057.rle", NULL);
+    lv_imgbtn_set_src(ui->video_play_imgbtn_1, LV_IMGBTN_STATE_CHECKED_RELEASED, NULL, "mnt/sdfile/EXT_RESERVED/uipackres/ui/56000056.rle", NULL);
+    lv_imgbtn_set_src(ui->video_play_imgbtn_1, LV_IMGBTN_STATE_CHECKED_PRESSED, NULL, "mnt/sdfile/EXT_RESERVED/uipackres/ui/56000057.rle", NULL);
 #endif
     lv_obj_add_flag(ui->video_play_imgbtn_1, LV_OBJ_FLAG_CHECKABLE);
     ui->video_play_imgbtn_1_label = lv_label_create(ui->video_play_imgbtn_1);
@@ -480,15 +480,15 @@ lv_obj_t *setup_scr_video_play(lv_ui *ui)
     lv_obj_set_scrollbar_mode(ui->video_play_imgbtn_2, LV_SCROLLBAR_MODE_OFF);
     lv_group_add_obj(def_group, ui->video_play_imgbtn_2);
 #if LV_USE_GUIBUILDER_SIMULATOR
-    lv_imgbtn_set_src(ui->video_play_imgbtn_2, LV_IMGBTN_STATE_RELEASED, NULL, "A:\\wl83\\wifi_video_master\\ui_prj\\dvr_800x480\\import\\image\\RETURN.png", NULL);
-    lv_imgbtn_set_src(ui->video_play_imgbtn_2, LV_IMGBTN_STATE_PRESSED, NULL, "A:\\wl83\\wifi_video_master\\ui_prj\\dvr_800x480\\import\\image\\return_on.png", NULL);
-    lv_imgbtn_set_src(ui->video_play_imgbtn_2, LV_IMGBTN_STATE_CHECKED_RELEASED, NULL, "A:\\wl83\\wifi_video_master\\ui_prj\\dvr_800x480\\import\\image\\RETURN.png", NULL);
-    lv_imgbtn_set_src(ui->video_play_imgbtn_2, LV_IMGBTN_STATE_CHECKED_PRESSED, NULL, "A:\\wl83\\wifi_video_master\\ui_prj\\dvr_800x480\\import\\image\\return_on.png", NULL);
+    lv_imgbtn_set_src(ui->video_play_imgbtn_2, LV_IMGBTN_STATE_RELEASED, NULL, "A:\\1111\\ac792\\ui_prj\\dvr_800x480\\import\\image\\RETURN.png", NULL);
+    lv_imgbtn_set_src(ui->video_play_imgbtn_2, LV_IMGBTN_STATE_PRESSED, NULL, "A:\\1111\\ac792\\ui_prj\\dvr_800x480\\import\\image\\return_on.png", NULL);
+    lv_imgbtn_set_src(ui->video_play_imgbtn_2, LV_IMGBTN_STATE_CHECKED_RELEASED, NULL, "A:\\1111\\ac792\\ui_prj\\dvr_800x480\\import\\image\\RETURN.png", NULL);
+    lv_imgbtn_set_src(ui->video_play_imgbtn_2, LV_IMGBTN_STATE_CHECKED_PRESSED, NULL, "A:\\1111\\ac792\\ui_prj\\dvr_800x480\\import\\image\\return_on.png", NULL);
 #else
-    lv_imgbtn_set_src(ui->video_play_imgbtn_2, LV_IMGBTN_STATE_RELEASED, NULL, "mnt/sdfile/EXT_RESERVED/uipackres/ui/56000057.rle", NULL);
-    lv_imgbtn_set_src(ui->video_play_imgbtn_2, LV_IMGBTN_STATE_PRESSED, NULL, "mnt/sdfile/EXT_RESERVED/uipackres/ui/56000058.rle", NULL);
-    lv_imgbtn_set_src(ui->video_play_imgbtn_2, LV_IMGBTN_STATE_CHECKED_RELEASED, NULL, "mnt/sdfile/EXT_RESERVED/uipackres/ui/56000057.rle", NULL);
-    lv_imgbtn_set_src(ui->video_play_imgbtn_2, LV_IMGBTN_STATE_CHECKED_PRESSED, NULL, "mnt/sdfile/EXT_RESERVED/uipackres/ui/56000058.rle", NULL);
+    lv_imgbtn_set_src(ui->video_play_imgbtn_2, LV_IMGBTN_STATE_RELEASED, NULL, "mnt/sdfile/EXT_RESERVED/uipackres/ui/56000058.rle", NULL);
+    lv_imgbtn_set_src(ui->video_play_imgbtn_2, LV_IMGBTN_STATE_PRESSED, NULL, "mnt/sdfile/EXT_RESERVED/uipackres/ui/56000059.rle", NULL);
+    lv_imgbtn_set_src(ui->video_play_imgbtn_2, LV_IMGBTN_STATE_CHECKED_RELEASED, NULL, "mnt/sdfile/EXT_RESERVED/uipackres/ui/56000058.rle", NULL);
+    lv_imgbtn_set_src(ui->video_play_imgbtn_2, LV_IMGBTN_STATE_CHECKED_PRESSED, NULL, "mnt/sdfile/EXT_RESERVED/uipackres/ui/56000059.rle", NULL);
 #endif
     lv_obj_add_flag(ui->video_play_imgbtn_2, LV_OBJ_FLAG_CHECKABLE);
     ui->video_play_imgbtn_2_label = lv_label_create(ui->video_play_imgbtn_2);
@@ -556,9 +556,9 @@ lv_obj_t *setup_scr_video_play(lv_ui *ui)
     lv_group_add_obj(def_group, ui->video_play_img_prev_file);
     lv_obj_add_flag(ui->video_play_img_prev_file, LV_OBJ_FLAG_CLICKABLE);
 #if LV_USE_GUIBUILDER_SIMULATOR
-    lv_img_set_src(ui->video_play_img_prev_file, "A:\\wl83\\wifi_video_master\\ui_prj\\dvr_800x480\\import\\image\\skip_previous.png");
+    lv_img_set_src(ui->video_play_img_prev_file, "A:\\1111\\ac792\\ui_prj\\dvr_800x480\\import\\image\\skip_previous.png");
 #else
-    lv_img_set_src(ui->video_play_img_prev_file, "mnt/sdfile/EXT_RESERVED/uipackres/ui/56000059.rle");
+    lv_img_set_src(ui->video_play_img_prev_file, "mnt/sdfile/EXT_RESERVED/uipackres/ui/5600005a.rle");
 #endif
     lv_img_set_pivot(ui->video_play_img_prev_file, 0, 0);
     lv_img_set_angle(ui->video_play_img_prev_file, 0);
@@ -593,9 +593,9 @@ lv_obj_t *setup_scr_video_play(lv_ui *ui)
     lv_group_add_obj(def_group, ui->video_play_img_next_file);
     lv_obj_add_flag(ui->video_play_img_next_file, LV_OBJ_FLAG_CLICKABLE);
 #if LV_USE_GUIBUILDER_SIMULATOR
-    lv_img_set_src(ui->video_play_img_next_file, "A:\\wl83\\wifi_video_master\\ui_prj\\dvr_800x480\\import\\image\\skip_next.png");
+    lv_img_set_src(ui->video_play_img_next_file, "A:\\1111\\ac792\\ui_prj\\dvr_800x480\\import\\image\\skip_next.png");
 #else
-    lv_img_set_src(ui->video_play_img_next_file, "mnt/sdfile/EXT_RESERVED/uipackres/ui/5600005a.rle");
+    lv_img_set_src(ui->video_play_img_next_file, "mnt/sdfile/EXT_RESERVED/uipackres/ui/5600005b.rle");
 #endif
     lv_img_set_pivot(ui->video_play_img_next_file, 0, 0);
     lv_img_set_angle(ui->video_play_img_next_file, 0);

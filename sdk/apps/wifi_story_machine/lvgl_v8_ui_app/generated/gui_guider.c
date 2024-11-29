@@ -1,8 +1,9 @@
 /*Generate Code, Do NOT Edit!*/
 #include "lvgl.h"
 #include <stdio.h>
-#include "gui_guider.h"
-#include "gui_timelines.h"
+#include "./gui_guider.h"
+#include "./gui_timelines/gui_timelines.h"
+#include "./gui_group/gui_group.h"
 
 void ui_load_scr_anim(lv_ui *ui, gui_scr_t *screen, lv_scr_load_anim_t anim_type,	uint32_t time,
                       uint32_t delay, bool is_clean, bool auto_del, bool is_push_satck)
@@ -51,9 +52,9 @@ void ui_init_style(lv_style_t *style)
 
 void init_scr_del_flag(lv_ui *ui)
 {
-    ui->boot_animation_del = true;
     ui->audio_del = true;
     ui->camera_del = true;
+    ui->boot_animation_del = true;
     ui->home_del = true;
     ui->key_del = true;
     ui->camera1_mipi_del = true;
@@ -74,6 +75,7 @@ void setup_ui(lv_ui *ui)
     init_scr_del_flag(ui);
     gui_scr_t *scr = gui_scr_create(GUI_SCREEN_BOOT_ANIMATION, "boot_animation", ui->boot_animation, (gui_scr_setup_cb_t)setup_scr_boot_animation, (gui_scr_unload_cb_t)unload_scr_boot_animation);
     ui_load_scr_anim(ui, scr, LV_SCR_LOAD_ANIM_NONE, 0, 0, false, false, false);
+    gui_group_init();
 #if LV_USE_MSG
     gui_msg_init(ui);
 #endif

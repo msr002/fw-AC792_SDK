@@ -5,9 +5,9 @@
 extern "C" {
 #endif
 
-#include "gui_guider.h"
+#include "../gui_guider.h"
 #include "lvgl.h"
-#include "custom.h"
+#include "../../custom/custom.h"
 
 extern void init_gui_timelines(lv_ui *ui);
 extern void stop_gui_timelines();

@@ -4,9 +4,9 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-#include "gui_guider.h"
+#include "../gui_guider.h"
 #include "lvgl.h"
-#include "custom.h"
+#include "../../custom/custom.h"
 
 #ifdef __cplusplus
 }

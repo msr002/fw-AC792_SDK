@@ -42,9 +42,9 @@ lv_obj_t *setup_scr_car_parking(lv_ui *ui)
     lv_obj_set_scrollbar_mode(ui->car_parking_img_1, LV_SCROLLBAR_MODE_OFF);
     lv_obj_add_flag(ui->car_parking_img_1, LV_OBJ_FLAG_CLICKABLE);
 #if LV_USE_GUIBUILDER_SIMULATOR
-    lv_img_set_src(ui->car_parking_img_1, "A:\\wl83\\wifi_video_master\\ui_prj\\dvr_800x480\\import\\image\\video_page\\astern.png");
+    lv_img_set_src(ui->car_parking_img_1, "A:\\1111\\ac792\\ui_prj\\dvr_800x480\\import\\image\\video_page\\astern.png");
 #else
-    lv_img_set_src(ui->car_parking_img_1, "mnt/sdfile/EXT_RESERVED/uipackres/ui/56000031.rle");
+    lv_img_set_src(ui->car_parking_img_1, "mnt/sdfile/EXT_RESERVED/uipackres/ui/56000032.rle");
 #endif
     lv_img_set_pivot(ui->car_parking_img_1, 0, 0);
     lv_img_set_angle(ui->car_parking_img_1, 0);

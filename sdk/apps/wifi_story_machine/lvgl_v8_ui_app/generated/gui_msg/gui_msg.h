@@ -5,9 +5,9 @@
 extern "C" {
 #endif
 #include <stdlib.h>
-#include "gui_guider.h"
+#include "../gui_guider.h"
 #include "lvgl.h"
-#include "custom.h"
+#include "../../custom/custom.h"
 #include "time.h"
 
 typedef enum {
@@ -58,50 +58,54 @@ typedef union {
 } gui_msg_data_t;
 
 typedef enum {
-    GUI_BLUE_MSG_ID = 0,
-    GUI_BLUETOOTH_MSG_ID,
-    GUI_KEY_MSG_ID,
-    GUI_LOCAL_MUSIC_VOLUME_MSG_ID,
-    GUI_RECORDER_VOLUME_MSG_ID,
-    GUI_SD_CARD_MSG_ID,
-    GUI_WIFI_STATE_LABEL_MSG_ID,
+    GUI_BLUETOOTH_MSG_ID = 0x0001,
+    GUI_KEY_MSG_ID = 0x0003,
+    GUI_LOCAL_MUSIC_VOLUME_MSG_ID = 0x0005,
+    GUI_RECORDER_VOLUME_MSG_ID = 0x0009,
+    GUI_SD_CARD_MSG_ID = 0x000B,
+    GUI_WIFI_STATE_LABEL_MSG_ID = 0x000D,
+    GUI_BLUE_MSG_ID = 0x0010,
 } gui_msg_id_t;
 
 typedef struct {
-    void *data;
+    lv_subject_t *subject;
     int32_t msg_id;
 } gui_msg_sub_t;
 
-#if LV_USE_MSG
 typedef struct {
-    uint32_t msg_id;
-    lv_msg_subscribe_cb_t callback;
-    void *user_data;
-    void *_priv_data;       /*Internal: used only store 'obj' in lv_obj_subscribe*/
-} gui_msg_sub_dsc_t;
-#endif
+    int32_t msg_id;
+    char is_subscribe;
+    char is_unsubscribe;
+} _gui_msg_status_t;
 
 extern void gui_msg_init(lv_ui *ui);
 extern void gui_msg_init_ui();
 extern void gui_msg_init_events();
 extern void gui_msg_unsubscribe();
 extern gui_msg_status_t gui_msg_send(int32_t msg_id, void *value, int32_t len);
+extern GUI_WEAKREF gui_msg_data_t *gui_msg_get(int32_t msg_id);
+extern gui_msg_data_t *gui_msg_get_guider(int32_t msg_id);
 extern GUI_WEAKREF void gui_msg_action_change(int32_t msg_id, gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type);
 extern void gui_msg_action_change_guider(int32_t msg_id, gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type);
 extern GUI_WEAKREF void gui_msg_subscribe_change(int32_t msg_id, gui_msg_subscribe_t sub_type);
 extern void gui_msg_subscribe_change_guider(int32_t msg_id, gui_msg_subscribe_t sub_type);
-extern void *gui_msg_insert_list(lv_ll_t *ll_p, void *data);
-extern bool gui_msg_id_is_in_list(lv_ll_t *ll_p, int32_t msg_id);
+extern lv_subject_t *gui_msg_get_subject(int32_t msg_id);
+extern gui_msg_sub_t *gui_msg_get_sub(int32_t msg_id);
+extern gui_msg_sub_t *gui_msg_create_sub(int32_t msg_id);
 extern gui_msg_data_t *gui_msg_get_data();
 
-#if LV_USE_MSG
-#include "gui_blue_msg.h"
-#include "gui_bluetooth_msg.h"
-#include "gui_key_msg.h"
-#include "gui_local_music_volume_msg.h"
-#include "gui_recorder_volume_msg.h"
-#include "gui_sd_card_msg.h"
-#include "gui_wifi_state_label_msg.h"
+extern void gui_msg_set_label_text_by_string_cb(lv_observer_t *observer, lv_subject_t *subject);
+extern void gui_msg_set_slider_starting_value_by_int32_cb(lv_observer_t *observer, lv_subject_t *subject);
+extern void gui_msg_set_bar_bar_value_by_int32_cb(lv_observer_t *observer, lv_subject_t *subject);
+extern void gui_msg_set_textarea_text_by_string_cb(lv_observer_t *observer, lv_subject_t *subject);
+#if LV_USE_OBSERVER
+#include "./gui_bluetooth_msg.h"
+#include "./gui_key_msg.h"
+#include "./gui_local_music_volume_msg.h"
+#include "./gui_recorder_volume_msg.h"
+#include "./gui_sd_card_msg.h"
+#include "./gui_wifi_state_label_msg.h"
+#include "./gui_blue_msg.h"
 #endif
 
 extern gui_msg_data_t guider_msg_data;

@@ -2,13 +2,12 @@
 #include "lvgl.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include "gui_guider.h"
-#include "events_init.h"
-#include "callback_handler.h"
-#include "gui_timelines.h"
-#include "custom.h"
+#include "../gui_guider.h"
+#include "../gui_events/events_init.h"
+#include "../gui_events/callback_handler.h"
+#include "../gui_timelines/gui_timelines.h"
+#include "../../custom/custom.h"
 
-static lv_obj_t *g_kb_wifi;
 static void kb_wifi_event_cb(lv_event_t *e)
 {
     lv_event_code_t code = lv_event_get_code(e);
@@ -31,6 +30,7 @@ __attribute__((unused)) static void ta_wifi_event_cb(lv_event_t *e)
         lv_keyboard_set_textarea(kb, NULL);
         lv_obj_move_background(kb);
         lv_obj_add_flag(kb, LV_OBJ_FLAG_HIDDEN);
+        lv_indev_reset(NULL, ta);
     }
 }
 
@@ -40,10 +40,13 @@ lv_obj_t *setup_scr_wifi(lv_ui *ui)
     ui->wifi = lv_obj_create(NULL);
 
     //Create keyboard on wifi
-    g_kb_wifi = lv_keyboard_create(ui->wifi);
-    lv_obj_add_event_cb(g_kb_wifi, kb_wifi_event_cb, LV_EVENT_ALL, NULL);
-    lv_obj_add_flag(g_kb_wifi, LV_OBJ_FLAG_HIDDEN);
-    lv_obj_set_style_text_font(g_kb_wifi, &lv_font_Merge_fonts_24, LV_PART_MAIN | LV_STATE_DEFAULT);
+    ui->g_kb_wifi = lv_keyboard_create(ui->wifi);
+    lv_obj_add_event_cb(ui->g_kb_wifi, kb_wifi_event_cb, LV_EVENT_ALL, NULL);
+    lv_obj_add_flag(ui->g_kb_wifi, LV_OBJ_FLAG_HIDDEN);
+    lv_obj_set_style_text_font(ui->g_kb_wifi, &lv_font_Merge_fonts_24, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_size(ui->g_kb_wifi, LV_PCT(100), LV_PCT(40));
+    lv_keyboard_set_mode(ui->g_kb_wifi, LV_KEYBOARD_MODE_TEXT_LOWER);
+    lv_group_t *def_group = lv_group_get_default();
 
     //Set style for wifi. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
     lv_obj_set_style_bg_color(ui->wifi, lv_color_make(0xF7, 0x98, 0xB1), LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -53,7 +56,6 @@ lv_obj_t *setup_scr_wifi(lv_ui *ui)
     lv_obj_set_style_border_width(ui->wifi, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_scrollbar_mode(ui->wifi, LV_SCROLLBAR_MODE_OFF);
     lv_obj_clear_flag(ui->wifi, LV_OBJ_FLAG_SCROLLABLE);
-    lv_group_t *def_group = lv_group_get_default();
     //Write codes wifi_title
     ui->wifi_title = lv_label_create(ui->wifi);
     lv_label_set_text(ui->wifi_title, "WIFI\n");
@@ -98,6 +100,7 @@ lv_obj_t *setup_scr_wifi(lv_ui *ui)
     lv_obj_set_style_outline_pad(ui->wifi_back_btn, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_color(ui->wifi_back_btn, lv_color_make(0x0A, 0x0A, 0x0A), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_font(ui->wifi_back_btn, &lv_font_FontAwesome5_24, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_letter_space(ui->wifi_back_btn, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_align(ui->wifi_back_btn, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_pos(ui->wifi_back_btn, 5, 10);
     lv_obj_set_size(ui->wifi_back_btn, 101, 43);
@@ -118,6 +121,10 @@ lv_obj_t *setup_scr_wifi(lv_ui *ui)
     lv_obj_set_style_border_width(ui->wifi_show_current_ssid, 3, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_border_opa(ui->wifi_show_current_ssid, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_border_side(ui->wifi_show_current_ssid, LV_BORDER_SIDE_FULL, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_outline_color(ui->wifi_show_current_ssid, lv_color_make(0x21, 0x95, 0xf6), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_outline_width(ui->wifi_show_current_ssid, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_outline_opa(ui->wifi_show_current_ssid, 128, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_outline_pad(ui->wifi_show_current_ssid, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_color(ui->wifi_show_current_ssid, lv_color_make(0x0D, 0x30, 0x55), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_font(ui->wifi_show_current_ssid, &lv_font_montserratMedium_30, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_letter_space(ui->wifi_show_current_ssid, 4, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -136,11 +143,10 @@ lv_obj_t *setup_scr_wifi(lv_ui *ui)
     lv_obj_set_scrollbar_mode(ui->wifi_show_current_ssid, LV_SCROLLBAR_MODE_OFF);
     lv_obj_clear_flag(ui->wifi_show_current_ssid, LV_OBJ_FLAG_CLICKABLE);
     lv_obj_clear_flag(ui->wifi_show_current_ssid, LV_OBJ_FLAG_CHECKABLE);
-    lv_group_add_obj(def_group, ui->wifi_show_current_ssid);
     lv_textarea_set_text(ui->wifi_show_current_ssid, "WIFI Connect Fail SSID:");
 
     //use keyboard on wifi_show_current_ssid
-    lv_obj_add_event_cb(ui->wifi_show_current_ssid, ta_wifi_event_cb, LV_EVENT_ALL, g_kb_wifi);
+    lv_obj_add_event_cb(ui->wifi_show_current_ssid, ta_wifi_event_cb, LV_EVENT_ALL, ui->g_kb_wifi);
     //Write codes wifi_login_wifi
     ui->wifi_login_wifi = lv_obj_create(ui->wifi);
 
@@ -172,7 +178,12 @@ lv_obj_t *setup_scr_wifi(lv_ui *ui)
     lv_obj_set_style_border_width(ui->wifi_ssid_txt, 3, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_border_opa(ui->wifi_ssid_txt, 153, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_border_side(ui->wifi_ssid_txt, LV_BORDER_SIDE_FULL, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_outline_color(ui->wifi_ssid_txt, lv_color_make(0x21, 0x95, 0xf6), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_outline_width(ui->wifi_ssid_txt, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_outline_opa(ui->wifi_ssid_txt, 128, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_outline_pad(ui->wifi_ssid_txt, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_color(ui->wifi_ssid_txt, lv_color_make(0x00, 0x00, 0x00), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui->wifi_ssid_txt, &lv_font_montserratMedium_12, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_letter_space(ui->wifi_ssid_txt, 2, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_align(ui->wifi_ssid_txt, LV_TEXT_ALIGN_LEFT, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_pad_left(ui->wifi_ssid_txt, 4, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -187,10 +198,9 @@ lv_obj_t *setup_scr_wifi(lv_ui *ui)
     lv_obj_set_pos(ui->wifi_ssid_txt, 117, 16);
     lv_obj_set_size(ui->wifi_ssid_txt, 220, 50);
     lv_obj_set_scrollbar_mode(ui->wifi_ssid_txt, LV_SCROLLBAR_MODE_OFF);
-    lv_group_add_obj(def_group, ui->wifi_ssid_txt);
 
     //use keyboard on wifi_ssid_txt
-    lv_obj_add_event_cb(ui->wifi_ssid_txt, ta_wifi_event_cb, LV_EVENT_ALL, g_kb_wifi);
+    lv_obj_add_event_cb(ui->wifi_ssid_txt, ta_wifi_event_cb, LV_EVENT_ALL, ui->g_kb_wifi);
     //Write codes wifi_pwd_txt
     ui->wifi_pwd_txt = lv_textarea_create(ui->wifi_login_wifi);
 
@@ -203,7 +213,12 @@ lv_obj_t *setup_scr_wifi(lv_ui *ui)
     lv_obj_set_style_border_width(ui->wifi_pwd_txt, 3, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_border_opa(ui->wifi_pwd_txt, 153, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_border_side(ui->wifi_pwd_txt, LV_BORDER_SIDE_FULL, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_outline_color(ui->wifi_pwd_txt, lv_color_make(0x21, 0x95, 0xf6), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_outline_width(ui->wifi_pwd_txt, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_outline_opa(ui->wifi_pwd_txt, 128, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_outline_pad(ui->wifi_pwd_txt, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_color(ui->wifi_pwd_txt, lv_color_make(0x00, 0x00, 0x00), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui->wifi_pwd_txt, &lv_font_montserratMedium_12, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_letter_space(ui->wifi_pwd_txt, 2, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_align(ui->wifi_pwd_txt, LV_TEXT_ALIGN_LEFT, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_pad_left(ui->wifi_pwd_txt, 4, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -218,10 +233,9 @@ lv_obj_t *setup_scr_wifi(lv_ui *ui)
     lv_obj_set_pos(ui->wifi_pwd_txt, 117, 78);
     lv_obj_set_size(ui->wifi_pwd_txt, 220, 50);
     lv_obj_set_scrollbar_mode(ui->wifi_pwd_txt, LV_SCROLLBAR_MODE_OFF);
-    lv_group_add_obj(def_group, ui->wifi_pwd_txt);
 
     //use keyboard on wifi_pwd_txt
-    lv_obj_add_event_cb(ui->wifi_pwd_txt, ta_wifi_event_cb, LV_EVENT_ALL, g_kb_wifi);
+    lv_obj_add_event_cb(ui->wifi_pwd_txt, ta_wifi_event_cb, LV_EVENT_ALL, ui->g_kb_wifi);
     //Write codes wifi_connect_btn
     ui->wifi_connect_btn = lv_btn_create(ui->wifi_login_wifi);
 
@@ -240,6 +254,7 @@ lv_obj_t *setup_scr_wifi(lv_ui *ui)
     lv_obj_set_style_outline_pad(ui->wifi_connect_btn, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_color(ui->wifi_connect_btn, lv_color_make(0x0A, 0x0A, 0x0A), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_font(ui->wifi_connect_btn, &lv_font_FontAwesome5_18, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_letter_space(ui->wifi_connect_btn, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_align(ui->wifi_connect_btn, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_pos(ui->wifi_connect_btn, 239, 150);
     lv_obj_set_size(ui->wifi_connect_btn, 98, 41);

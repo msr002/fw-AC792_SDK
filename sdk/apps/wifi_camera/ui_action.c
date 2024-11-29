@@ -1,4 +1,6 @@
 #include "app_config.h"
+#ifdef CONFIG_UI_ENABLE
+
 #ifdef CONFIG_UI_STYLE_LY_ENABLE
 #include "lvgl_v8_ui_app/style_LY/generated/gui_guider.h"
 #else
@@ -35,3 +37,4 @@ void jl_gui_init(void)
     setup_ui(&guider_ui);
     events_init(&guider_ui);
 }
+#endif //CONFIG_UI_ENABLE

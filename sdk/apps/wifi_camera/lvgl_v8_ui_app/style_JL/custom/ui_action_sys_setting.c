@@ -1,6 +1,5 @@
 #include "app_config.h"
 #ifdef CONFIG_UI_STYLE_JL_ENABLE
-
 #if !LV_USE_GUIBUILDER_SIMULATOR
 
 #include "lvgl.h"
@@ -15,7 +14,7 @@
 
 lv_group_t *def_group;
 lv_group_t *group_list;
-
+extern void sys_prompt_show_ctl(int32_t show_time, void *tips);
 //注册页面加载卸载回调
 int gui_src_action_setting(int action)
 {
@@ -54,13 +53,14 @@ int gui_src_action_setting(int action)
 REGISTER_UI_SCREEN_ACTION_HANDLER(GUI_SCREEN_SYS_SETTING)
 .onchange = gui_src_action_setting,
 };
+extern void sys_prompt_show_ctl(int32_t show_time, void *tips);
 void format_callback(void *p, int err)
 {
     lv_obj_add_flag(guider_ui.sys_prompt_img_warn, LV_OBJ_FLAG_CLICKABLE);
     if (err == 0) {
-        sys_prompt_show_ctl(3000, (void *)_("format_succ"));
+        lvgl_rpc_post_func(sys_prompt_show_ctl, 2, 3000, (void *)_("format_succ"));
     } else {
-        sys_prompt_show_ctl(3000, (void *)_("format_failed"));
+        lvgl_rpc_post_func(sys_prompt_show_ctl, 2, 3000, (void *)_("format_failed"));
     }
 }
 void video_system_format(void)
@@ -73,6 +73,5 @@ void video_system_format(void)
     start_app_async(&it, format_callback, NULL);
 }
 #endif
-
 
 #endif

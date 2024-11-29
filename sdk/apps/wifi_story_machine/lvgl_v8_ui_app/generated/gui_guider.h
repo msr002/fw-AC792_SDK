@@ -6,21 +6,13 @@ extern "C" {
 #endif
 
 #include "lvgl.h"
-#include "common.h"
-#include "gui_fonts.h"
-#include "gui_images.h"
-
-#if LV_USE_GUIBUILDER_SIMULATOR
-#define GUI_WEAKREF __attribute__((weakref))
-#define GUI_WEAK __attribute__((weak))
-#else
-#define GUI_WEAKREF
-#define GUI_WEAK __attribute__((weak))
-#endif
+#include "./common.h"
+#include "./gui_fonts/gui_fonts.h"
+#include "./gui_images/gui_images.h"
 
 #ifdef JL_GUI_KERNEL_VERSION_MAJOR
-#if GUI_CORE_VERSION_MAJOR > JL_GUI_KERNEL_VERSION_MAJOR
-#error "Current Kernel Version is too low, please update the kernel version!"
+#if GUI_CORE_VERSION_MAJOR != JL_GUI_KERNEL_VERSION_MAJOR
+#error "Current Kernel Version is not compatible, please replace or upgrade the kernel!"
 #endif
 #if GUI_CORE_VERSION_MINOR > JL_GUI_KERNEL_VERSION_MINOR
 #warning "Current Kernel Version is too low, some features may not be available, please update the kernel version!"
@@ -31,11 +23,6 @@ extern "C" {
 
 // generate lv_ui gui_guider
 typedef struct {
-    // Screen boot_animation
-    lv_obj_t *boot_animation;
-    bool      boot_animation_del;
-    lv_obj_t *boot_animation_jl_logo;
-
     // Screen audio
     lv_obj_t *audio;
     bool      audio_del;
@@ -63,6 +50,11 @@ typedef struct {
     lv_obj_t *camera_camera2_btn_label;
     lv_obj_t *camera_camera3_btn;
     lv_obj_t *camera_camera3_btn_label;
+
+    // Screen boot_animation
+    lv_obj_t *boot_animation;
+    bool      boot_animation_del;
+    lv_obj_t *boot_animation_jl_logo;
 
     // Screen home
     lv_obj_t *home;
@@ -126,6 +118,7 @@ typedef struct {
     // Screen wifi
     lv_obj_t *wifi;
     bool      wifi_del;
+    lv_obj_t *g_kb_wifi;
     lv_obj_t *wifi_title;
     lv_obj_t *wifi_back_btn;
     lv_obj_t *wifi_back_btn_label;
@@ -176,6 +169,7 @@ typedef struct {
     lv_obj_t *sdcard_sdcard_total_label;
     lv_obj_t *sdcard_not_found_label;
 
+    lv_group_t *default_group;
 } lv_ui;
 
 void ui_load_scr_anim(lv_ui *ui, gui_scr_t *screen, lv_scr_load_anim_t anim_type,	uint32_t time,
@@ -187,16 +181,16 @@ void ui_scr_stack_pop_anim(lv_ui *ui, lv_scr_load_anim_t anim_type, uint32_t tim
 void ui_init_style(lv_style_t *style);
 void init_scr_del_flag(lv_ui *ui);
 void setup_ui(lv_ui *ui);
-#include "gui_msg.h"
-extern lv_ui guider_ui;// Screen boot_animation
-lv_obj_t *setup_scr_boot_animation(lv_ui *ui);
-void unload_scr_boot_animation(lv_ui *ui);
-// Screen audio
+#include "./gui_msg/gui_msg.h"
+extern lv_ui guider_ui;// Screen audio
 lv_obj_t *setup_scr_audio(lv_ui *ui);
 void unload_scr_audio(lv_ui *ui);
 // Screen camera
 lv_obj_t *setup_scr_camera(lv_ui *ui);
 void unload_scr_camera(lv_ui *ui);
+// Screen boot_animation
+lv_obj_t *setup_scr_boot_animation(lv_ui *ui);
+void unload_scr_boot_animation(lv_ui *ui);
 // Screen home
 lv_obj_t *setup_scr_home(lv_ui *ui);
 void unload_scr_home(lv_ui *ui);
@@ -233,9 +227,6 @@ void unload_scr_camera3_dvp(lv_ui *ui);
 // Screen sdcard
 lv_obj_t *setup_scr_sdcard(lv_ui *ui);
 void unload_scr_sdcard(lv_ui *ui);
-
-// Image Declare
-LV_IMG_DECLARE(_img_logo_alpha_332x82);
 #ifdef __cplusplus
 }
 #endif

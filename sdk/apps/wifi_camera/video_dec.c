@@ -10,7 +10,9 @@
 
 #define AUDIO_DEC_BUF_SIZE  64 * 1024
 
-#define VIDEO_DEC_BUF_SIZE  2 * 1024 * 1024
+#define VIDEO_DEC_BUF_SIZE  1 * 1024 * 1024 + 512 * 1024
+
+#define DEFAULT_PLAY_VOLUME 100
 
 #ifdef CONFIG_EMR_DIR_ENABLE
 const char *dec_path[DEC_PATH_NUM][2] = {
@@ -85,7 +87,7 @@ void video_dec_post_file_info_to_ui(int fname_len, int format)
     /*
      * 发送分辨率和影片时长信息
      */
-    post_msg2_dec(0);
+    video_dec_post_msg("fileInfo", 0);
     /*video_dec_post_msg("res:w=%2 h=%2,filmLen:s=%4", __this->req.dec.info.width,*/
     /*__this->req.dec.info.height, __this->req.dec.info.total_time);*/
 
@@ -346,7 +348,7 @@ static int video_dec_start(void *p)
       */
     __this->req.dec.preview = 1;
 
-    __this->req.dec.volume = 100;
+    __this->req.dec.volume = __this->volume;
     __this->curr_dir = 0;
 #ifndef CONFIG_UI_ENABLE
     video_dec_scan_dir();
@@ -552,6 +554,7 @@ static int video_dec_switch_audio_volume(void)
     }
 
     __this->req.dec.volume = __this->req.dec.volume ? 0 : 100;
+    __this->volume = __this->req.dec.volume;
     return video_dec_set_audio_volume(__this->req.dec.volume);
 }
 
@@ -611,7 +614,7 @@ int dec_open_file()
      * 是否预览，设0即为自动播放
      */
     __this->req.dec.preview = 1;
-    __this->req.dec.volume = 100;
+    __this->req.dec.volume = __this->volume;
 
     __this->req.dec.pctl = NULL;
 
@@ -651,7 +654,7 @@ int dec_open_file()
     /*
      * 发送分辨率和影片时长信息
      */
-    post_msg2_dec(0);
+    video_dec_post_msg("fileInfo", 0);
     /*video_dec_post_msg("res:w=%2 h=%2,filmLen:s=%4", __this->req.dec.info.width,*/
     /*__this->req.dec.info.height, __this->req.dec.info.total_time);*/
 
@@ -718,6 +721,7 @@ static int state_machine(struct application *app, enum app_state state, struct i
     case APP_STA_CREATE:
         log_d("\n>>>>>>> video_dec: create\n");
         memset(__this, 0, sizeof(struct video_dec_hdl));
+        __this->volume = DEFAULT_PLAY_VOLUME;
 #if 0 //def CONFIG_UI_ENABLE
         /*
          *打开UI服务，请求显示界面

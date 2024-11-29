@@ -16,6 +16,7 @@ extern "C" {
 
 #include "barcode/lv_barcode.h"
 #include "bin/lv_bin.h"
+#include "jlffmpeg/lv_jlffmpeg.h"
 #include "jljpeg/lv_jljpeg.h"
 #include "rle/lv_rle.h"
 #include "lz4/lz4.h"

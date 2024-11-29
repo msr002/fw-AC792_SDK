@@ -5,16 +5,16 @@
 extern "C" {
 #endif
 
-#include "res_common.h"
+#include "./gui_res/res_common.h"
 
 #define GUI_UIT_VERSION_MAJOR 1
 #define GUI_UIT_VERSION_MINOR 0
 #define GUI_UIT_VERSION_PATCH 0
-#define GUI_UIT_VERSION_INFO "20240708"
+#define GUI_UIT_VERSION_INFO "20241111"
 
-#define GUI_CORE_VERSION_MAJOR 1
+#define GUI_CORE_VERSION_MAJOR 2
 #define GUI_CORE_VERSION_MINOR 1
-#define GUI_CORE_VERSION_PATCH 2
+#define GUI_CORE_VERSION_PATCH 0
 #define GUI_CORE_VERSION_INFO "GENERIC(with tools)"
 
 typedef enum {
@@ -23,9 +23,9 @@ typedef enum {
 } gui_screen_action_t;
 
 typedef enum {
-    GUI_SCREEN_BOOT_ANIMATION = 0,
-    GUI_SCREEN_AUDIO,
+    GUI_SCREEN_AUDIO = 0,
     GUI_SCREEN_CAMERA,
+    GUI_SCREEN_BOOT_ANIMATION,
     GUI_SCREEN_HOME,
     GUI_SCREEN_KEY,
     GUI_SCREEN_CAMERA1_MIPI,

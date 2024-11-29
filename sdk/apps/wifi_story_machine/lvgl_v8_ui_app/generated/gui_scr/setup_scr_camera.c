@@ -2,17 +2,18 @@
 #include "lvgl.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include "gui_guider.h"
-#include "events_init.h"
-#include "callback_handler.h"
-#include "gui_timelines.h"
-#include "custom.h"
+#include "../gui_guider.h"
+#include "../gui_events/events_init.h"
+#include "../gui_events/callback_handler.h"
+#include "../gui_timelines/gui_timelines.h"
+#include "../../custom/custom.h"
 
 
 lv_obj_t *setup_scr_camera(lv_ui *ui)
 {
     //Write codes camera
     ui->camera = lv_obj_create(NULL);
+    lv_group_t *def_group = lv_group_get_default();
 
     //Set style for camera. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
     lv_obj_set_style_bg_color(ui->camera, lv_color_make(0xF7, 0x98, 0xB1), LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -21,7 +22,6 @@ lv_obj_t *setup_scr_camera(lv_ui *ui)
     lv_obj_set_style_bg_opa(ui->camera, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_border_width(ui->camera, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_scrollbar_mode(ui->camera, LV_SCROLLBAR_MODE_OFF);
-    lv_group_t *def_group = lv_group_get_default();
     //Write codes camera_title
     ui->camera_title = lv_label_create(ui->camera);
     lv_label_set_text(ui->camera_title, "Camera");
@@ -66,6 +66,7 @@ lv_obj_t *setup_scr_camera(lv_ui *ui)
     lv_obj_set_style_outline_pad(ui->camera_back_btn, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_color(ui->camera_back_btn, lv_color_make(0x0A, 0x0A, 0x0A), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_font(ui->camera_back_btn, &lv_font_FontAwesome5_24, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_letter_space(ui->camera_back_btn, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_align(ui->camera_back_btn, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_pos(ui->camera_back_btn, 5, 10);
     lv_obj_set_size(ui->camera_back_btn, 101, 43);
@@ -92,6 +93,7 @@ lv_obj_t *setup_scr_camera(lv_ui *ui)
     lv_obj_set_style_outline_pad(ui->camera_camera1_btn, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_color(ui->camera_camera1_btn, lv_color_make(0x0D, 0x30, 0x55), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_font(ui->camera_camera1_btn, &lv_font_montserratMedium_24, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_letter_space(ui->camera_camera1_btn, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_align(ui->camera_camera1_btn, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_pos(ui->camera_camera1_btn, 140, 159);
     lv_obj_set_size(ui->camera_camera1_btn, 200, 100);
@@ -118,6 +120,7 @@ lv_obj_t *setup_scr_camera(lv_ui *ui)
     lv_obj_set_style_outline_pad(ui->camera_camera2_btn, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_color(ui->camera_camera2_btn, lv_color_make(0x0D, 0x30, 0x55), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_font(ui->camera_camera2_btn, &lv_font_montserratMedium_24, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_letter_space(ui->camera_camera2_btn, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_align(ui->camera_camera2_btn, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_pos(ui->camera_camera2_btn, 140, 312);
     lv_obj_set_size(ui->camera_camera2_btn, 200, 100);
@@ -144,6 +147,7 @@ lv_obj_t *setup_scr_camera(lv_ui *ui)
     lv_obj_set_style_outline_pad(ui->camera_camera3_btn, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_color(ui->camera_camera3_btn, lv_color_make(0x0D, 0x30, 0x55), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_font(ui->camera_camera3_btn, &lv_font_montserratMedium_24, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_letter_space(ui->camera_camera3_btn, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_align(ui->camera_camera3_btn, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_pos(ui->camera_camera3_btn, 140, 460);
     lv_obj_set_size(ui->camera_camera3_btn, 200, 98);

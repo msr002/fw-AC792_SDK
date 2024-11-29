@@ -709,7 +709,7 @@
 #define LV_FFMPEG_DUMP_FORMAT 0
 #endif
 
-#define LV_USE_JLFFMPEG 0
+#define LV_USE_JLFFMPEG 1
 
 /*use the jieli GUI components*/
 #define LV_USE_JL_GUI_COMP 1

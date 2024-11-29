@@ -258,12 +258,16 @@ static int device_event_handler(struct sys_event *e)
         switch (event->event) {
         //添加USB弹窗
         case DEVICE_EVENT_IN:
+#ifdef CONFIG_UI_ENABLE
             extern void usb_page_show(int arg);
             lvgl_rpc_post_func(usb_page_show, 1, 0);
+#endif
             break;
         case DEVICE_EVENT_OUT:
+#ifdef CONFIG_UI_ENABLE
             extern void usb_page_hide(int arg);
             lvgl_rpc_post_func(usb_page_hide, 1, 0);
+#endif
             break;
         }
 
@@ -299,8 +303,10 @@ static int device_event_handler(struct sys_event *e)
             puts("\n =============parking on eee video rec=========\n");
             extern u8 rec_park_flag;
             rec_park_flag++;
+#ifdef CONFIG_UI_ENABLE
             extern void parking_page_show(int arg);
             lvgl_rpc_post_func(parking_page_show, 1, 0);
+#endif
 
             sys_power_auto_shutdown_pause();
             return true;
@@ -408,18 +414,20 @@ static void logo_poweron_play_end(void)
         while (lvgl_ui_is_suspended()) {
             os_time_dly(1);
         }
+#ifdef CONFIG_UI_ENABLE
         extern void usb_page_show(int arg);
         lvgl_rpc_post_func(usb_page_show, 1, 0);
+#endif
     }
 #endif
 
     key_event_enable();
     touch_event_enable();
 }
+
 /*
  * 应用程序主函数
  */
-#include "asm/gpio.h"
 void app_main()
 {
     struct intent it;
@@ -431,16 +439,6 @@ void app_main()
     lcd_tools_main();
 #endif
 
-    /*生成文件列表*/
-    if (dev_online(SDX_DEV)) {
-        char buf[64];
-#if defined CONFIG_ENABLE_VLIST
-        FILE_LIST_IN_MEM(1);
-#endif
-        strcpy(buf, "online:1");
-        CTP_CMD_COMBINED(NULL, CTP_NO_ERR, "SD_STATUS", "NOTIFY", buf);
-
-    }
 
     init_intent(&it);
     it.name = "video_system";
@@ -475,6 +473,19 @@ void app_main()
     it.action = ACTION_VIDEO_REC_MAIN;
     start_app(&it);
 #endif
+
+
+    /*生成文件列表*/
+    if (dev_online(SDX_DEV)) {
+        char buf[64];
+#if defined CONFIG_ENABLE_VLIST
+        FILE_LIST_IN_MEM(1);
+#endif
+        strcpy(buf, "online:1");
+        CTP_CMD_COMBINED(NULL, CTP_NO_ERR, "SD_STATUS", "NOTIFY", buf);
+
+    }
+
 }
 
 

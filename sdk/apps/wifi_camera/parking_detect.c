@@ -249,10 +249,12 @@ static void parking_detect_ctrl(void *par)
             __this->off_cnt = 0;
         }
     }
+#if (defined CONFIG_UI_ENABLE && defined USE_LVGL_V8_UI_DEMO)
     //防止UI还未开始，提前触发倒车导致无法进去倒车页面
     if (lvgl_ui_is_suspended()) {
         __this->state = PARKING_STA_OFF;
     }
+#endif
 
     if (__this->state != __this->prev_state) {
         __this->prev_state = __this->state;

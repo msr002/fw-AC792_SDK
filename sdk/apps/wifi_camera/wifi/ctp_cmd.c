@@ -334,8 +334,10 @@ int cmd_put_app_access(void *priv, char *content)
     const char *ver = json_object_get_string(key);
     printf("version : %s\n", ver);
     app = get_current_app();
-
-    bool usb_app_flag = get_usb_app_flag();
+    bool usb_app_flag;
+#ifdef CONFIG_UI_ENABLE
+    usb_app_flag = get_usb_app_flag();
+#endif
 
 #if CONFIG_NET_VDIEO_GAP_ENABLE
     int gap = 0;

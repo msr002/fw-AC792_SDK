@@ -52,6 +52,7 @@ struct ispt_packet_header {
 };
 
 struct isp_tool_fh {
+    u8 inited;
     u32 usb_id;
     u8 *buf;
     u32 buf_size;
@@ -116,12 +117,13 @@ void isp_tool_init(usb_dev usb_id, struct ispt_param *cfg)
     __this->isp_buf = __this->buf;
     __this->packet_buf = __this->buf + (__this->buf_size / 2);
     __this->get_video_device = cfg->get_video_device;
+    __this->inited = 1;
 }
 
 static int ispt_parse_write_config(struct isp_tool_fh *tool, u8 *cmd, u32 cmd_len)
 {
     u8 channel = isp0_get_id();
-    if (channel == 0xff) {
+    if (channel == 0xff || __this->inited == 0) {
         return -EINVAL;
     }
     struct ispt_packet_header packet_header;
@@ -214,7 +216,7 @@ static int ispt_parse_read_config(struct isp_tool_fh *tool, u8 *cmd, u32 cmd_len
     u8 *data;
 
     u8 channel = isp0_get_id();
-    if (channel == 0xff) {
+    if (channel == 0xff || __this->inited == 0) {
         return -EINVAL;
     }
     //cmd -- 0 : isp_cmd, 1 -- read/write, 2 -- sub cmd

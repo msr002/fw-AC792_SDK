@@ -186,6 +186,6 @@
 参考资源
 ------------
 
-* 芯片数据手册&原理图 : [doc/datasheet/AC791N规格书](./doc/硬件资料/datasheet)
+* 芯片数据手册&原理图 : [doc/datasheet/AC792N规格书](./doc/硬件资料/datasheet)
 * SDK 发布版本信息 : [AC79NN_SDK_发布版本信息](https://doc.zh-jieli.com/AC792/zh-cn/wifi_video_master/other/version/index.html)
 * 钉钉技术支持群号 : 91050006452

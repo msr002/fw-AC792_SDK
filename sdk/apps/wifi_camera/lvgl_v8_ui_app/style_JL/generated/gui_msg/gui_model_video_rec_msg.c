@@ -46,6 +46,16 @@ void gui_model_video_rec_msg_video_rec_img_11_set_img_path_cb(lv_observer_t *obs
     gui_msg_data_t *data = (gui_msg_data_t *)observer->user_data;
     lv_img_set_src(obj, gui_get_res_path(data->value_int));
 }
+void gui_model_video_rec_msg_video_rec_img_app_set_img_path_cb(lv_observer_t *observer, lv_subject_t *subject)
+{
+    lv_obj_t *obj = lv_observer_get_target_obj(observer);
+    if (obj == NULL || lv_obj_is_valid(obj) == false) {
+        return;
+    }
+
+    gui_msg_data_t *data = (gui_msg_data_t *)observer->user_data;
+    lv_img_set_src(obj, gui_get_res_path(data->value_int));
+}
 void gui_model_video_rec_msg_video_rec_digitclock_remain_time_set_digit_clock_time_cb(lv_observer_t *observer, lv_subject_t *subject)
 {
     lv_obj_t *obj = lv_observer_get_target_obj(observer);
@@ -317,6 +327,15 @@ GUI_WEAK int gui_model_video_rec_msg_show_record_time_cb(gui_msg_action_t access
     data->value_int = show_record_time_var;
     return 0;
 }
+GUI_WEAK int gui_model_video_rec_msg_app_connected_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type)
+{
+    static int32_t app_connected_var = RES_DISCONNECT;
+    if (access == GUI_MSG_ACCESS_SET) {
+        app_connected_var = data->value_int;
+    }
+    data->value_int = app_connected_var;
+    return 0;
+}
 
 void gui_model_video_rec_msg_init(lv_ui *ui)
 {
@@ -425,6 +444,10 @@ void gui_model_video_rec_msg_init(lv_ui *ui)
     if (sub != NULL) {
         lv_subject_init_pointer(sub->subject, &guider_msg_data);
     }
+    sub = gui_msg_create_sub(GUI_MODEL_VIDEO_REC_MSG_ID_APP_CONNECTED);
+    if (sub != NULL) {
+        lv_subject_init_pointer(sub->subject, &guider_msg_data);
+    }
     gui_model_video_rec_msg_init_ui();
     gui_model_video_rec_msg_init_events();
 }
@@ -436,7 +459,7 @@ void gui_model_video_rec_msg_init_ui()
 void gui_model_video_rec_msg_init_events()
 {
     void *res = NULL;
-    _gui_msg_status_t status[26] = {
+    _gui_msg_status_t status[27] = {
         {GUI_MODEL_VIDEO_REC_MSG_ID_CYCREC_ICON, 0, 0},
         {GUI_MODEL_VIDEO_REC_MSG_ID_MIC_ICON, 0, 0},
         {GUI_MODEL_VIDEO_REC_MSG_ID_DELAYREC_ICON, 0, 0},
@@ -463,9 +486,10 @@ void gui_model_video_rec_msg_init_events()
         {GUI_MODEL_VIDEO_REC_MSG_ID_SHOW_REMAIN_TIME, 0, 0},
         {GUI_MODEL_VIDEO_REC_MSG_ID_HIDE_RECORD_TIME, 0, 0},
         {GUI_MODEL_VIDEO_REC_MSG_ID_SHOW_RECORD_TIME, 0, 0},
+        {GUI_MODEL_VIDEO_REC_MSG_ID_APP_CONNECTED, 0, 0},
     };
 
-    for (int i = 0; i < 26; i++) {
+    for (int i = 0; i < 27; i++) {
         lv_subject_t *subject = gui_msg_get_subject(status[i].msg_id);
         if (subject == NULL) {
             continue;
@@ -503,11 +527,15 @@ void gui_model_video_rec_msg_init_events()
     lv_subject_t *subject_show_remain_time = gui_msg_get_subject(GUI_MODEL_VIDEO_REC_MSG_ID_SHOW_REMAIN_TIME);
     lv_subject_t *subject_hide_record_time = gui_msg_get_subject(GUI_MODEL_VIDEO_REC_MSG_ID_HIDE_RECORD_TIME);
     lv_subject_t *subject_show_record_time = gui_msg_get_subject(GUI_MODEL_VIDEO_REC_MSG_ID_SHOW_RECORD_TIME);
+    lv_subject_t *subject_app_connected = gui_msg_get_subject(GUI_MODEL_VIDEO_REC_MSG_ID_APP_CONNECTED);
     if (!guider_ui.video_rec_del) {
         gui_model_video_rec_msg_hide_car_crashlock_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
         lv_subject_add_observer_obj(subject_hide_car_crashlock, gui_msg_set_flag_by_int32_cb, guider_ui.video_rec_img_lock_icon, &guider_msg_data);
         gui_model_video_rec_msg_show_car_crashlock_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
         lv_subject_add_observer_obj(subject_show_car_crashlock, gui_msg_set_clear_flag_by_int32_cb, guider_ui.video_rec_img_lock_icon, &guider_msg_data);
+
+        gui_model_video_rec_msg_app_connected_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
+        lv_subject_add_observer_obj(subject_app_connected, gui_model_video_rec_msg_video_rec_img_app_set_img_path_cb, guider_ui.video_rec_img_app, &guider_msg_data);
 
         gui_model_video_rec_msg_flash_headlight_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_BOOL);
         lv_subject_add_observer_obj(subject_flash_headlight, gui_msg_set_visible_by_bool_cb, guider_ui.video_rec_headlight, &guider_msg_data);
@@ -574,7 +602,7 @@ void gui_model_video_rec_msg_init_events()
         lv_subject_add_observer_obj(subject_cycrec_icon, gui_model_video_rec_msg_video_rec_img_4_set_img_path_cb, guider_ui.video_rec_img_4, &guider_msg_data);
 
 
-        for (int i = 0; i < 26; i++) {
+        for (int i = 0; i < 27; i++) {
             if (status[i].msg_id == GUI_MODEL_VIDEO_REC_MSG_ID_REC_RESO) {
                 status[i].is_subscribe = 1;
             }
@@ -591,6 +619,9 @@ void gui_model_video_rec_msg_init_events()
                 status[i].is_subscribe = 1;
             }
             if (status[i].msg_id == GUI_MODEL_VIDEO_REC_MSG_ID_SHOW_MOTION_ICON) {
+                status[i].is_subscribe = 1;
+            }
+            if (status[i].msg_id == GUI_MODEL_VIDEO_REC_MSG_ID_APP_CONNECTED) {
                 status[i].is_subscribe = 1;
             }
             if (status[i].msg_id == GUI_MODEL_VIDEO_REC_MSG_ID_HIDE_GSENSOR_ICON) {
@@ -656,7 +687,7 @@ void gui_model_video_rec_msg_init_events()
         }
     }
 
-    for (int i = 0; i < 26; i++) {
+    for (int i = 0; i < 27; i++) {
         if (status[i].is_subscribe == 0 && status[i].is_unsubscribe == 1) {
             gui_msg_subscribe_change(status[i].msg_id, GUI_MSG_UNSUBSCRIBE);
         } else if (status[i].is_subscribe == 1 && status[i].is_unsubscribe == 0) {
@@ -667,7 +698,7 @@ void gui_model_video_rec_msg_init_events()
 
 void gui_model_video_rec_msg_unsubscribe()
 {
-    _gui_msg_status_t status[26] = {
+    _gui_msg_status_t status[27] = {
         {GUI_MODEL_VIDEO_REC_MSG_ID_CYCREC_ICON, 0, 0},
         {GUI_MODEL_VIDEO_REC_MSG_ID_MIC_ICON, 0, 0},
         {GUI_MODEL_VIDEO_REC_MSG_ID_DELAYREC_ICON, 0, 0},
@@ -694,8 +725,9 @@ void gui_model_video_rec_msg_unsubscribe()
         {GUI_MODEL_VIDEO_REC_MSG_ID_SHOW_REMAIN_TIME, 0, 0},
         {GUI_MODEL_VIDEO_REC_MSG_ID_HIDE_RECORD_TIME, 0, 0},
         {GUI_MODEL_VIDEO_REC_MSG_ID_SHOW_RECORD_TIME, 0, 0},
+        {GUI_MODEL_VIDEO_REC_MSG_ID_APP_CONNECTED, 0, 0},
     };
-    for (int i = 0; i < 26; i++) {
+    for (int i = 0; i < 27; i++) {
         lv_subject_t *subject = gui_msg_get_subject(status[i].msg_id);
         if (subject == NULL) {
             continue;
@@ -714,7 +746,7 @@ void gui_model_video_rec_msg_unsubscribe()
         }
     }
 
-    for (int i = 0; i < 26; i++) {
+    for (int i = 0; i < 27; i++) {
         if (status[i].is_unsubscribe == 1) {
             gui_msg_subscribe_change(status[i].msg_id, GUI_MSG_UNSUBSCRIBE);
         }
@@ -828,6 +860,10 @@ gui_msg_data_t *gui_model_video_rec_msg_get(int32_t msg_id)
         gui_model_video_rec_msg_show_record_time_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
         break;
     }
+    case GUI_MODEL_VIDEO_REC_MSG_ID_APP_CONNECTED: {
+        gui_model_video_rec_msg_app_connected_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
+        break;
+    }
     default:
         return NULL;
     }
@@ -939,6 +975,10 @@ void gui_model_video_rec_msg_action_change(int32_t msg_id, gui_msg_action_t acce
     }
     case GUI_MODEL_VIDEO_REC_MSG_ID_SHOW_RECORD_TIME: {
         gui_model_video_rec_msg_show_record_time_cb(access, data, type);
+        break;
+    }
+    case GUI_MODEL_VIDEO_REC_MSG_ID_APP_CONNECTED: {
+        gui_model_video_rec_msg_app_connected_cb(access, data, type);
         break;
     }
     default: {
@@ -1105,6 +1145,12 @@ gui_msg_status_t gui_model_video_rec_msg_send(int32_t msg_id, void *value, int32
             break;
         }
         case GUI_MODEL_VIDEO_REC_MSG_ID_SHOW_RECORD_TIME: {
+            data_type = VALUE_INT;
+            guider_msg_data.value_array.ptr = value;
+            guider_msg_data.value_array.len = len;
+            break;
+        }
+        case GUI_MODEL_VIDEO_REC_MSG_ID_APP_CONNECTED: {
             data_type = VALUE_INT;
             guider_msg_data.value_array.ptr = value;
             guider_msg_data.value_array.len = len;

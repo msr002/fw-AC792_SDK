@@ -1365,6 +1365,7 @@
 <Unit filename="../../../../apps/common/lvgl_v8/src/extra/jl_extra/libs/barcode/lv_barcode.h" />
 <Unit filename="../../../../apps/common/lvgl_v8/src/extra/jl_extra/libs/bin/lv_bin.h" />
 <Unit filename="../../../../apps/common/lvgl_v8/src/extra/jl_extra/libs/jl_libs.h" />
+<Unit filename="../../../../apps/common/lvgl_v8/src/extra/jl_extra/libs/jlffmpeg/lv_jlffmpeg.h" />
 <Unit filename="../../../../apps/common/lvgl_v8/src/extra/jl_extra/libs/jljpeg/lv_jljpeg.h" />
 <Unit filename="../../../../apps/common/lvgl_v8/src/extra/jl_extra/libs/lz4/lz4.h" />
 <Unit filename="../../../../apps/common/lvgl_v8/src/extra/jl_extra/libs/rle/lv_rle.h" />
@@ -1726,6 +1727,8 @@
 <Unit filename="../../../../apps/common/video/get_yuv_data.h" />
 <Unit filename="../../../../apps/common/video/page_turning_detect.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/common/video/qr_code_net_config.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="../../../../apps/common/video/simple_avi_unpkg.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="../../../../apps/common/video/simple_avi_unpkg.h" />
 <Unit filename="../../../../apps/common/video/user_video_disp.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/common/video/user_video_rec.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/wifi_story_machine/app_main.c"><Option compilerVer="CC"/></Unit>
@@ -1758,9 +1761,11 @@
 <Unit filename="../../../../apps/wifi_story_machine/lvgl_v8_ui_app/generated/gui_events/i18n_handler.h" />
 <Unit filename="../../../../apps/wifi_story_machine/lvgl_v8_ui_app/generated/gui_fonts/gui_fonts.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/wifi_story_machine/lvgl_v8_ui_app/generated/gui_fonts/gui_fonts.h" />
+<Unit filename="../../../../apps/wifi_story_machine/lvgl_v8_ui_app/generated/gui_group/gui_group.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="../../../../apps/wifi_story_machine/lvgl_v8_ui_app/generated/gui_group/gui_group.h" />
 <Unit filename="../../../../apps/wifi_story_machine/lvgl_v8_ui_app/generated/gui_guider.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/wifi_story_machine/lvgl_v8_ui_app/generated/gui_guider.h" />
-<Unit filename="../../../../apps/wifi_story_machine/lvgl_v8_ui_app/generated/gui_images/_img_logo_alpha_332x82.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="../../../../apps/wifi_story_machine/lvgl_v8_ui_app/generated/gui_images/_img_logo_alpha332x82.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/wifi_story_machine/lvgl_v8_ui_app/generated/gui_images/gui_images.h" />
 <Unit filename="../../../../apps/wifi_story_machine/lvgl_v8_ui_app/generated/gui_msg/gui_blue_msg.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/wifi_story_machine/lvgl_v8_ui_app/generated/gui_msg/gui_blue_msg.h" />
@@ -2202,6 +2207,7 @@
 <Unit filename="../../../../include_lib/utils/fs/virfat_flash.h" />
 <Unit filename="../../../../include_lib/utils/syscfg/syscfg_id.h" />
 <Unit filename="../../../../include_lib/utils/version.z.S" />
+<Unit filename="../../../../include_lib/utils/yuv_to_rgb.h" />
 <Unit filename="../../../../lib/net/version.z.S" />
 <Unit filename="../../../../lib/server/version.z.S" />
 <Unit filename="../../../../lib/utils/version.z.S" />

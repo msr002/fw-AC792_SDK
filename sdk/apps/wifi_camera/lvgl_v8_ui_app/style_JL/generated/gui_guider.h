@@ -66,6 +66,7 @@ typedef struct {
     lv_obj_t *video_rec_img_9;
     lv_obj_t *video_rec_img_lock_icon;
     lv_obj_t *video_rec_img_11;
+    lv_obj_t *video_rec_img_app;
     lv_obj_t *video_rec_img_12;
     lv_obj_t *video_rec_lbl_2;
     lv_obj_t *video_rec_lbl_3;
@@ -132,8 +133,8 @@ typedef struct {
     lv_obj_t *home_page_imgbtn_3_label;
     lv_obj_t *home_page_img_1;
     lv_obj_t *home_page_digitclock_1;
-    lv_obj_t *home_page_lbl_2;
     lv_obj_t *home_page_lbl_3;
+    lv_obj_t *home_page_lbl_1;
 
     // Screen sys_prompt
     lv_obj_t *sys_prompt;
@@ -175,7 +176,6 @@ typedef struct {
     lv_obj_t *sys_setting_view_subpage;
     lv_obj_t *sys_setting_img_icon;
     lv_obj_t *sys_setting_lbl_menu_title;
-    lv_obj_t *sys_setting_lbl_18;
     lv_obj_t *sys_setting_view_3;
     lv_obj_t *sys_setting_img_15;
     lv_obj_t *sys_setting_img_14;

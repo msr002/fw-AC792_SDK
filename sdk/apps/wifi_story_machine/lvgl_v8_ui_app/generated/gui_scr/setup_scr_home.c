@@ -2,17 +2,18 @@
 #include "lvgl.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include "gui_guider.h"
-#include "events_init.h"
-#include "callback_handler.h"
-#include "gui_timelines.h"
-#include "custom.h"
+#include "../gui_guider.h"
+#include "../gui_events/events_init.h"
+#include "../gui_events/callback_handler.h"
+#include "../gui_timelines/gui_timelines.h"
+#include "../../custom/custom.h"
 
 
 lv_obj_t *setup_scr_home(lv_ui *ui)
 {
     //Write codes home
     ui->home = lv_obj_create(NULL);
+    lv_group_t *def_group = lv_group_get_default();
 
     //Set style for home. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
     lv_obj_set_style_bg_color(ui->home, lv_color_make(0xF7, 0x98, 0xB1), LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -22,7 +23,6 @@ lv_obj_t *setup_scr_home(lv_ui *ui)
     lv_obj_set_style_border_width(ui->home, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_scrollbar_mode(ui->home, LV_SCROLLBAR_MODE_OFF);
     lv_obj_clear_flag(ui->home, LV_OBJ_FLAG_SCROLLABLE);
-    lv_group_t *def_group = lv_group_get_default();
     //Write codes home_list
     ui->home_list = lv_list_create(ui->home);
 
@@ -54,6 +54,7 @@ lv_obj_t *setup_scr_home(lv_ui *ui)
     lv_style_set_border_side(&style_home_list_extra_btns_main_default, LV_BORDER_SIDE_BOTTOM);
     lv_style_set_text_color(&style_home_list_extra_btns_main_default, lv_color_make(0x0D, 0x30, 0x55));
     lv_style_set_text_font(&style_home_list_extra_btns_main_default, &lv_font_FontAwesome5_40);
+    lv_style_set_text_letter_space(&style_home_list_extra_btns_main_default, 0);
     lv_style_set_pad_left(&style_home_list_extra_btns_main_default, 20);
     lv_style_set_pad_right(&style_home_list_extra_btns_main_default, 5);
     lv_style_set_pad_top(&style_home_list_extra_btns_main_default, 20);
@@ -68,6 +69,7 @@ lv_obj_t *setup_scr_home(lv_ui *ui)
     lv_style_set_border_width(&style_home_list_extra_texts_main_default, 0);
     lv_style_set_text_color(&style_home_list_extra_texts_main_default, lv_color_make(0x0D, 0x30, 0x55));
     lv_style_set_text_font(&style_home_list_extra_texts_main_default, &lv_font_montserratMedium_40);
+    lv_style_set_text_letter_space(&style_home_list_extra_texts_main_default, 0);
     lv_style_set_pad_left(&style_home_list_extra_texts_main_default, 5);
     lv_style_set_pad_right(&style_home_list_extra_texts_main_default, 5);
     lv_style_set_pad_top(&style_home_list_extra_texts_main_default, 5);

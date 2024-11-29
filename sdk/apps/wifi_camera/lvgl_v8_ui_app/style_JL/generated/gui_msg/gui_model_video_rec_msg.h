@@ -37,6 +37,7 @@ typedef enum {
     GUI_MODEL_VIDEO_REC_MSG_ID_SHOW_REMAIN_TIME = 0x0079,
     GUI_MODEL_VIDEO_REC_MSG_ID_HIDE_RECORD_TIME = 0x007A,
     GUI_MODEL_VIDEO_REC_MSG_ID_SHOW_RECORD_TIME = 0x007B,
+    GUI_MODEL_VIDEO_REC_MSG_ID_APP_CONNECTED = 0x007C,
 } gui_model_video_rec_msg_id_t;
 
 extern int gui_model_video_rec_msg_cycrec_icon_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type);
@@ -65,6 +66,7 @@ extern int gui_model_video_rec_msg_hide_remain_time_cb(gui_msg_action_t access, 
 extern int gui_model_video_rec_msg_show_remain_time_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type);
 extern int gui_model_video_rec_msg_hide_record_time_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type);
 extern int gui_model_video_rec_msg_show_record_time_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type);
+extern int gui_model_video_rec_msg_app_connected_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type);
 
 extern void gui_model_video_rec_msg_init(lv_ui *ui);
 extern void gui_model_video_rec_msg_init_ui();

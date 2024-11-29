@@ -111,7 +111,8 @@ static int __fb_lcd_line_done_wait(u8 comp, u8 wait_line)
 {
     u32 cur_line = 0;
     if (!wait_line) {
-#if 1
+#if 0
+        // TODO : cur_line 计算受中断影响，不同场景会出现计算有误差,导致cur_line不准影响判断
         //只要当前dmm读的行数大于最小被追上的行,则不用等line pend
         if (g_dmm_line_period) {
             cur_line = (get_system_us() - g_vsync_start_time) / g_dmm_line_period ;
@@ -332,8 +333,8 @@ static int __fb_lcd_frame_rotate_copy_flush(u8 wait_line, u8 *frame_buffer, u8 *
         if (g_dmm_line_period) {
             u32 rotate_line = __fb_abs(lcd_vert_total, (rotate_use_time / g_dmm_line_period), &rotate_slow);
             static u8 err_cnt = 0;
-            //printf("rotate_time==%d\n",rotate_use_time);
-            //printf("rotate_line==%d\n",rotate_line);
+            /* printf("rotate_time==%d\n",rotate_use_time); */
+            /* printf("rotate_line==%d\n",rotate_line); */
             if (rotate_line > g_dmm_line + 3) { //允许有几行的误差
                 if (++err_cnt > 2) {
                     log_warn("fb lcd rotate and screen data rear-end! rotate_line=%d g_dmm_line=%d\n", rotate_line, g_dmm_line);
@@ -367,6 +368,7 @@ static int __fb_lcd_framerate_calc(void)
 }
 #endif
 
+#if (defined USE_LVGL_V8_UI_DEMO)
 void dmm_vsync_int_handler(void)
 {
     struct lcd_dev_drive *lcd = NULL;
@@ -405,6 +407,7 @@ void dmm_vsync_int_handler(void)
 #endif
     g_vsync_start_time = get_system_us(); //记录Vsync起始时间点
 }
+#endif
 
 static void dump_frame_buffer(uint8_t *buffer, int buffer_size)
 {

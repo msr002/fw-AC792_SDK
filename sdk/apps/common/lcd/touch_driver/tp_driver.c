@@ -188,6 +188,13 @@ static void tp_xy_calc(tp_info_t *data_in, tp_info_t *data_out)
 
 void get_touch_x_y_status(uint16_t *x, uint16_t *y, uint8_t *status)
 {
+    if (touch_event_is_disable()) {
+        *x = 0;
+        *y = 0;
+        *status = TP_STATUS_RELEASE;
+        return;
+    }
+
     *x = tp_latest_info.x;
     *y = tp_latest_info.y;
     *status = tp_latest_info.status;

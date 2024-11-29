@@ -131,9 +131,9 @@ lv_obj_t *setup_scr_sys_setting(lv_ui *ui)
     lv_group_add_obj(def_group, ui->sys_setting_img_saver);
     lv_obj_add_flag(ui->sys_setting_img_saver, LV_OBJ_FLAG_CLICKABLE);
 #if LV_USE_GUIBUILDER_SIMULATOR
-    lv_img_set_src(ui->sys_setting_img_saver, "A:\\wl83\\wifi_video_master\\ui_prj\\dvr_800x480\\import\\image\\video_page\\sys_setting\\icon\\lcd_off.png");
+    lv_img_set_src(ui->sys_setting_img_saver, "A:\\1111\\ac792\\ui_prj\\dvr_800x480\\import\\image\\video_page\\sys_setting\\icon\\lcd_off.png");
 #else
-    lv_img_set_src(ui->sys_setting_img_saver, "mnt/sdfile/EXT_RESERVED/uipackres/ui/56000032.rle");
+    lv_img_set_src(ui->sys_setting_img_saver, "mnt/sdfile/EXT_RESERVED/uipackres/ui/56000033.rle");
 #endif
     lv_img_set_pivot(ui->sys_setting_img_saver, 0, 0);
     lv_img_set_angle(ui->sys_setting_img_saver, 0);
@@ -169,9 +169,9 @@ lv_obj_t *setup_scr_sys_setting(lv_ui *ui)
     lv_group_add_obj(def_group, ui->sys_setting_img_2);
     lv_obj_add_flag(ui->sys_setting_img_2, LV_OBJ_FLAG_CLICKABLE);
 #if LV_USE_GUIBUILDER_SIMULATOR
-    lv_img_set_src(ui->sys_setting_img_2, "A:\\wl83\\wifi_video_master\\ui_prj\\dvr_800x480\\import\\image\\video_page\\sys_setting\\icon\\auto_off.png");
+    lv_img_set_src(ui->sys_setting_img_2, "A:\\1111\\ac792\\ui_prj\\dvr_800x480\\import\\image\\video_page\\sys_setting\\icon\\auto_off.png");
 #else
-    lv_img_set_src(ui->sys_setting_img_2, "mnt/sdfile/EXT_RESERVED/uipackres/ui/56000033.rle");
+    lv_img_set_src(ui->sys_setting_img_2, "mnt/sdfile/EXT_RESERVED/uipackres/ui/56000034.rle");
 #endif
     lv_img_set_pivot(ui->sys_setting_img_2, 0, 0);
     lv_img_set_angle(ui->sys_setting_img_2, 0);
@@ -207,9 +207,9 @@ lv_obj_t *setup_scr_sys_setting(lv_ui *ui)
     lv_group_add_obj(def_group, ui->sys_setting_img_3);
     lv_obj_add_flag(ui->sys_setting_img_3, LV_OBJ_FLAG_CLICKABLE);
 #if LV_USE_GUIBUILDER_SIMULATOR
-    lv_img_set_src(ui->sys_setting_img_3, "A:\\wl83\\wifi_video_master\\ui_prj\\dvr_800x480\\import\\image\\video_page\\sys_setting\\icon\\frequency.png");
+    lv_img_set_src(ui->sys_setting_img_3, "A:\\1111\\ac792\\ui_prj\\dvr_800x480\\import\\image\\video_page\\sys_setting\\icon\\frequency.png");
 #else
-    lv_img_set_src(ui->sys_setting_img_3, "mnt/sdfile/EXT_RESERVED/uipackres/ui/56000034.rle");
+    lv_img_set_src(ui->sys_setting_img_3, "mnt/sdfile/EXT_RESERVED/uipackres/ui/56000035.rle");
 #endif
     lv_img_set_pivot(ui->sys_setting_img_3, 0, 0);
     lv_img_set_angle(ui->sys_setting_img_3, 0);
@@ -245,19 +245,19 @@ lv_obj_t *setup_scr_sys_setting(lv_ui *ui)
     lv_group_add_obj(def_group, ui->sys_setting_img_4);
     lv_obj_add_flag(ui->sys_setting_img_4, LV_OBJ_FLAG_CLICKABLE);
 #if LV_USE_GUIBUILDER_SIMULATOR
-    lv_img_set_src(ui->sys_setting_img_4, "A:\\wl83\\wifi_video_master\\ui_prj\\dvr_800x480\\import\\image\\video_page\\sys_setting\\icon\\voice.png");
+    lv_img_set_src(ui->sys_setting_img_4, "A:\\1111\\ac792\\ui_prj\\dvr_800x480\\import\\image\\video_page\\sys_setting\\icon\\voice.png");
 #else
-    lv_img_set_src(ui->sys_setting_img_4, "mnt/sdfile/EXT_RESERVED/uipackres/ui/56000035.rle");
+    lv_img_set_src(ui->sys_setting_img_4, "mnt/sdfile/EXT_RESERVED/uipackres/ui/56000036.rle");
 #endif
     lv_img_set_pivot(ui->sys_setting_img_4, 0, 0);
     lv_img_set_angle(ui->sys_setting_img_4, 0);
     lv_img_set_zoom(ui->sys_setting_img_4, 256);
     //Write codes sys_setting_lbl_1
     ui->sys_setting_lbl_1 = lv_label_create(ui->sys_setting_view_menupage);
-    lv_label_set_text(ui->sys_setting_lbl_1, _("lcdprotect"));
+    lv_label_set_text(ui->sys_setting_lbl_1, _("lcdprotect_s"));
     lv_label_set_long_mode(ui->sys_setting_lbl_1, LV_LABEL_LONG_WRAP);
 
-    const lv_font_t *sys_setting_lbl_1_font = _font("lcdprotect");
+    const lv_font_t *sys_setting_lbl_1_font = _font("lcdprotect_s");
     if (sys_setting_lbl_1_font == NULL) {
         sys_setting_lbl_1_font = &lv_font_FangZhengKaiTiJianTi_1_16;
     }
@@ -282,10 +282,10 @@ lv_obj_t *setup_scr_sys_setting(lv_ui *ui)
     lv_obj_set_scrollbar_mode(ui->sys_setting_lbl_1, LV_SCROLLBAR_MODE_OFF);
     //Write codes sys_setting_lbl_2
     ui->sys_setting_lbl_2 = lv_label_create(ui->sys_setting_view_menupage);
-    lv_label_set_text(ui->sys_setting_lbl_2, _("poweroff"));
+    lv_label_set_text(ui->sys_setting_lbl_2, _("poweroff_s"));
     lv_label_set_long_mode(ui->sys_setting_lbl_2, LV_LABEL_LONG_WRAP);
 
-    const lv_font_t *sys_setting_lbl_2_font = _font("poweroff");
+    const lv_font_t *sys_setting_lbl_2_font = _font("poweroff_s");
     if (sys_setting_lbl_2_font == NULL) {
         sys_setting_lbl_2_font = &lv_font_FangZhengKaiTiJianTi_1_16;
     }
@@ -310,10 +310,10 @@ lv_obj_t *setup_scr_sys_setting(lv_ui *ui)
     lv_obj_set_scrollbar_mode(ui->sys_setting_lbl_2, LV_SCROLLBAR_MODE_OFF);
     //Write codes sys_setting_lbl_3
     ui->sys_setting_lbl_3 = lv_label_create(ui->sys_setting_view_menupage);
-    lv_label_set_text(ui->sys_setting_lbl_3, _("frequency"));
+    lv_label_set_text(ui->sys_setting_lbl_3, _("frequency_s"));
     lv_label_set_long_mode(ui->sys_setting_lbl_3, LV_LABEL_LONG_WRAP);
 
-    const lv_font_t *sys_setting_lbl_3_font = _font("frequency");
+    const lv_font_t *sys_setting_lbl_3_font = _font("frequency_s");
     if (sys_setting_lbl_3_font == NULL) {
         sys_setting_lbl_3_font = &lv_font_FangZhengKaiTiJianTi_1_16;
     }
@@ -338,10 +338,10 @@ lv_obj_t *setup_scr_sys_setting(lv_ui *ui)
     lv_obj_set_scrollbar_mode(ui->sys_setting_lbl_3, LV_SCROLLBAR_MODE_OFF);
     //Write codes sys_setting_lbl_4
     ui->sys_setting_lbl_4 = lv_label_create(ui->sys_setting_view_menupage);
-    lv_label_set_text(ui->sys_setting_lbl_4, _("speaker"));
+    lv_label_set_text(ui->sys_setting_lbl_4, _("speaker_s"));
     lv_label_set_long_mode(ui->sys_setting_lbl_4, LV_LABEL_LONG_WRAP);
 
-    const lv_font_t *sys_setting_lbl_4_font = _font("speaker");
+    const lv_font_t *sys_setting_lbl_4_font = _font("speaker_s");
     if (sys_setting_lbl_4_font == NULL) {
         sys_setting_lbl_4_font = &lv_font_FangZhengKaiTiJianTi_1_16;
     }
@@ -361,7 +361,7 @@ lv_obj_t *setup_scr_sys_setting(lv_ui *ui)
     lv_obj_set_style_pad_right(ui->sys_setting_lbl_4, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_pad_top(ui->sys_setting_lbl_4, 8, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_pad_bottom(ui->sys_setting_lbl_4, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_pos(ui->sys_setting_lbl_4, 342, 123);
+    lv_obj_set_pos(ui->sys_setting_lbl_4, 341, 123);
     lv_obj_set_size(ui->sys_setting_lbl_4, 77, 51);
     lv_obj_set_scrollbar_mode(ui->sys_setting_lbl_4, LV_SCROLLBAR_MODE_OFF);
     //Write codes sys_setting_img_5
@@ -395,9 +395,9 @@ lv_obj_t *setup_scr_sys_setting(lv_ui *ui)
     lv_group_add_obj(def_group, ui->sys_setting_img_5);
     lv_obj_add_flag(ui->sys_setting_img_5, LV_OBJ_FLAG_CLICKABLE);
 #if LV_USE_GUIBUILDER_SIMULATOR
-    lv_img_set_src(ui->sys_setting_img_5, "A:\\wl83\\wifi_video_master\\ui_prj\\dvr_800x480\\import\\image\\video_page\\sys_setting\\icon\\languages.png");
+    lv_img_set_src(ui->sys_setting_img_5, "A:\\1111\\ac792\\ui_prj\\dvr_800x480\\import\\image\\video_page\\sys_setting\\icon\\languages.png");
 #else
-    lv_img_set_src(ui->sys_setting_img_5, "mnt/sdfile/EXT_RESERVED/uipackres/ui/56000036.rle");
+    lv_img_set_src(ui->sys_setting_img_5, "mnt/sdfile/EXT_RESERVED/uipackres/ui/56000037.rle");
 #endif
     lv_img_set_pivot(ui->sys_setting_img_5, 0, 0);
     lv_img_set_angle(ui->sys_setting_img_5, 0);
@@ -437,9 +437,9 @@ lv_obj_t *setup_scr_sys_setting(lv_ui *ui)
     lv_group_add_obj(def_group, ui->sys_setting_img_7);
     lv_obj_add_flag(ui->sys_setting_img_7, LV_OBJ_FLAG_CLICKABLE);
 #if LV_USE_GUIBUILDER_SIMULATOR
-    lv_img_set_src(ui->sys_setting_img_7, "A:\\wl83\\wifi_video_master\\ui_prj\\dvr_800x480\\import\\image\\video_page\\menu_icon\\software.png");
+    lv_img_set_src(ui->sys_setting_img_7, "A:\\1111\\ac792\\ui_prj\\dvr_800x480\\import\\image\\video_page\\menu_icon\\software.png");
 #else
-    lv_img_set_src(ui->sys_setting_img_7, "mnt/sdfile/EXT_RESERVED/uipackres/ui/56000037.rle");
+    lv_img_set_src(ui->sys_setting_img_7, "mnt/sdfile/EXT_RESERVED/uipackres/ui/56000038.rle");
 #endif
     lv_img_set_pivot(ui->sys_setting_img_7, 0, 0);
     lv_img_set_angle(ui->sys_setting_img_7, 0);
@@ -475,9 +475,9 @@ lv_obj_t *setup_scr_sys_setting(lv_ui *ui)
     lv_group_add_obj(def_group, ui->sys_setting_img_9);
     lv_obj_add_flag(ui->sys_setting_img_9, LV_OBJ_FLAG_CLICKABLE);
 #if LV_USE_GUIBUILDER_SIMULATOR
-    lv_img_set_src(ui->sys_setting_img_9, "A:\\wl83\\wifi_video_master\\ui_prj\\dvr_800x480\\import\\image\\video_page\\sys_setting\\icon\\car_num.png");
+    lv_img_set_src(ui->sys_setting_img_9, "A:\\1111\\ac792\\ui_prj\\dvr_800x480\\import\\image\\video_page\\sys_setting\\icon\\car_num.png");
 #else
-    lv_img_set_src(ui->sys_setting_img_9, "mnt/sdfile/EXT_RESERVED/uipackres/ui/56000038.rle");
+    lv_img_set_src(ui->sys_setting_img_9, "mnt/sdfile/EXT_RESERVED/uipackres/ui/56000039.rle");
 #endif
     lv_img_set_pivot(ui->sys_setting_img_9, 0, 0);
     lv_img_set_angle(ui->sys_setting_img_9, 0);
@@ -513,19 +513,19 @@ lv_obj_t *setup_scr_sys_setting(lv_ui *ui)
     lv_group_add_obj(def_group, ui->sys_setting_img_8);
     lv_obj_add_flag(ui->sys_setting_img_8, LV_OBJ_FLAG_CLICKABLE);
 #if LV_USE_GUIBUILDER_SIMULATOR
-    lv_img_set_src(ui->sys_setting_img_8, "A:\\wl83\\wifi_video_master\\ui_prj\\dvr_800x480\\import\\image\\video_page\\sys_setting\\icon\\lane.png");
+    lv_img_set_src(ui->sys_setting_img_8, "A:\\1111\\ac792\\ui_prj\\dvr_800x480\\import\\image\\video_page\\sys_setting\\icon\\lane.png");
 #else
-    lv_img_set_src(ui->sys_setting_img_8, "mnt/sdfile/EXT_RESERVED/uipackres/ui/56000039.rle");
+    lv_img_set_src(ui->sys_setting_img_8, "mnt/sdfile/EXT_RESERVED/uipackres/ui/5600003a.rle");
 #endif
     lv_img_set_pivot(ui->sys_setting_img_8, 0, 0);
     lv_img_set_angle(ui->sys_setting_img_8, 0);
     lv_img_set_zoom(ui->sys_setting_img_8, 256);
     //Write codes sys_setting_lbl_5
     ui->sys_setting_lbl_5 = lv_label_create(ui->sys_setting_view_menupage);
-    lv_label_set_text(ui->sys_setting_lbl_5, _("language"));
+    lv_label_set_text(ui->sys_setting_lbl_5, _("language_s"));
     lv_label_set_long_mode(ui->sys_setting_lbl_5, LV_LABEL_LONG_WRAP);
 
-    const lv_font_t *sys_setting_lbl_5_font = _font("language");
+    const lv_font_t *sys_setting_lbl_5_font = _font("language_s");
     if (sys_setting_lbl_5_font == NULL) {
         sys_setting_lbl_5_font = &lv_font_FangZhengKaiTiJianTi_1_16;
     }
@@ -550,10 +550,10 @@ lv_obj_t *setup_scr_sys_setting(lv_ui *ui)
     lv_obj_set_scrollbar_mode(ui->sys_setting_lbl_5, LV_SCROLLBAR_MODE_OFF);
     //Write codes sys_setting_lbl_6
     ui->sys_setting_lbl_6 = lv_label_create(ui->sys_setting_view_menupage);
-    lv_label_set_text(ui->sys_setting_lbl_6, _("lamp"));
+    lv_label_set_text(ui->sys_setting_lbl_6, _("lamp_s"));
     lv_label_set_long_mode(ui->sys_setting_lbl_6, LV_LABEL_LONG_WRAP);
 
-    const lv_font_t *sys_setting_lbl_6_font = _font("lamp");
+    const lv_font_t *sys_setting_lbl_6_font = _font("lamp_s");
     if (sys_setting_lbl_6_font == NULL) {
         sys_setting_lbl_6_font = &lv_font_FangZhengKaiTiJianTi_1_16;
     }
@@ -607,9 +607,9 @@ lv_obj_t *setup_scr_sys_setting(lv_ui *ui)
     lv_group_add_obj(def_group, ui->sys_setting_img_6);
     lv_obj_add_flag(ui->sys_setting_img_6, LV_OBJ_FLAG_CLICKABLE);
 #if LV_USE_GUIBUILDER_SIMULATOR
-    lv_img_set_src(ui->sys_setting_img_6, "A:\\wl83\\wifi_video_master\\ui_prj\\dvr_800x480\\import\\image\\video_page\\sys_setting\\icon\\flig.png");
+    lv_img_set_src(ui->sys_setting_img_6, "A:\\1111\\ac792\\ui_prj\\dvr_800x480\\import\\image\\video_page\\sys_setting\\icon\\flig.png");
 #else
-    lv_img_set_src(ui->sys_setting_img_6, "mnt/sdfile/EXT_RESERVED/uipackres/ui/5600003a.rle");
+    lv_img_set_src(ui->sys_setting_img_6, "mnt/sdfile/EXT_RESERVED/uipackres/ui/5600003b.rle");
 #endif
     lv_img_set_pivot(ui->sys_setting_img_6, 0, 0);
     lv_img_set_angle(ui->sys_setting_img_6, 0);
@@ -645,9 +645,9 @@ lv_obj_t *setup_scr_sys_setting(lv_ui *ui)
     lv_group_add_obj(def_group, ui->sys_setting_img_10);
     lv_obj_add_flag(ui->sys_setting_img_10, LV_OBJ_FLAG_CLICKABLE);
 #if LV_USE_GUIBUILDER_SIMULATOR
-    lv_img_set_src(ui->sys_setting_img_10, "A:\\wl83\\wifi_video_master\\ui_prj\\dvr_800x480\\import\\image\\video_page\\sys_setting\\icon\\format.png");
+    lv_img_set_src(ui->sys_setting_img_10, "A:\\1111\\ac792\\ui_prj\\dvr_800x480\\import\\image\\video_page\\sys_setting\\icon\\format.png");
 #else
-    lv_img_set_src(ui->sys_setting_img_10, "mnt/sdfile/EXT_RESERVED/uipackres/ui/5600003b.rle");
+    lv_img_set_src(ui->sys_setting_img_10, "mnt/sdfile/EXT_RESERVED/uipackres/ui/5600003c.rle");
 #endif
     lv_img_set_pivot(ui->sys_setting_img_10, 0, 0);
     lv_img_set_angle(ui->sys_setting_img_10, 0);
@@ -683,9 +683,9 @@ lv_obj_t *setup_scr_sys_setting(lv_ui *ui)
     lv_group_add_obj(def_group, ui->sys_setting_img_11);
     lv_obj_add_flag(ui->sys_setting_img_11, LV_OBJ_FLAG_CLICKABLE);
 #if LV_USE_GUIBUILDER_SIMULATOR
-    lv_img_set_src(ui->sys_setting_img_11, "A:\\wl83\\wifi_video_master\\ui_prj\\dvr_800x480\\import\\image\\video_page\\sys_setting\\icon\\reset.png");
+    lv_img_set_src(ui->sys_setting_img_11, "A:\\1111\\ac792\\ui_prj\\dvr_800x480\\import\\image\\video_page\\sys_setting\\icon\\reset.png");
 #else
-    lv_img_set_src(ui->sys_setting_img_11, "mnt/sdfile/EXT_RESERVED/uipackres/ui/5600003c.rle");
+    lv_img_set_src(ui->sys_setting_img_11, "mnt/sdfile/EXT_RESERVED/uipackres/ui/5600003d.rle");
 #endif
     lv_img_set_pivot(ui->sys_setting_img_11, 0, 0);
     lv_img_set_angle(ui->sys_setting_img_11, 0);
@@ -721,19 +721,19 @@ lv_obj_t *setup_scr_sys_setting(lv_ui *ui)
     lv_group_add_obj(def_group, ui->sys_setting_img_12);
     lv_obj_add_flag(ui->sys_setting_img_12, LV_OBJ_FLAG_CLICKABLE);
 #if LV_USE_GUIBUILDER_SIMULATOR
-    lv_img_set_src(ui->sys_setting_img_12, "A:\\wl83\\wifi_video_master\\ui_prj\\dvr_800x480\\import\\image\\video_page\\sys_setting\\icon\\date.png");
+    lv_img_set_src(ui->sys_setting_img_12, "A:\\1111\\ac792\\ui_prj\\dvr_800x480\\import\\image\\video_page\\sys_setting\\icon\\date.png");
 #else
-    lv_img_set_src(ui->sys_setting_img_12, "mnt/sdfile/EXT_RESERVED/uipackres/ui/5600003d.rle");
+    lv_img_set_src(ui->sys_setting_img_12, "mnt/sdfile/EXT_RESERVED/uipackres/ui/5600003e.rle");
 #endif
     lv_img_set_pivot(ui->sys_setting_img_12, 0, 0);
     lv_img_set_angle(ui->sys_setting_img_12, 0);
     lv_img_set_zoom(ui->sys_setting_img_12, 256);
     //Write codes sys_setting_lbl_7
     ui->sys_setting_lbl_7 = lv_label_create(ui->sys_setting_view_menupage);
-    lv_label_set_text(ui->sys_setting_lbl_7, _("software"));
+    lv_label_set_text(ui->sys_setting_lbl_7, _("software_s"));
     lv_label_set_long_mode(ui->sys_setting_lbl_7, LV_LABEL_LONG_WRAP);
 
-    const lv_font_t *sys_setting_lbl_7_font = _font("software");
+    const lv_font_t *sys_setting_lbl_7_font = _font("software_s");
     if (sys_setting_lbl_7_font == NULL) {
         sys_setting_lbl_7_font = &lv_font_FangZhengKaiTiJianTi_1_16;
     }
@@ -758,10 +758,10 @@ lv_obj_t *setup_scr_sys_setting(lv_ui *ui)
     lv_obj_set_scrollbar_mode(ui->sys_setting_lbl_7, LV_SCROLLBAR_MODE_OFF);
     //Write codes sys_setting_lbl_8
     ui->sys_setting_lbl_8 = lv_label_create(ui->sys_setting_view_menupage);
-    lv_label_set_text(ui->sys_setting_lbl_8, _("carnum"));
+    lv_label_set_text(ui->sys_setting_lbl_8, _("carnum_s"));
     lv_label_set_long_mode(ui->sys_setting_lbl_8, LV_LABEL_LONG_WRAP);
 
-    const lv_font_t *sys_setting_lbl_8_font = _font("carnum");
+    const lv_font_t *sys_setting_lbl_8_font = _font("carnum_s");
     if (sys_setting_lbl_8_font == NULL) {
         sys_setting_lbl_8_font = &lv_font_FangZhengKaiTiJianTi_1_16;
     }
@@ -786,10 +786,10 @@ lv_obj_t *setup_scr_sys_setting(lv_ui *ui)
     lv_obj_set_scrollbar_mode(ui->sys_setting_lbl_8, LV_SCROLLBAR_MODE_OFF);
     //Write codes sys_setting_lbl_9
     ui->sys_setting_lbl_9 = lv_label_create(ui->sys_setting_view_menupage);
-    lv_label_set_text(ui->sys_setting_lbl_9, _("roadline"));
+    lv_label_set_text(ui->sys_setting_lbl_9, _("roadline_s"));
     lv_label_set_long_mode(ui->sys_setting_lbl_9, LV_LABEL_LONG_WRAP);
 
-    const lv_font_t *sys_setting_lbl_9_font = _font("roadline");
+    const lv_font_t *sys_setting_lbl_9_font = _font("roadline_s");
     if (sys_setting_lbl_9_font == NULL) {
         sys_setting_lbl_9_font = &lv_font_FangZhengKaiTiJianTi_1_16;
     }
@@ -814,10 +814,10 @@ lv_obj_t *setup_scr_sys_setting(lv_ui *ui)
     lv_obj_set_scrollbar_mode(ui->sys_setting_lbl_9, LV_SCROLLBAR_MODE_OFF);
     //Write codes sys_setting_lbl_10
     ui->sys_setting_lbl_10 = lv_label_create(ui->sys_setting_view_menupage);
-    lv_label_set_text(ui->sys_setting_lbl_10, _("formatting"));
+    lv_label_set_text(ui->sys_setting_lbl_10, _("formatting_s"));
     lv_label_set_long_mode(ui->sys_setting_lbl_10, LV_LABEL_LONG_WRAP);
 
-    const lv_font_t *sys_setting_lbl_10_font = _font("formatting");
+    const lv_font_t *sys_setting_lbl_10_font = _font("formatting_s");
     if (sys_setting_lbl_10_font == NULL) {
         sys_setting_lbl_10_font = &lv_font_FangZhengKaiTiJianTi_1_16;
     }
@@ -842,10 +842,10 @@ lv_obj_t *setup_scr_sys_setting(lv_ui *ui)
     lv_obj_set_scrollbar_mode(ui->sys_setting_lbl_10, LV_SCROLLBAR_MODE_OFF);
     //Write codes sys_setting_lbl_11
     ui->sys_setting_lbl_11 = lv_label_create(ui->sys_setting_view_menupage);
-    lv_label_set_text(ui->sys_setting_lbl_11, _("reset"));
+    lv_label_set_text(ui->sys_setting_lbl_11, _("reset_s"));
     lv_label_set_long_mode(ui->sys_setting_lbl_11, LV_LABEL_LONG_WRAP);
 
-    const lv_font_t *sys_setting_lbl_11_font = _font("reset");
+    const lv_font_t *sys_setting_lbl_11_font = _font("reset_s");
     if (sys_setting_lbl_11_font == NULL) {
         sys_setting_lbl_11_font = &lv_font_FangZhengKaiTiJianTi_1_16;
     }
@@ -870,10 +870,10 @@ lv_obj_t *setup_scr_sys_setting(lv_ui *ui)
     lv_obj_set_scrollbar_mode(ui->sys_setting_lbl_11, LV_SCROLLBAR_MODE_OFF);
     //Write codes sys_setting_lbl_12
     ui->sys_setting_lbl_12 = lv_label_create(ui->sys_setting_view_menupage);
-    lv_label_set_text(ui->sys_setting_lbl_12, _("date"));
+    lv_label_set_text(ui->sys_setting_lbl_12, _("date_s"));
     lv_label_set_long_mode(ui->sys_setting_lbl_12, LV_LABEL_LONG_WRAP);
 
-    const lv_font_t *sys_setting_lbl_12_font = _font("date");
+    const lv_font_t *sys_setting_lbl_12_font = _font("date_s");
     if (sys_setting_lbl_12_font == NULL) {
         sys_setting_lbl_12_font = &lv_font_FangZhengKaiTiJianTi_1_16;
     }
@@ -930,9 +930,9 @@ lv_obj_t *setup_scr_sys_setting(lv_ui *ui)
     lv_obj_add_flag(ui->sys_setting_img_icon, LV_OBJ_FLAG_CLICKABLE);
     lv_obj_add_flag(ui->sys_setting_img_icon, LV_OBJ_FLAG_CLICKABLE);
 #if LV_USE_GUIBUILDER_SIMULATOR
-    lv_img_set_src(ui->sys_setting_img_icon, "A:\\wl83\\wifi_video_master\\ui_prj\\dvr_800x480\\import\\image\\video_page\\sys_setting\\icon\\auto_off.png");
+    lv_img_set_src(ui->sys_setting_img_icon, "A:\\1111\\ac792\\ui_prj\\dvr_800x480\\import\\image\\video_page\\sys_setting\\icon\\auto_off.png");
 #else
-    lv_img_set_src(ui->sys_setting_img_icon, "mnt/sdfile/EXT_RESERVED/uipackres/ui/56000033.rle");
+    lv_img_set_src(ui->sys_setting_img_icon, "mnt/sdfile/EXT_RESERVED/uipackres/ui/56000034.rle");
 #endif
     lv_img_set_pivot(ui->sys_setting_img_icon, 0, 0);
     lv_img_set_angle(ui->sys_setting_img_icon, 0);
@@ -960,30 +960,6 @@ lv_obj_t *setup_scr_sys_setting(lv_ui *ui)
     lv_obj_set_pos(ui->sys_setting_lbl_menu_title, 117, 28);
     lv_obj_set_size(ui->sys_setting_lbl_menu_title, 232, 53);
     lv_obj_set_scrollbar_mode(ui->sys_setting_lbl_menu_title, LV_SCROLLBAR_MODE_OFF);
-    //Write codes sys_setting_lbl_18
-    ui->sys_setting_lbl_18 = lv_label_create(ui->sys_setting_view_subpage);
-    lv_label_set_text(ui->sys_setting_lbl_18, "这个是预生成控件\n注意与lbl_menu_title字体字号一致\n屏幕保护\n自动关机\n光源频率\n按键声音打开关闭\n语言设置取消确认简体中文\n电视制式\n日期时间\n车牌号码\n车道偏移\n前照灯提醒\n格式化\n默认\n版本号\n软件版本：JL V1.0.0\nVersion: JL V1.0.0");
-    lv_label_set_long_mode(ui->sys_setting_lbl_18, LV_LABEL_LONG_WRAP);
-
-    //Set style for sys_setting_lbl_18. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
-    lv_obj_set_style_radius(ui->sys_setting_lbl_18, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_color(ui->sys_setting_lbl_18, lv_color_make(0x21, 0x95, 0xf6), LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_opa(ui->sys_setting_lbl_18, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_shadow_width(ui->sys_setting_lbl_18, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_border_width(ui->sys_setting_lbl_18, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_text_color(ui->sys_setting_lbl_18, lv_color_make(0xff, 0xff, 0xff), LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_text_font(ui->sys_setting_lbl_18, &lv_font_FangZhengKaiTiJianTi_1_24, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_text_letter_space(ui->sys_setting_lbl_18, 2, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_text_line_space(ui->sys_setting_lbl_18, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_text_align(ui->sys_setting_lbl_18, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_pad_left(ui->sys_setting_lbl_18, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_pad_right(ui->sys_setting_lbl_18, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_pad_top(ui->sys_setting_lbl_18, 16, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_pad_bottom(ui->sys_setting_lbl_18, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_pos(ui->sys_setting_lbl_18, 86, 56);
-    lv_obj_set_size(ui->sys_setting_lbl_18, 262, 71);
-    lv_obj_set_scrollbar_mode(ui->sys_setting_lbl_18, LV_SCROLLBAR_MODE_OFF);
-    lv_obj_add_flag(ui->sys_setting_lbl_18, LV_OBJ_FLAG_HIDDEN);
     //Write codes sys_setting_view_3
     ui->sys_setting_view_3 = lv_obj_create(ui->sys_setting_view_subpage);
 
@@ -1046,9 +1022,9 @@ lv_obj_t *setup_scr_sys_setting(lv_ui *ui)
     lv_group_add_obj(def_group, ui->sys_setting_img_15);
     lv_obj_add_flag(ui->sys_setting_img_15, LV_OBJ_FLAG_CLICKABLE);
 #if LV_USE_GUIBUILDER_SIMULATOR
-    lv_img_set_src(ui->sys_setting_img_15, "A:\\wl83\\wifi_video_master\\ui_prj\\dvr_800x480\\import\\image\\video_page\\sys_setting\\left_tools\\video.png");
+    lv_img_set_src(ui->sys_setting_img_15, "A:\\1111\\ac792\\ui_prj\\dvr_800x480\\import\\image\\video_page\\sys_setting\\left_tools\\video.png");
 #else
-    lv_img_set_src(ui->sys_setting_img_15, "mnt/sdfile/EXT_RESERVED/uipackres/ui/5600003e.rle");
+    lv_img_set_src(ui->sys_setting_img_15, "mnt/sdfile/EXT_RESERVED/uipackres/ui/5600003f.rle");
 #endif
     lv_img_set_pivot(ui->sys_setting_img_15, 0, 0);
     lv_img_set_angle(ui->sys_setting_img_15, 0);
@@ -1096,9 +1072,9 @@ lv_obj_t *setup_scr_sys_setting(lv_ui *ui)
     lv_group_add_obj(def_group, ui->sys_setting_img_14);
     lv_obj_add_flag(ui->sys_setting_img_14, LV_OBJ_FLAG_CLICKABLE);
 #if LV_USE_GUIBUILDER_SIMULATOR
-    lv_img_set_src(ui->sys_setting_img_14, "A:\\wl83\\wifi_video_master\\ui_prj\\dvr_800x480\\import\\image\\video_page\\sys_setting\\left_tools\\FILES.png");
+    lv_img_set_src(ui->sys_setting_img_14, "A:\\1111\\ac792\\ui_prj\\dvr_800x480\\import\\image\\video_page\\sys_setting\\left_tools\\FILES.png");
 #else
-    lv_img_set_src(ui->sys_setting_img_14, "mnt/sdfile/EXT_RESERVED/uipackres/ui/5600003f.rle");
+    lv_img_set_src(ui->sys_setting_img_14, "mnt/sdfile/EXT_RESERVED/uipackres/ui/56000040.rle");
 #endif
     lv_img_set_pivot(ui->sys_setting_img_14, 0, 0);
     lv_img_set_angle(ui->sys_setting_img_14, 0);
@@ -1142,9 +1118,9 @@ lv_obj_t *setup_scr_sys_setting(lv_ui *ui)
     lv_group_add_obj(def_group, ui->sys_setting_img_16);
     lv_obj_add_flag(ui->sys_setting_img_16, LV_OBJ_FLAG_CLICKABLE);
 #if LV_USE_GUIBUILDER_SIMULATOR
-    lv_img_set_src(ui->sys_setting_img_16, "A:\\wl83\\wifi_video_master\\ui_prj\\dvr_800x480\\import\\image\\video_page\\left_tools\\home.png");
+    lv_img_set_src(ui->sys_setting_img_16, "A:\\1111\\ac792\\ui_prj\\dvr_800x480\\import\\image\\video_page\\left_tools\\home.png");
 #else
-    lv_img_set_src(ui->sys_setting_img_16, "mnt/sdfile/EXT_RESERVED/uipackres/ui/56000017.rle");
+    lv_img_set_src(ui->sys_setting_img_16, "mnt/sdfile/EXT_RESERVED/uipackres/ui/56000018.rle");
 #endif
     lv_img_set_pivot(ui->sys_setting_img_16, 0, 0);
     lv_img_set_angle(ui->sys_setting_img_16, 0);
@@ -1426,7 +1402,7 @@ lv_obj_t *setup_scr_sys_setting(lv_ui *ui)
     lv_obj_clear_flag(ui->sys_setting_lbl_funkey7, LV_OBJ_FLAG_SCROLLABLE);
     //Write codes sys_setting_lbl_subpage_warning
     ui->sys_setting_lbl_subpage_warning = lv_label_create(ui->sys_setting_view_subpage);
-    lv_label_set_text(ui->sys_setting_lbl_subpage_warning, "警告\n恢复出厂设置\n点击确认删除所有数据\n没有内存卡\nVersion: JL V1.0.0\n版本：JL V1.0.0");
+    lv_label_set_text(ui->sys_setting_lbl_subpage_warning, "");
     lv_label_set_long_mode(ui->sys_setting_lbl_subpage_warning, LV_LABEL_LONG_WRAP);
 
     //Set style for sys_setting_lbl_subpage_warning. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT

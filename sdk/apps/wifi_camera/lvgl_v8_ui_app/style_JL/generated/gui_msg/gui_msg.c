@@ -213,6 +213,7 @@ gui_msg_status_t gui_msg_send(int32_t msg_id, void *value, int32_t len)
     case GUI_MODEL_VIDEO_REC_MSG_ID_SHOW_REMAIN_TIME:
     case GUI_MODEL_VIDEO_REC_MSG_ID_HIDE_RECORD_TIME:
     case GUI_MODEL_VIDEO_REC_MSG_ID_SHOW_RECORD_TIME:
+    case GUI_MODEL_VIDEO_REC_MSG_ID_APP_CONNECTED:
         ret = gui_model_video_rec_msg_send(msg_id, value, len);
         gui_msg_send_status = GUI_MSG_SEND_DONE;
         return ret;
@@ -380,6 +381,7 @@ gui_msg_data_t *gui_msg_get_guider(int32_t msg_id)
     case GUI_MODEL_VIDEO_REC_MSG_ID_SHOW_REMAIN_TIME:
     case GUI_MODEL_VIDEO_REC_MSG_ID_HIDE_RECORD_TIME:
     case GUI_MODEL_VIDEO_REC_MSG_ID_SHOW_RECORD_TIME:
+    case GUI_MODEL_VIDEO_REC_MSG_ID_APP_CONNECTED:
         return gui_model_video_rec_msg_get(msg_id);
 
     case GUI_SYS_MODEL_MSG_ID:
@@ -537,6 +539,7 @@ void gui_msg_action_change_guider(int32_t msg_id, gui_msg_action_t access, gui_m
     case GUI_MODEL_VIDEO_REC_MSG_ID_SHOW_REMAIN_TIME:
     case GUI_MODEL_VIDEO_REC_MSG_ID_HIDE_RECORD_TIME:
     case GUI_MODEL_VIDEO_REC_MSG_ID_SHOW_RECORD_TIME:
+    case GUI_MODEL_VIDEO_REC_MSG_ID_APP_CONNECTED:
         return gui_model_video_rec_msg_action_change(msg_id, access, data, type);
 
     case GUI_SYS_MODEL_MSG_ID:
@@ -653,6 +656,15 @@ void gui_msg_set_visible_by_bool_cb(lv_observer_t *observer, lv_subject_t *subje
     } else {
         lv_obj_add_flag(obj, LV_OBJ_FLAG_HIDDEN);
     }
+}
+void gui_msg_set_digital_clock_clock_time_by_time_cb(lv_observer_t *observer, lv_subject_t *subject)
+{
+    lv_obj_t *obj = lv_observer_get_target_obj(observer);
+    if (obj == NULL || lv_obj_is_valid(obj) == false) {
+        return;
+    }
+
+    gui_msg_data_t *data = (gui_msg_data_t *)observer->user_data;
 }
 void gui_msg_set_bar_bar_value_by_int32_cb(lv_observer_t *observer, lv_subject_t *subject)
 {

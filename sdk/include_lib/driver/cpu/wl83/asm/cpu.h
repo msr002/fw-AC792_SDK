@@ -52,7 +52,10 @@ typedef unsigned long long      u64, uint64_t;
 		extern void wdt_clear(void);\
 		/*wl83 双核要分开配置q32DSP*/ \
         q32DSP(a)->ILAT_SET|=BIT(7-a); \
-        wdt_clear(); \
+        extern const int config_clear_wdg_in_idle_hook; \
+        if (config_clear_wdg_in_idle_hook) { \
+            wdt_clear(); \
+        } \
     } while (0)
 
 #define  CPU_INT_NESTING 	2

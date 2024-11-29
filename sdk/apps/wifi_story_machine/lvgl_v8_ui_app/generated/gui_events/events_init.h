@@ -4,8 +4,8 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-#include "gui_guider.h"
-#include "i18n_handler.h"
+#include "../gui_guider.h"
+#include "./i18n_handler.h"
 
 void events_init(lv_ui *ui);
 void events_init_audio(lv_ui *ui);

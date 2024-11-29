@@ -7,6 +7,8 @@ const int config_sdfile_ext_enable = 1;
 const int config_sdfile_ext_enable = 0;
 #endif
 
+const int config_clear_wdg_in_idle_hook = 1;
+
 const int config_wwdg_clear_by_tick_isr = 1;
 
 const int config_cpu_unmask_irq_enable = 0;

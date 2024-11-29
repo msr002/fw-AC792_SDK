@@ -769,6 +769,7 @@
 <Unit filename="../../../../apps/common/lvgl_v8/src/extra/jl_extra/libs/barcode/lv_barcode.h" />
 <Unit filename="../../../../apps/common/lvgl_v8/src/extra/jl_extra/libs/bin/lv_bin.h" />
 <Unit filename="../../../../apps/common/lvgl_v8/src/extra/jl_extra/libs/jl_libs.h" />
+<Unit filename="../../../../apps/common/lvgl_v8/src/extra/jl_extra/libs/jlffmpeg/lv_jlffmpeg.h" />
 <Unit filename="../../../../apps/common/lvgl_v8/src/extra/jl_extra/libs/jljpeg/lv_jljpeg.h" />
 <Unit filename="../../../../apps/common/lvgl_v8/src/extra/jl_extra/libs/lz4/lz4.h" />
 <Unit filename="../../../../apps/common/lvgl_v8/src/extra/jl_extra/libs/rle/lv_rle.h" />

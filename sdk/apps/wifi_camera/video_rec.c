@@ -119,6 +119,26 @@ static void get_isp_lv_timer_cb(void *p);
 extern int video_rec_set_config(struct intent *it);
 extern int user_isp_get_current_scene(int channel);
 
+//pipeline 事件回调函数
+#include "pipeline_core.h"
+void video_pipeline_extern_do(const char *name, int event, void *arg)
+{
+    buffer_meta_t *buf_meta = (buffer_meta_t *)arg;
+    if (name && !strncmp(name, "uvc", 3)) {
+        switch (event) {
+        case EVENT_DATA_DONE: //获取uvc收到的数据帧
+            if (buf_meta) {
+                /* put_buf(buf_meta->ext_data,buf_meta->data_len); */
+            }
+            break;
+        case EVENT_FRAME_DONE: //uvc解码完一帧数据回调
+            break;
+        case EVENT_BUFFER_EMPTY: //uvc获取不到数据回调
+            break;
+        }
+    }
+}
+
 #ifdef CONFIG_WIFI_ENABLE
 /******************************用于网络实时流*************************************/
 static void ve_mdet_reset();
@@ -4647,16 +4667,20 @@ int lane_det_setting_disp()
 
 static void check_usb_gpio_state(void)
 {
+    static u8 prev_gpio_state;
+    u8 gpio_state;
     gpio_direction_input(TCFG_USB_POWER_CHECK_IO);
     gpio_set_die(TCFG_USB_POWER_CHECK_IO, 1);
-    int gpio_state = gpio_read(TCFG_USB_POWER_CHECK_IO);
-    int vbat_level;
+    gpio_state = gpio_read(TCFG_USB_POWER_CHECK_IO);
     if (gpio_state) {
-        post_msg2bat_icon(110);
+        if (gpio_state != prev_gpio_state) {
+            video_rec_post_msg("batIcon", 110);
+        }
     } else {
-        vbat_level = get_vbat_percent();
-        post_msg2bat_icon(vbat_level);
+        int vbat_level = get_vbat_percent();
+        video_rec_post_msg("batIcon", vbat_level);
     }
+    prev_gpio_state = gpio_state;
 }
 
 static int video_rec_init()
@@ -5452,7 +5476,7 @@ static int video_rec_device_event_handler(struct sys_event *sys_eve)
 
             video_rec_sd_in();
             if (storage_device_available()) {
-                post_msg2sd_icon(1);
+                video_rec_post_msg("sdStatus", 1);
             }
 
 
@@ -5460,7 +5484,7 @@ static int video_rec_device_event_handler(struct sys_event *sys_eve)
         case DEVICE_EVENT_OUT:
             if (!fdir_exist(CONFIG_STORAGE_PATH)) {
                 video_rec_sd_out();
-                post_msg2sd_icon(0);
+                video_rec_post_msg("sdStatus", 0);
                 video_rec_post_msg("Remain:s=%4", ((u32)(0)));
 
             }
@@ -5470,16 +5494,16 @@ static int video_rec_device_event_handler(struct sys_event *sys_eve)
     } else if (sys_eve->from == DEVICE_EVENT_FROM_POWER) {
         if (device_eve->event == POWER_EVENT_POWER_CHANGE) {
             int battery_per = sys_power_get_battery_persent();
-            post_msg2bat_icon(battery_per);
+            video_rec_post_msg("batIcon", battery_per);
         } else if (device_eve->event == POWER_EVENT_POWER_WARNING) {
             int power_warn = sys_power_get_battery_persent();
-            post_msg2bat_icon(power_warn);
+            video_rec_post_msg("batIcon", power_warn);
         } else if (device_eve->event == POWER_EVENT_POWER_LOW) {
             int power_low = sys_power_get_battery_persent();
-            post_msg2bat_icon(power_low);
+            video_rec_post_msg("batIcon", power_low);
         } else if (device_eve->event == POWER_EVENT_POWER_AUTOOFF) {
         } else if (device_eve->event == POWER_EVENT_POWER_CHARGE) {
-            post_msg2bat_icon(0xff);
+            video_rec_post_msg("batIcon", 0xff);
         }
 
 #ifdef CONFIG_VIDEO2_ENABLE
@@ -5494,7 +5518,7 @@ static int video_rec_device_event_handler(struct sys_event *sys_eve)
             if (!__this->video_online[2]) {
                 __this->video_online[2] = true;
 #ifndef CONFIG_UI_STYLE_LY_ENABLE
-                post_msg2sw_winicon(1);
+                video_rec_post_msg("swWinicon", 1);
 #endif
                 printf("UVC or msd_storage online : %s, id=%d\n", type, __this->uvc_id);
 
@@ -5503,7 +5527,7 @@ static int video_rec_device_event_handler(struct sys_event *sys_eve)
                     video_rec_start();
                 }
                 /* video_set_disp_window(); */
-                video_disp_win_switch(DISP_WIN_SW_DEV_IN, 2);
+                video_disp_win_switch(DISP_WIN_SW_DEV_IN, 0);
 
 
             }
@@ -5513,9 +5537,9 @@ static int video_rec_device_event_handler(struct sys_event *sys_eve)
             if (__this->video_online[2]) {
                 __this->video_online[2] = false;
 #ifndef CONFIG_UI_STYLE_LY_ENABLE
-                post_msg2sw_winicon(0);
+                video_rec_post_msg("swWinicon", 0);
 #endif
-                video_disp_win_switch(DISP_WIN_SW_DEV_OUT, 2);
+                video_disp_win_switch(DISP_WIN_SW_DEV_OUT, 0);
 
                 if (__this->state == VIDREC_STA_START) {
                     video_rec_stop(0);
@@ -5533,8 +5557,10 @@ static int video_rec_device_event_handler(struct sys_event *sys_eve)
             puts("parking on\n");	//parking on
 
             rec_park_flag++;
+#ifdef CONFIG_UI_ENABLE
             extern void parking_page_show(int arg);
             lvgl_rpc_post_func(parking_page_show, 1, 0);
+#endif
             video_disp_win_switch(DISP_WIN_SW_SHOW_PARKING, 0);
             sys_power_auto_shutdown_pause();
 
@@ -5543,8 +5569,10 @@ static int video_rec_device_event_handler(struct sys_event *sys_eve)
         case DEVICE_EVENT_OUT://parking off
             puts("parking off\n");
 
+#ifdef CONFIG_UI_ENABLE
             extern void parking_page_hide(int arg);
             lvgl_rpc_post_func(parking_page_hide, 1, 0);
+#endif
             video_disp_win_switch(DISP_WIN_SW_HIDE_PARKING, 0);
             if (__this->state == VIDREC_STA_START) {
                 sys_power_auto_shutdown_pause();

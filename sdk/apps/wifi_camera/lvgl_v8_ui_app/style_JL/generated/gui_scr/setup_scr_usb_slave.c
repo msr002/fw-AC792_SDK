@@ -39,7 +39,7 @@ lv_obj_t *setup_scr_usb_slave(lv_ui *ui)
     lv_obj_add_flag(ui->usb_slave_img_icon_pccam, LV_OBJ_FLAG_HIDDEN);
     lv_obj_add_flag(ui->usb_slave_img_icon_pccam, LV_OBJ_FLAG_CLICKABLE);
 #if LV_USE_GUIBUILDER_SIMULATOR
-    lv_img_set_src(ui->usb_slave_img_icon_pccam, "A:\\wl83\\wifi_video_master\\ui_prj\\dvr_800x480\\import\\image\\video_page\\USB\\s_PC.png");
+    lv_img_set_src(ui->usb_slave_img_icon_pccam, "A:\\1111\\ac792\\ui_prj\\dvr_800x480\\import\\image\\video_page\\USB\\s_PC.png");
 #else
     lv_img_set_src(ui->usb_slave_img_icon_pccam, "mnt/sdfile/EXT_RESERVED/uipackres/ui/56000000.rle");
 #endif
@@ -63,7 +63,7 @@ lv_obj_t *setup_scr_usb_slave(lv_ui *ui)
     lv_obj_add_flag(ui->usb_slave_img_icon_masstorage, LV_OBJ_FLAG_HIDDEN);
     lv_obj_add_flag(ui->usb_slave_img_icon_masstorage, LV_OBJ_FLAG_CLICKABLE);
 #if LV_USE_GUIBUILDER_SIMULATOR
-    lv_img_set_src(ui->usb_slave_img_icon_masstorage, "A:\\wl83\\wifi_video_master\\ui_prj\\dvr_800x480\\import\\image\\video_page\\USB\\s_MASS.png");
+    lv_img_set_src(ui->usb_slave_img_icon_masstorage, "A:\\1111\\ac792\\ui_prj\\dvr_800x480\\import\\image\\video_page\\USB\\s_MASS.png");
 #else
     lv_img_set_src(ui->usb_slave_img_icon_masstorage, "mnt/sdfile/EXT_RESERVED/uipackres/ui/56000001.rle");
 #endif
@@ -148,10 +148,10 @@ lv_obj_t *setup_scr_usb_slave(lv_ui *ui)
     lv_obj_set_scrollbar_mode(ui->usb_slave_imgbtn_videorec, LV_SCROLLBAR_MODE_OFF);
     lv_group_add_obj(def_group, ui->usb_slave_imgbtn_videorec);
 #if LV_USE_GUIBUILDER_SIMULATOR
-    lv_imgbtn_set_src(ui->usb_slave_imgbtn_videorec, LV_IMGBTN_STATE_RELEASED, NULL, "A:\\wl83\\wifi_video_master\\ui_prj\\dvr_800x480\\import\\image\\video_page\\USB\\VIDEO.png", NULL);
-    lv_imgbtn_set_src(ui->usb_slave_imgbtn_videorec, LV_IMGBTN_STATE_PRESSED, NULL, "A:\\wl83\\wifi_video_master\\ui_prj\\dvr_800x480\\import\\image\\video_page\\USB\\VIDEO_on.png", NULL);
-    lv_imgbtn_set_src(ui->usb_slave_imgbtn_videorec, LV_IMGBTN_STATE_CHECKED_RELEASED, NULL, "A:\\wl83\\wifi_video_master\\ui_prj\\dvr_800x480\\import\\image\\video_page\\USB\\VIDEO.png", NULL);
-    lv_imgbtn_set_src(ui->usb_slave_imgbtn_videorec, LV_IMGBTN_STATE_CHECKED_PRESSED, NULL, "A:\\wl83\\wifi_video_master\\ui_prj\\dvr_800x480\\import\\image\\video_page\\USB\\VIDEO_on.png", NULL);
+    lv_imgbtn_set_src(ui->usb_slave_imgbtn_videorec, LV_IMGBTN_STATE_RELEASED, NULL, "A:\\1111\\ac792\\ui_prj\\dvr_800x480\\import\\image\\video_page\\USB\\VIDEO.png", NULL);
+    lv_imgbtn_set_src(ui->usb_slave_imgbtn_videorec, LV_IMGBTN_STATE_PRESSED, NULL, "A:\\1111\\ac792\\ui_prj\\dvr_800x480\\import\\image\\video_page\\USB\\VIDEO_on.png", NULL);
+    lv_imgbtn_set_src(ui->usb_slave_imgbtn_videorec, LV_IMGBTN_STATE_CHECKED_RELEASED, NULL, "A:\\1111\\ac792\\ui_prj\\dvr_800x480\\import\\image\\video_page\\USB\\VIDEO.png", NULL);
+    lv_imgbtn_set_src(ui->usb_slave_imgbtn_videorec, LV_IMGBTN_STATE_CHECKED_PRESSED, NULL, "A:\\1111\\ac792\\ui_prj\\dvr_800x480\\import\\image\\video_page\\USB\\VIDEO_on.png", NULL);
 #else
     lv_imgbtn_set_src(ui->usb_slave_imgbtn_videorec, LV_IMGBTN_STATE_RELEASED, NULL, "mnt/sdfile/EXT_RESERVED/uipackres/ui/56000002.rle", NULL);
     lv_imgbtn_set_src(ui->usb_slave_imgbtn_videorec, LV_IMGBTN_STATE_PRESSED, NULL, "mnt/sdfile/EXT_RESERVED/uipackres/ui/56000003.rle", NULL);
@@ -242,10 +242,10 @@ lv_obj_t *setup_scr_usb_slave(lv_ui *ui)
     lv_obj_set_scrollbar_mode(ui->usb_slave_imgbtn_masstorage, LV_SCROLLBAR_MODE_OFF);
     lv_group_add_obj(def_group, ui->usb_slave_imgbtn_masstorage);
 #if LV_USE_GUIBUILDER_SIMULATOR
-    lv_imgbtn_set_src(ui->usb_slave_imgbtn_masstorage, LV_IMGBTN_STATE_RELEASED, NULL, "A:\\wl83\\wifi_video_master\\ui_prj\\dvr_800x480\\import\\image\\video_page\\USB\\MASS.png", NULL);
-    lv_imgbtn_set_src(ui->usb_slave_imgbtn_masstorage, LV_IMGBTN_STATE_PRESSED, NULL, "A:\\wl83\\wifi_video_master\\ui_prj\\dvr_800x480\\import\\image\\video_page\\USB\\MASS_on.png", NULL);
-    lv_imgbtn_set_src(ui->usb_slave_imgbtn_masstorage, LV_IMGBTN_STATE_CHECKED_RELEASED, NULL, "A:\\wl83\\wifi_video_master\\ui_prj\\dvr_800x480\\import\\image\\video_page\\USB\\MASS.png", NULL);
-    lv_imgbtn_set_src(ui->usb_slave_imgbtn_masstorage, LV_IMGBTN_STATE_CHECKED_PRESSED, NULL, "A:\\wl83\\wifi_video_master\\ui_prj\\dvr_800x480\\import\\image\\video_page\\USB\\MASS_on.png", NULL);
+    lv_imgbtn_set_src(ui->usb_slave_imgbtn_masstorage, LV_IMGBTN_STATE_RELEASED, NULL, "A:\\1111\\ac792\\ui_prj\\dvr_800x480\\import\\image\\video_page\\USB\\MASS.png", NULL);
+    lv_imgbtn_set_src(ui->usb_slave_imgbtn_masstorage, LV_IMGBTN_STATE_PRESSED, NULL, "A:\\1111\\ac792\\ui_prj\\dvr_800x480\\import\\image\\video_page\\USB\\MASS_on.png", NULL);
+    lv_imgbtn_set_src(ui->usb_slave_imgbtn_masstorage, LV_IMGBTN_STATE_CHECKED_RELEASED, NULL, "A:\\1111\\ac792\\ui_prj\\dvr_800x480\\import\\image\\video_page\\USB\\MASS.png", NULL);
+    lv_imgbtn_set_src(ui->usb_slave_imgbtn_masstorage, LV_IMGBTN_STATE_CHECKED_PRESSED, NULL, "A:\\1111\\ac792\\ui_prj\\dvr_800x480\\import\\image\\video_page\\USB\\MASS_on.png", NULL);
 #else
     lv_imgbtn_set_src(ui->usb_slave_imgbtn_masstorage, LV_IMGBTN_STATE_RELEASED, NULL, "mnt/sdfile/EXT_RESERVED/uipackres/ui/56000004.rle", NULL);
     lv_imgbtn_set_src(ui->usb_slave_imgbtn_masstorage, LV_IMGBTN_STATE_PRESSED, NULL, "mnt/sdfile/EXT_RESERVED/uipackres/ui/56000005.rle", NULL);
@@ -319,10 +319,10 @@ lv_obj_t *setup_scr_usb_slave(lv_ui *ui)
     lv_obj_set_scrollbar_mode(ui->usb_slave_imgbtn_pccam, LV_SCROLLBAR_MODE_OFF);
     lv_group_add_obj(def_group, ui->usb_slave_imgbtn_pccam);
 #if LV_USE_GUIBUILDER_SIMULATOR
-    lv_imgbtn_set_src(ui->usb_slave_imgbtn_pccam, LV_IMGBTN_STATE_RELEASED, NULL, "A:\\wl83\\wifi_video_master\\ui_prj\\dvr_800x480\\import\\image\\video_page\\USB\\PCCAM.png", NULL);
-    lv_imgbtn_set_src(ui->usb_slave_imgbtn_pccam, LV_IMGBTN_STATE_PRESSED, NULL, "A:\\wl83\\wifi_video_master\\ui_prj\\dvr_800x480\\import\\image\\video_page\\USB\\PCCAM_on.png", NULL);
-    lv_imgbtn_set_src(ui->usb_slave_imgbtn_pccam, LV_IMGBTN_STATE_CHECKED_RELEASED, NULL, "A:\\wl83\\wifi_video_master\\ui_prj\\dvr_800x480\\import\\image\\video_page\\USB\\PCCAM.png", NULL);
-    lv_imgbtn_set_src(ui->usb_slave_imgbtn_pccam, LV_IMGBTN_STATE_CHECKED_PRESSED, NULL, "A:\\wl83\\wifi_video_master\\ui_prj\\dvr_800x480\\import\\image\\video_page\\USB\\PCCAM_on.png", NULL);
+    lv_imgbtn_set_src(ui->usb_slave_imgbtn_pccam, LV_IMGBTN_STATE_RELEASED, NULL, "A:\\1111\\ac792\\ui_prj\\dvr_800x480\\import\\image\\video_page\\USB\\PCCAM.png", NULL);
+    lv_imgbtn_set_src(ui->usb_slave_imgbtn_pccam, LV_IMGBTN_STATE_PRESSED, NULL, "A:\\1111\\ac792\\ui_prj\\dvr_800x480\\import\\image\\video_page\\USB\\PCCAM_on.png", NULL);
+    lv_imgbtn_set_src(ui->usb_slave_imgbtn_pccam, LV_IMGBTN_STATE_CHECKED_RELEASED, NULL, "A:\\1111\\ac792\\ui_prj\\dvr_800x480\\import\\image\\video_page\\USB\\PCCAM.png", NULL);
+    lv_imgbtn_set_src(ui->usb_slave_imgbtn_pccam, LV_IMGBTN_STATE_CHECKED_PRESSED, NULL, "A:\\1111\\ac792\\ui_prj\\dvr_800x480\\import\\image\\video_page\\USB\\PCCAM_on.png", NULL);
 #else
     lv_imgbtn_set_src(ui->usb_slave_imgbtn_pccam, LV_IMGBTN_STATE_RELEASED, NULL, "mnt/sdfile/EXT_RESERVED/uipackres/ui/56000006.rle", NULL);
     lv_imgbtn_set_src(ui->usb_slave_imgbtn_pccam, LV_IMGBTN_STATE_PRESSED, NULL, "mnt/sdfile/EXT_RESERVED/uipackres/ui/56000007.rle", NULL);

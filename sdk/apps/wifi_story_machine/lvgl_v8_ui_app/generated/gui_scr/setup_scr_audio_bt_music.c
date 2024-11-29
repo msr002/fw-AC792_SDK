@@ -2,17 +2,18 @@
 #include "lvgl.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include "gui_guider.h"
-#include "events_init.h"
-#include "callback_handler.h"
-#include "gui_timelines.h"
-#include "custom.h"
+#include "../gui_guider.h"
+#include "../gui_events/events_init.h"
+#include "../gui_events/callback_handler.h"
+#include "../gui_timelines/gui_timelines.h"
+#include "../../custom/custom.h"
 
 
 lv_obj_t *setup_scr_audio_bt_music(lv_ui *ui)
 {
     //Write codes audio_bt_music
     ui->audio_bt_music = lv_obj_create(NULL);
+    lv_group_t *def_group = lv_group_get_default();
 
     //Set style for audio_bt_music. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
     lv_obj_set_style_bg_color(ui->audio_bt_music, lv_color_make(0xF7, 0x98, 0xB1), LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -21,7 +22,6 @@ lv_obj_t *setup_scr_audio_bt_music(lv_ui *ui)
     lv_obj_set_style_bg_opa(ui->audio_bt_music, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_border_width(ui->audio_bt_music, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_scrollbar_mode(ui->audio_bt_music, LV_SCROLLBAR_MODE_OFF);
-    lv_group_t *def_group = lv_group_get_default();
     //Write codes audio_bt_music_title
     ui->audio_bt_music_title = lv_label_create(ui->audio_bt_music);
     lv_label_set_text(ui->audio_bt_music_title, "BT Music");
@@ -66,6 +66,7 @@ lv_obj_t *setup_scr_audio_bt_music(lv_ui *ui)
     lv_obj_set_style_outline_pad(ui->audio_bt_music_back_btn, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_color(ui->audio_bt_music_back_btn, lv_color_make(0x0A, 0x0A, 0x0A), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_font(ui->audio_bt_music_back_btn, &lv_font_FontAwesome5_24, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_letter_space(ui->audio_bt_music_back_btn, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_align(ui->audio_bt_music_back_btn, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_pos(ui->audio_bt_music_back_btn, 5, 10);
     lv_obj_set_size(ui->audio_bt_music_back_btn, 101, 43);

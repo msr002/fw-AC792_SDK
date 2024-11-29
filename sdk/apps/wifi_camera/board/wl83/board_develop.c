@@ -21,7 +21,7 @@
 #include "eth/eth_phy.h"
 #include "eth/ethmac.h"
 #endif
-#ifdef CONFIG_UI_ENABLE
+#if TCFG_LCD_ENABLE
 #include "lcd_driver.h"
 #include "device/video/fb.h"
 #include "tp_driver.h"
@@ -39,6 +39,10 @@
 #endif
 #if TCFG_EXT_WIFI_ENABLE
 #include "net/wireless_ext/wifi_dev.h"
+#endif
+
+#ifdef CONFIG_LTE_PHY_ENABLE
+#include "lte_module.h"
 #endif
 
 #if TCFG_EXT_WIFI_ENABLE
@@ -1112,6 +1116,13 @@ static const struct video_platform_data video5_data = {
 
 #endif
 
+#ifdef CONFIG_LTE_PHY_ENABLE
+extern const struct device_operations lte_module_dev_ops;
+LTE_MODULE_DATA_BEGIN(lte_module_data)
+	.name = (u8 *)"usb_rndis",
+LTE_MODULE_DATA_END()
+#endif
+
 #if defined CONFIG_BT_ENABLE || TCFG_WIFI_ENABLE
 #include "wifi/wifi_connect.h"
 const struct wifi_calibration_param wifi_calibration_param = {
@@ -1379,6 +1390,10 @@ REGISTER_DEVICES(device_table) = {
 
 #if TCFG_GSENSOR_ENABLE
 	{"gsensor", &gsensor_dev_ops, (void *)&gsensor_data },
+#endif
+
+#ifdef CONFIG_LTE_PHY_ENABLE
+    { "lte",  &lte_module_dev_ops, (void *) &lte_module_data},
 #endif
 };
 

@@ -2,24 +2,24 @@
 #include "lvgl.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include "gui_guider.h"
-#include "events_init.h"
-#include "callback_handler.h"
-#include "gui_timelines.h"
-#include "custom.h"
+#include "../gui_guider.h"
+#include "../gui_events/events_init.h"
+#include "../gui_events/callback_handler.h"
+#include "../gui_timelines/gui_timelines.h"
+#include "../../custom/custom.h"
 
 
 lv_obj_t *setup_scr_camera2_dvp(lv_ui *ui)
 {
     //Write codes camera2_dvp
     ui->camera2_dvp = lv_obj_create(NULL);
+    lv_group_t *def_group = lv_group_get_default();
 
     //Set style for camera2_dvp. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
     lv_obj_set_style_bg_color(ui->camera2_dvp, lv_color_make(0x55, 0xaa, 0xa5), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_opa(ui->camera2_dvp, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_border_width(ui->camera2_dvp, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_scrollbar_mode(ui->camera2_dvp, LV_SCROLLBAR_MODE_OFF);
-    lv_group_t *def_group = lv_group_get_default();
     //Write codes camera2_dvp_title
     ui->camera2_dvp_title = lv_label_create(ui->camera2_dvp);
     lv_label_set_text(ui->camera2_dvp_title, "CAM2(DVP)\n\nClick the screen to exit");

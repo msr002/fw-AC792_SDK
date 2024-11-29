@@ -7,7 +7,7 @@ extern "C" {
 
 #include <stdint.h>
 #include <string.h>
-#include "gui_fonts.h"
+#include "../gui_fonts/gui_fonts.h"
 #include "lvgl.h"
 
 typedef enum {

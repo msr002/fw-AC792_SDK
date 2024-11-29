@@ -7,6 +7,11 @@ extern "C" {
 
 #include "lvgl.h"
 
+// Image Declare
+LV_IMG_DECLARE(_img_logo_alpha332x82);
+
+// Lottie Declare
+#define LV_LOT_DECLARE(array_name) extern const uint8_t array_name[];
 
 #ifdef __cplusplus
 }

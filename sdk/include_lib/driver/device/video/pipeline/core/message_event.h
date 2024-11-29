@@ -115,6 +115,7 @@ enum {
 #define   EVENT_SPEED_FULL             0x13
 #define   EVENT_LINE_ERR             0x14
 #define   EVENT_OSD_ERR             0x15
+#define   EVENT_BUFFER_EMPTY        0x16
 
 
 #endif

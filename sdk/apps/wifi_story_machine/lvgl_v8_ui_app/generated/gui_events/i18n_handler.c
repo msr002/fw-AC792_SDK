@@ -1,5 +1,5 @@
 /*Generate Code, Do NOT Edit!*/
-#include "i18n_handler.h"
+#include "./i18n_handler.h"
 
 void i18n_refresh_texts(const char *page_name)
 {
@@ -7,15 +7,15 @@ void i18n_refresh_texts(const char *page_name)
         return;
     }
 
-    if (strcmp(page_name, "boot_animation") == 0 && !guider_ui.boot_animation_del) {
-
-    }
-
     if (strcmp(page_name, "audio") == 0 && !guider_ui.audio_del) {
 
     }
 
     if (strcmp(page_name, "camera") == 0 && !guider_ui.camera_del) {
+
+    }
+
+    if (strcmp(page_name, "boot_animation") == 0 && !guider_ui.boot_animation_del) {
 
     }
 
@@ -70,15 +70,15 @@ void i18n_refresh_texts(const char *page_name)
 
 void i18n_refresh_all_texts()
 {
-    if (!guider_ui.boot_animation_del) {
-
-    }
-
     if (!guider_ui.audio_del) {
 
     }
 
     if (!guider_ui.camera_del) {
+
+    }
+
+    if (!guider_ui.boot_animation_del) {
 
     }
 

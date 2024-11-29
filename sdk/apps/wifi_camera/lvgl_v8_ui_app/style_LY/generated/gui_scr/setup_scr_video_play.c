@@ -123,8 +123,8 @@ lv_obj_t *setup_scr_video_play(lv_ui *ui)
     lv_obj_set_scrollbar_mode(ui->video_play_imgbtn_pause, LV_SCROLLBAR_MODE_OFF);
     lv_group_add_obj(def_group, ui->video_play_imgbtn_pause);
 #if LV_USE_GUIBUILDER_SIMULATOR
-    lv_imgbtn_set_src(ui->video_play_imgbtn_pause, LV_IMGBTN_STATE_RELEASED, NULL, "A:\\gitlab\\ac792\\ui_prj\\dvr_ly_800x480\\import\\image\\video_play.png", NULL);
-    lv_imgbtn_set_src(ui->video_play_imgbtn_pause, LV_IMGBTN_STATE_CHECKED_RELEASED, NULL, "A:\\gitlab\\ac792\\ui_prj\\dvr_ly_800x480\\import\\image\\video_pause.png", NULL);
+    lv_imgbtn_set_src(ui->video_play_imgbtn_pause, LV_IMGBTN_STATE_RELEASED, NULL, "A:\\1111\\ac792\\ui_prj\\dvr_ly_800x480\\import\\image\\video_play.png", NULL);
+    lv_imgbtn_set_src(ui->video_play_imgbtn_pause, LV_IMGBTN_STATE_CHECKED_RELEASED, NULL, "A:\\1111\\ac792\\ui_prj\\dvr_ly_800x480\\import\\image\\video_pause.png", NULL);
 #else
     lv_imgbtn_set_src(ui->video_play_imgbtn_pause, LV_IMGBTN_STATE_RELEASED, NULL, "mnt/sdfile/EXT_RESERVED/uipackres/ui/56000044.rle", NULL);
     lv_imgbtn_set_src(ui->video_play_imgbtn_pause, LV_IMGBTN_STATE_CHECKED_RELEASED, NULL, "mnt/sdfile/EXT_RESERVED/uipackres/ui/56000045.rle", NULL);
@@ -164,7 +164,7 @@ lv_obj_t *setup_scr_video_play(lv_ui *ui)
     lv_group_add_obj(def_group, ui->video_play_img_prev_file);
     lv_obj_add_flag(ui->video_play_img_prev_file, LV_OBJ_FLAG_CLICKABLE);
 #if LV_USE_GUIBUILDER_SIMULATOR
-    lv_img_set_src(ui->video_play_img_prev_file, "A:\\gitlab\\ac792\\ui_prj\\dvr_ly_800x480\\import\\image\\skip_previous.png");
+    lv_img_set_src(ui->video_play_img_prev_file, "A:\\1111\\ac792\\ui_prj\\dvr_ly_800x480\\import\\image\\skip_previous.png");
 #else
     lv_img_set_src(ui->video_play_img_prev_file, "mnt/sdfile/EXT_RESERVED/uipackres/ui/56000046.rle");
 #endif
@@ -201,7 +201,7 @@ lv_obj_t *setup_scr_video_play(lv_ui *ui)
     lv_group_add_obj(def_group, ui->video_play_img_next_file);
     lv_obj_add_flag(ui->video_play_img_next_file, LV_OBJ_FLAG_CLICKABLE);
 #if LV_USE_GUIBUILDER_SIMULATOR
-    lv_img_set_src(ui->video_play_img_next_file, "A:\\gitlab\\ac792\\ui_prj\\dvr_ly_800x480\\import\\image\\skip_next.png");
+    lv_img_set_src(ui->video_play_img_next_file, "A:\\1111\\ac792\\ui_prj\\dvr_ly_800x480\\import\\image\\skip_next.png");
 #else
     lv_img_set_src(ui->video_play_img_next_file, "mnt/sdfile/EXT_RESERVED/uipackres/ui/56000047.rle");
 #endif
@@ -270,8 +270,8 @@ lv_obj_t *setup_scr_video_play(lv_ui *ui)
     lv_obj_set_scrollbar_mode(ui->video_play_imgbtn_loud, LV_SCROLLBAR_MODE_OFF);
     lv_group_add_obj(def_group, ui->video_play_imgbtn_loud);
 #if LV_USE_GUIBUILDER_SIMULATOR
-    lv_imgbtn_set_src(ui->video_play_imgbtn_loud, LV_IMGBTN_STATE_RELEASED, NULL, "A:\\gitlab\\ac792\\ui_prj\\dvr_ly_800x480\\import\\image\\volumeLouder_solid_1.png", NULL);
-    lv_imgbtn_set_src(ui->video_play_imgbtn_loud, LV_IMGBTN_STATE_CHECKED_RELEASED, NULL, "A:\\gitlab\\ac792\\ui_prj\\dvr_ly_800x480\\import\\image\\volumeMute_solid_1.png", NULL);
+    lv_imgbtn_set_src(ui->video_play_imgbtn_loud, LV_IMGBTN_STATE_RELEASED, NULL, "A:\\1111\\ac792\\ui_prj\\dvr_ly_800x480\\import\\image\\volumeLouder_solid_1.png", NULL);
+    lv_imgbtn_set_src(ui->video_play_imgbtn_loud, LV_IMGBTN_STATE_CHECKED_RELEASED, NULL, "A:\\1111\\ac792\\ui_prj\\dvr_ly_800x480\\import\\image\\volumeMute_solid_1.png", NULL);
 #else
     lv_imgbtn_set_src(ui->video_play_imgbtn_loud, LV_IMGBTN_STATE_RELEASED, NULL, "mnt/sdfile/EXT_RESERVED/uipackres/ui/56000048.rle", NULL);
     lv_imgbtn_set_src(ui->video_play_imgbtn_loud, LV_IMGBTN_STATE_CHECKED_RELEASED, NULL, "mnt/sdfile/EXT_RESERVED/uipackres/ui/56000049.rle", NULL);
@@ -472,10 +472,10 @@ lv_obj_t *setup_scr_video_play(lv_ui *ui)
     lv_obj_set_scrollbar_mode(ui->video_play_imgbtn_1, LV_SCROLLBAR_MODE_OFF);
     lv_group_add_obj(def_group, ui->video_play_imgbtn_1);
 #if LV_USE_GUIBUILDER_SIMULATOR
-    lv_imgbtn_set_src(ui->video_play_imgbtn_1, LV_IMGBTN_STATE_RELEASED, NULL, "A:\\gitlab\\ac792\\ui_prj\\dvr_ly_800x480\\import\\image\\PHOTO.png", NULL);
-    lv_imgbtn_set_src(ui->video_play_imgbtn_1, LV_IMGBTN_STATE_PRESSED, NULL, "A:\\gitlab\\ac792\\ui_prj\\dvr_ly_800x480\\import\\image\\photo_on.png", NULL);
-    lv_imgbtn_set_src(ui->video_play_imgbtn_1, LV_IMGBTN_STATE_CHECKED_RELEASED, NULL, "A:\\gitlab\\ac792\\ui_prj\\dvr_ly_800x480\\import\\image\\PHOTO.png", NULL);
-    lv_imgbtn_set_src(ui->video_play_imgbtn_1, LV_IMGBTN_STATE_CHECKED_PRESSED, NULL, "A:\\gitlab\\ac792\\ui_prj\\dvr_ly_800x480\\import\\image\\photo_on.png", NULL);
+    lv_imgbtn_set_src(ui->video_play_imgbtn_1, LV_IMGBTN_STATE_RELEASED, NULL, "A:\\1111\\ac792\\ui_prj\\dvr_ly_800x480\\import\\image\\PHOTO.png", NULL);
+    lv_imgbtn_set_src(ui->video_play_imgbtn_1, LV_IMGBTN_STATE_PRESSED, NULL, "A:\\1111\\ac792\\ui_prj\\dvr_ly_800x480\\import\\image\\photo_on.png", NULL);
+    lv_imgbtn_set_src(ui->video_play_imgbtn_1, LV_IMGBTN_STATE_CHECKED_RELEASED, NULL, "A:\\1111\\ac792\\ui_prj\\dvr_ly_800x480\\import\\image\\PHOTO.png", NULL);
+    lv_imgbtn_set_src(ui->video_play_imgbtn_1, LV_IMGBTN_STATE_CHECKED_PRESSED, NULL, "A:\\1111\\ac792\\ui_prj\\dvr_ly_800x480\\import\\image\\photo_on.png", NULL);
 #else
     lv_imgbtn_set_src(ui->video_play_imgbtn_1, LV_IMGBTN_STATE_RELEASED, NULL, "mnt/sdfile/EXT_RESERVED/uipackres/ui/5600004a.rle", NULL);
     lv_imgbtn_set_src(ui->video_play_imgbtn_1, LV_IMGBTN_STATE_PRESSED, NULL, "mnt/sdfile/EXT_RESERVED/uipackres/ui/5600004b.rle", NULL);

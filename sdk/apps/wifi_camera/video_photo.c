@@ -56,11 +56,6 @@ static int camera_display_resume(void);
 int storage_device_available(void);
 u32 get_take_photo_num(void);
 extern int user_isp_color_switch(int channel, int mode);
-#ifndef CONFIG_UI_STYLE_LY_ENABLE
-extern void post_msg2photo_capture_time(int32_t num);
-#else
-extern void video_photo_post_msg(const char *msg, ...);
-#endif
 
 
 struct video_photo_handler {
@@ -187,6 +182,11 @@ static int change_capture_res(int reso_index)
     return update_camera_setting("pres", reso_index);
 }
 
+
+_WEAK_ void video_photo_post_msg(const char *msg, ...)
+{
+//给UI发送消息
+}
 
 //修改图片锐度:强烈/标准/柔和
 static int change_capture_acu(int acu)
@@ -728,7 +728,7 @@ static int camera_take_photo(void)
 
         //发送UI MSG 更新可拍照数量
         u32 img_num = get_take_photo_num();
-        post_msg2photo_remain(img_num);
+        video_photo_post_msg("remainPhoto", img_num);
 
         key_voice_start(1);
     }
@@ -772,7 +772,7 @@ static void delay_capture_timer_cb(void *p)
 
     printf("----delay time :%d ----\n", __this->delay_ms);
 #ifndef CONFIG_UI_STYLE_LY_ENABLE
-    post_msg2photo_capture_time(__this->delay_ms / 1000);
+    video_photo_post_msg("captureTime", __this->delay_ms / 1000);
 #endif
 
     if (__this->delay_ms == 0) {
@@ -815,7 +815,7 @@ static int camera_delay_capture(int sec)
     if (sec > 0) {
         __this->delay_ms = sec * 1000;
 #ifndef CONFIG_UI_STYLE_LY_ENABLE
-        post_msg2photo_capture_time(__this->delay_ms / 1000);
+        video_photo_post_msg("captureTime", __this->delay_ms / 1000);
 #endif
         __this->delay_capture_timeout = sys_timer_add(NULL, delay_capture_timer_cb, 1000);
         if (!__this->delay_capture_timeout) {
@@ -979,10 +979,10 @@ static void check_usb_gpio_state(void)
     int gpio_state = gpio_read(TCFG_USB_POWER_CHECK_IO);
     int vbat_level;
     if (gpio_state) {
-        post_msg2bat_icon(110);
+        video_photo_post_msg("batIcon", 110);
     } else {
         vbat_level = get_vbat_percent();
-        post_msg2bat_icon(vbat_level);
+        video_photo_post_msg("batIcon", vbat_level);
     }
 }
 
@@ -1032,7 +1032,7 @@ static int state_machine(struct application *app, enum app_state state, struct i
             photo_mode_start(0, uvc_id >= 0 ? uvc_id : 0);
             //发送UI MSG 更新可拍照数量
             img_num = get_take_photo_num();
-            post_msg2photo_remain(img_num);
+            video_photo_post_msg("remainPhoto", img_num);
             break;
         case ACTION_PHOTO_TAKE_CONTROL:
             delay = get_camera_setting_value("phm");
@@ -1110,22 +1110,18 @@ static int video_photo_device_event_handler(struct sys_event *e)
     char *type = NULL;
     static u32 uvc_offline = 0;
 
-    extern void post_msg2sd_icon(int online);
-#ifndef CONFIG_UI_STYLE_LY_ENABLE
-    extern void post_msg2sw_winicon(int online);
-#endif
 
     //SD卡
     if (e->from == DEVICE_EVENT_FROM_SD) {
         switch (device_eve->event) {
         case DEVICE_EVENT_IN:
-            post_msg2sd_icon(1);
+            video_photo_post_msg("sdStatus", 1);
             u32 img_num = get_take_photo_num();
-            post_msg2photo_remain(img_num);
+            video_photo_post_msg("remainPhoto", img_num);
             break;
         case DEVICE_EVENT_OUT:
-            post_msg2sd_icon(0);
-            post_msg2photo_remain(0);
+            video_photo_post_msg("sdStatus", 0);
+            video_photo_post_msg("remainPhoto", 0);
             break;
         }
     }
@@ -1134,12 +1130,12 @@ static int video_photo_device_event_handler(struct sys_event *e)
         switch (device_eve->event) {
         case DEVICE_EVENT_IN:
 #ifndef CONFIG_UI_STYLE_LY_ENABLE
-            post_msg2sw_winicon(1);
+            video_photo_post_msg("swWinicon", 1);
 #endif
             break;
         case DEVICE_EVENT_OUT:
 #ifndef CONFIG_UI_STYLE_LY_ENABLE
-            post_msg2sw_winicon(0);
+            video_photo_post_msg("swWinicon", 0);
 #endif
             if (__this->camera_id == 2) {
                 switch_camera();

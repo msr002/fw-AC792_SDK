@@ -908,6 +908,7 @@ c_SRC_FILES := \
 	../../../../apps/common/video/get_yuv_data.c \
 	../../../../apps/common/video/page_turning_detect.c \
 	../../../../apps/common/video/qr_code_net_config.c \
+	../../../../apps/common/video/simple_avi_unpkg.c \
 	../../../../apps/common/video/user_video_disp.c \
 	../../../../apps/common/video/user_video_rec.c \
 	../../../../apps/wifi_story_machine/app_main.c \
@@ -924,8 +925,9 @@ c_SRC_FILES := \
 	../../../../apps/wifi_story_machine/lvgl_v8_ui_app/generated/gui_events/events_init.c \
 	../../../../apps/wifi_story_machine/lvgl_v8_ui_app/generated/gui_events/i18n_handler.c \
 	../../../../apps/wifi_story_machine/lvgl_v8_ui_app/generated/gui_fonts/gui_fonts.c \
+	../../../../apps/wifi_story_machine/lvgl_v8_ui_app/generated/gui_group/gui_group.c \
 	../../../../apps/wifi_story_machine/lvgl_v8_ui_app/generated/gui_guider.c \
-	../../../../apps/wifi_story_machine/lvgl_v8_ui_app/generated/gui_images/_img_logo_alpha_332x82.c \
+	../../../../apps/wifi_story_machine/lvgl_v8_ui_app/generated/gui_images/_img_logo_alpha332x82.c \
 	../../../../apps/wifi_story_machine/lvgl_v8_ui_app/generated/gui_msg/gui_blue_msg.c \
 	../../../../apps/wifi_story_machine/lvgl_v8_ui_app/generated/gui_msg/gui_bluetooth_msg.c \
 	../../../../apps/wifi_story_machine/lvgl_v8_ui_app/generated/gui_msg/gui_key_msg.c \

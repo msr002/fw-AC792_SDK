@@ -39,7 +39,7 @@ lv_obj_t *setup_scr_usb_slave(lv_ui *ui)
     lv_obj_add_flag(ui->usb_slave_img_icon_pccam, LV_OBJ_FLAG_HIDDEN);
     lv_obj_add_flag(ui->usb_slave_img_icon_pccam, LV_OBJ_FLAG_CLICKABLE);
 #if LV_USE_GUIBUILDER_SIMULATOR
-    lv_img_set_src(ui->usb_slave_img_icon_pccam, "A:\\gitlab\\ac792\\ui_prj\\dvr_ly_800x480\\import\\image\\video_page\\USB\\s_PC.png");
+    lv_img_set_src(ui->usb_slave_img_icon_pccam, "A:\\1111\\ac792\\ui_prj\\dvr_ly_800x480\\import\\image\\video_page\\USB\\s_PC.png");
 #else
     lv_img_set_src(ui->usb_slave_img_icon_pccam, "mnt/sdfile/EXT_RESERVED/uipackres/ui/56000000.rle");
 #endif
@@ -63,7 +63,7 @@ lv_obj_t *setup_scr_usb_slave(lv_ui *ui)
     lv_obj_add_flag(ui->usb_slave_img_icon_masstorage, LV_OBJ_FLAG_HIDDEN);
     lv_obj_add_flag(ui->usb_slave_img_icon_masstorage, LV_OBJ_FLAG_CLICKABLE);
 #if LV_USE_GUIBUILDER_SIMULATOR
-    lv_img_set_src(ui->usb_slave_img_icon_masstorage, "A:\\gitlab\\ac792\\ui_prj\\dvr_ly_800x480\\import\\image\\video_page\\USB\\s_MASS.png");
+    lv_img_set_src(ui->usb_slave_img_icon_masstorage, "A:\\1111\\ac792\\ui_prj\\dvr_ly_800x480\\import\\image\\video_page\\USB\\s_MASS.png");
 #else
     lv_img_set_src(ui->usb_slave_img_icon_masstorage, "mnt/sdfile/EXT_RESERVED/uipackres/ui/56000001.rle");
 #endif

@@ -68,7 +68,7 @@ lv_obj_t *setup_scr_video_file(lv_ui *ui)
     lv_obj_set_scrollbar_mode(ui->video_file_img_1, LV_SCROLLBAR_MODE_OFF);
     lv_obj_add_flag(ui->video_file_img_1, LV_OBJ_FLAG_CLICKABLE);
 #if LV_USE_GUIBUILDER_SIMULATOR
-    lv_img_set_src(ui->video_file_img_1, "A:\\gitlab\\ac792\\ui_prj\\dvr_ly_800x480\\import\\image\\up.png");
+    lv_img_set_src(ui->video_file_img_1, "A:\\1111\\ac792\\ui_prj\\dvr_ly_800x480\\import\\image\\up.png");
 #else
     lv_img_set_src(ui->video_file_img_1, "mnt/sdfile/EXT_RESERVED/uipackres/ui/5600004c.rle");
 #endif
@@ -104,7 +104,7 @@ lv_obj_t *setup_scr_video_file(lv_ui *ui)
     lv_obj_set_scrollbar_mode(ui->video_file_img_2, LV_SCROLLBAR_MODE_OFF);
     lv_obj_add_flag(ui->video_file_img_2, LV_OBJ_FLAG_CLICKABLE);
 #if LV_USE_GUIBUILDER_SIMULATOR
-    lv_img_set_src(ui->video_file_img_2, "A:\\gitlab\\ac792\\ui_prj\\dvr_ly_800x480\\import\\image\\down.png");
+    lv_img_set_src(ui->video_file_img_2, "A:\\1111\\ac792\\ui_prj\\dvr_ly_800x480\\import\\image\\down.png");
 #else
     lv_img_set_src(ui->video_file_img_2, "mnt/sdfile/EXT_RESERVED/uipackres/ui/5600004d.rle");
 #endif
@@ -285,7 +285,7 @@ lv_obj_t *setup_scr_video_file(lv_ui *ui)
     lv_obj_set_scrollbar_mode(ui->video_file_img_3, LV_SCROLLBAR_MODE_OFF);
     lv_obj_add_flag(ui->video_file_img_3, LV_OBJ_FLAG_CLICKABLE);
 #if LV_USE_GUIBUILDER_SIMULATOR
-    lv_img_set_src(ui->video_file_img_3, "A:\\gitlab\\ac792\\ui_prj\\dvr_ly_800x480\\import\\image\\LY_UI\\dec\\delet.png");
+    lv_img_set_src(ui->video_file_img_3, "A:\\1111\\ac792\\ui_prj\\dvr_ly_800x480\\import\\image\\LY_UI\\dec\\delet.png");
 #else
     lv_img_set_src(ui->video_file_img_3, "mnt/sdfile/EXT_RESERVED/uipackres/ui/5600004e.rle");
 #endif
@@ -373,7 +373,7 @@ lv_obj_t *setup_scr_video_file(lv_ui *ui)
     lv_obj_set_scrollbar_mode(ui->video_file_img_4, LV_SCROLLBAR_MODE_OFF);
     lv_obj_add_flag(ui->video_file_img_4, LV_OBJ_FLAG_CLICKABLE);
 #if LV_USE_GUIBUILDER_SIMULATOR
-    lv_img_set_src(ui->video_file_img_4, "A:\\gitlab\\ac792\\ui_prj\\dvr_ly_800x480\\import\\image\\LY_UI\\dec\\protect.png");
+    lv_img_set_src(ui->video_file_img_4, "A:\\1111\\ac792\\ui_prj\\dvr_ly_800x480\\import\\image\\LY_UI\\dec\\protect.png");
 #else
     lv_img_set_src(ui->video_file_img_4, "mnt/sdfile/EXT_RESERVED/uipackres/ui/5600004f.rle");
 #endif
@@ -424,7 +424,7 @@ lv_obj_t *setup_scr_video_file(lv_ui *ui)
     lv_obj_set_scrollbar_mode(ui->video_file_img_13, LV_SCROLLBAR_MODE_OFF);
     lv_obj_add_flag(ui->video_file_img_13, LV_OBJ_FLAG_CLICKABLE);
 #if LV_USE_GUIBUILDER_SIMULATOR
-    lv_img_set_src(ui->video_file_img_13, "A:\\gitlab\\ac792\\ui_prj\\dvr_ly_800x480\\import\\image\\LY_UI\\rec\\rec_menu\\menu_sta.png");
+    lv_img_set_src(ui->video_file_img_13, "A:\\1111\\ac792\\ui_prj\\dvr_ly_800x480\\import\\image\\LY_UI\\rec\\rec_menu\\menu_sta.png");
 #else
     lv_img_set_src(ui->video_file_img_13, "mnt/sdfile/EXT_RESERVED/uipackres/ui/5600001d.rle");
 #endif
@@ -447,7 +447,7 @@ lv_obj_t *setup_scr_video_file(lv_ui *ui)
     lv_obj_set_scrollbar_mode(ui->video_file_img_14, LV_SCROLLBAR_MODE_OFF);
     lv_obj_add_flag(ui->video_file_img_14, LV_OBJ_FLAG_CLICKABLE);
 #if LV_USE_GUIBUILDER_SIMULATOR
-    lv_img_set_src(ui->video_file_img_14, "A:\\gitlab\\ac792\\ui_prj\\dvr_ly_800x480\\import\\image\\LY_UI\\rec\\rec_menu\\menu_sta.png");
+    lv_img_set_src(ui->video_file_img_14, "A:\\1111\\ac792\\ui_prj\\dvr_ly_800x480\\import\\image\\LY_UI\\rec\\rec_menu\\menu_sta.png");
 #else
     lv_img_set_src(ui->video_file_img_14, "mnt/sdfile/EXT_RESERVED/uipackres/ui/5600001d.rle");
 #endif
@@ -470,7 +470,7 @@ lv_obj_t *setup_scr_video_file(lv_ui *ui)
     lv_obj_set_scrollbar_mode(ui->video_file_img_15, LV_SCROLLBAR_MODE_OFF);
     lv_obj_add_flag(ui->video_file_img_15, LV_OBJ_FLAG_CLICKABLE);
 #if LV_USE_GUIBUILDER_SIMULATOR
-    lv_img_set_src(ui->video_file_img_15, "A:\\gitlab\\ac792\\ui_prj\\dvr_ly_800x480\\import\\image\\LY_UI\\rec\\rec_menu\\play.png");
+    lv_img_set_src(ui->video_file_img_15, "A:\\1111\\ac792\\ui_prj\\dvr_ly_800x480\\import\\image\\LY_UI\\rec\\rec_menu\\play.png");
 #else
     lv_img_set_src(ui->video_file_img_15, "mnt/sdfile/EXT_RESERVED/uipackres/ui/56000050.rle");
 #endif
@@ -493,7 +493,7 @@ lv_obj_t *setup_scr_video_file(lv_ui *ui)
     lv_obj_set_scrollbar_mode(ui->video_file_img_16, LV_SCROLLBAR_MODE_OFF);
     lv_obj_add_flag(ui->video_file_img_16, LV_OBJ_FLAG_CLICKABLE);
 #if LV_USE_GUIBUILDER_SIMULATOR
-    lv_img_set_src(ui->video_file_img_16, "A:\\gitlab\\ac792\\ui_prj\\dvr_ly_800x480\\import\\image\\LY_UI\\rec\\rec_menu\\set.png");
+    lv_img_set_src(ui->video_file_img_16, "A:\\1111\\ac792\\ui_prj\\dvr_ly_800x480\\import\\image\\LY_UI\\rec\\rec_menu\\set.png");
 #else
     lv_img_set_src(ui->video_file_img_16, "mnt/sdfile/EXT_RESERVED/uipackres/ui/5600001f.rle");
 #endif
@@ -516,7 +516,7 @@ lv_obj_t *setup_scr_video_file(lv_ui *ui)
     lv_obj_set_scrollbar_mode(ui->video_file_img_17, LV_SCROLLBAR_MODE_OFF);
     lv_obj_add_flag(ui->video_file_img_17, LV_OBJ_FLAG_CLICKABLE);
 #if LV_USE_GUIBUILDER_SIMULATOR
-    lv_img_set_src(ui->video_file_img_17, "A:\\gitlab\\ac792\\ui_prj\\dvr_ly_800x480\\import\\image\\LY_UI\\direc\\left.png");
+    lv_img_set_src(ui->video_file_img_17, "A:\\1111\\ac792\\ui_prj\\dvr_ly_800x480\\import\\image\\LY_UI\\direc\\left.png");
 #else
     lv_img_set_src(ui->video_file_img_17, "mnt/sdfile/EXT_RESERVED/uipackres/ui/56000020.rle");
 #endif
@@ -539,7 +539,7 @@ lv_obj_t *setup_scr_video_file(lv_ui *ui)
     lv_obj_set_scrollbar_mode(ui->video_file_img_18, LV_SCROLLBAR_MODE_OFF);
     lv_obj_add_flag(ui->video_file_img_18, LV_OBJ_FLAG_CLICKABLE);
 #if LV_USE_GUIBUILDER_SIMULATOR
-    lv_img_set_src(ui->video_file_img_18, "A:\\gitlab\\ac792\\ui_prj\\dvr_ly_800x480\\import\\image\\LY_UI\\direc\\up.png");
+    lv_img_set_src(ui->video_file_img_18, "A:\\1111\\ac792\\ui_prj\\dvr_ly_800x480\\import\\image\\LY_UI\\direc\\up.png");
 #else
     lv_img_set_src(ui->video_file_img_18, "mnt/sdfile/EXT_RESERVED/uipackres/ui/56000021.rle");
 #endif
@@ -562,7 +562,7 @@ lv_obj_t *setup_scr_video_file(lv_ui *ui)
     lv_obj_set_scrollbar_mode(ui->video_file_img_19, LV_SCROLLBAR_MODE_OFF);
     lv_obj_add_flag(ui->video_file_img_19, LV_OBJ_FLAG_CLICKABLE);
 #if LV_USE_GUIBUILDER_SIMULATOR
-    lv_img_set_src(ui->video_file_img_19, "A:\\gitlab\\ac792\\ui_prj\\dvr_ly_800x480\\import\\image\\LY_UI\\direc\\down.png");
+    lv_img_set_src(ui->video_file_img_19, "A:\\1111\\ac792\\ui_prj\\dvr_ly_800x480\\import\\image\\LY_UI\\direc\\down.png");
 #else
     lv_img_set_src(ui->video_file_img_19, "mnt/sdfile/EXT_RESERVED/uipackres/ui/56000022.rle");
 #endif
@@ -585,7 +585,7 @@ lv_obj_t *setup_scr_video_file(lv_ui *ui)
     lv_obj_set_scrollbar_mode(ui->video_file_img_20, LV_SCROLLBAR_MODE_OFF);
     lv_obj_add_flag(ui->video_file_img_20, LV_OBJ_FLAG_CLICKABLE);
 #if LV_USE_GUIBUILDER_SIMULATOR
-    lv_img_set_src(ui->video_file_img_20, "A:\\gitlab\\ac792\\ui_prj\\dvr_ly_800x480\\import\\image\\LY_UI\\direc\\right.png");
+    lv_img_set_src(ui->video_file_img_20, "A:\\1111\\ac792\\ui_prj\\dvr_ly_800x480\\import\\image\\LY_UI\\direc\\right.png");
 #else
     lv_img_set_src(ui->video_file_img_20, "mnt/sdfile/EXT_RESERVED/uipackres/ui/56000023.rle");
 #endif

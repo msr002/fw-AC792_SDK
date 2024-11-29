@@ -17,7 +17,8 @@ int target_time = 0;
 static int count = 0;
 extern bool usb_flag;
 static int rec_remain_handler(const char *type, u32 remain_time);
-
+extern void sys_prompt_show_ctl(int32_t show_time, void *tips);
+void video_rec_post_msg(const char *msg, ...);
 /* 注册控件模型 */
 REGISTER_UI_MODULE_EVENT_HANDLER(GUI_MODEL_VIDEO_REC_MSG_ID_REC_REMAIN_TIME)
 .onchange = gui_model_video_rec_msg_rec_remain_time_cb,
@@ -294,6 +295,11 @@ void rec_set_lock_crash(void)
 int video_rec_record_time()
 {
     if (rec_running) {
+        if (!lv_obj_is_valid(guider_ui.video_rec_digitclock_record_time)) {
+            printf("obj no valid \n");
+            return 0;
+        }
+
         if (!count) {
             memset(&rec_running_time, 0, sizeof(rec_running_time));
             count = 1;
@@ -336,6 +342,9 @@ int video_rec_record_time()
 //	{ "HlightOn",      rec_headlight_on_handler   },
 //	{ "HlightOff",     rec_headlight_off_handler  },
 //	{ "Remain",         rec_remain_handler  },
+//  { "appConnect",     app_connect_handler  },
+//  { "appDisconnect",  app_disconnect_handler  },
+//  { "wifiPreview",    wifi_preview_handler  },
 //	{ NULL, NULL},      /* 必须以此结尾！ */
 //};
 /*
@@ -349,7 +358,6 @@ static int rec_on_handler(const char *type, u32 arg)
     rec_running = 1;
     lvgl_module_msg_send_global_ptr(GUI_MODEL_VIDEO_REC_MSG_ID_HIDE_REMAIN_TIME, (void *)LV_OBJ_FLAG_HIDDEN, 1, 0);
     lvgl_module_msg_send_global_ptr(GUI_MODEL_VIDEO_REC_MSG_ID_SHOW_RECORD_TIME, (void *)LV_OBJ_FLAG_HIDDEN, 1, 0);
-    video_rec_record_time();
     if (guider_ui.video_rec_timer_1 != NULL) {
         lv_timer_resume(guider_ui.video_rec_timer_1);
     }
@@ -367,6 +375,9 @@ static int rec_off_handler(const char *type, u32 arg)
     lvgl_module_msg_send_global_ptr(GUI_MODEL_VIDEO_REC_MSG_ID_SHOW_REMAIN_TIME, (void *)LV_OBJ_FLAG_HIDDEN, 1, 0);
     lvgl_module_msg_send_global_ptr(GUI_MODEL_VIDEO_REC_MSG_ID_HIDE_RECORD_TIME, (void *)LV_OBJ_FLAG_HIDDEN, 1, 0);
     memset(&rec_running_time, 0, sizeof(rec_running_time));
+    if (lv_obj_is_valid(guider_ui.video_rec_digitclock_record_time)) {
+        lv_label_set_text_fmt(guider_ui.video_rec_digitclock_record_time, "%02d:%02d:%02d", rec_running_time.tm_hour, rec_running_time.tm_min, rec_running_time.tm_sec);
+    }
     lvgl_module_msg_send_value(GUI_MODEL_VIDEO_REC_MSG_ID_REC_BTN, LV_STATE_DEFAULT, 0);
     lvgl_module_msg_send_global_ptr(GUI_MODEL_VIDEO_REC_MSG_ID_REC_TIME_STATE, (void *)LV_STATE_DEFAULT, 1, 0);
     return 0;
@@ -374,6 +385,7 @@ static int rec_off_handler(const char *type, u32 arg)
 
 static int rec_remain_handler(const char *type, u32 remain_time)
 {
+    lvgl_module_msg_send_global_ptr(GUI_MODEL_VIDEO_REC_MSG_ID_HIDE_RECORD_TIME, (void *)LV_OBJ_FLAG_HIDDEN, 1, 0);
     printf("remain= %s %d\n", type, remain_time);
 
     struct tm *rec_remain_time_var;
@@ -384,7 +396,6 @@ static int rec_remain_handler(const char *type, u32 remain_time)
     time->tm_hour = remain_time / 3600;
     time->tm_min = remain_time % 3600 / 60;
     time->tm_sec = remain_time % 60;
-    lvgl_module_msg_send_global_ptr(GUI_MODEL_VIDEO_REC_MSG_ID_HIDE_RECORD_TIME, (void *)LV_OBJ_FLAG_HIDDEN, 1, 0);
     printf("%p reTIME hour:%02d, min:%02d, sec:%02d\n", rec_remain_time_var, time->tm_hour, time->tm_min, time->tm_sec);
     lvgl_module_msg_send_ptr(rec_remain_time_var, 0);
 
@@ -426,7 +437,6 @@ static int rec_no_card_handler(const char *type, u32 arg)
 {
     rec_remain_handler(NULL, 0);// 剩余时间清0
     lvgl_module_msg_send_value(GUI_MODEL_VIDEO_REC_MSG_ID_REC_BTN, LV_STATE_DEFAULT, 0);
-    extern void sys_prompt_show_ctl(int32_t show_time, void *tips);
     lvgl_rpc_post_func(sys_prompt_show_ctl, 2, 3000, (void *)_("nosd"));
     return 0;
 }
@@ -435,8 +445,7 @@ static int rec_fs_err_handler(const char *type, u32 arg)
 {
     //TF卡状态异常回调
     lvgl_module_msg_send_value(GUI_MODEL_VIDEO_REC_MSG_ID_REC_BTN, LV_STATE_DEFAULT, 0);
-    post_msg2sd_icon(0);
-    extern void sys_prompt_show_ctl(int32_t show_time, void *tips);
+    video_rec_post_msg("sdStatus", 0);
     lvgl_rpc_post_func(sys_prompt_show_ctl, 2, 3000, (void *)_("fs_err"));
     return 0;
 }
@@ -444,7 +453,6 @@ static int rec_fs_err_handler(const char *type, u32 arg)
 static int rec_gap_err_handler(const char *type, u32 arg)
 {
     //提示用户关闭缩时录影
-    extern void sys_prompt_show_ctl(int32_t show_time, void *tips);
     lvgl_rpc_post_func(sys_prompt_show_ctl, 2, 3000, (void *)_("gap_err"));
     return 0;
 }
@@ -464,6 +472,27 @@ static int rec_headlight_on_handler(const char *type, u32 arg)
     }
 
     return 0;
+}
+
+static int app_connect_handler(const char *type, u32 arg)
+{
+    //app已连接回调
+    lvgl_module_msg_send_global_ptr(GUI_MODEL_VIDEO_REC_MSG_ID_APP_CONNECTED, (void *)RES_CONNECTED, sizeof(RES_CONNECTED), 0);
+    lvgl_rpc_post_func(sys_prompt_show_ctl, 2, 3000, (void *)_("app_connect"));
+}
+
+static int app_disconnect_handler(const char *type, u32 arg)
+{
+    //app断开回调
+    lvgl_module_msg_send_global_ptr(GUI_MODEL_VIDEO_REC_MSG_ID_APP_CONNECTED, (void *)RES_DISCONNECT, sizeof(RES_CONNECTED), 0);
+    lvgl_rpc_post_func(sys_prompt_show_ctl, 2, 3000, (void *)_("app_disconnect"));
+}
+
+static int wifi_preview_handler(const char *type, u32 arg)
+{
+    //不允许录像
+    lvgl_module_msg_send_value(GUI_MODEL_VIDEO_REC_MSG_ID_REC_BTN, LV_STATE_DEFAULT, 0);
+    lvgl_rpc_post_func(sys_prompt_show_ctl, 2, 3000, (void *)_("wifi_preview"));
 }
 
 static int rec_headlight_off_handler(const char *type, u32 arg)
@@ -516,10 +545,30 @@ void video_rec_post_msg(const char *msg, ...)
 
     } else if (strstr(msg, "gapErr")) {
         rec_gap_err_handler(msg, 0);
+
+    } else if (!strcmp(msg, "appConnect")) {
+        app_connect_handler(msg, va_arg(argptr, int)); //获取第一个int数据
+
+    } else if (!strcmp(msg, "appDisconnect")) {
+        app_disconnect_handler(msg, va_arg(argptr, int));//
+
+    } else if (!strcmp(msg, "wifiPreview")) {
+        wifi_preview_handler(msg, va_arg(argptr, int));
+
+    } else if (strstr(msg, "swWinicon")) {
+        post_msg2sw_winicon(msg, va_arg(argptr, int)); //获取第一个int数据
+
+    } else if (strstr(msg, "batIcon")) {
+        post_msg2bat_icon(msg, va_arg(argptr, int)); //获取第一个int数据
+
+    } else if (strstr(msg, "sdStatus")) {
+        post_msg2sd_icon(msg, va_arg(argptr, int)); //获取第一个int数据
+
+
     } else {
         printf("[chili] %s your msg [%s] no callback! \n", __func__, msg, __LINE__);
-    }
 
+    }
     va_end(argptr);
 
 #endif

@@ -1,61 +1,9 @@
 /*Generate Code, Do NOT Edit!*/
-#include "gui_local_music_volume_msg.h"
-#if LV_USE_MSG
+#include "./gui_local_music_volume_msg.h"
+#if LV_USE_OBSERVER
 
 static lv_ll_t subs_ll;
 
-void gui_local_music_volume_msg_audio_local_music_volume_slider_set_starting_value_cb(lv_event_t *e)
-{
-    lv_obj_t *obj = lv_event_get_target(e);
-    if (guider_ui.audio_local_music_del || obj == NULL) {
-        return;
-    }
-    lv_msg_t *msg = (lv_msg_t *)lv_event_get_param(e);
-    if (msg == NULL || msg->id != GUI_LOCAL_MUSIC_VOLUME_MSG_ID_VOLUME) {
-        return;
-    }
-
-    lv_slider_set_value(obj, guider_msg_data.value_int, LV_ANIM_OFF);
-}
-void gui_local_music_volume_msg_audio_local_music_lbl_1_set_text_cb(lv_event_t *e)
-{
-    lv_obj_t *obj = lv_event_get_target(e);
-    if (guider_ui.audio_local_music_del || obj == NULL) {
-        return;
-    }
-    lv_msg_t *msg = (lv_msg_t *)lv_event_get_param(e);
-    if (msg == NULL || msg->id != GUI_LOCAL_MUSIC_VOLUME_MSG_ID_PLAY_NAME) {
-        return;
-    }
-
-    lv_label_set_text(obj, guider_msg_data.value_string);
-}
-void gui_local_music_volume_msg_audio_local_music_music_time_set_bar_value_cb(lv_event_t *e)
-{
-    lv_obj_t *obj = lv_event_get_target(e);
-    if (guider_ui.audio_local_music_del || obj == NULL) {
-        return;
-    }
-    lv_msg_t *msg = (lv_msg_t *)lv_event_get_param(e);
-    if (msg == NULL || msg->id != GUI_LOCAL_MUSIC_VOLUME_MSG_ID_PLAY_TIME) {
-        return;
-    }
-
-    lv_bar_set_value(obj, guider_msg_data.value_int, LV_ANIM_OFF);
-}
-void gui_local_music_volume_msg_audio_recorder_volume_slider_set_starting_value_cb(lv_event_t *e)
-{
-    lv_obj_t *obj = lv_event_get_target(e);
-    if (guider_ui.audio_recorder_del || obj == NULL) {
-        return;
-    }
-    lv_msg_t *msg = (lv_msg_t *)lv_event_get_param(e);
-    if (msg == NULL || msg->id != GUI_LOCAL_MUSIC_VOLUME_MSG_ID_VOLUME) {
-        return;
-    }
-
-    lv_slider_set_value(obj, guider_msg_data.value_int, LV_ANIM_OFF);
-}
 
 GUI_WEAK int gui_local_music_volume_msg_volume_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type)
 {
@@ -68,7 +16,7 @@ GUI_WEAK int gui_local_music_volume_msg_volume_cb(gui_msg_action_t access, gui_m
 }
 GUI_WEAK int gui_local_music_volume_msg_play_name_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type)
 {
-    static char play_name_init_var[] = "";
+    char play_name_init_var[] = "";
     static bool play_name_is_init = false;
     static char *play_name_var = NULL;
     if (play_name_is_init == false) {
@@ -96,108 +44,147 @@ GUI_WEAK int gui_local_music_volume_msg_play_time_cb(gui_msg_action_t access, gu
 
 void gui_local_music_volume_msg_init(lv_ui *ui)
 {
-    _lv_ll_init(&subs_ll, sizeof(gui_msg_sub_t));
+    gui_msg_sub_t *sub;
+    sub = gui_msg_create_sub(GUI_LOCAL_MUSIC_VOLUME_MSG_ID_VOLUME);
+    if (sub != NULL) {
+        lv_subject_init_pointer(sub->subject, &guider_msg_data);
+    }
+    sub = gui_msg_create_sub(GUI_LOCAL_MUSIC_VOLUME_MSG_ID_PLAY_NAME);
+    if (sub != NULL) {
+        lv_subject_init_pointer(sub->subject, &guider_msg_data);
+    }
+    sub = gui_msg_create_sub(GUI_LOCAL_MUSIC_VOLUME_MSG_ID_PLAY_TIME);
+    if (sub != NULL) {
+        lv_subject_init_pointer(sub->subject, &guider_msg_data);
+    }
     gui_local_music_volume_msg_init_ui();
     gui_local_music_volume_msg_init_events();
 }
 
 void gui_local_music_volume_msg_init_ui()
 {
-    if (!guider_ui.audio_recorder_del) {
-        gui_msg_action_change(GUI_LOCAL_MUSIC_VOLUME_MSG_ID_VOLUME, GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
-        lv_slider_set_value(guider_ui.audio_recorder_volume_slider, guider_msg_data.value_int, LV_ANIM_OFF);
-    }
-    if (!guider_ui.audio_local_music_del) {
-        gui_msg_action_change(GUI_LOCAL_MUSIC_VOLUME_MSG_ID_VOLUME, GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
-        lv_slider_set_value(guider_ui.audio_local_music_volume_slider, guider_msg_data.value_int, LV_ANIM_OFF);
-
-        gui_msg_action_change(GUI_LOCAL_MUSIC_VOLUME_MSG_ID_PLAY_NAME, GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_STRING);
-        lv_label_set_text(guider_ui.audio_local_music_lbl_1, guider_msg_data.value_string);
-
-        gui_msg_action_change(GUI_LOCAL_MUSIC_VOLUME_MSG_ID_PLAY_TIME, GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
-        lv_bar_set_value(guider_ui.audio_local_music_music_time, guider_msg_data.value_int, LV_ANIM_OFF);
-    }
 }
 
 void gui_local_music_volume_msg_init_events()
 {
     void *res = NULL;
-    char sub_ids[3] = {0};
-    char unsub_ids[3] = {0};
-    int32_t first_id = GUI_LOCAL_MUSIC_VOLUME_MSG_ID_VOLUME;
+    _gui_msg_status_t status[3] = {
+        {GUI_LOCAL_MUSIC_VOLUME_MSG_ID_VOLUME, 0, 0},
+        {GUI_LOCAL_MUSIC_VOLUME_MSG_ID_PLAY_NAME, 0, 0},
+        {GUI_LOCAL_MUSIC_VOLUME_MSG_ID_PLAY_TIME, 0, 0},
+    };
 
-    gui_msg_sub_t *head = _lv_ll_get_head(&subs_ll);
-    while (head != NULL) {
-        gui_msg_sub_t *next = _lv_ll_get_next(&subs_ll, head);
-        if (head->data != NULL && lv_obj_is_valid((((gui_msg_sub_dsc_t *)head->data)->_priv_data))) {
-            lv_msg_unsubscribe_obj(head->msg_id, ((gui_msg_sub_dsc_t *)head->data)->_priv_data);
+    for (int i = 0; i < 3; i++) {
+        lv_subject_t *subject = gui_msg_get_subject(status[i].msg_id);
+        if (subject == NULL) {
+            continue;
         }
-        unsub_ids[head->msg_id - first_id] = 1;
-        _lv_ll_remove(&subs_ll, head);
-        lv_mem_free(head);
-        head = next;
+        lv_ll_t subject_ll = subject->subs_ll;
+        gui_msg_sub_t *head = _lv_ll_get_head(&subject_ll);
+        if (head != NULL) {
+            status[i].is_unsubscribe = 1;
+        }
     }
 
+    lv_subject_t *subject_volume = gui_msg_get_subject(GUI_LOCAL_MUSIC_VOLUME_MSG_ID_VOLUME);
+    lv_subject_t *subject_play_name = gui_msg_get_subject(GUI_LOCAL_MUSIC_VOLUME_MSG_ID_PLAY_NAME);
+    lv_subject_t *subject_play_time = gui_msg_get_subject(GUI_LOCAL_MUSIC_VOLUME_MSG_ID_PLAY_TIME);
     if (!guider_ui.audio_recorder_del) {
-        lv_obj_remove_event_cb(guider_ui.audio_recorder_volume_slider, gui_local_music_volume_msg_audio_recorder_volume_slider_set_starting_value_cb);
-        lv_obj_add_event_cb(guider_ui.audio_recorder_volume_slider, gui_local_music_volume_msg_audio_recorder_volume_slider_set_starting_value_cb, LV_EVENT_MSG_RECEIVED, NULL);
+        gui_local_music_volume_msg_volume_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
+        lv_subject_add_observer_obj(subject_volume, gui_msg_set_slider_starting_value_by_int32_cb, guider_ui.audio_recorder_volume_slider, &guider_msg_data);
 
-        res = lv_msg_subsribe_obj(GUI_LOCAL_MUSIC_VOLUME_MSG_ID_VOLUME, guider_ui.audio_recorder_volume_slider, NULL);
-        gui_msg_insert_list(&subs_ll, res);
 
-        sub_ids[GUI_LOCAL_MUSIC_VOLUME_MSG_ID_VOLUME - first_id] = 1;
+        for (int i = 0; i < 3; i++) {
+            if (status[i].msg_id == GUI_LOCAL_MUSIC_VOLUME_MSG_ID_VOLUME) {
+                status[i].is_subscribe = 1;
+            }
+        }
     }
     if (!guider_ui.audio_local_music_del) {
-        lv_obj_remove_event_cb(guider_ui.audio_local_music_volume_slider, gui_local_music_volume_msg_audio_local_music_volume_slider_set_starting_value_cb);
-        lv_obj_add_event_cb(guider_ui.audio_local_music_volume_slider, gui_local_music_volume_msg_audio_local_music_volume_slider_set_starting_value_cb, LV_EVENT_MSG_RECEIVED, NULL);
+        gui_local_music_volume_msg_volume_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
+        lv_subject_add_observer_obj(subject_volume, gui_msg_set_slider_starting_value_by_int32_cb, guider_ui.audio_local_music_volume_slider, &guider_msg_data);
 
-        lv_obj_remove_event_cb(guider_ui.audio_local_music_music_time, gui_local_music_volume_msg_audio_local_music_music_time_set_bar_value_cb);
-        lv_obj_add_event_cb(guider_ui.audio_local_music_music_time, gui_local_music_volume_msg_audio_local_music_music_time_set_bar_value_cb, LV_EVENT_MSG_RECEIVED, NULL);
+        gui_local_music_volume_msg_play_time_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
+        lv_subject_add_observer_obj(subject_play_time, gui_msg_set_bar_bar_value_by_int32_cb, guider_ui.audio_local_music_music_time, &guider_msg_data);
 
-        lv_obj_remove_event_cb(guider_ui.audio_local_music_lbl_1, gui_local_music_volume_msg_audio_local_music_lbl_1_set_text_cb);
-        lv_obj_add_event_cb(guider_ui.audio_local_music_lbl_1, gui_local_music_volume_msg_audio_local_music_lbl_1_set_text_cb, LV_EVENT_MSG_RECEIVED, NULL);
+        gui_local_music_volume_msg_play_name_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_STRING);
+        lv_subject_add_observer_obj(subject_play_name, gui_msg_set_label_text_by_string_cb, guider_ui.audio_local_music_lbl_1, &guider_msg_data);
 
-        res = lv_msg_subsribe_obj(GUI_LOCAL_MUSIC_VOLUME_MSG_ID_VOLUME, guider_ui.audio_local_music_volume_slider, NULL);
-        gui_msg_insert_list(&subs_ll, res);
-        res = lv_msg_subsribe_obj(GUI_LOCAL_MUSIC_VOLUME_MSG_ID_PLAY_TIME, guider_ui.audio_local_music_music_time, NULL);
-        gui_msg_insert_list(&subs_ll, res);
-        res = lv_msg_subsribe_obj(GUI_LOCAL_MUSIC_VOLUME_MSG_ID_PLAY_NAME, guider_ui.audio_local_music_lbl_1, NULL);
-        gui_msg_insert_list(&subs_ll, res);
 
-        sub_ids[GUI_LOCAL_MUSIC_VOLUME_MSG_ID_PLAY_NAME - first_id] = 1;
-        sub_ids[GUI_LOCAL_MUSIC_VOLUME_MSG_ID_VOLUME - first_id] = 1;
-        sub_ids[GUI_LOCAL_MUSIC_VOLUME_MSG_ID_PLAY_TIME - first_id] = 1;
+        for (int i = 0; i < 3; i++) {
+            if (status[i].msg_id == GUI_LOCAL_MUSIC_VOLUME_MSG_ID_PLAY_NAME) {
+                status[i].is_subscribe = 1;
+            }
+            if (status[i].msg_id == GUI_LOCAL_MUSIC_VOLUME_MSG_ID_VOLUME) {
+                status[i].is_subscribe = 1;
+            }
+            if (status[i].msg_id == GUI_LOCAL_MUSIC_VOLUME_MSG_ID_PLAY_TIME) {
+                status[i].is_subscribe = 1;
+            }
+        }
     }
 
     for (int i = 0; i < 3; i++) {
-        if (sub_ids[i] == 0 && unsub_ids[i] == 1) {
-            gui_msg_subscribe_change(first_id + i, GUI_MSG_UNSUBSCRIBE);
-        } else if (sub_ids[i] == 1 && unsub_ids[i] == 0) {
-            gui_msg_subscribe_change(first_id + i, GUI_MSG_SUBSCRIBE);
+        if (status[i].is_subscribe == 0 && status[i].is_unsubscribe == 1) {
+            gui_msg_subscribe_change(status[i].msg_id, GUI_MSG_UNSUBSCRIBE);
+        } else if (status[i].is_subscribe == 1 && status[i].is_unsubscribe == 0) {
+            gui_msg_subscribe_change(status[i].msg_id, GUI_MSG_SUBSCRIBE);
         }
     }
 }
 
 void gui_local_music_volume_msg_unsubscribe()
 {
-    char msg_ids[3] = {0};
-    int32_t first_id = GUI_LOCAL_MUSIC_VOLUME_MSG_ID_VOLUME;
-    gui_msg_sub_t *head = _lv_ll_get_head(&subs_ll);
-    while (head != NULL) {
-        gui_msg_sub_t *next = _lv_ll_get_next(&subs_ll, head);
-        if (head->data != NULL && lv_obj_is_valid((((gui_msg_sub_dsc_t *)head->data)->_priv_data))) {
-            lv_msg_unsubscribe_obj(head->msg_id, (((gui_msg_sub_dsc_t *)head->data)->_priv_data));
-        }
-        msg_ids[head->msg_id - first_id] = 1;
-        _lv_ll_remove(&subs_ll, head);
-        lv_mem_free(head);
-        head = next;
-    }
+    _gui_msg_status_t status[3] = {
+        {GUI_LOCAL_MUSIC_VOLUME_MSG_ID_VOLUME, 0, 0},
+        {GUI_LOCAL_MUSIC_VOLUME_MSG_ID_PLAY_NAME, 0, 0},
+        {GUI_LOCAL_MUSIC_VOLUME_MSG_ID_PLAY_TIME, 0, 0},
+    };
     for (int i = 0; i < 3; i++) {
-        if (msg_ids[i] == 1) {
-            gui_msg_subscribe_change(first_id + i, GUI_MSG_UNSUBSCRIBE);
+        lv_subject_t *subject = gui_msg_get_subject(status[i].msg_id);
+        if (subject == NULL) {
+            continue;
+        }
+        lv_ll_t subject_ll = subject->subs_ll;
+        lv_observer_t *head = _lv_ll_get_head(&subject_ll);
+        if (head != NULL) {
+            status[i].is_unsubscribe = 1;
+        }
+        while (head != NULL) {
+            lv_obj_t *obj = head->target;
+            if (obj != NULL && lv_obj_is_valid(obj) == true) {
+                lv_subject_remove_all_obj(subject, obj);
+            }
+            head = _lv_ll_get_head(&subject_ll);
         }
     }
+
+    for (int i = 0; i < 3; i++) {
+        if (status[i].is_unsubscribe == 1) {
+            gui_msg_subscribe_change(status[i].msg_id, GUI_MSG_UNSUBSCRIBE);
+        }
+    }
+}
+
+gui_msg_data_t *gui_local_music_volume_msg_get(int32_t msg_id)
+{
+    switch (msg_id) {
+    case GUI_LOCAL_MUSIC_VOLUME_MSG_ID_VOLUME: {
+        gui_local_music_volume_msg_volume_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
+        break;
+    }
+    case GUI_LOCAL_MUSIC_VOLUME_MSG_ID_PLAY_NAME: {
+        gui_local_music_volume_msg_play_name_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_STRING);
+        break;
+    }
+    case GUI_LOCAL_MUSIC_VOLUME_MSG_ID_PLAY_TIME: {
+        gui_local_music_volume_msg_play_time_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
+        break;
+    }
+    default:
+        return NULL;
+    }
+    return &guider_msg_data;
 }
 
 void gui_local_music_volume_msg_action_change(int32_t msg_id, gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type)
@@ -224,26 +211,23 @@ void gui_local_music_volume_msg_action_change(int32_t msg_id, gui_msg_action_t a
 gui_msg_status_t gui_local_music_volume_msg_send(int32_t msg_id, void *value, int32_t len)
 {
     if (msg_id == GUI_LOCAL_MUSIC_VOLUME_MSG_ID) {
-        lv_msg_send(GUI_LOCAL_MUSIC_VOLUME_MSG_ID_VOLUME, NULL);
-        lv_msg_send(GUI_LOCAL_MUSIC_VOLUME_MSG_ID_PLAY_NAME, NULL);
-        lv_msg_send(GUI_LOCAL_MUSIC_VOLUME_MSG_ID_PLAY_TIME, NULL);
     } else {
         gui_msg_data_type_t data_type = VALUE_INT;
         switch (msg_id) {
         case GUI_LOCAL_MUSIC_VOLUME_MSG_ID_VOLUME: {
-            data_type = VALUE_ARRAY;
+            data_type = VALUE_INT;
             guider_msg_data.value_array.ptr = value;
             guider_msg_data.value_array.len = len;
             break;
         }
         case GUI_LOCAL_MUSIC_VOLUME_MSG_ID_PLAY_NAME: {
-            data_type = VALUE_ARRAY;
+            data_type = VALUE_STRING;
             guider_msg_data.value_array.ptr = value;
             guider_msg_data.value_array.len = len;
             break;
         }
         case GUI_LOCAL_MUSIC_VOLUME_MSG_ID_PLAY_TIME: {
-            data_type = VALUE_ARRAY;
+            data_type = VALUE_INT;
             guider_msg_data.value_array.ptr = value;
             guider_msg_data.value_array.len = len;
             break;
@@ -252,8 +236,11 @@ gui_msg_status_t gui_local_music_volume_msg_send(int32_t msg_id, void *value, in
             break;
         }
         gui_msg_action_change(msg_id, GUI_MSG_ACCESS_SET, &guider_msg_data, data_type);
-        bool found = lv_msg_send(msg_id, NULL);
-        return found ? GUI_MSG_STATUS_SUCCESS : GUI_MSG_STATUS_NO_SUBSCRIBE;
+        lv_subject_t *subject = gui_msg_get_subject(msg_id);
+        if (subject == NULL) {
+            return GUI_MSG_STATUS_NO_SUBSCRIBE;
+        }
+        lv_subject_set_pointer(subject, &guider_msg_data);
     }
     return GUI_MSG_STATUS_SUCCESS;
 }

@@ -241,11 +241,20 @@ static int image_rotate(uint8_t *dst, int dst_w, int dst_h, int dst_stride, int 
     surfaceToImage[8] = 1.0f;
 
     //旋转后缩放
-    if (src_w != dst_h || src_h != dst_w) {
-        float zoom_x = src_h * 1.0f * 256 / dst_w / 256;
-        float zoom_y = src_w * 1.0f * 256 / dst_h / 256;
-        jlvg_matrix_scale(surfaceToImage, zoom_y, zoom_x);
-        quality = VGHW_IMAGE_QUALITY_BILINEAR; //双线性插值
+    if (degree == 90.0f || degree == 270.0f) {
+        if (src_w != dst_h || src_h != dst_w) {
+            float zoom_x = src_h * 1.0f * 256 / dst_w / 256;
+            float zoom_y = src_w * 1.0f * 256 / dst_h / 256;
+            jlvg_matrix_scale(surfaceToImage, zoom_y, zoom_x);
+            quality = VGHW_IMAGE_QUALITY_BILINEAR; //双线性插值
+        }
+    } else if (degree == 180.0f) {
+        if (src_w != dst_w || src_h != dst_h) {
+            float zoom_x = src_w * 1.0f * 256 / dst_w / 256;
+            float zoom_y = src_h * 1.0f * 256 / dst_h / 256;
+            jlvg_matrix_scale(surfaceToImage, zoom_x, zoom_y);
+            quality = VGHW_IMAGE_QUALITY_BILINEAR; //双线性插值
+        }
     }
 
     if (mirror == 1) {

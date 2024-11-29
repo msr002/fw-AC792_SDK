@@ -2,17 +2,18 @@
 #include "lvgl.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include "gui_guider.h"
-#include "events_init.h"
-#include "callback_handler.h"
-#include "gui_timelines.h"
-#include "custom.h"
+#include "../gui_guider.h"
+#include "../gui_events/events_init.h"
+#include "../gui_events/callback_handler.h"
+#include "../gui_timelines/gui_timelines.h"
+#include "../../custom/custom.h"
 
 
 lv_obj_t *setup_scr_audio_local_music(lv_ui *ui)
 {
     //Write codes audio_local_music
     ui->audio_local_music = lv_obj_create(NULL);
+    lv_group_t *def_group = lv_group_get_default();
 
     //Set style for audio_local_music. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
     lv_obj_set_style_bg_color(ui->audio_local_music, lv_color_make(0xF7, 0x98, 0xB1), LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -22,7 +23,6 @@ lv_obj_t *setup_scr_audio_local_music(lv_ui *ui)
     lv_obj_set_style_border_width(ui->audio_local_music, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_scrollbar_mode(ui->audio_local_music, LV_SCROLLBAR_MODE_OFF);
     lv_obj_clear_flag(ui->audio_local_music, LV_OBJ_FLAG_SCROLLABLE);
-    lv_group_t *def_group = lv_group_get_default();
     //Write codes audio_local_music_title
     ui->audio_local_music_title = lv_label_create(ui->audio_local_music);
     lv_label_set_text(ui->audio_local_music_title, "Local Music");
@@ -67,6 +67,7 @@ lv_obj_t *setup_scr_audio_local_music(lv_ui *ui)
     lv_obj_set_style_outline_pad(ui->audio_local_music_back_btn, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_color(ui->audio_local_music_back_btn, lv_color_make(0x0A, 0x0A, 0x0A), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_font(ui->audio_local_music_back_btn, &lv_font_FontAwesome5_24, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_letter_space(ui->audio_local_music_back_btn, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_align(ui->audio_local_music_back_btn, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_pos(ui->audio_local_music_back_btn, 0, 9);
     lv_obj_set_size(ui->audio_local_music_back_btn, 101, 43);
@@ -93,6 +94,7 @@ lv_obj_t *setup_scr_audio_local_music(lv_ui *ui)
     lv_obj_set_style_outline_pad(ui->audio_local_music_switch_btn, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_color(ui->audio_local_music_switch_btn, lv_color_make(0xff, 0xff, 0xff), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_font(ui->audio_local_music_switch_btn, &lv_font_montserratMedium_24, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_letter_space(ui->audio_local_music_switch_btn, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_align(ui->audio_local_music_switch_btn, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_pos(ui->audio_local_music_switch_btn, 156, 346);
     lv_obj_set_size(ui->audio_local_music_switch_btn, 176, 108);
@@ -120,6 +122,7 @@ lv_obj_t *setup_scr_audio_local_music(lv_ui *ui)
     lv_obj_set_style_outline_pad(ui->audio_local_music_prev_btn, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_color(ui->audio_local_music_prev_btn, lv_color_make(0xff, 0xff, 0xff), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_font(ui->audio_local_music_prev_btn, &lv_font_montserratMedium_24, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_letter_space(ui->audio_local_music_prev_btn, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_align(ui->audio_local_music_prev_btn, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_pos(ui->audio_local_music_prev_btn, 25, 370);
     lv_obj_set_size(ui->audio_local_music_prev_btn, 98, 60);
@@ -146,6 +149,7 @@ lv_obj_t *setup_scr_audio_local_music(lv_ui *ui)
     lv_obj_set_style_outline_pad(ui->audio_local_music_next_btn, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_color(ui->audio_local_music_next_btn, lv_color_make(0xff, 0xff, 0xff), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_font(ui->audio_local_music_next_btn, &lv_font_montserratMedium_24, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_letter_space(ui->audio_local_music_next_btn, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_align(ui->audio_local_music_next_btn, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_pos(ui->audio_local_music_next_btn, 361, 370);
     lv_obj_set_size(ui->audio_local_music_next_btn, 98, 60);
