@@ -23,6 +23,8 @@ extern "C" {
 #include "obj2p5d/lv_font2p5d.h"
 #include "obj2p5d/lv_img2p5d.h"
 #include "keyboard/lv_ime_pinyin.h"
+#include "lyrics/lv_lyrics.h"
+
 /*********************
  *      DEFINES
  *********************/

@@ -97,11 +97,26 @@ void *lvgl_module_msg_group_add_ptr(void *group, unsigned int msg_id, unsigned i
 int lvgl_module_msg_group_send(void *group, char refr_now);
 
 
+/*-------------------------------------------------------------------------------
+* @brief                     通过一个变量的变化来发送控件值/状态,注：变量要配合DEFINE_UI_VARIABLE_REG()使用
+* @param[in] msg_id:         需要刷新的模型id
+* @param[in] refr_now:       是否立刻刷新UI界面,还是说等UI刷新周期自动更新,建议填写0
+*-------------------------------------------------------------------------------*/
 int lvgl_module_varable_reg_send(unsigned int msg_id, char refr_now);
+/*-------------------------------------------------------------------------------
+* @brief                     通过模型组添加并同时发送多个变量来刷新控件值/状态,注：每个变量都要配合DEFINE_UI_VARIABLE_REG()使用
+* @param[in] group:          需要刷新的模型组指针
+* @param[in] msg_id:         添加到模型组的模型id
+*-------------------------------------------------------------------------------*/
 int lvgl_module_varable_reg_group_add(void *group, unsigned int msg_id);
 int lvgl_module_varable_reg_group_send(void *group, char refr_now);
 
-
+/*-------------------------------------------------------------------------------
+* @brief                                    非LVGL线程通过rpc解耦函数来调用LVGL线程接口
+* @param[in] void:(*rpc_func)(...)          LVGL内部接口
+* @param[in] argc                           LVGL内部接口所需要的参数数量
+* @param[in] ...                            LVGL内部接口所需要的参数
+*-------------------------------------------------------------------------------*/
 int lvgl_rpc_post_func(void (*rpc_func)(void *, ...), int argc, ...);
 
 
@@ -124,7 +139,7 @@ extern const struct ui_module_event_handler ui_module_event_handler_begin[], ui_
 
 
 
-//UI页面切换注册函数
+//UI页面切换注册函数,页面注册函数通常是进行app切换操作，需要在UI工具上针对指定页面开启“加载/卸载函数”
 struct ui_screen_action_handler {
     int page_id;
     int (*onchange)(int action);
@@ -161,6 +176,14 @@ struct ui_varable_reg_t {
 
 extern const struct ui_varable_reg_t ui_varable_reg_tab_begin[], ui_varable_reg_tab_end[];
 
+/*-------------------------------------------------------------------------------------------------
+* @brief                              varable变量模型注册接口
+* @param[in] MSG_ID                   绑定的模型ID
+* @param[in] VARIABLE_TYPE            varable变量类型，只允许发送u8,u16,u32类型的变量
+* @param[in] VARIABLE_NAME            varable变量名称，使用时，需要在外部用extern声明该变量,再修改它,最后调用lvgl_module_varable_reg_send接口发送
+* @param[in] GET_SET_VALUE_CALLBACK   需要指定GET_SET_VALUE_CALLBACK回调,lvgl现成发送并刷新完varable变量消息后，会进到该回调，
+                                      可以在该回调中做一些通知外部线程的操作，若不需要通知，则直接填NULL
+*---------------------------------------------------------------------------------------------------*/
 #define DEFINE_UI_VARIABLE_REG(MSG_ID,VARIABLE_TYPE,VARIABLE_NAME,GET_SET_VALUE_CALLBACK) \
         VARIABLE_TYPE VARIABLE_NAME; \
         static const struct ui_varable_reg_t varable_reg_##MSG_ID \

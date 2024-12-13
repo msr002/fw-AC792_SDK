@@ -536,7 +536,7 @@ void carnum_utf8_to_gb2312(const uint8_t *utf_8, uint8_t *gb2312_data, int selec
 }
 
 //sd卡状态图标更新
-void post_msg2sd_icon(const char *type, u32 online)
+void post_msg2sd_icon(const char *type, uint32_t online)
 {
 #ifdef USE_LVGL_V8_UI_DEMO
     if (online) {

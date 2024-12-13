@@ -1207,6 +1207,9 @@
 <Unit filename="../../../../apps/common/lvgl_v8/examples/widgets/list/lv_example_list_1.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/common/lvgl_v8/examples/widgets/list/lv_example_list_2.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/common/lvgl_v8/examples/widgets/lv_example_widgets.h" />
+<Unit filename="../../../../apps/common/lvgl_v8/examples/widgets/lyrics/lv_example_lyrics_1.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="../../../../apps/common/lvgl_v8/examples/widgets/lyrics/lv_example_lyrics_2.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="../../../../apps/common/lvgl_v8/examples/widgets/lyrics/lv_example_lyrics_3.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/common/lvgl_v8/examples/widgets/menu/lv_example_menu_1.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/common/lvgl_v8/examples/widgets/menu/lv_example_menu_2.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/common/lvgl_v8/examples/widgets/menu/lv_example_menu_3.c"><Option compilerVer="CC"/></Unit>
@@ -1363,6 +1366,7 @@
 <Unit filename="../../../../apps/common/lvgl_v8/src/extra/jl_extra/widgets/jl_widgets.h" />
 <Unit filename="../../../../apps/common/lvgl_v8/src/extra/jl_extra/widgets/keyboard/lv_ime_pinyin.h" />
 <Unit filename="../../../../apps/common/lvgl_v8/src/extra/jl_extra/widgets/keyboard/lv_zh_keyboard.h" />
+<Unit filename="../../../../apps/common/lvgl_v8/src/extra/jl_extra/widgets/lyrics/lv_lyrics.h" />
 <Unit filename="../../../../apps/common/lvgl_v8/src/extra/jl_extra/widgets/obj2p5d/lv_font2p5d.h" />
 <Unit filename="../../../../apps/common/lvgl_v8/src/extra/jl_extra/widgets/obj2p5d/lv_img2p5d.h" />
 <Unit filename="../../../../apps/common/lvgl_v8/src/extra/jl_extra/widgets/obj2p5d/lv_obj2p5d.h" />

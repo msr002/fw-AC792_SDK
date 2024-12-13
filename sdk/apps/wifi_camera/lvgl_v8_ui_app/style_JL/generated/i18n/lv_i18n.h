@@ -9,6 +9,7 @@ extern "C" {
 
 #include <stdint.h>
 #include <string.h>
+#include "../common.h"
 #include "../gui_fonts/gui_fonts.h"
 #include "lvgl.h"
 
@@ -80,6 +81,12 @@ const lv_font_t *lv_i18n_get_font(const char *msg_id);
  * @return name of the currently used localization. E.g. "en_GB"
  */
 const char *lv_i18n_get_current_locale(void);
+
+/**
+ * Get the default locale
+ * @return the default locale. E.g. "en_GB"
+ */
+extern GUI_WEAKREF const char *lv_i18n_get_default_locale(void);
 
 void __lv_i18n_reset(void);
 

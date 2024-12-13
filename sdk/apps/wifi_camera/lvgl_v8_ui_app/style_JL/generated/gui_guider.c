@@ -2,7 +2,9 @@
 #ifdef CONFIG_UI_STYLE_JL_ENABLE
 /*Generate Code, Do NOT Edit!*/
 #include "lvgl.h"
+#if LV_USE_GUIBUILDER_SIMULATOR
 #include <stdio.h>
+#endif
 #include "./gui_guider.h"
 #include "./gui_timelines/gui_timelines.h"
 #include "./gui_group/gui_group.h"
@@ -71,7 +73,7 @@ void init_scr_del_flag(lv_ui *ui)
 void setup_ui(lv_ui *ui)
 {
     lv_i18n_init(lv_i18n_language_pack);
-    lv_i18n_set_locale("zh_cn");
+    lv_i18n_set_locale(lv_i18n_get_default_locale());
     init_gui_fonts();
     init_scr_del_flag(ui);
     gui_scr_t *scr = gui_scr_create(GUI_SCREEN_VIDEO_REC, "video_rec", ui->video_rec, (gui_scr_setup_cb_t)setup_scr_video_rec, (gui_scr_unload_cb_t)unload_scr_video_rec);

@@ -354,7 +354,7 @@
 //*********************************************************************************//
 //                                   LCD配置                                       //
 //*********************************************************************************//
-#ifdef CONFIG_UI_ENABLE
+// #ifdef CONFIG_UI_ENABLE
 #define TCFG_LCD_ENABLE                     1
 #define TCFG_LCD_DEVICE_NAME                ""
 
@@ -436,7 +436,7 @@
 #define TCFG_TP_INT_PIN                     IO_PORTA_03
 #define TCFG_TP_COMMUNICATE_IF              "iic0"
 
-#endif
+// #endif
 
 
 //*********************************************************************************//

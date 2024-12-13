@@ -577,4 +577,14 @@ const char *lv_i18n_get_current_locale(void)
     }
     return current_lang->locale_name;
 }
+
+/**
+ * Get the default locale
+ * @return the default locale. E.g. "en_GB"
+ */
+GUI_WEAK const char *lv_i18n_get_default_locale(void)
+{
+    return "zh_CN";
+}
+
 #endif

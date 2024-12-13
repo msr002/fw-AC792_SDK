@@ -21,7 +21,7 @@
 #include "eth/eth_phy.h"
 #include "eth/ethmac.h"
 #endif
-#ifdef CONFIG_UI_ENABLE
+#if TCFG_LCD_ENABLE
 #include "lcd_driver.h"
 #include "device/video/fb.h"
 #include "tp_driver.h"

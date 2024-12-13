@@ -1,7 +1,9 @@
 #include "app_config.h"
 #ifdef CONFIG_UI_STYLE_LY_ENABLE
 #include "lvgl.h"
+#if LV_USE_GUIBUILDER_SIMULATOR
 #include <stdio.h>
+#endif
 #include "./gui_fonts.h"
 
 lv_font_t lv_font_FangZhengKaiTiJianTi_1_22;

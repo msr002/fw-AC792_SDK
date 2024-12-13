@@ -53,8 +53,6 @@ void parking_page_show(int arg)
 #else
         lv_obj_set_style_bg_opa(guider_ui.car_parking, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
 #endif
-        gui_msg_init_ui();
-        gui_msg_init_events();
         delete_gui_timelines();
     }
 
