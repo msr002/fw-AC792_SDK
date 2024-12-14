@@ -2,7 +2,9 @@
 #ifdef CONFIG_UI_STYLE_JL_ENABLE
 /*Generate Code, Do NOT Edit!*/
 #include "./events_init.h"
+#if LV_USE_GUIBUILDER_SIMULATOR
 #include <stdio.h>
+#endif
 #include "lvgl.h"
 #include "./callback_handler.h"
 #include "../gui_timelines/gui_timelines.h"

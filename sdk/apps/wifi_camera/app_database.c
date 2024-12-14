@@ -36,7 +36,7 @@ static int task_pid;
 #define    VM_WBL_INDEX                 15
 #define    VM_COL_INDEX                 16
 #define    VM_SCA_INDEX                 17
-#define    VM_PEXP_INDEX                18
+//#define    VM_PEXP_INDEX                18
 #define    VM_ISO_INDEX                 19
 #define    VM_STK_INDEX                 20
 #define    VM_DELAY_INDEX               21
@@ -73,7 +73,7 @@ static int task_pid;
 #define    VM_DATEH_INDEX               51//时
 #define    VM_DATEMI_INDEX              52//分
 #define    VM_DATES_INDEX              53//分
-#define    VM_PROC_INDEX                54 //省
+//#define    VM_PROC_INDEX                54 //省
 #define    VM_ZOOM_INDEX                55
 #define    VM_PROC_INDEX                56 //省
 
@@ -308,4 +308,5 @@ static int app_config_init()
 }
 
 __initcall(app_config_init);
+
 

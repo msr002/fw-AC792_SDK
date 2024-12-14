@@ -60,7 +60,7 @@ void lv_draw_jl_gpu2p5d_arc(lv_draw_ctx_t *draw_ctx, const lv_draw_arc_dsc_t *ds
     }
 
     float endpoint_radius = (float)width / 2.0; // 线宽的一半作为端点的半径
-    //printf("endpoint_radius = %f.", endpoint_radius);
+    //printf("radius = %d; endpoint_radius = %f.", radius, endpoint_radius);
 
     lv_point_t rel_center = {center->x - draw_ctx->buf_area->x1, center->y - draw_ctx->buf_area->y1};
 
@@ -206,13 +206,26 @@ jlvg_begin:
     jlvg_point2_t point_arc_end_1;      // 弧形区域的终点处的坐标
     jlvg_point2_t point_arc_end_2;
 
-    float sin_start = sin((float)start_angle * M_PI / 180.0);
-    float cos_start = cos((float)start_angle * M_PI / 180.0);
-    float sin_end = sin((float)end_angle * M_PI / 180.0);
-    float cos_end = cos((float)end_angle * M_PI / 180.0);
+    float start_angle_f = (float)start_angle;
+    float end_angle_f = (float)end_angle;
+
+    // 防止内圆和外圆闭合
+    if ((start_angle_f - end_angle_f) == 360.0f) {
+        start_angle_f -= 0.1f;
+    } else if ((start_angle_f - end_angle_f) == -360.0f) {
+        end_angle_f -= 0.1f;
+    }
+
+    float sin_start = sin(start_angle_f * M_PI / 180.0);
+    float cos_start = cos(start_angle_f * M_PI / 180.0);
+    float sin_end = sin(end_angle_f * M_PI / 180.0);
+    float cos_end = cos(end_angle_f * M_PI / 180.0);
 
     // 计算弧形两个端点的中点
-    float arc_radius = radius - endpoint_radius;
+    float arc_radius = radius - endpoint_radius;    // 这个是绘制时实际的圆环中心的半径, radius 为外圆半径
+    if (arc_radius < 0.0f) {
+        arc_radius = 0.0f;
+    }
     point_arc_start.x = rel_center.x + cos_start * arc_radius;
     point_arc_start.y = rel_center.y + sin_start * arc_radius;
     point_arc_end.x = rel_center.x + cos_end * arc_radius;
@@ -280,8 +293,17 @@ jlvg_begin:
     points[npoints++] = point_arc_start_2.y;
 
     //outer arc
+    float outer_arc_radius = (arc_radius + endpoint_radius);
+    float inner_arc_radius = (arc_radius - endpoint_radius);
+    //printf("outer_arc_radius = %f; inner_arc_radius = %f.", outer_arc_radius, inner_arc_radius);
+
+    // 绘制外弧: 是必须要画的
     jlvg_path_circle2beizer(&segments[nsegments], &nseg_tmp, &points[npoints], &npoints_tmp,
-                            final_center.x, final_center.y, (arc_radius + endpoint_radius), point_arc_start_2.x, point_arc_start_2.y, point_arc_end_1.x, point_arc_end_1.y, 0, 0);  // 顺时针
+                            final_center.x, final_center.y, // 圆心
+                            outer_arc_radius, // 半径
+                            point_arc_start_2.x, point_arc_start_2.y, // 起始点
+                            point_arc_end_1.x, point_arc_end_1.y,   // 终点
+                            0, 0);  // 顺时针
     nsegments += nseg_tmp;
     npoints += npoints_tmp;
 
@@ -291,10 +313,17 @@ jlvg_begin:
     points[npoints++] = point_arc_end_2.y;
 
     //inner arc
-    jlvg_path_circle2beizer(&segments[nsegments], &nseg_tmp, &points[npoints], &npoints_tmp,
-                            final_center.x, final_center.y, (arc_radius - endpoint_radius), point_arc_end_2.x, point_arc_end_2.y, point_arc_start_1.x, point_arc_start_1.y, 1, 0);    // 逆时针
-    nsegments += nseg_tmp;
-    npoints += npoints_tmp;
+    // 绘制内弧: 内弧半径大于 0.0f 才绘制
+    if (inner_arc_radius > 0.0f) {
+        jlvg_path_circle2beizer(&segments[nsegments], &nseg_tmp, &points[npoints], &npoints_tmp,
+                                final_center.x, final_center.y, // 圆心
+                                inner_arc_radius, // 半径
+                                point_arc_end_2.x, point_arc_end_2.y, // 起始点
+                                point_arc_start_1.x, point_arc_start_1.y, // 终点
+                                1, 0);    // 逆时针
+        nsegments += nseg_tmp;
+        npoints += npoints_tmp;
+    }
 
     //line to
     segments[nsegments++] = VGHW_LINE_TO;
@@ -329,7 +358,7 @@ jlvg_quit:
 
 static void lv_draw_jl_gpu2p5d_arc_endpoints_path_fill(jlvg_path_t *path, jlvg_point2_t point, float radius)
 {
-    //printf("%s() point: (x, y) = (%d, %d); radius = %f.", __func__, point.x, point.y, radius);
+    //printf("%s() point: (x, y) = (%f, %f); radius = %f.", __func__, point.x, point.y, radius);
     uint32_t nsegments = 0;
     uint8_t segments[9] = { 0 };
     float points[2 + 3 * 6 + 3 * 6] = { 0 };

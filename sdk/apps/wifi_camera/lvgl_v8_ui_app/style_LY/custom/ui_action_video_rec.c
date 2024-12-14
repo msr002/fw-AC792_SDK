@@ -55,18 +55,18 @@ int gui_src_action_video_rec(int action)
         }
 
         // printf("--->%s()----->%d\n", __func__, __LINE__);
-        app = get_current_app();
-        if (app && strcmp(app->name, "video_rec")) {
-            printf("[chili] %s %d   \n", app->name, __LINE__);
-            key_event_disable();
-            it.name = app->name;//APP状态机在：video_rec.c
-            it.action = ACTION_BACK;
-            start_app(&it);
-        } else if (app && !strcmp(app->name, "video_rec")) {
-            /*printf("--->%s()----->%d\n", __func__, __LINE__);*/
-            video_rec_get_remain_time();
-            break;
-        }
+        //app = get_current_app();
+        //if (app && strcmp(app->name, "video_rec")) {
+        printf("[chili] %s %d   \n", app->name, __LINE__);
+        key_event_disable();
+        it.name = app->name;//APP状态机在：video_rec.c
+        it.action = ACTION_BACK;
+        start_app(&it);
+        //} else if (app && !strcmp(app->name, "video_rec")) {
+        /*printf("--->%s()----->%d\n", __func__, __LINE__);*/
+        //video_rec_get_remain_time();
+        //  break;
+        //}
         it.name = "video_rec";//APP状态机在：video_rec.c
         it.action = ACTION_VIDEO_REC_MAIN;
         start_app(&it);

@@ -140,6 +140,10 @@ void lv_example_win_1(void);
 
 void lv_example_span_1(void);
 
+void lv_example_lyrics_1(void);
+void lv_example_lyrics_2(void);
+void lv_example_lyrics_3(void);
+
 /**********************
  *      MACROS
  **********************/

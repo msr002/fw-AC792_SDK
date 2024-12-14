@@ -2,7 +2,9 @@
 #ifdef CONFIG_UI_STYLE_JL_ENABLE
 /*Generate Code, Do NOT Edit!*/
 #include "lvgl.h"
+#if LV_USE_GUIBUILDER_SIMULATOR
 #include <stdio.h>
+#endif
 #include <stdlib.h>
 #include "../gui_guider.h"
 #include "../gui_events/events_init.h"
@@ -87,17 +89,10 @@ lv_obj_t *setup_scr_home_page(lv_ui *ui)
     lv_obj_set_size(ui->home_page_imgbtn_1, 128, 220);
     lv_obj_set_scrollbar_mode(ui->home_page_imgbtn_1, LV_SCROLLBAR_MODE_OFF);
     lv_group_add_obj(def_group, ui->home_page_imgbtn_1);
-#if LV_USE_GUIBUILDER_SIMULATOR
-    lv_imgbtn_set_src(ui->home_page_imgbtn_1, LV_IMGBTN_STATE_RELEASED, NULL, "A:\\1111\\ac792\\ui_prj\\dvr_800x480\\import\\image\\video_page\\main_page\\video.png", NULL);
-    lv_imgbtn_set_src(ui->home_page_imgbtn_1, LV_IMGBTN_STATE_PRESSED, NULL, "A:\\1111\\ac792\\ui_prj\\dvr_800x480\\import\\image\\video_page\\main_page\\video__on.png", NULL);
-    lv_imgbtn_set_src(ui->home_page_imgbtn_1, LV_IMGBTN_STATE_CHECKED_RELEASED, NULL, "A:\\1111\\ac792\\ui_prj\\dvr_800x480\\import\\image\\video_page\\main_page\\video.png", NULL);
-    lv_imgbtn_set_src(ui->home_page_imgbtn_1, LV_IMGBTN_STATE_CHECKED_PRESSED, NULL, "A:\\1111\\ac792\\ui_prj\\dvr_800x480\\import\\image\\video_page\\main_page\\video__on.png", NULL);
-#else
-    lv_imgbtn_set_src(ui->home_page_imgbtn_1, LV_IMGBTN_STATE_RELEASED, NULL, "mnt/sdfile/EXT_RESERVED/uipackres/ui/5600002a.rle", NULL);
-    lv_imgbtn_set_src(ui->home_page_imgbtn_1, LV_IMGBTN_STATE_PRESSED, NULL, "mnt/sdfile/EXT_RESERVED/uipackres/ui/5600002b.rle", NULL);
-    lv_imgbtn_set_src(ui->home_page_imgbtn_1, LV_IMGBTN_STATE_CHECKED_RELEASED, NULL, "mnt/sdfile/EXT_RESERVED/uipackres/ui/5600002a.rle", NULL);
-    lv_imgbtn_set_src(ui->home_page_imgbtn_1, LV_IMGBTN_STATE_CHECKED_PRESSED, NULL, "mnt/sdfile/EXT_RESERVED/uipackres/ui/5600002b.rle", NULL);
-#endif
+    lv_imgbtn_set_src(ui->home_page_imgbtn_1, LV_IMGBTN_STATE_RELEASED, NULL, gui_get_res_path(GUI_RES_VIDEO_1_PNG), NULL);
+    lv_imgbtn_set_src(ui->home_page_imgbtn_1, LV_IMGBTN_STATE_PRESSED, NULL, gui_get_res_path(GUI_RES_VIDEO__ON_PNG), NULL);
+    lv_imgbtn_set_src(ui->home_page_imgbtn_1, LV_IMGBTN_STATE_CHECKED_RELEASED, NULL, gui_get_res_path(GUI_RES_VIDEO_1_PNG), NULL);
+    lv_imgbtn_set_src(ui->home_page_imgbtn_1, LV_IMGBTN_STATE_CHECKED_PRESSED, NULL, gui_get_res_path(GUI_RES_VIDEO__ON_PNG), NULL);
     lv_obj_add_flag(ui->home_page_imgbtn_1, LV_OBJ_FLAG_CHECKABLE);
     ui->home_page_imgbtn_1_label = lv_label_create(ui->home_page_imgbtn_1);
     lv_label_set_text(ui->home_page_imgbtn_1_label, "");
@@ -164,17 +159,10 @@ lv_obj_t *setup_scr_home_page(lv_ui *ui)
     lv_obj_set_size(ui->home_page_imgbtn_2, 128, 220);
     lv_obj_set_scrollbar_mode(ui->home_page_imgbtn_2, LV_SCROLLBAR_MODE_OFF);
     lv_group_add_obj(def_group, ui->home_page_imgbtn_2);
-#if LV_USE_GUIBUILDER_SIMULATOR
-    lv_imgbtn_set_src(ui->home_page_imgbtn_2, LV_IMGBTN_STATE_RELEASED, NULL, "A:\\1111\\ac792\\ui_prj\\dvr_800x480\\import\\image\\video_page\\main_page\\file.png", NULL);
-    lv_imgbtn_set_src(ui->home_page_imgbtn_2, LV_IMGBTN_STATE_PRESSED, NULL, "A:\\1111\\ac792\\ui_prj\\dvr_800x480\\import\\image\\video_page\\main_page\\file_on.png", NULL);
-    lv_imgbtn_set_src(ui->home_page_imgbtn_2, LV_IMGBTN_STATE_CHECKED_RELEASED, NULL, "A:\\1111\\ac792\\ui_prj\\dvr_800x480\\import\\image\\video_page\\main_page\\file.png", NULL);
-    lv_imgbtn_set_src(ui->home_page_imgbtn_2, LV_IMGBTN_STATE_CHECKED_PRESSED, NULL, "A:\\1111\\ac792\\ui_prj\\dvr_800x480\\import\\image\\video_page\\main_page\\file_on.png", NULL);
-#else
-    lv_imgbtn_set_src(ui->home_page_imgbtn_2, LV_IMGBTN_STATE_RELEASED, NULL, "mnt/sdfile/EXT_RESERVED/uipackres/ui/5600002c.rle", NULL);
-    lv_imgbtn_set_src(ui->home_page_imgbtn_2, LV_IMGBTN_STATE_PRESSED, NULL, "mnt/sdfile/EXT_RESERVED/uipackres/ui/5600002d.rle", NULL);
-    lv_imgbtn_set_src(ui->home_page_imgbtn_2, LV_IMGBTN_STATE_CHECKED_RELEASED, NULL, "mnt/sdfile/EXT_RESERVED/uipackres/ui/5600002c.rle", NULL);
-    lv_imgbtn_set_src(ui->home_page_imgbtn_2, LV_IMGBTN_STATE_CHECKED_PRESSED, NULL, "mnt/sdfile/EXT_RESERVED/uipackres/ui/5600002d.rle", NULL);
-#endif
+    lv_imgbtn_set_src(ui->home_page_imgbtn_2, LV_IMGBTN_STATE_RELEASED, NULL, gui_get_res_path(GUI_RES_FILE_PNG), NULL);
+    lv_imgbtn_set_src(ui->home_page_imgbtn_2, LV_IMGBTN_STATE_PRESSED, NULL, gui_get_res_path(GUI_RES_FILE_ON_PNG), NULL);
+    lv_imgbtn_set_src(ui->home_page_imgbtn_2, LV_IMGBTN_STATE_CHECKED_RELEASED, NULL, gui_get_res_path(GUI_RES_FILE_PNG), NULL);
+    lv_imgbtn_set_src(ui->home_page_imgbtn_2, LV_IMGBTN_STATE_CHECKED_PRESSED, NULL, gui_get_res_path(GUI_RES_FILE_ON_PNG), NULL);
     lv_obj_add_flag(ui->home_page_imgbtn_2, LV_OBJ_FLAG_CHECKABLE);
     ui->home_page_imgbtn_2_label = lv_label_create(ui->home_page_imgbtn_2);
     lv_label_set_text(ui->home_page_imgbtn_2_label, "");
@@ -241,17 +229,10 @@ lv_obj_t *setup_scr_home_page(lv_ui *ui)
     lv_obj_set_size(ui->home_page_imgbtn_3, 128, 220);
     lv_obj_set_scrollbar_mode(ui->home_page_imgbtn_3, LV_SCROLLBAR_MODE_OFF);
     lv_group_add_obj(def_group, ui->home_page_imgbtn_3);
-#if LV_USE_GUIBUILDER_SIMULATOR
-    lv_imgbtn_set_src(ui->home_page_imgbtn_3, LV_IMGBTN_STATE_RELEASED, NULL, "A:\\1111\\ac792\\ui_prj\\dvr_800x480\\import\\image\\video_page\\main_page\\setting.png", NULL);
-    lv_imgbtn_set_src(ui->home_page_imgbtn_3, LV_IMGBTN_STATE_PRESSED, NULL, "A:\\1111\\ac792\\ui_prj\\dvr_800x480\\import\\image\\video_page\\main_page\\setting_on.png", NULL);
-    lv_imgbtn_set_src(ui->home_page_imgbtn_3, LV_IMGBTN_STATE_CHECKED_RELEASED, NULL, "A:\\1111\\ac792\\ui_prj\\dvr_800x480\\import\\image\\video_page\\main_page\\setting.png", NULL);
-    lv_imgbtn_set_src(ui->home_page_imgbtn_3, LV_IMGBTN_STATE_CHECKED_PRESSED, NULL, "A:\\1111\\ac792\\ui_prj\\dvr_800x480\\import\\image\\video_page\\main_page\\setting_on.png", NULL);
-#else
-    lv_imgbtn_set_src(ui->home_page_imgbtn_3, LV_IMGBTN_STATE_RELEASED, NULL, "mnt/sdfile/EXT_RESERVED/uipackres/ui/5600002e.rle", NULL);
-    lv_imgbtn_set_src(ui->home_page_imgbtn_3, LV_IMGBTN_STATE_PRESSED, NULL, "mnt/sdfile/EXT_RESERVED/uipackres/ui/5600002f.rle", NULL);
-    lv_imgbtn_set_src(ui->home_page_imgbtn_3, LV_IMGBTN_STATE_CHECKED_RELEASED, NULL, "mnt/sdfile/EXT_RESERVED/uipackres/ui/5600002e.rle", NULL);
-    lv_imgbtn_set_src(ui->home_page_imgbtn_3, LV_IMGBTN_STATE_CHECKED_PRESSED, NULL, "mnt/sdfile/EXT_RESERVED/uipackres/ui/5600002f.rle", NULL);
-#endif
+    lv_imgbtn_set_src(ui->home_page_imgbtn_3, LV_IMGBTN_STATE_RELEASED, NULL, gui_get_res_path(GUI_RES_SETTING_1_PNG), NULL);
+    lv_imgbtn_set_src(ui->home_page_imgbtn_3, LV_IMGBTN_STATE_PRESSED, NULL, gui_get_res_path(GUI_RES_SETTING_ON_PNG), NULL);
+    lv_imgbtn_set_src(ui->home_page_imgbtn_3, LV_IMGBTN_STATE_CHECKED_RELEASED, NULL, gui_get_res_path(GUI_RES_SETTING_1_PNG), NULL);
+    lv_imgbtn_set_src(ui->home_page_imgbtn_3, LV_IMGBTN_STATE_CHECKED_PRESSED, NULL, gui_get_res_path(GUI_RES_SETTING_ON_PNG), NULL);
     lv_obj_add_flag(ui->home_page_imgbtn_3, LV_OBJ_FLAG_CHECKABLE);
     ui->home_page_imgbtn_3_label = lv_label_create(ui->home_page_imgbtn_3);
     lv_label_set_text(ui->home_page_imgbtn_3_label, "");
@@ -272,11 +253,7 @@ lv_obj_t *setup_scr_home_page(lv_ui *ui)
     lv_obj_set_size(ui->home_page_img_1, 48, 48);
     lv_obj_set_scrollbar_mode(ui->home_page_img_1, LV_SCROLLBAR_MODE_OFF);
     lv_obj_add_flag(ui->home_page_img_1, LV_OBJ_FLAG_CLICKABLE);
-#if LV_USE_GUIBUILDER_SIMULATOR
-    lv_img_set_src(ui->home_page_img_1, "A:\\1111\\ac792\\ui_prj\\dvr_800x480\\import\\image\\video_page\\battery\\full.png");
-#else
-    lv_img_set_src(ui->home_page_img_1, "mnt/sdfile/EXT_RESERVED/uipackres/ui/56000015.rle");
-#endif
+    lv_img_set_src(ui->home_page_img_1, gui_get_res_path(GUI_RES_FULL_PNG));
     lv_img_set_pivot(ui->home_page_img_1, 0, 0);
     lv_img_set_angle(ui->home_page_img_1, 0);
     lv_img_set_zoom(ui->home_page_img_1, 256);

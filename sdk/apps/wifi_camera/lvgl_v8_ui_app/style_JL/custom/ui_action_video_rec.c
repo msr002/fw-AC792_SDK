@@ -385,11 +385,10 @@ static int rec_off_handler(const char *type, u32 arg)
 
 static int rec_remain_handler(const char *type, u32 remain_time)
 {
-    lvgl_module_msg_send_global_ptr(GUI_MODEL_VIDEO_REC_MSG_ID_HIDE_RECORD_TIME, (void *)LV_OBJ_FLAG_HIDDEN, 1, 0);
+
     printf("remain= %s %d\n", type, remain_time);
-
+    lvgl_module_msg_send_global_ptr(GUI_MODEL_VIDEO_REC_MSG_ID_HIDE_RECORD_TIME, (void *)LV_OBJ_FLAG_HIDDEN, 1, 0);
     struct tm *rec_remain_time_var;
-
     rec_remain_time_var = lvgl_module_msg_get_ptr(GUI_MODEL_VIDEO_REC_MSG_ID_REC_REMAIN_TIME, sizeof(struct tm));
 
     struct tm *time = rec_remain_time_var;

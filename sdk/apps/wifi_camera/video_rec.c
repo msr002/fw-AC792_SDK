@@ -1313,16 +1313,14 @@ void video_rec_get_remain_time(void)
     int hour = 0, min = 0, sec = 0;
     int second = 0;
     u32 gap_time = db_select("gap");
-#ifdef CONFIG_WIFI_ENABLE
     u8 fps = video_rec_get_fps();
-#else
-    u8 fps = 25;
-#endif
-#if 0 //TODO
-    if (gap_time) {
-        fps = 1000 / gap_time;
+    if (!fps) {
+        fps = 25;
     }
-#endif
+
+    if (__this->state == VIDREC_STA_START) { /* 允许ui打开菜单 */
+        return;
+    }
 
     /*
      * 这里填入SD卡剩余录像时间
@@ -4928,7 +4926,6 @@ static int video_rec_change_status(struct intent *it)
     } else if (!strcmp(it->data, "exitMENU")) { /* ui已经关闭rec菜单 */
         puts("ui tell me exitMENU.\n");
         __this->menu_inout = 0;
-
         video_rec_get_remain_time();
         video_rec_fun_restore();
         if (db_select("mot")) {

@@ -3,4 +3,4 @@
 .global lib_server_version
 
 lib_server_version:
-.asciz "SERVER-$f56c6d7"
+.asciz "SERVER-$683be2b"

@@ -602,6 +602,11 @@
 #define LV_USE_IMG2P5D 1
 #define LV_USE_FONT2P5D 1
 #endif
+
+#define LV_USE_LYRICS 1
+#if LV_USE_LYRICS
+#define LV_LYRICS_FONT_ENGINE_USE_FREETYPE 1 // 字库引擎使用 Freetype(优先)
+#endif
 #endif
 
 #define LV_USE_FILE_EXPLORER 1
