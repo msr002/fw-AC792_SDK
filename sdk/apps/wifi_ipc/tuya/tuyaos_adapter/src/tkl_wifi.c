@@ -448,7 +448,7 @@ void print_scan_result(struct wifi_scan_ssid_info *list, int num)
         memcpy(item->bssid, list[i].mac_addr, 6);
         strncpy((char *)item->ssid, list[i].ssid, list[i].ssid_len);
         item->s_len = list[i].ssid_len;
-        TAL_PR_DEBUG("scan ssid %s rssi %d channel_number %d\n", list[i].ssid, list[i].rssi, list[i].channel_number);
+        // TAL_PR_DEBUG("scan ssid %s rssi %d channel_number %d\n", list[i].ssid, list[i].rssi, list[i].channel_number);
     }
 
     tkl_system_free(list);
@@ -603,7 +603,7 @@ static int wifi_event_callback(void *network_ctx, enum WIFI_EVENT event)
             //-------------------------------
             wifi_reconnect();
         }
-        TAL_PR_DEBUG("|network_user_callback->WIFI_STA_SCAN_COMPLETED\n");
+        // TAL_PR_DEBUG("|network_user_callback->WIFI_STA_SCAN_COMPLETED\n");
         break;
     case WIFI_EVENT_STA_CONNECT_SUCC:
         TAL_PR_DEBUG("|network_user_callback->WIFI_STA_CONNECT_SUCC,CH=%d\r\n", wifi_get_channel());
@@ -1307,10 +1307,9 @@ OPERATE_RET tkl_wifi_set_mac(CONST WF_IF_E wf, CONST NW_MAC_S *mac)
 
     unsigned char mac_read[6];
 
-    TAL_PR_DEBUG("adapt_set_wifi_mac:%x %x %x %x %x %x\n", mac->mac[0], mac->mac[1], mac->mac[2], mac->mac[3], mac->mac[4], mac->mac[5]);
 //
     wifi_set_mac((char *)mac->mac);
-#if 0
+#if 1
     error = syscfg_write(VM_TUYA_MAC_IDX, mac->mac, 6);
 
     TAL_PR_DEBUG("syscfg_write :%x %d\r\n", error, error);
@@ -1337,10 +1336,11 @@ OPERATE_RET tkl_wifi_get_mac(CONST WF_IF_E wf, NW_MAC_S *mac)
     TAL_PR_DEBUG("tkl_wifi_get_mac");
     u8 mac_t[6];
 
-    //syscfg_read(VM_TUYA_MAC_IDX, mac_t, 6);
-    wifi_get_mac(mac_t);
+    syscfg_read(VM_TUYA_MAC_IDX, mac_t, 6);
+    // wifi_get_mac(mac_t);
     memcpy(mac->mac, mac_t, sizeof(mac_t));
 
+    TAL_PR_DEBUG("tkl_wifi_get_mac:%x %x %x %x %x %x\n", mac->mac[0], mac->mac[1], mac->mac[2], mac->mac[3], mac->mac[4], mac->mac[5]);
     return OPRT_OK;
 //    return OPRT_NOT_SUPPORTED;
     // --- END: user implements ---

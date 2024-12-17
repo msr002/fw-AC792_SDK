@@ -33,6 +33,11 @@ static VGHW_CMD_TypeDef gCmd = {0};
 
 #define MATRIX_COEFF_TO_FIXED(m)  (*(VGHWuint*)&(m))
 
+static u32 run_time = 0;
+static int __gpu_out_cb_func(void)
+{
+    run_time = get_system_us() - run_time;
+}
 static void convertMatrixX9(float *matrix, VGHW_FragImage_TypeDef *gFragImage)
 {
     float t;
@@ -288,18 +293,18 @@ static int image_rotate(uint8_t *dst, int dst_w, int dst_h, int dst_stride, int 
 
     jlgpu_add_layer(cmd);
 
-    /* u32 j = 0 ; */
-    /* u32 j1 = 0 ; */
-    /* j = get_system_us(); */
+    jlgpu_set_out_callback(__gpu_out_cb_func);
+    run_time = get_system_us();
+
     jlgpu_run();
     jlgpu_wait_done();
+    jlgpu_set_out_callback(NULL);
 
-    /* j1 = get_system_us() - j; */
-    /* printf("use=%dus\n", j1); */
+    /* printf("image_rotate use=%dus\n", run_time); */
 
     /* jlgpu_free(); */
 
-    return 0;
+    return run_time;
 }
 static int image_scale(uint8_t *dst, int dst_w, int dst_h, int dst_stride, int dst_format,
                        uint8_t *src, int src_w, int src_h, int src_stride, int src_format, int rbs, uint8_t mirror)
@@ -380,16 +385,16 @@ static int image_scale(uint8_t *dst, int dst_w, int dst_h, int dst_stride, int d
 
     jlgpu_add_layer(cmd);
 
-    /* u32 j = 0 ; */
-    /* u32 j1 = 0 ; */
-    /* j = get_system_us(); */
+    jlgpu_set_out_callback(__gpu_out_cb_func);
+    run_time = get_system_us();
     jlgpu_run();
     jlgpu_wait_done();
+    jlgpu_set_out_callback(NULL);
 
     /* j1 = get_system_us() - j; */
     /* printf("use=%dus\n", j1); */
 
-    return 0;
+    return run_time;
 }
 
 /**
@@ -408,7 +413,7 @@ static int image_scale(uint8_t *dst, int dst_w, int dst_h, int dst_stride, int d
  * @param:    in_format : 输入图层格式
  * @param:    out_format : 输出图层格式
  * @param:    mirror : 输出镜像,1:垂直镜像
- * @return:   0: 成功 -1:失败
+ * @return:   -1:失败 其他:rotate耗费时间(us)
  **/
 int fb_frame_buf_rotate(uint8_t *image_src, uint8_t *image_dst, int src_width, int src_height, int src_stride,
                         int dst_width, int dst_height, int dst_stride, int degree, int xoffset, int yoffset,

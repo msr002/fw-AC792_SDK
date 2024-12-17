@@ -4,8 +4,10 @@
 #include "pipeline_port.h"
 
 #define PLUGIN_SOURCE_ISC_BASE  (0)
-#define PLUGIN_SOURCE_UVC_BASE  (2)
-#define PLUGIN_SOURCE_CSI_BASE  (3)
+#define PLUGIN_SOURCE_CSI_BASE  (2)
+#define PLUGIN_SOURCE_UVC_BASE  (3)
+#define PLUGIN_SOURCE_VIR_BASE  (5)
+#define PLUGIN_SOURCE_FILE_BASE (10)
 
 
 
@@ -29,6 +31,21 @@ enum pipeline_plugin_type {
     PLUGIN_SINK,
 };
 
+enum pipeline_plugin_error {
+    PLUGIN_NO_ERR            =  0,
+    PLUGIN_UNKOWN_ERR        = -1, //不知道返回什么就-1
+    PLUGIN_BUFFER_ERR        = -2, //buffer申请问题
+    PLUGIN_ARGS_ERR          = -3, //参数问题
+    PLUGIN_LINK_ERR          = -4, //连接问题
+};
+
+#define PLUGIN_ERR_LOG() do {log_error("PLUGIN UNKOWN ERR AT %s  %d",__func__,__LINE__);} while(0);
+
+
+
+char *video_format_str(int format);
+char *plugin_state_str(int state);
+
 typedef struct pipeline_plugin pipe_plugin_t;
 
 typedef struct pipeline_plugin_ops pipe_plugin_ops;
@@ -47,15 +64,15 @@ struct pipeline_plugin_ops {
     char *name;
     int type;
     int (*init)(pipe_plugin_t *plugin);
-    int (*connect)(pipe_plugin_t *prev_plugin, pipe_plugin_t *plugin);
-    int (*prepare)(pipe_plugin_t *plugin);
-    int (*start)(pipe_plugin_t *plugin);
-    int (*stop)(pipe_plugin_t *plugin);
-    int (*reset)(pipe_plugin_t *plugin);
-    int (*pause)(pipe_plugin_t *plugin);
-    int (*resume)(pipe_plugin_t *plugin);
-    int (*get_parameter)(pipe_plugin_t *plugin, int cmd, void *arg);
-    int (*set_parameter)(pipe_plugin_t *plugin, int cmd, void *arg);
+    int (*connect)(pipe_plugin_t *prev_plugin, pipe_plugin_t *plugin, int source_channel);
+    int (*prepare)(pipe_plugin_t *plugin, int source_channel);
+    int (*start)(pipe_plugin_t *plugin, int source_channel);
+    int (*stop)(pipe_plugin_t *plugin, int source_channel);
+    int (*reset)(pipe_plugin_t *plugin, int source_channel);
+    int (*pause)(pipe_plugin_t *plugin, int source_channel);
+    int (*resume)(pipe_plugin_t *plugin, int source_channel);
+    int (*get_parameter)(pipe_plugin_t *plugin, int cmd, void *arg, int source_channel);
+    int (*set_parameter)(pipe_plugin_t *plugin, int cmd, void *arg, int source_channel);
     int (*msg_cb)(pipe_plugin_t *plugin, int cmd, void *arg);
 };
 
@@ -79,6 +96,7 @@ extern const struct pipeline_plugin_ops plugin_end[];
 
 
 
+void port_source_channel_inc(pipe_plugin_t *prev_plugin, pipe_plugin_t *plugin, int source_channel);
 
 pipe_plugin_t *plugin_register(const char *name);
 
@@ -96,9 +114,13 @@ int plugin_factory_plugin_status(void);
 
 char *plugin_factory_find(const char *find_name);
 
+int plugin_source_to_channel(const char *source_name);
+
 pipe_plugin_t *plugin_factory_find_used(const char *find_name);
 
 bool port_check_connected(pipe_plugin_t *prev_plugin, pipe_plugin_t *plugin);
+
+void plugin_pre_unregister(pipe_plugin_t *plugin);
 
 #endif
 

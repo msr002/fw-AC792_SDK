@@ -165,6 +165,7 @@
 <Unit filename="../../../../../apps/common/rf_fcc_tool/include/datatype.h" />
 <Unit filename="../../../../../apps/common/rf_fcc_tool/include/rf_fcc_main.h" />
 <Unit filename="../../../../../apps/common/rf_fcc_tool/rf_fcc_main.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="../../../../../apps/common/rf_fcc_tool/wifi_adaptivity.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../../apps/common/system/init.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../../apps/common/system/perf_counter/example/main.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../../apps/common/system/perf_counter/perf_counter.c"><Option compilerVer="CC"/></Unit>
@@ -176,6 +177,7 @@
 <Unit filename="../../../../../apps/demo/demo_wifi/board/wl83/board_config.h" />
 <Unit filename="../../../../../apps/demo/demo_wifi/board/wl83/board_demo.h" />
 <Unit filename="../../../../../apps/demo/demo_wifi/board/wl83/chip_cfg.h" />
+<Unit filename="../../../../../apps/demo/demo_wifi/examples/wifi_raw_test.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../../apps/demo/demo_wifi/include/app_config.h" />
 <Unit filename="../../../../../apps/demo/demo_wifi/wifi_demo_task.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../../cpu/wl83/adc_api.c"><Option compilerVer="CC"/></Unit>

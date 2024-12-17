@@ -54,16 +54,10 @@ static const struct lcd_platform_data data = {
 #define LCD_PLATFORM_DATA_END() \
 };
 
-struct base_info {
-    struct imd_dmm_info info;
-    struct te_mode_ctrl te_mode;
-    // struct pll4_info pll4;
-};
-
 struct spi_dev {
-    struct imd_dmm_info info;
+    struct basic_info info;
     struct te_mode_ctrl te_mode;
-    enum LCD_LSB data_out_mode; //输出数据大小端
+    enum LCD_ENDIAN data_out_endian;
     char *interface_name;
     u8 spi_open_flag;
 };
@@ -88,7 +82,6 @@ struct spi_dev {
     };
 
 union lcd_dev_info {
-    struct base_info base;
     struct imd_dev imd;
     struct mipi_dev mipi;
     struct spi_dev spi;

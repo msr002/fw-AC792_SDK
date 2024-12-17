@@ -215,7 +215,6 @@ INCLUDES := \
 	-I../../../../apps/wifi_ipc/camx_xciot/include/osal/core \
 	-I../../../../apps/wifi_ipc/camx_xciot/src/camx \
 	-I../../../../apps/wifi_ipc/board/wl83 \
-	-I../../../../apps/wifi_ipc/tuya/demo_quickstart/include \
 	-I../../../../apps/wifi_ipc/tuya/tuyaos_adapter/include \
 	-I../../../../apps/wifi_ipc/tuya/include/components/tal_system/include \
 	-I../../../../apps/wifi_ipc/tuya/tuyaos_adapter/include/utilities/include \
@@ -239,6 +238,7 @@ INCLUDES := \
 	-I../../../../apps/wifi_ipc/tuya/tuyaos_adapter/include/timer \
 	-I../../../../apps/wifi_ipc/tuya/tuyaos_adapter/include/wifi \
 	-I../../../../apps/wifi_ipc/tuya/tuyaos_adapter/include/watchdog \
+	-I../../../../apps/wifi_ipc/tuya/tuya_demo_vedio_lock_ty/include \
 	-I../../../../apps/wifi_ipc/tuya/include/components/lib_cJSON/include \
 	-I../../../../apps/wifi_ipc/tuya/include/components/svc_wifi/include \
 	-I../../../../apps/wifi_ipc/tuya/include/components/svc_api_iot/include \
@@ -255,12 +255,20 @@ INCLUDES := \
 	-I../../../../apps/wifi_ipc/tuya/include/components/svc_mf_test/include \
 	-I../../../../apps/wifi_ipc/tuya/include/components/svc_tuya_cloud/include/mqtt \
 	-I../../../../apps/wifi_ipc/tuya/include/components/ty_gfw_lock_streamer/include \
-	-I../../../../apps/wifi_ipc/tuya/common_video_lock_demo/include \
 	-I../../../../apps/wifi_ipc/tuya/include/components/lib_http/include \
 	-I../../../../apps/wifi_ipc/tuya/include/components/base_uf/include \
 	-I../../../../apps/wifi_ipc/tuya/include/components/tal_security/include \
 	-I../../../../apps/wifi_ipc/tuya/include/tal_compatible/include \
 	-I../../../../apps/wifi_ipc/tuya/include/components/tal_driver/include \
+	-I../../../../apps/wifi_ipc/tuya/include/components/tfm_gpio_test/include \
+	-I../../../../apps/wifi_ipc/tuya/include/components/tdl_frame_send_recv/include \
+	-I../../../../apps/wifi_ipc/tuya/include/components/tbl_lock_app_proc/include \
+	-I../../../../apps/wifi_ipc/tuya/include/components/tbl_lock_dp_report/include \
+	-I../../../../apps/wifi_ipc/tuya/include/components/tbl_lock_kiwi_password/include \
+	-I../../../../apps/wifi_ipc/tuya/include/components/tfm_dp_cloud_cache/include \
+	-I../../../../apps/wifi_ipc/tuya/include/components/tfm_protocol_data_proc/include \
+	-I../../../../apps/wifi_ipc/tuya/include/components/tdd_uart/include \
+	-I../../../../apps/wifi_ipc/tuya/include/components/app_tuya_driver/include \
 	-I../../../../apps/common/net \
 	-I../../../../include_lib/net \
 	-I../../../../include_lib/net/tutk \
@@ -294,7 +302,6 @@ c_SRC_FILES := \
 	../../../../apps/common/audio_music/http_recorder.c \
 	../../../../apps/common/audio_music/music_decrypt.c \
 	../../../../apps/common/audio_music/pcm_play_api.c \
-	../../../../apps/common/audio_music/usb_audio_api.c \
 	../../../../apps/common/audio_music/wifi_upload_pcm.c \
 	../../../../apps/common/ble/le_24g_deal.c \
 	../../../../apps/common/ble/le_hogp.c \
@@ -902,6 +909,7 @@ c_SRC_FILES := \
 	../../../../apps/common/net/wifi_conf.c \
 	../../../../apps/common/rf_fcc_tool/bt.c \
 	../../../../apps/common/rf_fcc_tool/rf_fcc_main.c \
+	../../../../apps/common/rf_fcc_tool/wifi_adaptivity.c \
 	../../../../apps/common/system/device_mount.c \
 	../../../../apps/common/system/flash_write_protect.c \
 	../../../../apps/common/system/init.c \
@@ -980,25 +988,15 @@ c_SRC_FILES := \
 	../../../../apps/wifi_ipc/main/app_database.c \
 	../../../../apps/wifi_ipc/main/app_main.c \
 	../../../../apps/wifi_ipc/profile.c \
+	../../../../apps/wifi_ipc/record/usb_audio_rec.c \
 	../../../../apps/wifi_ipc/record/video_rec.c \
 	../../../../apps/wifi_ipc/record/video_rec_file.c \
-	../../../../apps/wifi_ipc/tuya/common_video_lock_demo/src/tuya_audio.c \
-	../../../../apps/wifi_ipc/tuya/common_video_lock_demo/src/tuya_photo_and_stream.c \
-	../../../../apps/wifi_ipc/tuya/common_video_lock_demo/src/tuya_video.c \
-	../../../../apps/wifi_ipc/tuya/demo_quickstart/src/app_key.c \
-	../../../../apps/wifi_ipc/tuya/demo_quickstart/src/app_led.c \
-	../../../../apps/wifi_ipc/tuya/demo_quickstart/src/dp_process.c \
-	../../../../apps/wifi_ipc/tuya/demo_quickstart/src/libqrencode/bitstream.c \
-	../../../../apps/wifi_ipc/tuya/demo_quickstart/src/libqrencode/mask.c \
-	../../../../apps/wifi_ipc/tuya/demo_quickstart/src/libqrencode/mmask.c \
-	../../../../apps/wifi_ipc/tuya/demo_quickstart/src/libqrencode/mqrspec.c \
-	../../../../apps/wifi_ipc/tuya/demo_quickstart/src/libqrencode/qrenc.c \
-	../../../../apps/wifi_ipc/tuya/demo_quickstart/src/libqrencode/qrencode.c \
-	../../../../apps/wifi_ipc/tuya/demo_quickstart/src/libqrencode/qrinput.c \
-	../../../../apps/wifi_ipc/tuya/demo_quickstart/src/libqrencode/qrspec.c \
-	../../../../apps/wifi_ipc/tuya/demo_quickstart/src/libqrencode/rsecc.c \
-	../../../../apps/wifi_ipc/tuya/demo_quickstart/src/tal_uart.c \
-	../../../../apps/wifi_ipc/tuya/demo_quickstart/src/tuya_app_main.c \
+	../../../../apps/wifi_ipc/tuya/tuya_demo_vedio_lock_ty/src/tuya_audio.c \
+	../../../../apps/wifi_ipc/tuya/tuya_demo_vedio_lock_ty/src/tuya_device.c \
+	../../../../apps/wifi_ipc/tuya/tuya_demo_vedio_lock_ty/src/tuya_main.c \
+	../../../../apps/wifi_ipc/tuya/tuya_demo_vedio_lock_ty/src/tuya_prod_test.c \
+	../../../../apps/wifi_ipc/tuya/tuya_demo_vedio_lock_ty/src/tuya_stream.c \
+	../../../../apps/wifi_ipc/tuya/tuya_demo_vedio_lock_ty/src/tuya_video.c \
 	../../../../apps/wifi_ipc/tuya/tuyaos_adapter/include/init/src/tkl_init_common.c \
 	../../../../apps/wifi_ipc/tuya/tuyaos_adapter/include/init/src/tkl_init_network.c \
 	../../../../apps/wifi_ipc/tuya/tuyaos_adapter/include/init/src/tkl_init_system.c \

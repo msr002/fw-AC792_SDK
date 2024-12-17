@@ -1,5 +1,6 @@
 #include "system/includes.h"
 #include "server/video_server.h"
+#include "server/audio_server.h"
 #include "event/key_event.h"
 #include "event/device_event.h"
 #include "video_rec.h"
@@ -56,6 +57,14 @@ static int video_rec_sd_in();
 static int video_rec_sd_out();
 static int video_rec_get_abr(u32 width);
 
+static const u16 pic_pix_w[] = {1280, 1920, 2560, 3072};
+static const u16 pic_pix_h[] = {720,  1088, 1600, 2208};
+extern u32 user_uac_audio_read_input(u8 id, u8 *buf, u32 len);
+
+#ifdef CONFIG_TUYA_SDK_ENABLE
+extern int video_flag;
+#endif
+
 
 #ifdef CONFIG_XCIOT_ENABLE
 unsigned char REC_FLAG = 1;
@@ -74,10 +83,6 @@ int net_video_rec_get_fps(void)
 
 
 
-#ifdef CONFIG_VIDEO2_ENABLE
-extern int uvc_host_online(void);
-#endif
-
 struct VideoConfig video_configs[] = {
 
 #ifdef CONFIG_VIDEO0_ENABLE
@@ -86,17 +91,18 @@ struct VideoConfig video_configs[] = {
         .path_main = CONFIG_REC_PATH_0,
         .req.rec.channel     = 0,
         .req.rec.camera_type = VIDEO_CAMERA_NORMAL,
-        .req.rec.width 	    = 1280,
-        .req.rec.height 	    = 720,
+        .req.rec.width 	    = 640,
+        .req.rec.height 	    = 480,
         .req.rec.format 	    = VIDEO0_REC_FORMAT,
         .req.rec.state 	    = VIDEO_STATE_START,
         .req.rec.quality     = VIDEO_LOW_Q,
-        .req.rec.fps 	    = 10,
-        .req.rec.real_fps 	= 10,
+        .req.rec.fps 	    = 15,
+        .req.rec.real_fps 	= 15,
         .req.rec.audio.sample_rate = 8000,
         .req.rec.audio.channel 	= 1,
         .req.rec.audio.volume    = AUDIO_VOLUME,
-        .req.rec.audio.buf_len = AUDIO_BUF_SIZE,
+        .req.rec.audio.buf_len = AUDIO0_BUF_SIZE,
+        .req.rec.audio.aud_interval_size = 0,
         .req.rec.pkg_mute.aud_mute = 0,
         .req.rec.enable_dri  = 0,
         .req.rec.online = 1,
@@ -124,19 +130,23 @@ struct VideoConfig video_configs[] = {
         .req.rec.camera_type = VIDEO_CAMERA_NORMAL,
         .req.rec.width 	    = 640,
         .req.rec.height 	    = 480,
-        .req.rec.src_w = 640,
-        .req.rec.src_h = 480,
+        .req.rec.src_w = 1280,
+        .req.rec.src_h = 720,
 
         .req.rec.format 	    = VIDEO1_REC_FORMAT,
         .req.rec.state 	    = VIDEO_STATE_START,
         .req.rec.quality     = VIDEO_LOW_Q,
-        .req.rec.fps 	    = 20,
-        .req.rec.real_fps 	= 20,
+        .req.rec.fps 	    = 15,
+        .req.rec.real_fps 	= 15,
         .req.rec.audio.sample_rate = 8000,
         .req.rec.audio.channel 	= 1,
         .req.rec.audio.volume    = AUDIO_VOLUME,
-        .req.rec.audio.buf_len = AUDIO_BUF_SIZE,
+        .req.rec.audio.buf_len = AUDIO1_BUF_SIZE,
+        .req.rec.audio.aud_interval_size = 0,
         .req.rec.pkg_mute.aud_mute = 0,
+        .req.rec.enable_dri  = 0,
+        .req.rec.online = 1,
+
 
         /*
         *码率，I帧和P帧比例，必须是偶数（当录MOV的时候才有效）,
@@ -170,8 +180,13 @@ struct VideoConfig video_configs[] = {
         .req.rec.audio.sample_rate = 8000,
         .req.rec.audio.channel 	= 1,
         .req.rec.audio.volume    = AUDIO_VOLUME,
-        .req.rec.audio.buf_len = AUDIO_BUF_SIZE,
+        .req.rec.audio.buf_len = AUDIO2_BUF_SIZE,
+        .req.rec.audio.aud_interval_size = 0,
         .req.rec.pkg_mute.aud_mute = 0,
+        .req.rec.enable_dri  = 0,
+        .req.rec.online = 0,
+
+
 
         /*
         *码率，I帧和P帧比例，必须是偶数（当录MOV的时候才有效）,
@@ -203,8 +218,12 @@ struct VideoConfig video_configs[] = {
         .req.rec.audio.sample_rate = 8000,
         .req.rec.audio.channel 	= 1,
         .req.rec.audio.volume    = AUDIO_VOLUME,
-        .req.rec.audio.buf_len = AUDIO_BUF_SIZE,
+        .req.rec.audio.buf_len = AUDIO0_BUF_SIZE,
+        .req.rec.audio.aud_interval_size = 0,
         .req.rec.pkg_mute.aud_mute = 0,
+        .req.rec.enable_dri  = 0,
+        .req.rec.online = 0,
+
 
         /*
         *码率，I帧和P帧比例，必须是偶数（当录MOV的时候才有效）,
@@ -218,16 +237,135 @@ struct VideoConfig video_configs[] = {
         .req.rec.rec_small_pic   = 0,
     },
 #endif
+};
+
+struct VideoConfig video_uvc_configs[] = {
+
+#ifdef CONFIG_UVC_VIDEO0_ENABLE
+    {
+        .channel = 0,
+        .path_main = CONFIG_REC_PATH_UVC0,
+        .req.rec.channel     = 0,
+        .req.rec.camera_type = VIDEO_CAMERA_NORMAL,
+        .req.rec.width 	    = 640,
+        .req.rec.height 	    = 480,
+        .req.rec.format 	    = VIDEO10_REC_FORMAT,
+        .req.rec.state 	    = VIDEO_STATE_START,
+        .req.rec.quality     = VIDEO_LOW_Q,
+        .req.rec.fps 	    = 15,
+        .req.rec.real_fps 	= 15,
+        .req.rec.audio.sample_rate = 8000,
+        .req.rec.audio.channel 	= 1,
+        .req.rec.audio.volume    = AUDIO_VOLUME,
+        .req.rec.audio.buf_len = AUDIO0_BUF_SIZE,
+        .req.rec.audio.aud_interval_size = 0,
+        .req.rec.pkg_mute.aud_mute = 0,
+        .req.rec.enable_dri  = 0,
+        .req.rec.online = 0,
 
 
+
+        /*
+        *码率，I帧和P帧比例，必须是偶数（当录MOV的时候才有效）,
+        *roio_xy :值表示宏块坐标， [6:0]左边x坐标 ，[14:8]右边x坐标，[22:16]上边y坐标，[30:24]下边y坐标,写0表示1个宏块有效
+        * roio_ratio : 区域比例系数
+        */
+        .req.rec.abr_kbps = 8000,
+
+        .req.rec.cycle_time = 60, //不能超过600,不能为0
+        .req.rec.buf_len = VREC0_UVC_FBUF_SIZE,
+        .req.rec.rec_small_pic   = 0,
+    },
+#endif
+
+#ifdef CONFIG_UVC_VIDEO1_ENABLE
+    {
+        .channel = 1,
+        .path_main = CONFIG_REC_PATH_UVC1,
+        .req.rec.channel     = 0,
+        .req.rec.camera_type = VIDEO_CAMERA_UVC,
+        .req.rec.width 	    = 640,
+        .req.rec.height 	    = 480,
+        .req.rec.format 	    = VIDEO11_REC_FORMAT,
+        .req.rec.state 	    = VIDEO_STATE_START,
+        .req.rec.quality     = VIDEO_LOW_Q,
+        .req.rec.fps 	    = 15,
+        .req.rec.real_fps 	= 15,
+        .req.rec.audio.sample_rate = 8000,
+        .req.rec.audio.channel 	= 1,
+        .req.rec.audio.volume    = AUDIO_VOLUME,
+        .req.rec.audio.buf_len = AUDIO1_BUF_SIZE,
+        .req.rec.audio.aud_interval_size = 0,
+        .req.rec.pkg_mute.aud_mute = 0,
+        .req.rec.enable_dri  = 0,
+        .req.rec.online = 0,
+
+
+        /*
+        *码率，I帧和P帧比例，必须是偶数（当录MOV的时候才有效）,
+        *roio_xy :值表示宏块坐标， [6:0]左边x坐标 ，[14:8]右边x坐标，[22:16]上边y坐标，[30:24]下边y坐标,写0表示1个宏块有效
+        * roio_ratio : 区域比例系数
+        */
+        .req.rec.abr_kbps = 8000,
+
+        .req.rec.cycle_time = 60, //不能超过600,不能为0
+        .req.rec.buf_len = VREC1_UVC_FBUF_SIZE,
+        .req.rec.rec_small_pic   = 0,
+    },
+#endif
+
+#ifdef CONFIG_UVC_VIDEO2_ENABLE
+    {
+        .channel = 2,
+        .path_main = CONFIG_REC_PATH_UVC2,
+        .req.rec.channel     = 0,
+        .req.rec.camera_type = VIDEO_CAMERA_UVC,
+        .req.rec.width 	    = 1920,
+        .req.rec.height 	    = 1080,
+        .req.rec.format 	    = VIDEO12_REC_FORMAT,
+        .req.rec.state 	    = VIDEO_STATE_START,
+        .req.rec.quality     = VIDEO_LOW_Q,
+        .req.rec.fps 	    = 25,
+        .req.rec.real_fps 	= 25,
+        .req.rec.audio.sample_rate = 8000,
+        .req.rec.audio.channel 	= 1,
+        .req.rec.audio.volume    = AUDIO_VOLUME,
+        .req.rec.audio.buf_len = AUDIO2_BUF_SIZE,
+        .req.rec.audio.aud_interval_size = 0,
+        .req.rec.pkg_mute.aud_mute = 0,
+        .req.rec.enable_dri  = 0,
+        .req.rec.online = 0,
+
+
+
+
+        /*
+        *码率，I帧和P帧比例，必须是偶数（当录MOV的时候才有效）,
+        *roio_xy :值表示宏块坐标， [6:0]左边x坐标 ，[14:8]右边x坐标，[22:16]上边y坐标，[30:24]下边y坐标,写0表示1个宏块有效
+        * roio_ratio : 区域比例系数
+        */
+        .req.rec.abr_kbps = 8000,
+
+        .req.rec.cycle_time = 60, //不能超过600,不能为0
+        .req.rec.buf_len = VREC2_UVC_FBUF_SIZE,
+        .req.rec.rec_small_pic   = 0,
+    },
+#endif
 };
 
 #define CONFIG_VIDEO_NUM (sizeof(video_configs) / sizeof(video_configs[0]))
+#define CONFIG_VIDEO_UVC_NUM (sizeof(video_uvc_configs) / sizeof(video_uvc_configs[0]))
 
 struct VideoConfig *get_video_configs(void)
 {
     return video_configs;
 }
+
+struct VideoConfig *get_video_uvc_configs(void)
+{
+    return video_uvc_configs;
+}
+
 
 static int video_rec_online_nums()
 {
@@ -242,6 +380,22 @@ static int video_rec_online_nums()
     return nums;
 }
 
+static int video_rec_uvc_online_nums()
+{
+    u8 nums = 0;
+
+#ifdef CONFIG_UVC_VIDEO_ENABLE
+    for (int i = 0; i < CONFIG_VIDEO_UVC_REC_NUM; i++) {
+        __this->video_uvc_online[i] = get_uvc_host_online_status(i);
+        if (__this->video_uvc_online[i]) {
+            nums++;
+        }
+    }
+#endif
+    return nums;
+}
+
+
 
 int get_config_viedo_num(void)
 {
@@ -250,9 +404,21 @@ int get_config_viedo_num(void)
     return nums;
 }
 
+int get_config_viedo_uvc_num(void)
+{
+    u8 nums = 0;
+    nums = video_rec_uvc_online_nums();
+    return nums;
+}
+
 int get_bp_num(void)
 {
     return CONFIG_VIDEO_NUM;
+}
+
+int get_bp_uvc_num(void)
+{
+    return CONFIG_VIDEO_UVC_NUM;
 }
 
 int video_rec_get_audio_sampel_rate(void)
@@ -276,27 +442,49 @@ int video_rec_get_abr_from(u32 width)
     return video_rec_get_abr(width);
 }
 
+static void *video_alloc_buffer(int *buf, int channel, int *buf_size, const char *buf_name)
+{
+    if (!buf[channel] && buf_size[channel] > 0) {
+        buf[channel] = malloc(buf_size[channel]);
+        if (!buf[channel]) {
+            log_d(">>>>>>>>>> %s alloc err for channel %d >>>>>>\n", buf_name, channel);
+        }
+    } else {
+        buf[channel] = NULL;
+    }
+    return buf[channel];
+}
+
 static void video_rec_buf_alloc()
 {
+    int channel = 0;
+    int online_num = video_rec_online_nums();
+    int uvc_online_num = video_rec_uvc_online_nums();
     int buf_size[] = {VREC0_FBUF_SIZE, VREC1_FBUF_SIZE, VREC2_FBUF_SIZE};
-    if ((!__this->audio_buf) && AUDIO_BUF_SIZE > 0) {
-        __this->audio_buf = malloc(AUDIO_BUF_SIZE);
-        if (!__this->audio_buf) {
-            log_d(">>>>>>>>>> audiobuf alloc err>>>>>>\n");
-            return ;
-        }
+    int uvc_buf_size[] = {VREC0_UVC_FBUF_SIZE, VREC1_UVC_FBUF_SIZE, VREC2_UVC_FBUF_SIZE};
+
+    int abuf_size[] = {AUDIO0_BUF_SIZE, AUDIO1_BUF_SIZE, AUDIO2_BUF_SIZE};
+    int uvc_abuf_size[] = {AUDIO0_BUF_SIZE, AUDIO1_BUF_SIZE, AUDIO2_BUF_SIZE};
+    // 检查视频通道是否在线
+    if (!online_num && !uvc_online_num) {
+        log_error("video all not online");
+        return;
     }
-    for (int i = 0; i < ARRAY_SIZE(buf_size); i++) {
-        if (buf_size[i]) {
-            if (!__this->video_buf[i]) {
-                __this->video_buf[i] = malloc(buf_size[i]);
-                if (!__this->video_buf[i]) {
-                    log_d(">>>>>>>>>> videobuf alloc err>>>>>>\n");
-                }
-            }
-        } else {
-            __this->video_buf[i] = NULL;
-        }
+
+    // 为视频通道分配缓冲区
+    for (int index = 0; index < online_num; index++) {
+        channel = video_configs[index].channel;
+        video_alloc_buffer(__this->video_buf, channel, buf_size, "video_buf");
+        video_alloc_buffer(__this->audio_buf, channel, abuf_size, "audio_buf");
+    }
+
+    // 为UVC视频通道分配缓冲区
+    for (int index = 0; index < uvc_online_num; index++) {
+        channel = video_uvc_configs[index].channel;
+        video_alloc_buffer(__this->video_uvc_buf, channel, uvc_buf_size, "video_uvc_buf");
+        video_alloc_buffer(__this->audio_uvc_buf, channel, uvc_abuf_size, "audio_buf");
+
+
     }
 }
 static int video_rec_destroy()
@@ -310,11 +498,28 @@ static int video_rec_destroy()
             free(__this->video_buf[i]);
             __this->video_buf[i] = NULL;
         }
+        if (__this->audio_buf[i]) {
+            free(__this->audio_buf[i]);
+            __this->audio_buf[i] = NULL;
+        }
+
+
     }
-    if (__this->audio_buf) {
-        free(__this->audio_buf);
-        __this->audio_buf = NULL;
+
+#ifdef CONFIG_UVC_VIDEO_ENABLE
+    for (int i = 0; i < CONFIG_VIDEO_UVC_REC_NUM; i++) {
+        if (__this->video_uvc_buf[i]) {
+            free(__this->video_uvc_buf[i]);
+            __this->video_uvc_buf[i] = NULL;
+        }
+        if (__this->audio_uvc_buf[i]) {
+            free(__this->audio_uvc_buf[i]);
+            __this->audio_uvc_buf[i] = NULL;
+        }
+
+
     }
+#endif
 
     if (__this->cap_buf) {
         free(__this->cap_buf);
@@ -466,14 +671,7 @@ static int video_disp_start(int id, const struct video_window *win)
         return 0;
     }
 
-    sprintf(dev_name, "video%d.%d", id, id < 3 ? 0 : __this->uvc_id);
-
-#ifdef CONFIG_VIDEO2_ENABLE
-    if (uvc_host_online() < 0) {
-
-        return -EFAULT;
-    }
-#endif
+    sprintf(dev_name, "video%d.2", id);
 
     if (!__this->video_display[id]) {
         __this->video_display[id] = server_open("video_server", (void *)dev_name);
@@ -502,7 +700,7 @@ static int video_disp_start(int id, const struct video_window *win)
         req.display.camera_config   = NULL;
         /* req.display.camera_config   = load_default_camera_config; */
         req.display.camera_type     = VIDEO_CAMERA_NORMAL;
-    } else if ((id == 1) || (id == 3)) {
+    } else if ((id == 1) || (id == 2) || (id == 3)) {
         /*if (req.display.width < 1280) {
             req.display.width 	+= 32;
             req.display.height 	+= 32;
@@ -515,21 +713,14 @@ static int video_disp_start(int id, const struct video_window *win)
 
         req.display.camera_config   = NULL;
         req.display.camera_type     = VIDEO_CAMERA_NORMAL;
-    } else if (id == 2) {
-        /* #ifdef THREE_WAY_ENABLE */
-        req.display.uvc_id = __this->uvc_id;
-        req.display.camera_config = NULL;
-        req.display.camera_type = VIDEO_CAMERA_UVC;
-        req.display.src_w = 640;//__this->src_width[3];
-        req.display.src_h = 480;//__this->src_height[3];
-        //旋转参数配置:
-        //0:不旋转,不镜像 (原图)
-        //1:逆时针旋转90度,不镜像
-        //2:逆时针旋转270度,不镜像
-        //3:逆时针旋转90度后,再垂直镜像
-        //4:逆时针旋转90度后,再水平镜像
-        req.display.rotate = 0; //usb后视频图像旋转显示
     }
+    //旋转参数配置:
+    //0:不旋转,不镜像 (原图)
+    //1:逆时针旋转90度,不镜像
+    //2:逆时针旋转270度,不镜像
+    //3:逆时针旋转90度后,再垂直镜像
+    //4:逆时针旋转90度后,再水平镜像
+    /* req.display.rotate = 0; //usb后视频图像旋转显示 */
 
     req.display.state 	        = VIDEO_STATE_START;
     req.display.pctl            = NULL;
@@ -558,6 +749,113 @@ static int video_disp_start(int id, const struct video_window *win)
 
     return err;
 }
+
+//uvc中的video_server 10往后
+static int video_disp_uvc_start(int id, const struct video_window *win)
+{
+    int err = 0;
+    union video_req req = {0};
+    static char dev_name[20];
+    char fb_name[3];
+#ifdef CONFIG_DISPLAY_ENABLE
+
+    printf("video_disp_uvc_start: %d, %d x %d\n", id + 10, win->width, win->height);
+
+    if (win->width == (u16) - 1) {
+        puts("video_disp_hide\n");
+        return 0;
+    }
+
+    sprintf(dev_name, "video%d.2", id + 10);
+
+    if (!__this->video_uvc_display[id]) {
+        __this->video_uvc_display[id] = server_open("video_server", (void *)dev_name);
+        if (!__this->video_uvc_display[id]) {
+            log_e("open video_server: faild, id = %d\n", id);
+            return -EFAULT;
+        }
+    }
+
+
+    memset(fb_name, 0, sizeof(fb_name));
+
+    sprintf(fb_name, "fb%d", 4 + id);
+
+    req.display.fb 		        = fb_name;
+    req.display.left  	        = win->left;
+    req.display.top 	        = win->top;
+    req.display.width 	        = win->width;
+    req.display.height 	        = win->height;
+    req.display.border_left     = win->border_left;
+    req.display.border_top      = win->border_top;
+    req.display.border_right    = win->border_right;
+    req.display.border_bottom   = win->border_bottom;
+    req.display.mirror   		= win->mirror;
+    req.display.jaggy			= 0;	// IMC 抗锯齿
+
+    /* if (id == 0) { */
+    /* req.display.uvc_id = __this->uvc_id; */
+    /* req.display.camera_config   = NULL; */
+    /* req.display.camera_config   = load_default_camera_config; */
+    /* req.display.camera_type     = VIDEO_CAMERA_NORMAL; */
+    /* } else if ((id == 1) || (id == 3)) { */
+    /*if (req.display.width < 1280) {
+        req.display.width 	+= 32;
+        req.display.height 	+= 32;
+
+        req.display.border_left   = 16;
+        req.display.border_top    = 16;
+        req.display.border_right  = 16;
+        req.display.border_bottom = 16;
+    }*/
+
+    /* req.display.camera_config   = NULL; */
+    /* req.display.camera_type     = VIDEO_CAMERA_NORMAL; */
+    /* } else if (id == 2) { */
+    /* #ifdef THREE_WAY_ENABLE */
+    /* req.display.uvc_id = __this->uvc_id; */
+    req.display.uvc_id = id;
+    req.display.camera_config = NULL;
+    req.display.camera_type = VIDEO_CAMERA_UVC;
+    req.display.src_w = 640;//__this->src_width[3];
+    req.display.src_h = 480;//__this->src_height[3];
+    //旋转参数配置:
+    //0:不旋转,不镜像 (原图)
+    //1:逆时针旋转90度,不镜像
+    //2:逆时针旋转270度,不镜像
+    //3:逆时针旋转90度后,再垂直镜像
+    //4:逆时针旋转90度后,再水平镜像
+    req.display.rotate = 0; //usb后视频图像旋转显示
+    /* } */
+
+    req.display.state 	        = VIDEO_STATE_START;
+    req.display.pctl            = NULL;
+
+    /* sys_key_event_disable(); */
+    /* sys_touch_event_disable(); */
+    err = server_request(__this->video_uvc_display[id], VIDEO_REQ_DISPLAY, &req);
+    if (err) {
+        printf("display req err = %d!!\n", err);
+        server_close(__this->video_uvc_display[id]);
+        __this->video_uvc_display[id] = NULL;
+    }
+#ifndef CONFIG_VIDEO4_ENABLE
+
+    /* video_rec_start_isp_scenes(); */
+
+    /* if (id == 0) { */
+    /*rec显示重设曝光补偿*/
+    /* __this->exposure_set = 1; */
+    /* video_rec_set_exposure(db_select("exp")); */
+    /* } */
+#endif
+#endif
+    /* sys_key_event_enable(); */
+    /* sys_touch_event_enable(); */
+
+    return err;
+}
+
 /**
  * @brief       video3 指定uvc 显示
  *
@@ -573,7 +871,6 @@ int video3_disp_start(int sub_id, const struct video_window *win)
     static char dev_name[20];
 #ifdef CONFIG_DISPLAY_ENABLE
 
-    /* video3.x 子设备号x划分: 0-4为uvc0 5-6为uvc1 7-8为uvc2 9为uvc3*/
     u8 id = sub_id;
 
     if (win->width == (u16) - 1) {
@@ -684,6 +981,29 @@ static void video_disp_stop(int id)
 #endif
 }
 
+static void video_disp_uvc_stop(int id)
+{
+#ifdef CONFIG_DISPLAY_ENABLE
+    union video_req req = {0};
+
+    if (__this->video_uvc_display[id]) {
+        if (id == 0) {
+            /* video_rec_stop_isp_scenes(1, 0); */
+        }
+
+        req.display.state 	= VIDEO_STATE_STOP;
+        server_request(__this->video_uvc_display[id], VIDEO_REQ_DISPLAY, &req);
+
+        server_close(__this->video_uvc_display[id]);
+        __this->video_uvc_display[id] = NULL;
+
+        if (id == 0) {
+            /* video_rec_start_isp_scenes(); */
+        }
+    }
+#endif
+}
+
 static int video_disp_win_switch(int mode, int dev_id)
 {
     int i;
@@ -746,6 +1066,13 @@ static int video_disp_win_switch(int mode, int dev_id)
         video_disp_stop(i);
     }
 
+#ifdef CONFIG_UVC_VIDEO_ENABLE
+    for (i = 1; i < CONFIG_VIDEO_UVC_REC_NUM; i++) {
+        video_disp_uvc_stop(i);
+    }
+#endif
+
+
     if (curr_win != next_win || mode == DISP_WIN_SW_MIRROR) {
         video_disp_stop(0);
         err = video_disp_start(0, &disp_window[next_win][0]);
@@ -757,6 +1084,19 @@ static int video_disp_win_switch(int mode, int dev_id)
             break;
         }
     }
+#ifdef CONFIG_UVC_VIDEO_ENABLE
+    for (i = 0; i < CONFIG_VIDEO_UVC_REC_NUM; i++) {
+        if (get_uvc_host_online_status(i)) {
+
+            //todo  只会显示一路
+            err = video_disp_uvc_start(i, &disp_window[next_win][0]);
+            if (err == 0) {
+                break;
+            }
+        }
+    }
+
+#endif
 
     if (next_win != DISP_PARK_WIN) {
         __this->disp_state = next_win;
@@ -781,88 +1121,105 @@ static int video_disp_win_switch(int mode, int dev_id)
 
 
 
-static void take_photo(void *priv)
-{
-#ifdef CONFIG_USR_VIDEO_ENABLE
-    int err;
-    extern int user_video_rec0_open(void);
-    extern int user_video_rec_take_photo(void);
-    extern int user_video_rec0_close(void);
-    err = user_video_rec0_open();
-    if (err) {
-        log_error("user_video_open fail!\n");
-        return;
-    }
-    os_time_dly(5);
-    user_video_rec_take_photo();
-    user_video_rec0_close();
-    return;
-#endif
-    return;
-}
-int video_rec_take_photo(void)
-{
-    struct server *server = NULL;
-    union video_req req = {0};
-    char *path;
-    char buf[48];
-    char name_buf[20];
-    int err;
+/*
+ * 录像时拍照的控制函数, 不能单独调用，必须录像时才可以调用，实际的调用地方已有
+ * 录像时拍照会需要至少1.5M + 400K的空间，请根据实际情况来使用
+ * 如果是两路录像或者两路实时流同时开启，不能调用该函数
+ */
+//todo
 
-    if (__this->state == VIDREC_STA_START) {
-        server = __this->video_rec0;
+static int video_rec_take_photo(void)
+{
+    union video_req req = {0};
+
+    if (__this->video_rec0) {
+        req.rec.rec_save_path = CAMERA0_CAP_PATH"img_***.jpg";
+        server_request(__this->video_rec0, VIDEO_REQ_SAVE_FRAME, &req);
+    } else {
+        struct server *server;
+        union video_req req = {0};
+        char video_name[4];
+        int err;
+        static struct video_text_osd label;
+        int cap_buf_size = 400 * 1024;
+
+        /* sprintf(video_name, "video%d.0", __this->photo_camera_sel); */
+
+        sprintf(video_name, "video%d.0", 0);
+        server = server_open("video_server", video_name);
         if (!server) {
-            log_error("error :video not open\n");
-            return -EINVAL;
+            log_e("video_server open fail");
+            return -EFAULT;
         }
-        req.icap.quality = VIDEO_HIG_Q;
-        req.icap.buf_size = CAP_IMG_SIZE;
-        req.icap.buf = malloc(CAP_IMG_SIZE);
-        if (!req.icap.buf) {
-            goto error;
+
+        if (__this->cap_buf == NULL) {
+            __this->cap_buf = malloc(cap_buf_size);
+
+            if (!__this->cap_buf) {
+                puts("\ntake photo no mem\n");
+                return -ENOMEM;
+            }
         }
-        req.rec.text_osd = NULL;
-        req.rec.graph_osd = NULL;
-        req.icap.text_label = NULL;
-        req.icap.file_name = name_buf;
-        req.icap.path = CAMERA0_CAP_PATH"IMG_****.jpg";
-        path = CAMERA0_CAP_PATH;
+        if (__this->photo_camera_sel == 0) {
+
+#ifdef PHOTO_STICKER_ENABLE_SMALL_MEM
+            req.icap.width = pic_pix_w[0];
+            req.icap.height = pic_pix_h[0];
+
+#else
+            req.icap.width = pic_pix_w[0];
+            req.icap.height = pic_pix_h[0];
+#endif
+
+        } else {
+            req.icap.width = 640;
+            req.icap.height = 480;
+        }
+        req.icap.quality = VIDEO_MID_Q;
+        req.icap.text_label = &label;
+        req.icap.image_state = 0;
+        req.icap.online = 0;
+        set_label_config(req.icap.width, req.icap.height, 0xe20095, req.icap.text_label);
+        req.icap.buf = __this->cap_buf;
+        req.icap.buf_size = 400 * 1024;
+        if (__this->photo_camera_sel == 0) {
+            req.icap.path = CAMERA0_CAP_PATH"img_***.jpg";
+        } else if (__this->photo_camera_sel == 1) {
+            req.icap.path = CAMERA1_CAP_PATH"img_***.jpg";
+        } else if (__this->photo_camera_sel == 2) {
+            req.icap.path = CAMERA1_CAP_PATH"img_***.jpg";
+        } else {
+            req.icap.path = CAMERA2_CAP_PATH"img_***.jpg";
+        }
+        /* req.icap.src_w = __this->src_width[__this->photo_camera_sel]; */
+        req.icap.src_w = 640;
+        /* req.icap.src_h = __this->src_height[__this->photo_camera_sel]; */
+        req.icap.src_h = 480;
+
+
+#if CAMERA_THUMBNAIL_ENABLE
+        log_i("add thumbnail");
+        struct jpg_thumbnail thumbnails = {0};
+        thumbnails.enable = 1;
+        thumbnails.buf = __this->cap_buf + cap_buf_size - IMAGE_THUMB_BUF_SIZE;
+        thumbnails.len = IMAGE_THUMB_BUF_SIZE;
+        req.icap.thumbnails = &thumbnails;
+#endif
+
         err = server_request(server, VIDEO_REQ_IMAGE_CAPTURE, &req);
         if (err != 0) {
-            log_error("\n\n\ntake photo err\n\n\n");
-            goto error;
-        }
-        sprintf(buf, "%s%s", path, req.icap.file_name);
-        log_info("%s\n\n", buf);
-        if (req.icap.buf) {
-            free(req.icap.buf);
-        }
-        return 0;
-
-error:
-        if (req.icap.buf) {
-            free(req.icap.buf);
-        }
-        return -EINVAL;
-    } else if (__this->state != VIDREC_STA_STARTING && __this->state != VIDREC_STA_STOPING) {
-        sys_timeout_add_to_task("sys_timer", NULL, take_photo, 10);
-#if 0
-#ifdef CONFIG_USR_VIDEO_ENABLE
-        extern int user_video_rec0_open(void);
-        extern int user_video_rec_take_photo(void);
-        extern int user_video_rec0_close(void);
-        err = user_video_rec0_open();
-        if (err) {
+            log_e("\ntake photo err: %d\n", err);
             return -EINVAL;
         }
-        os_time_dly(5);
-        user_video_rec_take_photo();
-        user_video_rec0_close();
-        return 0;
-#endif
-#endif
+        if (__this->cap_buf) {
+            free(__this->cap_buf);
+            __this->cap_buf = NULL;
+        }
+        server_close(server);
+
     }
-    return -EINVAL;
+
+    return 0;
 }
 
 static void rec_dev_server_event_handler(void *priv, int argc, int *argv)
@@ -882,7 +1239,23 @@ static void rec_dev_server_event_handler(void *priv, int argc, int *argv)
         break;
     case VIDEO_SERVER_PKG_END:
         if (db_select("cyc") > 0) {
-            video_rec_savefile((int)priv);
+            if (priv >= 10) {
+#ifdef		CONFIG_TUYA_SDK_ENABLE
+                ty_net_video_stop();
+#endif
+                video_rec_uvc_savefile((int)priv - 10);
+#ifdef		CONFIG_TUYA_SDK_ENABLE
+                video_convert(video_flag);
+#endif
+            } else {
+#ifdef		CONFIG_TUYA_SDK_ENABLE
+                ty_net_video_stop();
+#endif
+                video_rec_savefile((int)priv);
+#ifdef		CONFIG_TUYA_SDK_ENABLE
+                video_convert(video_flag);
+#endif
+            }
         } else {
             video_rec_stop(0);
         }
@@ -918,6 +1291,7 @@ void assign_video_rec_params(union video_req *req, struct video_text_osd *text_o
     req->rec.fps 	    = config->req.rec.fps;
     req->rec.real_fps 	= config->req.rec.real_fps;
 
+#if 1
     /*
      *采样率，通道数，录像音量，音频使用的循环BUF,录不录声音
      */
@@ -925,7 +1299,9 @@ void assign_video_rec_params(union video_req *req, struct video_text_osd *text_o
     req->rec.audio.channel 	= config->req.rec.audio.channel;
     req->rec.audio.volume    = config->req.rec.audio.volume;
     req->rec.audio.buf_len = config->req.rec.audio.buf_len;
+    req->rec.audio.aud_interval_size = config->req.rec.audio.aud_interval_size;
     req->rec.pkg_mute.aud_mute = config->req.rec.pkg_mute.aud_mute;
+#endif
 
     /*
      *码率，I帧和P帧比例，必须是偶数（当录MOV的时候才有效）,
@@ -970,7 +1346,20 @@ void assign_video_rec_params(union video_req *req, struct video_text_osd *text_o
     // 其他赋值操作...
 }
 
-int video_set_rec_start(void)
+int open_video_server(int channel, void **video_rec, const char *device_name)
+{
+    if (!*video_rec) {
+        void *server_dev = server_open("video_server", device_name);
+        if (!server_dev) {
+            return channel; // 返回通道号对应的错误
+        }
+        *video_rec = server_dev;
+        server_register_event_handler(server_dev, (void *)channel, rec_dev_server_event_handler);
+    }
+    return 0; // 成功返回
+}
+
+static int video_set_rec_start(void)
 {
     int err;
     union video_req req = {0};
@@ -984,81 +1373,113 @@ int video_set_rec_start(void)
     int online_num =  video_rec_online_nums();
 
     for (int index = 0; index < online_num; index++) {
+        int result = 0; // 用于存储错误码
 
         switch (video_configs[index].channel) {
         case 0:
-            if (!__this->video_rec0) {
-                server_dev = __this->video_rec0 = server_open("video_server", "video0.0");
-                if (!__this->video_rec0) {
-                    return VREC_ERR_V0_SERVER_OPEN;
-                }
-                server_register_event_handler(__this->video_rec0, (void *)0, rec_dev_server_event_handler);
-            } else {
-                server_dev = __this->video_rec0;//拔插卡之后重新赋值
-            }
+            result = open_video_server(0, &__this->video_rec0, "video0.0");
+            server_dev = __this->video_rec0;
             break;
         case 1:
-            if (!__this->video_rec1) {
-                server_dev = __this->video_rec1 = server_open("video_server", "video1.0");
-                if (!__this->video_rec1) {
-                    return VREC_ERR_V1_SERVER_OPEN;
-                }
-                server_register_event_handler(__this->video_rec1, (void *)1, rec_dev_server_event_handler);
-            } else {
-                server_dev = __this->video_rec1;
-            }
-
+            result = open_video_server(1, &__this->video_rec1, "video1.0");
+            server_dev = __this->video_rec1;
             break;
         case 2:
-            if (!__this->video_rec2) {
-
-#ifdef CONFIG_VIDEO2_ENABLE
-                if (uvc_host_online() < 0) {
-                    log_e("uvc no online\n");
-                    return VREC_ERR_UVC_OFFLINE;
-                }
-                server_dev = __this->video_rec2 = server_open("video_server", "video2.0");
-                if (!__this->video_rec2) {
-                    return VREC_ERR_V2_SERVER_OPEN;
-                }
-                server_register_event_handler(__this->video_rec2, (void *)2, rec_dev_server_event_handler);
-#endif
-            } else {
-                server_dev = __this->video_rec2;
-            }
+            result = open_video_server(2, &__this->video_rec2, "video2.0");
+            server_dev = __this->video_rec2;
             break;
-
         case 3:
-            if (!__this->video_rec3) {
-                server_dev = __this->video_rec3 = server_open("video_server", "video3.0");
-                if (!__this->video_rec3) {
-                    return VREC_ERR_V3_SERVER_OPEN;
-                }
-                server_register_event_handler(__this->video_rec3, (void *)3, rec_dev_server_event_handler);
-            } else {
-                server_dev = __this->video_rec3;
-            }
-
+            result = open_video_server(3, &__this->video_rec3, "video3.0");
+            server_dev = __this->video_rec3;
             break;
-
-
-
         default:
-            continue;
+            break;
+        }
+
+        if (result != 0) {
+            // 根据返回的错误码处理错误
+            return VREC_ERR_V0_SERVER_OPEN + result;
         }
 
         int channel  = video_configs[index].channel;
         req.rec.file        = __this->file[channel];
         req.rec.fsize       = __this->new_file_size[channel];
-        req.rec.audio.buf   = __this->audio_buf;
+        req.rec.audio.buf   = __this->audio_buf[channel];
         req.rec.buf         = __this->video_buf[channel];
-        req.rec.online      = 1;
 
         assign_video_rec_params(&req, &text_osd, &video_configs[index]);
-#ifdef CONFIG_VIDEO2_ENABLE
-        req.rec.uvc_id      = uvc_host_online();
+
+#if TCFG_HOST_AUDIO_ENABLE
+        req.rec.audio.read_input = user_uac_audio_read_input,
+                      req.rec.audio.sample_source = "virtual",
 #endif
-        err = server_request(server_dev, VIDEO_REQ_REC, &req);
+
+                                    err = server_request(server_dev, VIDEO_REQ_REC, &req);
+        if (err != 0) {
+            log_error("\n\n\nstart rec err\n\n\n");
+            return VREC_ERR_REQ_START;
+        }
+        __this->state = VIDREC_STA_START;
+    }
+    return 0;
+}
+
+static int video_set_uvc_rec_start(void)
+{
+    int err;
+    union video_req req = {0};
+    struct video_text_osd text_osd;
+
+    const char *video_server = "video_server";
+    const char *video_dev = NULL;
+    FILE *file = NULL;
+    int *video_rec = NULL;
+    void *server_dev;
+    int online_num =  video_rec_uvc_online_nums();
+
+
+    for (int index = 0; index < online_num; index++) {
+        int result = 0; // 用于存储错误码
+
+        switch (video_uvc_configs[index].channel) {
+        case 0:
+            result = open_video_server(10, &__this->video_uvc_rec0, "video10.0");
+            server_dev = __this->video_uvc_rec0;
+            break;
+        case 1:
+            result = open_video_server(11, &__this->video_uvc_rec1, "video11.0");
+            server_dev = __this->video_uvc_rec1;
+            break;
+        case 2:
+            result = open_video_server(12, &__this->video_uvc_rec2, "video12.0");
+            server_dev = __this->video_uvc_rec2;
+            break;
+        default:
+            break;
+        }
+
+        if (result != 0) {
+            // 根据返回的错误码处理错误
+            /* return result == 0 ? VREC_ERR_V0_SERVER_OPEN + result : VREC_ERR_V2_SERVER_OPEN; */
+            return VREC_ERR_V0_SERVER_OPEN + result;
+        }
+
+        int channel  = video_uvc_configs[index].channel;
+        req.rec.file        = __this->file_uvc[channel];
+        req.rec.fsize       = __this->new_file_uvc_size[channel];
+        req.rec.audio.buf   = __this->audio_buf[channel];
+        req.rec.buf         = __this->video_uvc_buf[channel];
+
+        assign_video_rec_params(&req, &text_osd, &video_uvc_configs[index]);
+        /* #ifdef CONFIG_VIDEO2_ENABLE */
+        req.rec.uvc_id      = channel;
+        /* #endif */
+
+#if TCFG_HOST_AUDIO_ENABLE
+        req.rec.audio.read_input = user_uac_audio_read_input,
+                      req.rec.audio.sample_source = "virtual",
+#endif
+                                    err = server_request(server_dev, VIDEO_REQ_REC, &req);
         if (err != 0) {
             log_error("\n\n\nstart rec err\n\n\n");
             return VREC_ERR_REQ_START;
@@ -1089,7 +1510,6 @@ int video_rec_start()
     }
 
     while (!get_db_status()) {
-
         os_time_dly(100);
     }
 
@@ -1102,12 +1522,15 @@ int video_rec_start()
      * 判断SD卡空间，删除旧文件并创建新文件
      */
     int online_num  = video_rec_online_nums();
+    int uvc_online_num  = video_rec_uvc_online_nums();
 
-    if (!online_num) {
+    if ((!online_num) && (!uvc_online_num)) {
         log_error("video device all not online!\n");
         return 0;
     }
     log_info("online_num ===%d\n", online_num);
+    log_info("uvc_online_num ===%d\n", uvc_online_num);
+    /* usb_host_audio_set_init(online_num+uvc_online_num, 1, 8000); */
     for (int i = 0; i < online_num; i++) {
         int channel = video_configs[i].channel;
 redo:
@@ -1126,13 +1549,46 @@ redo:
         __this->new_file[channel] = NULL;
     }
 
+#ifdef CONFIG_UVC_VIDEO_ENABLE
+    for (int i = 0; i < uvc_online_num; i++) {
+        int channel = video_uvc_configs[i].channel;
+redo_uvc:
+        err = video_rec_del_old_uvc_file(channel);
+        if (err) {
+            cnt++;
+            if (cnt < 3) {
+                log_d("retry ... \n\n");
+                os_time_dly(50);
+                goto redo_uvc;
+            }
+            log_e("start free space err\n");
+            return VREC_ERR_START_FREE_SPACE;
+        }
+        __this->file_uvc[channel] = __this->new_file_uvc[channel];
+        __this->new_file_uvc[channel] = NULL;
+    }
+#endif
+#ifdef  CONFIG_TUYA_SDK_ENABLE
+    ty_net_video_stop(); //关闭实时流
+#endif
+
     err = video_set_rec_start();
+#ifdef CONFIG_UVC_VIDEO_ENABLE
+    err = video_set_uvc_rec_start();
+#endif
     if (err) {
         video_rec_stop(0);
+#ifdef		CONFIG_TUYA_SDK_ENABLE
+        video_convert(video_flag); //打开实时流
+#endif
         return err;
     }
     __this->state = VIDREC_STA_START;
     log_d("video_rec_start: out )))))))\n");
+
+#ifdef		CONFIG_TUYA_SDK_ENABLE
+    video_convert(video_flag); //打开实时流
+#endif
     return 0;
 }
 
@@ -1150,12 +1606,36 @@ static int video_rec_storage_device_ready(void *p)
     return 0;
 }
 
+static int stop_video_rec(struct server *server_dev, union video_req *req, int channel)
+{
+    if (server_dev) {
+        req->rec.channel = 0;
+        req->rec.state = VIDEO_STATE_STOP;
+        int err = server_request(server_dev, VIDEO_REQ_REC, req);
+        if (err != 0) {
+            log_error("\nstop rec err 0x%x\n", err);
+            return VREC_ERR_V0_REQ_STOP;
+        }
+    }
+    return 0;
+}
+
+// 提取公共的资源关闭函数
+static void close_server_device(void *server_dev, int close)
+{
+    if (close && server_dev) {
+        server_close(server_dev);
+        server_dev = NULL;
+    }
+}
+
 int video_rec_stop(u8 close)
 {
     int err;
     __this->need_restart_rec = 0;
     union video_req req = {0};
     void *server_dev;
+
     if (__this->state != VIDREC_STA_START) {
         return 0;
     }
@@ -1165,56 +1645,70 @@ int video_rec_stop(u8 close)
     __this->state = VIDREC_STA_STOPING;
 
     for (int index = 0; index < CONFIG_VIDEO_NUM; index++) {
+        server_dev = NULL;
+
         switch (video_configs[index].channel) {
         case 0:
-            if (__this->video_rec0) {
-                server_dev = __this->video_rec0;
-            }
+            server_dev = __this->video_rec0;
             break;
         case 1:
-            if (__this->video_rec1) {
-                server_dev = __this->video_rec1;
-            }
+            server_dev = __this->video_rec1;
             break;
         case 2:
-            if (__this->video_rec2) {
-                server_dev = __this->video_rec2;
-            }
+            server_dev = __this->video_rec2;
             break;
         case 3:
-            if (__this->video_rec3) {
-                server_dev = __this->video_rec3;
-            }
+            server_dev = __this->video_rec3;
             break;
-
         default:
             continue;
         }
-        if (server_dev) {
-            req.rec.channel = 0;
-            req.rec.state = VIDEO_STATE_STOP;
-            err = server_request(server_dev, VIDEO_REQ_REC, &req);
-            if (err != 0) {
-                log_error("\nstop rec err 0x%x\n", err);
-                return VREC_ERR_V0_REQ_STOP;
-            }
+
+        err = stop_video_rec(server_dev, &req, video_configs[index].channel);
+        if (err) {
+            return err;
         }
         video_rec_close_file(video_configs[index].channel);
 
-        //video_rec_start_isp_scenes();
-        if (close) {
-            if (server_dev) {
-                server_close(server_dev);
-                server_dev = NULL;
-            }
+        close_server_device(server_dev, close);
+    }
+
+#ifdef CONFIG_UVC_VIDEO_ENABLE
+    for (int index = 0; index < CONFIG_VIDEO_UVC_NUM; index++) {
+        server_dev = NULL;
+
+        // 根据 channel 查找对应的 UVC 视频设备
+        switch (video_uvc_configs[index].channel) {
+        case 0:
+            server_dev = __this->video_uvc_rec0;
+            break;
+        case 1:
+            server_dev = __this->video_uvc_rec1;
+            break;
+        case 2:
+            server_dev = __this->video_uvc_rec2;
+            break;
+        case 3:
+            server_dev = __this->video_uvc_rec3;
+            break;
+        default:
+            continue;
         }
 
+        err = stop_video_rec(server_dev, &req, video_uvc_configs[index].channel);
+        if (err) {
+            return err;
+        }
+        video_rec_uvc_close_file(video_uvc_configs[index].channel);
+        /* video_rec_close_file(video_uvc_configs[index].channel+10); */
+
+        close_server_device(server_dev, close);
     }
+#endif
     __this->state = VIDREC_STA_STOP;
     log_info("video_rec_stop: exit\n");
     return 0;
 }
-
 static int video_rec_close()
 {
     for (int index = 0; index < CONFIG_VIDEO_NUM; index++) {
@@ -1247,21 +1741,45 @@ static int video_rec_close()
             continue;
         }
     }
+
+#ifdef CONFIG_UVC_VIDEO_ENABLE
+    for (int index = 0; index < CONFIG_VIDEO_UVC_NUM; index++) {
+        switch (video_uvc_configs[index].channel) {
+        case 0:
+            if (__this->video_uvc_rec0) {
+                server_close(__this->video_uvc_rec0);
+                __this->video_uvc_rec0 = NULL;
+            }
+            break;
+        case 1:
+            if (__this->video_uvc_rec1) {
+                server_close(__this->video_uvc_rec1);
+                __this->video_uvc_rec1 = NULL;
+            }
+            break;
+        case 2:
+            if (__this->video_uvc_rec2) {
+                server_close(__this->video_uvc_rec2);
+                __this->video_uvc_rec2 = NULL;
+            }
+        case 3:
+            if (__this->video_uvc_rec3) {
+                server_close(__this->video_uvc_rec3);
+                __this->video_uvc_rec3 = NULL;
+            }
+
+            break;
+        default:
+            continue;
+        }
+    }
+#endif
     return 0;
 }
 
 static int device_ready(void *priv)
 {
-#ifdef CONFIG_VIDEO2_ENABLE
-    if (uvc_host_online() < 0 || !storage_device_ready()) {
-        return false;
-    }
-
-    return true;
-#else
-
     return storage_device_ready();
-#endif
 }
 
 
@@ -1273,17 +1791,22 @@ static int video_rec_init()
 #endif
 
 #ifdef CONFIG_VIDEO1_ENABLE
-    __this->video_online[1] = dev_online("video1.*");
+    __this->video_online[1] = 1;
 #endif
 
 #ifdef CONFIG_VIDEO2_ENABLE
-    __this->video_online[2] = dev_online("uvc");
+    __this->video_online[2] = 1;
 #endif
 
 #ifdef CONFIG_VIDEO3_ENABLE
     __this->video_online[3] = 1;
 #endif
 
+#ifdef CONFIG_UVC_VIDEO_ENABLE
+    for (int i = 0; i < CONFIG_VIDEO_UVC_REC_NUM; i++) {
+        __this->video_uvc_online[i] = get_uvc_host_online_status(i);
+    }
+#endif
 
 
     int err = 0;
@@ -1350,16 +1873,12 @@ static int video_rec_state_machine(struct application *app, enum app_state state
             break;
         case ACTION_VIDEO_REC_DISPLAY:
             log_info("ACTION_VIDEO_REC_DISPLAY\n");
-#ifdef CONFIG_VIDEO2_ENABLE
-            u8 online_flag  = uvc_host_online();
-            if (online_flag) {
-                video_set_disp_window();
-                video_disp_win_switch(DISP_WIN_SW_DEV_IN, 2);
-            }
-#else
+#ifndef CONFIG_TUYA_SDK_ENABLE
             video_set_disp_window();
             video_disp_win_switch(DISP_WIN_SW_SHOW_SMALL, 0);
 #endif
+            //todo
+            video_rec_init();
             break;
 
         case ACTION_VIDEO_REC_SET_CONFIG:
@@ -1496,52 +2015,74 @@ static int video_rec_device_event_handler(struct sys_event *sys_eve)
         } else if (device_eve->event == POWER_EVENT_POWER_CHARGE) {
 
         }
-
-#ifdef CONFIG_VIDEO2_ENABLE
-    } else if (sys_eve->from == DEVICE_EVENT_FROM_USB_HOST && !strncmp((const char *)device_eve->value, "uvc", 3)) {
+    }
+#ifdef CONFIG_UVC_VIDEO_ENABLE
+    else if (sys_eve->from == DEVICE_EVENT_FROM_USB_HOST && !strncmp((const char *)device_eve->value, "uvc", 3)) {
         switch (device_eve->event) {
         case DEVICE_EVENT_IN:
 
-            __this->uvc_id  = uvc_host_online();
-            if (!__this->video_online[2]) {
-                __this->video_online[2] = true;
+            printf("into device event in CONFIG_VIDEO_UVC_NUM:%d uvc_id:%d", CONFIG_VIDEO_UVC_NUM, uvc_host_online());
+            u8 open_uvc_flag = 0;
+            for (int i = 0; i < CONFIG_VIDEO_UVC_REC_NUM; i++) {
+                printf("online :%d", get_uvc_host_online_status(i));
+                __this->video_uvc_online[i] = get_uvc_host_online_status(i);
+                if (__this->video_uvc_online[i]) {
+                    log_info("UVC or msd_storage online : %s, id=%d\n", type, i);
+                    open_uvc_flag = 1;
+                }
+            }
 
-                log_info("UVC or msd_storage online : %s, id=%d\n", type, __this->uvc_id);
-
+            if (open_uvc_flag) {
                 if (__this->state == VIDREC_STA_START) {
                     video_rec_stop(0);
                     video_rec_start();
                 }
+#ifndef CONFIG_TUYA_SDK_ENABLE
+
                 video_set_disp_window();
                 video_disp_win_switch(DISP_WIN_SW_DEV_IN, 2);
-
-
+#endif
+#ifdef CONFIG_TUYA_SDK_ENABLE
+                video_flag = 1;
+                video_convert(video_flag);
+#endif
             }
             break;
         case DEVICE_EVENT_OUT:
             puts("DEVICE_EVENT_OFFLINE: uvc\n");
-            if (__this->video_online[2]) {
-                __this->video_online[2] = false;
 
-                video_disp_win_switch(DISP_WIN_SW_DEV_OUT, 2);
+            for (int i = 0; i < CONFIG_VIDEO_UVC_REC_NUM; i++) {
+                __this->video_uvc_online[i] = get_uvc_host_online_status(i);
 
-                if (__this->state == VIDREC_STA_START) {
-                    video_rec_stop(0);
-                    video_rec_start();
+                if (__this->video_uvc_online[i]) {
+                    log_info("UVC or msd_storage online : %s, id=%d\n", type, i);
+#ifndef CONFIG_TUYA_SDK_ENABLE
+                    video_disp_win_switch(DISP_WIN_SW_DEV_OUT, 2);
+#endif
+                    if (__this->state == VIDREC_STA_START) {
+                        video_rec_stop(0);
+                        video_rec_start();
+                    }
+
                 }
             }
+
+#ifdef CONFIG_TUYA_SDK_ENABLE
+            video_flag = 0;
+            video_convert(video_flag);
+#endif
+
             break;
         }
-#endif
     }
+#endif
+
 }
 
 
 
 
-
-
-/*录像app的事件总入口*/
+/* 录像app的事件总入口 */
 static int video_rec_event_handler(struct application *app, struct sys_event *event)
 {
     switch (event->type) {

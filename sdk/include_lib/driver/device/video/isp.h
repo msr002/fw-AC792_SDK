@@ -105,5 +105,10 @@ struct ispt_param {
 #define ISP_IOCTL_GET_CUSTOMIZE_CFG         _IOR('I', 3,  struct ispt_customize_cfg)
 #define ISP_IOCTL_SET_FPS                   _IOW('I', 4,  int)
 
+s32 isp0_mount(void *arg);
+void isp_dump_reg();
+int isp_delete(int channel);
+s32 isp0_ioctrl(void *parm, u32 cmd);
+int isp_ioctl(u32 cmd, void *arg);
 
 #endif

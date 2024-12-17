@@ -59,6 +59,7 @@ int start_quick_uvc_disp(u8 id, u32 x, u32 y, u32 width, u32 height)
     sprintf(fb_source, "fb%d", id + 3);
     sprintf(dis_source, "disp%d", id + 3);
     //UVC
+    pipe_core[id]->channel = plugin_source_to_channel(source_uvc);
     uvc_filter = pipeline_filter_add(pipe_core[id], source_uvc);
     if (!uvc_filter) {
         return -1;

@@ -2,6 +2,8 @@
 
 #ifdef CONFIG_MEDIA_ENABLE
 
+#include "audio_def.h"
+
 source_node_adapter
 decoder_node_adapter
 resample_node_adapter
@@ -15,6 +17,9 @@ tone_file_plug
 ring_file_plug
 key_tone_file_plug
 tts_file_plug
+#if TCFG_FILEPLAY_NODE_ENABLE
+file_play_plug
+#endif
 #if TCFG_USER_TWS_ENABLE
 tws_tone_file_plug
 #endif
@@ -88,16 +93,24 @@ alac_dec_plug
 #if TCFG_DEC_APE_ENABLE
 ape_dec_plug
 #endif
-#if TCFG_DEC_JLA_ENABLE
+#if (TCFG_LE_AUDIO_CODEC_TYPE == AUDIO_CODING_JLA_LW)
+#if (TCFG_KBOX_1T3_MODE_EN == 0)
+jla_lw_encoder_plug
+#endif
+jla_lw_dec_plug
+#elif (TCFG_LE_AUDIO_CODEC_TYPE == AUDIO_CODING_JLA_LL)
+#if (TCFG_KBOX_1T3_MODE_EN == 0)
+jla_ll_encoder_plug
+#endif
+jla_ll_dec_plug
+#elif (TCFG_LE_AUDIO_CODEC_TYPE == AUDIO_CODING_JLA_V2)
+jla_v2_dec_plug
+jla_v2_enc_plug
+#elif (TCFG_LE_AUDIO_CODEC_TYPE == AUDIO_CODING_JLA)
 jla_dec_plug
-#endif
-#if TCFG_ENC_JLA_ENABLE
 jla_encoder_plug
-#endif
-#if TCFG_DEC_LC3_ENABLE
+#else
 lc3_dec_plug
-#endif
-#if TCFG_ENC_LC3_ENABLE
 lc3_encoder_plug
 #endif
 #if TCFG_ENC_OGG_ENABLE

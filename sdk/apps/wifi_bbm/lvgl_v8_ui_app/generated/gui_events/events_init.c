@@ -1,0 +1,536 @@
+/*Generate Code, Do NOT Edit!*/
+#include "./events_init.h"
+#include <stdio.h>
+#include "lvgl.h"
+#include "./callback_handler.h"
+#include "../gui_timelines/gui_timelines.h"
+#include "../gui_group/gui_group.h"
+
+
+void events_init(lv_ui *ui)
+{
+}
+
+static void home_imgbtn_1_event_handler(lv_event_t *e)
+{
+    lv_event_code_t code = lv_event_get_code(e);
+    lv_ui *ui = (lv_ui *) lv_event_get_user_data(e);
+    lv_obj_t *src = lv_event_get_target(e);
+    switch (code) {
+    case LV_EVENT_CLICKED: {
+        gui_scr_t *screen = gui_scr_get(GUI_SCREEN_PAIR_STATUS);
+        if (screen == NULL) {
+            screen = gui_scr_create(GUI_SCREEN_PAIR_STATUS, "pair_status", guider_ui.pair_status, (gui_scr_setup_cb_t)setup_scr_pair_status, (gui_scr_unload_cb_t)unload_scr_pair_status);
+        }
+        ui_load_scr_anim(ui, screen, LV_SCR_LOAD_ANIM_NONE, 0, 0, true, true, false);
+    }
+    break;
+    default:
+        break;
+    }
+}
+
+static void home_imgbtn_2_event_handler(lv_event_t *e)
+{
+    lv_event_code_t code = lv_event_get_code(e);
+    lv_ui *ui = (lv_ui *) lv_event_get_user_data(e);
+    lv_obj_t *src = lv_event_get_target(e);
+    switch (code) {
+    case LV_EVENT_CLICKED: {
+        gui_scr_t *screen = gui_scr_get(GUI_SCREEN_RT_STREAM);
+        if (screen == NULL) {
+            screen = gui_scr_create(GUI_SCREEN_RT_STREAM, "rt_stream", guider_ui.rt_stream, (gui_scr_setup_cb_t)setup_scr_rt_stream, (gui_scr_unload_cb_t)unload_scr_rt_stream);
+        }
+        ui_load_scr_anim(ui, screen, LV_SCR_LOAD_ANIM_NONE, 0, 0, true, true, false);
+    }
+    break;
+    default:
+        break;
+    }
+}
+
+static void home_imgbtn_3_event_handler(lv_event_t *e)
+{
+    lv_event_code_t code = lv_event_get_code(e);
+    lv_ui *ui = (lv_ui *) lv_event_get_user_data(e);
+    lv_obj_t *src = lv_event_get_target(e);
+    switch (code) {
+    case LV_EVENT_CLICKED: {
+        gui_scr_t *screen = gui_scr_get(GUI_SCREEN_FILE_BROWSER);
+        if (screen == NULL) {
+            screen = gui_scr_create(GUI_SCREEN_FILE_BROWSER, "file_browser", guider_ui.file_browser, (gui_scr_setup_cb_t)setup_scr_file_browser, (gui_scr_unload_cb_t)unload_scr_file_browser);
+        }
+        ui_load_scr_anim(ui, screen, LV_SCR_LOAD_ANIM_NONE, 0, 0, true, true, false);
+    }
+    break;
+    default:
+        break;
+    }
+}
+static void home_screen_event_handler(lv_event_t *e)
+{
+    lv_event_code_t code = lv_event_get_code(e);
+    switch (code) {
+    case LV_EVENT_SCREEN_LOAD_START: {
+        gui_scr_action_cb(GUI_SCREEN_HOME, GUI_SCREEN_ACTION_LOAD);
+        break;
+    }
+    case LV_EVENT_SCREEN_UNLOADED: {
+        gui_scr_action_cb(GUI_SCREEN_HOME, GUI_SCREEN_ACTION_UNLOAD);
+        break;
+    }
+    }
+}
+
+void events_init_home(lv_ui *ui)
+{
+    lv_obj_add_event_cb(ui->home_imgbtn_1, home_imgbtn_1_event_handler, LV_EVENT_ALL, ui);
+    lv_obj_add_event_cb(ui->home_imgbtn_2, home_imgbtn_2_event_handler, LV_EVENT_ALL, ui);
+    lv_obj_add_event_cb(ui->home_imgbtn_3, home_imgbtn_3_event_handler, LV_EVENT_ALL, ui);
+    lv_obj_add_event_cb(ui->home, home_screen_event_handler, LV_EVENT_ALL, ui);
+}
+
+static void pair_status_imgbtn_1_event_handler(lv_event_t *e)
+{
+    lv_event_code_t code = lv_event_get_code(e);
+    lv_ui *ui = (lv_ui *) lv_event_get_user_data(e);
+    lv_obj_t *src = lv_event_get_target(e);
+    switch (code) {
+    case LV_EVENT_CLICKED: {
+        gui_scr_t *screen = gui_scr_get(GUI_SCREEN_HOME);
+        if (screen == NULL) {
+            screen = gui_scr_create(GUI_SCREEN_HOME, "home", guider_ui.home, (gui_scr_setup_cb_t)setup_scr_home, (gui_scr_unload_cb_t)unload_scr_home);
+        }
+        ui_load_scr_anim(ui, screen, LV_SCR_LOAD_ANIM_NONE, 0, 0, true, true, false);
+    }
+    break;
+    default:
+        break;
+    }
+}
+
+static void pair_status_imglist_1_event_handler(lv_event_t *e)
+{
+    lv_event_code_t code = lv_event_get_code(e);
+    lv_ui *ui = (lv_ui *) lv_event_get_user_data(e);
+    lv_obj_t *src = lv_event_get_target(e);
+    switch (code) {
+    case LV_EVENT_CLICKED: {
+        //custom code pair_options
+        {
+            lv_obj_t *dest = ui->pair_options;
+            extern void set_cur_pair_channel(uint8_t channel);
+            set_cur_pair_channel(0);
+        }
+        gui_scr_t *screen = gui_scr_get(GUI_SCREEN_PAIR_OPTIONS);
+        if (screen == NULL) {
+            screen = gui_scr_create(GUI_SCREEN_PAIR_OPTIONS, "pair_options", guider_ui.pair_options, (gui_scr_setup_cb_t)setup_scr_pair_options, (gui_scr_unload_cb_t)unload_scr_pair_options);
+        }
+        ui_load_scr_anim(ui, screen, LV_SCR_LOAD_ANIM_NONE, 0, 0, true, true, false);
+    }
+    break;
+    default:
+        break;
+    }
+}
+
+static void pair_status_imglist_2_event_handler(lv_event_t *e)
+{
+    lv_event_code_t code = lv_event_get_code(e);
+    lv_ui *ui = (lv_ui *) lv_event_get_user_data(e);
+    lv_obj_t *src = lv_event_get_target(e);
+    switch (code) {
+    case LV_EVENT_CLICKED: {
+        //custom code pair_options
+        {
+            lv_obj_t *dest = ui->pair_options;
+            extern void set_cur_pair_channel(uint8_t channel);
+            set_cur_pair_channel(1);
+        }
+        gui_scr_t *screen = gui_scr_get(GUI_SCREEN_PAIR_OPTIONS);
+        if (screen == NULL) {
+            screen = gui_scr_create(GUI_SCREEN_PAIR_OPTIONS, "pair_options", guider_ui.pair_options, (gui_scr_setup_cb_t)setup_scr_pair_options, (gui_scr_unload_cb_t)unload_scr_pair_options);
+        }
+        ui_load_scr_anim(ui, screen, LV_SCR_LOAD_ANIM_NONE, 0, 0, true, true, false);
+    }
+    break;
+    default:
+        break;
+    }
+}
+
+static void pair_status_imglist_3_event_handler(lv_event_t *e)
+{
+    lv_event_code_t code = lv_event_get_code(e);
+    lv_ui *ui = (lv_ui *) lv_event_get_user_data(e);
+    lv_obj_t *src = lv_event_get_target(e);
+    switch (code) {
+    case LV_EVENT_CLICKED: {
+        //custom code pair_options
+        {
+            lv_obj_t *dest = ui->pair_options;
+            extern void set_cur_pair_channel(uint8_t channel);
+            set_cur_pair_channel(2);
+        }
+        gui_scr_t *screen = gui_scr_get(GUI_SCREEN_PAIR_OPTIONS);
+        if (screen == NULL) {
+            screen = gui_scr_create(GUI_SCREEN_PAIR_OPTIONS, "pair_options", guider_ui.pair_options, (gui_scr_setup_cb_t)setup_scr_pair_options, (gui_scr_unload_cb_t)unload_scr_pair_options);
+        }
+        ui_load_scr_anim(ui, screen, LV_SCR_LOAD_ANIM_NONE, 0, 0, true, true, false);
+    }
+    break;
+    default:
+        break;
+    }
+}
+
+static void pair_status_imglist_4_event_handler(lv_event_t *e)
+{
+    lv_event_code_t code = lv_event_get_code(e);
+    lv_ui *ui = (lv_ui *) lv_event_get_user_data(e);
+    lv_obj_t *src = lv_event_get_target(e);
+    switch (code) {
+    case LV_EVENT_CLICKED: {
+        //custom code pair_options
+        {
+            lv_obj_t *dest = ui->pair_options;
+            extern void set_cur_pair_channel(uint8_t channel);
+            set_cur_pair_channel(3);
+        }
+        gui_scr_t *screen = gui_scr_get(GUI_SCREEN_PAIR_OPTIONS);
+        if (screen == NULL) {
+            screen = gui_scr_create(GUI_SCREEN_PAIR_OPTIONS, "pair_options", guider_ui.pair_options, (gui_scr_setup_cb_t)setup_scr_pair_options, (gui_scr_unload_cb_t)unload_scr_pair_options);
+        }
+        ui_load_scr_anim(ui, screen, LV_SCR_LOAD_ANIM_NONE, 0, 0, true, true, false);
+    }
+    break;
+    default:
+        break;
+    }
+}
+
+static void pair_status_imglist_5_event_handler(lv_event_t *e)
+{
+    lv_event_code_t code = lv_event_get_code(e);
+    lv_ui *ui = (lv_ui *) lv_event_get_user_data(e);
+    lv_obj_t *src = lv_event_get_target(e);
+    switch (code) {
+    case LV_EVENT_CLICKED: {
+        //custom code pair_options
+        {
+            lv_obj_t *dest = ui->pair_options;
+            extern void set_cur_pair_channel(uint8_t channel);
+            set_cur_pair_channel(4);
+        }
+        gui_scr_t *screen = gui_scr_get(GUI_SCREEN_PAIR_OPTIONS);
+        if (screen == NULL) {
+            screen = gui_scr_create(GUI_SCREEN_PAIR_OPTIONS, "pair_options", guider_ui.pair_options, (gui_scr_setup_cb_t)setup_scr_pair_options, (gui_scr_unload_cb_t)unload_scr_pair_options);
+        }
+        ui_load_scr_anim(ui, screen, LV_SCR_LOAD_ANIM_NONE, 0, 0, true, true, false);
+    }
+    break;
+    default:
+        break;
+    }
+}
+
+static void pair_status_imglist_6_event_handler(lv_event_t *e)
+{
+    lv_event_code_t code = lv_event_get_code(e);
+    lv_ui *ui = (lv_ui *) lv_event_get_user_data(e);
+    lv_obj_t *src = lv_event_get_target(e);
+    switch (code) {
+    case LV_EVENT_CLICKED: {
+        //custom code pair_options
+        {
+            lv_obj_t *dest = ui->pair_options;
+            extern void set_cur_pair_channel(uint8_t channel);
+            set_cur_pair_channel(5);
+        }
+        gui_scr_t *screen = gui_scr_get(GUI_SCREEN_PAIR_OPTIONS);
+        if (screen == NULL) {
+            screen = gui_scr_create(GUI_SCREEN_PAIR_OPTIONS, "pair_options", guider_ui.pair_options, (gui_scr_setup_cb_t)setup_scr_pair_options, (gui_scr_unload_cb_t)unload_scr_pair_options);
+        }
+        ui_load_scr_anim(ui, screen, LV_SCR_LOAD_ANIM_NONE, 0, 0, true, true, false);
+    }
+    break;
+    default:
+        break;
+    }
+}
+
+void events_init_pair_status(lv_ui *ui)
+{
+    lv_obj_add_event_cb(ui->pair_status_imgbtn_1, pair_status_imgbtn_1_event_handler, LV_EVENT_ALL, ui);
+    lv_obj_add_event_cb(ui->pair_status_imglist_1, pair_status_imglist_1_event_handler, LV_EVENT_ALL, ui);
+    lv_obj_add_event_cb(ui->pair_status_imglist_2, pair_status_imglist_2_event_handler, LV_EVENT_ALL, ui);
+    lv_obj_add_event_cb(ui->pair_status_imglist_3, pair_status_imglist_3_event_handler, LV_EVENT_ALL, ui);
+    lv_obj_add_event_cb(ui->pair_status_imglist_4, pair_status_imglist_4_event_handler, LV_EVENT_ALL, ui);
+    lv_obj_add_event_cb(ui->pair_status_imglist_5, pair_status_imglist_5_event_handler, LV_EVENT_ALL, ui);
+    lv_obj_add_event_cb(ui->pair_status_imglist_6, pair_status_imglist_6_event_handler, LV_EVENT_ALL, ui);
+}
+
+static void rt_stream_event_handler(lv_event_t *e)
+{
+    lv_event_code_t code = lv_event_get_code(e);
+    lv_ui *ui = (lv_ui *) lv_event_get_user_data(e);
+    lv_obj_t *src = lv_event_get_target(e);
+    switch (code) {
+    case LV_EVENT_CLICKED: {
+        gui_scr_t *screen = gui_scr_get(GUI_SCREEN_HOME);
+        if (screen == NULL) {
+            screen = gui_scr_create(GUI_SCREEN_HOME, "home", guider_ui.home, (gui_scr_setup_cb_t)setup_scr_home, (gui_scr_unload_cb_t)unload_scr_home);
+        }
+        ui_load_scr_anim(ui, screen, LV_SCR_LOAD_ANIM_NONE, 0, 0, true, true, false);
+    }
+    break;
+    default:
+        break;
+    }
+}
+
+static void rt_stream_imgbtn_1_event_handler(lv_event_t *e)
+{
+    lv_event_code_t code = lv_event_get_code(e);
+    lv_ui *ui = (lv_ui *) lv_event_get_user_data(e);
+    lv_obj_t *src = lv_event_get_target(e);
+    switch (code) {
+    case LV_EVENT_CLICKED: {
+        //custom code
+        {
+            lv_obj_t *dest = src;
+            extern int gui_bbm_switch_camera(void);
+            gui_bbm_switch_camera();
+        }
+    }
+    break;
+    default:
+        break;
+    }
+}
+static void rt_stream_screen_event_handler(lv_event_t *e)
+{
+    lv_event_code_t code = lv_event_get_code(e);
+    switch (code) {
+    case LV_EVENT_SCREEN_LOAD_START: {
+        gui_scr_action_cb(GUI_SCREEN_RT_STREAM, GUI_SCREEN_ACTION_LOAD);
+        break;
+    }
+    case LV_EVENT_SCREEN_UNLOADED: {
+        gui_scr_action_cb(GUI_SCREEN_RT_STREAM, GUI_SCREEN_ACTION_UNLOAD);
+        break;
+    }
+    }
+}
+
+void events_init_rt_stream(lv_ui *ui)
+{
+    lv_obj_add_event_cb(ui->rt_stream, rt_stream_event_handler, LV_EVENT_ALL, ui);
+    lv_obj_add_event_cb(ui->rt_stream_imgbtn_1, rt_stream_imgbtn_1_event_handler, LV_EVENT_ALL, ui);
+    lv_obj_add_event_cb(ui->rt_stream, rt_stream_screen_event_handler, LV_EVENT_ALL, ui);
+}
+
+static void file_browser_imgbtn_1_event_handler(lv_event_t *e)
+{
+    lv_event_code_t code = lv_event_get_code(e);
+    lv_ui *ui = (lv_ui *) lv_event_get_user_data(e);
+    lv_obj_t *src = lv_event_get_target(e);
+    switch (code) {
+    case LV_EVENT_CLICKED: {
+        gui_scr_t *screen = gui_scr_get(GUI_SCREEN_HOME);
+        if (screen == NULL) {
+            screen = gui_scr_create(GUI_SCREEN_HOME, "home", guider_ui.home, (gui_scr_setup_cb_t)setup_scr_home, (gui_scr_unload_cb_t)unload_scr_home);
+        }
+        ui_load_scr_anim(ui, screen, LV_SCR_LOAD_ANIM_NONE, 0, 0, true, true, false);
+    }
+    break;
+    default:
+        break;
+    }
+}
+
+static void file_browser_imgbtn_2_event_handler(lv_event_t *e)
+{
+    lv_event_code_t code = lv_event_get_code(e);
+    lv_ui *ui = (lv_ui *) lv_event_get_user_data(e);
+    lv_obj_t *src = lv_event_get_target(e);
+    switch (code) {
+    case LV_EVENT_CLICKED: {
+        //custom code
+        {
+            lv_obj_t *dest = src;
+#if !LV_USE_GUIBUILDER_SIMULATOR
+            int gui_bbm_prev_page(void);
+            gui_bbm_prev_page();
+#endif
+        }
+    }
+    break;
+    default:
+        break;
+    }
+}
+
+static void file_browser_imgbtn_3_event_handler(lv_event_t *e)
+{
+    lv_event_code_t code = lv_event_get_code(e);
+    lv_ui *ui = (lv_ui *) lv_event_get_user_data(e);
+    lv_obj_t *src = lv_event_get_target(e);
+    switch (code) {
+    case LV_EVENT_CLICKED: {
+        //custom code
+        {
+            lv_obj_t *dest = src;
+#if !LV_USE_GUIBUILDER_SIMULATOR
+            int gui_bbm_next_page(void);
+            gui_bbm_next_page();
+#endif
+        }
+    }
+    break;
+    default:
+        break;
+    }
+}
+static void file_browser_screen_event_handler(lv_event_t *e)
+{
+    lv_event_code_t code = lv_event_get_code(e);
+    switch (code) {
+    case LV_EVENT_SCREEN_LOAD_START: {
+        gui_scr_action_cb(GUI_SCREEN_FILE_BROWSER, GUI_SCREEN_ACTION_LOAD);
+        break;
+    }
+    case LV_EVENT_SCREEN_UNLOADED: {
+        gui_scr_action_cb(GUI_SCREEN_FILE_BROWSER, GUI_SCREEN_ACTION_UNLOAD);
+        break;
+    }
+    }
+}
+
+void events_init_file_browser(lv_ui *ui)
+{
+    lv_obj_add_event_cb(ui->file_browser_imgbtn_1, file_browser_imgbtn_1_event_handler, LV_EVENT_ALL, ui);
+    lv_obj_add_event_cb(ui->file_browser_imgbtn_2, file_browser_imgbtn_2_event_handler, LV_EVENT_ALL, ui);
+    lv_obj_add_event_cb(ui->file_browser_imgbtn_3, file_browser_imgbtn_3_event_handler, LV_EVENT_ALL, ui);
+    lv_obj_add_event_cb(ui->file_browser, file_browser_screen_event_handler, LV_EVENT_ALL, ui);
+}
+
+static void pair_options_imgbtn_1_event_handler(lv_event_t *e)
+{
+    lv_event_code_t code = lv_event_get_code(e);
+    lv_ui *ui = (lv_ui *) lv_event_get_user_data(e);
+    lv_obj_t *src = lv_event_get_target(e);
+    switch (code) {
+    case LV_EVENT_CLICKED: {
+        gui_scr_t *screen = gui_scr_get(GUI_SCREEN_PAIRING);
+        if (screen == NULL) {
+            screen = gui_scr_create(GUI_SCREEN_PAIRING, "pairing", guider_ui.pairing, (gui_scr_setup_cb_t)setup_scr_pairing, (gui_scr_unload_cb_t)unload_scr_pairing);
+        }
+        ui_load_scr_anim(ui, screen, LV_SCR_LOAD_ANIM_NONE, 0, 0, true, true, false);
+    }
+    break;
+    default:
+        break;
+    }
+}
+
+static void pair_options_imgbtn_2_event_handler(lv_event_t *e)
+{
+    lv_event_code_t code = lv_event_get_code(e);
+    lv_ui *ui = (lv_ui *) lv_event_get_user_data(e);
+    lv_obj_t *src = lv_event_get_target(e);
+    switch (code) {
+    case LV_EVENT_CLICKED: {
+        gui_scr_t *screen = gui_scr_get(GUI_SCREEN_UNPAIR);
+        if (screen == NULL) {
+            screen = gui_scr_create(GUI_SCREEN_UNPAIR, "unpair", guider_ui.unpair, (gui_scr_setup_cb_t)setup_scr_unpair, (gui_scr_unload_cb_t)unload_scr_unpair);
+        }
+        ui_load_scr_anim(ui, screen, LV_SCR_LOAD_ANIM_NONE, 0, 0, true, true, false);
+    }
+    break;
+    default:
+        break;
+    }
+}
+
+static void pair_options_imgbtn_3_event_handler(lv_event_t *e)
+{
+    lv_event_code_t code = lv_event_get_code(e);
+    lv_ui *ui = (lv_ui *) lv_event_get_user_data(e);
+    lv_obj_t *src = lv_event_get_target(e);
+    switch (code) {
+    case LV_EVENT_CLICKED: {
+        gui_scr_t *screen = gui_scr_get(GUI_SCREEN_PAIR_STATUS);
+        if (screen == NULL) {
+            screen = gui_scr_create(GUI_SCREEN_PAIR_STATUS, "pair_status", guider_ui.pair_status, (gui_scr_setup_cb_t)setup_scr_pair_status, (gui_scr_unload_cb_t)unload_scr_pair_status);
+        }
+        ui_load_scr_anim(ui, screen, LV_SCR_LOAD_ANIM_NONE, 0, 0, true, true, false);
+    }
+    break;
+    default:
+        break;
+    }
+}
+
+void events_init_pair_options(lv_ui *ui)
+{
+    lv_obj_add_event_cb(ui->pair_options_imgbtn_1, pair_options_imgbtn_1_event_handler, LV_EVENT_ALL, ui);
+    lv_obj_add_event_cb(ui->pair_options_imgbtn_2, pair_options_imgbtn_2_event_handler, LV_EVENT_ALL, ui);
+    lv_obj_add_event_cb(ui->pair_options_imgbtn_3, pair_options_imgbtn_3_event_handler, LV_EVENT_ALL, ui);
+}
+
+static void pairing_event_handler(lv_event_t *e)
+{
+    lv_event_code_t code = lv_event_get_code(e);
+    lv_ui *ui = (lv_ui *) lv_event_get_user_data(e);
+    lv_obj_t *src = lv_event_get_target(e);
+    switch (code) {
+    case LV_EVENT_CLICKED: {
+        //custom code pair_options
+        {
+            lv_obj_t *dest = ui->pair_options;
+#if !LV_USE_GUIBUILDER_SIMULATOR
+            extern int gui_set_bbm_exit_pairing(void);
+            gui_set_bbm_exit_pairing();
+#endif
+        }
+        gui_scr_t *screen = gui_scr_get(GUI_SCREEN_PAIR_OPTIONS);
+        if (screen == NULL) {
+            screen = gui_scr_create(GUI_SCREEN_PAIR_OPTIONS, "pair_options", guider_ui.pair_options, (gui_scr_setup_cb_t)setup_scr_pair_options, (gui_scr_unload_cb_t)unload_scr_pair_options);
+        }
+        ui_load_scr_anim(ui, screen, LV_SCR_LOAD_ANIM_NONE, 0, 0, true, true, false);
+    }
+    break;
+    default:
+        break;
+    }
+}
+
+void events_init_pairing(lv_ui *ui)
+{
+    lv_obj_add_event_cb(ui->pairing, pairing_event_handler, LV_EVENT_ALL, ui);
+}
+
+static void unpair_event_handler(lv_event_t *e)
+{
+    lv_event_code_t code = lv_event_get_code(e);
+    lv_ui *ui = (lv_ui *) lv_event_get_user_data(e);
+    lv_obj_t *src = lv_event_get_target(e);
+    switch (code) {
+    case LV_EVENT_CLICKED: {
+        gui_scr_t *screen = gui_scr_get(GUI_SCREEN_PAIR_OPTIONS);
+        if (screen == NULL) {
+            screen = gui_scr_create(GUI_SCREEN_PAIR_OPTIONS, "pair_options", guider_ui.pair_options, (gui_scr_setup_cb_t)setup_scr_pair_options, (gui_scr_unload_cb_t)unload_scr_pair_options);
+        }
+        ui_load_scr_anim(ui, screen, LV_SCR_LOAD_ANIM_NONE, 0, 0, true, true, false);
+    }
+    break;
+    default:
+        break;
+    }
+}
+
+void events_init_unpair(lv_ui *ui)
+{
+    lv_obj_add_event_cb(ui->unpair, unpair_event_handler, LV_EVENT_ALL, ui);
+}

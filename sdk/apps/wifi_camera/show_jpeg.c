@@ -65,7 +65,9 @@ int show_jpeg()
     }
 
 
-    virtual_filter = pipeline_filter_add(pipe_core, plugin_factory_find("virtual")); //选择pipeline_core插件
+    char *source_name = plugin_factory_find("virtual");
+    pipe_core->channel = plugin_source_to_channel(source_name);
+    virtual_filter = pipeline_filter_add(pipe_core, source_name); //选择pipeline_core插件
     jpeg_dec_filter = pipeline_filter_add(pipe_core, plugin_factory_find("jpeg_dec"));
     rep_filter = pipeline_filter_add(pipe_core, "rep0");
     imc_filter = pipeline_filter_add(pipe_core, plugin_factory_find("imc"));

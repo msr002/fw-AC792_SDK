@@ -180,21 +180,16 @@ REGISTER_IMD_DEVICE_BEGIN(lcd_mcu_dev) = {
             .mode = 0,
         },
 
-        .in_swap        = false, //输入数据RB交换
-        .out_swap       = false, //输出数据RB交换
-#if (LV_COLOR_DEPTH == 32)
-        .in_fmt         = LCD_IN_ARGB888,
-        .dither_en      = true,  //使能dither 使能将低位转换为高位解决光圈问题
-#else
-        .in_fmt         = LCD_IN_RGB565,
-        .dither_en      = false, //使能dither 0低位截断 1dither
-#endif
+        .in_rbs         = false, //输入数据RB交换
+        .out_rbs        = false, //输出数据RB交换
+        .in_fmt         = TCFG_LCD_INPUT_FORMAT,
         .out_fmt        = LCD_OUT_RGB565,
+        .dither_en      = false, //使能dither 0低位截断 1dither
         .in_bt601       = false, //yuv422输入 转换0 bt601, 1 bt709
         .out_bt601      = false, //yuv422输出 转换0 bt601, 1 bt709
     },
 
-    .data_out_mode   = MODE_BE,//RGB565模式生效 RGB888调节swap
+    .data_out_endian = MODE_BE,//RGB565模式生效 RGB888调节swap
     .set_io_hd       = 1,
     .ncycle          = CYCLE_TWO,
     .data_width      = PORT_8BITS,

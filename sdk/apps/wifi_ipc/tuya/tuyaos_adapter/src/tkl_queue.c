@@ -61,7 +61,7 @@ OPERATE_RET tkl_queue_create_init(TKL_QUEUE_HANDLE *queue, INT_T msgsize, INT_T 
         return OPRT_OS_ADAPTER_QUEUE_CREAT_FAILED;
     }
 
-    tkl_queue->msgsize = queue_size;
+    tkl_queue->msgsize = msgsize;
     *queue = (TKL_QUEUE_HANDLE)tkl_queue;
     return OPRT_OK;
 
@@ -136,7 +136,7 @@ OPERATE_RET tkl_queue_fetch(CONST TKL_QUEUE_HANDLE queue, VOID_T *msg, UINT_T ti
         wait_ms = timeout;
     }
 
-    int msg1[16] = {0,};
+    int msg1[16] = {0};
     // 接收数据的指针
     int ret = os_q_recv(tkl_queue->os_queue, msg1, wait_ms);
     data_ptr = (void *)msg1[0];
@@ -144,6 +144,7 @@ OPERATE_RET tkl_queue_fetch(CONST TKL_QUEUE_HANDLE queue, VOID_T *msg, UINT_T ti
         // 复制数据到用户提供的缓冲区
         memcpy(msg, data_ptr, tkl_queue->msgsize);
         free(data_ptr);  // 释放之前分配的内存
+
         return OPRT_OK;
     } else {
 //        printf("pend timeout");
@@ -167,15 +168,19 @@ VOID_T tkl_queue_free(CONST TKL_QUEUE_HANDLE queue)
     if (queue == NULL) {
         return;
     }
-
     TKL_QUEUE *tkl_queue = (TKL_QUEUE *)queue;
 
     // 删除 OS 队列
     os_q_del(tkl_queue->os_queue, OS_DEL_ALWAYS);  // 假设 1 表示强制删除
 
     // 释放分配的内存
-    free(tkl_queue->os_queue);
-    free(tkl_queue);
+    if (tkl_queue->os_queue) {
+        free(tkl_queue->os_queue);
+    }
+    if (tkl_queue) {
+        free(tkl_queue);
+    }
+    PR_DEBUG("exit tkl_queue_free\n");
 
 
     // --- END: user implements ---

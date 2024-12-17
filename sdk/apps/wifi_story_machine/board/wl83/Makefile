@@ -859,6 +859,7 @@ c_SRC_FILES := \
 	../../../../apps/common/net/wifi_conf.c \
 	../../../../apps/common/rf_fcc_tool/bt.c \
 	../../../../apps/common/rf_fcc_tool/rf_fcc_main.c \
+	../../../../apps/common/rf_fcc_tool/wifi_adaptivity.c \
 	../../../../apps/common/system/device_mount.c \
 	../../../../apps/common/system/flash_write_protect.c \
 	../../../../apps/common/system/init.c \

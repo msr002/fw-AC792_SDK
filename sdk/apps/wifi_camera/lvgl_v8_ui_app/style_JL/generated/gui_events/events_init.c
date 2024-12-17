@@ -2,9 +2,7 @@
 #ifdef CONFIG_UI_STYLE_JL_ENABLE
 /*Generate Code, Do NOT Edit!*/
 #include "./events_init.h"
-#if LV_USE_GUIBUILDER_SIMULATOR
 #include <stdio.h>
-#endif
 #include "lvgl.h"
 #include "./callback_handler.h"
 #include "../gui_timelines/gui_timelines.h"
@@ -339,8 +337,8 @@ static void video_rec_view_video_set_event_handler(lv_event_t *e)
             case SUBPAGE_DOUBLE_REC:
                 rec_subpage_data.icon_res_id = (void *)RES_DOUBLE_VIDEO;
                 rec_subpage_data.title = (void *)_("doublerec");
-                rec_subpage_data.funkey2 = (void *)_("close_s");
-                rec_subpage_data.funkey3 = (void *)_("open_s");
+                rec_subpage_data.funkey2 = (void *)_("close");
+                rec_subpage_data.funkey3 = (void *)_("open");
                 switch (db_select("two")) { //处理高亮样式
                 case 1:
                     rec_subpage_data.btn_focus_id = SUBPAGE_FUNKEY3;
@@ -353,8 +351,8 @@ static void video_rec_view_video_set_event_handler(lv_event_t *e)
             case SUBPAGE_HDR:
                 rec_subpage_data.icon_res_id = (void *)RES_HDR;
                 rec_subpage_data.title = (void *)"HDR";
-                rec_subpage_data.funkey2 = (void *)_("close_s");
-                rec_subpage_data.funkey3 = (void *)_("open_s");
+                rec_subpage_data.funkey2 = (void *)_("close");
+                rec_subpage_data.funkey3 = (void *)_("open");
                 switch (db_select("hdr")) { //处理高亮样式
                 case 1:
                     rec_subpage_data.btn_focus_id = SUBPAGE_FUNKEY3;
@@ -367,8 +365,8 @@ static void video_rec_view_video_set_event_handler(lv_event_t *e)
             case SUBPAGE_MOTION:
                 rec_subpage_data.icon_res_id = (void *)RES_CHECK_SPORT;
                 rec_subpage_data.title = (void *)_("motion");
-                rec_subpage_data.funkey2 = (void *)_("close_s");
-                rec_subpage_data.funkey3 = (void *)_("open_s");
+                rec_subpage_data.funkey2 = (void *)_("close");
+                rec_subpage_data.funkey3 = (void *)_("open");
                 switch (db_select("mot")) { //处理高亮样式
                 case 1:
                     rec_subpage_data.btn_focus_id = SUBPAGE_FUNKEY3;
@@ -382,8 +380,8 @@ static void video_rec_view_video_set_event_handler(lv_event_t *e)
             case SUBPAGE_RECORD:
                 rec_subpage_data.icon_res_id = (void *)GUI_RES_SOUND_PNG;
                 rec_subpage_data.title = (void *)_("record");
-                rec_subpage_data.funkey2 = (void *)_("close_s");
-                rec_subpage_data.funkey3 = (void *)_("open_s");
+                rec_subpage_data.funkey2 = (void *)_("close");
+                rec_subpage_data.funkey3 = (void *)_("open");
                 switch (db_select("mic")) { //处理高亮样式
                 case 1:
                     rec_subpage_data.btn_focus_id = SUBPAGE_FUNKEY3;
@@ -396,8 +394,8 @@ static void video_rec_view_video_set_event_handler(lv_event_t *e)
             case SUBPAGE_GUARD:
                 rec_subpage_data.icon_res_id = (void *)GUI_RES_STOPPING_MONITOR_1_PNG;
                 rec_subpage_data.title = (void *)_("guard");
-                rec_subpage_data.funkey2 = (void *)_("close_s");
-                rec_subpage_data.funkey3 = (void *)_("open_s");
+                rec_subpage_data.funkey2 = (void *)_("close");
+                rec_subpage_data.funkey3 = (void *)_("open");
                 switch (db_select("par")) { //处理高亮样式
                 case 1:
                     rec_subpage_data.btn_focus_id = SUBPAGE_FUNKEY3;
@@ -410,8 +408,8 @@ static void video_rec_view_video_set_event_handler(lv_event_t *e)
             case SUBPAGE_CARNUM:
                 rec_subpage_data.icon_res_id = (void *)GUI_RES_CAR_NUM_PNG;
                 rec_subpage_data.title = (void *)_("carnum");
-                rec_subpage_data.funkey2 = (void *)_("close_s");
-                rec_subpage_data.funkey3 = (void *)_("open_s");
+                rec_subpage_data.funkey2 = (void *)_("close");
+                rec_subpage_data.funkey3 = (void *)_("open");
                 switch (db_select("num")) { //处理高亮样式
                 case 1:
                     rec_subpage_data.btn_focus_id = SUBPAGE_FUNKEY3;
@@ -425,7 +423,7 @@ static void video_rec_view_video_set_event_handler(lv_event_t *e)
             case SUBPAGE_CYC_REC:
                 rec_subpage_data.icon_res_id = (void *)RES_CYCLIC_VIDEO;
                 rec_subpage_data.title = (void *)_("cycrec");
-                rec_subpage_data.funkey1 = (void *)_("close_s");
+                rec_subpage_data.funkey1 = (void *)_("close");
                 rec_subpage_data.funkey2 = (void *)"1min";
                 rec_subpage_data.funkey3 = (void *)"3min";
                 rec_subpage_data.funkey4 = (void *)"10min";
@@ -447,7 +445,7 @@ static void video_rec_view_video_set_event_handler(lv_event_t *e)
             case SUBPAGE_GAP:
                 rec_subpage_data.icon_res_id = (void *)RES_INTERVAL_VIDEO;
                 rec_subpage_data.title = (void *)_("gaprec");
-                rec_subpage_data.funkey1 = (void *)_("close_s");
+                rec_subpage_data.funkey1 = (void *)_("close");
                 rec_subpage_data.funkey2 = (void *)"100ms";
                 rec_subpage_data.funkey3 = (void *)"200ms";
                 rec_subpage_data.funkey4 = (void *)"500ms";
@@ -469,7 +467,7 @@ static void video_rec_view_video_set_event_handler(lv_event_t *e)
             case SUBPAGE_GSENSOR:
                 rec_subpage_data.icon_res_id = (void *)RES_GRAVITY_SENSOR;
                 rec_subpage_data.title = (void *)_("gsensor");
-                rec_subpage_data.funkey1 = (void *)_("close_s");
+                rec_subpage_data.funkey1 = (void *)_("close");
                 rec_subpage_data.funkey2 = (void *)_("Lsensitive");
                 rec_subpage_data.funkey3 = (void *)_("Msensitive");
                 rec_subpage_data.funkey4 = (void *)_("Hsensitive");
@@ -522,9 +520,9 @@ static void video_rec_view_video_set_event_handler(lv_event_t *e)
                 break;
             case SUBPAGE_DATE:
                 rec_subpage_data.icon_res_id = (void *)RES_DATE;
-                rec_subpage_data.title = (void *)_("date_s");
-                rec_subpage_data.funkey2 = (void *)_("close_s");
-                rec_subpage_data.funkey3 = (void *)_("open_s");
+                rec_subpage_data.title = (void *)_("date");
+                rec_subpage_data.funkey2 = (void *)_("close");
+                rec_subpage_data.funkey3 = (void *)_("open");
                 switch (db_select("dat")) { //处理高亮样式
                 case 1:
                     rec_subpage_data.btn_focus_id = SUBPAGE_FUNKEY3;
@@ -1251,8 +1249,6 @@ static void sys_prompt_img_warn_event_handler(lv_event_t *e)
             }
             if (guider_ui.sys_prompt_del == false && lv_obj_is_valid(guider_ui.sys_prompt)) {
                 lv_obj_add_flag(guider_ui.sys_prompt, LV_OBJ_FLAG_HIDDEN);
-                unload_scr_sys_prompt(&guider_ui);
-                lv_obj_clean(guider_ui.sys_prompt);
             }
 
         }
@@ -1413,7 +1409,7 @@ static void sys_setting_view_menupage_event_handler(lv_event_t *e)
                 my_sysmenu_subpage.icon_res_id = (void *)RES_LANGUAGES;
                 my_sysmenu_subpage.title = (void *)_("language");
                 my_sysmenu_subpage.funkey4 = (void *)"简体中文";
-                my_sysmenu_subpage.funkey5 = (void *)"English";
+                my_sysmenu_subpage.funkey5 = (void *)"english";
                 switch (db_select("lag")) { //处理高亮样式
                 case LANG_ENGLISH:
                     my_sysmenu_subpage.list_focus_id = 1;
@@ -2309,8 +2305,8 @@ static void video_photo_view_video_set_event_handler(lv_event_t *e)
             case SUBPAGE_SHOTS:
                 photo_subpage_data.icon_res_id = (void *)GUI_RES_CONTINUOUS_PHOTO_PNG;
                 photo_subpage_data.title = (void *)_("shots");
-                photo_subpage_data.funkey2 = (void *)_("close_s");
-                photo_subpage_data.funkey3 = (void *)_("open_s");
+                photo_subpage_data.funkey2 = (void *)_("close");
+                photo_subpage_data.funkey3 = (void *)_("open");
                 switch (db_select("cyt")) { //处理高亮样式
                 case 1:
                     photo_subpage_data.btn_focus_id = 3;
@@ -2447,8 +2443,8 @@ static void video_photo_view_video_set_event_handler(lv_event_t *e)
             case SUBPAGE_HANDSHAKE:
                 photo_subpage_data.icon_res_id = (void *)GUI_RES_HAND_SHAKE_1_PNG;
                 photo_subpage_data.title = (void *)_("handshake");
-                photo_subpage_data.funkey2 = (void *)_("close_s");
-                photo_subpage_data.funkey3 = (void *)_("open_s");
+                photo_subpage_data.funkey2 = (void *)_("close");
+                photo_subpage_data.funkey3 = (void *)_("open");
                 switch (db_select("sok")) { //处理高亮样式
                 case 1:
                     photo_subpage_data.btn_focus_id = 3;
@@ -2461,7 +2457,7 @@ static void video_photo_view_video_set_event_handler(lv_event_t *e)
             case SUBPAGE_PREVIEW:
                 photo_subpage_data.icon_res_id = (void *)GUI_RES_QUICK_SCAN_PNG;
                 photo_subpage_data.title = (void *)_("preview");
-                photo_subpage_data.funkey1 = (void *)_("close_s");
+                photo_subpage_data.funkey1 = (void *)_("close");
                 photo_subpage_data.funkey2 = (void *)"2s";
                 photo_subpage_data.funkey3 = (void *)"5s";
                 //printf("[chili] %s sub user_photo_preview %d   \n",  __func__, user_photo_preview);
@@ -2480,9 +2476,9 @@ static void video_photo_view_video_set_event_handler(lv_event_t *e)
                 break;
             case SUBPAGE_DATE:
                 photo_subpage_data.icon_res_id = (void *)RES_DATE;
-                photo_subpage_data.title = (void *)_("date_s");
-                photo_subpage_data.funkey2 = (void *)_("close_s");
-                photo_subpage_data.funkey3 = (void *)_("open_s");
+                photo_subpage_data.title = (void *)_("date");
+                photo_subpage_data.funkey2 = (void *)_("close");
+                photo_subpage_data.funkey3 = (void *)_("open");
                 switch (db_select("pdat")) { //处理高亮样式
                 case 1:
                     photo_subpage_data.btn_focus_id = 3;
@@ -4154,8 +4150,8 @@ static void sys_popwin_btn_1_event_handler(lv_event_t *e)
             lv_obj_t *dest = ui->sys_popwin;
             if (guider_ui.sys_popwin_del == false && lv_obj_is_valid(guider_ui.sys_popwin)) {
                 lv_obj_add_flag(guider_ui.sys_popwin, LV_OBJ_FLAG_HIDDEN);
-                unload_scr_sys_popwin(&guider_ui);
-                lv_obj_clean(guider_ui.sys_popwin);
+                /*unload_scr_sys_popwin(&guider_ui);*/
+                /*lv_obj_del(guider_ui.sys_popwin);*/
                 gui_msg_init_ui();
                 gui_msg_init_events();
                 delete_gui_timelines();
@@ -4181,8 +4177,8 @@ static void sys_popwin_btn_2_event_handler(lv_event_t *e)
             video_dec_edit_files(del);
             if (guider_ui.sys_popwin_del == false && lv_obj_is_valid(guider_ui.sys_popwin)) {
                 lv_obj_add_flag(guider_ui.sys_popwin, LV_OBJ_FLAG_HIDDEN);
-                unload_scr_sys_popwin(&guider_ui);
-                lv_obj_clean(guider_ui.sys_popwin);
+                /*unload_scr_sys_popwin(&guider_ui);*/
+                /*lv_obj_del(guider_ui.sys_popwin);*/
                 gui_msg_init_ui();
                 gui_msg_init_events();
                 delete_gui_timelines();

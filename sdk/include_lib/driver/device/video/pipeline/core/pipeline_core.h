@@ -35,6 +35,12 @@ int pipeline_filter_stop(pipe_core_t *pipe_core, pipe_filter_t *filter);
 
 int pipeline_filter_remove(pipe_core_t *pipe_core, pipe_filter_t *filter);
 
+int pipeline_filter_start(pipe_core_t *pipe_core, pipe_filter_t *filter);
+
+int pipeline_filter_stop(pipe_core_t *pipe_core, pipe_filter_t *filter);
+
+int pipeline_filter_reset(pipe_core_t *pipe_core, pipe_filter_t *filter);
+
 pipe_filter_t *pipeline_filter_find(pipe_core_t *pipe_core, const char *name);
 
 pipe_filter_t *pipeline_filter_prev(pipe_core_t *pipe_core, pipe_filter_t *filter);
@@ -64,12 +70,15 @@ enum {
     PIPELINE_SET_OUTPUT_WIDTH,
     PIPELINE_SET_OUTPUT_HEIGHT,
     PIPELINE_SET_IMAGE_PHOTO,
+    PIPELINE_SET_1080P,
     PIPELINE_SET_MCV_TOTAL_CH,
+    PIPELINE_EXTERN_CONNECT,
     PIPELINE_SET_FORMAT,
     PIPELINE_GET_FORMAT,
     PIPELINE_SET_CUR_CHANNEL,
     PIPELINE_SET_BUFFER_LINE,
     PIPELINE_INSERT_EMPTY_FRAME,
+    PIPELINE_SET_REP_MIN_PERIOD,
     PIPELINE_SET_SINK_OUT_FORMAT,
     PIPELINE_GET_YUV_BUF,
 };

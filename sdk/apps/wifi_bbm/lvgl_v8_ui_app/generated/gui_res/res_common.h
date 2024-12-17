@@ -1,0 +1,37 @@
+/*Generate Code, Do NOT Edit!*/
+#ifndef __RES_COMMON_H__
+#define __RES_COMMON_H__
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#include "lvgl.h"
+
+#if LV_USE_GUIBUILDER_SIMULATOR
+#define GUI_WEAKREF __attribute__((weakref))
+#define GUI_WEAK __attribute__((weak))
+#else
+#define GUI_WEAKREF
+#define GUI_WEAK __attribute__((weak))
+#endif
+
+typedef enum {
+    GUI_RES_LINK_PNG = 0x55000000,   //F:\gitlab-m\ac792\ui_prj\wifi_bbm_800x480\import\image\link.png
+    GUI_RES_CAMERA_PNG = 0x55000001,   //F:\gitlab-m\ac792\ui_prj\wifi_bbm_800x480\import\image\camera.png
+    GUI_RES_DIR_PNG = 0x55000002,   //F:\gitlab-m\ac792\ui_prj\wifi_bbm_800x480\import\image\dir.png
+    GUI_RES_BACK_PNG = 0x55000003,   //F:\gitlab-m\ac792\ui_prj\wifi_bbm_800x480\import\image\back.png
+    GUI_RES_UNPAIR_PNG = 0x55000004,   //F:\gitlab-m\ac792\ui_prj\wifi_bbm_800x480\import\image\unpair.png
+    GUI_RES_PAIRED_PNG = 0x55000005,   //F:\gitlab-m\ac792\ui_prj\wifi_bbm_800x480\import\image\paired.png
+    GUI_RES_SWITCH_PNG = 0x55000006,   //F:\gitlab-m\ac792\ui_prj\wifi_bbm_800x480\import\image\switch.png
+    GUI_RES_UP_PNG = 0x55000007,   //F:\gitlab-m\ac792\ui_prj\wifi_bbm_800x480\import\image\up.png
+    GUI_RES_DOWN_PNG = 0x55000008,   //F:\gitlab-m\ac792\ui_prj\wifi_bbm_800x480\import\image\down.png
+    GUI_RES_PAIR_OPT_PAIR_PNG = 0x55000009,   //F:\gitlab-m\ac792\ui_prj\wifi_bbm_800x480\import\image\pair_opt_pair.png
+    GUI_RES_PAIR_OPT_UNPAIR_PNG = 0x5500000A,   //F:\gitlab-m\ac792\ui_prj\wifi_bbm_800x480\import\image\pair_opt_unpair.png
+} GUI_RES_ID;
+
+extern char *gui_get_res_path(int32_t id);
+
+#ifdef __cplusplus
+}
+#endif
+#endif

@@ -345,6 +345,8 @@ static int gpu_prepare(pipe_plugin_t *plugin)
     list_for_each_entry_safe(common, n, &msg_group.list, entry) {
         hdl->output_width = common->width;
         hdl->output_height = common->height;
+
+        //todo 需要转换下
         hdl->output_format = common->format;
         free(common);
     }
@@ -356,12 +358,14 @@ static int gpu_prepare(pipe_plugin_t *plugin)
 }
 
 
-static int gpu_connect(pipe_plugin_t *prev_plugin, pipe_plugin_t *plugin)
+static int gpu_connect(pipe_plugin_t *prev_plugin, pipe_plugin_t *plugin, int source_channel)
 {
+#if 0
     ASSERT(prev_plugin);
     ASSERT(plugin);
 
     if (port_check_connected(prev_plugin, plugin)) {
+        port_source_channel_inc(prev_plugin, plugin, source_channel);
         return 0;
     }
 
@@ -379,8 +383,8 @@ static int gpu_connect(pipe_plugin_t *prev_plugin, pipe_plugin_t *plugin)
 
     buffer_t *buffer = buffer_init(plugin->name, EXTERN_BUFFER, &api);
 
-    port_add_output_endpoint(prev_plugin->port, plugin->name);
-    port_add_input_endpoint(plugin->port, prev_plugin->name);
+    port_add_output_endpoint(prev_plugin->port, plugin->name, source_channel);
+    port_add_input_endpoint(plugin->port, prev_plugin->name, source_channel);
 
     for (int i = 0 ; i < port_output_endpoint_num(prev_plugin->port); i++) {
         // log_info("out direction %s -> %s", prev_plugin->name, port_get_output_endpoint_name(prev_plugin->port, i));
@@ -393,6 +397,9 @@ static int gpu_connect(pipe_plugin_t *prev_plugin, pipe_plugin_t *plugin)
         pipe_endpoint_t *in_endpoint = port_get_input_endpoint(plugin->port, i);
         in_endpoint->data_buffer = buffer;
     }
+#else
+    ASSERT(0);
+#endif
 
     return 0;
 }
@@ -465,7 +472,7 @@ static int gpu_stop(pipe_plugin_t *plugin)
     return 0;
 }
 
-static int gpu_reset(pipe_plugin_t *plugin)
+static int gpu_reset(pipe_plugin_t *plugin, int source_channel)
 {
     ASSERT(plugin);
     struct gpu_handle *hdl = (struct gpu_handle *)plugin->private_data;
@@ -480,7 +487,7 @@ static int gpu_reset(pipe_plugin_t *plugin)
     for (int i = 0 ; i < port_input_endpoint_num(plugin->port); i++) {
         pipe_endpoint_t *in_endpoint = port_get_input_endpoint(plugin->port, i);
         if (in_endpoint) {
-            buffer_uninit(in_endpoint->data_buffer);
+            buffer_uninit(in_endpoint->data_buffer, source_channel);
         }
 
     }

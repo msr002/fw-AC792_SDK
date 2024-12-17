@@ -448,7 +448,11 @@ void cfg_file_parse(void)
 #endif
 
     extern void bt_max_pwr_set(u8 pwr, u8 pg_pwr, u8 iq_pwr, u8 ble_pwr);
-    bt_max_pwr_set(bt_power, 6, 6, ble_power);	//0-11 设置蓝牙发射功率
+#ifdef RF_FCC_TEST_ENABLE
+    bt_max_pwr_set(7, 6, 6, 8);	//0-10 设置蓝牙发射功率
+#else
+    bt_max_pwr_set(bt_power, 6, 6, ble_power);	//0-10 设置蓝牙发射功率
+#endif
     log_info("rf bt_power:%d, ble_power:%d", bt_power, ble_power);
 
     //-----------------------------CFG_TWS_PAIR_CODE_ID----------------------------//

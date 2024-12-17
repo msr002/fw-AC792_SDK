@@ -8,13 +8,22 @@
 #define MAX_BUFFER_NAME_LEN (16)
 
 #define LBUF_RESERVE_LEN (256)
+#define UNDEFINE_BUFFER_TPYE (0)
 
 typedef enum {
     GENERAL_BUFFER = 0x0,
     FAST_BUFFER,
     QUEUE_BUFFER,
     EXTERN_BUFFER,
-} buffer_type;
+} buffer_type_t;
+
+typedef struct {
+    buffer_type_t buffer_type;
+    memory_type_t memory_type;
+    uint32_t buffer_size;
+    struct buffer_api *ops;
+    int32_t source_channel;
+} buffer_info_t;
 
 typedef struct {
     uint32_t id;
@@ -61,7 +70,8 @@ struct buffer_api {
 
 typedef struct _buffer_t {
     int magic;
-    buffer_type type;
+    buffer_type_t type;
+    memory_type_t mem_type;
 
     //private:
     struct list_head entry;
@@ -71,8 +81,10 @@ typedef struct _buffer_t {
     OS_SEM sem;
     int sem_timeout;
     u8 memory_is_ok;
+    int source_channel;
 
     struct lbuff_head *lbuf;
+    u32  buffer_size;
     buffer_meta_t *meta_addr;
 
     //func:
@@ -85,8 +97,14 @@ typedef struct _buffer_t {
     buffer_meta_t *(*realloc_addr)(buffer_t *buffer, buffer_meta_t *m, size_t size);
 } buffer_t;
 
+buffer_t *buffer_init(const char *buffer_name, buffer_info_t *info);
+void buffer_early_uninit(buffer_t *buf);
+int buffer_uninit(buffer_t *buf, int source_channel);
 void *buffer_get_memory_address(buffer_t *buffer);
+int buffer_alloc_memory(buffer_t *buffer, buffer_info_t *buffer_info);
+int buffer_free_memory(buffer_t *buffer);
 u32 buffer_get_memory_size(buffer_t *buffer);
 int buffer_check_vaild(buffer_t *buffer);
+
 
 #endif

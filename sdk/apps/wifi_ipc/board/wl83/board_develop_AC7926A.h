@@ -354,9 +354,10 @@
 //*********************************************************************************//
 //                                   LCD配置                                       //
 //*********************************************************************************//
-// #ifdef CONFIG_UI_ENABLE
+//#ifdef CONFIG_UI_ENABLE
 #define TCFG_LCD_ENABLE                     1
 #define TCFG_LCD_DEVICE_NAME                ""
+#define TCFG_LCD_INPUT_FORMAT               LCD_IN_RGB565
 
 //MCU LCD
 #define TCFG_LCD_MCU_ILI9488_320X480        0
@@ -436,7 +437,7 @@
 #define TCFG_TP_INT_PIN                     IO_PORTA_03
 #define TCFG_TP_COMMUNICATE_IF              "iic0"
 
-// #endif
+//#endif
 
 
 //*********************************************************************************//
@@ -581,18 +582,18 @@
 //                                AUDIO DAC配置                                    //
 //*********************************************************************************//
 #define TCFG_AUDIO_DAC_ENABLE               1
-#define TCFG_AUDIO_DAC_PA_AUTO_MUTE_ENABLE  1
+#define TCFG_AUDIO_DAC_PA_AUTO_MUTE_ENABLE  0
 #define TCFG_AUDIO_DAC_PA_MUTE_PORT         IO_PORTE_15
-#define TCFG_AUDIO_DAC_PA_MUTE_LEVEL        0
+#define TCFG_AUDIO_DAC_PA_MUTE_LEVEL        1
 #define TCFG_AUDIO_DAC_DIFFER_OUTPUT_ENABLE 0
 #define TCFG_AUDIO_DAC_HW_CHANNEL           (AUDIO_DAC_CH_L)// | AUDIO_DAC_CH_R)
-#define TCFG_AUDIO_DAC_VCM_CAP_ENABLE       0
+#define TCFG_AUDIO_DAC_VCM_CAP_ENABLE       1
 #if TCFG_AUDIO_DAC_VCM_CAP_ENABLE
 #define TCFG_AUDIO_DAC_VCM_INIT_DELAY_MS    1000
 #else
 #define TCFG_AUDIO_DAC_VCM_INIT_DELAY_MS    0
 #endif
-#define TCFG_AUDIO_DAC_PA_MUTE_DELAY_MS     500
+#define TCFG_AUDIO_DAC_PA_MUTE_DELAY_MS     0
 
 
 //*********************************************************************************//
@@ -601,11 +602,11 @@
 //--- AIN_AP0: PC7 AIN_AN0: PC6 AIN_BP0: PC11 AIN_BN0: PC12
 //--- AIN_AP1: PC3 AIN_AN1: PC2 AIN_BP1: PC4  AIN_BN1: PC5
 #define TCFG_AUDIO_ADC_ENABLE               1
-#define TCFG_MIC_IO_PORT                    {IO_PORTC_07/*MIC0P*/, IO_PORTC_06/*MIC0N*/, IO_PORTC_11/*MIC1P*/, IO_PORTC_12/*MIC1N*/}
-#define TCFG_MIC_CHANNEL_NUM                2
-#define TCFG_LINEIN_IO_PORT                 {IO_PORTC_07/*AUX0P*/, IO_PORTC_06/*AUX0N*/, IO_PORTC_11/*AUX1P*/, IO_PORTC_12/*AUX1N*/}
-#define TCFG_LINEIN_CHANNEL_NUM             2
-#define TCFG_AUDIO_ADC_ALL_CHANNEL_OPEN     1
+#define TCFG_MIC_IO_PORT                    {IO_PORTC_07/*MIC0P*/, IO_PORTC_06/*MIC0N*/, -1/*MIC1P*/, -1/*MIC1N*/}
+#define TCFG_MIC_CHANNEL_NUM                1
+#define TCFG_LINEIN_IO_PORT                 {-1/*AUX0P*/, -1/*AUX0N*/, IO_PORTC_11/*AUX1P*/, IO_PORTC_12/*AUX1N*/}
+#define TCFG_LINEIN_CHANNEL_NUM             1
+#define TCFG_AUDIO_ADC_ALL_CHANNEL_OPEN     0
 #define TCFG_DMIC_ENABLE                    0
 #define TCFG_DMIC_SCLK_FREQUENCY            2000000
 #define TCFG_DMIC_IO_SCLK                   IO_PORTC_11
@@ -664,8 +665,8 @@
 #define CONFIG_VOICE_NET_CFG_ADC_CHANNEL    0              //声波配网mic通道
 #define CONFIG_AISP_MIC0_ADC_CHANNEL        0              //本地唤醒左mic通道
 #define CONFIG_AISP_MIC1_ADC_CHANNEL        1              //本地唤醒右mic通道
-#define CONFIG_REVERB_ADC_CHANNEL           1              //混响mic通道
-#define CONFIG_PHONE_CALL_ADC_CHANNEL       1              //通话mic通道
+#define CONFIG_REVERB_ADC_CHANNEL           0              //混响mic通道
+#define CONFIG_PHONE_CALL_ADC_CHANNEL       0              //通话mic通道
 #define CONFIG_UAC_MIC_ADC_CHANNEL          0              //UAC mic通道
 #define CONFIG_AISP_LINEIN_ADC_CHANNEL      1              //本地唤醒LINEIN回采通道
 #define CONFIG_FM_LINEIN_ADC_CHANNEL        1              //FM音频流LINEIN回采通道
@@ -841,12 +842,19 @@
 //*********************************************************************************//
 #ifdef CONFIG_VIDEO_ENABLE
 
-//#define CONFIG_VIDEO0_ENABLE
-#define CONFIG_VIDEO1_ENABLE
-#if TCFG_HOST_UVC_ENABLE
+#define CONFIG_VIDEO0_ENABLE
+// #define CONFIG_VIDEO1_ENABLE
 // #define CONFIG_VIDEO2_ENABLE
-#endif
 // #define CONFIG_VIDEO3_ENABLE
+
+#if TCFG_HOST_UVC_ENABLE
+#define CONFIG_UVC_VIDEO_ENABLE
+//#define CONFIG_UVC_VIDEO0_ENABLE
+//#define CONFIG_UVC_VIDEO1_ENABLE
+//#define CONFIG_UVC_VIDEO2_ENABLE
+#endif
+
+
 
 /*video0的IO组和硬件IO */
 #ifdef CONFIG_VIDEO0_ENABLE

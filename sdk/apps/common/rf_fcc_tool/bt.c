@@ -10,7 +10,6 @@
 #include "hci_event.h"
 #include "event/bt_event.h"
 
-extern void bredr_set_dut_enble(u8 en, u8 phone);
 extern void bredr_close_all_scan(void);
 extern void __set_a2dp_auto_play_flag(u8 auto_en);
 extern void __set_simple_pair_flag(bool flag);
@@ -276,16 +275,6 @@ static u8 bt_hci_event_filter(struct bt_event *bt)
             /* log_debug("clear_test_box_flag"); */
             return 0;
         }
-    }
-
-    if ((bt->event != HCI_EVENT_CONNECTION_COMPLETE) ||
-        ((bt->event == HCI_EVENT_CONNECTION_COMPLETE) && (bt->value != ERROR_CODE_SUCCESS))) {
-        //if (get_remote_test_flag() \
-        //    && !(HCI_EVENT_DISCONNECTION_COMPLETE == bt->event) \
-        //    && !(HCI_EVENT_VENDOR_REMOTE_TEST == bt->event)) {
-        //    log_i("cpu reset\n");
-        //    /* cpu_reset(); */
-        //}
     }
 
     return 1;

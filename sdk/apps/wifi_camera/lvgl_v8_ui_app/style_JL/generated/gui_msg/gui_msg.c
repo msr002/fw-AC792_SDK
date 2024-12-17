@@ -657,15 +657,6 @@ void gui_msg_set_visible_by_bool_cb(lv_observer_t *observer, lv_subject_t *subje
         lv_obj_add_flag(obj, LV_OBJ_FLAG_HIDDEN);
     }
 }
-void gui_msg_set_digital_clock_clock_time_by_time_cb(lv_observer_t *observer, lv_subject_t *subject)
-{
-    lv_obj_t *obj = lv_observer_get_target_obj(observer);
-    if (obj == NULL || lv_obj_is_valid(obj) == false) {
-        return;
-    }
-
-    gui_msg_data_t *data = (gui_msg_data_t *)observer->user_data;
-}
 void gui_msg_set_bar_bar_value_by_int32_cb(lv_observer_t *observer, lv_subject_t *subject)
 {
     lv_obj_t *obj = lv_observer_get_target_obj(observer);

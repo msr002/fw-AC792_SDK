@@ -4,7 +4,9 @@
 
 static void video_eva_xbus_init(void)
 {
-    /* eva_xbus_rsel |= BIT(rid_dmm); //dmm独占eva xbus通道1 */
+
+    eva_xbus_rsel |= BIT(rid_dmm) | BIT(rid_rep_ch0); //dmm独占eva xbus通道1
+    eva_xbus_wsel |= BIT(wid_imc_ch1) | BIT(wid_imc_ch0); //dmm独占eva xbus通道1
 }
 
 void setup_arch(void)

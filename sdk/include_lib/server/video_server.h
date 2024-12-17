@@ -86,6 +86,9 @@ struct vs_audio {
     u8 type;
     const char *sample_source;
     void *aec_attr;                           /*!< AEC回声消除算法配置参数 */
+    const struct audio_vfs_ops *vfs_ops;      /*!< 虚拟文件操作句柄 */
+    int(*read_input)(u8 *buf, u32 len);       /*!< 用于虚拟采样源"virtual"编码时的数据读取操作读输入buf及其长度，返回负值自动停止编码并回调编码结束的事件 */
+
 };
 #endif
 
@@ -218,6 +221,7 @@ struct vs_video_rec {
     void *isc_sbuf;
     u32 sbuf_size;
     u8 bfmode;//ppbuf mode
+    u8 double_raw;
 
     /*net_video*/
     const char *fpath;
@@ -262,6 +266,7 @@ struct vs_video_display {
     u32 rotate;
     u16 src_w;
     u16 src_h;
+    u8 double_raw;
 };
 
 struct vs_image_capture {
@@ -339,6 +344,7 @@ enum {
     VIDEO_REQ_REC,
     VIDEO_REQ_DISPLAY,
     VIDEO_REQ_IMAGE_CAPTURE,
+    VIDEO_REQ_QUICK_IMAGE_CAPTURE,
     VIDEO_REQ_CAMERA_EFFECT,
     VIDEO_REQ_CAMERA_SCA,
     VIDEO_REQ_GET_IMAGE,

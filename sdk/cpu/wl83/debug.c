@@ -1759,7 +1759,6 @@ void debug_init(void)
 #endif
 #endif
 #endif
-        /* mpu_enable_by_index(5, 0x100000, 0x11FE00 - 1, 1, "CxrwPrw0rw1rw2rw3rw", get_debug_dev_id("DBG_BT"), get_debug_dev_id("DBG_BT_RF"), get_debug_dev_id("DBG_BT_BLE"), get_debug_dev_id("DBG_BT_BREDR")); */
 #endif
     }
 }

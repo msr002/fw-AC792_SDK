@@ -356,6 +356,7 @@
 #ifdef CONFIG_UI_ENABLE
 #define TCFG_LCD_ENABLE                     1
 #define TCFG_LCD_DEVICE_NAME                ""
+#define TCFG_LCD_INPUT_FORMAT               LCD_IN_RGB565
 
 //MCU LCD
 #define TCFG_LCD_MCU_ILI9488_320X480        0
@@ -375,7 +376,6 @@
 
 #define TCFG_LCD_RGB_24BIT_ENABLE           1
 #define TCFG_LCD_RGB_IO_HD_LEVEL            1
-#define TCFG_LCD_RGB_INPUT_FORMAT           LCD_IN_RGB565
 
 //SPI LCD
 #define TCFG_LCD_SPI_GC9307_240X296         0
@@ -623,11 +623,15 @@
 //*********************************************************************************//
 //                                AUDIO ADC配置                                    //
 //*********************************************************************************//
+//--- MICBIASA: PC9  MICBIASB: PC10
 //--- AIN_AP0: PC7 AIN_AN0: PC6 AIN_BP0: PC11 AIN_BN0: PC12
 //--- AIN_AP1: PC3 AIN_AN1: PC2 AIN_BP1: PC4  AIN_BN1: PC5
 #define TCFG_AUDIO_ADC_ENABLE               1
 #define TCFG_MIC_IO_PORT                    {-1/*MIC0P*/, -1/*MIC0N*/, IO_PORTC_11/*MIC1P*/, IO_PORTC_12/*MIC1N*/}
 #define TCFG_MIC_CHANNEL_NUM                1
+#define TCFG_MIC_SHARE_MICBIAS_ENABLE       0 //使用到两个mic时候，共用偏置电压MICBIASB:PC10使用
+#define TCFG_MIC_OTHER_POWER_ENABLE         0 //不使用micbias使能普通io或外部ldo供电做mic电源
+#define TCFG_MIC_OTHER_POWER_IO_PORT        {-1/*MIC0_POWER*/, -1/*MIC1_POWER*/} //不使用micbias时的供电io，外部ldo供电填-1
 #define TCFG_LINEIN_IO_PORT                 {IO_PORTC_07/*AUX0P*/, IO_PORTC_06/*AUX0N*/, -1/*AUX1P*/, -1/*AUX1N*/}
 #define TCFG_LINEIN_CHANNEL_NUM             1
 #define TCFG_AUDIO_ADC_ALL_CHANNEL_OPEN     1

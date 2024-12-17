@@ -438,7 +438,18 @@ void usb_host_event_handler(struct device_event *event)
 #if TCFG_HOST_UVC_ENABLE
         extern int usb_host_video_init(const usb_dev usb_id, const u8 sub_id);
         if (!strncmp((const char *)event->value, "uvc", 3)) {
-            usb_host_video_init(usb_id, usb_id);
+            if (usb_id == 1) {
+                if (uvc_host_is_support_h264_fmt()) { /* 判断UVC是否支持h264格式 */
+                    u8 uvc_vaild_nums = uvc_host_is_vaild();
+                    for (int i = 0; i < uvc_vaild_nums; i++) {
+                        usb_host_video_init(1, 1 + i); /* 只接在usb1上 */
+                    }
+                } else {
+                    usb_host_video_init(usb_id, usb_id);
+                }
+            } else {
+                usb_host_video_init(usb_id, usb_id);
+            }
         }
 #endif
 #if TCFG_HOST_AUDIO_ENABLE

@@ -711,6 +711,15 @@ static const struct adc_platform_data adc_data = {
     .mic_port               = TCFG_MIC_IO_PORT,
     .linein_port            = TCFG_LINEIN_IO_PORT,
     .mic_ch_num             = TCFG_MIC_CHANNEL_NUM,
+#if TCFG_MIC_CHANNEL_NUM == 2
+    .mic_share_micbias      = TCFG_MIC_SHARE_MICBIAS_ENABLE,
+#else
+    .mic_share_micbias      = 0,
+#endif
+    .mic_other_power_enable    = TCFG_MIC_OTHER_POWER_ENABLE,
+#if TCFG_MIC_OTHER_POWER_ENABLE
+    .mic_other_power_port      = TCFG_MIC_OTHER_POWER_IO_PORT,
+#endif
     .linein_ch_num          = TCFG_LINEIN_CHANNEL_NUM,
     .all_channel_open       = TCFG_AUDIO_ADC_ALL_CHANNEL_OPEN,
     .dmic_enable            = TCFG_DMIC_ENABLE,
@@ -1173,7 +1182,8 @@ REGISTER_DEVICES(device_table) = {
 #endif
 #ifdef CONFIG_VIDEO2_ENABLE
     { "uvc", &uvc_dev_ops, NULL },
-    { "video2.*",  &video_dev_ops, NULL },
+    /* { "video2.*",  &video_dev_ops, NULL }, */
+    { "video10.*",  &video_dev_ops, NULL },
 #endif
 #ifdef CONFIG_VIDEO3_ENABLE
     { "video3.*",  &video_dev_ops, (void *)&video3_data },

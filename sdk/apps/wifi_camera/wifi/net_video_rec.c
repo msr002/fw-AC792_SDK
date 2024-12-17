@@ -893,6 +893,9 @@ static int net_video_rec0_start()
 #if THREE_WAY_ENABLE
     req.rec.three_in_one_open = 1;
 #endif
+#ifdef CONFIG_VIDEO_DOUBLE_RAW
+    req.rec.double_raw      = 1;
+#endif
 
     /*
      *帧率为0表示使用摄像头的帧率
@@ -1059,6 +1062,9 @@ static int net_video_rec1_start()
     req.rec.width 	= __this_net->net_videoreq[1].rec.width;
     req.rec.height 	= __this_net->net_videoreq[1].rec.height;
 
+#ifdef CONFIG_VIDEO_DOUBLE_RAW
+    req.rec.double_raw      = 1;
+#endif
 #ifdef CONFIG_VIDEO1_ENABLE
     puts("start_video_rec1 \n");
 

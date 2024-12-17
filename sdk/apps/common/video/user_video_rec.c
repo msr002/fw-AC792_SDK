@@ -126,6 +126,16 @@ void *user_video_rec_open(const char *video_name)
         goto __exit;
     }
 
+    int major = 0;
+    int mijor = 0;
+
+    sscanf(video_name, "video%d.%d", &major, &mijor);
+    if (major == 2) {
+        major = 10;
+        sprintf(video_name, "video%d.%d", major, mijor);
+        log_info("Updated video_name: %s\n", video_name);
+    }
+
     handle->user_video_rec = server_open("video_server", (void *)video_name);
     if (!handle->user_video_rec) {
         goto __exit;

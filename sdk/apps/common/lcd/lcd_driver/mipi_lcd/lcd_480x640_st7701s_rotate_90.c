@@ -120,9 +120,9 @@ REGISTER_MIPI_DEVICE_BEGIN(mipi_dev_t) = {
             .angle = 0,
             .mode = 0,
         },
-        .in_swap        = false, //输入数据大小端
-        .out_swap       = false, //输出数据大小端
-        .in_fmt         = TCFG_LCD_RGB_INPUT_FORMAT,
+        .in_rbs         = false, //输入数据RB交换
+        .out_rbs        = false, //输出数据RB交换
+        .in_fmt         = TCFG_LCD_INPUT_FORMAT,
         .out_fmt        = LCD_OUT_RGB888,
         .dither_en      = false, //使能dither 0低位截断 1dither
         .in_bt601       = false, //yuv422输入 转换0 bt601, 1 bt709

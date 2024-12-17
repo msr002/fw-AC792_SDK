@@ -143,7 +143,7 @@ extern struct photo_submenu_data photo_subpage_data;  //拍照设置菜单
 extern struct sysmenu_subpage_data my_sysmenu_subpage;  //系统设置菜单
 extern char user_roller_str[128];//记录roller被选项
 extern int subpage_cur_btn;//子页面当前被按下的按键 0无按下 1~n代表funkey1~n
-extern bool update_date;
+
 
 /*
 * 录像启停控制--控件触摸事件回调
@@ -204,9 +204,7 @@ void format_sdcard(void);
 void setting_reset(void);
 void custom_init(lv_ui *ui);
 void hide_label_timer_cb(lv_timer_t *timer);
-void set_rtc_time(void);
-void set_carnum(void);
-void carnum_utf8_to_gb2312(const uint8_t *utf_8, uint8_t *gb2312_data, int selected_index);
+
 
 #if !LV_USE_GUIBUILDER_SIMULATOR
 void set_menu_status(int data);

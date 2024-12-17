@@ -9,8 +9,6 @@
 // #define CONFIG_SDFILE_EXT_ENABLE                           //外挂隐藏sdfile区的支持
 // #define CONFIG_DMSDX_ENABLE                                //msd多分区显示支持
 
-#define CONFIG_GSENSOR_ENABLE
-
 #define CONFIG_NET_ENABLE
 // #define CONFIG_BT_ENABLE
 #define CONFIG_UI_ENABLE
@@ -365,6 +363,7 @@
 // #ifdef CONFIG_UI_ENABLE
 #define TCFG_LCD_ENABLE                     1
 #define TCFG_LCD_DEVICE_NAME                ""
+#define TCFG_LCD_INPUT_FORMAT               LCD_IN_RGB565
 
 //MCU LCD
 #define TCFG_LCD_MCU_ILI9488_320X480        0
@@ -386,7 +385,6 @@
 
 #define TCFG_LCD_RGB_24BIT_ENABLE           1
 #define TCFG_LCD_RGB_IO_HD_LEVEL            1
-#define TCFG_LCD_RGB_INPUT_FORMAT           LCD_IN_RGB565
 
 //SPI LCD
 #define TCFG_LCD_SPI_GC9307_240X296         0
@@ -907,7 +905,7 @@
 #ifdef CONFIG_VIDEO_ENABLE
 
 #define CONFIG_VIDEO0_ENABLE
-// #define CONFIG_VIDEO1_ENABLE
+#define CONFIG_VIDEO1_ENABLE
 #define CONFIG_VIDEO2_ENABLE
 // #define CONFIG_VIDEO3_ENABLE
 // #define CONFIG_VIDEO4_ENABLE

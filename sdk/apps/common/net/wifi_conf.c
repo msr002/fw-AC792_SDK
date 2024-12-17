@@ -38,7 +38,7 @@ const char WL_RX_PEND_DEBUG_SEC = 2; //统计WIFI底层连续多少秒都接收�
 
 const char WL_RX_OVERFLOW_DEBUG = 0; //统计WIFI底层接收FIFO塞满导致丢包打印,一般认为对端发送太猛/空中干扰太强/CPU太繁忙来接收线程来不及取数因素导致, 使能后如果出现丢包打印每秒丢多少个数据包
 
-const char WIFI_PA_ENABLE = 0; //wifi开启外挂硬件PA功率放大，791X占据PA1和PA2硬件IO，远距离传输
+const char WIFI_PA_ENABLE = 0; //wifi开启外挂硬件PA功率放大，需要根据实际原理图配置需要映射的IO
 
 #if defined CONFIG_NO_SDRAM_ENABLE
 const u8 RxReorderEnable = 0; //底层包乱序整理，0为关闭(关闭时UDP重发包也会上传到上层, 但关闭可以减少内存消耗)，1为开启
@@ -113,6 +113,19 @@ u8 wifi_lowpower_mode = 0;
 const u8 CONFIG_WIFI_USE_TLSF_MEM = 0; //配置wifi使用独立的内存管理，与系统内存管理分割开
 const unsigned int CONFIG_WIFI_MAX_MEM_LIMIT = 200 * 1024; //允许wifi使用的内存大小
 const unsigned char CONFIG_AP_TXQ_PRI = 0;  //AP模式下tx和rx队列分配,tx占最大比重，用于改善发送为主的性能
+
+
+#ifdef RF_FCC_TEST_ENABLE
+//WIFI Adaptivity
+/*n/8 dBm 干扰功率阈值, 设置值和真实值有-20dBm的差值, 即默认值为(-80*8)时，干扰功率为-60dBm时进行规避, 最低配置值为(-127*8)*/
+short CHL_PWR_THR = (-70 * 8); //75
+short CHL_BUSY_CONFIG = (0xe & 0x0f); //0xe
+#else
+//WIFI Adaptivity
+/*n/8 dBm 干扰功率阈值, 设置值和真实值有-20dBm的差值, 即默认值为(-80*8)时，干扰功率为-60dBm时进行规避, 最低配置值为(-127*8)*/
+short CHL_PWR_THR = (-80 * 8);
+short CHL_BUSY_CONFIG = (0xc & 0x0f); //0xe
+#endif
 
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 

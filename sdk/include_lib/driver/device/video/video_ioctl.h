@@ -117,6 +117,8 @@ struct video_capability {
 #define VIDIOC_SET_CAMERA_INFO          _IOW('V', 38, sizeof(struct camera_device_info))
 #define VIDIOC_PAUSE                    _IOW('V', 39, sizeof(int))
 #define VIDIOC_RESUME                   _IOW('V', 40, sizeof(int))
+#define VIDIOC_GET_SOURCE_CH            _IOW('V', 41, sizeof(int))
+
 
 
 enum video_buf_type {
@@ -126,12 +128,15 @@ enum video_buf_type {
     VIDEO_BUF_TYPE_VIDEO_PLAY,
     VIDEO_BUF_TYPE_YUV_CAPTURE,
     VIDEO_BUF_TYPE_UVC_CAPTURE,
+    VIDEO_BUF_TYPE_ISP_TRAIN,
+    VIDEO_BUF_TYPE_QUICK_IMAGE,
 };
 
 enum video_three_way_type {
     VIDEO_THREE_WAY_NONE,
     VIDEO_THREE_WAY_JPEG,
     VIDEO_THREE_WAY_H264,
+    VIDEO_THREE_WAY_DOU_RAW,
 
 };
 
@@ -183,6 +188,7 @@ struct video_format {
     u32 gap_fps;
     struct video_window win;
     void *private_data;
+    u8 double_raw;
 };
 
 struct jpg_thumbnail {

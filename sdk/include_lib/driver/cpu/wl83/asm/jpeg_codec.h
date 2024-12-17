@@ -236,6 +236,7 @@ int jpeg_codec_init(void);
  */
 int jpeg_encode_one_image(struct jpeg_encode_req *req);
 int jpeg_manual_encode_frame(void *fd, struct jpeg_encode_req *req);
+int jpeg_get_codec_state(u8 id);
 
 int mjpg_handl2ch(void *_fh);
 void *mjpg_enc_open(void *_info, enum jpeg_enc_mode mode);
@@ -277,7 +278,9 @@ void *mjpg_image_enc_force_open(void *_info, enum jpeg_enc_mode mode, int id);
 int mjpg_image_enc_start(void *_fh, struct YUV_frame_data *input_frame, u8 *bits_buf, int buf_len, u8 q_val);
 int mjpg_enc_set_thumbnails(void *_fh, void *thumbnail, int size);
 void *mjpg_get_auto_stream_encoder(void *_fh);
+int mjpg_stream_reset_bits_rate(void *fd, u32 bits_rate);
 int mjpg_manu_enc_check_space(void *fd, u32 size);
+int mjpg_dri_enc_start(void *_fh, struct YUV_frame_data *input_frame, u8 *bits_buf, int buf_len, u8 q_val);
 /*
  * jpeg decode
  * JPEG解码使用函数
@@ -296,6 +299,7 @@ int jpeg_yuv_to_yuv420(struct jpeg_yuv *src_yuv, struct jpeg_yuv *dst_yuv, u16 s
 int jpeg_decode_image_info(struct jpeg_image_info *info);
 int jpeg_decode_one_image(struct jpeg_decode_req *req, u8 id);
 int jpeg_yuv_to_yuv420(struct jpeg_yuv *src_yuv, struct jpeg_yuv *dst_yuv, u16 stride, u16 image_w, u16 out_w, u8 yuv_type, u16 lines);
+void *jpeg_decode_force_open(void *arg, int id);
 
 #endif
 

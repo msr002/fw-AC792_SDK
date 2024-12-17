@@ -152,9 +152,9 @@ const struct task_info task_info_table[] = {
 
 
 
-    {"avi0",                29,      320,   64    },
-    {"avi1",                29,      320,   64    },
-    {"avi2",                29,      320,   64    },
+    {"avi0",                28,      320,   64    },
+    {"avi1",                28,      320,   64    },
+    {"avi2",                28,      320,   64    },
     {"jpg_dec",             10,     1024,   32    },
     {"video_dec_server",    16,     1024,   256   },
     {"vunpkg_server",       16,     1024,   128   },

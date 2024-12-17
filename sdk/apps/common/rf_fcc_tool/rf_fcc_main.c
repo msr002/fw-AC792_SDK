@@ -91,6 +91,9 @@ struct ctl_params {
     u8 FCC_HEART_ARRAY[10];
     u8 FCC_READY_ARRAY[10];
     u8 fcc_str[3][8];
+    s8 ana_pw;
+    u8 test_mode;
+    u8 signalling_mode;
 } *__THIS;
 
 static u8 g_cur_mode;
@@ -119,6 +122,7 @@ static void report_data(u8 opcode, void *data, u32 len);
 u8 set_search_bd_name(char *name);
 void bt_set_local_name(char *name);
 void wf_tx_sine_test_reset(unsigned char reset);
+void bredr_set_dut_enble(u8 en, u8 phone);
 
 static u8 array_cmp(void *a_array, void *b_array, u32 size)
 {
@@ -806,6 +810,10 @@ static void fcc_data_show(u8 opcode, void *priv)
         log_info("OP_FCC_WIFI_CONN:\n");
         log_info("\tssid = %s\n", ((struct WIFI_CONN_INFO *)priv)->ssid);
         log_info("\tpwd  = %s\n", ((struct WIFI_CONN_INFO *)priv)->pwd);
+
+        void wifi_adaptivity_start(void);
+        wifi_adaptivity_start();
+
         break;
 
     default:
@@ -1079,6 +1087,9 @@ static void fcc_data_deal_task(void *priv)
 
             memset(&__THIS->g_sign_info, 0, sizeof(struct WIFI_SIGN_INFO));
             syscfg_write(WIFI_SIGN_INDEX, &__THIS->g_sign_info, sizeof(struct WIFI_SIGN_INFO));
+            if (__THIS->signalling_mode) {
+                cpu_reset();
+            }
             if (lcw && (fcc->opcode != OP_FCC_START_TX)) {
                 lcw = FALSE;
                 wf_tx_sine_test_reset(1);
@@ -1374,6 +1385,12 @@ static void fcc_data_deal_task(void *priv)
 
                 status = ST_SUCC;
                 report_data(OP_FCC_RPT_ST, &status, sizeof(status));
+
+                os_time_dly(10);
+
+                if (!__THIS->signalling_mode) {
+                    cpu_reset();
+                }
 
 #ifdef CONFIG_IPERF_ENABLE
                 extern void iperf_test(void);
@@ -1888,6 +1905,10 @@ static void fcc_cfg_parse(void)
     }
 #endif
 
+    if (json_object_object_get(new_obj, "ANALOG")) {
+        __THIS->ana_pw = json_object_get_int(json_object_object_get(new_obj, "ANALOG"));
+    }
+
 #ifdef CONFIG_NET_ENABLE
     u8 xosc[2], pa[7];
     if (json_object_object_get(new_obj, "XOSC")) {
@@ -1896,6 +1917,8 @@ static void fcc_cfg_parse(void)
                 xosc[i] = json_object_get_int(json_object_array_get_idx(json_object_object_get(new_obj, "XOSC"), i));
             }
             syscfg_write(VM_XOSC_INDEX, xosc, 2);
+            wf_write_xosc(xosc);
+            put_buf(xosc, 2);
         }
     }
 
@@ -1905,6 +1928,8 @@ static void fcc_cfg_parse(void)
                 pa[i] = json_object_get_int(json_object_array_get_idx(json_object_object_get(new_obj, "PA"), i));
             }
             syscfg_write(VM_WIFI_PA_DATA, pa, sizeof(pa));
+            set_pa_config_data(pa);
+            put_buf(pa, 6);
         }
     }
 #endif
@@ -2013,8 +2038,6 @@ u8 rf_fcc_test_init(void)
 #endif
     }
 
-    fcc_cfg_parse();
-
     __THIS = (struct ctl_params *)zalloc(sizeof(struct ctl_params));
     ASSERT(__THIS);
     memcpy(__THIS->wifi_send_pkg, wifi_head, sizeof(wifi_head));
@@ -2034,12 +2057,16 @@ u8 rf_fcc_test_init(void)
     memcpy(__THIS->fcc_str, fcc_str, sizeof(fcc_str));
     memcpy(__THIS->tx_rate_tab, tx_rate_tab, sizeof(tx_rate_tab));
 
+    __THIS->ana_pw = -1;
+    fcc_cfg_parse();
+
 #ifdef CONFIG_NET_ENABLE
     if (syscfg_read(WIFI_SIGN_INDEX, &__THIS->g_sign_info, sizeof(struct WIFI_SIGN_INFO)) == sizeof(struct WIFI_SIGN_INFO)) {
         if (!strcmp(__THIS->g_sign_info.str, WIFI_SIGN_STR)) {
             log_info("%s, %s\n", __FUNCTION__, __THIS->g_sign_info.str);
             mode = FCC_WIFI_MODE;
             g_cur_mode = FCC_WIFI_MODE;
+            __THIS->signalling_mode = 1;
 #ifdef CMD_DEBUG
             fcc_data_show(OP_FCC_ENTER_WIFI_SIGN, &__THIS->g_sign_info.data);
 #endif
@@ -2101,6 +2128,7 @@ u8 rf_fcc_test_init(void)
         wifi_set_mac(mac);
 #endif
         config_btctler_mode = BT_FCC;
+        __THIS->test_mode = BT_FCC;
         config_btctler_hci_standard = 1;
         fcc_bt_ble_module_init();
         return FCC_BT_MODE;
@@ -2113,8 +2141,10 @@ u8 rf_fcc_test_init(void)
         wifi_set_mac(mac);
 #endif
         config_btctler_mode = BT_NORMAL;
+        __THIS->test_mode = 3;
         config_btctler_hci_standard = 0;
         fcc_bt_ble_module_init();
+        bredr_set_dut_enble(1, 1);
         return FCC_BT_MODE;
 #else
         return 0;
@@ -2125,6 +2155,7 @@ u8 rf_fcc_test_init(void)
         wifi_set_mac(mac);
 #endif
         config_btctler_mode = BT_BQB;
+        __THIS->test_mode = BT_BQB;
         config_btctler_hci_standard = 1;
         fcc_bt_ble_module_init();
         return FCC_BT_MODE;
@@ -2137,6 +2168,7 @@ u8 rf_fcc_test_init(void)
         wifi_set_mac(mac);
 #endif
         config_btctler_mode = BT_NORMAL;
+        __THIS->test_mode = 0;
         config_btctler_hci_standard = 1;
         if (g_mode_info.params[0]) {
             set_search_bd_name(&g_mode_info.params[1]);
@@ -2151,6 +2183,9 @@ u8 rf_fcc_test_init(void)
 #endif
     } else if (mode == FCC_WIFI_MODE) {
 #ifdef CONFIG_NET_ENABLE
+        if (!__THIS->signalling_mode) {
+            __THIS->test_mode = 1;
+        }
         //wifi_set_sta_connect_timeout(10000);
         wifi_set_event_callback(wifi_event_callback);
         /* CHL_BUSY_CONFIG = (0xe & 0x0f); //0xe | 0xc ;open close */
@@ -2162,8 +2197,10 @@ u8 rf_fcc_test_init(void)
         os_mutex_create(&__THIS->list_mutex);
         thread_fork("fcc_data_deal_task", 26, 1024, 0, NULL, fcc_data_deal_task, NULL);
 
-        extern void wifi_set_pwr(unsigned char pwr_sel);
-        wifi_set_pwr(6);
+        if (__THIS->ana_pw > 0) {
+            extern void wifi_set_pwr(unsigned char pwr_sel);
+            wifi_set_pwr(__THIS->ana_pw);
+        }
 
         return FCC_WIFI_MODE;
 #else
@@ -2335,10 +2372,10 @@ u8 fcc_wifi_sign_dgain_set(u8 phy, u8 mcs)
 #endif
 
 
-AT(.volatile_ram_code)
+sec(.volatile_ram_code)
 u8 is_fcc_auth(void)
 {
-    return FALSE;//__THIS->wifi_stray;
+    return __THIS->test_mode;
 }
 
 #endif

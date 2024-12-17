@@ -23,6 +23,8 @@ extern void malloc_dump(void);
 extern void ram_free(void *rmem);
 extern void *ram_malloc(unsigned long size);
 extern void *ram_realloc(void *rmem, unsigned long newsize);
+extern void *ram_zalloc(unsigned long size);
+extern void *ram_calloc(unsigned long count, unsigned long size);
 
 extern void mmu_free(void *rmem);
 extern void *mmu_malloc(size_t size);

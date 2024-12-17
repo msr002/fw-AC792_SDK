@@ -11,13 +11,13 @@
 typedef void (*on_event_t)(const char *plugin_name, int event, void *arg);
 
 typedef struct pipeline_common {
+    struct list_head entry;
     void *data;
     u8 channel;
     u8 format;
     u16 width;
     u16 height;
-    u32 out_fps;
-    struct list_head entry;
+    u32 fps;
 } pipe_common_t;
 
 typedef struct pipeline_message_group {
@@ -26,10 +26,28 @@ typedef struct pipeline_message_group {
     int group_num;
 } pipe_msg_group_t;
 
+struct info_handle {
+    struct list_head entry;
+    void *data;
+    u8 channel;
+
+    u8 dst_format;
+    u16 dst_width;
+    u16 dst_height;
+    u32 dst_fps;
+
+    u8 src_format;
+    u16 src_width;
+    u16 src_height;
+    u32 src_fps;
+
+    u8 refs;
+};
+
 typedef enum {
     FORMAT_YUV420P = 0,
     FORMAT_YUV422P,
-    FORMAT_YUV422_YUYV = 0x06,
+    FORMAT_YUV422_YUYV,
     FORMAT_YUV422_UYVY,
     FORMAT_RAW8,
     FORMAT_NONE = 0xff,
@@ -47,10 +65,15 @@ enum {
     IMC_DOWN_BUFFER,
     IMC_GET_OUTPUT_HEIGHT,
     IMC_GET_OUTPUT_WIDTH,
+
     JPEG_DEC_ONE_FRAME,
     JPEG_ENC_ONE_FRAME,
+
+    H264_ENC_ONE_FRAME,
+
     ENCODER_NEED_KSTART,
     ENCODER_KSTART_SUCC,
+    ENCODER_KSTART_FAIL,
     ENCODER_USED_JPEG,
 
     GET_JPEG_NEED_KSTART,
@@ -58,12 +81,13 @@ enum {
     GET_CAMERA_SENSOR_DEV,
     GET_CAMERA_SENSOR_DEV_ALL,
 
+    GET_RAW_MODE,
     GET_DATA_INFO,
     GET_DATA_INFO_ALL,
 
     SET_FRAME_SENSOR_START,
     SET_REP_GET_DATA_RATE,
-
+    PIPELINE_SET_SOURCE_CHANNEL,
 
     REP_KSTART_NOTIFY,
     REP_BUF_NOTIFY,
@@ -75,14 +99,17 @@ enum {
     REP_SEM_DEC,
     REP_SEM_POST,
 
+    PIPELINE_SET_IMC_RAW,
+    PIPELINE_SET_FIRST_RAW_IMAGE,
     GET_ISP_SEM_HANDLE,
     GET_DROP_CHANNEL,
     INC_IMC_FRAME_RATE,
     DEC_IMC_FRAME_RATE,
     SOFT_IMC_FREE_BUF,
     DISP_FB_PUT_BUF,
-
+    GET_OUTPUT_LINE,
     VIDEOSINK_ONE_FRAME,
+    VIDEOSINK_ONE_H264_FRAME,
     SOFT_IMC_IS_STOP,
     IMC_FRAME_DONE,
     COMPOSITE_ONE_FRAME,

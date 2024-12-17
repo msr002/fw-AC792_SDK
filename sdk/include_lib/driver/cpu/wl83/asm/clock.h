@@ -116,6 +116,7 @@ void wl_clock_early_init(void);
 
 int clk_get(const char *name);
 
+//name : hsb lsb sys ddr sdram sfc
 int clk_set(const char *name, int clk);
 
 int sys_clk_get(void);

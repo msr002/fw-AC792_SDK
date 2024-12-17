@@ -17,6 +17,7 @@
 #include "uart.h"
 #include "os/os_api.h"
 #include "init.h"
+#include "uni_log.h"
 // --- END: user defines and implements ---
 
 
@@ -25,18 +26,132 @@
 #define UART_DEV_NUM       2
 #define REC_BUFF_FIFO_LEN  1024
 #define TUYA_UART_FIFO_LEN 512
+
 /*============================ TYPES =========================================*/
+
+typedef struct {
+    unsigned char *base;  //初始化的动态非配存储空间
+    int front;            //头指针，若队列不空，指向队列的头元素
+    int rear;             //尾指针，若队列不空，指向队列尾元素的下一个位置
+} SqQueue;
+
 typedef struct {
     unsigned char init_flag;
     void *hdl;
     unsigned char rec_buff[REC_BUFF_FIFO_LEN];
+    SqQueue fifo;
     // TaskHandle_t xHandle;
     int uart_pid; //pid
+    TUYA_UART_IRQ_CB tkl_rx_cb;
 } jl_uart_hdl;
 
 static jl_uart_hdl s_jl_uart_hdl[UART_DEV_NUM] = {0};
-//-----user define ------
 
+//-----user define ------
+/**
+ * @brief  入队列数据
+ *
+ * @param[in]  SqQueue *Q           队列
+ * @param[in]  unsigned char e      数据
+ */
+void EnQueue(SqQueue *Q, unsigned char e)
+{
+    //插入元素e为Q的新的队尾元素
+    if ((Q->rear + 1) % TUYA_UART_FIFO_LEN == Q->front) {
+        return;    // 队列满
+    }
+
+    Q->base[Q->rear] = e;
+    Q->rear = (Q->rear + 1) % TUYA_UART_FIFO_LEN;
+    return;
+}
+
+/**
+ * @brief  出队列数据
+ *
+ * @param[in]  SqQueue *Q           队列
+ * @param[in]  unsigned char e      数据
+ *
+ */
+static int DeQueue(SqQueue *Q, unsigned char *e)
+{
+    //若队列不空，则删除Q的对头元素，用e返回其值，并返回OK；
+    //否则返回ERROR
+    if (Q->front == Q->rear) {
+        return OPRT_OS_ADAPTER_COM_ERROR;
+    }
+
+    *e = Q->base[Q->front];
+    Q->front = (Q->front + 1) % TUYA_UART_FIFO_LEN;
+    return OPRT_OK;
+}
+
+
+static void rx_callback()
+{
+    tkl_rx_cb(TUYA_UART_NUM_0);
+}
+
+/**
+ * @brief 串口读取队列
+ *
+ * @param[in]  void * pvParameters
+ */
+void jl_uart_read_task(void *pvParameters)
+{
+    int len = 0;
+    unsigned  char port = 0;
+    unsigned  char byte;
+
+    port = (int)pvParameters;
+    if (port > TUYA_UART_NUM_1) {
+        goto fail;
+    }
+
+    while (1) {
+
+        len = dev_read(s_jl_uart_hdl[port].hdl, &byte, 1);
+        if (len == 1) {
+            EnQueue(&s_jl_uart_hdl[port].fifo, byte);
+            /* printf("port :%d byte :0x%02x \r\n", port, byte); */
+            if (s_jl_uart_hdl[port].tkl_rx_cb) {
+                s_jl_uart_hdl[port].tkl_rx_cb(port);
+            }
+        } else {
+            if (len == -1) {
+                dev_ioctl(s_jl_uart_hdl[port].hdl, IOCTL_UART_FLUSH, 0);
+            }
+            mdelay(10);
+        }
+    }
+
+fail:
+    // vTaskDelete(NULL);
+    // thread_kill()
+    return;
+}
+
+
+
+
+/* 串口中断事件回调函数，该函数在中断中调用，程序执行时间应尽量短 */
+static void uart_irq_cb(uart_irq_event_t event)
+{
+    switch (event) {
+    case UART_IRQ_EVENT_TX:
+//        printf("I am UART_IRQ_EVENT_TX\n");
+        break;
+    case UART_IRQ_EVENT_RX:
+//        printf("I am UART_IRQ_EVENT_RX\n");
+        break;
+    case UART_IRQ_EVENT_OT:
+//        printf("I am UART_IRQ_EVENT_OT\n");
+        break;
+    default:
+//        printf("I am %d\n", event);
+        break;
+    }
+}
 
 /**
  * @brief uart init
@@ -63,6 +178,7 @@ OPERATE_RET tkl_uart_init(TUYA_UART_NUM_E port_id, TUYA_UART_BASE_CFG_T *cfg)
     //unsigned int param;
     printf("uart_dev_init");
 
+
     if (TUYA_UART_NUM_0 == port_id) {
         port_name = "uart1";
     } else if (TUYA_UART_NUM_1 == port_id) {
@@ -74,12 +190,30 @@ OPERATE_RET tkl_uart_init(TUYA_UART_NUM_E port_id, TUYA_UART_BASE_CFG_T *cfg)
     if (s_jl_uart_hdl[port_id].init_flag) {
         return OPRT_OK;
     }
-
+    printf("port name:%s", port_name);
     s_jl_uart_hdl[port_id].hdl = dev_open(port_name, NULL);
+    printf("s_jl_uart_hdl[port_id].hdl:%x", s_jl_uart_hdl[port_id].hdl);
     if (!s_jl_uart_hdl[port_id].hdl) {
         printf("dev_open uart error \r\n");
         return OPRT_OS_ADAPTER_COM_ERROR;
     }
+
+    s_jl_uart_hdl[port_id].fifo.base = malloc(TUYA_UART_FIFO_LEN);
+    if (s_jl_uart_hdl[port_id].fifo.base == NULL) {
+        dev_close(s_jl_uart_hdl[port_id].hdl);
+        return OPRT_OS_ADAPTER_MALLOC_FAILED;
+    }
+    s_jl_uart_hdl[port_id].fifo.front = 0;
+    s_jl_uart_hdl[port_id].fifo.rear = 0;
+    // ret = xTaskCreate(jl_uart_read_task, "adapt_uart", 1024*8, (void *)port_id, 5, &s_jl_uart_hdl[port_id].uart_pid);
+    ret = thread_fork("adapt_uart", 5, 1024 * 5, 0, &s_jl_uart_hdl[port_id].uart_pid, jl_uart_read_task, (void *)port_id);
+    if (ret != 0) {
+        dev_close(s_jl_uart_hdl[port_id].hdl);
+        free(s_jl_uart_hdl[port_id].fifo.base);
+        return OPRT_OS_ADAPTER_THRD_CREAT_FAILED;
+    }
+
+
 
     dev_ioctl(s_jl_uart_hdl[port_id].hdl, IOCTL_UART_SET_CIRCULAR_BUFF_ADDR, (u32)s_jl_uart_hdl[port_id].rec_buff);
 
@@ -92,10 +226,12 @@ OPERATE_RET tkl_uart_init(TUYA_UART_NUM_E port_id, TUYA_UART_BASE_CFG_T *cfg)
     /* 4 . 使能特殊串口,启动收发数据 */
     dev_ioctl(s_jl_uart_hdl[port_id].hdl, IOCTL_UART_START, 0);
 
-//    dev_ioctl(s_jl_uart_hdl[port_id].hdl, IOCTL_UART_SET_BAUDRATE, cfg->baudrate);
+    dev_ioctl(s_jl_uart_hdl[port_id].hdl, IOCTL_UART_SET_BAUDRATE, cfg->baudrate);
 
     s_jl_uart_hdl[port_id].init_flag = 1;
 
+
+    printf("-----------------%s---------------------%d\n", __func__, cfg->baudrate);
     printf("jl uart success\r\n");
     printf("leave uart init");
 
@@ -118,15 +254,19 @@ OPERATE_RET tkl_uart_init(TUYA_UART_NUM_E port_id, TUYA_UART_BASE_CFG_T *cfg)
 OPERATE_RET tkl_uart_deinit(TUYA_UART_NUM_E port_id)
 {
     // --- BEGIN: user implements ---
+    printf("tkl_uart_deinit");
     if (port_id > TUYA_UART_NUM_1) {
         return OPRT_OS_ADAPTER_INVALID_PARM;
     }
-
-    thread_kill(s_jl_uart_hdl[port_id].uart_pid, KILL_WAIT);
+    thread_kill(&s_jl_uart_hdl[port_id].uart_pid, KILL_FORCE);
     dev_close(s_jl_uart_hdl[port_id].hdl);
+    if (s_jl_uart_hdl[port_id].fifo.base) {
+        free(s_jl_uart_hdl[port_id].fifo.base);
+    }
 
     s_jl_uart_hdl[port_id].init_flag = 0;
     s_jl_uart_hdl[port_id].hdl = NULL;
+
     return OPRT_OK;
     // --- END: user implements ---
 }
@@ -148,18 +288,23 @@ OPERATE_RET tkl_uart_deinit(TUYA_UART_NUM_E port_id)
 INT_T tkl_uart_write(TUYA_UART_NUM_E port_id, VOID_T *buff, UINT16_T len)
 {
     // --- BEGIN: user implements ---
+    // printf("tkl_uart_write!, len:%d", len);
     if (port_id > TUYA_UART_NUM_1) {
         return OPRT_OS_ADAPTER_INVALID_PARM;
     }
 
     if (!s_jl_uart_hdl[port_id].init_flag) {
+        // printf("uart is not init");
         return OPRT_OS_ADAPTER_COM_ERROR;
     }
-    printf("串口写数据");
+    // printf("write date:");
+    // put_buf(buff, len);
     dev_write(s_jl_uart_hdl[port_id].hdl, buff, len);
-    return 0;
+    return len;
     // --- END: user implements ---
 }
+
+
 
 /**
  * @brief enable uart rx interrupt and regist interrupt callback
@@ -177,6 +322,10 @@ INT_T tkl_uart_write(TUYA_UART_NUM_E port_id, VOID_T *buff, UINT16_T len)
 VOID_T tkl_uart_rx_irq_cb_reg(TUYA_UART_NUM_E port_id, TUYA_UART_IRQ_CB rx_cb)
 {
     // --- BEGIN: user implements ---
+    printf("tkl_uart_rx_irq_cb_reg");
+    s_jl_uart_hdl[port_id].tkl_rx_cb = rx_cb;
+
+    //dev_ioctl(s_jl_uart_hdl[port_id].hdl, IOCTL_UART_SET_IRQ_EVENT_CB , (u32)&uart_irq_cb);
     return ;
     // --- END: user implements ---
 }
@@ -199,6 +348,7 @@ VOID_T tkl_uart_rx_irq_cb_reg(TUYA_UART_NUM_E port_id, TUYA_UART_IRQ_CB rx_cb)
 VOID_T tkl_uart_tx_irq_cb_reg(TUYA_UART_NUM_E port_id, TUYA_UART_IRQ_CB tx_cb)
 {
     // --- BEGIN: user implements ---
+    printf("tkl_uart_tx_irq_cb_reg");
     return ;
     // --- END: user implements ---
 }
@@ -221,14 +371,38 @@ INT_T tkl_uart_read(TUYA_UART_NUM_E port_id, VOID_T *buff, UINT16_T len)
 {
     // --- BEGIN: user implements ---
     int ret = OPRT_OK;
+    u8 *buf = 0;
+    INT_T read_len = 0;
+    int i = 0;
 
+    /* printf("tkl_uart_read,len:%d", len); */
     if (port_id > TUYA_UART_NUM_1) {
         return OPRT_OS_ADAPTER_INVALID_PARM;
     }
+    buf = malloc(len);
+    if (!buf) {
+        return OPRT_OS_ADAPTER_MALLOC_FAILED;
+    }
+    // dev_read(s_jl_uart_hdl[port_id].hdl, buff, len);
+    for (i = 0; i < len; i++) {
+        ret = DeQueue(&s_jl_uart_hdl[port_id].fifo, buf + i);
+        if (ret) {
+            read_len = i;
+            // printf("read err  read_len = %d\n",read_len);
+            break;
+        }
+    }
+    if (i == len) {
+        read_len = len;
+    }
 
-    dev_read(s_jl_uart_hdl[port_id].hdl, buff, len);
-
-    return OPRT_OK;
+    // printf("read date: %d",read_len);
+    if (read_len) {
+        put_buf(buf, len);
+        memcpy(buff, buf, read_len);
+    }
+    free(buf);
+    return read_len;
 //    return 0;
     // --- END: user implements ---
 }
@@ -249,6 +423,7 @@ INT_T tkl_uart_read(TUYA_UART_NUM_E port_id, VOID_T *buff, UINT16_T len)
 OPERATE_RET tkl_uart_set_tx_int(TUYA_UART_NUM_E port_id, BOOL_T enable)
 {
     // --- BEGIN: user implements ---
+    printf("tkl_uart_set_tx_int");
     return OPRT_NOT_SUPPORTED;
     // --- END: user implements ---
 }
@@ -269,6 +444,7 @@ OPERATE_RET tkl_uart_set_tx_int(TUYA_UART_NUM_E port_id, BOOL_T enable)
 OPERATE_RET tkl_uart_set_rx_flowctrl(TUYA_UART_NUM_E port_id, BOOL_T enable)
 {
     // --- BEGIN: user implements ---
+    printf("tkl_uart_set_rx_flowctrl");
     return OPRT_NOT_SUPPORTED;
     // --- END: user implements ---
 }
@@ -291,6 +467,7 @@ OPERATE_RET tkl_uart_set_rx_flowctrl(TUYA_UART_NUM_E port_id, BOOL_T enable)
 OPERATE_RET tkl_uart_wait_for_data(TUYA_UART_NUM_E port_id, INT_T timeout_ms)
 {
     // --- BEGIN: user implements ---
+    printf("tkl_uart_wait_for_data!");
     return OPRT_NOT_SUPPORTED;
     // --- END: user implements ---
 }
@@ -307,6 +484,7 @@ OPERATE_RET tkl_uart_wait_for_data(TUYA_UART_NUM_E port_id, INT_T timeout_ms)
 OPERATE_RET tkl_uart_ioctl(TUYA_UART_NUM_E port_id, UINT32_T cmd, VOID *arg)
 {
     // --- BEGIN: user implements ---
+    printf("tkl uart ioctl!");
     return OPRT_NOT_SUPPORTED;
     // --- END: user implements ---
 }

@@ -10,18 +10,19 @@ struct pipeline_filter {
 
     on_event_t on_event;
     void *on_event_arg;
+    void *parent;
 
     pipe_plugin_t *plugin;
     int (*init)(pipe_filter_t *filter);
-    int (*connect)(pipe_filter_t *prev_filter, pipe_filter_t *filter);
-    int (*start)(pipe_filter_t *filter);
-    int (*stop)(pipe_filter_t *filter);
-    int (*reset)(pipe_filter_t *filter);
-    int (*prepare)(pipe_filter_t *filter);
-    int (*pause)(pipe_filter_t *filter);
-    int (*resume)(pipe_filter_t *filter);
-    int (*set_parameter)(pipe_filter_t *filter, int cmd, void *arg);
-    int (*get_parameter)(pipe_filter_t *filter, int cmd, void *arg);
+    int (*connect)(pipe_filter_t *prev_filter, pipe_filter_t *filter, int source_channel);
+    int (*start)(pipe_filter_t *filter, int source_channel);
+    int (*stop)(pipe_filter_t *filter, int source_channel);
+    int (*reset)(pipe_filter_t *filter, int source_channel);
+    int (*prepare)(pipe_filter_t *filter, int source_channel);
+    int (*pause)(pipe_filter_t *filter, int source_channel);
+    int (*resume)(pipe_filter_t *filter, int source_channel);
+    int (*set_parameter)(pipe_filter_t *filter, int cmd, void *arg, int source_channel);
+    int (*get_parameter)(pipe_filter_t *filter, int cmd, void *arg, int source_channel);
 };
 
 pipe_filter_t *filter_register(const char *name);

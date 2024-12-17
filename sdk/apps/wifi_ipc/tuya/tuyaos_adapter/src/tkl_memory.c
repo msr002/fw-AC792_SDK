@@ -26,7 +26,11 @@ VOID_T *tkl_system_malloc(SIZE_T size)
 VOID_T tkl_system_free(VOID_T *ptr)
 {
     // --- BEGIN: user implements ---
-    free(ptr);
+    // printf("----------------------%s---------------%x\n",__func__,ptr);
+    if (ptr) {
+        free(ptr);
+    }
+    // printf("exit tkl_system_free\n");
     return;
     // --- END: user implements ---
 }
@@ -53,5 +57,10 @@ INT_T tkl_system_get_free_heap_size(VOID_T)
     // --- BEGIN: user implements ---
     return (INT_T)xPortGetFreeHeapSize();
     // --- END: user implements ---
+}
+
+TUYA_WEAK_ATTRIBUTE VOID_T *tkl_system_memset(VOID_T *src, INT_T ch, CONST SIZE_T n)
+{
+    printf("tkl_system_memset");
 }
 

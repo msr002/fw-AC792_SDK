@@ -196,7 +196,7 @@ c_SRC_FILES := \
 	../../../../../apps/common/debug/debug_user.c \
 	../../../../../apps/common/dma2d_gpu/dma2d_common_api.c \
 	../../../../../apps/common/dma2d_gpu/gpu_common_api.c \
-	../../../../../apps/common/example/peripheral/lcd/main.c \
+	../../../../../apps/common/example/peripheral/lcd/lcd_driver_test.c \
 	../../../../../apps/common/example/third_party/freetype/src/autofit/autofit.c \
 	../../../../../apps/common/example/third_party/freetype/src/base/ftbase.c \
 	../../../../../apps/common/example/third_party/freetype/src/base/ftbitmap.c \

@@ -523,7 +523,7 @@ static int lcd_dev_open(const char *name, struct device **device, void *arg)
             if ((!__this->lcd_dev) && (lcd_reopen() < 0)) {
                 return -ENODEV;
             }
-            if (dev->imd.data_out_mode == MODE_BE) {
+            if (dev->imd.data_out_endian == MODE_BE) {
                 __this->draw_buf = malloc(LCD_RGB565_DATA_SIZE);
                 if (!__this->draw_buf) {
                     printf("[LCD]lcd driver draw buf malloc fail!!!");
@@ -565,7 +565,7 @@ static int lcd_dev_open(const char *name, struct device **device, void *arg)
             if ((!__this->lcd_dev) && (lcd_reopen() < 0)) {
                 return -ENODEV;
             }
-            if (dev->spi.data_out_mode == MODE_BE) {
+            if (dev->spi.data_out_endian == MODE_BE) {
                 __this->draw_buf = malloc(LCD_RGB565_DATA_SIZE);
                 if (!__this->draw_buf) {
                     printf("[LCD]lcd driver draw buf malloc fail!!!");
@@ -623,14 +623,14 @@ static int lcd_dev_ioctl(struct device *device, u32 cmd, u32 arg)
         if (lcd->type == LCD_MCU_SINGLE_FRAME) {
             lcd->draw((void *)arg);
         } else if (lcd->type == LCD_MCU) {
-            if (__this->lcd->dev->imd.data_out_mode == MODE_BE) {
+            if (__this->lcd->dev->imd.data_out_endian == MODE_BE) {
                 jldma2d_endian_trans(__this->draw_buf, (uint8_t *)arg, LCD_W, LCD_H, JLDMA2D_FORMAT_RGB565);
                 lcd->draw((void *)__this->draw_buf);
             } else {
                 lcd->draw((void *)arg);
             }
         } else if (lcd->type == LCD_SPI) {
-            if (__this->lcd->dev->spi.data_out_mode == MODE_BE) {
+            if (__this->lcd->dev->spi.data_out_endian == MODE_BE) {
                 jldma2d_endian_trans(__this->draw_buf, (uint8_t *)arg, LCD_W, LCD_H, JLDMA2D_FORMAT_RGB565);
                 lcd->draw((void *)__this->draw_buf);
             } else {
@@ -671,7 +671,7 @@ static int lcd_dev_ioctl(struct device *device, u32 cmd, u32 arg)
         __this->lcd_open_flag = 1;
 
         if (lcd->type == LCD_MCU) {
-            if (__this->lcd->dev->imd.data_out_mode == MODE_BE) {
+            if (__this->lcd->dev->imd.data_out_endian == MODE_BE) {
                 jldma2d_endian_trans(__this->draw_buf, (uint8_t *)arg, LCD_W, LCD_H, JLDMA2D_FORMAT_RGB565);
                 lcd->draw((void *)__this->draw_buf);
             } else {
@@ -680,7 +680,7 @@ static int lcd_dev_ioctl(struct device *device, u32 cmd, u32 arg)
         }
 
         if (lcd->type == LCD_SPI) {
-            if (__this->lcd->dev->spi.data_out_mode == MODE_BE) {
+            if (__this->lcd->dev->spi.data_out_endian == MODE_BE) {
                 jldma2d_endian_trans(__this->draw_buf, (uint8_t *)arg, LCD_W, LCD_H, JLDMA2D_FORMAT_RGB565);
                 lcd->draw((void *)__this->draw_buf);
             } else {
@@ -702,7 +702,6 @@ static int lcd_dev_ioctl(struct device *device, u32 cmd, u32 arg)
 static int lcd_dev_close(struct device *device)
 {
     struct lcd_dev_drive *lcd = (struct lcd_dev_drive *)device->private_data;
-    struct imd_dmm_info *info = &lcd->dev->base.info;
 
     switch (lcd->type) {
     case LCD_RGB:
@@ -741,7 +740,7 @@ static int lcd_dev_close(struct device *device)
                 dev_close(__this->lcd_dev);
                 __this->lcd_dev = NULL;
             }
-            if (__this->lcd->dev->imd.data_out_mode == MODE_BE) {
+            if (__this->lcd->dev->imd.data_out_endian == MODE_BE) {
                 free(__this->draw_buf);
                 __this->draw_buf = NULL;
                 dma2d_free();
@@ -760,7 +759,7 @@ static int lcd_dev_close(struct device *device)
                 dev_close(__this->lcd_dev);
                 __this->lcd_dev = NULL;
             }
-            if (__this->lcd->dev->spi.data_out_mode == MODE_BE) {
+            if (__this->lcd->dev->spi.data_out_endian == MODE_BE) {
                 free(__this->draw_buf);
                 __this->draw_buf = NULL;
                 dma2d_free();

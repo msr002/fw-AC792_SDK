@@ -19,6 +19,7 @@ int jlgpu_run();
 int jlgpu_wait_done();
 void jlgpu_reset_all_regs();
 
+void jlgpu_set_out_callback(void *cb_func);
 unsigned int jlgpu_get_gradlut_ptr();
 void jlgpu_set_gradlut_ptr(unsigned int ptr);
 void jlgpu_set_gradlut_dat(unsigned int dat);

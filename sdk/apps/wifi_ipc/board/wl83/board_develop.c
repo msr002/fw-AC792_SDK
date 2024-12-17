@@ -955,7 +955,7 @@ static const struct video_platform_data video1_data = {
 #endif // CONFIG_VIDEO1_ENABLE
 
 
-#ifdef CONFIG_VIDEO2_ENABLE
+#ifdef CONFIG_UVC_VIDEO_ENABLE
 UVC_PLATFORM_DATA_BEGIN(uvc_data)
     .width = 1280,//1280,
     .height = 720,//480,
@@ -965,13 +965,30 @@ UVC_PLATFORM_DATA_BEGIN(uvc_data)
     .put_msg = 0,
 UVC_PLATFORM_DATA_END()
 
-static const struct video_subdevice_data video2_subdev_data[] = {
+static const struct video_subdevice_data video10_subdev_data[] = {
     { VIDEO_TAG_UVC, (void *)&uvc_data },
 };
-static const struct video_platform_data video2_data = {
-    .data = video2_subdev_data,
-    .num = ARRAY_SIZE(video2_subdev_data),
+static const struct video_platform_data video10_data = {
+    .data = video10_subdev_data,
+    .num = ARRAY_SIZE(video10_subdev_data),
 };
+
+static const struct video_subdevice_data video11_subdev_data[] = {
+    { VIDEO_TAG_UVC, (void *)&uvc_data },
+};
+static const struct video_platform_data video11_data = {
+    .data = video11_subdev_data,
+    .num = ARRAY_SIZE(video11_subdev_data),
+};
+
+static const struct video_subdevice_data video12_subdev_data[] = {
+    { VIDEO_TAG_UVC, (void *)&uvc_data },
+};
+static const struct video_platform_data video12_data = {
+    .data = video12_subdev_data,
+    .num = ARRAY_SIZE(video12_subdev_data),
+};
+
 #endif
 
 
@@ -1234,7 +1251,6 @@ REGISTER_DEVICES(device_table) = {
     { "video1.*",  &video_dev_ops, (void *)&video1_data },
 #endif
 #ifdef CONFIG_VIDEO2_ENABLE
-    {"uvc", &uvc_dev_ops, NULL},
     { "video2.*",  &video_dev_ops, (void *)&video2_data },
 #endif
 
@@ -1248,6 +1264,12 @@ REGISTER_DEVICES(device_table) = {
 #endif
     { "videoengine",  &video_engine_ops, NULL },
 
+#ifdef CONFIG_UVC_VIDEO_ENABLE
+    {"uvc", &uvc_dev_ops, NULL},
+    { "video10.*",  &video_dev_ops, (void *)&video10_data },
+    { "video11.*",  &video_dev_ops, (void *)&video11_data },
+    { "video12.*",  &video_dev_ops, (void *)&video12_data },
+#endif
 
 
 #if defined CONFIG_VIDEO_ENABLE || defined CONFIG_UI_ENABLE

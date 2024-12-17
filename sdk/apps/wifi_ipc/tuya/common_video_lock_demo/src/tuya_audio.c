@@ -629,12 +629,6 @@ STATIC INT_T recorder_vfs_fwrite(VOID *file, VOID *data, UINT_T len)
         if (voice_buf_size <= cbuf_get_data_size(cbuf)) {
             cbuf_read(cbuf, audio_data, voice_buf_size);
             //PR_DEBUG("put audio data to queue");
-//            if(fp){
-//                 int ret = fwrite(audio_data, voice_buf_size, 1, fp);
-//                 if(ret>0) {
-//                     PR_DEBUG("fwrite succ");
-//                 }
-//            }
             ty_audio_stream_in_queue(audio_data, voice_buf_size);
         }
 
@@ -1465,15 +1459,129 @@ typedef enum {
 
 STATIC TY_AUDIO_TYPE ty_audio_type = TYPE_NULL;
 
-VOID ty_usb_audio_get_cfg(u8 *channel, u8 *bit_reso, UINT_T *sample_rate)
+void usb_audio_get_cfg(u8 *channel, u8 *bit_reso, UINT_T *sample_rate)
+{
+    *channel     = PCM_CHANNEL;
+    *bit_reso    = PCM_BIT_DEP;
+    *sample_rate = PCM_SAMPLE_RATE;
+}
+
+void ty_usb_audio_get_cfg(u8 *channel, u8 *bit_reso, UINT_T *sample_rate)
 {
     usb_audio_get_cfg(channel, bit_reso, sample_rate);
 }
+
+void usb_audio_set_cfg(u8 channel, u8 bit_reso, UINT_T sample_rate)
+{
+    PCM_SAMPLE_RATE = sample_rate;
+    PCM_CHANNEL     = channel;
+    PCM_BIT_DEP     = bit_reso;
+}
+
 
 STATIC VOID audio_player_local_init(VOID_T *arg)
 {
     memcpy(&g_local_file, arg, SIZEOF(TY_AUDIO_LOCAL_MSG));
 }
+
+//解码器读取PCM数据
+STATIC INT_T audio_play_net_vfs_fread(VOID *file, VOID *data, UINT_T len)
+{
+
+    cbuffer_t *cbuf = NULL;
+    UINT_T cbuf_len = 0;
+    UINT_T rlen = 0;
+    UINT_T c_rlen = 0;
+    cbuf = (cbuffer_t *)file;
+    do {
+        cbuf_len = cbuf_get_data_size(cbuf);
+        rlen = cbuf_len > len ? len : cbuf_len;
+        c_rlen = cbuf_read(cbuf, data, rlen);
+        if (c_rlen > 0) {
+            //PR_DEBUG("c_rlen=%d rlen=%d cbuf_len=%d len=%d",c_rlen,rlen,cbuf_len,len);
+            break;
+        }
+        //PR_DEBUG("os_sem_pend");
+        //此处等待信号量是为了防止解码器因为读不到数而一直空转
+        if (FALSE == g_audio_hdl.is_audio_play_open) {
+            rlen = 0;
+            break;
+        }
+        g_audio_ctrl.pcm_wait_sem = 1;
+        tuya_hal_semaphore_waittimeout(g_audio_ctrl.r_sem, TY_AUDIO_WAIT_TIMEOUT);
+        g_audio_ctrl.pcm_wait_sem = 0;
+
+    } while (1);
+
+
+
+    //返回成功读取的字节数
+    return rlen;
+}
+
+STATIC CONST struct audio_vfs_ops audio_play_net_vfs_ops = {
+    .fread  = audio_play_net_vfs_fread,
+    .fwrite = 0,
+    .fopen = 0,
+    .fseek = 0,
+    .ftell = 0,
+    .flen = 0,
+    .fclose = 0,
+};
+
+/**
+ * @berief: 初始化播放功能,播放PCM的数据,从pcm_buff中读取数据播放
+ * @param   INT_T
+ * @return: none
+ * @retval: none
+ */
+STATIC VOID audio_player_net_init()
+{
+    STATIC BOOL_T flag = FALSE;
+    INT_T err;
+    union audio_req req = {0};
+    // if(flag) {
+    //    return;
+    // }
+    flag = TRUE;
+
+    req.dec.cmd             = AUDIO_DEC_OPEN;
+    req.dec.volume          = AUDIO_PLAY_VOICE_VOLUME;
+    req.dec.output_buf_len  = 8 * 1024;
+    req.dec.priority        = 1;
+    req.dec.channel         = PCM_CHANNEL;  /*dac 差分输出 单路*/
+    req.dec.sample_rate     = PCM_SAMPLE_RATE;
+    req.dec.vfs_ops         = &audio_play_net_vfs_ops;
+    req.dec.dec_type 		= "pcm";
+    req.dec.sample_source   = "dac";
+
+    req.dec.file            = (FILE *)&g_audio_hdl.pcm_cbuff_r;
+    /* req.dec.attr            = AUDIO_ATTR_LR_ADD; */          //左右声道数据合在一起,封装只有DACL但需要测试两个MIC时可以打开此功能
+    PR_DEBUG("audio_player_net_init ");
+    err = server_request(g_audio_hdl.dec_server, AUDIO_REQ_DEC, &req);
+    if (err) {
+        PR_ERR("server_request dec_server AUDIO_DEC_OPEN err %d", err);
+        goto __err;
+    }
+    req.dec.cmd = AUDIO_DEC_START;
+    server_request(g_audio_hdl.dec_server, AUDIO_REQ_DEC, &req);
+    return;
+__err :
+
+    return;
+
+}
+
+STATIC VOID tuya_audio_player_stop()
+{
+    INT_T err;
+    union audio_req req = {0};
+    req.dec.cmd             = AUDIO_DEC_STOP;
+    err = server_request(g_audio_hdl.dec_server, AUDIO_REQ_DEC, &req);
+    PR_DEBUG("tuya_audio_player_stop err=%d", err);
+
+}
+
 
 VOID tuya_usb_audio_start_play(VOID)
 {
@@ -1483,9 +1591,9 @@ VOID tuya_usb_audio_start_play(VOID)
         return;
     }
 
-    //if(!audio_power_off) {
-    //   usb_audio_resume_recorder(audio_id);
-    //}
+    // if(!audio_power_off) {
+    usb_audio_resume_recorder(audio_id);
+    // }
     PR_NOTICE("tuya_usb_audio_start_play");
 }
 
@@ -1496,9 +1604,9 @@ VOID tuya_usb_audio_stop_play(VOID)
         PR_ERR("audio not online!");
         return;
     }
-    //if(!audio_power_off) {
-    //usb_audio_pause_recorder(audio_id);
-    //}
+    // if(!audio_power_off) {
+    usb_audio_pause_recorder(audio_id);
+    // }
     PR_NOTICE("tuya_usb_audio_stop_play");
 }
 
@@ -1509,9 +1617,9 @@ VOID tuya_usb_audio_start_record(VOID)
         PR_ERR("audio not online!");
         return;
     }
-    //if(!audio_power_off) {
-    //usb_audio_resume_player(audio_id);
-    //}
+    // if(!audio_power_off) {
+    // usb_audio_resume_player(audio_id);
+    // }
     PR_NOTICE("tuya_usb_audio_start_record");
 }
 
@@ -1522,9 +1630,9 @@ VOID tuya_usb_audio_stop_record(VOID)
         PR_ERR("audio not online!");
         return;
     }
-    //if(!audio_power_off) {
-    //  usb_audio_pause_player(audio_id);
-    //}
+    // if(!audio_power_off) {
+    // usb_audio_pause_player(audio_id);
+    // }
 
     PR_NOTICE("tuya_usb_audio_stop_record");
 }
@@ -1633,7 +1741,7 @@ STATIC VOID __audio_task(PVOID_T pArg)
 
             g_audio_hdl.is_audio_play_open = TRUE;
             tuya_usb_audio_start_play();
-
+            // audio_player_net_init();
         }
         break;
         case MSG_START_LOCAL_AUDIO_PLAY: {
@@ -1656,6 +1764,7 @@ STATIC VOID __audio_task(PVOID_T pArg)
             cbuf_clear(&g_audio_hdl.pcm_cbuff_r);
             g_audio_hdl.is_audio_play_open = FALSE;
             tuya_usb_audio_stop_play();
+            // tuya_audio_player_stop();
         }
         break;
         case MSG_STOP_LOCAL_AUDIO_PLAY: {
@@ -1969,41 +2078,6 @@ INT_T ty_usb_audio_record_get_buf_test_new(VOID *ptr, UINT_T len)
 STATIC INT_T ty_usb_audio_play_put_buf_net(VOID *data, UINT_T len)
 {
 
-    cbuffer_t *cbuf = NULL;
-    UINT_T cbuf_len = 0;
-    UINT_T rlen = 0;
-    UINT_T c_rlen = 0;
-    cbuf = &g_audio_hdl.pcm_cbuff_r;
-    do {
-        if (FALSE == g_audio_hdl.is_audio_play_open) {
-            rlen = 0;
-            break;
-        }
-        cbuf_len = cbuf_get_data_size(cbuf);
-        if (cbuf_len == 0) {
-            //user_printf("1");
-            rlen = 0;
-            break;
-        }
-        rlen = cbuf_len > len ? len : cbuf_len;
-        if (rlen == 0) {
-            //user_printf("2");
-            break;
-        }
-        c_rlen = cbuf_read(cbuf, data, rlen);
-        if (c_rlen > 0) {
-            //PR_NOTICE("c_rlen=%d rlen=%d cbuf_len=%d len=%d",c_rlen,rlen,cbuf_len,len);
-            break;
-        } else {
-            break;
-        }
-    } while (1);
-    //返回成功读取的字节数
-    return rlen;
-}
-
-STATIC INT_T ty_usb_audio_record_get_buf_net(VOID *data, UINT_T len)
-{
     cbuffer_t *cbuf = &g_audio_hdl.pcm_cbuff_w;
     if (FALSE == g_audio_hdl.is_audio_record_open) {
         return len;
@@ -2019,13 +2093,55 @@ STATIC INT_T ty_usb_audio_record_get_buf_net(VOID *data, UINT_T len)
             // PR_DEBUG("cbuf_write %d",len);
         }
     } else {
-        cbuf_write(cbuf, data, len);
+        // cbuf_write(cbuf, data, len);
+        // PR_DEBUG("data_len:%d", len);
+        if (0 == cbuf_write(cbuf, data, len)) {
+            //上层buf写不进去时清空一下，避免出现声音滞后的情况
+            cbuf_clear(cbuf);
+        }
         if (voice_buf_size <= cbuf_get_data_size(cbuf)) {
             cbuf_read(cbuf, audio_data, voice_buf_size);
             ty_audio_stream_in_queue(audio_data, voice_buf_size);
         }
     }
     return len;
+
+}
+
+STATIC INT_T ty_usb_audio_record_get_buf_net(VOID *data, UINT_T len)
+{
+    cbuffer_t *cbuf = NULL;
+    UINT_T cbuf_len = 0;
+    UINT_T rlen = 0;
+    UINT_T c_rlen = 0;
+    cbuf = &g_audio_hdl.pcm_cbuff_r;
+    do {
+        if (FALSE == g_audio_hdl.is_audio_play_open) {
+            rlen = 0;
+            break;
+        }
+        cbuf_len = cbuf_get_data_size(cbuf);
+        if (cbuf_len == 0) {
+            // user_printf("1");
+            rlen = 0;
+            break;
+        }
+        rlen = cbuf_len > len ? len : cbuf_len;
+        if (rlen == 0) {
+            // user_printf("2");
+            break;
+        }
+        c_rlen = cbuf_read(cbuf, data, rlen);
+        if (c_rlen > 0) {
+            PR_NOTICE("c_rlen=%d rlen=%d cbuf_len=%d len=%d", c_rlen, rlen, cbuf_len, len);
+            break;
+        } else {
+            break;
+        }
+    } while (1);
+    // 返回成功读取的字节数
+    return rlen;
+
 }
 
 
@@ -2064,7 +2180,7 @@ STATIC INT_T ty_usb_audio_play_put_buf_local(VOID *data, UINT_T len)
     //返回成功读取的字节数
     return rlen;
 }
-STATIC INT_T usb_host_audio_play_put_buf(CONST usb_dev usb_id, VOID *ptr, UINT_T len, u8 channel, UINT_T sample_rate)
+STATIC INT_T usb_host_audio_play_put_buf_test(CONST usb_dev usb_id, VOID *ptr, UINT_T len, u8 channel, UINT_T sample_rate)
 {
     INT_T send_len = 0;
     if (len == 0 || (FALSE == g_audio_hdl.is_audio_play_open)) {
@@ -2090,7 +2206,7 @@ STATIC INT_T usb_host_audio_play_put_buf(CONST usb_dev usb_id, VOID *ptr, UINT_T
     return send_len;
 }
 
-STATIC INT_T usb_host_audio_record_get_buf(CONST usb_dev usb_id, VOID *ptr, UINT_T len, u8 channel, UINT_T sample_rate)
+STATIC INT_T usb_host_audio_record_get_buf_test(CONST usb_dev usb_id, VOID *ptr, UINT_T len, u8 channel, UINT_T sample_rate)
 {
     INT_T send_len = len;
     if (len == 0 || (FALSE == g_audio_hdl.is_audio_record_open)) {
@@ -2112,12 +2228,16 @@ STATIC INT_T usb_host_audio_record_get_buf(CONST usb_dev usb_id, VOID *ptr, UINT
     return send_len;
 }
 
-STATIC INT_T usb_host_audio_api_init(VOID)
+STATIC INT_T usb_host_audio_test_init(VOID)
 {
-    usb_host_audio_init(1, usb_host_audio_record_get_buf, usb_host_audio_play_put_buf);
+    usb_host_audio_init(0, usb_host_audio_play_put_buf_test, usb_host_audio_record_get_buf_test);
+#if USB_MAX_HW_NUM > 1
+    usb_host_audio_init(1, usb_host_audio_play_put_buf_test, usb_host_audio_record_get_buf_test);
+#endif
+
     return 0;
 }
-late_initcall(usb_host_audio_api_init);
+late_initcall(usb_host_audio_test_init);
 
 #endif
 
@@ -2147,10 +2267,10 @@ STATIC OPERATE_RET tuya_audio_soft_init(VOID)
     u8 *pcm_buff_w = NULL;
     u8 *pcm_buff_r = NULL;
     PR_DEBUG("into tuya audio soft init");
-    pcm_buff_w = Malloc(PCM_SAMPLE_RATE * PCM_CHANNEL * 10);
-    cbuf_init(&g_audio_hdl.pcm_cbuff_w, pcm_buff_w, PCM_SAMPLE_RATE * PCM_CHANNEL * 10);
-    pcm_buff_r = Malloc(PCM_SAMPLE_RATE * PCM_CHANNEL * 10);
-    cbuf_init(&g_audio_hdl.pcm_cbuff_r, pcm_buff_r, PCM_SAMPLE_RATE * PCM_CHANNEL * 10);
+    pcm_buff_w = Malloc(PCM_SAMPLE_RATE * PCM_CHANNEL * 20);
+    cbuf_init(&g_audio_hdl.pcm_cbuff_w, pcm_buff_w, PCM_SAMPLE_RATE * PCM_CHANNEL * 20);
+    pcm_buff_r = Malloc(PCM_SAMPLE_RATE * PCM_CHANNEL * 20);
+    cbuf_init(&g_audio_hdl.pcm_cbuff_r, pcm_buff_r, PCM_SAMPLE_RATE * PCM_CHANNEL * 20);
 
 
 #if (TCFG_HOST_AUDIO_ENABLE==0)

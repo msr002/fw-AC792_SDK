@@ -22,7 +22,13 @@ int user_video_disp_start(int video_id, int sub_id, const struct video_window *w
 
     log_info("video_disp_start: %d, %d x %d", video_id, win->width, win->height);
 
-    sprintf(dev_name, "video%d.%d", video_id, sub_id);
+    if (video_id == 2) {
+
+        sprintf(dev_name, "video%d.%d", 10, sub_id);
+    } else {
+
+        sprintf(dev_name, "video%d.%d", video_id, sub_id);
+    }
 
 #ifdef CONFIG_VIDEO2_ENABLE
     int uvc_host_online(void);

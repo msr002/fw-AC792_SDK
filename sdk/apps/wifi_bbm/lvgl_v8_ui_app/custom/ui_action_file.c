@@ -1,0 +1,623 @@
+#include <stdio.h>
+#include "lvgl.h"
+#include "gui_guider.h"
+
+#if !LV_USE_GUIBUILDER_SIMULATOR
+#include "app_core.h"
+#include "app_config.h"
+#include "action.h"
+#include "ui.h"
+#include "baby_monitor.h"
+#include "asm/jpeg_codec.h"
+#include "asm/hwi.h"
+#include "system/includes.h"
+#include "video_ioctl.h"
+#include "video.h"
+#include "pipeline_core.h"
+#include "asm/jldma2d.h"
+#endif
+
+#if !LV_USE_GUIBUILDER_SIMULATOR
+
+#define IMG_W                192
+#define IMG_H                160
+#define MAX_FILE_SIZE        100*1024
+#define ONE_PAGE_MAX_NUM     6   //一页文件数量
+#define THUMB_DEC_TASK_NAME  "FILE_BROWSER_THUMB_DEC_TASK"
+
+struct file_browser_handle {
+    u8 *file_buf_list[ONE_PAGE_MAX_NUM];
+    int file_buf_len_list[ONE_PAGE_MAX_NUM];
+
+    u8 *img_buf_list[ONE_PAGE_MAX_NUM];
+    lv_img_dsc_t image_dsc_list[ONE_PAGE_MAX_NUM];
+
+
+    char **file_list;
+    int cur_page;
+    int file_total_num;
+    int file_total_page;
+    int file_cur_page;
+    int file_cur_page_num;
+
+    int thumb_dec_task_pid;
+
+    struct net_ctp_thumb thumb_data;
+
+    OS_SEM pipe_sem;
+    pipe_core_t *pipe_core;
+
+};
+static struct file_browser_handle file_hdl;
+#define __this (&file_hdl)
+
+
+static void thumb_dec_task(void);
+static void jpeg2yuv_pipeline_uninit(void);
+
+
+int gui_bbm_start_file_browser(void)
+{
+    struct intent it;
+    init_intent(&it);
+    it.name	= "baby_monitor";
+    it.action = ACTION_BBM_START_FILE_BROWSER;
+    return start_app(&it);
+}
+
+int gui_bbm_stop_file_browser(void)
+{
+    struct intent it;
+    init_intent(&it);
+    it.name	= "baby_monitor";
+    it.action = ACTION_BBM_STOP_FILE_BROWSER;
+    start_app(&it);
+
+    return 0;
+}
+
+int gui_bbm_get_file_num(void)
+{
+    struct intent it;
+    init_intent(&it);
+    it.name	= "baby_monitor";
+    it.action = ACTION_BBM_GET_FILE_NUM;
+    it.data = &__this->file_total_num;
+    start_app(&it);
+
+    return 0;
+}
+
+int gui_bbm_get_file_list(void)
+{
+    struct intent it;
+    init_intent(&it);
+    it.name	= "baby_monitor";
+    it.action = ACTION_BBM_GET_FILE_LIST;
+    it.data = &__this->file_list;
+    start_app(&it);
+
+    return 0;
+}
+
+int bbm_get_file_thumb_req(int index, int file_num)
+{
+    struct intent it;
+    init_intent(&it);
+    it.name	= "baby_monitor";
+    it.action = ACTION_BBM_GET_FILE_THUMB_REQ;
+
+    __this->thumb_data.start_index = index;
+    __this->thumb_data.file_num = file_num;
+    __this->thumb_data.file_buf_list = __this->file_buf_list;
+    __this->thumb_data.file_buf_len_list = __this->file_buf_len_list;
+
+    it.data = &__this->thumb_data;
+    start_app(&it);
+
+    return 0;
+}
+
+static int file_browser_update_file_num(void)
+{
+    char *ptr = lvgl_module_msg_get_ptr(GUI_FILE_BROWSER_MSG_ID_FILE_NUM, 24);
+    u16 cur_num = __this->file_cur_page * ONE_PAGE_MAX_NUM;
+    cur_num = cur_num > __this->file_total_num ? __this->file_total_num : cur_num;
+    sprintf(ptr, "%d\n/\n%d", cur_num, __this->file_total_num);
+    lvgl_module_msg_send_ptr(ptr, 0);
+}
+
+static int file_browser_update_file_cont(void)
+{
+    int i;
+    int ret = 0;
+    int start_index = (__this->file_cur_page - 1) * ONE_PAGE_MAX_NUM;
+    int msg[3];
+
+    //先发送获取缩略图(jpg)请求,解码线程中信号量同步
+    //post解码线程.
+    os_taskq_del_type(THUMB_DEC_TASK_NAME, Q_MSG);
+    os_taskq_post_type(THUMB_DEC_TASK_NAME, Q_MSG, 1, msg);
+
+    for (i = 0; i < __this->file_cur_page_num; i++) {
+        lv_obj_t *contain = lv_obj_get_child(guider_ui.file_browser_browser_cont, i);
+        lv_obj_clear_flag(contain, LV_OBJ_FLAG_HIDDEN);
+
+        //图片控件
+        lv_obj_t *img = lv_obj_get_child(contain, 0);
+        lv_img_set_src(img, &__this->image_dsc_list[i]);
+
+        //文件名控件
+        lv_obj_t *lab = lv_obj_get_child(contain, 1);
+        char *path = __this->file_list[start_index + i];
+        char *file_name = strrchr(path, '/');
+        lv_label_set_text(lab, ++file_name);
+    }
+
+    for (i = __this->file_cur_page_num; i < ONE_PAGE_MAX_NUM; i++) {
+        lv_obj_t *contain = lv_obj_get_child(guider_ui.file_browser_browser_cont, i);
+        lv_obj_add_flag(contain, LV_OBJ_FLAG_HIDDEN);
+    }
+
+
+    return ret;
+}
+
+static void cal_cur_page_file_num(void)
+{
+    if (__this->file_cur_page < __this->file_total_page) {
+        __this->file_cur_page_num = ONE_PAGE_MAX_NUM;
+    } else {
+        __this->file_cur_page_num = __this->file_total_num - (__this->file_cur_page - 1) * ONE_PAGE_MAX_NUM;
+    }
+}
+
+static void file_browser_update(void)
+{
+    cal_cur_page_file_num();
+
+    file_browser_update_file_num();
+    file_browser_update_file_cont();
+}
+
+static int file_browser_buf_init(void)
+{
+    int i;
+    for (i = 0; i < ONE_PAGE_MAX_NUM; i++) {
+        __this->file_buf_list[i] = malloc(MAX_FILE_SIZE); //jpg
+        __this->img_buf_list[i] = malloc(IMG_W * IMG_H * 2);        //rgb16
+
+        //lvgl img
+        memset(__this->img_buf_list[i], 0x00, IMG_W * IMG_H * 2);
+        __this->image_dsc_list[i].header.always_zero = 0;
+        __this->image_dsc_list[i].header.w = IMG_W;
+        __this->image_dsc_list[i].header.h = IMG_H;
+        __this->image_dsc_list[i].data_size = IMG_W * IMG_H * 2;
+        __this->image_dsc_list[i].header.cf = LV_IMG_CF_TRUE_COLOR;
+        __this->image_dsc_list[i].data = __this->img_buf_list[i];
+
+        if ((!__this->file_buf_list[i]) || (!__this->img_buf_list[i])) {
+            printf("file browser buf init err\n");
+            goto err;
+        }
+    }
+
+    return 0;
+err:
+    for (i = 0; i < ONE_PAGE_MAX_NUM; i++) {
+        if (__this->file_buf_list[i]) {
+            free(__this->file_buf_list[i]);
+            __this->file_buf_list[i] = NULL;
+        }
+        if (__this->img_buf_list[i]) {
+            free(__this->img_buf_list[i]);
+            __this->img_buf_list[i] = NULL;
+        }
+    }
+    return -1;
+}
+
+
+static int file_browser_buf_exit(void)
+{
+    int i;
+    for (i = 0; i < ONE_PAGE_MAX_NUM; i++) {
+        if (__this->file_buf_list[i]) {
+            free(__this->file_buf_list[i]);
+            __this->file_buf_list[i] = NULL;
+        }
+        if (__this->img_buf_list[i]) {
+            free(__this->img_buf_list[i]);
+            __this->img_buf_list[i] = NULL;
+        }
+    }
+}
+
+
+int gui_bbm_next_page(void)
+{
+    __this->file_cur_page++;
+    if (__this->file_cur_page > __this->file_total_page) {
+        __this->file_cur_page = __this->file_total_page;
+        return -1;
+    }
+
+    file_browser_update();
+
+    return 0;
+}
+
+int gui_bbm_prev_page()
+{
+    __this->file_cur_page--;
+    if (__this->file_cur_page < 1) {
+        __this->file_cur_page = 1;
+        return -1;
+    }
+
+    file_browser_update();
+
+    return 0;
+}
+
+static int gui_bbm_thumb_task_init(void)
+{
+    return thread_fork(THUMB_DEC_TASK_NAME, 10, 1024, 1024, &__this->thumb_dec_task_pid, thumb_dec_task, NULL);
+}
+
+
+static void gui_bbm_thumb_task_exit(void)
+{
+    int msg = 1;
+    if (__this->thumb_dec_task_pid) {
+        os_taskq_post_type(THUMB_DEC_TASK_NAME, Q_USER, 1, &msg);
+        thread_kill(&__this->thumb_dec_task_pid, KILL_WAIT);
+        __this->thumb_dec_task_pid = 0;
+    }
+}
+
+
+static int file_browser_screen_load(void)
+{
+    int ret;
+
+    //关闭摄像头实时流
+    gui_bbm_stop_stream();
+
+    //开启ctp文件流程
+    ret = gui_bbm_start_file_browser();
+    if (ret) {
+        return -1;
+    }
+
+    //获取文件数量
+    gui_bbm_get_file_num();
+    //获取文件名列表
+    gui_bbm_get_file_list();
+
+    //内存申请
+    ret = file_browser_buf_init();
+    if (ret) {
+        return -1;
+    }
+    //缩略图解码线程
+    gui_bbm_thumb_task_init();
+
+    //缩略图同步信号量
+    os_sem_create(&__this->thumb_data.sem, 0);
+
+    __this->file_total_page = ceil((float)__this->file_total_num / ONE_PAGE_MAX_NUM);
+    __this->file_cur_page = 1;
+
+    //更新UI
+    file_browser_update();
+
+    return 0;
+}
+
+static int file_browser_screen_unload(void)
+{
+    //缩略图信号量
+    os_sem_del(&__this->thumb_data.sem, OS_DEL_ALWAYS);
+    //关闭ctp文件流程
+    gui_bbm_stop_file_browser();
+    //关闭缩略图解码线程
+    gui_bbm_thumb_task_exit();
+    //释放内存
+    file_browser_buf_exit();
+    //开启摄像头实时流
+    gui_bbm_start_stream();
+
+    return 0;
+}
+
+
+static int gui_src_action_file_browser(int action)
+{
+    int ret;
+
+    switch (action) {
+    case GUI_SCREEN_ACTION_LOAD:
+        ret = file_browser_screen_load();
+        if (ret) {
+            //todo
+            //back home?
+        }
+        break;
+    case GUI_SCREEN_ACTION_UNLOAD:
+        file_browser_screen_unload();
+        break;
+    }
+}
+REGISTER_UI_SCREEN_ACTION_HANDLER(GUI_SCREEN_FILE_BROWSER)
+.onchange = gui_src_action_file_browser,
+};
+
+static void clean_thumb_buf(void)
+{
+    int i;
+    for (i = 0; i < ONE_PAGE_MAX_NUM; i++) {
+        memset(__this->img_buf_list[i], 0x00, IMG_W * IMG_H * 2);
+        memset(__this->file_buf_list[i], 0x00, MAX_FILE_SIZE);
+    }
+}
+
+static void post_func_flush_img(void)
+{
+    if (lv_obj_is_valid(guider_ui.file_browser_browser_cont)) {
+        lv_obj_invalidate(guider_ui.file_browser_browser_cont);
+    }
+}
+
+static void thumb_dec_task(void)
+{
+    int res;
+    int i;
+    int msg[8];
+
+    while (1) {
+        res = os_task_pend("taskq", msg, ARRAY_SIZE(msg));
+
+        switch (res) {
+        case OS_TASKQ:
+            switch (msg[0]) {
+            case Q_MSG:
+                clean_thumb_buf();
+                int start_index = (__this->file_cur_page - 1) * ONE_PAGE_MAX_NUM;
+                bbm_get_file_thumb_req(start_index, __this->file_cur_page_num);
+                //等待获取jpg数据
+                os_sem_pend(&__this->thumb_data.sem, 0);
+
+                //todo
+                //切换页面
+                int cur_index = (__this->file_cur_page - 1) * ONE_PAGE_MAX_NUM;
+                if (cur_index != start_index) {
+                    break;
+                }
+
+                for (i = 0; i < __this->thumb_data.file_num; i++) {
+                    u8 *jpeg_buf = __this->thumb_data.file_buf_list[i];
+                    int jpeg_len = __this->thumb_data.file_buf_len_list[i];
+                    u8 *rgb_buf = __this->img_buf_list[i];
+                    jpeg2yuv_with_pipeline(jpeg_buf, jpeg_len, rgb_buf, IMG_W, IMG_H);
+                }
+                //刷新UI
+                lvgl_rpc_post_func(post_func_flush_img, 0);
+                break;
+            case Q_USER:
+                printf("bbm thumb dec task exit\n");
+                goto exit;
+                break;
+            default:
+                break;
+            }
+            break;
+        default:
+            break;
+        }
+    }
+
+exit:
+    jpeg2yuv_pipeline_uninit();
+}
+
+
+static int yuyv2rgb16_dma2d(u8 *yuv_buf, u8 *rgb_buf, int width, int height)
+{
+    int err;
+
+    u32 in_format = JLDMA2D_FORMAT_YUV422_BT709;
+    u32 out_format = JLDMA2D_FORMAT_RGB565;
+    u32 dest_stride = width * dma2d_get_format_bpp(out_format) / 8;
+    u32 src_stride = width * dma2d_get_format_bpp(in_format) / 8;
+    err = jldma2d_format(rgb_buf, \
+                         yuv_buf, \
+                         dest_stride, \
+                         src_stride, \
+                         in_format, \
+                         out_format, \
+                         width, \
+                         height, \
+                         0, \
+                         0);
+    return err;
+}
+
+static void on_event2(const char *name, int type, void *arg)
+{
+    OS_SEM *sem = (OS_SEM *)arg;
+    switch (type) {
+    case EVENT_FRAME_DONE:
+        if (!strncmp(name, "yuv", 3)) {
+            os_sem_post(sem);
+        }
+        break;
+    case EVENT_PREPARE_DONE:
+        printf("PREPARE %s done", name);
+        break;
+
+    case EVENT_START_DONE:
+        printf("START %s done", name);
+        break;
+
+    case EVENT_STOP_DONE:
+        printf("STOP %s done", name);
+        break;
+    case EVENT_RESET_DONE:
+        printf("RESET %s done", name);
+        break;
+    case EVENT_BW_FULL:
+    case EVENT_BUFFER_FULL:
+    case EVENT_SPEED_FULL:
+    case EVENT_OSD_ERR:
+    case EVENT_LINE_ERR:
+        printf("err %s ", name);
+        break;
+    }
+
+}
+
+static int jpeg2yuv_pipeline_init(struct video_format *f)
+{
+    pipe_filter_t *jpeg_dec_filter, *imc_filter, *rep_filter, *yuv_filter, *virtual_filter;
+    os_sem_create(&__this->pipe_sem, 0);
+    __this->pipe_core = pipeline_init(on_event2, &__this->pipe_sem);
+    if (!__this->pipe_core) {
+        printf("pipeline init err\n");
+        return -1;
+    }
+
+    char *source_name = plugin_factory_find("virtual");
+
+    __this->pipe_core->channel = plugin_source_to_channel(source_name);
+    virtual_filter = pipeline_filter_add(__this->pipe_core, source_name);
+    jpeg_dec_filter = pipeline_filter_add(__this->pipe_core, plugin_factory_find("jpeg_dec"));
+    rep_filter = pipeline_filter_add(__this->pipe_core, "rep1");
+    imc_filter = pipeline_filter_add(__this->pipe_core, "imc3");
+    yuv_filter = pipeline_filter_add(__this->pipe_core, plugin_factory_find("yuv"));
+
+    pipeline_param_set(__this->pipe_core, NULL, PIPELINE_SET_FORMAT, f);
+
+    int out_format = FORMAT_YUV422_UYVY;
+    pipeline_param_set(__this->pipe_core, NULL, PIPELINE_SET_SINK_OUT_FORMAT, (int)&out_format);
+
+    int line_cnt = 16;
+    pipeline_param_set(__this->pipe_core, NULL, PIPELINE_SET_BUFFER_LINE, (int)&line_cnt);
+
+    pipeline_filter_link(virtual_filter, jpeg_dec_filter);
+
+    pipeline_filter_link(jpeg_dec_filter, rep_filter);
+
+    pipeline_filter_link(rep_filter, imc_filter);
+
+    pipeline_filter_link(imc_filter, yuv_filter);
+
+    pipeline_prepare(__this->pipe_core);
+
+    pipeline_start(__this->pipe_core);
+}
+
+static void jpeg2yuv_pipeline_uninit(void)
+{
+    if (!__this->pipe_core) {
+        return;
+    }
+
+    pipeline_stop(__this->pipe_core);
+
+    pipeline_reset(__this->pipe_core);
+
+    pipeline_uninit(__this->pipe_core);
+
+    os_sem_del(&__this->pipe_sem, 0);
+    __this->pipe_core = NULL;
+}
+
+
+static int jpeg2yuv_with_pipeline(u8 *jpeg_buf, int jpeg_len, u8 *img_buf, int dst_w, int dst_h)
+{
+    int err = 0;
+    u8 *yuv_buf;
+    static int last_width, last_height, last_format;
+
+    struct jpeg_image_info info = {0};
+    struct video_format f  = {0};
+    int fmt;
+    info.input.data.buf = jpeg_buf;
+    info.input.data.len = jpeg_len;
+    err = jpeg_decode_image_info(&info);
+    if (err) {
+        printf("jpeg_decode_image_info err:%d\n", err);
+        goto exit;
+    }
+    switch (info.sample_fmt) {
+    case JPG_SAMP_FMT_YUV444:
+        fmt = VIDEO_PIX_FMT_YUV444;
+        break;
+    case JPG_SAMP_FMT_YUV422:
+        fmt = VIDEO_PIX_FMT_YUV422;
+        break;
+    case JPG_SAMP_FMT_YUV420:
+        fmt = VIDEO_PIX_FMT_YUV420;
+        break;
+    default:
+        printf("input err fmt\n");
+        goto exit;
+        break;
+    }
+    f.src_width = info.width;
+    f.src_height = info.height;
+    f.win.width = dst_w;
+    f.win.height = dst_h;
+    f.type = VIDEO_BUF_TYPE_VIDEO_PLAY;
+    f.pixelformat = VIDEO_PIX_FMT_JPEG | fmt;
+    f.private_data = "fb5";
+
+    if ((last_height != info.height) || (last_width != info.width)
+        || (last_format != fmt)) {
+
+        jpeg2yuv_pipeline_uninit();
+        jpeg2yuv_pipeline_init(&f);
+    }
+    last_width = info.width;
+    last_height = info.height;
+    last_format = fmt;
+
+    //设置jpeg buf
+    struct video_cap_buffer buffer ;
+    buffer.buf = jpeg_buf;
+    buffer.size = jpeg_len;
+    pipeline_param_set(__this->pipe_core, NULL, VIDIOC_RDBUF, &buffer);
+
+    err = os_sem_pend(&__this->pipe_sem, 200);
+    if (err) {
+        log_e("jpeg2yuv timeout\n");
+        goto exit;
+    }
+    printf("jpeg2yuv ok\n");
+
+    //获取YUV
+    pipeline_param_get(__this->pipe_core, NULL, PIPELINE_GET_YUV_BUF, &yuv_buf);
+    if (!yuv_buf) {
+        printf("get yuv buf err\n");
+        err = -EFAULT;
+        goto exit;
+    }
+
+    //yuv to rgb
+    yuyv2rgb16_dma2d(yuv_buf, img_buf, dst_w, dst_h);
+
+exit:
+    if (err) {
+        memset(img_buf, 0x00, dst_w * dst_h * 2);
+    }
+    return err;
+}
+
+
+#endif
+
+
+
+
+

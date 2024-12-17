@@ -186,19 +186,6 @@ void video_photo_post_msg(const char *msg, ...)
         tph_take_photo_in_handler();
     } else if (strstr(msg, "tphout")) {
         tph_take_photo_out_handler();
-
-    } else if (strstr(msg, "remainPhoto")) {
-        post_msg2photo_remain(msg, va_arg(argptr, int)); //获取第一个int数据
-
-    } else if (strstr(msg, "swWinicon")) {
-
-    } else if (strstr(msg, "batIcon")) {
-        post_msg2bat_icon(msg, va_arg(argptr, int)); //获取第一个int数据
-
-    } else if (strstr(msg, "sdStatus")) {
-        post_msg2sd_icon(msg, va_arg(argptr, int)); //获取第一个int数据
-
-
     }
 
     va_end(argptr);
@@ -498,7 +485,7 @@ int gui_model_video_photo_msg_photo_reso_cb(gui_msg_action_t access, gui_msg_dat
 }
 
 //剩余拍照数量更新
-static int post_msg2photo_remain(const char *type, u32 num)
+void post_msg2photo_remain(int32_t num)
 {
 #ifdef USE_LVGL_V8_UI_DEMO
     static char remain[16];

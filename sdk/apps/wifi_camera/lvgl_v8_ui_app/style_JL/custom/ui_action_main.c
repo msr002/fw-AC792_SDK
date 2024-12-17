@@ -21,8 +21,8 @@ static void sys_prompt_timer_cb(lv_timer_t *timer)
     printf("[chili]: %s %d\n", __func__, __LINE__);
     if (guider_ui.sys_prompt_del == false && lv_obj_is_valid(guider_ui.sys_prompt)) {
         lv_obj_add_flag(guider_ui.sys_prompt, LV_OBJ_FLAG_HIDDEN);
-        unload_scr_sys_prompt(&guider_ui);
-        lv_obj_clean(guider_ui.sys_prompt);
+        //unload_scr_sys_prompt(&guider_ui);
+        //lv_obj_del(guider_ui.sys_prompt);
     }
     if (prompt_timer) {//删除定时器
         lv_timer_del(prompt_timer);
@@ -54,11 +54,10 @@ void sys_prompt_show_ctl(int32_t show_time, void *tips)
             prompt_timer = lv_timer_create(sys_prompt_timer_cb, show_time, 0);
         }
         if (guider_ui.sys_prompt_del == false && lv_obj_is_valid(guider_ui.sys_prompt)) {
-            //lv_obj_clear_flag(guider_ui.sys_prompt, LV_OBJ_FLAG_HIDDEN);
+            lv_obj_clear_flag(guider_ui.sys_prompt, LV_OBJ_FLAG_HIDDEN);
         } else {
             printf("[chili]: %s %d\n", __func__, __LINE__);
             setup_scr_sys_prompt(&guider_ui);
-            lv_obj_clear_flag(guider_ui.sys_prompt, LV_OBJ_FLAG_HIDDEN);
             printf("[chili]: %s %d\n", __func__, __LINE__);
             gui_model_main_msg_init_ui();
             printf("[chili]: %s %d\n", __func__, __LINE__);
@@ -69,10 +68,7 @@ void sys_prompt_show_ctl(int32_t show_time, void *tips)
         if (guider_ui.sys_prompt_del == false && lv_obj_is_valid(guider_ui.sys_prompt)) {
             lv_obj_add_flag(guider_ui.sys_prompt, LV_OBJ_FLAG_HIDDEN);
             unload_scr_sys_prompt(&guider_ui);
-            lv_obj_clean(guider_ui.sys_prompt);
-            gui_msg_init_ui();
-            gui_msg_init_events();
-            delete_gui_timelines();
+            lv_obj_del(guider_ui.sys_prompt);
         }
 
         if (prompt_timer) {//删除定时器
@@ -236,7 +232,7 @@ void post_msg2sd_homebtn(int online)
 #endif // USE_LVGL_V8_UI_DEMO
 }
 //sd卡状态图标更新
-void post_msg2sd_icon(const char *type, u32 online)
+void post_msg2sd_icon(int online)
 {
 #ifdef USE_LVGL_V8_UI_DEMO
     if (online) {
@@ -248,7 +244,7 @@ void post_msg2sd_icon(const char *type, u32 online)
 }
 
 //视窗切换图标显示隐藏
-void post_msg2sw_winicon(const char *type, u32 online)
+void post_msg2sw_winicon(int online)
 {
 #ifdef USE_LVGL_V8_UI_DEMO
     printf("[chili] %s online %d   \n", __func__, online);
@@ -260,7 +256,7 @@ void post_msg2sw_winicon(const char *type, u32 online)
 #endif // USE_LVGL_V8_UI_DEMO
 }
 //电池电量图标更新
-void post_msg2bat_icon(const char *type, u32 vbt)
+void post_msg2bat_icon(int vbt)
 {
 #ifdef USE_LVGL_V8_UI_DEMO
     //电量更新

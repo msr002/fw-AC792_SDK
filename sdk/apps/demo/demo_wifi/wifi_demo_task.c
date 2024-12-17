@@ -621,6 +621,8 @@ static void wifi_scan_test(void)
 
 static void wifi_demo_task(void *priv)
 {
+#if 1
+
     wifi_set_store_ssid_cnt(NETWORK_SSID_INFO_CNT);
     wifi_set_event_callback(wifi_event_callback);
 
@@ -692,6 +694,14 @@ static void wifi_demo_task(void *priv)
 //wifi_scan_test();
 #endif // WIFI_MODE_CYCLE_TEST
     }
+#else
+
+    //wifi raw 测试
+    wifi_raw_test();
+    while (1) {
+        os_time_dly(50 * 100);
+    }
+#endif
 }
 
 static int demo_wifi(void)

@@ -94,40 +94,40 @@ struct pll4_info {
     u16 pll_freq;
 };
 
-struct imd_dmm_info {
-    u16 x;					    // 显存在屏的水平方向偏移
-    u16 y;					    // 显存在屏的垂直方向偏移
-    u16 xres;					// 显存水平分辨率
-    u16 yres;					// 显存垂直分辨率
-    u16 target_xres;            // 屏水平分辨率
-    u16 target_yres;            // 屏垂直分辨率
-    u8 interpolation_en;     	// 屏幕插值使能
+struct basic_info {
+    u16 x;                                     ///< 显存在屏的水平方向偏移
+    u16 y;                                     ///< 显存在屏的垂直方向偏移
+    u16 xres;                                  ///< 显存水平分辨率
+    u16 yres;                                  ///< 显存垂直分辨率
+    u16 target_xres;                           ///< 屏水平分辨率
+    u16 target_yres;                           ///< 屏垂直分辨率
+    u8 interpolation_en;                       ///< 屏幕插值使能
 
-    enum LCD_IF drive_mode;         //驱动模式
-    u8 in_swap;				        //输入数据大小端
-    u8 in_bt601;			        //yuv422输入转换
-    u8 out_swap;				    //输出数据大小端
-    u8 dither_en;                   //0低位截断，1 dither
-    u8 in_fmt;                      //输入数据格式
-    u8 out_fmt;                     //输出数据格式
-    u8 out_bt601;                   //yuv422输出转换
+    enum LCD_IF drive_mode;                    ///< 驱动模式
+    u8 in_rbs;                                 ///< 输入数据RB交换
+    u8 in_bt601;                               ///< yuv422输入转换
+    u8 out_rbs;                                ///< 输出数据RB交换
+    u8 dither_en;                              ///< 0低位截断，1 dither
+    u8 in_fmt;                                 ///< 输入数据格式
+    u8 out_fmt;                                ///< 输出数据格式
+    u8 out_bt601;                              ///< yuv422输出转换
 
-    u32 buf_addr;				// 显示缓存
+    u32 buf_addr;                              ///< 显示缓存
     enum BUFFER_MODE mode;
-    enum INTERLACED interlaced_mode;         // 隔行模式
+    enum INTERLACED interlaced_mode;           ///< 隔行模式
 
-    u8  test_mode;				// 测试模式(纯色)使能
-    u32 test_mode_color;		// 测试模式颜色设置
-    u32 bg_color;           	// 背景颜色
+    u8  test_mode;                             ///< 测试模式(纯色)使能
+    u32 test_mode_color;                       ///< 测试模式颜色设置
+    u32 bg_color;                              ///< 背景颜色
 
-    enum IN_FORMAT sample;		// 采样方式 YUV420/YUV422/YUV444
-    enum OUT_FORMAT format;     // 输出数据格式
-    struct color_correct adjust;// 颜色校正参数
+    enum IN_FORMAT sample;                     ///< 采样方式 YUV420/YUV422/YUV444
+    enum OUT_FORMAT format;                    ///< 输出数据格式
+    struct color_correct adjust;               ///< 颜色校正参数
 
-    enum LEN_CFG len;		    // 访问的块长度
-    enum ODD_EVEN_FILED interlaced_1st_filed;  	// 首场是奇场or偶场,INTERLACED_DATA 时有效
+    enum LEN_CFG len;                          ///< 访问的块长度
+    enum ODD_EVEN_FILED interlaced_1st_filed;  ///< 首场是奇场or偶场,INTERLACED_DATA 时有效
 
-    u16  rotate;				// 旋转角度(90.0 / 180.0 / 270.0)
+    u16 rotate;                                ///< 旋转角度(90.0 / 180.0 / 270.0)
 };
 
 #endif

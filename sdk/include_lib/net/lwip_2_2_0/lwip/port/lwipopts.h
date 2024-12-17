@@ -66,8 +66,9 @@ extern "C" {
 
 #define DHCPS_UNICAST_ENABLE            0
 #if DHCPS_UNICAST_ENABLE
-#define ETHARP_SUPPORT_STATIC_ENTRIES   1
+// #define ETHARP_SUPPORT_STATIC_ENTRIES   1
 #endif
+#define ETHARP_SUPPORT_STATIC_ENTRIES   1
 
 /*
    -----------------------------------------------

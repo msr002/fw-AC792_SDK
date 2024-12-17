@@ -51,8 +51,8 @@ struct usb_video_manager {
     u32 frame_cnt;
     struct device dev;
 };
-
-static struct usb_video_manager uvc_manager[USB_MAX_HW_NUM];
+#define USB_MAX_UVC_NUM 3
+static struct usb_video_manager uvc_manager[USB_MAX_UVC_NUM];
 
 #define     usbpriv_to_usbid(priv)	((usb_dev)(priv->usb_id))
 
@@ -65,13 +65,19 @@ static u8 usbdev_to_usbid(struct device *device)
 int uvc_host_online(void)
 {
     int id = 0;
-    for (id = 0; id < 2; id++) {
+    for (id = 0; id < 3; id++) {
         if (uvc_manager[id].online) {
             return id;
         }
     }
     return -EINVAL;
 }
+
+int get_uvc_host_online_status(u8 id)
+{
+    return uvc_manager[id].online;
+}
+
 u32 uvc_host_get_frame(usb_dev usb_id)
 {
     return uvc_manager[usb_id].frame_cnt;
@@ -99,7 +105,7 @@ static const struct interface_ctrl uvc_host_ops = {
     .get_power = uvc_get_power,
     .ioctl = uvc_ioctl,
 };
-static struct usb_interface_info uvc_host_inf[USB_MAX_HW_NUM] = {
+static struct usb_interface_info uvc_host_inf[USB_MAX_UVC_NUM] = {
     {
         .ctrl = (struct interface_ctrl *) &uvc_host_ops,
         .dev.uvc = NULL,
@@ -108,6 +114,11 @@ static struct usb_interface_info uvc_host_inf[USB_MAX_HW_NUM] = {
         .ctrl = (struct interface_ctrl *) &uvc_host_ops,
         .dev.uvc = NULL,
     },
+    {
+        .ctrl = (struct interface_ctrl *) &uvc_host_ops,
+        .dev.uvc = NULL,
+    },
+
 };
 
 #define device_to_uvc(device)     (uvc_host_inf[usb_id].dev.uvc)
@@ -226,7 +237,7 @@ static struct device *uvc_host_device_find(const char *name)
     }
     usb_dev usb_id = name[3] - '0';
     struct usb_video_manager *hdl = &uvc_manager[usb_id];
-    if (usb_id >= 0 && usb_id <= 1 && name && hdl->name) {
+    if (usb_id >= 0 && usb_id <= 2 && name && hdl->name) {
         if (!strcmp(hdl->name, name)) {
             return &hdl->dev;
         }
@@ -260,7 +271,7 @@ int usb_uvc_parser(struct usb_host_device *host_dev, u8 interface_num, u8 *pBuf)
     if (interface_num) {
         //同一个usb口下另外一个uvc 设备
         //TODO
-        /* usb_id = 0; */
+        usb_id = 2;
     }
     struct usb_video_manager *hdl = &uvc_manager[usb_id];
     u8 int_ep = 0;
@@ -628,7 +639,17 @@ int usb_uvc_parser(struct usb_host_device *host_dev, u8 interface_num, u8 *pBuf)
     uvc_host_inf[usb_id].dev.uvc = real_uvc;
     host_dev->interface_info[interface_num] = &uvc_host_inf[usb_id];
     hdl->dev.private_data = host_dev;
-    hdl->name = usb_id ? "uvc1" : "uvc0";
+    switch (usb_id) {
+    case 0:
+        hdl->name = "uvc0";
+        break;
+    case 1:
+        hdl->name = "uvc1";
+        break;
+    case 2:
+        hdl->name = "uvc2";
+        break;
+    }
     hdl->frame_cnt = 0;
     return len;
 
@@ -712,11 +733,11 @@ static u32 StreamInterfaceNum_set_cur(struct device *device, u16 id)
         return -1;
     }
     id = cpu_to_be16(id);
-    if (uvc_host_get_fmt() == 0) {
+    if (uvc_host_get_fmt(usb_id) == 0) {
         Video_Probe_Commit_Control[2] = uvc->mjpeg_format_index;
-    } else if (uvc_host_get_fmt() == 1) {
+    } else if (uvc_host_get_fmt(usb_id) == 1) {
         Video_Probe_Commit_Control[2] = uvc->yuyv_format_index;
-    } else if (uvc_host_get_fmt() == 2) {
+    } else if (uvc_host_get_fmt(usb_id) == 2) {
         Video_Probe_Commit_Control[2] = uvc->h264_format_index;
     }
     Video_Probe_Commit_Control[3] = uvc->cur_frame;
@@ -751,7 +772,7 @@ static void Stream_head_analysis(u8 *rx_addr)
 #endif
 }
 
-static volatile struct uvc_stream_list uvc_global_l[USB_MAX_HW_NUM][ISO_INTR_CNT];
+static volatile struct uvc_stream_list uvc_global_l[USB_MAX_UVC_NUM][ISO_INTR_CNT];
 
 static void vs_iso_handler(struct usb_host_device *host_dev, u32 ep)
 {
@@ -761,7 +782,7 @@ static void vs_iso_handler(struct usb_host_device *host_dev, u32 ep)
     u8 error_flag;
     /* u8 stream_state = 0; */
     u32 maxpsize;
-    static u32 trans_err_cnt[USB_MAX_HW_NUM] = {0};
+    static u32 trans_err_cnt[USB_MAX_UVC_NUM] = {0};
     struct device *device;
     struct usb_uvc *uvc;
     if (!host_dev) {
@@ -860,7 +881,7 @@ static void vs_iso_burst_handler(struct usb_host_device *host_dev, u32 ep)
     u32 rlen_table[8];
     u32 uvc_pos = 0;
     u32 valid_cnt = 0;
-    static u32 trans_err_cnt[USB_MAX_HW_NUM] = {0};
+    static u32 trans_err_cnt[USB_MAX_UVC_NUM] = {0};
     struct device *device;
     struct usb_uvc *uvc;
 
@@ -983,9 +1004,9 @@ static void vs_bulk_handler(struct usb_host_device *host_dev, u32 ep)
     u8 error_flag;
     /* u8 stream_state = 0; */
     u8 *last_buf;
-    static u32 trans_err_cnt[USB_MAX_HW_NUM] = {0};
-    static u32 last_len[USB_MAX_HW_NUM];
-    static u32 frame_len[USB_MAX_HW_NUM];
+    static u32 trans_err_cnt[USB_MAX_UVC_NUM] = {0};
+    static u32 last_len[USB_MAX_UVC_NUM];
+    static u32 frame_len[USB_MAX_UVC_NUM];
     u32 maxpsize;
     struct device *device;
     struct usb_uvc *uvc;
@@ -1131,9 +1152,9 @@ static void vs_bulk_handler2(struct usb_host_device *host_dev, u32 ep)
     u8 error_flag;
     /* u8 stream_state = 0; */
     u8 *last_buf;
-    static u32 trans_err_cnt[USB_MAX_HW_NUM] = {0};
-    static u32 last_len[USB_MAX_HW_NUM];
-    static u32 frame_len[USB_MAX_HW_NUM];
+    static u32 trans_err_cnt[USB_MAX_UVC_NUM] = {0};
+    static u32 last_len[USB_MAX_UVC_NUM];
+    static u32 frame_len[USB_MAX_UVC_NUM];
     u32 maxpsize;
     struct device *device;
     struct usb_uvc *uvc;
@@ -1143,12 +1164,14 @@ static void vs_bulk_handler2(struct usb_host_device *host_dev, u32 ep)
     /* putchar('2'); */
 
     usb_id = host_device2id(host_dev);
-    struct usb_video_manager *hdl = &uvc_manager[0/*usb_id*/];
+    /* struct usb_video_manager *hdl = &uvc_manager[0[>usb_id<]]; */
+    struct usb_video_manager *hdl = &uvc_manager[2/*usb_id*/];
     device = &hdl->dev;
     if (!device) {
         return;
     }
-    uvc = uvc_host_inf[0].dev.uvc;//device_to_uvc(device);
+    /* uvc = uvc_host_inf[0].dev.uvc;//device_to_uvc(device); */
+    uvc = uvc_host_inf[2].dev.uvc;//device_to_uvc(device);
     if (!host_dev) {
         return;
     }
@@ -1170,7 +1193,8 @@ static void vs_bulk_handler2(struct usb_host_device *host_dev, u32 ep)
     }
     usb_h_ep_read_async(usb_id, uvc->host_ep, uvc->ep, NULL, 0, USB_ENDPOINT_XFER_BULK, 1);//请求下个数据包
     start_addr = hdl->buffer;
-    struct uvc_stream_list *uvc_list = uvc_global_l[0/*usb_id*/];
+    /* struct uvc_stream_list *uvc_list = uvc_global_l[0[>usb_id<]]; */
+    struct uvc_stream_list *uvc_list = uvc_global_l[2/*usb_id*/];
     if (rx_len > 0) {
         _header = 0;
         last_buf = &hdl->buffer[maxpsize];
@@ -1313,7 +1337,7 @@ static void bulk_ep_rx_init(struct device *device)
     struct usb_host_device *host_dev = device_to_usbdev(device);
     void *bulk_rx_handler = NULL;
     usb_dev usb_id = usbdev_to_usbid(device);
-    if (usb_id == 1) {
+    if (usb_id <= 1) {
         bulk_rx_handler = vs_bulk_handler;
     } else {
         bulk_rx_handler = vs_bulk_handler2;
@@ -1424,11 +1448,11 @@ int uvc_host_close_camera(void *fd)
 
             Video_Probe_Commit_Control[0]  = 0;
             Video_Probe_Commit_Control[1]  = 0;
-            if (uvc_host_get_fmt() == 0) {
+            if (uvc_host_get_fmt(usb_id) == 0) {
                 Video_Probe_Commit_Control[2] = uvc->mjpeg_format_index;
-            } else if (uvc_host_get_fmt() == 1) {
+            } else if (uvc_host_get_fmt(usb_id) == 1) {
                 Video_Probe_Commit_Control[2] = uvc->yuyv_format_index;
-            } else if (uvc_host_get_fmt() == 2) {
+            } else if (uvc_host_get_fmt(usb_id) == 2) {
                 Video_Probe_Commit_Control[2] = uvc->h264_format_index;
             }
             Video_Probe_Commit_Control[3]  = uvc->cur_frame;
@@ -1607,11 +1631,11 @@ static int usb_uvc_info(struct device *device)
     log_debug_hexdump(Video_Probe_Commit_Control, sizeof(Video_Probe_Commit_Control));
     check_ret(ret);
 
-    if (uvc_host_get_fmt() == 0) {
+    if (uvc_host_get_fmt(usb_id) == 0) {
         Video_Probe_Commit_Control[2] = uvc->mjpeg_format_index;
-    } else if (uvc_host_get_fmt() == 1) {
+    } else if (uvc_host_get_fmt(usb_id) == 1) {
         Video_Probe_Commit_Control[2] = uvc->yuyv_format_index;
-    } else if (uvc_host_get_fmt() == 2) {
+    } else if (uvc_host_get_fmt(usb_id) == 2) {
         Video_Probe_Commit_Control[2] = uvc->h264_format_index;
     }
     Video_Probe_Commit_Control[3] = uvc->cur_frame;
@@ -1889,12 +1913,9 @@ int uvc2usb_ioctl(void *fd, u32 cmd, void *arg)
 }
 
 
-u32 uvc_host_get_fmt(void)
+u32 uvc_host_get_fmt(u16 id)
 {
-    if (uvc_host_online() < 0) {
-        return 0;
-    }
-    u8 format = uvc_host_inf[uvc_host_online()].dev.uvc->format;
+    u8 format = uvc_host_inf[id].dev.uvc->format;
     if (format & BIT(0)) {
         return 0;//mjpg
     }
@@ -1911,7 +1932,7 @@ u8 uvc_host_is_support_h264_fmt(void)
 {
     struct usb_uvc *uvc;
     usb_dev usb_id;
-    for (u8 i = 0; i < USB_MAX_HW_NUM; ++i) {
+    for (u8 i = 0; i < USB_MAX_UVC_NUM; ++i) {
         usb_id = i;
         uvc = device_to_uvc(device);
         if (uvc && uvc->h264_format_index) {
@@ -1921,14 +1942,26 @@ u8 uvc_host_is_support_h264_fmt(void)
     return 0;
 }
 
+u8 uvc_host_is_vaild(void)
+{
+    struct usb_uvc *uvc;
+    usb_dev usb_id;
+    u8 usb_vaild_nums = 0;
+    for (u8 i = 1; i < USB_MAX_UVC_NUM; ++i) {
+        usb_id = i;
+        uvc = device_to_uvc(device);
+        if (uvc) {
+            usb_vaild_nums++;
+        }
+    }
+    return usb_vaild_nums;
+}
+
 #define JPEG_HEAD 	0xE0FFD8FF
 #define JPEG_HEAD1 	0xC0FFD8FF
 
 int net_jpeg_pkg_head_check(u32 head)
 {
-    if (uvc_host_get_fmt()) {
-        return true;
-    }
 
     if (head == JPEG_HEAD) {
         return true;
@@ -1941,9 +1974,6 @@ int net_jpeg_pkg_head_check(u32 head)
 
 int jpeg_pkg_head_check(u32 head)
 {
-    if (uvc_host_get_fmt()) {
-        return true;
-    }
 
     if (head == JPEG_HEAD) {
         return true;

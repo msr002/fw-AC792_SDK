@@ -126,25 +126,43 @@ struct video_rec_hdl {
     struct server *video_rec1;
     struct server *video_rec2;
     struct server *video_rec3;
+    struct server *video_uvc_rec0;
+    struct server *video_uvc_rec1;
+    struct server *video_uvc_rec2;
+    struct server *video_uvc_rec3;
     struct server *video_display[CONFIG_VIDEO_REC_NUM];
+    struct server *video_uvc_display[CONFIG_VIDEO_UVC_REC_NUM];
     struct server *video_engine;
 
 
     struct vfscan *fscan[2][CONFIG_VIDEO_REC_NUM];
+    struct vfscan *fscan_uvc[2][CONFIG_VIDEO_UVC_REC_NUM];
+
     u16 file_number[2][CONFIG_VIDEO_REC_NUM];
+    u16 file_uvc_number[2][CONFIG_VIDEO_UVC_REC_NUM];
     u16 old_file_number[2][CONFIG_VIDEO_REC_NUM];
+    u16 old_file_uvc_number[2][CONFIG_VIDEO_UVC_REC_NUM];
 
     u32 total_size;
     u32 lock_fsize;
 
     u8 *video_buf[CONFIG_VIDEO_REC_NUM];
+    u8 *video_uvc_buf[CONFIG_VIDEO_UVC_REC_NUM];
     u8 *cap_buf;
-    u8 *audio_buf;
+    u8 *audio_buf[CONFIG_VIDEO_REC_NUM];
+    u8 *audio_uvc_buf[CONFIG_VIDEO_UVC_REC_NUM];
 
     FILE *file[CONFIG_VIDEO_REC_NUM];
+    FILE *file_uvc[CONFIG_VIDEO_UVC_REC_NUM];
+
     FILE *new_file[CONFIG_VIDEO_REC_NUM];
+    FILE *new_file_uvc[CONFIG_VIDEO_UVC_REC_NUM];
+
     u32 new_file_size[CONFIG_VIDEO_REC_NUM];
+    u32 new_file_uvc_size[CONFIG_VIDEO_UVC_REC_NUM];
+
     char fname[CONFIG_VIDEO_REC_NUM][MAX_FILE_NAME_LEN];
+    char fname_uvc[CONFIG_VIDEO_UVC_REC_NUM][MAX_FILE_NAME_LEN];
 
     u16 park_wait;
     u16 sd_wait;
@@ -157,6 +175,7 @@ struct video_rec_hdl {
     u8 lock_fsize_count;
     /*u8 avin_dev;*/
     u8 video_online[CONFIG_VIDEO_REC_NUM];
+    u8 video_uvc_online[CONFIG_VIDEO_UVC_REC_NUM];
     u8 disp_video_ctrl;
     u8 disp_sw_flag;
     u8 disp_park_sel;

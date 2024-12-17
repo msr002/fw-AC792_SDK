@@ -7,16 +7,16 @@ typedef enum {
     DDR_MEMORY = 0,    ///< Surface
     RAM_MEMORY,   ///< Share Memory fd
     UNKNOW_MEMORY,
-} memory_type;
+} memory_type_t;
 
 typedef struct {
     void *mem_addr;
     size_t size;
     size_t offset;
-    memory_type type;
+    memory_type_t type;
 } memory;
 
-int memory_alloc_static(memory_type type, memory *mem, int size);
+int memory_alloc_static(memory_type_t type, memory *mem, int size);
 
 void  memory_free(memory *mem);
 

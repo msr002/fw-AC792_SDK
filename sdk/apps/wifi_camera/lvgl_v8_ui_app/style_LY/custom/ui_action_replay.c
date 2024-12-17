@@ -59,7 +59,7 @@ extern u8 deleting_flag;
 static struct replay_info handler;
 #define __this  (&handler)
 #define sizeof_this     (sizeof(struct replay_info))
-void post_msg2_dec(const char *type, u32 arg)
+void post_msg2_dec(int mode)
 {
 #ifdef USE_LVGL_V8_UI_DEMO
     lvgl_module_msg_send_string(GUI_MODEL_MSG_ID_TOTAL_TIME, NULL, 0);

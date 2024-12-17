@@ -353,6 +353,7 @@
 #ifdef CONFIG_UI_ENABLE
 #define TCFG_LCD_ENABLE                     1
 #define TCFG_LCD_DEVICE_NAME                ""
+#define TCFG_LCD_INPUT_FORMAT               LCD_IN_RGB565
 
 //MCU LCD
 #define TCFG_LCD_MCU_ILI9488_320X480        0
@@ -371,7 +372,6 @@
 
 #define TCFG_LCD_RGB_24BIT_ENABLE           1
 #define TCFG_LCD_RGB_IO_HD_LEVEL            1
-#define TCFG_LCD_RGB_INPUT_FORMAT           LCD_IN_RGB565
 
 
 #if TCFG_LCD_MIPI_ST7701S_480x800

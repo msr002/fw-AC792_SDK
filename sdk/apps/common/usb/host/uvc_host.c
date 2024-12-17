@@ -48,20 +48,6 @@ void uvc_host_jpg_callback_register(void (*cb)(char *jpg_buf, u32 jpg_len))
     uvc_host_jpg_cb = cb;
 }
 
-static int uvc_jpeg_head_check(u32 head)
-{
-    if (uvc_host_get_fmt()) {
-        return true;
-    }
-
-    if (head == UVC_JPEG_HEAD) {
-        return true;
-    } else if (head == UVC_JPEG_HEAD1) {
-        return true;
-    }
-    return 0;
-}
-
 struct uvc_dev_control {
     OS_SEM sem;
     struct list_head dev_list;
@@ -117,6 +103,19 @@ static struct uvc_dev_control uvc_dev;
         list_del(&fh->entry);
 
 
+static int uvc_jpeg_head_check(struct uvc_fh *fh, u32 head)
+{
+    if (uvc_host_get_fmt(fh->id)) {
+        return true;
+    }
+
+    if (head == UVC_JPEG_HEAD) {
+        return true;
+    } else if (head == UVC_JPEG_HEAD1) {
+        return true;
+    }
+    return 0;
+}
 static int uvc_img_cap(void *_fh, u32 arg)
 {
     struct uvc_fh *fh = (struct uvc_fh *)_fh;
@@ -136,7 +135,7 @@ static int uvc_img_cap(void *_fh, u32 arg)
         }
         fh->image_req = false;
         head = (u32 *)(fh->img.buf + 8);
-        if (uvc_jpeg_head_check(*head)) {
+        if (uvc_jpeg_head_check(fh, *head)) {
             fh->img.size -= 8;
             memcpy(icap->baddr, icap->baddr + 8, fh->img.size);
         }
@@ -362,7 +361,7 @@ int uvc_mjpg_stream_out(void *fd, int cnt, void *stream_list, int state)
     int err = 0;
     u32 tmp_jiffies = 0, req_size;
 
-    u8 UVC_REC_JPG_HEAD_SIZE = uvc_host_get_fmt() ? 0 : 8;
+    u8 UVC_REC_JPG_HEAD_SIZE = uvc_host_get_fmt(fh->id) ? 0 : 8;
 
     if ((cnt < 0) || !list) {
         /*putchar('E');*/
@@ -391,13 +390,13 @@ int uvc_mjpg_stream_out(void *fd, int cnt, void *stream_list, int state)
     if (!fh->buf) {
         if (fh->share_buf) {//有共享内存则使用共享内存大小（一般打开两个通道或者开启UI）
             fh->buf = fh->share_buf;
-            fh->free_size = uvc_host_get_fmt() ? UVC_RECV_BUFF_SHARE_SIZE : UVC_RECV_BUFF_SHARE_SIZE - UVC_REC_JPG_ALIGN;
+            fh->free_size = uvc_host_get_fmt(fh->id) ? UVC_RECV_BUFF_SHARE_SIZE : UVC_RECV_BUFF_SHARE_SIZE - UVC_REC_JPG_ALIGN;
             fh->alloc_channel = 0;
         } else {//没有使用共享内存，则请求剩余空间足够再申请内存
             fh->free_size = uvc_buf_free_space(fh, fh->alloc_channel);
             if (fh->free_size > 1024) {
                 fh->buf = uvc_buf_malloc(fh, fh->free_size, fh->alloc_channel);
-                if (!uvc_host_get_fmt()) {
+                if (!uvc_host_get_fmt(fh->id)) {
                     fh->free_size -= UVC_REC_JPG_ALIGN;//减512防止realloc时512对齐断言
                 }
             }
@@ -452,7 +451,7 @@ int uvc_mjpg_stream_out(void *fd, int cnt, void *stream_list, int state)
         }
 #endif
         if (fh->b_offset) { //数据长度>0
-            if (uvc_host_get_fmt()) {
+            if (uvc_host_get_fmt(fh->id)) {
                 req_size = fh->b_offset + UVC_REC_JPG_HEAD_SIZE;
             } else {
                 req_size = ADDR_ALIGNE(fh->b_offset + UVC_REC_JPG_HEAD_SIZE, UVC_REC_JPG_ALIGN);//JPEG图像数据需要512对齐
@@ -807,11 +806,11 @@ static int uvc_get_fmt(struct uvc_fh *fh, unsigned int *fmt)
 {
 
     os_sem_pend(&fh->sem, 0);
-    if (uvc_host_get_fmt() == 0) {
+    if (uvc_host_get_fmt(fh->id) == 0) {
         *fmt = 0;
-    } else if (uvc_host_get_fmt() == 1) {
+    } else if (uvc_host_get_fmt(fh->id) == 1) {
         *fmt = 1;
-    } else if (uvc_host_get_fmt() == 2) {
+    } else if (uvc_host_get_fmt(fh->id) == 2) {
         *fmt = 2;
     }
     os_sem_post(&fh->sem);

@@ -14,7 +14,7 @@
 
 
 #define ENDPOINT_NUM 	5
-#define CAMERA_DEVICE_NUM  8
+#define CAMERA_DEVICE_NUM  13
 
 #define CSI2_X0_LANE    0
 #define CSI2_X1_LANE    1
@@ -112,13 +112,17 @@ extern const struct device_operations camera_dev_ops;
 
 int camera_init(const char *name, void *camera_data);
 
-void *sensor_driver_open(int id, int type_base);
 void *camera_driver_open(int id, struct camera_device_info *info);
-int camera_driver_ioctl(void *_camera, u32 cmd, void *arg);
-
 int camera_driver_close(void *_camera);
 int camera_driver_force_close(void *_camera);
+int camera_driver_ioctl(void *_camera, u32 cmd, void *arg);
+void *camera_get_sen_dev(void *c);
+void *camera_get_platform_data(void *c);
+int get_camera_devices_fps(int id);
+int camera_get_in_format(void *c);
 
+void sensor_driver_close(int channel, int interface_type);
+void *sensor_driver_open(int channel, int interface_type);
 
 
 

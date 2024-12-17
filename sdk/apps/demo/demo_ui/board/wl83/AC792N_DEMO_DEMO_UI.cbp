@@ -180,7 +180,7 @@
 <Unit filename="../../../../../apps/common/dma2d_gpu/dma2d_common_api.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../../apps/common/dma2d_gpu/gpu_common_api.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../../apps/common/dma2d_gpu/gpu_common_api.h" />
-<Unit filename="../../../../../apps/common/example/peripheral/lcd/main.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="../../../../../apps/common/example/peripheral/lcd/lcd_driver_test.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../../apps/common/example/third_party/freetype/include/freetype/config/ftconfig.h" />
 <Unit filename="../../../../../apps/common/example/third_party/freetype/include/freetype/config/ftheader.h" />
 <Unit filename="../../../../../apps/common/example/third_party/freetype/include/freetype/config/ftmodule.h" />

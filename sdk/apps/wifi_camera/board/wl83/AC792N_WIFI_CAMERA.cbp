@@ -320,7 +320,7 @@
 <Unit filename="../../../../apps/common/dma2d_gpu/dma2d_common_api.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/common/dma2d_gpu/filter/gpu_adapter.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/common/dma2d_gpu/filter/gpu_adapter.h" />
-<Unit filename="../../../../apps/common/example/peripheral/lcd/main.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="../../../../apps/common/example/peripheral/lcd/lcd_driver_test.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/common/gsensor/da380.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/common/gsensor/da380.h" />
 <Unit filename="../../../../apps/common/gsensor/gSensor_manage.c"><Option compilerVer="CC"/></Unit>
@@ -1037,6 +1037,7 @@
 <Unit filename="../../../../apps/common/lvgl_v8/src/widgets/lv_textarea.h" />
 <Unit filename="../../../../apps/common/net/MultSine_Control.h" />
 <Unit filename="../../../../apps/common/net/assign_macaddr.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="../../../../apps/common/net/assign_macaddr.h" />
 <Unit filename="../../../../apps/common/net/config_network.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/common/net/iperf_test.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/common/net/platform_cfg.c"><Option compilerVer="CC"/></Unit>
@@ -1060,6 +1061,7 @@
 <Unit filename="../../../../apps/common/rf_fcc_tool/include/datatype.h" />
 <Unit filename="../../../../apps/common/rf_fcc_tool/include/rf_fcc_main.h" />
 <Unit filename="../../../../apps/common/rf_fcc_tool/rf_fcc_main.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="../../../../apps/common/rf_fcc_tool/wifi_adaptivity.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/common/system/app_power_manage.h" />
 <Unit filename="../../../../apps/common/system/device_mount.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/common/system/flash_write_protect.c"><Option compilerVer="CC"/></Unit>

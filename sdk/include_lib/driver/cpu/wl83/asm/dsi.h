@@ -131,7 +131,7 @@ enum PACKET_TYPE {
 };
 
 struct mipi_dev {
-    struct imd_dmm_info info;
+    struct basic_info info;
     struct pll4_info pll4;
     struct te_mode_ctrl te_mode;
     struct dsi_lane_mapping lane_mapping;

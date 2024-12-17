@@ -604,13 +604,27 @@
 #define MAX_FILE_NAME_LEN       64
 #define FILE_SHOW_NUM           12  /* 一页显示文件数 */
 
-#if (defined CONFIG_VIDEO1_ENABLE) && (defined CONFIG_VIDEO2_ENABLE)
+#if (defined CONFIG_VIDEO0_ENABLE) && (defined CONFIG_VIDEO1_ENABLE) && (defined CONFIG_VIDEO2_ENABLE)
 #define THREE_WAY_ENABLE		1
+#define THREE_WAY_DOUBLE_RAW    1
 #define CONFIG_VIDEO_REC_NUM    4
-#else
+#elif (defined CONFIG_VIDEO0_ENABLE) && (defined CONFIG_VIDEO1_ENABLE)
 #define THREE_WAY_ENABLE		0
+#define THREE_WAY_DOUBLE_RAW    1
 #define CONFIG_VIDEO_REC_NUM    4
+#elif (defined CONFIG_VIDEO0_ENABLE) && (defined CONFIG_VIDEO2_ENABLE)
+#define THREE_WAY_ENABLE		0
+#define THREE_WAY_DOUBLE_RAW    0
+#define CONFIG_VIDEO_REC_NUM    4
+#elif (defined CONFIG_VIDEO1_ENABLE) && (defined CONFIG_VIDEO2_ENABLE)
+#define THREE_WAY_ENABLE		0
+#define THREE_WAY_DOUBLE_RAW    0
+#define CONFIG_VIDEO_REC_NUM    4
+
 #endif
+
+
+
 
 #if defined CONFIG_VIDEO1_ENABLE
 #define CONFIG_PARK_ENABLE
@@ -793,7 +807,7 @@
  * 3:表示 LCD开3块帧显存,其中2块通过交换的方式来更新推屏数据,另外1块用做合成输出
  * */
 /* 2个宏组合更多详细说明,请移步开源文档 */
-#define LV_DISP_UI_FB_NUM      0
+#define LV_DISP_UI_FB_NUM      1
 #define FB_LCD_BUF_NUM         2
 #if (LV_DISP_UI_FB_NUM)
 #define LV_COLOR_DEPTH_EXTEN   24 //24-适配ARGB8565,需要把LV_DISP_UI_FB_NUM 1/2

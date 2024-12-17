@@ -1,6 +1,8 @@
 #ifndef __JL_CFG_DEC_H__
 #define __JL_CFG_DEC_H__
 
+#include "generic/typedef.h"
+
 /// \cond DO_NOT_DOCUMENT
 struct btif_item {
     u16 id;

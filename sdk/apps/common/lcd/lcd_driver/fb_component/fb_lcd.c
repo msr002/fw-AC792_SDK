@@ -119,7 +119,7 @@ static int __fb_lcd_line_done_wait(u8 comp, u8 wait_line)
         }
         /* printf("cur line=%d\n",cur_line ); */
         if (comp == 0) {
-            if (cur_line >= g_dmm_line) {
+            if (cur_line > g_dmm_line) {
                 return 0;
             }
         }
@@ -253,7 +253,7 @@ static int __fb_lcd_frame_copy_flush(u8 wait_line, u8 *frame_buffer, u16 x, u16 
 static int __fb_lcd_frame_rotate_copy_flush(u8 wait_line, u8 *frame_buffer, u8 *out_buffer)
 {
     static u8 rotate_slow = 0;  //0:旋转速度比推屏快  1:旋转速度比推屏慢 旋转90度出现耗时比推1帧时间多
-#define CALC_CNT  60
+#define CALC_CNT  10
     static u8 statistics_cnt = CALC_CNT;
     u16 src_w = __this->interpolation_en ? __this->out_buf_h : __this->out_h;
     u16 src_h = __this->interpolation_en ? __this->out_buf_w : __this->out_w;
@@ -261,6 +261,7 @@ static int __fb_lcd_frame_rotate_copy_flush(u8 wait_line, u8 *frame_buffer, u8 *
     struct lcd_dev_drive *lcd = NULL;
     struct imd_dev *imd;
     struct mipi_dev *mipi;
+    u32 rotate_use_time = 0;
 
     static u32 *rotate_times = NULL;
 
@@ -269,16 +270,13 @@ static int __fb_lcd_frame_rotate_copy_flush(u8 wait_line, u8 *frame_buffer, u8 *
         __fb_lcd_line_done_wait(rotate_slow, statistics_cnt);
     }
 
-    u32 rotate_start_time;
-    rotate_start_time = get_system_us();
 
     //2.旋转并推屏
     if (__this->rotate == ROTATE_180) {
         src_w = __this->out_w;
         src_h = __this->out_h;
     }
-    fb_frame_buf_rotate(frame_buffer, (u8 *)out_buffer, src_w, src_h, 0, __this->out_w, __this->out_h, 0, __this->rotate, __this->out_buf_x, __this->out_buf_y, __this->out_format, __this->out_format, 0);
-    u32 rotate_use_time = get_system_us() - rotate_start_time;
+    rotate_use_time = fb_frame_buf_rotate(frame_buffer, (u8 *)out_buffer, src_w, src_h, 0, __this->out_w, __this->out_h, 0, __this->rotate, __this->out_buf_x, __this->out_buf_y, __this->out_format, __this->out_format, 0);
 
     //下面是旋转时间统计
     if (statistics_cnt > 0) {
@@ -337,7 +335,7 @@ static int __fb_lcd_frame_rotate_copy_flush(u8 wait_line, u8 *frame_buffer, u8 *
             /* printf("rotate_line==%d\n",rotate_line); */
             if (rotate_line > g_dmm_line + 3) { //允许有几行的误差
                 if (++err_cnt > 2) {
-                    log_warn("fb lcd rotate and screen data rear-end! rotate_line=%d g_dmm_line=%d\n", rotate_line, g_dmm_line);
+                    log_info("fb lcd rotate and screen data rear-end! rotate_line=%d g_dmm_line=%d\n", rotate_line, g_dmm_line);
                     g_dmm_line = rotate_line;
                     dmm_line_pend_init(g_dmm_line);
                 }
@@ -657,13 +655,6 @@ void fb_lcd_frame_buf_update(u8 *frame_buffer)
                 __fb_lcd_frame_swap_flush((u8 *)__this->out_buf[0]);
                 goto _exit;
             }
-#if FB_LCD_FRAME_RATE_DEBUG_EN
-            frame_period_us = get_system_us() - frame_period_start_us;;
-            if (max_frame_period_us < frame_period_us) { //统计最大帧间隔
-                max_frame_period_us = frame_period_us;
-                log_info("fb lcd max line pend period : %dus", max_frame_period_us);
-            }
-#endif
         } else {
             if (__this->lcd_type == LCD_MIPI || __this->lcd_type == LCD_RGB) {
                 __fb_lcd_frame_copy_flush(1, frame_buffer, __this->out_buf_x, __this->out_buf_y);
@@ -673,13 +664,6 @@ void fb_lcd_frame_buf_update(u8 *frame_buffer)
                 __fb_lcd_frame_swap_flush((u8 *)__this->out_buf[0]);
                 goto _exit;
             }
-#if FB_LCD_FRAME_RATE_DEBUG_EN
-            frame_period_us = get_system_us() - frame_period_start_us;;
-            if (max_frame_period_us < frame_period_us) { //统计最大帧间隔
-                max_frame_period_us = frame_period_us;
-                log_info("fb lcd max frame period : %dus", max_frame_period_us);
-            }
-#endif
         }
     } else {
         if (__this->out_buf_num != 0) {
@@ -695,14 +679,14 @@ void fb_lcd_frame_buf_update(u8 *frame_buffer)
             }
         }
         __fb_lcd_frame_swap_flush(frame_buffer);
-#if FB_LCD_FRAME_RATE_DEBUG_EN
-        frame_period_us = get_system_us() - frame_period_start_us;;
-        if (max_frame_period_us < frame_period_us) { //统计最大帧间隔
-            max_frame_period_us = frame_period_us;
-            log_info("fb lcd max frame period : %dus", max_frame_period_us);
-        }
-#endif
     }
+#if FB_LCD_FRAME_RATE_DEBUG_EN
+    frame_period_us = get_system_us() - frame_period_start_us;;
+    if (max_frame_period_us < frame_period_us) { //统计最大帧间隔
+        max_frame_period_us = frame_period_us;
+        log_info("fb lcd max frame period : %dus", max_frame_period_us);
+    }
+#endif
 
 _exit:
 #if FB_LCD_FRAME_RATE_DEBUG_EN

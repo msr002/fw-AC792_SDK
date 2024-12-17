@@ -1652,6 +1652,7 @@
 <Unit filename="../../../../apps/common/rf_fcc_tool/include/datatype.h" />
 <Unit filename="../../../../apps/common/rf_fcc_tool/include/rf_fcc_main.h" />
 <Unit filename="../../../../apps/common/rf_fcc_tool/rf_fcc_main.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="../../../../apps/common/rf_fcc_tool/wifi_adaptivity.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/common/system/app_power_manage.h" />
 <Unit filename="../../../../apps/common/system/device_mount.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/common/system/flash_write_protect.c"><Option compilerVer="CC"/></Unit>
@@ -2028,6 +2029,7 @@
 <Unit filename="../../../../include_lib/net/json_c/linkhash.h" />
 <Unit filename="../../../../include_lib/net/json_c/printbuf.h" />
 <Unit filename="../../../../include_lib/net/lte_module/lte_module.h" />
+<Unit filename="../../../../include_lib/net/lwip_2_2_0/lwip/app/dhcp_srv/dhcp_srv.h" />
 <Unit filename="../../../../include_lib/net/lwip_2_2_0/lwip/app/sock_api/sock_api.h" />
 <Unit filename="../../../../include_lib/net/lwip_2_2_0/lwip/port/arch/cc.h" />
 <Unit filename="../../../../include_lib/net/lwip_2_2_0/lwip/port/arch/cpu.h" />

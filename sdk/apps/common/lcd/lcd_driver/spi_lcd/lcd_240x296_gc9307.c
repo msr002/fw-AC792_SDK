@@ -172,11 +172,7 @@ REGISTER_LCD_SPI_DEVICE_BEGIN(lcd_spi_240x296_gc9307_dev) = {
         .target_xres 	 = LCD_W,
         .target_yres 	 = LCD_H,
         .rotate          = ROTATE_0,
-#if (LV_COLOR_DEPTH == 32)
-        .in_fmt          = LCD_IN_ARGB888,
-#else
-        .in_fmt          = LCD_IN_RGB565,
-#endif
+        .in_fmt          = TCFG_LCD_INPUT_FORMAT,
     },
 
 #if TCFG_LCD_TE_ENABLE
@@ -187,7 +183,7 @@ REGISTER_LCD_SPI_DEVICE_BEGIN(lcd_spi_240x296_gc9307_dev) = {
     },
 #endif // TCFG_LCD_TE_ENABLE
 
-    .data_out_mode    = MODE_BE,///< 大端数据，lcd_driver内部会malloc一个buf专门用来转换。
+    .data_out_endian  = MODE_BE,///< 大端数据，lcd_driver内部会malloc一个buf专门用来转换。
     .interface_name   = SPI_IF,
 },
 REGISTER_LCD_SPI_DEVICE_END()

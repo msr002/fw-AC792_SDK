@@ -272,7 +272,7 @@ c_SRC_FILES := \
 	../../../../apps/common/debug/debug_user.c \
 	../../../../apps/common/dma2d_gpu/dma2d_common_api.c \
 	../../../../apps/common/dma2d_gpu/filter/gpu_adapter.c \
-	../../../../apps/common/example/peripheral/lcd/main.c \
+	../../../../apps/common/example/peripheral/lcd/lcd_driver_test.c \
 	../../../../apps/common/gsensor/da380.c \
 	../../../../apps/common/gsensor/gSensor_manage.c \
 	../../../../apps/common/gsensor/gma301.c \
@@ -766,6 +766,7 @@ c_SRC_FILES := \
 	../../../../apps/common/product_test_tool/product_port.c \
 	../../../../apps/common/rf_fcc_tool/bt.c \
 	../../../../apps/common/rf_fcc_tool/rf_fcc_main.c \
+	../../../../apps/common/rf_fcc_tool/wifi_adaptivity.c \
 	../../../../apps/common/system/device_mount.c \
 	../../../../apps/common/system/flash_write_protect.c \
 	../../../../apps/common/system/init.c \

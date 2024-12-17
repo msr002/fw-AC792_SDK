@@ -7,11 +7,6 @@
 #include "video_photo.h"
 #include "video_system.h"
 
-#ifdef CONFIG_GSENSOR_ENABLE
-#include "gSensor_manage.h"
-#endif
-
-/* #include "user_isp_cfg.h" */
 #include "lcd_config.h"
 #include "event/key_event.h"
 #include "event/device_event.h"
@@ -20,17 +15,16 @@
 
 
 #include "action.h"
-/* #include "style.h" */
 #include "app_config.h"
 #include "asm/debug.h"
 #include "vrec_osd.h"
 #include "vrec_icon_osd.h"
 #include "app_database.h"
 #include "storage_device.h"
-
-#ifdef CONFIG_WIFI_ENABLE
-
 #include "net_video_rec.h"
+
+#if TCFG_GSENSOR_ENABLE
+#include "gSensor_manage.h"
 #endif
 
 
@@ -667,6 +661,12 @@ int video_disp_start(int id, struct video_window *win)
     req.display.src_crop_enable = VIDEO_LARGE_IMAGE;
 #endif
 
+
+#if THREE_WAY_DOUBLE_RAW
+    req.display.double_raw      = 1;
+    req.display.three_way_type = VIDEO_THREE_WAY_DOU_RAW;
+#endif
+
     if (id == 0) {
         req.display.camera_config   = NULL;//load_default_camera_config;
         req.display.camera_type     = VIDEO_CAMERA_NORMAL;
@@ -689,11 +689,6 @@ int video_disp_start(int id, struct video_window *win)
         req.display.camera_type     = VIDEO_CAMERA_NORMAL;
         /* req.display.mirror = VIDEO_HOR_MIRROR | VIDEO_VER_MIRROR; */
     } else if (id == 2) {
-#if THREE_WAY_ENABLE
-        req.display.three_way_type = VIDEO_THREE_WAY_JPEG;
-#else
-        req.display.three_way_type = 0;
-#endif
         req.display.uvc_id = __this->uvc_id;
         req.display.camera_config = NULL;
         req.display.camera_type = VIDEO_CAMERA_UVC;
@@ -1990,7 +1985,11 @@ static int video0_rec_start()
         osd_line_num = 2;
     }
     osd_max_heigh = (req.rec.height == 1088) ? 1080 : req.rec.height ;
-    text_osd.x = (req.rec.width - max_one_line_strnum * text_osd.font_w) / 64 * 64;
+    if (res == VIDEO_RES_1080P) {
+        text_osd.x = (req.rec.width / 2 - max_one_line_strnum * text_osd.font_w) / 64 * 64;
+    } else {
+        text_osd.x = (req.rec.width - max_one_line_strnum * text_osd.font_w) / 64 * 64;
+    }
     text_osd.y = (osd_max_heigh - text_osd.font_h * osd_line_num) / 16 * 16;
     text_osd.color[0] = 0x057d88;
     text_osd.color[1] = 0xe20095;
@@ -2070,6 +2069,9 @@ static int video0_rec_start()
     req.rec.sca.tar_h = y_offset;
 #else
     /* req.rec.src_crop_enable = 0; */
+#endif
+#if THREE_WAY_DOUBLE_RAW
+    req.rec.double_raw      = 1;
 #endif
 
     req.rec.cycle_time = req.rec.cycle_time * 60;
@@ -2350,13 +2352,7 @@ static int video1_rec_start()
 
     u32 res = db_select("res");
 
-#if THREE_WAY_ENABLE
-    req.rec.online  = 0;
-    //VGA
-    res = 2;
-#else
     req.rec.online  = 1;
-#endif
     req.rec.enable_dri  = 0;
     req.rec.channel = 0;
     req.rec.camera_type = VIDEO_CAMERA_NORMAL;
@@ -2509,6 +2505,9 @@ static int video1_rec_start()
         req.rec.thumbnails = &thumbnails;
     }
 #endif
+#if THREE_WAY_DOUBLE_RAW
+    req.rec.double_raw      = 1;
+#endif
 
 
     err = server_request(__this->video_rec1, VIDEO_REQ_REC, &req);
@@ -2597,9 +2596,6 @@ static int video1_rec_savefile()
     }
 
     u32 res = db_select("res");
-#if THREE_WAY_ENABLE
-    res = 2;
-#endif
 
     req.rec.channel = 0;
     req.rec.width 	= rec_pix_w[res];
@@ -2792,6 +2788,9 @@ static int video2_rec_start()
     req.rec.three_way_type = 0;
     req.rec.IP_interval = 0;
 #endif
+    if (db_select("res") == VIDEO_RES_1080P) {
+        req.rec.three_way_type = VIDEO_THREE_WAY_JPEG;
+    }
     req.rec.format 	= VIDEO2_REC_FORMAT;
     req.rec.width 	= UVC_ENC_WIDTH;
     req.rec.height 	= UVC_ENC_HEIGH;

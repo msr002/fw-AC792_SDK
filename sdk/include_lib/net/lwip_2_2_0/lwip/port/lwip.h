@@ -103,7 +103,8 @@ struct iphdr_e {
 #define  BT_NETIF       (2)
 #define  LTE_NETIF      (3)
 #define  EXT_WIFI_NETIF (4)
-#define  MAX_NETIF_NUM  (5)
+#define  WIFI_RAW_NETIF (5)
+#define  MAX_NETIF_NUM  (6)
 
 #ifndef __LW_IP_C
 /* Exported variables --------------------------------------------------------*/

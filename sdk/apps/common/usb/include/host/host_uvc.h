@@ -214,7 +214,7 @@ extern int uvc2usb_ioctl(void *fd, u32 cmd, void *arg);
 extern int uvc_host_get_fps(void *fd);
 //extern int uvc_get_device_id(void *fd, struct usb_device_id *id);
 int usb_host_video_init(const usb_dev usb_id, const u8 sub_id);
-extern u32 uvc_host_get_fmt(void);
+extern u32 uvc_host_get_fmt(u16 id);
 extern u8 uvc_host_is_support_h264_fmt(void);
 #ifdef __cplusplus
 }

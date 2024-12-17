@@ -151,7 +151,7 @@ UART4_PLATFORM_DATA_END();
 SD0_PLATFORM_DATA_BEGIN(sd0_data)
     .port                   = TCFG_SD0_PORTS,
     .port_group             = TCFG_SD0_PORTS_GROUP,
-    .priority               = 4,
+    .priority               = 2,
     .data_width             = TCFG_SD0_DAT_WIDTH,
     .speed                  = TCFG_SD0_CLK,
     .detect_mode            = TCFG_SD0_DET_MODE,
@@ -176,7 +176,7 @@ SD0_PLATFORM_DATA_END()
 SD1_PLATFORM_DATA_BEGIN(sd1_data)
     .port                   = TCFG_SD1_PORTS,
     .port_group             = TCFG_SD1_PORTS_GROUP,
-    .priority               = 4,
+    .priority               = 2,
     .data_width             = TCFG_SD1_DAT_WIDTH,
     .speed                  = TCFG_SD1_CLK,
     .detect_mode            = TCFG_SD1_DET_MODE,

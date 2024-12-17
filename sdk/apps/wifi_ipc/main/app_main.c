@@ -12,6 +12,7 @@
 #include "asm/gpio.h"
 #include "asm/clock.h"
 
+#include "tuya_video.h"
 
 /*中断列表 */
 const struct irq_info irq_info_table[] = {
@@ -71,9 +72,7 @@ const struct task_info task_info_table[] = {
     {"app_core",            15,     APP_CORE_STK_SIZE,	  APP_CORE_Q_SIZE,		 app_core_tcb_stk_q },
     {"sys_event",           29,     SYS_EVENT_STK_SIZE,	   0, 					 sys_event_tcb_stk_q },
     {"systimer",            14,     SYSTIMER_STK_SIZE, 	   0,					 systimer_tcb_stk_q },
-#ifndef  CONFIG_TUYA_SDK_ENABLE
     {"sys_timer",            9,     SYS_TIMER_STK_SIZE,	  SYS_TIMER_Q_SIZE,		 sys_timer_tcb_stk_q },
-#endif
     {"audio_server",        16,      512,   64    },
     {"audio_mix",           28,      512,   0     },
     {"audio_encoder",       12,      384,   64    },
@@ -133,21 +132,6 @@ const struct task_info task_info_table[] = {
 
     {"video_server",        16,      768,   128   },
     {"vpkg_server",         16,      512,   128   },
-    {"video0_rec0",         20,      1024,   128   },
-    {"video0_rec1",         20,      1024,   128   },
-    {"video1_rec0",         20,      512,   128   },
-    {"video1_rec1",         20,      512,   128   },
-    {"video2_rec0",         20,      1024,   128   },
-    {"video2_rec1",         20,      1024,   128   },
-    {"video3_rec0",         20,      1024,   128   },
-    {"video3_rec1",         20,      1024,   128   },
-
-    {"audio2_rec0",         20,      1024,   128   },
-    {"audio2_rec1",         20,      1024,   128   },
-    {"audio0_rec0",         20,      1024,   128   },
-    {"audio0_rec1",         20,      1024,   128   },
-    {"audio3_rec0",         20,      1024,   128   },
-    {"audio3_rec1",         20,      1024,   128   },
 
     {"net_video_server",    16,      256,   64    },
 
@@ -156,6 +140,9 @@ const struct task_info task_info_table[] = {
 
     {"avi0",                11,      320,   64    },
     {"avi1",                11,      320,   64    },
+    {"mov0",                11,      512,   64    },
+    {"mov1",                11,      512,   64    },
+    {"mov2",                11,      512,   64    },
     {"jpg_dec",             10,     1024,   32    },
     {"video_dec_server",    16,     1024,   256   },
     {"vunpkg_server",       16,     1024,   128   },

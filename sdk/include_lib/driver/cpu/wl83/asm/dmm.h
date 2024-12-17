@@ -70,11 +70,12 @@ typedef struct { //报错信息结构体
 
 void dmm_log_error_statistics(void);
 void dmm_get_error_statistics(dmm_error_info *info);
+void dmm_debug_max_Vsync(void);
 
 //dmm 控制接口
 void dmm_init(void);
 void dmm_deinit(void);
-void dmm_config(struct imd_dmm_info *dmm_info);
+void dmm_config(struct basic_info *dmm_info);
 void dmm_buf_sem_post(void);
 int dmm_buf_sem_query(void);
 int dmm_buf_sem_pend(void);

@@ -3823,6 +3823,7 @@ static int video_event_handler(struct sys_event *e)
 {
     struct device_event *event = (struct device_event *)e->payload;
     int err = 0;
+    UCHAR_T *type;
     INT_T w, h, r, f;
     if (e->from == DEVICE_EVENT_FROM_SD) {
         switch (event->event) {
@@ -3840,6 +3841,7 @@ static int video_event_handler(struct sys_event *e)
     }
 #ifdef CONFIG_VIDEO2_ENABLE
     else if (e->from == DEVICE_EVENT_FROM_USB_HOST) {
+        type = event->value;
         if (event->event == DEVICE_EVENT_IN) {
             if (!strncmp((const char *)event->value, "uvc", 3)) {
                 PR_DEBUG("uvc_id:%d", uvc_host_online());
@@ -3853,6 +3855,13 @@ static int video_event_handler(struct sys_event *e)
                 }
                 printf("\n[ debug ]--func=%s line=%d\n", __func__, __LINE__);
             }
+#if TCFG_HOST_AUDIO_ENABLE
+            if (!strncmp((const char *)event->value, "audio", 5)) {
+                audioid = type[5] - '0';
+                g_video_ctrl.audio_online = true;
+                PR_NOTICE("audio online : %s, id=%d", type, audioid);
+            }
+#endif
         } else if (event->event == DEVICE_EVENT_OUT) {
             if (!strncmp((const char *)event->value, "uvc", 3)) {
                 display_convert(0);

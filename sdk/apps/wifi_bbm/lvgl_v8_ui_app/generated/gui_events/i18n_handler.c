@@ -1,0 +1,68 @@
+/*Generate Code, Do NOT Edit!*/
+#include "./i18n_handler.h"
+
+void i18n_refresh_texts(const char *page_name)
+{
+    if (page_name == NULL) {
+        return;
+    }
+
+    if (strcmp(page_name, "home") == 0 && !guider_ui.home_del) {
+
+    }
+
+    if (strcmp(page_name, "pair_status") == 0 && !guider_ui.pair_status_del) {
+
+    }
+
+    if (strcmp(page_name, "rt_stream") == 0 && !guider_ui.rt_stream_del) {
+
+    }
+
+    if (strcmp(page_name, "file_browser") == 0 && !guider_ui.file_browser_del) {
+
+    }
+
+    if (strcmp(page_name, "pair_options") == 0 && !guider_ui.pair_options_del) {
+
+    }
+
+    if (strcmp(page_name, "pairing") == 0 && !guider_ui.pairing_del) {
+
+    }
+
+    if (strcmp(page_name, "unpair") == 0 && !guider_ui.unpair_del) {
+
+    }
+}
+
+void i18n_refresh_all_texts()
+{
+    if (!guider_ui.home_del) {
+
+    }
+
+    if (!guider_ui.pair_status_del) {
+
+    }
+
+    if (!guider_ui.rt_stream_del) {
+
+    }
+
+    if (!guider_ui.file_browser_del) {
+
+    }
+
+    if (!guider_ui.pair_options_del) {
+
+    }
+
+    if (!guider_ui.pairing_del) {
+
+    }
+
+    if (!guider_ui.unpair_del) {
+
+    }
+}

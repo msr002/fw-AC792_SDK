@@ -132,7 +132,7 @@ enum RAW_MODE {
 
 
 //<RGB输出大小端配置只有IMD模块支持>
-enum LCD_LSB {//小端模式原始数据输出 大端模式交换两个字节的位置 仅在RGB565模式生效 //取余数据格式通过调节RB生效
+enum LCD_ENDIAN {//小端模式原始数据输出 大端模式交换两个字节的位置 仅在RGB565模式生效 //取余数据格式通过调节RB生效
     MODE_BE,//大端
     MODE_LE,//小端
 };
@@ -264,10 +264,10 @@ struct te_mode_ctrl {
 };
 
 struct imd_dev {
-    struct imd_dmm_info info;
+    struct basic_info info;
     struct te_mode_ctrl te_mode;
 
-    enum LCD_LSB data_out_mode;     //输出数据大小端仅输出RGB565支持
+    enum LCD_ENDIAN data_out_endian;//输出数据大小端仅输出RGB565支持
     enum NCYCLE ncycle;             //每像素时钟数
     enum PHASE raw_odd_phase;	    //奇行相位
     enum PHASE raw_even_phase;      //偶行相位
@@ -290,7 +290,7 @@ struct imd_dev {
 };
 
 struct imd_dev_info {
-    struct imd_dmm_info *info;
+    struct basic_info *info;
     struct color_correct *adjust;
     u8 opened;
 };

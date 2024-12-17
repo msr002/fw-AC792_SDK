@@ -61,6 +61,8 @@ echo "set UI_RES_PREFIX=story_" >> ${PROJ_BUILD}
 #if defined CONFIG_VOICE_PROMPT_FILE_SAVE_IN_RESERVED_EXPAND_ZONE && defined CONFIG_VOICE_PROMPT_FILE_PATH
 echo "packres\packres.exe -n tone -o packres/AUPACKRES story_aud_res" >> ${PROJ_BUILD}
 #endif
+#elif defined CONFIG_WIFI_BBM_PROJECT_ENABLE
+echo "set UI_RES_PREFIX=bbm_" >> ${PROJ_BUILD}
 #endif
 
 #if defined CONFIG_UI_ENABLE && defined CONFIG_UI_FILE_SAVE_IN_RESERVED_EXPAND_ZONE
@@ -222,6 +224,8 @@ set UI_RES_PREFIX=story_
 #if defined CONFIG_VOICE_PROMPT_FILE_SAVE_IN_RESERVED_EXPAND_ZONE && defined CONFIG_VOICE_PROMPT_FILE_PATH
 packres\packres.exe -n tone -o packres/AUPACKRES story_aud_res
 #endif
+#elif defined CONFIG_WIFI_BBM_PROJECT_ENABLE
+set UI_RES_PREFIX=bbm_
 #endif
 
 #if defined CONFIG_UI_ENABLE && defined CONFIG_UI_FILE_SAVE_IN_RESERVED_EXPAND_ZONE
