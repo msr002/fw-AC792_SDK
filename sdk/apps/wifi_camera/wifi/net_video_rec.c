@@ -1096,7 +1096,7 @@ static int net_video_rec1_start()
 
     puts("start_video_rec2 \n");
     if (!__this_net->net_video_rec1) {
-        sprintf(name, "video2.%d", __this->uvc_id);
+        sprintf(name, "video10.%d", __this->uvc_id);
         __this_net->net_video_rec1 = server_open("video_server", name);
         if (!__this_net->net_video_rec1) {
             return -EINVAL;

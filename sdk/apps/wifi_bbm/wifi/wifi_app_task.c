@@ -42,6 +42,7 @@ static int multicast_recv_task_pid;
 static int bbm_tx_online_task_pid;
 static int bbm_rx_online_task_pid;
 static u8 multicast_recv_task_exit;
+static int net_state_timer;
 
 #define DEST_IP_ADDR "192.168.1.1"
 
@@ -116,6 +117,16 @@ struct lan_setting lan_setting_info = {
     .SUB_NET_MASK3   = 255,
     .SUB_NET_MASK4   = 0,
 };
+
+
+static void net_state_timer_func(void *p)
+{
+    //网速
+    /* printf("WIFI U= %d KB/s, D= %d KB/s\r\n", wifi_get_upload_rate() / 1024, wifi_get_download_rate() / 1024); */
+
+    //内存
+    malloc_stats();
+}
 
 static int lwip_set_lan_info(struct lan_setting *__lan_setting_info)
 {
@@ -580,6 +591,7 @@ static void wifi_raw_init(void *priv)
                 , &bbm_tx_online_task_pid, bbm_tx_online_task, NULL);
 #endif
 
+    net_state_timer = sys_timer_add_to_task("app_core", NULL, net_state_timer_func, 5000);
 
     //TX创建CTP_SERVER
 #ifdef CONFIG_BBM_TX

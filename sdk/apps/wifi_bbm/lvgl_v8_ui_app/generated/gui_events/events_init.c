@@ -330,6 +330,168 @@ void events_init_rt_stream(lv_ui *ui)
     lv_obj_add_event_cb(ui->rt_stream, rt_stream_screen_event_handler, LV_EVENT_ALL, ui);
 }
 
+static void file_browser_file_cont1_event_handler(lv_event_t *e)
+{
+    lv_event_code_t code = lv_event_get_code(e);
+    lv_ui *ui = (lv_ui *) lv_event_get_user_data(e);
+    lv_obj_t *src = lv_event_get_target(e);
+    switch (code) {
+    case LV_EVENT_CLICKED: {
+        //custom code video_play
+        {
+            lv_obj_t *dest = ui->video_play;
+#if !LV_USE_GUIBUILDER_SIMULATOR
+            int gui_bbm_file_to_play(int index);
+            gui_bbm_file_to_play(0);
+#endif
+        }
+        gui_scr_t *screen = gui_scr_get(GUI_SCREEN_VIDEO_PLAY);
+        if (screen == NULL) {
+            screen = gui_scr_create(GUI_SCREEN_VIDEO_PLAY, "video_play", guider_ui.video_play, (gui_scr_setup_cb_t)setup_scr_video_play, (gui_scr_unload_cb_t)unload_scr_video_play);
+        }
+        ui_load_scr_anim(ui, screen, LV_SCR_LOAD_ANIM_NONE, 0, 0, true, true, false);
+    }
+    break;
+    default:
+        break;
+    }
+}
+
+static void file_browser_file_cont2_event_handler(lv_event_t *e)
+{
+    lv_event_code_t code = lv_event_get_code(e);
+    lv_ui *ui = (lv_ui *) lv_event_get_user_data(e);
+    lv_obj_t *src = lv_event_get_target(e);
+    switch (code) {
+    case LV_EVENT_CLICKED: {
+        //custom code video_play
+        {
+            lv_obj_t *dest = ui->video_play;
+#if !LV_USE_GUIBUILDER_SIMULATOR
+            int gui_bbm_file_to_play(int index);
+            gui_bbm_file_to_play(1);
+#endif
+        }
+        gui_scr_t *screen = gui_scr_get(GUI_SCREEN_VIDEO_PLAY);
+        if (screen == NULL) {
+            screen = gui_scr_create(GUI_SCREEN_VIDEO_PLAY, "video_play", guider_ui.video_play, (gui_scr_setup_cb_t)setup_scr_video_play, (gui_scr_unload_cb_t)unload_scr_video_play);
+        }
+        ui_load_scr_anim(ui, screen, LV_SCR_LOAD_ANIM_NONE, 0, 0, true, true, false);
+    }
+    break;
+    default:
+        break;
+    }
+}
+
+static void file_browser_file_cont3_event_handler(lv_event_t *e)
+{
+    lv_event_code_t code = lv_event_get_code(e);
+    lv_ui *ui = (lv_ui *) lv_event_get_user_data(e);
+    lv_obj_t *src = lv_event_get_target(e);
+    switch (code) {
+    case LV_EVENT_CLICKED: {
+        //custom code video_play
+        {
+            lv_obj_t *dest = ui->video_play;
+#if !LV_USE_GUIBUILDER_SIMULATOR
+            int gui_bbm_file_to_play(int index);
+            gui_bbm_file_to_play(2);
+#endif
+        }
+        gui_scr_t *screen = gui_scr_get(GUI_SCREEN_VIDEO_PLAY);
+        if (screen == NULL) {
+            screen = gui_scr_create(GUI_SCREEN_VIDEO_PLAY, "video_play", guider_ui.video_play, (gui_scr_setup_cb_t)setup_scr_video_play, (gui_scr_unload_cb_t)unload_scr_video_play);
+        }
+        ui_load_scr_anim(ui, screen, LV_SCR_LOAD_ANIM_NONE, 0, 0, true, true, false);
+    }
+    break;
+    default:
+        break;
+    }
+}
+
+static void file_browser_file_cont4_event_handler(lv_event_t *e)
+{
+    lv_event_code_t code = lv_event_get_code(e);
+    lv_ui *ui = (lv_ui *) lv_event_get_user_data(e);
+    lv_obj_t *src = lv_event_get_target(e);
+    switch (code) {
+    case LV_EVENT_CLICKED: {
+        //custom code video_play
+        {
+            lv_obj_t *dest = ui->video_play;
+#if !LV_USE_GUIBUILDER_SIMULATOR
+            int gui_bbm_file_to_play(int index);
+            gui_bbm_file_to_play(3);
+#endif
+        }
+        gui_scr_t *screen = gui_scr_get(GUI_SCREEN_VIDEO_PLAY);
+        if (screen == NULL) {
+            screen = gui_scr_create(GUI_SCREEN_VIDEO_PLAY, "video_play", guider_ui.video_play, (gui_scr_setup_cb_t)setup_scr_video_play, (gui_scr_unload_cb_t)unload_scr_video_play);
+        }
+        ui_load_scr_anim(ui, screen, LV_SCR_LOAD_ANIM_NONE, 0, 0, true, true, false);
+    }
+    break;
+    default:
+        break;
+    }
+}
+
+static void file_browser_file_cont5_event_handler(lv_event_t *e)
+{
+    lv_event_code_t code = lv_event_get_code(e);
+    lv_ui *ui = (lv_ui *) lv_event_get_user_data(e);
+    lv_obj_t *src = lv_event_get_target(e);
+    switch (code) {
+    case LV_EVENT_CLICKED: {
+        //custom code video_play
+        {
+            lv_obj_t *dest = ui->video_play;
+#if !LV_USE_GUIBUILDER_SIMULATOR
+            int gui_bbm_file_to_play(int index);
+            gui_bbm_file_to_play(4);
+#endif
+        }
+        gui_scr_t *screen = gui_scr_get(GUI_SCREEN_VIDEO_PLAY);
+        if (screen == NULL) {
+            screen = gui_scr_create(GUI_SCREEN_VIDEO_PLAY, "video_play", guider_ui.video_play, (gui_scr_setup_cb_t)setup_scr_video_play, (gui_scr_unload_cb_t)unload_scr_video_play);
+        }
+        ui_load_scr_anim(ui, screen, LV_SCR_LOAD_ANIM_NONE, 0, 0, true, true, false);
+    }
+    break;
+    default:
+        break;
+    }
+}
+
+static void file_browser_file_cont6_event_handler(lv_event_t *e)
+{
+    lv_event_code_t code = lv_event_get_code(e);
+    lv_ui *ui = (lv_ui *) lv_event_get_user_data(e);
+    lv_obj_t *src = lv_event_get_target(e);
+    switch (code) {
+    case LV_EVENT_CLICKED: {
+        //custom code video_play
+        {
+            lv_obj_t *dest = ui->video_play;
+#if !LV_USE_GUIBUILDER_SIMULATOR
+            int gui_bbm_file_to_play(int index);
+            gui_bbm_file_to_play(5);
+#endif
+        }
+        gui_scr_t *screen = gui_scr_get(GUI_SCREEN_VIDEO_PLAY);
+        if (screen == NULL) {
+            screen = gui_scr_create(GUI_SCREEN_VIDEO_PLAY, "video_play", guider_ui.video_play, (gui_scr_setup_cb_t)setup_scr_video_play, (gui_scr_unload_cb_t)unload_scr_video_play);
+        }
+        ui_load_scr_anim(ui, screen, LV_SCR_LOAD_ANIM_NONE, 0, 0, true, true, false);
+    }
+    break;
+    default:
+        break;
+    }
+}
+
 static void file_browser_imgbtn_1_event_handler(lv_event_t *e)
 {
     lv_event_code_t code = lv_event_get_code(e);
@@ -409,6 +571,12 @@ static void file_browser_screen_event_handler(lv_event_t *e)
 
 void events_init_file_browser(lv_ui *ui)
 {
+    lv_obj_add_event_cb(ui->file_browser_file_cont1, file_browser_file_cont1_event_handler, LV_EVENT_ALL, ui);
+    lv_obj_add_event_cb(ui->file_browser_file_cont2, file_browser_file_cont2_event_handler, LV_EVENT_ALL, ui);
+    lv_obj_add_event_cb(ui->file_browser_file_cont3, file_browser_file_cont3_event_handler, LV_EVENT_ALL, ui);
+    lv_obj_add_event_cb(ui->file_browser_file_cont4, file_browser_file_cont4_event_handler, LV_EVENT_ALL, ui);
+    lv_obj_add_event_cb(ui->file_browser_file_cont5, file_browser_file_cont5_event_handler, LV_EVENT_ALL, ui);
+    lv_obj_add_event_cb(ui->file_browser_file_cont6, file_browser_file_cont6_event_handler, LV_EVENT_ALL, ui);
     lv_obj_add_event_cb(ui->file_browser_imgbtn_1, file_browser_imgbtn_1_event_handler, LV_EVENT_ALL, ui);
     lv_obj_add_event_cb(ui->file_browser_imgbtn_2, file_browser_imgbtn_2_event_handler, LV_EVENT_ALL, ui);
     lv_obj_add_event_cb(ui->file_browser_imgbtn_3, file_browser_imgbtn_3_event_handler, LV_EVENT_ALL, ui);
@@ -533,4 +701,43 @@ static void unpair_event_handler(lv_event_t *e)
 void events_init_unpair(lv_ui *ui)
 {
     lv_obj_add_event_cb(ui->unpair, unpair_event_handler, LV_EVENT_ALL, ui);
+}
+
+static void video_play_imgbtn_1_event_handler(lv_event_t *e)
+{
+    lv_event_code_t code = lv_event_get_code(e);
+    lv_ui *ui = (lv_ui *) lv_event_get_user_data(e);
+    lv_obj_t *src = lv_event_get_target(e);
+    switch (code) {
+    case LV_EVENT_CLICKED: {
+        gui_scr_t *screen = gui_scr_get(GUI_SCREEN_FILE_BROWSER);
+        if (screen == NULL) {
+            screen = gui_scr_create(GUI_SCREEN_FILE_BROWSER, "file_browser", guider_ui.file_browser, (gui_scr_setup_cb_t)setup_scr_file_browser, (gui_scr_unload_cb_t)unload_scr_file_browser);
+        }
+        ui_load_scr_anim(ui, screen, LV_SCR_LOAD_ANIM_NONE, 0, 0, true, true, false);
+    }
+    break;
+    default:
+        break;
+    }
+}
+static void video_play_screen_event_handler(lv_event_t *e)
+{
+    lv_event_code_t code = lv_event_get_code(e);
+    switch (code) {
+    case LV_EVENT_SCREEN_LOAD_START: {
+        gui_scr_action_cb(GUI_SCREEN_VIDEO_PLAY, GUI_SCREEN_ACTION_LOAD);
+        break;
+    }
+    case LV_EVENT_SCREEN_UNLOADED: {
+        gui_scr_action_cb(GUI_SCREEN_VIDEO_PLAY, GUI_SCREEN_ACTION_UNLOAD);
+        break;
+    }
+    }
+}
+
+void events_init_video_play(lv_ui *ui)
+{
+    lv_obj_add_event_cb(ui->video_play_imgbtn_1, video_play_imgbtn_1_event_handler, LV_EVENT_ALL, ui);
+    lv_obj_add_event_cb(ui->video_play, video_play_screen_event_handler, LV_EVENT_ALL, ui);
 }

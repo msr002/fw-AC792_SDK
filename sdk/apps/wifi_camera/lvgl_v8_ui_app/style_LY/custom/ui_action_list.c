@@ -247,6 +247,9 @@ void video_dec_post_msg(const char *msg, ...)
         dec_play_time_handler(msg, va_arg(argptr, int));
     } else if (strstr(msg, "fname")) {
         dec_file_name_handler(msg, va_arg(argptr, int));
+    } else if (strstr(msg, "fileInfo")) {
+        post_msg2_dec(msg, va_arg(argptr, int));
+
     } else {
         printf("[chili] %s your msg [%s] no callback! \n", __func__, msg, __LINE__);
     }
@@ -1467,7 +1470,7 @@ static int jpeg2yuv_pipeline_init(struct video_format *f)
 
 
     char *source_name = plugin_factory_find("virtual");
-
+    pipe_core->channel = plugin_source_to_channel(source_name);
     virtual_filter = pipeline_filter_add(pipe_core, source_name);
     jpeg_dec_filter = pipeline_filter_add(pipe_core, plugin_factory_find("jpeg_dec"));
     rep_filter = pipeline_filter_add(pipe_core, "rep1");

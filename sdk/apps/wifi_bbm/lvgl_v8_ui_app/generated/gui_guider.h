@@ -124,6 +124,12 @@ typedef struct {
     bool      unpair_del;
     lv_obj_t *unpair_lbl_1;
 
+    // Screen video_play
+    lv_obj_t *video_play;
+    bool      video_play_del;
+    lv_obj_t *video_play_imgbtn_1;
+    lv_obj_t *video_play_imgbtn_1_label;
+
     lv_group_t *default_group;
 } lv_ui;
 
@@ -164,6 +170,9 @@ void unload_scr_pairing(lv_ui *ui);
 // Screen unpair
 lv_obj_t *setup_scr_unpair(lv_ui *ui);
 void unload_scr_unpair(lv_ui *ui);
+// Screen video_play
+lv_obj_t *setup_scr_video_play(lv_ui *ui);
+void unload_scr_video_play(lv_ui *ui);
 #ifdef __cplusplus
 }
 #endif

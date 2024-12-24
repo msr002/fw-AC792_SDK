@@ -583,8 +583,13 @@ int video_disp_start(int id, struct video_window *win)
         return 0;
     }
 
-    sprintf(dev_name, "video%d.%d", id, id < 2 ? 0 : __this->uvc_id);
     sprintf(fb_name, "fb%d", id + 1);
+
+    if (id == 2) {
+        sprintf(dev_name, "video%d.%d", 10, id < 2 ? 0 : __this->uvc_id);
+    } else {
+        sprintf(dev_name, "video%d.%d", id, id < 2 ? 0 : __this->uvc_id);
+    }
 
     if (!__this->video_display[id]) {
         __this->video_display[id] = server_open("video_server", (void *)dev_name);
@@ -745,9 +750,9 @@ int video2_disp_start(int sub_id, struct video_window *win)
         puts("video_disp_hide\n");
         return 0;
     }
-    sprintf(dev_name, "video2.%d", sub_id * 5);
+    sprintf(dev_name, "video10.%d", sub_id * 5);
     if (sub_id >= 2) {
-        sprintf(dev_name, "video2.%d", sub_id + 5);
+        sprintf(dev_name, "video10.%d", sub_id + 5);
     }
     log_d("video2_disp_start: %s, %d x %d\n", dev_name, win->width, win->height);
     if (!__this->video2_display[id]) {
@@ -2766,7 +2771,7 @@ static int video2_rec_start()
 
     puts("start_video_rec2 \n");
     if (!__this->video_rec2) {
-        sprintf(name, "video2.%d", __this->uvc_id);
+        sprintf(name, "video10.%d", __this->uvc_id);
         __this->video_rec2 = server_open("video_server", name);
         if (!__this->video_rec2) {
             return -EINVAL;
@@ -3869,7 +3874,7 @@ static int video_rec_change_source_reso(int dev_id, u16 width, u16 height)
         __this->src_width[2] = width;
         __this->src_height[2] = height;
         if (__this->video_online[2]) {
-            log_d("video2.* change source reso to %d x %d\n", width, height);
+            log_d("video12.* change source reso to %d x %d\n", width, height);
             int rec_state = __this->state;
             int disp_state = __this->disp_state;
             if (rec_state == VIDREC_STA_START) {
@@ -4089,8 +4094,10 @@ static int video_rec_capture(int id)
     if (id == 2) {
         req.icap.camera_type = VIDEO_CAMERA_UVC;
         req.icap.uvc_id = uvc_host_online();
+        sprintf(video_name, "video%d.0", 10);
+    } else {
+        sprintf(video_name, "video%d.0", id);
     }
-    sprintf(video_name, "video%d.0", id);
     server = server_open("video_server", video_name);
     if (!server) {
         log_e("video_server open fail");

@@ -16,7 +16,7 @@ lv_obj_t *setup_scr_file_browser(lv_ui *ui)
     lv_group_t *def_group = lv_group_get_default();
 
     //Set style for file_browser. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
-    lv_obj_set_style_bg_color(ui->file_browser, lv_color_make(0xff, 0xff, 0xff), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(ui->file_browser, lv_color_make(0xE2, 0xDC, 0xDC), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_opa(ui->file_browser, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_border_width(ui->file_browser, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_scrollbar_mode(ui->file_browser, LV_SCROLLBAR_MODE_OFF);
@@ -76,6 +76,7 @@ lv_obj_t *setup_scr_file_browser(lv_ui *ui)
     lv_obj_set_pos(ui->file_browser_img_1, 4, 0);
     lv_obj_set_size(ui->file_browser_img_1, 192, 160);
     lv_obj_set_scrollbar_mode(ui->file_browser_img_1, LV_SCROLLBAR_MODE_OFF);
+    lv_obj_add_flag(ui->file_browser_img_1, LV_OBJ_FLAG_EVENT_BUBBLE);
     //Write codes file_browser_lbl_2
     ui->file_browser_lbl_2 = lv_label_create(ui->file_browser_file_cont1);
     lv_label_set_text(ui->file_browser_lbl_2, "VID_0001.AVI");
@@ -136,6 +137,7 @@ lv_obj_t *setup_scr_file_browser(lv_ui *ui)
     lv_obj_set_pos(ui->file_browser_img_2, 4, 0);
     lv_obj_set_size(ui->file_browser_img_2, 192, 160);
     lv_obj_set_scrollbar_mode(ui->file_browser_img_2, LV_SCROLLBAR_MODE_OFF);
+    lv_obj_add_flag(ui->file_browser_img_2, LV_OBJ_FLAG_EVENT_BUBBLE);
     //Write codes file_browser_lbl_3
     ui->file_browser_lbl_3 = lv_label_create(ui->file_browser_file_cont2);
     lv_label_set_text(ui->file_browser_lbl_3, "VID_0001.AVI");
@@ -196,6 +198,7 @@ lv_obj_t *setup_scr_file_browser(lv_ui *ui)
     lv_obj_set_pos(ui->file_browser_img_3, 4, 0);
     lv_obj_set_size(ui->file_browser_img_3, 192, 160);
     lv_obj_set_scrollbar_mode(ui->file_browser_img_3, LV_SCROLLBAR_MODE_OFF);
+    lv_obj_add_flag(ui->file_browser_img_3, LV_OBJ_FLAG_EVENT_BUBBLE);
     //Write codes file_browser_lbl_4
     ui->file_browser_lbl_4 = lv_label_create(ui->file_browser_file_cont3);
     lv_label_set_text(ui->file_browser_lbl_4, "VID_0001.AVI");
@@ -256,6 +259,7 @@ lv_obj_t *setup_scr_file_browser(lv_ui *ui)
     lv_obj_set_pos(ui->file_browser_img_4, 4, 0);
     lv_obj_set_size(ui->file_browser_img_4, 192, 160);
     lv_obj_set_scrollbar_mode(ui->file_browser_img_4, LV_SCROLLBAR_MODE_OFF);
+    lv_obj_add_flag(ui->file_browser_img_4, LV_OBJ_FLAG_EVENT_BUBBLE);
     //Write codes file_browser_lbl_5
     ui->file_browser_lbl_5 = lv_label_create(ui->file_browser_file_cont4);
     lv_label_set_text(ui->file_browser_lbl_5, "VID_0001.AVI");
@@ -316,6 +320,7 @@ lv_obj_t *setup_scr_file_browser(lv_ui *ui)
     lv_obj_set_pos(ui->file_browser_img_5, 4, 0);
     lv_obj_set_size(ui->file_browser_img_5, 192, 160);
     lv_obj_set_scrollbar_mode(ui->file_browser_img_5, LV_SCROLLBAR_MODE_OFF);
+    lv_obj_add_flag(ui->file_browser_img_5, LV_OBJ_FLAG_EVENT_BUBBLE);
     //Write codes file_browser_lbl_6
     ui->file_browser_lbl_6 = lv_label_create(ui->file_browser_file_cont5);
     lv_label_set_text(ui->file_browser_lbl_6, "VID_0001.AVI");
@@ -376,6 +381,7 @@ lv_obj_t *setup_scr_file_browser(lv_ui *ui)
     lv_obj_set_pos(ui->file_browser_img_6, 4, 0);
     lv_obj_set_size(ui->file_browser_img_6, 192, 160);
     lv_obj_set_scrollbar_mode(ui->file_browser_img_6, LV_SCROLLBAR_MODE_OFF);
+    lv_obj_add_flag(ui->file_browser_img_6, LV_OBJ_FLAG_EVENT_BUBBLE);
     //Write codes file_browser_lbl_7
     ui->file_browser_lbl_7 = lv_label_create(ui->file_browser_file_cont6);
     lv_label_set_text(ui->file_browser_lbl_7, "VID_0001.AVI");

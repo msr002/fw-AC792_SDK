@@ -828,6 +828,7 @@ c_SRC_FILES := \
 	../../../../apps/wifi_bbm/lvgl_v8_ui_app/custom/ui_action_file.c \
 	../../../../apps/wifi_bbm/lvgl_v8_ui_app/custom/ui_action_home.c \
 	../../../../apps/wifi_bbm/lvgl_v8_ui_app/custom/ui_action_pair.c \
+	../../../../apps/wifi_bbm/lvgl_v8_ui_app/custom/ui_action_play.c \
 	../../../../apps/wifi_bbm/lvgl_v8_ui_app/custom/ui_action_stream.c \
 	../../../../apps/wifi_bbm/lvgl_v8_ui_app/generated/gui_events/callback_handler.c \
 	../../../../apps/wifi_bbm/lvgl_v8_ui_app/generated/gui_events/events_init.c \
@@ -852,6 +853,7 @@ c_SRC_FILES := \
 	../../../../apps/wifi_bbm/lvgl_v8_ui_app/generated/gui_scr/setup_scr_pairing.c \
 	../../../../apps/wifi_bbm/lvgl_v8_ui_app/generated/gui_scr/setup_scr_rt_stream.c \
 	../../../../apps/wifi_bbm/lvgl_v8_ui_app/generated/gui_scr/setup_scr_unpair.c \
+	../../../../apps/wifi_bbm/lvgl_v8_ui_app/generated/gui_scr/setup_scr_video_play.c \
 	../../../../apps/wifi_bbm/lvgl_v8_ui_app/generated/gui_timelines/gui_timelines.c \
 	../../../../apps/wifi_bbm/lvgl_v8_ui_app/generated/i18n/lv_i18n.c \
 	../../../../apps/wifi_bbm/protocols/arp_static_table.c \

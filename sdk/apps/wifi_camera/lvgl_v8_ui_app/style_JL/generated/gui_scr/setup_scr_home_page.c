@@ -301,34 +301,6 @@ lv_obj_t *setup_scr_home_page(lv_ui *ui)
     lv_obj_set_style_pad_top(ui->home_page_digitclock_1, 7, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_pos(ui->home_page_digitclock_1, 92, 14);
     lv_obj_set_size(ui->home_page_digitclock_1, 613, 75);
-    //Write codes home_page_lbl_2
-    ui->home_page_lbl_2 = lv_label_create(ui->home_page);
-    lv_label_set_text(ui->home_page_lbl_2, _("Sun"));
-    lv_label_set_long_mode(ui->home_page_lbl_2, LV_LABEL_LONG_WRAP);
-
-    const lv_font_t *home_page_lbl_2_font = _font("Sun");
-    if (home_page_lbl_2_font == NULL) {
-        home_page_lbl_2_font = &lv_font_FangZhengKaiTiJianTi_1_48;
-    }
-
-    //Set style for home_page_lbl_2. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
-    lv_obj_set_style_radius(ui->home_page_lbl_2, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_color(ui->home_page_lbl_2, lv_color_make(0x21, 0x95, 0xf6), LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_opa(ui->home_page_lbl_2, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_shadow_width(ui->home_page_lbl_2, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_border_width(ui->home_page_lbl_2, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_text_color(ui->home_page_lbl_2, lv_color_make(0xff, 0xff, 0xff), LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_text_font(ui->home_page_lbl_2, home_page_lbl_2_font, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_text_letter_space(ui->home_page_lbl_2, 2, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_text_line_space(ui->home_page_lbl_2, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_text_align(ui->home_page_lbl_2, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_pad_left(ui->home_page_lbl_2, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_pad_right(ui->home_page_lbl_2, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_pad_top(ui->home_page_lbl_2, 8, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_pad_bottom(ui->home_page_lbl_2, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_pos(ui->home_page_lbl_2, 127, 93);
-    lv_obj_set_size(ui->home_page_lbl_2, 178, 72);
-    lv_obj_set_scrollbar_mode(ui->home_page_lbl_2, LV_SCROLLBAR_MODE_OFF);
     //Write codes home_page_lbl_3
     ui->home_page_lbl_3 = lv_label_create(ui->home_page);
     lv_label_set_text(ui->home_page_lbl_3, _("sunny"));
@@ -357,6 +329,34 @@ lv_obj_t *setup_scr_home_page(lv_ui *ui)
     lv_obj_set_pos(ui->home_page_lbl_3, 515, 93);
     lv_obj_set_size(ui->home_page_lbl_3, 131, 67);
     lv_obj_set_scrollbar_mode(ui->home_page_lbl_3, LV_SCROLLBAR_MODE_OFF);
+    //Write codes home_page_lbl_1
+    ui->home_page_lbl_1 = lv_label_create(ui->home_page);
+    lv_label_set_text(ui->home_page_lbl_1, _("Sun"));
+    lv_label_set_long_mode(ui->home_page_lbl_1, LV_LABEL_LONG_WRAP);
+
+    const lv_font_t *home_page_lbl_1_font = _font("Sun");
+    if (home_page_lbl_1_font == NULL) {
+        home_page_lbl_1_font = &lv_font_FangZhengKaiTiJianTi_1_48;
+    }
+
+    //Set style for home_page_lbl_1. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
+    lv_obj_set_style_radius(ui->home_page_lbl_1, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(ui->home_page_lbl_1, lv_color_make(0x21, 0x95, 0xf6), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(ui->home_page_lbl_1, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_shadow_width(ui->home_page_lbl_1, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_border_width(ui->home_page_lbl_1, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_color(ui->home_page_lbl_1, lv_color_make(0xff, 0xff, 0xff), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui->home_page_lbl_1, home_page_lbl_1_font, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_letter_space(ui->home_page_lbl_1, 2, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_line_space(ui->home_page_lbl_1, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_align(ui->home_page_lbl_1, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_left(ui->home_page_lbl_1, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_right(ui->home_page_lbl_1, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_top(ui->home_page_lbl_1, 8, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_bottom(ui->home_page_lbl_1, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_pos(ui->home_page_lbl_1, 167, 93);
+    lv_obj_set_size(ui->home_page_lbl_1, 197, 67);
+    lv_obj_set_scrollbar_mode(ui->home_page_lbl_1, LV_SCROLLBAR_MODE_OFF);
     lv_obj_update_layout(ui->home_page);
     ui->home_page_del = false;
 

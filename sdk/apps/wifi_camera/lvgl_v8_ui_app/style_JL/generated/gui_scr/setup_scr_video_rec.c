@@ -1501,10 +1501,10 @@ lv_obj_t *setup_scr_video_rec(lv_ui *ui)
     lv_obj_set_scrollbar_mode(ui->video_rec_lbl_16, LV_SCROLLBAR_MODE_OFF);
     //Write codes video_rec_lbl_17
     ui->video_rec_lbl_17 = lv_label_create(ui->video_rec_view_video_set);
-    lv_label_set_text(ui->video_rec_lbl_17, _("date"));
+    lv_label_set_text(ui->video_rec_lbl_17, _("date_s"));
     lv_label_set_long_mode(ui->video_rec_lbl_17, LV_LABEL_LONG_WRAP);
 
-    const lv_font_t *video_rec_lbl_17_font = _font("date");
+    const lv_font_t *video_rec_lbl_17_font = _font("date_s");
     if (video_rec_lbl_17_font == NULL) {
         video_rec_lbl_17_font = &lv_font_FangZhengKaiTiJianTi_1_16;
     }
@@ -1585,10 +1585,10 @@ lv_obj_t *setup_scr_video_rec(lv_ui *ui)
     lv_obj_set_scrollbar_mode(ui->video_rec_lbl_19, LV_SCROLLBAR_MODE_OFF);
     //Write codes video_rec_lbl_20
     ui->video_rec_lbl_20 = lv_label_create(ui->video_rec_view_video_set);
-    lv_label_set_text(ui->video_rec_lbl_20, _("carnum"));
+    lv_label_set_text(ui->video_rec_lbl_20, _("carnum_s"));
     lv_label_set_long_mode(ui->video_rec_lbl_20, LV_LABEL_LONG_WRAP);
 
-    const lv_font_t *video_rec_lbl_20_font = _font("carnum");
+    const lv_font_t *video_rec_lbl_20_font = _font("carnum_s");
     if (video_rec_lbl_20_font == NULL) {
         video_rec_lbl_20_font = &lv_font_FangZhengKaiTiJianTi_1_16;
     }
@@ -1608,7 +1608,7 @@ lv_obj_t *setup_scr_video_rec(lv_ui *ui)
     lv_obj_set_style_pad_right(ui->video_rec_lbl_20, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_pad_top(ui->video_rec_lbl_20, 8, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_pad_bottom(ui->video_rec_lbl_20, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_pos(ui->video_rec_lbl_20, 332, 413);
+    lv_obj_set_pos(ui->video_rec_lbl_20, 327, 413);
     lv_obj_set_size(ui->video_rec_lbl_20, 90, 53);
     lv_obj_set_scrollbar_mode(ui->video_rec_lbl_20, LV_SCROLLBAR_MODE_OFF);
     //Write codes video_rec_view_subpage

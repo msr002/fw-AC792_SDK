@@ -1316,10 +1316,10 @@ lv_obj_t *setup_scr_video_photo(lv_ui *ui)
     lv_obj_set_scrollbar_mode(ui->video_photo_lbl_19, LV_SCROLLBAR_MODE_OFF);
     //Write codes video_photo_lbl_20
     ui->video_photo_lbl_20 = lv_label_create(ui->video_photo_view_video_set);
-    lv_label_set_text(ui->video_photo_lbl_20, _("date"));
+    lv_label_set_text(ui->video_photo_lbl_20, _("date_s"));
     lv_label_set_long_mode(ui->video_photo_lbl_20, LV_LABEL_LONG_WRAP);
 
-    const lv_font_t *video_photo_lbl_20_font = _font("date");
+    const lv_font_t *video_photo_lbl_20_font = _font("date_s");
     if (video_photo_lbl_20_font == NULL) {
         video_photo_lbl_20_font = &lv_font_FangZhengKaiTiJianTi_1_16;
     }

@@ -457,7 +457,7 @@ char *gui_get_res_path(int32_t id)
     } else if (id >= 0x54000000 && id < 0x55000000) {
         snprintf(path_buf, sizeof(path_buf), "%s%x.svg", flash_dir, id);
     } else if (id >= 0x55000000 && id < 0x56000000) {
-        snprintf(path_buf, sizeof(path_buf), "%s%x.bin", flash_dir, id);
+        snprintf(path_buf, sizeof(path_buf), "%s%x.zip", flash_dir, id);
     } else if (id >= 0x56000000 && id < 0x57000000) {
         snprintf(path_buf, sizeof(path_buf), "%s%x.rle", flash_dir, id);
     } else if (id >= 0x57000000 && id < 0x58000000) {

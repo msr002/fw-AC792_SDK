@@ -621,7 +621,7 @@ void video_photo_icon_reshow(int icon)
         lvgl_module_msg_group_add_global_ptr(photo_group, GUI_MODEL_VIDEO_PHOTO_MSG_ID_RESOLUTION_ICON, (void *)user_roller_str, strlen(user_roller_str));
         extern uint32_t get_take_photo_num(void);
         img_num = get_take_photo_num();
-        post_msg2photo_remain(img_num);
+        post_msg2photo_remain(NULL, img_num);
         break;
     case SUBPAGE_EXPOSURE:
 #if !LV_USE_GUIBUILDER_SIMULATOR
@@ -668,7 +668,7 @@ void video_photo_icon_reshow(int icon)
         break;
     case SUBPAGE_QUALITY:
         img_num = get_take_photo_num();
-        post_msg2photo_remain(img_num);
+        post_msg2photo_remain(NULL, img_num);
         //拍照界面显示并更新图标--图像质量
         switch (db_select("qua")) {
         case 2:
@@ -1002,7 +1002,7 @@ void sysmenu_subpage_btnlist_keyevent_cb(lv_ui *ui)
         my_sysmenu_subpage.icon_res_id = (void *)RES_LANGUAGES;
         my_sysmenu_subpage.title = (void *)_("language");
         my_sysmenu_subpage.funkey4 = (void *)"简体中文";
-        my_sysmenu_subpage.funkey5 = (void *)"english";
+        my_sysmenu_subpage.funkey5 = (void *)"English";
         switch (db_select("lag")) { //处理高亮样式
         case LANG_ENGLISH:
             my_sysmenu_subpage.list_focus_id = 1;

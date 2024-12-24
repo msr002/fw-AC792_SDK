@@ -59,6 +59,7 @@ void init_scr_del_flag(lv_ui *ui)
     ui->pair_options_del = true;
     ui->pairing_del = true;
     ui->unpair_del = true;
+    ui->video_play_del = true;
 }
 
 void setup_ui(lv_ui *ui)

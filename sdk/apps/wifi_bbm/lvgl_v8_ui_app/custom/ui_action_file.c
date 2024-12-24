@@ -39,6 +39,7 @@ struct file_browser_handle {
     int file_total_page;
     int file_cur_page;
     int file_cur_page_num;
+    int to_play_page;
 
     int thumb_dec_task_pid;
 
@@ -96,6 +97,16 @@ int gui_bbm_get_file_list(void)
     it.action = ACTION_BBM_GET_FILE_LIST;
     it.data = &__this->file_list;
     start_app(&it);
+
+    return 0;
+}
+
+int gui_bbm_file_to_play(int index)
+{
+    int list_index = (__this->file_cur_page - 1) * ONE_PAGE_MAX_NUM + index;
+    gui_bbm_set_cur_play_index(list_index);
+
+    __this->to_play_page = __this->file_cur_page;
 
     return 0;
 }
@@ -270,6 +281,7 @@ static void gui_bbm_thumb_task_exit(void)
 {
     int msg = 1;
     if (__this->thumb_dec_task_pid) {
+        os_taskq_del_type(THUMB_DEC_TASK_NAME, Q_MSG);
         os_taskq_post_type(THUMB_DEC_TASK_NAME, Q_USER, 1, &msg);
         thread_kill(&__this->thumb_dec_task_pid, KILL_WAIT);
         __this->thumb_dec_task_pid = 0;
@@ -282,7 +294,10 @@ static int file_browser_screen_load(void)
     int ret;
 
     //关闭摄像头实时流
-    gui_bbm_stop_stream();
+    if (!__this->to_play_page) {
+        //区分home页面还是回放页面
+        gui_bbm_stop_stream();
+    }
 
     //开启ctp文件流程
     ret = gui_bbm_start_file_browser();
@@ -307,7 +322,12 @@ static int file_browser_screen_load(void)
     os_sem_create(&__this->thumb_data.sem, 0);
 
     __this->file_total_page = ceil((float)__this->file_total_num / ONE_PAGE_MAX_NUM);
-    __this->file_cur_page = 1;
+    if (__this->to_play_page) {
+        __this->file_cur_page = __this->to_play_page;
+        __this->to_play_page = 0;
+    } else {
+        __this->file_cur_page = 1;
+    }
 
     //更新UI
     file_browser_update();
@@ -317,16 +337,20 @@ static int file_browser_screen_load(void)
 
 static int file_browser_screen_unload(void)
 {
-    //缩略图信号量
-    os_sem_del(&__this->thumb_data.sem, OS_DEL_ALWAYS);
-    //关闭ctp文件流程
-    gui_bbm_stop_file_browser();
     //关闭缩略图解码线程
     gui_bbm_thumb_task_exit();
+    //关闭ctp文件流程
+    gui_bbm_stop_file_browser();
     //释放内存
     file_browser_buf_exit();
+    //缩略图信号量
+    os_sem_del(&__this->thumb_data.sem, OS_DEL_ALWAYS);
+
     //开启摄像头实时流
-    gui_bbm_start_stream();
+    if (!__this->to_play_page) {
+        //区分home页面还是回放页面
+        gui_bbm_start_stream();
+    }
 
     return 0;
 }
@@ -492,8 +516,8 @@ static int jpeg2yuv_pipeline_init(struct video_format *f)
     __this->pipe_core->channel = plugin_source_to_channel(source_name);
     virtual_filter = pipeline_filter_add(__this->pipe_core, source_name);
     jpeg_dec_filter = pipeline_filter_add(__this->pipe_core, plugin_factory_find("jpeg_dec"));
-    rep_filter = pipeline_filter_add(__this->pipe_core, "rep1");
-    imc_filter = pipeline_filter_add(__this->pipe_core, "imc3");
+    rep_filter = pipeline_filter_add(__this->pipe_core, plugin_factory_find("rep"));
+    imc_filter = pipeline_filter_add(__this->pipe_core, plugin_factory_find("imc"));
     yuv_filter = pipeline_filter_add(__this->pipe_core, plugin_factory_find("yuv"));
 
     pipeline_param_set(__this->pipe_core, NULL, PIPELINE_SET_FORMAT, f);
@@ -574,7 +598,7 @@ static int jpeg2yuv_with_pipeline(u8 *jpeg_buf, int jpeg_len, u8 *img_buf, int d
     f.private_data = "fb5";
 
     if ((last_height != info.height) || (last_width != info.width)
-        || (last_format != fmt)) {
+        || (last_format != fmt) || (__this->pipe_core == NULL)) {
 
         jpeg2yuv_pipeline_uninit();
         jpeg2yuv_pipeline_init(&f);

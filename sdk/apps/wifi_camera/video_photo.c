@@ -616,7 +616,11 @@ static int camera_take_photo(void)
     }
 
     //video0.0
-    sprintf(video_name, "video%d.0", __this->camera_id);
+    if (__this->camera_id == 2) {
+        sprintf(video_name, "video%d.0", 10);
+    } else {
+        sprintf(video_name, "video%d.0", __this->camera_id);
+    }
     if (!__this->capture) {
         __this->capture = server_open("video_server", video_name);
         if (!__this->capture) {
@@ -877,7 +881,11 @@ static int camera_display_start(void)
         return 0;
     }
 
-    sprintf(video_name, "video%d.0", __this->camera_id);
+    if (__this->camera_id == 2) {
+        sprintf(video_name, "video%d.0", 10);
+    } else {
+        sprintf(video_name, "video%d.0", __this->camera_id);
+    }
     sprintf(fb_name, "fb%d", __this->camera_id + 1);
 
     __this->display = server_open("video_server", video_name);

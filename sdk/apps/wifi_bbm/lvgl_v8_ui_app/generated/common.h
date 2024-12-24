@@ -35,6 +35,7 @@ typedef enum {
     GUI_SCREEN_PAIR_OPTIONS,
     GUI_SCREEN_PAIRING,
     GUI_SCREEN_UNPAIR,
+    GUI_SCREEN_VIDEO_PLAY,
 } gui_screen_id_t;
 
 

@@ -29,7 +29,7 @@
 #define RT_RECV_PORT            2224    //图传接收数据端口
 #define RT_SEND_PORT            9981    //图传(音频)发送数据端口
 #define FILE_THUMB_PORT         2226    //缩略图数据端口
-#define FILE_RT_PORT            2223    //视频数据端口
+#define FILE_PLAY_PORT          2223    //视频回放端口
 #define HTTP_PORT               8080    //HTTP解析vs_list.txt端口
 
 #define VIDEO_DEC_BUF_MAX_SIZE       512    //解码服务缓存,单位Kb,申请大小不能小于一帧图像的大小
@@ -51,6 +51,7 @@
 #define INVALID_CH_NUM  99
 
 #define CTP_FILE_THUMB_TASK_NAME        "thread_socket_thumb"
+#define CTP_FILE_PLAY_TASK_NAME         "thread_socket_file_play"
 
 enum {
     BBM_MSG_CONNECT = 1,
@@ -70,6 +71,19 @@ enum {
     BBM_RT_STREAM_START  = 1,
 };
 
+enum {
+    BBM_FILE_PLAY_STOP = 0,
+    BBM_FILE_PLAY_START,
+    BBM_FILE_PLAY_PAUSE,
+    BBM_FILE_PLAY_RESUME,
+};
+//对应ctp_cmd.c
+#define PLAY_VIDEO_CONTINUE 0
+#define PLAY_VIDEO_PAUSE    1
+#define PLAY_VIDEO_STOP     2
+
+
+
 //todo
 //没头文件?
 struct ctp_hdl {
@@ -87,6 +101,12 @@ struct ctp_hdl {
     unsigned int timecheckout;
 };
 
+struct file_media_info {
+    u16 width;
+    u16 height;
+    u16 sample_rate;
+    u16 dur_time;
+};
 
 
 struct wifi_bbm_hdl {
@@ -94,18 +114,18 @@ struct wifi_bbm_hdl {
     int ctp_send_pid;
     int ctp_thumb_pid;
     int pairing_task_pid;
-    int ctp_file_rt_pid;
+    int ctp_file_play_pid;
 
     u8 ctp_recv_exit;
     u8 ctp_send_exit;
     u8 ctp_thumb_exit;
     u8 pairing_task_exit;
-    u8 ctp_file_rt_exit;
+    u8 ctp_file_play_exit;
 
     void *ctp_recv_sockfd;
     void *ctp_send_sockfd;
     void *ctp_thumb_sockfd;
-    void *ctp_file_rt_sockfd;
+    void *ctp_file_play_sockfd;
 
     struct ctp_hdl *ctp_cli_hdl;
     struct server *video_dec_server;
@@ -131,6 +151,7 @@ struct wifi_bbm_hdl {
 
     char **file_list;
     u16  file_total_num;
+    struct file_media_info **media_info_list;
 
     //todo
     char dest_ip_addr[20];
@@ -590,10 +611,10 @@ static void net_ctp_recv_task(void)
                 fps_cnt = 0;
             }
             fps_cnt++;
-            putchar('v');
+            /* putchar('v'); */
             video_dec_one_frame(data_buf + 8, data_size - 8);
         } else if (ret & PCM_TYPE_AUDIO) {
-            putchar('a');
+            /* putchar('a'); */
             audio_dec_one_frame(data_buf, data_size);
         } else {
             /* putchar('e'); */
@@ -616,66 +637,9 @@ exit:
     }
 }
 
-#if 0
-static int parse_thumb_packet(u8 *recv_buf, int recv_len, u8 *data_buf, u32 *data_len)
-{
-    static u8 jpeg_flag = 0;
-    static u32 jpeg_recv_size = 0;
-    static u32 jpeg_total_size = 0;
-    u32 offset = 0;
-
-continue_parse:
-    struct frm_head *frame_head = (struct frm_head *)(recv_buf + offset);
-
-    switch (frame_head->type) {
-    case MEDIA_INFO_TYPE:
-        struct media_info *media = (struct media_info *)(recv_buf + sizeof(struct frm_head));
-        //log
-        printf("media w:%d h:%d fps:%d audio_rate:%d dur_time:%d fname:%s \n"
-               , media->length, media->height, media->fps
-               , media->audio_rate, media->dur_time, media->filename);
-
-        if (recv_len > (offset + frame_head->frm_sz + 2 * sizeof(struct frm_head))) {
-            //还有多的 frame_head
-            offset += sizeof(struct frame_head) + frame_head->frm_sz;
-            goto continue_parse;
-        }
-        break;
-    case DATE_TIME_TYPE:
-        //时间包,暂时不处理
-        printf("date time\n");
-        if (recv_len > (offset + frame_head->frm_sz + 2 * sizeof(struct frm_head))) {
-            //还有多的 frame_head
-            offset += sizeof(struct frame_head) + frame_head->frm_sz;
-            goto continue_parse;
-        }
-        break;
-    case PREVIEW_TYPE:
-        //jpeg包
-        u32 jpeg_size = frame_head->frm_sz;
-        printf("jpeg_size :%d \n", jpeg_size);
-        if (!jpeg_flag) {
-            jpeg_flag = 1;
-            u8 *data = (u8 *)frame_head + sizeof(struct frm_head);
-            put_buf(data, 16);
-
-            u32 payload_size = recv_len - offset - sizeof(struct frm_head);
-            memcpy(data_buf +, data, payload_size);
-
-            jpeg_recv_size += payload_size;
-        } else {
-
-
-            jpeg_recv_size += payload_size;
-        }
-    }
-}
-#endif
-
 static void ctp_thumb_recv(struct net_ctp_thumb *thumb_data)
 {
     int recv_len = 0;
-    int timeout_cnt = 0;
     int file_cnt = 0;
     // 网络包接收缓存
     u8 *recv_buf = malloc(CTP_RECV_BUF_MAX_LEN);
@@ -685,35 +649,37 @@ static void ctp_thumb_recv(struct net_ctp_thumb *thumb_data)
     }
 
     u32 frame_head_size = sizeof(struct frm_head);
-    sock_set_recv_timeout(__this->ctp_thumb_sockfd, 200);
+    sock_set_recv_timeout(__this->ctp_thumb_sockfd, 3000);
 
     while (1) {
         recv_len = sock_recvfrom(__this->ctp_thumb_sockfd, recv_buf, frame_head_size, MSG_WAITALL, NULL, NULL);
         if (recv_len != frame_head_size) {
             printf("recv frame_head err \n");
-            if (++timeout_cnt > 2) {
-                break;
-            }
-            continue;
+            break;
         }
 
         struct frm_head *frame_head = (struct frm_head *)recv_buf;
 
         switch (frame_head->type) {
         case MEDIA_INFO_TYPE:
-            /* printf("media info type\n"); */
+            printf("media info type\n");
             recv_len = sock_recvfrom(__this->ctp_thumb_sockfd, recv_buf, frame_head->frm_sz, MSG_WAITALL, NULL, NULL);
-            /* struct media_info *media = (struct media_info *)recv_buf; */
-            /*             printf("media info w:%d h:%d fps:%d audio_rate:%d dur_time:%d fname:%s \n" */
-            /* , media->length, media->height, media->fps */
-            /* , media->audio_rate, media->dur_time, media->filename); */
+            struct media_info *media = (struct media_info *)recv_buf;
+            printf("media info w:%d h:%d audio_rate:%d dur_time:%d \n"
+                   , media->length, media->height, media->audio_rate, media->dur_time);
+
+            int list_index = thumb_data->start_index + file_cnt;
+            if (!strncmp(media->filename, __this->file_list[list_index], strlen(__this->file_list[list_index]))) {
+                struct file_media_info *media_info = (struct file_media_info *)__this->media_info_list[list_index];
+                media_info->width = media->length;
+                media_info->height = media->height;
+                media_info->sample_rate = media->audio_rate;
+                media_info->dur_time = media->dur_time;
+            }
             break;
         case DATE_TIME_TYPE:
-            /* printf("time type\n"); */
+            printf("time type\n");
             recv_len = sock_recvfrom(__this->ctp_thumb_sockfd, recv_buf, frame_head->frm_sz, MSG_WAITALL, NULL, NULL);
-            /* int time; */
-            /* memcpy(&time, recv_buf, 4); */
-            /* printf("time:%d \n", time); */
             break;
         case PREVIEW_TYPE:
             printf("recv thumb cnt:%d \n", file_cnt);
@@ -725,11 +691,10 @@ static void ctp_thumb_recv(struct net_ctp_thumb *thumb_data)
             thumb_data->file_buf_len_list[file_cnt] = recv_len;
             memcpy(thumb_data->file_buf_list[file_cnt], recv_buf, recv_len);
             file_cnt++;
-            if (file_cnt == thumb_data->file_num) {
-                printf("recv thumb done\n");
-                goto exit;
-            }
             break;
+        case PLAY_OVER_TYPE | LAST_FREG_MAKER:
+            printf("recv end type \n");
+            goto exit;
         default:
             printf("default frame type \n");
             recv_len = sock_recvfrom(__this->ctp_thumb_sockfd, recv_buf, frame_head->frm_sz, MSG_WAITALL, NULL, NULL);
@@ -819,33 +784,30 @@ static void ctp_thumb_task(void)
 
 }
 
-static void ctp_file_rt_task(void)
+static void ctp_file_play_task(void)
 {
-    int ret = 0;
+    int ret;
+    struct sockaddr_in dest;
+
     int recv_len = 0;
-    u32 data_size;
-    int msg[8];
-    u8 end_flag = 0;
-
-    //todo
-    char topic_1[] = {"TIME_AXIS_PLAY"};
-    char content_1[100];
-    char file_name[100];
-    u8 cnt = 3;
-    u32 frame_head_size =  sizeof(struct frm_head);
-
-    //网络包接收缓存
-    u32 recv_buf_len = CTP_RECV_BUF_MAX_LEN;
-    u8 *recv_buf = malloc(recv_buf_len);
+    u8 *recv_buf = malloc(CTP_RECV_BUF_MAX_LEN);
     if (!recv_buf) {
         printf("ctp recv malloc recv buff err \n");
         goto exit;
     }
+    u32 frame_head_size = sizeof(struct frm_head);
 
-    //解析jpeg/pcm网络包缓存
-    u8 *data_buf = malloc(PARSE_BUF_MAX_LEN);
-    if (!data_buf) {
-        printf("ctp recv malloc data buf err \n");
+    __this->ctp_file_play_sockfd = sock_reg(AF_INET, SOCK_STREAM, 0, NULL, NULL);
+    if (__this->ctp_file_play_sockfd == NULL) {
+        printf("sock_reg err\n");
+        goto exit;
+    }
+
+    dest.sin_family = AF_INET;
+    dest.sin_addr.s_addr = inet_addr(__this->dest_ip_addr);
+    dest.sin_port = htons(FILE_PLAY_PORT);
+    if (0 != sock_connect(__this->ctp_file_play_sockfd, (struct sockaddr *)&dest, sizeof(struct sockaddr_in))) {
+        printf("sock_connect fail.\n");
         goto exit;
     }
 
@@ -863,54 +825,19 @@ static void ctp_file_rt_task(void)
         goto exit;
     }
 
+    sock_set_recv_timeout(__this->ctp_file_play_sockfd, 3000);
 
-    sock_set_recv_timeout(__this->ctp_file_rt_sockfd, RECV_TIMEOUT);
-
+    int frame_cnt = 0;
 
     while (1) {
-        if (__this->ctp_file_rt_exit) {
+        if (__this->ctp_file_play_exit) {
+            printf("ctp file play task exit \n");
             break;
         }
-        if (!end_flag) {
-            if (os_taskq_accept(ARRAY_SIZE(msg), msg) != OS_TASKQ) {
-                continue;
-            }
 
-            switch (msg[0]) {
-            case Q_MSG:
-                char *full_name = (char *)msg[1];
-                int img_index = msg[2];
-                int update_num = msg[3];
-
-                snprintf(file_name, sizeof(file_name), "%s", full_name);
-                printf("file_rt_file_name =%s\n", file_name);
-                //todo 暂时写死时间是60s
-                int offset = 60;
-                sprintf(content_1, "{\"op\":\"PUT\",\"param\":{\"path\":\"%s\",\"offset\":%d}}", file_name, offset);
-                ret = ctp_cli_send(__this->ctp_cli_hdl, topic_1, content_1);
-                end_flag = 1;
-                if (ret) {
-                    printf("ctp_cli_send :%s err\n", topic_1);
-                    return;
-                }
-                break;
-            default:
-                break;
-
-            }
-
-            if (file_name[0] == '\0') {
-                continue;
-            }
-        }
-
-        recv_len = sock_recvfrom(__this->ctp_file_rt_sockfd, recv_buf, frame_head_size, MSG_WAITALL, NULL, NULL);
-
-        if (recv_len <= 0) {
-            printf("recv err \n");
-            end_flag = 0;
-            memset(file_name, 0, sizeof(file_name));
-
+        recv_len = sock_recvfrom(__this->ctp_file_play_sockfd, recv_buf, frame_head_size, MSG_WAITALL, NULL, NULL);
+        if (recv_len != frame_head_size) {
+            printf("video play recv err \n");
             continue;
         }
 
@@ -918,60 +845,46 @@ static void ctp_file_rt_task(void)
 
         switch (frame_head->type) {
         case MEDIA_INFO_TYPE:
-            recv_len = sock_recvfrom(__this->ctp_file_rt_sockfd, recv_buf, frame_head->frm_sz, MSG_WAITALL, NULL, NULL);
-            struct media_info *media = (struct media_info *)recv_buf;
-            printf("media info w:%d h:%d fps:%d audio_rate:%d dur_time:%d fname:%s \n"
-                   , media->length, media->height, media->fps
-                   , media->audio_rate, media->dur_time, media->filename);
+            printf("media info type\n");
+            recv_len = sock_recvfrom(__this->ctp_file_play_sockfd, recv_buf, frame_head->frm_sz, MSG_WAITALL, NULL, NULL);
             break;
-
         case DATE_TIME_TYPE:
-            recv_len = sock_recvfrom(__this->ctp_file_rt_sockfd, recv_buf, frame_head->frm_sz, MSG_WAITALL, NULL, NULL);
-            int time;
-            memcpy(&time, recv_buf, 4);
-            printf("time:%d \n", time);
+            /* printf("time type\n"); */
+            recv_len = sock_recvfrom(__this->ctp_file_play_sockfd, recv_buf, frame_head->frm_sz, MSG_WAITALL, NULL, NULL);
             break;
-
         case JPEG_TYPE_VIDEO:
-            putchar('v');
-            recv_len = sock_recvfrom(__this->ctp_file_rt_sockfd, recv_buf, frame_head->frm_sz, MSG_WAITALL, NULL, NULL);
-            if (recv_len < 1024) {
-                printf("recv video len err =%d\n", recv_len);
-                end_flag = 0;
-                memset(file_name, 0, sizeof(file_name));
+            recv_len = sock_recvfrom(__this->ctp_file_play_sockfd, recv_buf, frame_head->frm_sz, MSG_WAITALL, NULL, NULL);
+            if (recv_len <= 0) {
+                printf("recv video play len err =%d\n", recv_len);
                 break;
             }
+            printf("video play frame:%d ", frame_cnt++);
             video_dec_one_frame(recv_buf, recv_len);
             break;
-        case  PCM_TYPE_AUDIO:
-            putchar('a');
-            recv_len = sock_recvfrom(__this->ctp_file_rt_sockfd, recv_buf, frame_head->frm_sz, MSG_WAITALL, NULL, NULL);
-            if (recv_len < 0) {
-                printf("recv audio len err =%d\n", recv_len);
-                end_flag = 0;
-                memset(file_name, 0, sizeof(file_name));
+        case PCM_TYPE_AUDIO:
+            recv_len = sock_recvfrom(__this->ctp_file_play_sockfd, recv_buf, frame_head->frm_sz, MSG_WAITALL, NULL, NULL);
+            if (recv_len <= 0) {
+                printf("recv audio play len err =%d\n", recv_len);
                 break;
             }
-
             audio_dec_one_frame(recv_buf, recv_len);
             break;
         case PLAY_OVER_TYPE:
-            end_flag = 0;
-            memset(file_name, 0, sizeof(file_name));
-            break;
-
+            printf("recv end type \n");
+            goto exit;
         default:
-            break;
+            printf("default frame type :%d  \n", frame_head->type);
+            goto exit;
         }
-
     }
-
 exit:
+    if (__this->ctp_file_play_sockfd) {
+        sock_unreg(__this->ctp_file_play_sockfd);
+        __this->ctp_file_play_sockfd = NULL;
+    }
     if (recv_buf) {
         free(recv_buf);
-    }
-    if (data_buf) {
-        free(data_buf);
+        recv_buf = NULL;
     }
     if (__this->video_dec_server) {
         video_dec_exit();
@@ -1026,7 +939,7 @@ exit:
     if (data_buf) {
         free(data_buf);
     }
-    if (__this->audio_dec_server) {
+    if (__this->audio_enc_server) {
         audio_enc_exit();
     }
 }
@@ -1348,65 +1261,137 @@ static int ctp_file_thumb_exit(void)
     return 0;
 }
 
-static int ctp_file_rt_init(void)
+static int ctp_file_play_start(int list_index)
 {
-    printf("-----ctp_file_rt_init----\n");
     int ret;
-    struct sockaddr_in dest;
+    char topic_1[] = {"TIME_AXIS_PLAY"};
+    char content_1[256];
 
-    //tcp
-    __this->ctp_file_rt_sockfd = sock_reg(AF_INET, SOCK_STREAM, 0, NULL, NULL);
-    if (__this->ctp_file_rt_sockfd == NULL) {
-        printf("sock_reg err\n");
+    struct file_media_info *media_info = NULL;
+    char *file_path = NULL;
+
+    if (!__this->ctp_cli_hdl) {
+        printf("ctp cli hdl is NULL ! \n");
         return -1;
     }
-    /*     ret = sock_set_reuseaddr(__this->ctp_thumb_sockfd); */
-    /* if (ret) { */
-    /* printf("sock_set_reuseaddr err:%d\n", ret); */
-    /* goto err; */
-    /* } */
 
-    dest.sin_family = AF_INET;
-    dest.sin_addr.s_addr = inet_addr(__this->dest_ip_addr);
-    dest.sin_port = htons(FILE_RT_PORT);
-    if (0 != sock_connect(__this->ctp_file_rt_sockfd, (struct sockaddr *)&dest, sizeof(struct sockaddr_in))) {
-        printf("sock_connect fail.\n");
-        goto err;
+    file_path = __this->file_list[list_index];
+    media_info = __this->media_info_list[list_index];
+
+    //log
+    printf("media_info:path:%s w:%d h:%d samp:%d dur_time:%d \n",
+           file_path, media_info->width, media_info->height,
+           media_info->sample_rate, media_info->dur_time);
+
+    //todo
+    //dur_time 参数没有实际效果
+    //
+    sprintf(content_1, "{\"op\":\"PUT\",\"param\":{\"path\":\"%s\",\"offset\":%d}}",
+            file_path, media_info->dur_time);
+
+    ret = ctp_cli_send(__this->ctp_cli_hdl, topic_1, content_1);
+    if (ret) {
+        printf("ctp_cli_send :%s err\n", topic_1);
+        return -1;
     }
-    printf(" file rt  tcp connect success \n");
 
-    thread_fork("thread_socket_file_rt", 25, 2048, 2048, &__this->ctp_file_rt_pid, ctp_file_rt_task, NULL);
-
-    printf("-----ctp_file_rt_init done----\n");
+    thread_fork(CTP_FILE_PLAY_TASK_NAME, 15, 2048, 2048, &__this->ctp_file_play_pid, ctp_file_play_task, NULL);
 
     return 0;
-
-err:
-    if (__this->ctp_file_rt_sockfd) {
-        sock_unreg(__this->ctp_file_rt_sockfd);
-        __this->ctp_file_rt_sockfd = NULL;
-    }
-    return -1;
 }
 
-static int ctp_file_rt_exit(void)
+static int ctp_file_play_stop(void)
 {
-    printf("-----ctp_file_rt_exit----\n");
-    //kill thread
-    __this->ctp_file_rt_exit = 1;
-    thread_kill(&__this->ctp_file_rt_pid, KILL_WAIT);
-    __this->ctp_file_rt_exit = 0;
+    int ret;
+    char topic_1[] = {"TIME_AXIS_PLAY_CTRL"};
+    char content_1[64];
 
-
-    //free socket
-    if (__this->ctp_file_rt_sockfd) {
-        sock_unreg(__this->ctp_file_rt_sockfd);
-        __this->ctp_file_rt_sockfd = NULL;
+    if (!__this->ctp_cli_hdl) {
+        printf("ctp cli hdl is NULL ! \n");
+        return -1;
     }
 
-    printf("-----ctp_file_rt_exit----\n");
+    if (__this->ctp_file_play_pid) {
+        __this->ctp_file_play_exit = 1;
+        thread_kill(&__this->ctp_file_play_pid, KILL_WAIT);
+        __this->ctp_file_play_exit = 0;
+        __this->ctp_file_play_pid = 0;
+    }
+    sprintf(content_1, "{\"op\":\"PUT\",\"param\":{\"status\":\"%d\"}}", PLAY_VIDEO_STOP);
+    ret = ctp_cli_send(__this->ctp_cli_hdl, topic_1, content_1);
+    if (ret) {
+        printf("ctp_cli_send :%s err\n", topic_1);
+        return -1;
+    }
 
     return 0;
+}
+
+static int ctp_file_play_pause(void)
+{
+    int ret;
+    char topic_1[] = {"TIME_AXIS_PLAY_CTRL"};
+    char content_1[64];
+
+    if (!__this->ctp_cli_hdl) {
+        printf("ctp cli hdl is NULL ! \n");
+        return -1;
+    }
+
+    sprintf(content_1, "{\"op\":\"PUT\",\"param\":{\"status\":\"%d\"}}", PLAY_VIDEO_PAUSE);
+    ret = ctp_cli_send(__this->ctp_cli_hdl, topic_1, content_1);
+    if (ret) {
+        printf("ctp_cli_send :%s err\n", topic_1);
+        return -1;
+    }
+
+    return 0;
+}
+
+static int ctp_file_play_resume(void)
+{
+    int ret;
+    char topic_1[] = {"TIME_AXIS_PLAY_CTRL"};
+    char content_1[64];
+
+    if (!__this->ctp_cli_hdl) {
+        printf("ctp cli hdl is NULL ! \n");
+        return -1;
+    }
+
+    sprintf(content_1, "{\"op\":\"PUT\",\"param\":{\"status\":\"%d\"}}", PLAY_VIDEO_CONTINUE);
+    ret = ctp_cli_send(__this->ctp_cli_hdl, topic_1, content_1);
+    if (ret) {
+        printf("ctp_cli_send :%s err\n", topic_1);
+        return -1;
+    }
+
+    return 0;
+}
+
+static int ctp_file_play_control(u8 cmd, int arg)
+{
+    int ret = -1;
+    switch (cmd) {
+    case BBM_FILE_PLAY_STOP:
+        ret = ctp_file_play_stop();
+        break;
+    case BBM_FILE_PLAY_START:
+        int list_index = arg;
+        ret = ctp_file_play_start(list_index);
+        break;
+    case BBM_FILE_PLAY_PAUSE:
+        ret = ctp_file_play_pause();
+        break;
+    case BBM_FILE_PLAY_RESUME:
+        ret = ctp_file_play_resume();
+        break;
+    default:
+        printf("file play err cmd :%d \n", cmd);
+        break;
+    }
+
+    return ret;
 }
 
 static int get_file_name_cb(char *buf, void *priv)
@@ -1444,7 +1429,21 @@ static int get_file_name_cb(char *buf, void *priv)
     }
     memset(__this->file_list, 0x00, list_size);
 
-    for (int i = 0; i < array_length; i++) {
+    int media_list_size = __this->file_total_num * sizeof(struct file_media_info);
+    __this->media_info_list = malloc(media_list_size);
+    if (!__this->media_info_list) {
+        printf("file_media_info list malloc err \n");
+        goto err;
+    }
+    for (i = 0; i < __this->file_total_num; i++) {
+        __this->media_info_list[i] = malloc(sizeof(struct file_media_info));
+        if (!__this->media_info_list[i]) {
+            printf("media_info_list[%d] malloc err \n", i);
+            goto err;
+        }
+    }
+
+    for (i = 0; i < array_length; i++) {
         new_obj2 = json_object_array_get_idx(file_list_array, i);
         if (new_obj2 == NULL) {
             break;
@@ -1483,6 +1482,16 @@ err:
 
         free(__this->file_list);
         __this->file_list = NULL;
+    }
+    if (__this->media_info_list) {
+        for (i = 0; i < __this->file_total_num; i++) {
+            if (__this->media_info_list[i]) {
+                free(__this->media_info_list[i]);
+                __this->media_info_list[i] = NULL;
+            }
+        }
+        free(__this->media_info_list);
+        __this->media_info_list = NULL;
     }
     return -1;
 }
@@ -1577,6 +1586,18 @@ static int net_ctp_file_browser_exit(void)
         __this->file_list = NULL;
     }
 
+    if (__this->media_info_list) {
+        for (i = 0; i < __this->file_total_num; i++) {
+            if (__this->media_info_list[i]) {
+                free(__this->media_info_list[i]);
+                __this->media_info_list[i] = NULL;
+            }
+        }
+        free(__this->media_info_list);
+        __this->media_info_list = NULL;
+    }
+
+
     return 0;
 }
 
@@ -1596,24 +1617,6 @@ static int ctp_file_browser_list(struct intent *it)
 
     return 0;
 }
-
-
-static int net_ctp_file_rt_start()
-{
-    int ret;
-
-    /* if (!__this->ctp_cli_hdl) { */
-    /* ret = net_ctp_init(); */
-    /* if (ret) { */
-    /* printf("net ctp init err\n"); */
-    /* return -1; */
-    /* } */
-    /* } */
-
-    ctp_file_rt_init();
-    return 0;
-}
-
 
 static void fill_request_data(u8 *data, char *bbm_tx_ip_str, u8 *bbm_tx_mac)
 {
@@ -2171,8 +2174,25 @@ static int state_machine(struct application *app, enum app_state state, struct i
         case ACTION_BBM_GET_FILE_THUMB_REQ:
             log_d("\n>>>>>baby_monitor get_file_browser thumb <<<<<\n");
             int msg;
-            msg = it->data;   //index
+            msg = it->data;
             os_taskq_post_type(CTP_FILE_THUMB_TASK_NAME, Q_MSG, 1, &msg);
+            break;
+        case ACTION_BBM_FILE_PLAY_START:
+            log_d("\n>>>>>baby_monitor file play start <<<<<\n");
+            int list_index = it->data;
+            ctp_file_play_control(BBM_FILE_PLAY_START, list_index);
+            break;
+        case ACTION_BBM_FILE_PLAY_STOP:
+            log_d("\n>>>>>baby_monitor file play stop <<<<<\n");
+            ctp_file_play_control(BBM_FILE_PLAY_STOP, 0);
+            break;
+        case ACTION_BBM_FILE_PLAY_PAUSE:
+            log_d("\n>>>>>baby_monitor file play pause <<<<<\n");
+            ctp_file_play_control(BBM_FILE_PLAY_PAUSE, 0);
+            break;
+        case ACTION_BBM_FILE_PLAY_RESUME:
+            log_d("\n>>>>>baby_monitor file play resume <<<<<\n");
+            ctp_file_play_control(BBM_FILE_PLAY_RESUME, 0);
             break;
         case  ACTION_BBM_ONLINE:
             baby_monitor_net_event_hander(it);
@@ -2218,14 +2238,12 @@ static int baby_monitor_key_event_handler(struct key_event *key)
             break;
         case KEY_DOWN:
             printf("KEY4\n");
-            net_ctp_file_rt_start();
+            ctp_file_play_control(BBM_FILE_PLAY_PAUSE, 0);
             break;
         case KEY_OK:
             //todo  测试
             printf("KEY5\n");
-            int msg[1];
-            msg[0] = "storage/sd0/C/DCIM/1/VID_0001.AVI";
-            os_taskq_post_type("thread_socket_file_rt", Q_MSG, 1, msg);
+            ctp_file_play_control(BBM_FILE_PLAY_RESUME, 0);
 
             break;
         default:

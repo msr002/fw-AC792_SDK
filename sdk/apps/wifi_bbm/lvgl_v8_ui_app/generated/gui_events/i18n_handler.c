@@ -34,6 +34,10 @@ void i18n_refresh_texts(const char *page_name)
     if (strcmp(page_name, "unpair") == 0 && !guider_ui.unpair_del) {
 
     }
+
+    if (strcmp(page_name, "video_play") == 0 && !guider_ui.video_play_del) {
+
+    }
 }
 
 void i18n_refresh_all_texts()
@@ -63,6 +67,10 @@ void i18n_refresh_all_texts()
     }
 
     if (!guider_ui.unpair_del) {
+
+    }
+
+    if (!guider_ui.video_play_del) {
 
     }
 }
