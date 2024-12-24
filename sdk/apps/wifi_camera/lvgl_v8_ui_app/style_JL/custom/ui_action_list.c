@@ -223,8 +223,6 @@ void video_dec_post_msg(const char *msg, ...)
         dec_play_time_handler(msg, va_arg(argptr, int));
     } else if (strstr(msg, "fname")) {
         dec_file_name_handler(msg, va_arg(argptr, int));
-    } else if (strstr(msg, "fileInfo")) {
-        post_msg2_dec(msg, va_arg(argptr, int));
     } else {
         printf("[chili] %s your msg [%s] no callback! \n", __func__, msg, __LINE__);
     }

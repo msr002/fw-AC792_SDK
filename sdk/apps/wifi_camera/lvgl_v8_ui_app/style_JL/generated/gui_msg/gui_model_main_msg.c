@@ -385,7 +385,7 @@ void gui_model_main_msg_init_events()
         lv_subject_add_observer_obj(subject_systime, gui_model_main_msg_home_page_digitclock_1_set_digit_clock_time_cb, guider_ui.home_page_digitclock_1, &guider_msg_data);
 
         gui_model_main_msg_weekday_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_STRING);
-        lv_subject_add_observer_obj(subject_weekday, gui_msg_set_label_text_by_string_cb, guider_ui.home_page_lbl_1, &guider_msg_data);
+        lv_subject_add_observer_obj(subject_weekday, gui_msg_set_label_text_by_string_cb, guider_ui.home_page_lbl_2, &guider_msg_data);
 
 
         for (int i = 0; i < 13; i++) {

@@ -2,9 +2,7 @@
 #ifdef CONFIG_UI_STYLE_LY_ENABLE
 /*Generate Code, Do NOT Edit!*/
 #include "lvgl.h"
-#if LV_USE_GUIBUILDER_SIMULATOR
 #include <stdio.h>
-#endif
 #include <stdlib.h>
 #include "../gui_guider.h"
 #include "../gui_events/events_init.h"
@@ -56,7 +54,11 @@ lv_obj_t *setup_scr_video_rec(lv_ui *ui)
     lv_obj_set_size(ui->video_rec_img_1, 29, 29);
     lv_obj_set_scrollbar_mode(ui->video_rec_img_1, LV_SCROLLBAR_MODE_OFF);
     lv_obj_add_flag(ui->video_rec_img_1, LV_OBJ_FLAG_CLICKABLE);
-    lv_img_set_src(ui->video_rec_img_1, gui_get_res_path(GUI_RES_I_REC_PNG));
+#if LV_USE_GUIBUILDER_SIMULATOR
+    lv_img_set_src(ui->video_rec_img_1, "A:\\1111\\ac792\\ui_prj\\dvr_ly_800x480\\import\\image\\LY_UI\\rec\\rec_scan\\i_rec.png");
+#else
+    lv_img_set_src(ui->video_rec_img_1, "mnt/sdfile/EXT_RESERVED/uipackres/ui/5500000d.zip");
+#endif
     lv_img_set_pivot(ui->video_rec_img_1, 0, 0);
     lv_img_set_angle(ui->video_rec_img_1, 0);
     lv_img_set_zoom(ui->video_rec_img_1, 256);
@@ -75,7 +77,11 @@ lv_obj_t *setup_scr_video_rec(lv_ui *ui)
     lv_obj_set_size(ui->video_rec_img_cyc_state, 29, 31);
     lv_obj_set_scrollbar_mode(ui->video_rec_img_cyc_state, LV_SCROLLBAR_MODE_OFF);
     lv_obj_add_flag(ui->video_rec_img_cyc_state, LV_OBJ_FLAG_CLICKABLE);
-    lv_img_set_src(ui->video_rec_img_cyc_state, gui_get_res_path(GUI_RES_CYCLIC_VIDEO_3_PNG));
+#if LV_USE_GUIBUILDER_SIMULATOR
+    lv_img_set_src(ui->video_rec_img_cyc_state, "A:\\1111\\ac792\\ui_prj\\dvr_ly_800x480\\import\\image\\LY_UI\\rec\\rec_scan\\cyclic_video_3.png");
+#else
+    lv_img_set_src(ui->video_rec_img_cyc_state, "mnt/sdfile/EXT_RESERVED/uipackres/ui/5500000e.zip");
+#endif
     lv_img_set_pivot(ui->video_rec_img_cyc_state, 0, 0);
     lv_img_set_angle(ui->video_rec_img_cyc_state, 0);
     lv_img_set_zoom(ui->video_rec_img_cyc_state, 256);
@@ -94,7 +100,11 @@ lv_obj_t *setup_scr_video_rec(lv_ui *ui)
     lv_obj_set_size(ui->video_rec_img_exp_state, 29, 29);
     lv_obj_set_scrollbar_mode(ui->video_rec_img_exp_state, LV_SCROLLBAR_MODE_OFF);
     lv_obj_add_flag(ui->video_rec_img_exp_state, LV_OBJ_FLAG_CLICKABLE);
-    lv_img_set_src(ui->video_rec_img_exp_state, gui_get_res_path(GUI_RES_EXP_A0_PNG));
+#if LV_USE_GUIBUILDER_SIMULATOR
+    lv_img_set_src(ui->video_rec_img_exp_state, "A:\\1111\\ac792\\ui_prj\\dvr_ly_800x480\\import\\image\\LY_UI\\rec\\rec_scan\\exp_a0.png");
+#else
+    lv_img_set_src(ui->video_rec_img_exp_state, "mnt/sdfile/EXT_RESERVED/uipackres/ui/5500000f.zip");
+#endif
     lv_img_set_pivot(ui->video_rec_img_exp_state, 0, 0);
     lv_img_set_angle(ui->video_rec_img_exp_state, 0);
     lv_img_set_zoom(ui->video_rec_img_exp_state, 256);
@@ -113,7 +123,11 @@ lv_obj_t *setup_scr_video_rec(lv_ui *ui)
     lv_obj_set_size(ui->video_rec_img_mot_state, 22, 25);
     lv_obj_set_scrollbar_mode(ui->video_rec_img_mot_state, LV_SCROLLBAR_MODE_OFF);
     lv_obj_add_flag(ui->video_rec_img_mot_state, LV_OBJ_FLAG_CLICKABLE);
-    lv_img_set_src(ui->video_rec_img_mot_state, gui_get_res_path(GUI_RES_I_MOT_PNG));
+#if LV_USE_GUIBUILDER_SIMULATOR
+    lv_img_set_src(ui->video_rec_img_mot_state, "A:\\1111\\ac792\\ui_prj\\dvr_ly_800x480\\import\\image\\LY_UI\\rec\\rec_scan\\i_mot.png");
+#else
+    lv_img_set_src(ui->video_rec_img_mot_state, "mnt/sdfile/EXT_RESERVED/uipackres/ui/55000010.zip");
+#endif
     lv_img_set_pivot(ui->video_rec_img_mot_state, 0, 0);
     lv_img_set_angle(ui->video_rec_img_mot_state, 0);
     lv_img_set_zoom(ui->video_rec_img_mot_state, 256);
@@ -132,7 +146,11 @@ lv_obj_t *setup_scr_video_rec(lv_ui *ui)
     lv_obj_set_size(ui->video_rec_img_gap_state, 29, 31);
     lv_obj_set_scrollbar_mode(ui->video_rec_img_gap_state, LV_SCROLLBAR_MODE_OFF);
     lv_obj_add_flag(ui->video_rec_img_gap_state, LV_OBJ_FLAG_CLICKABLE);
-    lv_img_set_src(ui->video_rec_img_gap_state, gui_get_res_path(GUI_RES_I_TEAR_PNG));
+#if LV_USE_GUIBUILDER_SIMULATOR
+    lv_img_set_src(ui->video_rec_img_gap_state, "A:\\1111\\ac792\\ui_prj\\dvr_ly_800x480\\import\\image\\LY_UI\\rec\\rec_scan\\i_tear.png");
+#else
+    lv_img_set_src(ui->video_rec_img_gap_state, "mnt/sdfile/EXT_RESERVED/uipackres/ui/55000011.zip");
+#endif
     lv_img_set_pivot(ui->video_rec_img_gap_state, 0, 0);
     lv_img_set_angle(ui->video_rec_img_gap_state, 0);
     lv_img_set_zoom(ui->video_rec_img_gap_state, 256);
@@ -151,7 +169,11 @@ lv_obj_t *setup_scr_video_rec(lv_ui *ui)
     lv_obj_set_size(ui->video_rec_img_mic_state, 26, 29);
     lv_obj_set_scrollbar_mode(ui->video_rec_img_mic_state, LV_SCROLLBAR_MODE_OFF);
     lv_obj_add_flag(ui->video_rec_img_mic_state, LV_OBJ_FLAG_CLICKABLE);
-    lv_img_set_src(ui->video_rec_img_mic_state, gui_get_res_path(GUI_RES_MIC_ON_PNG));
+#if LV_USE_GUIBUILDER_SIMULATOR
+    lv_img_set_src(ui->video_rec_img_mic_state, "A:\\1111\\ac792\\ui_prj\\dvr_ly_800x480\\import\\image\\LY_UI\\rec\\rec_scan\\mic_on.png");
+#else
+    lv_img_set_src(ui->video_rec_img_mic_state, "mnt/sdfile/EXT_RESERVED/uipackres/ui/55000012.zip");
+#endif
     lv_img_set_pivot(ui->video_rec_img_mic_state, 0, 0);
     lv_img_set_angle(ui->video_rec_img_mic_state, 0);
     lv_img_set_zoom(ui->video_rec_img_mic_state, 256);
@@ -170,7 +192,11 @@ lv_obj_t *setup_scr_video_rec(lv_ui *ui)
     lv_obj_set_size(ui->video_rec_img_hdr_state, 29, 29);
     lv_obj_set_scrollbar_mode(ui->video_rec_img_hdr_state, LV_SCROLLBAR_MODE_OFF);
     lv_obj_add_flag(ui->video_rec_img_hdr_state, LV_OBJ_FLAG_CLICKABLE);
-    lv_img_set_src(ui->video_rec_img_hdr_state, gui_get_res_path(GUI_RES_I_HDR_PNG));
+#if LV_USE_GUIBUILDER_SIMULATOR
+    lv_img_set_src(ui->video_rec_img_hdr_state, "A:\\1111\\ac792\\ui_prj\\dvr_ly_800x480\\import\\image\\LY_UI\\rec\\rec_scan\\i_hdr.png");
+#else
+    lv_img_set_src(ui->video_rec_img_hdr_state, "mnt/sdfile/EXT_RESERVED/uipackres/ui/55000013.zip");
+#endif
     lv_img_set_pivot(ui->video_rec_img_hdr_state, 0, 0);
     lv_img_set_angle(ui->video_rec_img_hdr_state, 0);
     lv_img_set_zoom(ui->video_rec_img_hdr_state, 256);
@@ -189,7 +215,11 @@ lv_obj_t *setup_scr_video_rec(lv_ui *ui)
     lv_obj_set_size(ui->video_rec_img_gra_state, 34, 31);
     lv_obj_set_scrollbar_mode(ui->video_rec_img_gra_state, LV_SCROLLBAR_MODE_OFF);
     lv_obj_add_flag(ui->video_rec_img_gra_state, LV_OBJ_FLAG_CLICKABLE);
-    lv_img_set_src(ui->video_rec_img_gra_state, gui_get_res_path(GUI_RES_I_GRA_L_PNG));
+#if LV_USE_GUIBUILDER_SIMULATOR
+    lv_img_set_src(ui->video_rec_img_gra_state, "A:\\1111\\ac792\\ui_prj\\dvr_ly_800x480\\import\\image\\LY_UI\\rec\\rec_scan\\i_gra_l.png");
+#else
+    lv_img_set_src(ui->video_rec_img_gra_state, "mnt/sdfile/EXT_RESERVED/uipackres/ui/55000014.zip");
+#endif
     lv_img_set_pivot(ui->video_rec_img_gra_state, 0, 0);
     lv_img_set_angle(ui->video_rec_img_gra_state, 0);
     lv_img_set_zoom(ui->video_rec_img_gra_state, 256);
@@ -208,7 +238,11 @@ lv_obj_t *setup_scr_video_rec(lv_ui *ui)
     lv_obj_set_size(ui->video_rec_img_par_state, 27, 22);
     lv_obj_set_scrollbar_mode(ui->video_rec_img_par_state, LV_SCROLLBAR_MODE_OFF);
     lv_obj_add_flag(ui->video_rec_img_par_state, LV_OBJ_FLAG_CLICKABLE);
-    lv_img_set_src(ui->video_rec_img_par_state, gui_get_res_path(GUI_RES_PARK_PNG));
+#if LV_USE_GUIBUILDER_SIMULATOR
+    lv_img_set_src(ui->video_rec_img_par_state, "A:\\1111\\ac792\\ui_prj\\dvr_ly_800x480\\import\\image\\LY_UI\\rec\\rec_scan\\park.png");
+#else
+    lv_img_set_src(ui->video_rec_img_par_state, "mnt/sdfile/EXT_RESERVED/uipackres/ui/55000015.zip");
+#endif
     lv_img_set_pivot(ui->video_rec_img_par_state, 0, 0);
     lv_img_set_angle(ui->video_rec_img_par_state, 0);
     lv_img_set_zoom(ui->video_rec_img_par_state, 256);
@@ -271,7 +305,11 @@ lv_obj_t *setup_scr_video_rec(lv_ui *ui)
     lv_obj_set_size(ui->video_rec_img_bat, 25, 15);
     lv_obj_set_scrollbar_mode(ui->video_rec_img_bat, LV_SCROLLBAR_MODE_OFF);
     lv_obj_add_flag(ui->video_rec_img_bat, LV_OBJ_FLAG_CLICKABLE);
-    lv_img_set_src(ui->video_rec_img_bat, gui_get_res_path(GUI_RES_BAT_FULL_PNG));
+#if LV_USE_GUIBUILDER_SIMULATOR
+    lv_img_set_src(ui->video_rec_img_bat, "A:\\1111\\ac792\\ui_prj\\dvr_ly_800x480\\import\\image\\LY_UI\\rec\\rec_scan\\bat_full.png");
+#else
+    lv_img_set_src(ui->video_rec_img_bat, "mnt/sdfile/EXT_RESERVED/uipackres/ui/55000016.zip");
+#endif
     lv_img_set_pivot(ui->video_rec_img_bat, 0, 0);
     lv_img_set_angle(ui->video_rec_img_bat, 0);
     lv_img_set_zoom(ui->video_rec_img_bat, 256);
@@ -290,7 +328,11 @@ lv_obj_t *setup_scr_video_rec(lv_ui *ui)
     lv_obj_set_size(ui->video_rec_img_sd, 29, 29);
     lv_obj_set_scrollbar_mode(ui->video_rec_img_sd, LV_SCROLLBAR_MODE_OFF);
     lv_obj_add_flag(ui->video_rec_img_sd, LV_OBJ_FLAG_CLICKABLE);
-    lv_img_set_src(ui->video_rec_img_sd, gui_get_res_path(GUI_RES_CARD_ONLINE_PNG));
+#if LV_USE_GUIBUILDER_SIMULATOR
+    lv_img_set_src(ui->video_rec_img_sd, "A:\\1111\\ac792\\ui_prj\\dvr_ly_800x480\\import\\image\\LY_UI\\rec\\rec_scan\\card_online.png");
+#else
+    lv_img_set_src(ui->video_rec_img_sd, "mnt/sdfile/EXT_RESERVED/uipackres/ui/55000017.zip");
+#endif
     lv_img_set_pivot(ui->video_rec_img_sd, 0, 0);
     lv_img_set_angle(ui->video_rec_img_sd, 0);
     lv_img_set_zoom(ui->video_rec_img_sd, 256);
@@ -344,7 +386,11 @@ lv_obj_t *setup_scr_video_rec(lv_ui *ui)
     lv_obj_set_scrollbar_mode(ui->video_rec_img_rec_state, LV_SCROLLBAR_MODE_OFF);
     lv_obj_add_flag(ui->video_rec_img_rec_state, LV_OBJ_FLAG_HIDDEN);
     lv_obj_add_flag(ui->video_rec_img_rec_state, LV_OBJ_FLAG_CLICKABLE);
-    lv_img_set_src(ui->video_rec_img_rec_state, gui_get_res_path(GUI_RES_RED_CIRCLE_PNG));
+#if LV_USE_GUIBUILDER_SIMULATOR
+    lv_img_set_src(ui->video_rec_img_rec_state, "A:\\1111\\ac792\\ui_prj\\dvr_ly_800x480\\import\\image\\LY_UI\\rec\\rec_scan\\red_circle.png");
+#else
+    lv_img_set_src(ui->video_rec_img_rec_state, "mnt/sdfile/EXT_RESERVED/uipackres/ui/55000018.zip");
+#endif
     lv_img_set_pivot(ui->video_rec_img_rec_state, 0, 0);
     lv_img_set_angle(ui->video_rec_img_rec_state, 0);
     lv_img_set_zoom(ui->video_rec_img_rec_state, 256);
@@ -388,7 +434,11 @@ lv_obj_t *setup_scr_video_rec(lv_ui *ui)
     lv_obj_set_scrollbar_mode(ui->video_rec_img_headlight, LV_SCROLLBAR_MODE_OFF);
     lv_obj_add_flag(ui->video_rec_img_headlight, LV_OBJ_FLAG_HIDDEN);
     lv_obj_add_flag(ui->video_rec_img_headlight, LV_OBJ_FLAG_CLICKABLE);
-    lv_img_set_src(ui->video_rec_img_headlight, gui_get_res_path(GUI_RES_FLIG_ON_PNG));
+#if LV_USE_GUIBUILDER_SIMULATOR
+    lv_img_set_src(ui->video_rec_img_headlight, "A:\\1111\\ac792\\ui_prj\\dvr_ly_800x480\\import\\image\\LY_UI\\rec\\rec_scan\\flig_on.png");
+#else
+    lv_img_set_src(ui->video_rec_img_headlight, "mnt/sdfile/EXT_RESERVED/uipackres/ui/55000019.zip");
+#endif
     lv_img_set_pivot(ui->video_rec_img_headlight, 0, 0);
     lv_img_set_angle(ui->video_rec_img_headlight, 0);
     lv_img_set_zoom(ui->video_rec_img_headlight, 256);
@@ -407,7 +457,11 @@ lv_obj_t *setup_scr_video_rec(lv_ui *ui)
     lv_obj_set_size(ui->video_rec_img_key_state, 29, 29);
     lv_obj_set_scrollbar_mode(ui->video_rec_img_key_state, LV_SCROLLBAR_MODE_OFF);
     lv_obj_add_flag(ui->video_rec_img_key_state, LV_OBJ_FLAG_CLICKABLE);
-    lv_img_set_src(ui->video_rec_img_key_state, gui_get_res_path(GUI_RES_KEY_PNG));
+#if LV_USE_GUIBUILDER_SIMULATOR
+    lv_img_set_src(ui->video_rec_img_key_state, "A:\\1111\\ac792\\ui_prj\\dvr_ly_800x480\\import\\image\\LY_UI\\rec\\rec_scan\\key.png");
+#else
+    lv_img_set_src(ui->video_rec_img_key_state, "mnt/sdfile/EXT_RESERVED/uipackres/ui/5500001a.zip");
+#endif
     lv_img_set_pivot(ui->video_rec_img_key_state, 0, 0);
     lv_img_set_angle(ui->video_rec_img_key_state, 0);
     lv_img_set_zoom(ui->video_rec_img_key_state, 256);
@@ -504,7 +558,11 @@ lv_obj_t *setup_scr_video_rec(lv_ui *ui)
     lv_obj_set_size(ui->video_rec_img_2, 29, 29);
     lv_obj_set_scrollbar_mode(ui->video_rec_img_2, LV_SCROLLBAR_MODE_OFF);
     lv_obj_add_flag(ui->video_rec_img_2, LV_OBJ_FLAG_CLICKABLE);
-    lv_img_set_src(ui->video_rec_img_2, gui_get_res_path(GUI_RES_M_SOLU_PNG));
+#if LV_USE_GUIBUILDER_SIMULATOR
+    lv_img_set_src(ui->video_rec_img_2, "A:\\1111\\ac792\\ui_prj\\dvr_ly_800x480\\import\\image\\LY_UI\\rec\\rec_menu\\m_solu.png");
+#else
+    lv_img_set_src(ui->video_rec_img_2, "mnt/sdfile/EXT_RESERVED/uipackres/ui/5500001b.zip");
+#endif
     lv_img_set_pivot(ui->video_rec_img_2, 0, 0);
     lv_img_set_angle(ui->video_rec_img_2, 0);
     lv_img_set_zoom(ui->video_rec_img_2, 256);
@@ -588,7 +646,11 @@ lv_obj_t *setup_scr_video_rec(lv_ui *ui)
     lv_obj_set_size(ui->video_rec_img_3, 29, 29);
     lv_obj_set_scrollbar_mode(ui->video_rec_img_3, LV_SCROLLBAR_MODE_OFF);
     lv_obj_add_flag(ui->video_rec_img_3, LV_OBJ_FLAG_CLICKABLE);
-    lv_img_set_src(ui->video_rec_img_3, gui_get_res_path(GUI_RES_M_TWO_REC_PNG));
+#if LV_USE_GUIBUILDER_SIMULATOR
+    lv_img_set_src(ui->video_rec_img_3, "A:\\1111\\ac792\\ui_prj\\dvr_ly_800x480\\import\\image\\LY_UI\\rec\\rec_menu\\m_two_rec.png");
+#else
+    lv_img_set_src(ui->video_rec_img_3, "mnt/sdfile/EXT_RESERVED/uipackres/ui/5500001c.zip");
+#endif
     lv_img_set_pivot(ui->video_rec_img_3, 0, 0);
     lv_img_set_angle(ui->video_rec_img_3, 0);
     lv_img_set_zoom(ui->video_rec_img_3, 256);
@@ -672,7 +734,11 @@ lv_obj_t *setup_scr_video_rec(lv_ui *ui)
     lv_obj_set_size(ui->video_rec_img_4, 29, 29);
     lv_obj_set_scrollbar_mode(ui->video_rec_img_4, LV_SCROLLBAR_MODE_OFF);
     lv_obj_add_flag(ui->video_rec_img_4, LV_OBJ_FLAG_CLICKABLE);
-    lv_img_set_src(ui->video_rec_img_4, gui_get_res_path(GUI_RES_M_CYC_PNG));
+#if LV_USE_GUIBUILDER_SIMULATOR
+    lv_img_set_src(ui->video_rec_img_4, "A:\\1111\\ac792\\ui_prj\\dvr_ly_800x480\\import\\image\\LY_UI\\rec\\rec_menu\\m_cyc.png");
+#else
+    lv_img_set_src(ui->video_rec_img_4, "mnt/sdfile/EXT_RESERVED/uipackres/ui/5500001d.zip");
+#endif
     lv_img_set_pivot(ui->video_rec_img_4, 0, 0);
     lv_img_set_angle(ui->video_rec_img_4, 0);
     lv_img_set_zoom(ui->video_rec_img_4, 256);
@@ -756,7 +822,11 @@ lv_obj_t *setup_scr_video_rec(lv_ui *ui)
     lv_obj_set_size(ui->video_rec_img_5, 29, 29);
     lv_obj_set_scrollbar_mode(ui->video_rec_img_5, LV_SCROLLBAR_MODE_OFF);
     lv_obj_add_flag(ui->video_rec_img_5, LV_OBJ_FLAG_CLICKABLE);
-    lv_img_set_src(ui->video_rec_img_5, gui_get_res_path(GUI_RES_REC_NOCYC_PNG));
+#if LV_USE_GUIBUILDER_SIMULATOR
+    lv_img_set_src(ui->video_rec_img_5, "A:\\1111\\ac792\\ui_prj\\dvr_ly_800x480\\import\\image\\LY_UI\\rec\\rec_menu\\rec_nocyc.png");
+#else
+    lv_img_set_src(ui->video_rec_img_5, "mnt/sdfile/EXT_RESERVED/uipackres/ui/5500001e.zip");
+#endif
     lv_img_set_pivot(ui->video_rec_img_5, 0, 0);
     lv_img_set_angle(ui->video_rec_img_5, 0);
     lv_img_set_zoom(ui->video_rec_img_5, 256);
@@ -840,7 +910,11 @@ lv_obj_t *setup_scr_video_rec(lv_ui *ui)
     lv_obj_set_size(ui->video_rec_img_6, 29, 29);
     lv_obj_set_scrollbar_mode(ui->video_rec_img_6, LV_SCROLLBAR_MODE_OFF);
     lv_obj_add_flag(ui->video_rec_img_6, LV_OBJ_FLAG_CLICKABLE);
-    lv_img_set_src(ui->video_rec_img_6, gui_get_res_path(GUI_RES_M_HDR_PNG));
+#if LV_USE_GUIBUILDER_SIMULATOR
+    lv_img_set_src(ui->video_rec_img_6, "A:\\1111\\ac792\\ui_prj\\dvr_ly_800x480\\import\\image\\LY_UI\\rec\\rec_menu\\m_hdr.png");
+#else
+    lv_img_set_src(ui->video_rec_img_6, "mnt/sdfile/EXT_RESERVED/uipackres/ui/5500001f.zip");
+#endif
     lv_img_set_pivot(ui->video_rec_img_6, 0, 0);
     lv_img_set_angle(ui->video_rec_img_6, 0);
     lv_img_set_zoom(ui->video_rec_img_6, 256);
@@ -924,7 +998,11 @@ lv_obj_t *setup_scr_video_rec(lv_ui *ui)
     lv_obj_set_size(ui->video_rec_img_7, 29, 29);
     lv_obj_set_scrollbar_mode(ui->video_rec_img_7, LV_SCROLLBAR_MODE_OFF);
     lv_obj_add_flag(ui->video_rec_img_7, LV_OBJ_FLAG_CLICKABLE);
-    lv_img_set_src(ui->video_rec_img_7, gui_get_res_path(GUI_RES_M_EXP_PNG));
+#if LV_USE_GUIBUILDER_SIMULATOR
+    lv_img_set_src(ui->video_rec_img_7, "A:\\1111\\ac792\\ui_prj\\dvr_ly_800x480\\import\\image\\LY_UI\\rec\\rec_menu\\m_exp.png");
+#else
+    lv_img_set_src(ui->video_rec_img_7, "mnt/sdfile/EXT_RESERVED/uipackres/ui/55000020.zip");
+#endif
     lv_img_set_pivot(ui->video_rec_img_7, 0, 0);
     lv_img_set_angle(ui->video_rec_img_7, 0);
     lv_img_set_zoom(ui->video_rec_img_7, 256);
@@ -1008,7 +1086,11 @@ lv_obj_t *setup_scr_video_rec(lv_ui *ui)
     lv_obj_set_size(ui->video_rec_img_8, 29, 29);
     lv_obj_set_scrollbar_mode(ui->video_rec_img_8, LV_SCROLLBAR_MODE_OFF);
     lv_obj_add_flag(ui->video_rec_img_8, LV_OBJ_FLAG_CLICKABLE);
-    lv_img_set_src(ui->video_rec_img_8, gui_get_res_path(GUI_RES_M_MOT_PNG));
+#if LV_USE_GUIBUILDER_SIMULATOR
+    lv_img_set_src(ui->video_rec_img_8, "A:\\1111\\ac792\\ui_prj\\dvr_ly_800x480\\import\\image\\LY_UI\\rec\\rec_menu\\m_mot.png");
+#else
+    lv_img_set_src(ui->video_rec_img_8, "mnt/sdfile/EXT_RESERVED/uipackres/ui/55000021.zip");
+#endif
     lv_img_set_pivot(ui->video_rec_img_8, 0, 0);
     lv_img_set_angle(ui->video_rec_img_8, 0);
     lv_img_set_zoom(ui->video_rec_img_8, 256);
@@ -1092,7 +1174,11 @@ lv_obj_t *setup_scr_video_rec(lv_ui *ui)
     lv_obj_set_size(ui->video_rec_img_9, 29, 29);
     lv_obj_set_scrollbar_mode(ui->video_rec_img_9, LV_SCROLLBAR_MODE_OFF);
     lv_obj_add_flag(ui->video_rec_img_9, LV_OBJ_FLAG_CLICKABLE);
-    lv_img_set_src(ui->video_rec_img_9, gui_get_res_path(GUI_RES_M_AUD_PNG));
+#if LV_USE_GUIBUILDER_SIMULATOR
+    lv_img_set_src(ui->video_rec_img_9, "A:\\1111\\ac792\\ui_prj\\dvr_ly_800x480\\import\\image\\LY_UI\\rec\\rec_menu\\m_aud.png");
+#else
+    lv_img_set_src(ui->video_rec_img_9, "mnt/sdfile/EXT_RESERVED/uipackres/ui/55000022.zip");
+#endif
     lv_img_set_pivot(ui->video_rec_img_9, 0, 0);
     lv_img_set_angle(ui->video_rec_img_9, 0);
     lv_img_set_zoom(ui->video_rec_img_9, 256);
@@ -1176,7 +1262,11 @@ lv_obj_t *setup_scr_video_rec(lv_ui *ui)
     lv_obj_set_size(ui->video_rec_img_10, 29, 29);
     lv_obj_set_scrollbar_mode(ui->video_rec_img_10, LV_SCROLLBAR_MODE_OFF);
     lv_obj_add_flag(ui->video_rec_img_10, LV_OBJ_FLAG_CLICKABLE);
-    lv_img_set_src(ui->video_rec_img_10, gui_get_res_path(GUI_RES_M_DAT_PNG));
+#if LV_USE_GUIBUILDER_SIMULATOR
+    lv_img_set_src(ui->video_rec_img_10, "A:\\1111\\ac792\\ui_prj\\dvr_ly_800x480\\import\\image\\LY_UI\\rec\\rec_menu\\m_dat.png");
+#else
+    lv_img_set_src(ui->video_rec_img_10, "mnt/sdfile/EXT_RESERVED/uipackres/ui/55000023.zip");
+#endif
     lv_img_set_pivot(ui->video_rec_img_10, 0, 0);
     lv_img_set_angle(ui->video_rec_img_10, 0);
     lv_img_set_zoom(ui->video_rec_img_10, 256);
@@ -1260,7 +1350,11 @@ lv_obj_t *setup_scr_video_rec(lv_ui *ui)
     lv_obj_set_size(ui->video_rec_img_11, 29, 29);
     lv_obj_set_scrollbar_mode(ui->video_rec_img_11, LV_SCROLLBAR_MODE_OFF);
     lv_obj_add_flag(ui->video_rec_img_11, LV_OBJ_FLAG_CLICKABLE);
-    lv_img_set_src(ui->video_rec_img_11, gui_get_res_path(GUI_RES_M_GRA_PNG));
+#if LV_USE_GUIBUILDER_SIMULATOR
+    lv_img_set_src(ui->video_rec_img_11, "A:\\1111\\ac792\\ui_prj\\dvr_ly_800x480\\import\\image\\LY_UI\\rec\\rec_menu\\m_gra.png");
+#else
+    lv_img_set_src(ui->video_rec_img_11, "mnt/sdfile/EXT_RESERVED/uipackres/ui/55000024.zip");
+#endif
     lv_img_set_pivot(ui->video_rec_img_11, 0, 0);
     lv_img_set_angle(ui->video_rec_img_11, 0);
     lv_img_set_zoom(ui->video_rec_img_11, 256);
@@ -1344,7 +1438,11 @@ lv_obj_t *setup_scr_video_rec(lv_ui *ui)
     lv_obj_set_size(ui->video_rec_img_12, 29, 29);
     lv_obj_set_scrollbar_mode(ui->video_rec_img_12, LV_SCROLLBAR_MODE_OFF);
     lv_obj_add_flag(ui->video_rec_img_12, LV_OBJ_FLAG_CLICKABLE);
-    lv_img_set_src(ui->video_rec_img_12, gui_get_res_path(GUI_RES_M_PARK_PNG));
+#if LV_USE_GUIBUILDER_SIMULATOR
+    lv_img_set_src(ui->video_rec_img_12, "A:\\1111\\ac792\\ui_prj\\dvr_ly_800x480\\import\\image\\LY_UI\\rec\\rec_menu\\m_park.png");
+#else
+    lv_img_set_src(ui->video_rec_img_12, "mnt/sdfile/EXT_RESERVED/uipackres/ui/55000025.zip");
+#endif
     lv_img_set_pivot(ui->video_rec_img_12, 0, 0);
     lv_img_set_angle(ui->video_rec_img_12, 0);
     lv_img_set_zoom(ui->video_rec_img_12, 256);
@@ -1428,7 +1526,11 @@ lv_obj_t *setup_scr_video_rec(lv_ui *ui)
     lv_obj_set_size(ui->video_rec_img_13, 29, 29);
     lv_obj_set_scrollbar_mode(ui->video_rec_img_13, LV_SCROLLBAR_MODE_OFF);
     lv_obj_add_flag(ui->video_rec_img_13, LV_OBJ_FLAG_CLICKABLE);
-    lv_img_set_src(ui->video_rec_img_13, gui_get_res_path(GUI_RES_M_NUM_PNG));
+#if LV_USE_GUIBUILDER_SIMULATOR
+    lv_img_set_src(ui->video_rec_img_13, "A:\\1111\\ac792\\ui_prj\\dvr_ly_800x480\\import\\image\\LY_UI\\rec\\rec_menu\\m_num.png");
+#else
+    lv_img_set_src(ui->video_rec_img_13, "mnt/sdfile/EXT_RESERVED/uipackres/ui/55000026.zip");
+#endif
     lv_img_set_pivot(ui->video_rec_img_13, 0, 0);
     lv_img_set_angle(ui->video_rec_img_13, 0);
     lv_img_set_zoom(ui->video_rec_img_13, 256);
@@ -1512,7 +1614,11 @@ lv_obj_t *setup_scr_video_rec(lv_ui *ui)
     lv_obj_set_size(ui->video_rec_img_14, 29, 29);
     lv_obj_set_scrollbar_mode(ui->video_rec_img_14, LV_SCROLLBAR_MODE_OFF);
     lv_obj_add_flag(ui->video_rec_img_14, LV_OBJ_FLAG_CLICKABLE);
-    lv_img_set_src(ui->video_rec_img_14, gui_get_res_path(GUI_RES_M_FLIG_PNG));
+#if LV_USE_GUIBUILDER_SIMULATOR
+    lv_img_set_src(ui->video_rec_img_14, "A:\\1111\\ac792\\ui_prj\\dvr_ly_800x480\\import\\image\\LY_UI\\rec\\rec_menu\\m_flig.png");
+#else
+    lv_img_set_src(ui->video_rec_img_14, "mnt/sdfile/EXT_RESERVED/uipackres/ui/55000027.zip");
+#endif
     lv_img_set_pivot(ui->video_rec_img_14, 0, 0);
     lv_img_set_angle(ui->video_rec_img_14, 0);
     lv_img_set_zoom(ui->video_rec_img_14, 256);
@@ -1559,7 +1665,11 @@ lv_obj_t *setup_scr_video_rec(lv_ui *ui)
     lv_obj_set_size(ui->video_rec_img_15, 800, 40);
     lv_obj_set_scrollbar_mode(ui->video_rec_img_15, LV_SCROLLBAR_MODE_OFF);
     lv_obj_add_flag(ui->video_rec_img_15, LV_OBJ_FLAG_CLICKABLE);
-    lv_img_set_src(ui->video_rec_img_15, gui_get_res_path(GUI_RES_MENU_STA_PNG));
+#if LV_USE_GUIBUILDER_SIMULATOR
+    lv_img_set_src(ui->video_rec_img_15, "A:\\1111\\ac792\\ui_prj\\dvr_ly_800x480\\import\\image\\LY_UI\\rec\\rec_menu\\menu_sta.png");
+#else
+    lv_img_set_src(ui->video_rec_img_15, "mnt/sdfile/EXT_RESERVED/uipackres/ui/55000028.zip");
+#endif
     lv_img_set_pivot(ui->video_rec_img_15, 0, 0);
     lv_img_set_angle(ui->video_rec_img_15, 0);
     lv_img_set_zoom(ui->video_rec_img_15, 256);
@@ -1578,7 +1688,11 @@ lv_obj_t *setup_scr_video_rec(lv_ui *ui)
     lv_obj_set_size(ui->video_rec_img_16, 800, 40);
     lv_obj_set_scrollbar_mode(ui->video_rec_img_16, LV_SCROLLBAR_MODE_OFF);
     lv_obj_add_flag(ui->video_rec_img_16, LV_OBJ_FLAG_CLICKABLE);
-    lv_img_set_src(ui->video_rec_img_16, gui_get_res_path(GUI_RES_MENU_STA_PNG));
+#if LV_USE_GUIBUILDER_SIMULATOR
+    lv_img_set_src(ui->video_rec_img_16, "A:\\1111\\ac792\\ui_prj\\dvr_ly_800x480\\import\\image\\LY_UI\\rec\\rec_menu\\menu_sta.png");
+#else
+    lv_img_set_src(ui->video_rec_img_16, "mnt/sdfile/EXT_RESERVED/uipackres/ui/55000028.zip");
+#endif
     lv_img_set_pivot(ui->video_rec_img_16, 0, 0);
     lv_img_set_angle(ui->video_rec_img_16, 0);
     lv_img_set_zoom(ui->video_rec_img_16, 256);
@@ -1601,7 +1715,11 @@ lv_obj_t *setup_scr_video_rec(lv_ui *ui)
     lv_obj_set_size(ui->video_rec_img_17, 40, 30);
     lv_obj_set_scrollbar_mode(ui->video_rec_img_17, LV_SCROLLBAR_MODE_OFF);
     lv_obj_add_flag(ui->video_rec_img_17, LV_OBJ_FLAG_CLICKABLE);
-    lv_img_set_src(ui->video_rec_img_17, gui_get_res_path(GUI_RES_REC_PNG));
+#if LV_USE_GUIBUILDER_SIMULATOR
+    lv_img_set_src(ui->video_rec_img_17, "A:\\1111\\ac792\\ui_prj\\dvr_ly_800x480\\import\\image\\LY_UI\\rec\\rec_menu\\rec.png");
+#else
+    lv_img_set_src(ui->video_rec_img_17, "mnt/sdfile/EXT_RESERVED/uipackres/ui/55000029.zip");
+#endif
     lv_img_set_pivot(ui->video_rec_img_17, 0, 0);
     lv_img_set_angle(ui->video_rec_img_17, 0);
     lv_img_set_zoom(ui->video_rec_img_17, 256);
@@ -1620,7 +1738,11 @@ lv_obj_t *setup_scr_video_rec(lv_ui *ui)
     lv_obj_set_size(ui->video_rec_img_18, 37, 37);
     lv_obj_set_scrollbar_mode(ui->video_rec_img_18, LV_SCROLLBAR_MODE_OFF);
     lv_obj_add_flag(ui->video_rec_img_18, LV_OBJ_FLAG_CLICKABLE);
-    lv_img_set_src(ui->video_rec_img_18, gui_get_res_path(GUI_RES_SET_PNG));
+#if LV_USE_GUIBUILDER_SIMULATOR
+    lv_img_set_src(ui->video_rec_img_18, "A:\\1111\\ac792\\ui_prj\\dvr_ly_800x480\\import\\image\\LY_UI\\rec\\rec_menu\\set.png");
+#else
+    lv_img_set_src(ui->video_rec_img_18, "mnt/sdfile/EXT_RESERVED/uipackres/ui/5500002a.zip");
+#endif
     lv_img_set_pivot(ui->video_rec_img_18, 0, 0);
     lv_img_set_angle(ui->video_rec_img_18, 0);
     lv_img_set_zoom(ui->video_rec_img_18, 256);
@@ -1639,7 +1761,11 @@ lv_obj_t *setup_scr_video_rec(lv_ui *ui)
     lv_obj_set_size(ui->video_rec_img_19, 21, 29);
     lv_obj_set_scrollbar_mode(ui->video_rec_img_19, LV_SCROLLBAR_MODE_OFF);
     lv_obj_add_flag(ui->video_rec_img_19, LV_OBJ_FLAG_CLICKABLE);
-    lv_img_set_src(ui->video_rec_img_19, gui_get_res_path(GUI_RES_LEFT_PNG));
+#if LV_USE_GUIBUILDER_SIMULATOR
+    lv_img_set_src(ui->video_rec_img_19, "A:\\1111\\ac792\\ui_prj\\dvr_ly_800x480\\import\\image\\LY_UI\\direc\\left.png");
+#else
+    lv_img_set_src(ui->video_rec_img_19, "mnt/sdfile/EXT_RESERVED/uipackres/ui/5500002b.zip");
+#endif
     lv_img_set_pivot(ui->video_rec_img_19, 0, 0);
     lv_img_set_angle(ui->video_rec_img_19, 0);
     lv_img_set_zoom(ui->video_rec_img_19, 256);
@@ -1658,7 +1784,11 @@ lv_obj_t *setup_scr_video_rec(lv_ui *ui)
     lv_obj_set_size(ui->video_rec_img_20, 29, 21);
     lv_obj_set_scrollbar_mode(ui->video_rec_img_20, LV_SCROLLBAR_MODE_OFF);
     lv_obj_add_flag(ui->video_rec_img_20, LV_OBJ_FLAG_CLICKABLE);
-    lv_img_set_src(ui->video_rec_img_20, gui_get_res_path(GUI_RES_UP_PNG));
+#if LV_USE_GUIBUILDER_SIMULATOR
+    lv_img_set_src(ui->video_rec_img_20, "A:\\1111\\ac792\\ui_prj\\dvr_ly_800x480\\import\\image\\LY_UI\\direc\\up.png");
+#else
+    lv_img_set_src(ui->video_rec_img_20, "mnt/sdfile/EXT_RESERVED/uipackres/ui/5500002c.zip");
+#endif
     lv_img_set_pivot(ui->video_rec_img_20, 0, 0);
     lv_img_set_angle(ui->video_rec_img_20, 0);
     lv_img_set_zoom(ui->video_rec_img_20, 256);
@@ -1677,7 +1807,11 @@ lv_obj_t *setup_scr_video_rec(lv_ui *ui)
     lv_obj_set_size(ui->video_rec_img_21, 29, 21);
     lv_obj_set_scrollbar_mode(ui->video_rec_img_21, LV_SCROLLBAR_MODE_OFF);
     lv_obj_add_flag(ui->video_rec_img_21, LV_OBJ_FLAG_CLICKABLE);
-    lv_img_set_src(ui->video_rec_img_21, gui_get_res_path(GUI_RES_DOWN_PNG));
+#if LV_USE_GUIBUILDER_SIMULATOR
+    lv_img_set_src(ui->video_rec_img_21, "A:\\1111\\ac792\\ui_prj\\dvr_ly_800x480\\import\\image\\LY_UI\\direc\\down.png");
+#else
+    lv_img_set_src(ui->video_rec_img_21, "mnt/sdfile/EXT_RESERVED/uipackres/ui/5500002d.zip");
+#endif
     lv_img_set_pivot(ui->video_rec_img_21, 0, 0);
     lv_img_set_angle(ui->video_rec_img_21, 0);
     lv_img_set_zoom(ui->video_rec_img_21, 256);
@@ -1696,7 +1830,11 @@ lv_obj_t *setup_scr_video_rec(lv_ui *ui)
     lv_obj_set_size(ui->video_rec_img_22, 21, 29);
     lv_obj_set_scrollbar_mode(ui->video_rec_img_22, LV_SCROLLBAR_MODE_OFF);
     lv_obj_add_flag(ui->video_rec_img_22, LV_OBJ_FLAG_CLICKABLE);
-    lv_img_set_src(ui->video_rec_img_22, gui_get_res_path(GUI_RES_RIGHT_PNG));
+#if LV_USE_GUIBUILDER_SIMULATOR
+    lv_img_set_src(ui->video_rec_img_22, "A:\\1111\\ac792\\ui_prj\\dvr_ly_800x480\\import\\image\\LY_UI\\direc\\right.png");
+#else
+    lv_img_set_src(ui->video_rec_img_22, "mnt/sdfile/EXT_RESERVED/uipackres/ui/5500002e.zip");
+#endif
     lv_img_set_pivot(ui->video_rec_img_22, 0, 0);
     lv_img_set_angle(ui->video_rec_img_22, 0);
     lv_img_set_zoom(ui->video_rec_img_22, 256);

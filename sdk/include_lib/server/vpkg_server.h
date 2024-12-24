@@ -164,6 +164,7 @@ struct vpkg_media_info {
     u8 aud_ch;//²ÉÑùÍ¨µÀ
     u8 aud_bits;//²ÉÑùÎ»Éî
     u32 aud_sr;//²ÉÑùÂÊ
+    u32 aud_frame_len;//²ÉÑùÂÊ
 
     u16 vid_width;
     u16 vid_heigh;

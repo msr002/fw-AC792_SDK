@@ -2,9 +2,7 @@
 #ifdef CONFIG_UI_STYLE_JL_ENABLE
 /*Generate Code, Do NOT Edit!*/
 #include "lvgl.h"
-#if LV_USE_GUIBUILDER_SIMULATOR
 #include <stdio.h>
-#endif
 #include <stdlib.h>
 #include "../gui_guider.h"
 #include "../gui_events/events_init.h"
@@ -44,7 +42,11 @@ lv_obj_t *setup_scr_sys_prompt(lv_ui *ui)
     lv_obj_set_size(ui->sys_prompt_img_warn, 390, 200);
     lv_obj_set_scrollbar_mode(ui->sys_prompt_img_warn, LV_SCROLLBAR_MODE_OFF);
     lv_obj_add_flag(ui->sys_prompt_img_warn, LV_OBJ_FLAG_CLICKABLE);
-    lv_img_set_src(ui->sys_prompt_img_warn, gui_get_res_path(GUI_RES_POP_UP_WINDOW_PNG));
+#if LV_USE_GUIBUILDER_SIMULATOR
+    lv_img_set_src(ui->sys_prompt_img_warn, "A:\\1111\\ac792\\ui_prj\\dvr_800x480\\import\\image\\video_page\\pop_up_window.png");
+#else
+    lv_img_set_src(ui->sys_prompt_img_warn, "mnt/sdfile/EXT_RESERVED/uipackres/ui/55000045.zip");
+#endif
     lv_img_set_pivot(ui->sys_prompt_img_warn, 0, 0);
     lv_img_set_angle(ui->sys_prompt_img_warn, 0);
     lv_img_set_zoom(ui->sys_prompt_img_warn, 256);
@@ -92,7 +94,11 @@ lv_obj_t *setup_scr_sys_prompt(lv_ui *ui)
     lv_obj_set_scrollbar_mode(ui->sys_prompt_img_2, LV_SCROLLBAR_MODE_OFF);
     lv_obj_add_flag(ui->sys_prompt_img_2, LV_OBJ_FLAG_HIDDEN);
     lv_obj_add_flag(ui->sys_prompt_img_2, LV_OBJ_FLAG_CLICKABLE);
-    lv_img_set_src(ui->sys_prompt_img_2, gui_get_res_path(GUI_RES_FLIG_ON_PNG));
+#if LV_USE_GUIBUILDER_SIMULATOR
+    lv_img_set_src(ui->sys_prompt_img_2, "A:\\1111\\ac792\\ui_prj\\dvr_800x480\\import\\image\\video_page\\flig_on.png");
+#else
+    lv_img_set_src(ui->sys_prompt_img_2, "mnt/sdfile/EXT_RESERVED/uipackres/ui/55000046.zip");
+#endif
     lv_img_set_pivot(ui->sys_prompt_img_2, 0, 0);
     lv_img_set_angle(ui->sys_prompt_img_2, 0);
     lv_img_set_zoom(ui->sys_prompt_img_2, 256);
@@ -112,7 +118,11 @@ lv_obj_t *setup_scr_sys_prompt(lv_ui *ui)
     lv_obj_set_scrollbar_mode(ui->sys_prompt_img_1, LV_SCROLLBAR_MODE_OFF);
     lv_obj_add_flag(ui->sys_prompt_img_1, LV_OBJ_FLAG_HIDDEN);
     lv_obj_add_flag(ui->sys_prompt_img_1, LV_OBJ_FLAG_CLICKABLE);
-    lv_img_set_src(ui->sys_prompt_img_1, gui_get_res_path(GUI_RES_ASTERN_PNG));
+#if LV_USE_GUIBUILDER_SIMULATOR
+    lv_img_set_src(ui->sys_prompt_img_1, "A:\\1111\\ac792\\ui_prj\\dvr_800x480\\import\\image\\video_page\\astern.png");
+#else
+    lv_img_set_src(ui->sys_prompt_img_1, "mnt/sdfile/EXT_RESERVED/uipackres/ui/55000047.zip");
+#endif
     lv_img_set_pivot(ui->sys_prompt_img_1, 0, 0);
     lv_img_set_angle(ui->sys_prompt_img_1, 0);
     lv_img_set_zoom(ui->sys_prompt_img_1, 256);

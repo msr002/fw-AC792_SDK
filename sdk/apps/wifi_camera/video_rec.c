@@ -1942,6 +1942,7 @@ static int video0_rec_start()
     req.rec.audio.volume    = AUDIO_VOLUME;
     req.rec.audio.buf = __this->audio_buf[0];
     req.rec.audio.buf_len = AUDIO0_BUF_SIZE;
+    req.rec.audio.aud_interval_size = 8192;
 
     /* req.rec.audio.sample_source = "mic"; */
     //req.rec.audio.sample_source = "user";
@@ -2215,6 +2216,8 @@ static int video0_rec_savefile()
 #endif
     req.rec.audio.channel 	= 1;
     req.rec.audio.volume    = AUDIO_VOLUME;
+    req.rec.audio.aud_interval_size = 8192;
+
     req.rec.pkg_mute.aud_mute = !db_select("mic");
 
     req.rec.tlp_time = db_select("gap");
@@ -2376,13 +2379,17 @@ static int video1_rec_start()
 
 
 
-
+#ifdef CONFIG_WIFI_ENABLE
+    req.rec.audio.sample_rate = video_rec_get_audio_sampel_rate();
+#else
     req.rec.audio.sample_rate = 8000;
+#endif
     req.rec.audio.channel 	= 1;
     req.rec.audio.volume    = 100;
     req.rec.audio.buf = __this->audio_buf[1];
     req.rec.audio.buf_len = AUDIO1_BUF_SIZE;
     req.rec.pkg_mute.aud_mute = !db_select("mic");
+    req.rec.audio.aud_interval_size = 8192;
 
     req.rec.abr_kbps = video_rec_get_abr(req.rec.width);
     req.rec.IP_interval = 0;
@@ -2648,6 +2655,7 @@ static int video1_rec_savefile()
     req.rec.audio.channel 	= 1;
     req.rec.audio.volume    = AUDIO_VOLUME;
     req.rec.pkg_mute.aud_mute = !db_select("mic");
+    req.rec.audio.aud_interval_size = 8192;
 
     req.rec.tlp_time = db_select("gap");
     if (req.rec.tlp_time) {
@@ -2822,6 +2830,7 @@ static int video2_rec_start()
     req.rec.audio.buf = __this->audio_buf[2];
     req.rec.audio.buf_len = AUDIO2_BUF_SIZE;
     req.rec.pkg_mute.aud_mute = !db_select("mic");
+    req.rec.audio.aud_interval_size = 8192;
 
     req.rec.abr_kbps = video_rec_get_abr(req.rec.width);
 
@@ -3081,6 +3090,7 @@ static int video2_rec_savefile()
 #endif
         req.rec.audio.channel 	= 1;
         req.rec.pkg_mute.aud_mute = !db_select("mic");
+        req.rec.audio.aud_interval_size = 8192;
 
         err = server_request(__this->video_rec2, VIDEO_REQ_REC, &req);
         if (err != 0) {
@@ -3216,14 +3226,17 @@ static int video3_rec_start()
 #endif
 
 
-
-
+#ifdef CONFIG_WIFI_ENABLE
+    req.rec.audio.sample_rate = video_rec_get_audio_sampel_rate();
+#else
     req.rec.audio.sample_rate = 8000;
+#endif
     req.rec.audio.channel 	= 1;
     req.rec.audio.volume    = 100;
     req.rec.audio.buf = __this->audio_buf[3];
     req.rec.audio.buf_len = AUDIO3_BUF_SIZE;
     req.rec.pkg_mute.aud_mute = !db_select("mic");
+    req.rec.audio.aud_interval_size = 8192;
 
     req.rec.abr_kbps = video_rec_get_abr(req.rec.width);
     req.rec.IP_interval = 0;
@@ -3472,6 +3485,7 @@ static int video3_rec_savefile()
     req.rec.audio.channel 	= 1;
     req.rec.audio.volume    = AUDIO_VOLUME;
     req.rec.pkg_mute.aud_mute = !db_select("mic");
+    req.rec.audio.aud_interval_size = 8192;
 
     req.rec.tlp_time = db_select("gap");
     if (req.rec.tlp_time) {

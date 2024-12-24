@@ -523,6 +523,9 @@ static int wifi_event_callback(void *network_ctx, enum WIFI_EVENT event)
         break;
     case WIFI_EVENT_AP_ON_ASSOC:
         ;
+#ifdef TCFG_WIFI_ENABLE
+        lwip_set_default_netif(WIFI_NETIF);   //设置本地网卡为默认模块,兼容双网卡
+#endif
         struct eth_addr *hwaddr = (struct eth_addr *)network_ctx;
         printf("WIFI_EVENT_AP_ON_ASSOC hwaddr = %02x:%02x:%02x:%02x:%02x:%02x \r\n\r\n",
                hwaddr->addr[0], hwaddr->addr[1], hwaddr->addr[2], hwaddr->addr[3], hwaddr->addr[4], hwaddr->addr[5]);

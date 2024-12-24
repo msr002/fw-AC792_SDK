@@ -95,19 +95,6 @@ void gui_sys_model_msg_init_events()
     }
 
     lv_subject_t *subject_sys_time = gui_msg_get_subject(GUI_SYS_MODEL_MSG_ID_SYS_TIME);
-    if (!guider_ui.video_photo_del) {
-        gui_sys_model_msg_sys_time_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_TIME);
-        lv_subject_add_observer_obj(subject_sys_time, gui_msg_set_digital_clock_clock_time_by_time_cb, guider_ui.video_photo_digitclock_1, &guider_msg_data);
-
-
-        for (int i = 0; i < 1; i++) {
-            if (status[i].msg_id == GUI_SYS_MODEL_MSG_ID_SYS_TIME) {
-                status[i].is_subscribe = 1;
-            }
-        }
-
-        sys_time_timer_enable = true;
-    }
 
     for (int i = 0; i < 1; i++) {
         if (status[i].is_subscribe == 0 && status[i].is_unsubscribe == 1) {

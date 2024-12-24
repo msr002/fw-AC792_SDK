@@ -63,40 +63,6 @@ REGISTER_UI_MODULE_EVENT_HANDLER(GUI_MODEL_VIDEO_PHOTO_MSG_ID_SHOW_HANDSHAKE)
 
 #endif
 #if !LV_USE_GUIBUILDER_SIMULATOR
-
-void video_photo_post_msg(const char *msg, ...)
-{
-#ifdef USE_LVGL_V8_UI_DEMO
-    va_list argptr;
-    printf("[chili] %s %s   \n", __func__, msg);
-
-    va_start(argptr, msg);
-    if (strstr(msg, "tphin")) {
-
-    } else if (strstr(msg, "tphout")) {
-
-    } else if (strstr(msg, "captureTime")) {
-        post_msg2photo_capture_time(msg, va_arg(argptr, int)); //获取第一个int数据
-
-    } else if (strstr(msg, "remainPhoto")) {
-        post_msg2photo_remain(msg, va_arg(argptr, int)); //获取第一个int数据
-
-    } else if (strstr(msg, "swWinicon")) {
-        post_msg2sw_winicon(msg, va_arg(argptr, int)); //获取第一个int数据
-
-    } else if (strstr(msg, "batIcon")) {
-        post_msg2bat_icon(msg, va_arg(argptr, int)); //获取第一个int数据
-
-    } else if (strstr(msg, "sdStatus")) {
-        post_msg2sd_icon(msg, va_arg(argptr, int)); //获取第一个int数据
-
-    }
-
-    va_end(argptr);
-#endif
-
-}
-
 //注册页面加载卸载回调
 int gui_src_action_video_photo(int action)
 {
@@ -192,7 +158,7 @@ int gui_get_camera_config(char *label)
 }
 
 //剩余拍照数量更新
-int post_msg2photo_remain(const char *type, uint32_t num)
+void post_msg2photo_remain(int32_t num)
 {
 #ifdef USE_LVGL_V8_UI_DEMO
     static char remain[9];
@@ -202,7 +168,7 @@ int post_msg2photo_remain(const char *type, uint32_t num)
 }
 
 //延时拍照时间
-static int post_msg2photo_capture_time(const char *type, uint32_t num)
+void post_msg2photo_capture_time(int32_t num)
 {
 #ifdef USE_LVGL_V8_UI_DEMO
     char *time = lvgl_module_msg_get_ptr(GUI_MODEL_VIDEO_PHOTO_MSG_ID_CAPTURE_TIME, 4);

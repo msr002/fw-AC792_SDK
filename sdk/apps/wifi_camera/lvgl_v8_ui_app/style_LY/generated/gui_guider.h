@@ -32,6 +32,8 @@ extern "C" {
 #if GUI_TEMPLATE_VERSION_MINOR < COMPATIBLE_UI_PRJ_TEMPLATE_VERSION_MIN_MINOR || GUI_TEMPLATE_VERSION_MINOR > COMPATIBLE_UI_PRJ_TEMPLATE_VERSION_MAX_MINOR
 #warning "Current Project Template Version has minor incompatibilities with the SDK. Some features may not be available. Consider updating the SDK version."
 #endif
+#else
+#error "The SDK version is too low. Please update to a newer version!"
 #endif
 #endif
 
