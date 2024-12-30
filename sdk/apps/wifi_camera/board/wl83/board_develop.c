@@ -1336,6 +1336,7 @@ REGISTER_DEVICES(device_table) = {
 #ifdef CONFIG_VIDEO2_ENABLE
     {"uvc", &uvc_dev_ops, NULL},
     { "video10.*",  &video_dev_ops, (void *)&video2_data },
+    { "video11.*",  &video_dev_ops, (void *)&video2_data },
 #endif
 
 #ifdef CONFIG_VIDEO3_ENABLE

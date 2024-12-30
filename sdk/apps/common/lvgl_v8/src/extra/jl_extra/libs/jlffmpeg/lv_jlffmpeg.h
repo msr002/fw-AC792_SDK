@@ -36,9 +36,10 @@ struct ffmpeg_context_s {
     lv_fs_file_t *lv_file;
     uint32_t size;
     uint8_t *jpg_data;
-    uint8_t *yuv_data;
-    uint8_t *rgb_data;
-
+    uint8_t *buf_act;
+    uint8_t *buf1_data;
+    uint8_t *buf2_data;
+    bool auto_cycle;
 };
 
 typedef struct {
@@ -57,6 +58,11 @@ typedef enum {
     _LV_FFMPEG_PLAYER_CMD_LAST
 } lv_ffmpeg_player_cmd_t;
 
+typedef enum {
+    LV_FFMPEG_IMG_DECODE_START,
+    LV_FFMPEG_IMG_DECODE_STOP,
+    LV_FFMPEG_IMG_DECODE_TASK_KILL
+} lv_ffmpeg_img_decode_status_t;
 /**********************
  * GLOBAL PROTOTYPES
  **********************/
@@ -64,8 +70,7 @@ typedef enum {
 /**
  * Register FFMPEG image decoder
  */
-void lv_ffmpeg_init(void);
-
+void lv_ffmpeg_init(uint8_t doublebuf_en);
 /**
  * Get the number of frames contained in the file
  * @param path image or video file name

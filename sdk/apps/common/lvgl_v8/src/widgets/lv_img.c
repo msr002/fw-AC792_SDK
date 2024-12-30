@@ -32,7 +32,7 @@
 static void lv_img_constructor(const lv_obj_class_t *class_p, lv_obj_t *obj);
 static void lv_img_destructor(const lv_obj_class_t *class_p, lv_obj_t *obj);
 static void lv_img_event(const lv_obj_class_t *class_p, lv_event_t *e);
-static void draw_img(lv_event_t *e);
+void draw_img(lv_event_t *e);
 
 /**********************
  *  STATIC VARIABLES
@@ -533,7 +533,7 @@ static void lv_img_event(const lv_obj_class_t *class_p, lv_event_t *e)
     }
 }
 
-static void draw_img(lv_event_t *e)
+void draw_img(lv_event_t *e)
 {
     lv_event_code_t code = lv_event_get_code(e);
     lv_obj_t *obj = lv_event_get_target(e);

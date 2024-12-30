@@ -531,7 +531,7 @@ mov_find:
 }
 
 
-static u32 avi_find_index_addr(FILE *fd, u8 state)
+u32 avi_find_index_addr(FILE *fd, u8 state)
 {
     int offset;
     int index_addr;
@@ -651,7 +651,7 @@ static int avi_audio_get_offset_cnt(FILE *fd, int num, u8 state) //第一帧从1
     avi_info->last_ad_sum = addr;
     return addr;
 }
-static int avi_video_get_offset_cnt(FILE *fd, int num, u8 state) //第一帧从1开始，...
+int avi_video_get_offset_cnt(FILE *fd, int num, u8 state) //第一帧从1开始，...
 {
     int i;
     int addr = 0;

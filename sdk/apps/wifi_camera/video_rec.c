@@ -586,7 +586,7 @@ int video_disp_start(int id, struct video_window *win)
     sprintf(fb_name, "fb%d", id + 1);
 
     if (id == 2) {
-        sprintf(dev_name, "video%d.%d", 10, id < 2 ? 0 : __this->uvc_id);
+        sprintf(dev_name, "video%d.%d", 10 + __this->uvc_id, id < 2 ? 0 : __this->uvc_id);
     } else {
         sprintf(dev_name, "video%d.%d", id, id < 2 ? 0 : __this->uvc_id);
     }
@@ -2771,7 +2771,7 @@ static int video2_rec_start()
 
     puts("start_video_rec2 \n");
     if (!__this->video_rec2) {
-        sprintf(name, "video10.%d", __this->uvc_id);
+        sprintf(name, "video1%d.%d", __this->uvc_id, __this->uvc_id);
         __this->video_rec2 = server_open("video_server", name);
         if (!__this->video_rec2) {
             return -EINVAL;

@@ -171,5 +171,6 @@ int avi_get_audio_timestanp(FILE *fd, u8 state);
 int avi_audio_base_to_get_video_frame(u32 audio_num, u8 state);
 int avi_video_base_to_get_audio_frame(int vd_num, u8 state);
 int avi_video_set_frame_addr(FILE *fd, int offset_num, u8 state);
-
+u32 avi_find_index_addr(FILE *fd, u8 state);
+int avi_video_get_offset_cnt(FILE *fd, int num, u8 state);
 #endif  /*SIMPLE_MOV_UNPKG_H*/

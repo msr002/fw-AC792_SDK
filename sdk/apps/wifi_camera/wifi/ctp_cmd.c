@@ -366,7 +366,7 @@ int cmd_put_app_access(void *priv, char *content)
 
     }
 
-#if THREE_WAY_ENABLE
+#if 0//THREE_WAY_ENABLE
     if (app && !strcmp(app->name, "video_rec")) {
         init_intent(&it);
         it.name = app->name;
@@ -392,7 +392,7 @@ int cmd_put_app_access(void *priv, char *content)
     info.cli = priv;
 
 err:
-#if THREE_WAY_ENABLE
+#if 0//THREE_WAY_ENABLE
     if (app && !strcmp(app->name, "video_rec")) {
         init_intent(&it);
         it.name = app->name;
@@ -2253,7 +2253,7 @@ void close_rt_stream(struct sockaddr_in *dest)
 
     }
 
-#if THREE_WAY_ENABLE
+#if 0//THREE_WAY_ENABLE
     it.action = ACTION_BACK;
     start_app(&it);
 

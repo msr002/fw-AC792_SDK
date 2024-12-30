@@ -35,7 +35,7 @@ struct photo_submenu_data photo_subpage_data = { 0 };  //拍照模式
 char user_roller_str[128] = { 0 };//记录roller被选项
 int subpage_cur_btn = SUBPAGE_FUNKEY_NULL;//子页面当前被按下的按键 0无按下 1~n代表funkey1~n
 bool usb_flag = false;
-bool update_date = true; //true时表示需要更新 rtc 时间，默认初始化时需要更新
+bool update_date = false; //true时表示需要更新 rtc 时间，默认初始化时需要更新
 extern char video_rec_car_num[64];
 
 //=======================================================//
@@ -126,7 +126,7 @@ void lvgl_key_value_remap(uint8_t key_value, uint32_t *key_remap)
 {
     switch (key_value) {
     case KEY_MODE:
-        *key_remap = LV_KEY_BACKSPACE;  //对应设备的模式（mode）键，UI工具仿真时LV_KEY_RIGHT代替
+        *key_remap = LV_KEY_RIGHT;  //对应设备的模式（mode）键，UI工具仿真时LV_KEY_RIGHT代替
         break;
     case KEY_MENU:
         *key_remap = LV_KEY_HOME;  //对应设备的菜单（menu）键，UI工具仿真时LV_KEY_LEFT代替

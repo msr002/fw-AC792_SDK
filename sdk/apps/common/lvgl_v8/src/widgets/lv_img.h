@@ -216,6 +216,7 @@ bool lv_img_get_antialias(lv_obj_t *obj);
  */
 lv_img_size_mode_t lv_img_get_size_mode(lv_obj_t *obj);
 
+void draw_img(lv_event_t *e);
 /**********************
  *      MACROS
  **********************/

@@ -39,7 +39,7 @@ static int funkey8_timer_cnt = 5;
 char user_roller_str[64] = { 0 };//记录roller被选项
 int subpage_cur_btn = SUBPAGE_FUNKEY_NULL;//子页面当前被按下的按键 0无按下 1~n代表funkey1~n
 bool usb_flag = false;
-bool update_date = true;
+bool update_date = false;
 static bool reset_update_yes = false;
 /**********************
  *  STATIC PROTOTYPES
