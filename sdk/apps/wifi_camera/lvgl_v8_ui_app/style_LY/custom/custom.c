@@ -35,7 +35,7 @@ struct photo_submenu_data photo_subpage_data = { 0 };  //拍照模式
 char user_roller_str[128] = { 0 };//记录roller被选项
 int subpage_cur_btn = SUBPAGE_FUNKEY_NULL;//子页面当前被按下的按键 0无按下 1~n代表funkey1~n
 bool usb_flag = false;
-bool update_date = true; //true时表示需要更新 rtc 时间，默认初始化时需要更新
+bool update_date = false; //true时表示需要更新 rtc 时间，默认初始化时需要更新
 extern char video_rec_car_num[64];
 
 //=======================================================//
@@ -126,10 +126,10 @@ void lvgl_key_value_remap(uint8_t key_value, uint32_t *key_remap)
 {
     switch (key_value) {
     case KEY_MODE:
-        *key_remap = LV_KEY_RIGHT;  //对应机器的模式（mode）键
+        *key_remap = LV_KEY_RIGHT;  //对应设备的模式（mode）键，UI工具仿真时LV_KEY_RIGHT代替
         break;
     case KEY_MENU:
-        *key_remap = LV_KEY_HOME;  //对应机器的菜单（menu）键
+        *key_remap = LV_KEY_HOME;  //对应设备的菜单（menu）键，UI工具仿真时LV_KEY_LEFT代替
         break;
     case KEY_UP:
         key_scroll_to_view();
@@ -234,24 +234,20 @@ static int key_filter_event_handler(struct sys_event *e)
 {
     struct key_event *key = (struct key_event *)e->payload;
     // printf(">>>%s()-----key action: %d, value: %d\n", __func__, key->action, key->value);
-    /* 开录像状态下，过滤掉menu按键消息，但在菜单页面下已经是录像状态，则不过滤 */
-    if (rec_running && (key->value == KEY_MENU)) {
+
+    if (rec_running && (key->value == KEY_MENU)) {  //开录像状态下，过滤掉menu按键消息，但在菜单页面下已经是录像状态，则不过滤
         if (get_menu_status()) {
             return 0;
         } else {
-            return -EINVAL;  //过滤掉menu按键消息，不发给UI
+            return -EINVAL;  //过滤掉按键消息，不发给UI
         }
-    } else if (rec_running && (key->value == KEY_MODE)) {
+    } else if (rec_running && (key->value == KEY_MODE)) {  //录像状态下，mode键对当前文件加解锁
         if (key->action == KEY_EVENT_DOWN) {
             rec_lock_setting();
         }
         return -EINVAL;  //过滤掉按键消息，不发给UI
     }
 
-    /* 菜单页面下，过滤掉mode键消息 */
-    if (get_menu_status() && (key->value == KEY_MODE)) {
-        return -EINVAL;
-    }
     return 0;
 }
 
@@ -375,38 +371,6 @@ int rec_ask_app_open_menu(void)
 
 }
 #endif
-
-
-
-
-
-
-
-
-void setting_reset(void)
-{
-    int reset_err = 0;
-    char *carnumber_cn_init;
-
-    reset_err = db_reset();
-
-    update_date = true;  //rtc时间
-
-    /* 车牌 */
-    carnumber_cn_init = (char *)lvgl_module_msg_get_ptr(GUI_MODEL_VIDEO_REC_MSG_ID_CAR_NUNBER, 16);
-    strcpy(carnumber_cn_init, "京A00000");
-    lvgl_module_msg_send_ptr(carnumber_cn_init, 0);
-
-    /* 语言 */
-    lv_i18n_set_locale("zh_cn");
-    i18n_refresh_all_texts(); //语言即可生效
-
-    if (reset_err < 0) {
-        sys_prompt_show_ctl(3000, (void *)_("sys_reset_failed"));
-    } else {
-        sys_prompt_show_ctl(3000, (void *)_("sys_reset"));
-    }
-}
 
 
 
@@ -572,7 +536,7 @@ void carnum_utf8_to_gb2312(const uint8_t *utf_8, uint8_t *gb2312_data, int selec
 }
 
 //sd卡状态图标更新
-void post_msg2sd_icon(int online)
+void post_msg2sd_icon(const char *type, uint32_t online)
 {
 #ifdef USE_LVGL_V8_UI_DEMO
     if (online) {

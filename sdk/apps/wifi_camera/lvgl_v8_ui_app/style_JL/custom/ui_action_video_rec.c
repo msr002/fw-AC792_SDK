@@ -18,6 +18,7 @@ static int count = 0;
 extern bool usb_flag;
 static int rec_remain_handler(const char *type, u32 remain_time);
 extern void sys_prompt_show_ctl(int32_t show_time, void *tips);
+void video_rec_post_msg(const char *msg, ...);
 /* 注册控件模型 */
 REGISTER_UI_MODULE_EVENT_HANDLER(GUI_MODEL_VIDEO_REC_MSG_ID_REC_REMAIN_TIME)
 .onchange = gui_model_video_rec_msg_rec_remain_time_cb,
@@ -294,6 +295,11 @@ void rec_set_lock_crash(void)
 int video_rec_record_time()
 {
     if (rec_running) {
+        if (!lv_obj_is_valid(guider_ui.video_rec_digitclock_record_time)) {
+            printf("obj no valid \n");
+            return 0;
+        }
+
         if (!count) {
             memset(&rec_running_time, 0, sizeof(rec_running_time));
             count = 1;
@@ -379,18 +385,16 @@ static int rec_off_handler(const char *type, u32 arg)
 
 static int rec_remain_handler(const char *type, u32 remain_time)
 {
+
     printf("remain= %s %d\n", type, remain_time);
     lvgl_module_msg_send_global_ptr(GUI_MODEL_VIDEO_REC_MSG_ID_HIDE_RECORD_TIME, (void *)LV_OBJ_FLAG_HIDDEN, 1, 0);
-
     struct tm *rec_remain_time_var;
-
     rec_remain_time_var = lvgl_module_msg_get_ptr(GUI_MODEL_VIDEO_REC_MSG_ID_REC_REMAIN_TIME, sizeof(struct tm));
 
     struct tm *time = rec_remain_time_var;
     time->tm_hour = remain_time / 3600;
     time->tm_min = remain_time % 3600 / 60;
     time->tm_sec = remain_time % 60;
-    // lvgl_module_msg_send_global_ptr(GUI_MODEL_VIDEO_REC_MSG_ID_HIDE_RECORD_TIME, (void *)LV_OBJ_FLAG_HIDDEN, 1, 0);
     printf("%p reTIME hour:%02d, min:%02d, sec:%02d\n", rec_remain_time_var, time->tm_hour, time->tm_min, time->tm_sec);
     lvgl_module_msg_send_ptr(rec_remain_time_var, 0);
 
@@ -440,7 +444,7 @@ static int rec_fs_err_handler(const char *type, u32 arg)
 {
     //TF卡状态异常回调
     lvgl_module_msg_send_value(GUI_MODEL_VIDEO_REC_MSG_ID_REC_BTN, LV_STATE_DEFAULT, 0);
-    post_msg2sd_icon(0);
+    video_rec_post_msg("sdStatus", 0);
     lvgl_rpc_post_func(sys_prompt_show_ctl, 2, 3000, (void *)_("fs_err"));
     return 0;
 }
@@ -549,6 +553,16 @@ void video_rec_post_msg(const char *msg, ...)
 
     } else if (!strcmp(msg, "wifiPreview")) {
         wifi_preview_handler(msg, va_arg(argptr, int));
+
+    } else if (strstr(msg, "swWinicon")) {
+        post_msg2sw_winicon(msg, va_arg(argptr, int)); //获取第一个int数据
+
+    } else if (strstr(msg, "batIcon")) {
+        post_msg2bat_icon(msg, va_arg(argptr, int)); //获取第一个int数据
+
+    } else if (strstr(msg, "sdStatus")) {
+        post_msg2sd_icon(msg, va_arg(argptr, int)); //获取第一个int数据
+
 
     } else {
         printf("[chili] %s your msg [%s] no callback! \n", __func__, msg, __LINE__);

@@ -17,6 +17,7 @@ static struct tm rec_running_time = { 0 };
 int target_time = 0;
 static int count = 0;
 static int rec_remain_handler(const char *type, u32 remain_time);
+void video_rec_post_msg(const char *msg, ...);
 
 extern bool usb_flag;
 
@@ -54,18 +55,18 @@ int gui_src_action_video_rec(int action)
         }
 
         // printf("--->%s()----->%d\n", __func__, __LINE__);
-        // app = get_current_app();
-        // if (app && strcmp(app->name, "video_rec")) {
+        //app = get_current_app();
+        //if (app && strcmp(app->name, "video_rec")) {
         printf("[chili] %s %d   \n", app->name, __LINE__);
         key_event_disable();
         it.name = app->name;//APP状态机在：video_rec.c
         it.action = ACTION_BACK;
         start_app(&it);
-        //} else {
-        // printf("--->%s()----->%d\n", __func__, __LINE__);
-        //	video_rec_get_remain_time();
-        // break;
-        // }
+        //} else if (app && !strcmp(app->name, "video_rec")) {
+        /*printf("--->%s()----->%d\n", __func__, __LINE__);*/
+        //video_rec_get_remain_time();
+        //  break;
+        //}
         it.name = "video_rec";//APP状态机在：video_rec.c
         it.action = ACTION_VIDEO_REC_MAIN;
         start_app(&it);
@@ -295,6 +296,14 @@ REGISTER_UI_MODULE_EVENT_HANDLER(GUI_MODEL_VIDEO_REC_MSG_ID_FLASH_HEADLIGHT)
 
 REGISTER_UI_MODULE_EVENT_HANDLER(GUI_MODEL_VIDEO_REC_MSG_ID_REC_ICON_STATE)
 .onchange = gui_model_video_rec_msg_rec_icon_state_cb,
+};
+
+REGISTER_UI_MODULE_EVENT_HANDLER(GUI_MODEL_VIDEO_REC_MSG_ID_KEY_STATE)
+.onchange = gui_model_video_rec_msg_key_state_cb,
+};
+
+REGISTER_UI_MODULE_EVENT_HANDLER(GUI_MODEL_VIDEO_REC_MSG_ID_MIC_ICON)
+.onchange = gui_model_video_rec_msg_mic_icon_cb,
 };
 
 
@@ -610,16 +619,15 @@ int gui_model_video_rec_msg_car_num_cb(gui_msg_action_t access, gui_msg_data_t *
         data = &guider_msg_data;
     }
 
-    printf("---->%s()----num: %d\n", __func__, db_select("num"));
-    if (db_select("num")) {
-        car_num_var = true;
-        u32 parm = db_select("cna");
-        printf(">>>>>>car parm: %x\n", parm);
-
-    }
-
     if (access == GUI_MSG_ACCESS_SET) {
         car_num_var = data->value_int;
+    } else if (access == GUI_MSG_ACCESS_GET) {
+        // printf("---->%s()----num: %d\n", __func__, db_select("num"));
+        if (db_select("num")) {
+            car_num_var = true;
+        } else {
+            car_num_var = false;
+        }
     }
     data->value_int = car_num_var;
     return 0;
@@ -734,6 +742,47 @@ int gui_model_video_rec_msg_rec_icon_state_cb(gui_msg_action_t access, gui_msg_d
         rec_icon_state_var = data->value_int;
     }
     data->value_int = rec_icon_state_var;
+    return 0;
+}
+
+int gui_model_video_rec_msg_key_state_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type)
+{
+    printf(">>>>>%s()---->access: %d\n", __func__, access);
+    struct intent it;
+    init_intent(&it);
+    static bool key_state_var = false;
+
+    if (access == GUI_MSG_ACCESS_SET) {
+        key_state_var = data->value_int;
+    } else if (access == GUI_MSG_ACCESS_GET) {
+        it.name = "video_rec";
+        it.action = ACTION_VIDEO_REC_LOCK_FILE;
+        it.data = "get_lock_statu";
+        start_app(&it);
+        if (it.exdata) {
+            key_state_var = true;
+        } else {
+            key_state_var = false;
+        }
+    }
+    data->value_int = key_state_var;
+    return 0;
+}
+
+int gui_model_video_rec_msg_mic_icon_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type)
+{
+    static int32_t mic_icon_var = RES_MIC_ON;
+
+    if (db_select("mic")) {
+        mic_icon_var = RES_MIC_ON;
+    } else {
+        mic_icon_var = RES_MIC_OFF;
+    }
+
+    if (access == GUI_MSG_ACCESS_SET) {
+        mic_icon_var = data->value_int;
+    }
+    data->value_int = mic_icon_var;
     return 0;
 }
 
@@ -939,7 +988,7 @@ static int rec_fs_err_handler(const char *type, u32 arg)
 {
     //TF卡状态异常回调
     // lvgl_module_msg_send_value(GUI_MODEL_VIDEO_REC_MSG_ID_REC_BTN, LV_STATE_DEFAULT, 0);
-    post_msg2sd_icon(0);
+    video_rec_post_msg("sdStatus", 0);
     extern void sys_prompt_show_ctl(int32_t show_time, void *tips);
     lvgl_rpc_post_func(sys_prompt_show_ctl, 2, 3000, (void *)_("fs_err"));
     return 0;
@@ -989,6 +1038,15 @@ void video_rec_post_msg(const char *msg, ...)
         rec_fs_err_handler(msg, 0);
     } else if (strstr(msg, "gapErr")) {
         rec_gap_err_handler(msg, 0);
+    } else if (strstr(msg, "swWinicon")) {
+        /*post_msg2sw_winicon(msg, va_arg(argptr, int)); //获取第一个int数据*/
+
+    } else if (strstr(msg, "batIcon")) {
+        post_msg2bat_icon(msg, va_arg(argptr, int)); //获取第一个int数据
+
+    } else if (strstr(msg, "sdStatus")) {
+        post_msg2sd_icon(msg, va_arg(argptr, int)); //获取第一个int数据
+
     } else {
         printf("[chili] %s your msg [%s] no callback! \n", __func__, msg, __LINE__);
     }
@@ -1050,7 +1108,7 @@ int gui_model_main_msg_systime_cb(gui_msg_action_t access, gui_msg_data_t *data,
 }
 
 //电池电量图标更新
-void post_msg2bat_icon(int vbt)
+int post_msg2bat_icon(const char *type, u32 vbt)
 {
 #ifdef USE_LVGL_V8_UI_DEMO
     //电量更新
@@ -1259,6 +1317,31 @@ void video_rec_icon_reshow(int icon)
         break;
 
     }
+}
+
+void set_carnum(void)
+{
+    uint32_t *carnum_p = NULL;
+    int  selected_idx = 0;
+    unsigned char *carnumber_cn =  NULL;
+    unsigned char gb2312Data[16] = {0};
+
+    carnumber_cn = lvgl_module_msg_get_ptr(GUI_MODEL_VIDEO_REC_MSG_ID_CAR_NUNBER, 16);
+    lv_dropdown_get_selected_str(guider_ui.video_rec_ddlist_1, carnumber_cn, 4);
+    lv_dropdown_get_selected_str(guider_ui.video_rec_ddlist_2, &carnumber_cn[3], 2);
+    lv_dropdown_get_selected_str(guider_ui.video_rec_ddlist_3, &carnumber_cn[4], 2);
+    lv_dropdown_get_selected_str(guider_ui.video_rec_ddlist_4, &carnumber_cn[5], 2);
+    lv_dropdown_get_selected_str(guider_ui.video_rec_ddlist_5, &carnumber_cn[6], 2);
+    lv_dropdown_get_selected_str(guider_ui.video_rec_ddlist_6, &carnumber_cn[7], 2);
+    lv_dropdown_get_selected_str(guider_ui.video_rec_ddlist_7, &carnumber_cn[8], 2);
+    printf("[chili] %s carnumber_cn:%s   \n", __func__, carnumber_cn);
+    lvgl_module_msg_send_ptr(carnumber_cn, 0);
+    selected_idx = lv_dropdown_get_selected(guider_ui.video_rec_ddlist_1);
+    db_update("proc", selected_idx);
+    carnum_utf8_to_gb2312((uint8_t *)carnumber_cn, (uint8_t *)gb2312Data, selected_idx);
+    carnum_p = gb2312Data;
+    db_update("cna", carnum_p[0]);
+    db_update("cnb", carnum_p[1]);
 }
 
 

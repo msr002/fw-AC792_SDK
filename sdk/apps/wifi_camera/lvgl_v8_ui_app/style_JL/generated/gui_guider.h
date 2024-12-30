@@ -32,8 +32,6 @@ extern "C" {
 #if GUI_TEMPLATE_VERSION_MINOR < COMPATIBLE_UI_PRJ_TEMPLATE_VERSION_MIN_MINOR || GUI_TEMPLATE_VERSION_MINOR > COMPATIBLE_UI_PRJ_TEMPLATE_VERSION_MAX_MINOR
 #warning "Current Project Template Version has minor incompatibilities with the SDK. Some features may not be available. Consider updating the SDK version."
 #endif
-#else
-#error "The SDK version is too low. Please update to a newer version!"
 #endif
 #endif
 
@@ -133,8 +131,8 @@ typedef struct {
     lv_obj_t *home_page_imgbtn_3_label;
     lv_obj_t *home_page_img_1;
     lv_obj_t *home_page_digitclock_1;
-    lv_obj_t *home_page_lbl_2;
     lv_obj_t *home_page_lbl_3;
+    lv_obj_t *home_page_lbl_1;
 
     // Screen sys_prompt
     lv_obj_t *sys_prompt;
@@ -176,7 +174,6 @@ typedef struct {
     lv_obj_t *sys_setting_view_subpage;
     lv_obj_t *sys_setting_img_icon;
     lv_obj_t *sys_setting_lbl_menu_title;
-    lv_obj_t *sys_setting_lbl_18;
     lv_obj_t *sys_setting_view_3;
     lv_obj_t *sys_setting_img_15;
     lv_obj_t *sys_setting_img_14;

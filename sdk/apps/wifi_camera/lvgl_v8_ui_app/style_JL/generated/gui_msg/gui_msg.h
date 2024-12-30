@@ -110,6 +110,7 @@ extern void gui_msg_set_clear_flag_by_int32_cb(lv_observer_t *observer, lv_subje
 extern void gui_msg_set_label_text_by_string_cb(lv_observer_t *observer, lv_subject_t *subject);
 extern void gui_msg_set_roller_roller_name_by_string_cb(lv_observer_t *observer, lv_subject_t *subject);
 extern void gui_msg_set_visible_by_bool_cb(lv_observer_t *observer, lv_subject_t *subject);
+extern void gui_msg_set_digital_clock_clock_time_by_time_cb(lv_observer_t *observer, lv_subject_t *subject);
 extern void gui_msg_set_bar_bar_value_by_int32_cb(lv_observer_t *observer, lv_subject_t *subject);
 #if LV_USE_OBSERVER
 #include "./gui_model_msg.h"
@@ -121,7 +122,7 @@ extern void gui_msg_set_bar_bar_value_by_int32_cb(lv_observer_t *observer, lv_su
 #include "./gui_model_video_play_msg.h"
 #include "./gui_model_video_rec_msg.h"
 #include "./gui_sys_model_msg.h"
-#define GUI_MSG_MAX_ID GUI_MODEL_SYS_SETTING_MSG_ID_HIDE_VIEWLIST
+#define GUI_MSG_MAX_ID GUI_SYS_MODEL_MSG_ID_SYS_TIME
 #endif
 
 extern gui_msg_data_t guider_msg_data;

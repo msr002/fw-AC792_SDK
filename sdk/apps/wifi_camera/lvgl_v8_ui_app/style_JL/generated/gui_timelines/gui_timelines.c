@@ -4,7 +4,9 @@
 #include "lvgl.h"
 #include "../gui_guider.h"
 #include "./gui_timelines.h"
+#if LV_USE_GUIBUILDER_SIMULATOR
 #include <stdio.h>
+#endif
 
 //Init Timelines
 void init_gui_timelines(lv_ui *ui)

@@ -35,6 +35,8 @@ int gui_src_action_usb(int action)
     printf("--->%s()----->%d, action: %d\n", __func__, __LINE__, action);
     switch (action) {
     case GUI_SCREEN_ACTION_LOAD:
+        it.action = ACTION_BACK;
+        start_app(&it);
         //usb_start();
         break;
     case GUI_SCREEN_ACTION_UNLOAD:

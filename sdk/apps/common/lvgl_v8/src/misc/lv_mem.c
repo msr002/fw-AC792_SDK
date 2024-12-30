@@ -141,7 +141,9 @@ void *lv_mem_alloc(size_t size)
 
 #if LV_MEM_CUSTOM == 0
     extern int *lvgl_get_task_pid(void);
+#if LV_USE_MEM_MONITOR
     LV_ASSERT_MSG(get_cur_thread_pid() == lvgl_get_task_pid(), "lv_mem_alloc can't multi thread access");
+#endif
     void *alloc = lv_tlsf_malloc(tlsf, size);
 #else
     void *alloc = LV_MEM_CUSTOM_ALLOC(size);

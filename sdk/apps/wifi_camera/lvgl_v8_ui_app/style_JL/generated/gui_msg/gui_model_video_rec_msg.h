@@ -37,7 +37,7 @@ typedef enum {
     GUI_MODEL_VIDEO_REC_MSG_ID_SHOW_REMAIN_TIME = 0x0079,
     GUI_MODEL_VIDEO_REC_MSG_ID_HIDE_RECORD_TIME = 0x007A,
     GUI_MODEL_VIDEO_REC_MSG_ID_SHOW_RECORD_TIME = 0x007B,
-    GUI_MODEL_VIDEO_REC_MSG_ID_APP_CONNECTED = 0x0036,
+    GUI_MODEL_VIDEO_REC_MSG_ID_APP_CONNECTED = 0x007C,
 } gui_model_video_rec_msg_id_t;
 
 extern int gui_model_video_rec_msg_cycrec_icon_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type);

@@ -298,6 +298,10 @@
 
 /*1: Show the used memory and the memory fragmentation
  * Requires LV_MEM_CUSTOM = 0*/
+//lv_mem_alloc只允许在lvgl线程调用
+//开启此宏后,如果在非lvgl线程调用lv_mem_alloc则会触发断言
+//建议遇到内存问题需要调试时才启用
+//注意开启会损失一定性能
 #define LV_USE_MEM_MONITOR 0
 #if LV_USE_MEM_MONITOR
 #define LV_USE_MEM_MONITOR_POS LV_ALIGN_BOTTOM_LEFT
