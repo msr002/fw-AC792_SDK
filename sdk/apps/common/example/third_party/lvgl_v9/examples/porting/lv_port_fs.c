@@ -147,7 +147,12 @@ static void *fs_open(lv_fs_drv_t *drv, const char *path, lv_fs_mode_t mode)
 #ifdef CONFIG_JLFAT_ENABLE
     char _path[128];
     _path[long_file_name_encode(path, (unsigned char *)_path, sizeof(_path))] = '\0';
-    file = fopen(_path, "r");
+
+    if (path[0] == "m") {
+        file = fopen(path, "r");
+    } else {
+        file = fopen(_path, "r");
+    }
 #else
     file = fopen(path, "r");
 #endif
@@ -250,7 +255,7 @@ static lv_fs_res_t fs_seek(lv_fs_drv_t *drv, void *file_p, uint32_t pos, lv_fs_w
  */
 static lv_fs_res_t fs_tell(lv_fs_drv_t *drv, void *file_p, uint32_t *pos_p)
 {
-    *pos_p = flen(file_p);
+    *pos_p = ftell(file_p);
 
     return LV_FS_RES_OK;
 }

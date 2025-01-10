@@ -30,7 +30,9 @@ enum {
     CTP_NET_ERR,        // 网络异常
     CTP_PULL_OFFLINE,    //   后拉不在线
     CTP_PULL_NOSUPPORT,  //后拉不支持
+    CTP_THIRD_NOSUPPORT,  //后拉不支持
     CTP_RT_OPEN_FAIL,     //实时流打开失败
+    CTP_REC_OPEN_FAIL,     //录像打开失败
     CTP_XX_XXXXX  = 0xff,
 };
 #define CTP_NO_ERR_MSG         "\"msg\":\"CTP_NO_ERR\""
@@ -51,7 +53,9 @@ enum {
 #define CTP_PULL_OFFLINE_MSG     "\"msg\":\"CTP_PULL_OFFLINE\""     //   后拉不在线
 #define CTP_PULL_NOSUPPORT_MSG   "\"msg\":\"CTP_PULL_NOSUPPORT\""   //  后拉不支持
 #define CTP_RT_OPEN_FAIL_MSG       "\"msg\":\"CTP_RT_OPEN_FAIL\""   // 实时流打开失败
-
+#define CTP_REC_OPEN_FAIL_MSG       "\"msg\":\"CTP_REC_OPEN_FAIL\""   // 录像打开失败
+#define CTP_THIRD_OFFLINE_MSG       "\"msg\":\"CTP_THIRD_OFFLINE\""   // 实时流打开失败
+#define CTP_THIRD_NOSUPPORT_MSG       "\"msg\":\"CTP_THIRD_OFFLINE_MSG\""   // 实时流打开失败
 
 
 

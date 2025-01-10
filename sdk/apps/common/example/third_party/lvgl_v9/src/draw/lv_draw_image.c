@@ -134,7 +134,8 @@ lv_image_src_t lv_image_src_get_type(const void *src)
 
     /*The first byte shows the type of the image source*/
     if (u8_p[0] >= 0x20 && u8_p[0] <= 0x7F) {
-        return LV_IMAGE_SRC_FILE; /*If it's an ASCII character then it's file name*/
+        //return LV_IMAGE_SRC_FILE; /*If it's an ASCII character then it's file name*/
+        return lv_get_img_src_type(src);
     } else if (u8_p[0] >= 0x80) {
         return LV_IMAGE_SRC_SYMBOL; /*Symbols begins after 0x7F*/
     } else {

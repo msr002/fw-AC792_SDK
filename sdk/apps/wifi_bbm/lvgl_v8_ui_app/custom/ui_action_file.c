@@ -63,6 +63,7 @@ int gui_bbm_start_file_browser(void)
     init_intent(&it);
     it.name	= "baby_monitor";
     it.action = ACTION_BBM_START_FILE_BROWSER;
+    it.data = gui_bbm_get_cur_dir_ch();
     return start_app(&it);
 }
 
@@ -72,21 +73,21 @@ int gui_bbm_stop_file_browser(void)
     init_intent(&it);
     it.name	= "baby_monitor";
     it.action = ACTION_BBM_STOP_FILE_BROWSER;
-    start_app(&it);
+    it.data = gui_bbm_get_cur_dir_ch();
 
-    return 0;
+    return start_app(&it);
 }
 
-int gui_bbm_get_file_num(void)
+int gui_bbm_get_file_num(int *file_num)
 {
     struct intent it;
     init_intent(&it);
     it.name	= "baby_monitor";
     it.action = ACTION_BBM_GET_FILE_NUM;
-    it.data = &__this->file_total_num;
-    start_app(&it);
+    it.data = gui_bbm_get_cur_dir_ch();
+    it.exdata = file_num;
 
-    return 0;
+    return start_app(&it);
 }
 
 int gui_bbm_get_file_list(void)
@@ -95,10 +96,10 @@ int gui_bbm_get_file_list(void)
     init_intent(&it);
     it.name	= "baby_monitor";
     it.action = ACTION_BBM_GET_FILE_LIST;
-    it.data = &__this->file_list;
-    start_app(&it);
+    it.data = gui_bbm_get_cur_dir_ch();
+    it.exdata = &__this->file_list;
 
-    return 0;
+    return start_app(&it);
 }
 
 int gui_bbm_file_to_play(int index)
@@ -108,6 +109,12 @@ int gui_bbm_file_to_play(int index)
 
     __this->to_play_page = __this->file_cur_page;
 
+    return 0;
+}
+
+int gui_bbm_file_reset_to_play_page(void)
+{
+    __this->to_play_page = 0;
     return 0;
 }
 
@@ -123,7 +130,8 @@ int bbm_get_file_thumb_req(int index, int file_num)
     __this->thumb_data.file_buf_list = __this->file_buf_list;
     __this->thumb_data.file_buf_len_list = __this->file_buf_len_list;
 
-    it.data = &__this->thumb_data;
+    it.data = gui_bbm_get_cur_dir_ch();
+    it.exdata = &__this->thumb_data;
     start_app(&it);
 
     return 0;
@@ -282,6 +290,7 @@ static void gui_bbm_thumb_task_exit(void)
     int msg = 1;
     if (__this->thumb_dec_task_pid) {
         os_taskq_del_type(THUMB_DEC_TASK_NAME, Q_MSG);
+        os_sem_post(&__this->thumb_data.sem);
         os_taskq_post_type(THUMB_DEC_TASK_NAME, Q_USER, 1, &msg);
         thread_kill(&__this->thumb_dec_task_pid, KILL_WAIT);
         __this->thumb_dec_task_pid = 0;
@@ -293,10 +302,16 @@ static int file_browser_screen_load(void)
 {
     int ret;
 
-    //关闭摄像头实时流
-    if (!__this->to_play_page) {
-        //区分home页面还是回放页面
-        gui_bbm_stop_stream();
+
+    //获取文件数量
+    ret = gui_bbm_get_file_num(&__this->file_total_num);
+    if (ret) {
+        return -1;
+    }
+    //获取文件名列表
+    ret = gui_bbm_get_file_list();
+    if (ret) {
+        return -1;
     }
 
     //开启ctp文件流程
@@ -304,11 +319,6 @@ static int file_browser_screen_load(void)
     if (ret) {
         return -1;
     }
-
-    //获取文件数量
-    gui_bbm_get_file_num();
-    //获取文件名列表
-    gui_bbm_get_file_list();
 
     //内存申请
     ret = file_browser_buf_init();
@@ -337,20 +347,17 @@ static int file_browser_screen_load(void)
 
 static int file_browser_screen_unload(void)
 {
-    //关闭缩略图解码线程
-    gui_bbm_thumb_task_exit();
     //关闭ctp文件流程
     gui_bbm_stop_file_browser();
+
+    //关闭缩略图解码线程
+    gui_bbm_thumb_task_exit();
+
     //释放内存
     file_browser_buf_exit();
     //缩略图信号量
     os_sem_del(&__this->thumb_data.sem, OS_DEL_ALWAYS);
 
-    //开启摄像头实时流
-    if (!__this->to_play_page) {
-        //区分home页面还是回放页面
-        gui_bbm_start_stream();
-    }
 
     return 0;
 }
@@ -364,8 +371,9 @@ static int gui_src_action_file_browser(int action)
     case GUI_SCREEN_ACTION_LOAD:
         ret = file_browser_screen_load();
         if (ret) {
-            //todo
-            //back home?
+            post_home_msg_to_ui("back_home_page", 0);
+            char *lab = "File Load Error !";
+            post_home_msg_to_ui("show_sys_prompt", lab);
         }
         break;
     case GUI_SCREEN_ACTION_UNLOAD:
@@ -640,7 +648,6 @@ exit:
 
 
 #endif
-
 
 
 

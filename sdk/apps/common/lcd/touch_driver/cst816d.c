@@ -24,7 +24,7 @@
 
 #define print_error_and_line()   log_error("iic write err!!! line : %d", __LINE__)
 
-static OS_SEM *tp_drdy_sem;
+static void(*tp_drdy_sem_post_func)(void);
 static void *iic;
 static int cst816d_int_id;
 static u16 cst816d_timer_id;
@@ -165,7 +165,7 @@ static int cst816d_get_fig1_xy(u16 *x, u16 *y)
 
 static void cst816d_interrupt(void *arg, u32 parm)
 {
-    os_sem_post(tp_drdy_sem);
+    tp_drdy_sem_post_func();
 }
 
 
@@ -222,7 +222,7 @@ static void cst816d_reset(const tp_platform_data_t *pd_data)
 }
 
 
-static int cst816d_init(const tp_platform_data_t *pd_data, OS_SEM *sem)
+static int cst816d_init(const tp_platform_data_t *pd_data, void(*post_func)(void))
 {
     log_info(">>>>>init start !!!");
     cst816d_reset(pd_data);
@@ -239,7 +239,7 @@ static int cst816d_init(const tp_platform_data_t *pd_data, OS_SEM *sem)
         return -ENODEV;
     }
 
-    tp_drdy_sem = sem;
+    tp_drdy_sem_post_func = post_func;
 
     if (cst816d_int_enable(pd_data)) {
         dev_close(iic);

@@ -34,21 +34,27 @@ struct _remote {
 struct net_video_hdl {
     enum NET_VIDEO_REC_STA net_state;
     enum NET_VIDEO_REC_STA net_state1;
+    enum NET_VIDEO_REC_STA net_state2;
 
     struct server *net_video_rec;
     struct server *net_video_rec1;
+    struct server *net_video_rec2;
+
     u8 *net_v0_fbuf;
     u8 *net_v1_fbuf;
+    u8 *net_v2_fbuf;
     u8 *audio_buf;
     void *priv;
     u8 net_video0_vrt_on;
     u8 net_video0_art_on;
     u8 net_video1_vrt_on;
     u8 net_video1_art_on;
+    u8 net_video2_vrt_on;
+    u8 net_video2_art_on;
     u8 videoram_mark;
     union video_req net_videoreq[2];
     struct server *net_disbuf_enc;
-    u8 *net_v2_fbuf;
+//    u8 *net_v2_fbuf;
     u32 total_frame;
     int timer_handler;
     // fps_ctrl_t fps_ctrl_hdl;
@@ -101,4 +107,5 @@ extern int net_video_rec_event_stop(void);
 extern int net_video_rec_event_start(void);
 
 #endif
+
 

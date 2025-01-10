@@ -51,6 +51,12 @@ void perf_counter_init(void)
     update_perf_counter();
 }
 
+void perf_counter_update(u32 sys_clk)
+{
+    SystemCoreClock = sys_clk;
+    update_perf_counter();
+}
+
 #else //占据一个硬件TIMER
 
 #define TIMER_USE_ISR_SOLVE_OVERFLOW_PROBLEM 1 // 1:用中断解决溢出问题, 0:查pending再使用jiffies纠正
@@ -154,7 +160,7 @@ void update_perf_counter(void)
 
     g_lLastTimeStamp = get_system_ticks();
 
-    __perf_counter_printf__("update_perf_counter  SystemCoreClock=%dMhz,PERF_CNT_DELAY_US_COMPENSATION=%d", SystemCoreClock / 1000000, PERF_CNT_DELAY_US_COMPENSATION);
+    /* __perf_counter_printf__("update_perf_counter  SystemCoreClock=%dMhz,PERF_CNT_DELAY_US_COMPENSATION=%d", SystemCoreClock / 1000000, PERF_CNT_DELAY_US_COMPENSATION); */
 
 }
 

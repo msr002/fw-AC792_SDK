@@ -1654,11 +1654,20 @@ static int usb_stor_init(struct device *device)
     disk->dev_status = DEV_INIT;
 
     disk->udisk_ep.epin_buf = usb_h_alloc_ep_buffer(usb_id, disk->udisk_ep.host_epin | USB_DIR_IN, disk->udisk_ep.rxmaxp * 2);
+
+#if USB_HUB
+    usb_hub_rxreg_set(usb_id, disk->udisk_ep.host_epin, disk->udisk_ep.target_epin, &(host_dev->private_data.hub_info));
+#else
     usb_write_rxfuncaddr(usb_id, disk->udisk_ep.host_epin, host_dev->private_data.devnum);
+#endif
     usb_h_ep_config(usb_id, disk->udisk_ep.host_epin | USB_DIR_IN, USB_ENDPOINT_XFER_BULK, 0, 0, disk->udisk_ep.epin_buf, disk->udisk_ep.rxmaxp);
 
     disk->udisk_ep.epout_buf = usb_h_alloc_ep_buffer(usb_id, disk->udisk_ep.host_epout | USB_DIR_OUT, disk->udisk_ep.txmaxp);
+#if USB_HUB
+    usb_hub_txreg_set(usb_id, disk->udisk_ep.host_epout, disk->udisk_ep.target_epout, &(host_dev->private_data.hub_info));
+#else
     usb_write_txfuncaddr(usb_id, disk->udisk_ep.host_epout, host_dev->private_data.devnum);
+#endif
     usb_h_ep_config(usb_id, disk->udisk_ep.host_epout | USB_DIR_OUT, USB_ENDPOINT_XFER_BULK, 0, 0, disk->udisk_ep.epout_buf, disk->udisk_ep.txmaxp);
 
     u8 lun = 0;

@@ -12,12 +12,13 @@
 #include "lv_port_indev.h"
 #include "../../lvgl.h"
 #include "ui.h"
+#include "lcd_config.h"
 #ifdef USE_LVGL_V8_UI_DEMO
 
 /*********************
  *      DEFINES
  *********************/
-
+#define ABS(x) ((x)>0?(x):-(x))
 /**********************
  *      TYPEDEFS
  **********************/
@@ -57,6 +58,20 @@ lv_indev_t *indev_button;
 
 static int32_t encoder_diff;
 static lv_indev_state_t encoder_state;
+
+#if LV_USE_SIM_INERTIAL_SLIDE
+static u8 touch_cnt = 0;            //连续触摸计数
+static lv_indev_data_t g_touch_data;//模拟坐标
+static u8 lv_indev_sim_status = 0;  //是否处于模拟滑动
+
+struct lv_scroll_throw {
+    short final_interval_x; //最后的x间隔
+    short final_interval_y; //最后的y间隔
+    float ratio;
+};
+static struct lv_scroll_throw lv_throw = {0};
+#endif
+
 
 /**********************
  *      MACROS
@@ -190,14 +205,19 @@ void lv_indev_timer_read_touch(void *user_data)
     lv_indev_read_timer_cb(&timer);
 }
 
-void lv_indev_set_touch_mode(int mode)
+void lv_indev_set_touch_timer_en(int en)
 {
-    if (indev_touchpad->driver->read_timer) {
-        lv_timer_del(indev_touchpad->driver->read_timer);
-        indev_touchpad->driver->read_timer = NULL;
-    }
-    if (mode) {
-        indev_touchpad->driver->read_timer = lv_timer_create(lv_indev_read_timer_cb, LV_INDEV_DEF_READ_PERIOD, indev_touchpad);
+    if (en) {
+        if (indev_touchpad->driver->read_timer == NULL) {
+            indev_touchpad->driver->read_timer = lv_timer_create(lv_indev_read_timer_cb, LV_INDEV_DEF_READ_PERIOD, indev_touchpad);
+        }
+    } else {
+        void lv_set_touch_timer_status(u8 status);
+        lv_set_touch_timer_status(0);
+        if (indev_touchpad->driver->read_timer) {
+            lv_timer_del(indev_touchpad->driver->read_timer);
+            indev_touchpad->driver->read_timer = NULL;
+        }
     }
 }
 
@@ -227,6 +247,10 @@ static void touchpad_read(lv_indev_drv_t *indev_drv, lv_indev_data_t *data)
 {
     uint8_t status;
 
+#if LV_USE_SIM_INERTIAL_SLIDE
+    lv_indev_data_t touch_data;
+#endif
+
     /*Save the pressed coordinates and the state*/
     if (indev_drv->read_timer == NULL) {
         /* putchar('I'); */
@@ -234,13 +258,105 @@ static void touchpad_read(lv_indev_drv_t *indev_drv, lv_indev_data_t *data)
         lv_port_get_touch_x_y_status(indev_drv->user_data, &data->point.x, &data->point.y, &status);
     } else {
         /* putchar('T'); */
-        get_touch_x_y_status(&data->point.x, &data->point.y, &status);
+        extern void get_touch_x_y_status(uint16_t *x, uint16_t *y, uint8_t *status);
+
+#if LV_USE_SIM_INERTIAL_SLIDE
+        get_touch_x_y_status((uint16_t *)&touch_data.point.x, (uint16_t *)&touch_data.point.y, &status);
+
+        //处于模拟惯性滑动且没有再按下:模拟坐标启用
+        if (lv_indev_sim_status && !status) {
+            lv_throw.ratio += 0.2f; //模拟加速
+            g_touch_data.point.x += lv_throw.final_interval_x * lv_throw.ratio; //g_touch_data lvgl内部读取
+            g_touch_data.point.y += lv_throw.final_interval_y * lv_throw.ratio;
+
+            if (g_touch_data.point.x > LCD_W || g_touch_data.point.x < 0 || \
+                g_touch_data.point.y > LCD_H || g_touch_data.point.y < 0 || lv_throw.ratio > 2) {
+
+                g_touch_data.point.x = (g_touch_data.point.x >= 0 && g_touch_data.point.x <= LCD_W) ? \
+                                       g_touch_data.point.x : (g_touch_data.point.x < 0 ? 0 : LCD_W);
+                g_touch_data.point.y = (g_touch_data.point.y >= 0 && g_touch_data.point.y <= LCD_H) ? \
+                                       g_touch_data.point.y : (g_touch_data.point.y < 0 ? 0 : LCD_H);
+                g_touch_data.state = LV_INDEV_STATE_REL;
+
+                //自动退出模拟滑动,删除轮询定时器
+                lv_indev_set_touch_timer_en(0);
+                lv_indev_sim_status = 0;
+                lv_throw.ratio = 1.0f;
+            }
+
+            data->point.x = g_touch_data.point.x;
+            data->point.y = g_touch_data.point.y;
+            data->state = g_touch_data.state;
+            return;
+        }//if(lv_indev_sim_status && status){
+
+
+        if (!status) { //touch抬起
+            if (touch_cnt < 2 || (ABS(lv_throw.final_interval_y) < 5 && ABS(lv_throw.final_interval_x) < 5)) {
+                touch_cnt = 0;
+                //正常抬起,删除轮询定时器
+                lv_indev_set_touch_timer_en(0);
+                goto _GET_DATA_DONE;
+            }
+            //惯性滑动生效
+            lv_indev_sim_status = 1;
+
+            touch_cnt = 0;
+
+            //lvgl坐标
+            data->point.x = touch_data.point.x + lv_throw.final_interval_x;
+            data->point.y = touch_data.point.y + lv_throw.final_interval_y;
+            data->state = LV_INDEV_STATE_PR;//设置为按下（模拟）
+
+            //模拟坐标
+            g_touch_data.point.x = data->point.x;
+            g_touch_data.point.y = data->point.y;
+            g_touch_data.state = data->state;
+
+            return;
+        } else {//touch按下
+            //若处于模拟惯性即退出
+            if (lv_indev_sim_status) {
+                lv_indev_sim_status = 0;
+                lv_throw.ratio = 1.0f;
+            }
+        }
+
+        //处于按下状态,累加触摸连续次数,计算最后触摸距离
+        touch_cnt++;
+        lv_throw.final_interval_x = touch_data.point.x - g_touch_data.point.x;
+        lv_throw.final_interval_y = touch_data.point.y - g_touch_data.point.y;
     }
+
+
+_GET_DATA_DONE:
+    //lvgl坐标
+    data->point.x = touch_data.point.x;
+    data->point.y = touch_data.point.y;
     if (status) {
         data->state = LV_INDEV_STATE_PR;
     } else {
         data->state = LV_INDEV_STATE_REL;
     }
+    //模拟坐标
+    g_touch_data.point.x = data->point.x;
+    g_touch_data.point.y = data->point.y;
+    g_touch_data.state = data->state;
+
+#else
+
+        get_touch_x_y_status((uint16_t *)&data->point.x, (uint16_t *)&data->point.y, &status);
+    }
+    if (status)
+    {
+        data->state = LV_INDEV_STATE_PR;
+    } else
+    {
+        data->state = LV_INDEV_STATE_REL;
+        //检测到抬起,删除轮询定时器
+        lv_indev_set_touch_timer_en(0);
+    }
+#endif
 }
 
 /*Return true is the touchpad is pressed*/
@@ -408,7 +524,7 @@ static void keypad_read(lv_indev_drv_t *indev_drv, lv_indev_data_t *data)
  * Encoder
  * -----------------*/
 
-/*Initialize your keypad*/
+/*Initialize your encoder*/
 static void encoder_init(void)
 {
     /*Your code comes here*/

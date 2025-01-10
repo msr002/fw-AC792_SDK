@@ -134,6 +134,14 @@ own_ip_addr=192.168.1.1\n";
 
 /*wps channel only support 1 5 9 */
 
+u8 set_sta_scan_ch_num()
+{
+    return 0;// 0为使用默认
+}
+u8 set_sta_scan_only_ch()
+{
+    return 0;// 0为使用默认
+}
 static char wps_hostapd_config_file[] = \
                                         "interface=wlan0\n\
 ctrl_interface=/var/run/hostapd\n\

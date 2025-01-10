@@ -197,12 +197,26 @@ u32 aoa_process(u32 mode, u32 id)
     if (!aoa_bulk_ep_in_buf) {
         aoa_bulk_ep_in_buf = usb_h_alloc_ep_buffer(id, aoa.host_epin | USB_DIR_IN, 64 * 2);
     }
+
+#if USB_HUB
+    usb_hub_rxreg_set(usb_id, aoa.host_epin, aoa.target_epin, &(host_dev->private_data.hub_info));
+#else
+    usb_write_rxfuncaddr(id, aoa.host_epin, host_dev->private_data.devnum);
+#endif
+
     usb_h_ep_config(id, aoa.host_epin | USB_DIR_IN, USB_ENDPOINT_XFER_BULK, 1, 0, aoa_bulk_ep_in_buf, 64);
     usb_h_ep_read_async(id, aoa.host_epin, aoa.target_epin, NULL, 0, USB_ENDPOINT_XFER_BULK, 1);
 
     if (!aoa_bulk_ep_out_buf) {
         aoa_bulk_ep_out_buf = usb_h_alloc_ep_buffer(id, aoa.host_epout | USB_DIR_OUT, 64);
     }
+
+#if USB_HUB
+    usb_hub_txreg_set(usb_id, aoa.host_epout, aoa.target_epout, &(host_dev->private_data.hub_info));
+#else
+    usb_write_txfuncaddr(id, aoa.host_epout, host_dev->private_data.devnum);
+#endif
+
     usb_h_ep_config(id, aoa.host_epout | USB_DIR_OUT, USB_ENDPOINT_XFER_BULK, 0, 0, aoa_bulk_ep_out_buf, 64);
 
     aoa_timer_id = usr_timer_add((void *)0, aoa_timer_handler, 4, 0);

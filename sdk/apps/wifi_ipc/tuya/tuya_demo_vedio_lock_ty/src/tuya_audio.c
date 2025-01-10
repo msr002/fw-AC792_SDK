@@ -137,6 +137,7 @@ VOID audio_power_en(BOOL_T status)
 #endif
 }
 #endif // 0
+
 STATIC OPERATE_RET tuya_send_audio_msg(IN CONST UINT_T msgid, IN CONST VOID *data, IN CONST UINT_T len)
 {
     OPERATE_RET op_ret = OPRT_OK;
@@ -144,14 +145,7 @@ STATIC OPERATE_RET tuya_send_audio_msg(IN CONST UINT_T msgid, IN CONST VOID *dat
     if (!&g_audio_ctrl.msg_que) {
         return OPRT_MSG_OUT_OF_LMT;
     }
-//    op_ret = GetMsgNodeNum(g_audio_ctrl.msg_que,&msg_num);
-//    if((OPRT_OK == op_ret) && (msg_num >= 20)) {
-//        PR_ERR("msg_num is out of range");
-//        return OPRT_MSG_OUT_OF_LMT;
-//    }
-//
-//    P_MSG_DATA msg_data;
-//    UINT_T cur_len = len;
+
     TY_AUDIO_CTRL_MSG *msg_data;
     msg_data = Malloc(sizeof(TY_AUDIO_CTRL_MSG) + 1);
     if (!msg_data) {
@@ -173,11 +167,8 @@ STATIC OPERATE_RET tuya_send_audio_msg(IN CONST UINT_T msgid, IN CONST VOID *dat
         msg_data->data_len = len;
     } else {
         msg_data->data = NULL;
-//        cur_len = 0;
     }
 
-//    op_ret = PostMessage(g_audio_ctrl.msg_que,msgid,msg_data,cur_len);
-//    op_ret = tal_queue_post(g_audio_ctrl.msg_que, &msg_data, 500);
     op_ret = os_q_post(&g_audio_ctrl.msg_que, msg_data);
     if (OPRT_OK != op_ret) {
         if (msg_data->data) {
@@ -191,15 +182,6 @@ STATIC OPERATE_RET tuya_send_audio_msg(IN CONST UINT_T msgid, IN CONST VOID *dat
 
     return OPRT_OK;
 }
-/* VOID tuya_print_data(UCHAR_T *pdata, UINT_T len) */
-/* { */
-/* INT_T i; */
-
-/* for (i = 0; i < len; i++) { */
-/* PR_DEBUG_RAW("%02X ", pdata[i]); */
-/* } */
-/* PR_DEBUG_RAW("\r\n"); */
-/* } */
 
 STATIC VOID tuya_audio_test_timer_cb(UINT_T timerID, PVOID_T pTimerArg)
 {
@@ -1324,12 +1306,10 @@ BOOL_T is_audio_play_open(VOID)
 STATIC VOID __audio_task(PVOID_T pArg)
 {
     OPERATE_RET op_ret = OPRT_OK;
-//    P_MSG_LIST msgListNode;
     TY_AUDIO_CTRL_MSG *msg_data;
     int msg[16] = {0,};
     while (1) {
         //阻塞等待消息
-//        op_ret = tal_queue_fetch(g_audio_ctrl.msg_que,&msg_data, TKL_QUEUE_WAIT_FROEVER);
         op_ret = os_q_pend(&g_audio_ctrl.msg_que, 0, msg);
         if (op_ret != OPRT_OK) {
             if (op_ret != OPRT_MSG_LIST_EMPTY) {
@@ -1341,7 +1321,6 @@ STATIC VOID __audio_task(PVOID_T pArg)
         switch (msg_data->cmd) {
         case MSG_START_NET_AUDIO_PLAY: {
             cbuf_clear(&g_audio_hdl.pcm_cbuff_r);
-//                audio_power_en(TRUE);
             if (g_audio_hdl.is_audio_play_open) {
                 tuya_audio_player_stop();
             }
@@ -1353,7 +1332,6 @@ STATIC VOID __audio_task(PVOID_T pArg)
         break;
         case MSG_START_LOCAL_AUDIO_PLAY: {
             cbuf_clear(&g_audio_hdl.pcm_cbuff_r);
-//                audio_power_en(TRUE);
             if (g_audio_hdl.is_audio_play_open) {
                 tuya_audio_player_stop();
             }
@@ -1367,14 +1345,12 @@ STATIC VOID __audio_task(PVOID_T pArg)
         }
         break;
         case MSG_STOP_NET_AUDIO_PLAY: {
-//                audio_power_en(FALSE);
             cbuf_clear(&g_audio_hdl.pcm_cbuff_r);
             g_audio_hdl.is_audio_play_open = FALSE;
             tuya_audio_player_stop();
         }
         break;
         case MSG_STOP_LOCAL_AUDIO_PLAY: {
-//                audio_power_en(FALSE);
             cbuf_clear(&g_audio_hdl.pcm_cbuff_r);
             g_audio_hdl.is_audio_play_open = FALSE;
             tuya_audio_player_stop();
@@ -1396,20 +1372,12 @@ STATIC VOID __audio_task(PVOID_T pArg)
             cbuf_clear(&g_audio_hdl.pcm_cbuff_w);
             g_audio_hdl.is_audio_record_open = FALSE;
             tuya_audio_recoder_stop();
-//                if(fp){
-//                    int ret = fclose(fp);
-//                    if(ret==0)
-//                    {
-//                        PR_DEBUG("fclose succ");
-//                    }
-//                }
         }
         break;
 
         case MSG_START_AUDIO_TEST: {
             cbuf_clear(&g_audio_hdl.pcm_cbuff_r);
             cbuf_clear(&g_audio_hdl.pcm_cbuff_w);
-//                audio_power_en(TRUE);
             if (g_audio_hdl.is_audio_play_open) {
                 tuya_audio_player_stop();
             }
@@ -1431,7 +1399,6 @@ STATIC VOID __audio_task(PVOID_T pArg)
             cbuf_clear(&g_audio_hdl.pcm_cbuff_w);
             g_audio_hdl.is_audio_record_open = FALSE;
             tuya_audio_recoder_stop();
-//                audio_power_en(FALSE);
             g_audio_hdl.is_audio_play_open = FALSE;
             tuya_audio_player_stop();
 
@@ -1444,7 +1411,6 @@ STATIC VOID __audio_task(PVOID_T pArg)
                 tuya_audio_recoder_stop();
             }
             g_audio_hdl.is_audio_record_open = true;
-//                audio_power_en(TRUE);
             audio_recoder_test_new_init();
             audio_test_recorder_first_play_next = MSG_AUDIO_RECORDER_FIRST_PLAY_NEXT_TEST_RECORDER_START;
             tuya_audio_test_timer_init_and_start(audio_test_recorder_first_play_times);
@@ -1455,7 +1421,6 @@ STATIC VOID __audio_task(PVOID_T pArg)
             g_audio_hdl.is_audio_record_open = FALSE;
             tuya_audio_recoder_stop();
             g_audio_hdl.is_audio_play_open = TRUE;
-//                audio_power_en(TRUE);
             audio_player_test_new_init();
             audio_test_recorder_first_play_next = MSG_AUDIO_RECORDER_FIRST_PLAY_NEXT_TEST_PLAY_START;
             tuya_audio_test_timer_init_and_start(audio_test_recorder_first_play_times);
@@ -1463,7 +1428,6 @@ STATIC VOID __audio_task(PVOID_T pArg)
         break;
 
         case MSG_AUDIO_RECORDER_FIRST_PLAY_NEXT_STOP_PLAY_TEST: {
-//                audio_power_en(FALSE);
             g_audio_hdl.is_audio_play_open = FALSE;
             tuya_audio_player_stop();
             audio_test_recorder_first_play_next = MSG_AUDIO_RECORDER_FIRST_PLAY_NEXT_TEST_STOP;
@@ -1471,10 +1435,6 @@ STATIC VOID __audio_task(PVOID_T pArg)
         break;
 
         }
-//        if(msgListNode->msg.pMsgData) {
-//            Free(msgListNode->msg.pMsgData);
-//        }
-//        DelAndFreeMsgNodeFromQueue(g_audio_ctrl.msg_que,msgListNode);
         if (msg_data) {
             if (msg_data->data) {
                 tal_free(msg_data->data);
@@ -1560,7 +1520,7 @@ VOID tuya_usb_audio_start_record(VOID)
         return;
     }
     // if(!audio_power_off) {
-    // usb_audio_resume_player(audio_id);
+    /* usb_audio_resume_player(audio_id); */
     // }
     PR_NOTICE("tuya_usb_audio_start_record");
 }
@@ -1573,7 +1533,7 @@ VOID tuya_usb_audio_stop_record(VOID)
         return;
     }
     // if(!audio_power_off) {
-    // usb_audio_pause_player(audio_id);
+    /* usb_audio_pause_player(audio_id); */
     // }
 
     PR_NOTICE("tuya_usb_audio_stop_record");
@@ -1587,9 +1547,9 @@ VOID tuya_usb_audio_start_play_test(VOID)
         return;
     }
 
-    if (!audio_power_off) {
-        usb_audio_resume_recorder(audio_id);
-    }
+    /* if (!audio_power_off) { */
+    /* usb_audio_resume_recorder(audio_id); */
+    /* } */
 
 }
 
@@ -1600,9 +1560,9 @@ VOID tuya_usb_audio_stop_play_test(VOID)
         PR_ERR("audio not online!");
         return;
     }
-    if (!audio_power_off) {
-        usb_audio_pause_recorder(audio_id);
-    }
+    /* if (!audio_power_off) { */
+    /* usb_audio_pause_recorder(audio_id); */
+    /* } */
 
 }
 
@@ -1613,9 +1573,9 @@ VOID tuya_usb_audio_start_record_test(VOID)
         PR_ERR("audio not online!");
         return;
     }
-    if (!audio_power_off) {
-        usb_audio_resume_player(audio_id);
-    }
+    /* if (!audio_power_off) { */
+    /* usb_audio_resume_player(audio_id); */
+    /* } */
 }
 
 VOID tuya_usb_audio_stop_record_test(VOID)
@@ -1625,9 +1585,9 @@ VOID tuya_usb_audio_stop_record_test(VOID)
         PR_ERR("audio not online!");
         return;
     }
-    if (!audio_power_off) {
-        usb_audio_pause_player(audio_id);
-    }
+    /* if (!audio_power_off) { */
+    /* usb_audio_pause_player(audio_id); */
+    /* } */
 }
 STATIC VOID __audio_task(PVOID_T pArg)
 {
@@ -1906,26 +1866,29 @@ BOOL_T is_audio_play_open(VOID)
 INT_T ty_usb_audio_play_put_buf_test(VOID *ptr, UINT_T len)
 {
     cbuffer_t *cbuf = &g_audio_hdl.pcm_cbuff_r;
-    UINT_T cbuf_len = 0;
-    UINT_T rlen = 0;
-    UINT_T c_rlen = 0;
-
-    do {
-        if (FALSE == g_audio_hdl.is_audio_play_open) {
-            rlen = 0;
-            break;
+    STATIC INT_T last_time_ms = 0;
+    STATIC INT_T count = 0;
+    STATIC INT_T fps = 0;
+    INT_T now_time_ms = 0;
+    if (FALSE == g_audio_hdl.is_audio_record_open) {
+        return len;
+    }
+    if (0 == cbuf_write(cbuf, ptr, len)) {
+        //PR_NOTICE("cbuf_write size=%d full",len);
+    } else {
+        PR_DEBUG("w %d", len);
+        fps++;
+        count += len;
+        now_time_ms = tuya_hal_get_systemtickcount();
+        if (now_time_ms - 100 > last_time_ms) {
+            //PR_NOTICE("recorder fps %d size=%d  len =%d",fps,len,count);
+            last_time_ms = tuya_hal_get_systemtickcount();
+            fps = 0;
+            count = 0;
         }
-        cbuf_len = cbuf_get_data_size(cbuf);
-        rlen = cbuf_len > len ? len : cbuf_len;
-        c_rlen = cbuf_read(cbuf, ptr, rlen);
-        if (c_rlen > 0) {
-            //user_printf("c_rlen=%d rlen=%d cbuf_len=%d len=%d",c_rlen,rlen,cbuf_len,len);
-            break;
-        }
-        tuya_hal_semaphore_waittimeout(g_audio_ctrl.r_sem, TY_AUDIO_WAIT_TIMEOUT);
-    } while (1);
-
-    return rlen;
+    }
+    tuya_hal_semaphore_post(g_audio_ctrl.r_sem);
+    return len;
 }
 INT_T ty_usb_audio_play_put_buf_test_new(VOID *ptr, UINT_T len)
 {
@@ -1963,29 +1926,25 @@ INT_T ty_usb_audio_play_put_buf_test_new(VOID *ptr, UINT_T len)
 INT_T ty_usb_audio_record_get_buf_test(VOID *ptr, UINT_T len)
 {
     cbuffer_t *cbuf = &g_audio_hdl.pcm_cbuff_r;
-    STATIC INT_T last_time_ms = 0;
-    STATIC INT_T count = 0;
-    STATIC INT_T fps = 0;
-    INT_T now_time_ms = 0;
-    if (FALSE == g_audio_hdl.is_audio_record_open) {
-        return len;
-    }
-    if (0 == cbuf_write(cbuf, ptr, len)) {
-        //PR_NOTICE("cbuf_write size=%d full",len);
-    } else {
-        PR_DEBUG("w %d", len);
-        fps++;
-        count += len;
-        now_time_ms = tuya_hal_get_systemtickcount();
-        if (now_time_ms - 100 > last_time_ms) {
-            //PR_NOTICE("recorder fps %d size=%d  len =%d",fps,len,count);
-            last_time_ms = tuya_hal_get_systemtickcount();
-            fps = 0;
-            count = 0;
-        }
-    }
+    UINT_T cbuf_len = 0;
+    UINT_T rlen = 0;
+    UINT_T c_rlen = 0;
 
-    tuya_hal_semaphore_post(g_audio_ctrl.r_sem);
+    do {
+        if (FALSE == g_audio_hdl.is_audio_play_open) {
+            rlen = 0;
+            break;
+        }
+        cbuf_len = cbuf_get_data_size(cbuf);
+        rlen = cbuf_len > len ? len : cbuf_len;
+        c_rlen = cbuf_read(cbuf, ptr, rlen);
+        if (c_rlen > 0) {
+            //user_printf("c_rlen=%d rlen=%d cbuf_len=%d len=%d",c_rlen,rlen,cbuf_len,len);
+            break;
+        }
+        tuya_hal_semaphore_waittimeout(g_audio_ctrl.r_sem, TY_AUDIO_WAIT_TIMEOUT);
+    } while (1);
+
     return len;
 }
 
@@ -2143,6 +2102,7 @@ STATIC INT_T usb_host_audio_play_put_buf_test(CONST usb_dev usb_id, VOID *ptr, U
     case TYPE_TEST: {
         send_len = ty_usb_audio_play_put_buf_test(ptr, len);
     }
+    break;
     case TYPE_TEST_NEW: {
         send_len = ty_usb_audio_play_put_buf_test_new(ptr, len);
     }
@@ -2167,6 +2127,7 @@ INT_T usb_host_audio_record_get_buf_test(CONST usb_dev usb_id, VOID *ptr, UINT_T
     case TYPE_TEST: {
         send_len = ty_usb_audio_record_get_buf_test(ptr, len);
     }
+    break;
     case TYPE_TEST_NEW: {
         send_len = ty_usb_audio_record_get_buf_test_new(ptr, len);
     }

@@ -111,7 +111,7 @@ void user_net_video_rec_take_photo_cb(char *buf, int len)//必须打开user_net_
         put_buf(buf, 32);
         /*
         //目录1写卡例子
-        FILE *fd = fopen(CAMERA0_CAP_PATH"IMG_***.jpg","w+");
+        FILE *fd = fopen(CAMERA0_CAP_PATH"IMG_***.JPG","w+");
         if (fd) {
         	fwrite(fd,buf,len);
         	fclose(fd);
@@ -188,6 +188,16 @@ void *get_video_rec1_handler(void)
     return (void *)__this->video_rec2;
 #endif
     return NULL;
+}
+#ifdef CONFIG_VIDEO2_ENABLE
+void *get_video_rec2_handler(void)
+{
+    return (void *)__this->video_rec2;
+}
+#endif // CONFIG_VIDEO1_ENABLE
+void get_video_state_func()
+{
+    printf("============= __this->state:%d\n", __this->state);
 }
 
 int net_video_rec_state(void)//获取录像状态，返回值大于0（1280/640）成功，失败 0
@@ -425,38 +435,25 @@ void net_video_rec_status_notify(void)
 int net_video_rec_event_notify(void)
 {
     char buf[128];
-    u32 res = db_select("res2");
-#ifdef CONFIG_VIDEO1_ENABLE
-    if (dev_online("video1.*"))
-#else
-#ifdef CONFIG_VIDEO2_ENABLE
-    if (dev_online("uvc"))
-#else
-    if (0)
-#endif
-#endif
-    {
-        switch (res) {
-        case VIDEO_RES_1080P:
-            sprintf(buf, "status:1,h:%d,w:%d,fps:%d,rate:%d,format:1", 720, 1280, net_video_rec_get_fps(), net_video_rec_get_audio_rate());
-            break;
-        case VIDEO_RES_720P:
-            sprintf(buf, "status:1,h:%d,w:%d,fps:%d,rate:%d,format:1", 480, 640, net_video_rec_get_fps(), net_video_rec_get_audio_rate());
-            break;
-        case VIDEO_RES_VGA:
-            sprintf(buf, "status:1,h:%d,w:%d,fps:%d,rate:%d,format:1", 480, 640, net_video_rec_get_fps(), net_video_rec_get_audio_rate());
-            break;
-        default:
-            sprintf(buf, "status:1,h:%d,w:%d,fps:%d,rate:%d,format:1", 480, 640, net_video_rec_get_fps(), net_video_rec_get_audio_rate());
-            break;
-        }
-        CTP_CMD_COMBINED(NULL, CTP_NO_ERR, "PULL_VIDEO_STATUS", "NOTIFY", buf);
+    if (dev_online("uvc")) {
+        sprintf(buf, "status:1,h:%d,w:%d,fps:%d,rate:%d,format:1", 480, 640, net_video_rec_get_fps(), net_video_rec_get_audio_rate());
+        CTP_CMD_COMBINED(NULL, CTP_NO_ERR, "THIRD_VIDEO_STATUS", "NOTIFY", buf);
     } else {
         strcpy(buf, "status:0");
-        CTP_CMD_COMBINED(NULL, CTP_NO_ERR, "PULL_VIDEO_STATUS", "NOTIFY", buf);
+        CTP_CMD_COMBINED(NULL, CTP_NO_ERR, "THIRD_VIDEO_STATUS", "NOTIFY", buf);
     }
     return 0;
 }
+
+#ifdef CONFIG_VIDEO2_ENABLE
+int net_video2_rec_event_notify(void)
+{
+    char buf[128];
+    sprintf(buf, "status:1,h:%d,w:%d,fps:%d,rate:%d,format:0", 480, 640, net_video_rec_get_fps(), net_video_rec_get_audio_rate());
+    CTP_CMD_COMBINED(NULL, CTP_NO_ERR, "THIRD_VIDEO_STATUS", "NOTIFY", buf);
+    return 0;
+}
+#endif // CONFIG_VIDEO2_ENABLE
 int net_video_rec_event_stop(void)
 {
     strm_video_rec_close();
@@ -532,7 +529,7 @@ static void video_rec_get_path(struct intent *it)
         it->data = file_str;
     } else if (!strcmp(it->data, "video_rec2") && __this->file[2] != NULL) {
         fget_name((FILE *)__this->file[2], buf, sizeof(buf));
-        sprintf(file_str, CONFIG_REC_PATH_1"%s", buf);
+        sprintf(file_str, CONFIG_REC_PATH_2"%s", buf);
         it->data = file_str;
     } else
 #endif
@@ -653,19 +650,20 @@ static int net_video_rec_take_photo(void (*callback)(char *buffer, int len))
     /*不开实时流不能拍照*/
     if (!(__this_strm->state == VIDREC_STA_START)    &&
         !(__this_net->net_state == VIDREC_STA_START) &&
-        !(__this_net->net_state1 == VIDREC_STA_START)) {
+        !(__this_net->net_state1 == VIDREC_STA_START) &&
+        !(__this_net->net_state2 == VIDREC_STA_START)) {
         goto exit;
     }
 
     __this_net->cap_image = FALSE;
     __this_strm->cap_image = FALSE;
 
-    if ((__this_net->net_state == VIDREC_STA_START || __this_net->net_state1 == VIDREC_STA_START)) {
+    if ((__this_net->net_state == VIDREC_STA_START || __this_net->net_state1 == VIDREC_STA_START || __this_net->net_state2 == VIDREC_STA_START)) {
         printf("%s   %d\n", __func__, __LINE__);
 
-        server = !__this_net->video_id ?  __this_net->net_video_rec :  __this_net->net_video_rec1;
-        req.icap.path = !__this_net->video_id ? CONFIG_REC_PATH_0"IMG_****.jpg" : CONFIG_REC_PATH_1"IMG_****.jpg";
-        path = !__this_net->video_id ? CONFIG_REC_PATH_0 : CONFIG_REC_PATH_1;
+        server = (__this_net->video_id == 0) ?  __this_net->net_video_rec : ((__this_net->video_id == 1) ? __this_net->net_video_rec1 : __this_net->net_video_rec2) ;
+        req.icap.path = (__this_net->video_id == 0) ? CONFIG_REC_PATH_0"IMG_****.JPG" : ((__this_net->video_id == 1) ? CONFIG_REC_PATH_1"IMG_****.JPG" : CONFIG_REC_PATH_2"IMG_****.JPG");
+        path = (__this_net->video_id == 0) ? CONFIG_REC_PATH_0 : ((__this_net->video_id == 1) ? CONFIG_REC_PATH_1 : CONFIG_REC_PATH_2) ;
         req.icap.width =  __this_net->net_videoreq[__this_net->video_id].rec.width;
         req.icap.height = __this_net->net_videoreq[__this_net->video_id].rec.height;
         req.icap.image_state = 1;
@@ -673,16 +671,16 @@ static int net_video_rec_take_photo(void (*callback)(char *buffer, int len))
         printf("%s   %d\n", __func__, __LINE__);
     } else if (__this_strm->state == VIDREC_STA_START) {
         printf("%s   %d\n", __func__, __LINE__);
-        req.icap.path = !__this_strm->video_id ? CONFIG_REC_PATH_0"IMG_****.jpg" : CONFIG_REC_PATH_1"IMG_****.jpg";
-        path = !__this_strm->video_id ? CONFIG_REC_PATH_0 : CONFIG_REC_PATH_1;
+        req.icap.path = (__this_strm->video_id == 0) ? CONFIG_REC_PATH_0"IMG_****.JPG" : ((__this_strm->video_id == 1) ? CONFIG_REC_PATH_1"IMG_****.JPG" : CONFIG_REC_PATH_2"IMG_****.JPG");
+        path = (__this_strm->video_id == 0) ? CONFIG_REC_PATH_0 : ((__this_strm->video_id == 1) ? CONFIG_REC_PATH_1 : CONFIG_REC_PATH_2);
         req.icap.width = __this_strm->width;
         req.icap.height = __this_strm->height;
-        server = !__this_strm->video_id ?  __this_strm->video_rec0 :  __this_strm->video_rec1;
+        server = (__this_strm->video_id == 0) ?  __this_strm->video_rec0 :  __this_strm->video_rec1;
         printf("%s   %d\n", __func__, __LINE__);
     } else {
         /*目前不使用*/
         printf("%s   %d\n", __func__, __LINE__);
-        req.icap.path = __this->video_rec0 ? CONFIG_REC_PATH_0"IMG_****.jpg" : CONFIG_REC_PATH_1"IMG_****.jpg";
+        req.icap.path = __this->video_rec0 ? CONFIG_REC_PATH_0"IMG_****.JPG" : CONFIG_REC_PATH_1"IMG_****.JPG";
         path = __this->video_rec0 ? CONFIG_REC_PATH_0 : CONFIG_REC_PATH_1;
         req.icap.width = 1280;
         req.icap.height = 720;
@@ -780,8 +778,8 @@ static void rt_stream_cmd_analysis(u8 chl,  u32 add)
     char *value;
     struct rt_stream_app_info *info = (struct rt_stream_app_info *)add;
 
-    __this_net->net_videoreq[chl].rec.width = info->width;
-    __this_net->net_videoreq[chl].rec.height = info->height;
+    __this_net->net_videoreq[chl].rec.width = 640;
+    __this_net->net_videoreq[chl].rec.height = 480;
     __this_net->net_videoreq[chl].rec.format = 0;
     __this_net->net_videoreq[chl].rec.fps = net_video_rec_get_fps();
     __this_net->net_videoreq[chl].rec.real_fps = net_video_rec_get_fps();
@@ -1083,7 +1081,7 @@ static int net_video_rec1_start()
     __this_net->video_id = 1;
 #endif
 
-#ifdef CONFIG_VIDEO2_ENABLE
+#ifdef CONFIG_VIDEO3_ENABLE
     char name[12];
     void *uvc_fd;
     if (__this->video_rec2) {
@@ -1198,11 +1196,11 @@ static int net_video_rec1_start()
 #if (defined CONFIG_NET_UDP_ENABLE)
     sprintf(req.rec.net_par.netpath, "udp://%s:%d"
             , inet_ntoa(addr->sin_addr.s_addr)
-            , _BEHIND_PORT);
+            , _THIRD_PORT);
 #elif (defined CONFIG_NET_TCP_ENABLE)
     sprintf(req.rec.net_par.netpath, "tcp://%s:%d"
             , inet_ntoa(addr->sin_addr.s_addr)
-            , _BEHIND_PORT);
+            , _THIRD_PORT);
 #elif (defined CONFIG_NET_USR_ENABLE)
     sprintf(req.rec.net_par.netpath, "usr://%s", NET_USR_PATH);
 #endif
@@ -1273,7 +1271,238 @@ static int net_video_rec1_stop(u8 close)
 
     return 0;
 }
+#ifdef CONFIG_VIDEO2_ENABLE
+static int net_video_rec2_start()
+{
+    int err;
+    union video_req req = {0};
+    struct video_text_osd text_osd;
+    struct video_graph_osd graph_osd;
+    u16 max_one_line_strnum;
+    u16 osd_line_num;
+    u16 osd_max_heigh;
 
+    req.rec.width 	= __this_net->net_videoreq[1].rec.width;
+    req.rec.height 	= __this_net->net_videoreq[1].rec.height;
+
+// #ifdef CONFIG_VIDEO1_ENABLE
+//     puts("start_video_rec1 \n");
+
+//     if (__this->video_rec1) {
+//         __this_net->net_video_rec1 = __this->video_rec1;
+//     }
+//     if (!__this_net->net_video_rec1) {
+//         __this_net->net_video_rec1 = server_open("video_server", "video1.1");
+//         if (!__this_net->net_video_rec1) {
+//             return VREC_ERR_V1_SERVER_OPEN;
+//         }
+//         server_register_event_handler(__this_net->net_video_rec1, (void *)1, net_rec_dev_server_event_handler);
+//     }
+//     req.rec.camera_type = VIDEO_CAMERA_NORMAL;
+//     req.rec.file    = __this->file[1];
+//     req.rec.IP_interval = 0;
+//     req.rec.online  = 1;
+//     __this_net->video_id = 1;
+// #endif
+
+#ifdef CONFIG_VIDEO2_ENABLE
+    char name[12];
+    void *uvc_fd;
+    if (__this->video_rec2) {
+        __this_net->net_video_rec2 = __this->video_rec2;
+    }
+
+    /* struct uvc_capability uvc_cap; */
+
+    puts("start_video_rec2 \n");
+    if (!__this_net->net_video_rec2) {
+        sprintf(name, "video2.%d", __this->uvc_id);
+        __this_net->net_video_rec2 = server_open("video_server", name);
+        if (!__this_net->net_video_rec2) {
+            return -EINVAL;
+        }
+        server_register_event_handler(__this_net->net_video_rec2, (void *)1, net_rec_dev_server_event_handler);
+    }
+    req.rec.camera_type = VIDEO_CAMERA_UVC;
+#if THREE_WAY_ENABLE
+    req.rec.three_way_type = VIDEO_THREE_WAY_JPEG;
+#else
+    req.rec.three_way_type = 0;
+#endif
+
+    req.rec.width 	= 640;
+    req.rec.height 	= 480;
+    __this->uvc_width = 640;
+    __this->uvc_height = 480;
+    req.rec.uvc_id = __this->uvc_id;
+    req.rec.file    = __this->file[2];
+    __this_net->video_id = 2;
+    req.rec.online  = 0;
+#endif
+    /*
+     *通道号，分辨率，封装格式，写卡的路径
+     */
+    req.rec.channel = __this_net->channel = 2;
+    req.rec.format  = USER_VIDEO_FMT_AVI;
+    req.rec.state 	= VIDEO_STATE_START;
+
+    /*
+     *帧率为0表示使用摄像头的帧率
+     */
+    req.rec.quality     = VIDEO_MID_Q;
+    req.rec.fps         = 0;
+    req.rec.real_fps    = net_video_rec_get_fps();
+
+    /*
+     *采样率，通道数，录像音量，音频使用的循环BUF,录不录声音
+     */
+    req.rec.audio.sample_rate = VIDEO_REC_AUDIO_SAMPLE_RATE;
+    req.rec.audio.channel   = 1;
+    req.rec.audio.volume    = __this_net->net_video2_art_on ? AUDIO_VOLUME : 0;
+    req.rec.audio.buf = __this_net->audio_buf;
+    req.rec.audio.buf_len = NET_AUDIO_BUF_SIZE;
+    req.rec.pkg_mute.aud_mute = !db_select("mic");
+
+    /*
+     *码率，I帧和P帧比例，必须是偶数（当录MOV的时候才有效）,
+     *roio_xy :值表示宏块坐标， [6:0]左边x坐标 ，[14:8]右边x坐标，[22:16]上边y坐标，[30:24]下边y坐标,写0表示1个宏块有效
+     *roio_ratio : 区域比例系数
+     */
+    req.rec.abr_kbps = net_video_rec_get_abr(req.rec.width);
+
+    /*
+     * osd 相关的参数，注意坐标位置，x要64对齐，y要16对齐,底下例子是根据图像大小偏移到右下
+     */
+    /* memcpy(video_rec_osd_buf, osd_str_buf, strlen(osd_str_buf));  */
+    text_osd.font_w = 16;
+    text_osd.font_h = 32;
+    max_one_line_strnum = strlen(video_rec_osd_buf);//21;
+    osd_line_num = 1;
+    /* if (db_select("num")) { */
+    /* osd_line_num = 2; */
+    /* } */
+    osd_max_heigh = (req.rec.height == 1088) ? 1080 : req.rec.height ;
+    text_osd.x = (req.rec.width - max_one_line_strnum * text_osd.font_w) / 64 * 64;
+    text_osd.y = (osd_max_heigh - text_osd.font_h * osd_line_num) / 16 * 16;
+    /*     text_osd.color[0] = 0xe20095; */
+    /* text_osd.bit_mode = 1; */
+    text_osd.color[0] = 0x057d88;
+    text_osd.color[1] = 0xe20095;
+    text_osd.color[2] = 0xe20095;
+    text_osd.bit_mode = 2;
+    text_osd.text_format = video_rec_osd_buf;
+    text_osd.font_matrix_table = osd_str_total;
+    /*     text_osd.font_matrix_base = osd_str_matrix; */
+    /* text_osd.font_matrix_len = sizeof(osd_str_matrix); */
+    text_osd.font_matrix_base = osd2_str_matrix;
+    text_osd.font_matrix_len = sizeof(osd2_str_matrix);
+
+
+    text_osd.direction = 1;
+
+    if (db_select("dat")) {
+        req.rec.text_osd = &text_osd;
+        req.rec.graph_osd = NULL;//&graph_osd;
+    }
+
+    req.rec.buf = __this_net->net_v0_fbuf;
+    req.rec.buf_len = NET_VREC0_FBUF_SIZE;
+
+    /* req.rec.cycle_time = 3 * 60; */
+    req.rec.cycle_time = db_select("cyc");
+    if (req.rec.cycle_time == 0) {
+        req.rec.cycle_time = 5;
+    }
+    req.rec.cycle_time = req.rec.cycle_time * 60;
+
+
+
+    struct sockaddr_in *addr = ctp_srv_get_cli_addr(__this_net->priv);
+    if (!addr) {
+        addr = cdp_srv_get_cli_addr(__this_net->priv);
+    }
+#if (defined CONFIG_NET_UDP_ENABLE)
+    sprintf(req.rec.net_par.netpath, "udp://%s:%d"
+            , inet_ntoa(addr->sin_addr.s_addr)
+            , _BEHIND_PORT);
+#elif (defined CONFIG_NET_TCP_ENABLE)
+    sprintf(req.rec.net_par.netpath, "tcp://%s:%d"
+            , inet_ntoa(addr->sin_addr.s_addr)
+            , _BEHIND_PORT);
+#elif (defined CONFIG_NET_USR_ENABLE)
+    sprintf(req.rec.net_par.netpath, "usr://%s", NET_USR_PATH);
+#endif
+    printf("\n @@@@@@ path = %s\n", req.rec.net_par.netpath);
+    //数据外引，用于网络
+    req.rec.target = VIDEO_TO_OUT;
+    req.rec.out.path = req.rec.net_par.netpath;
+    req.rec.out.arg  = NULL ;
+    req.rec.out.open = stream_open;
+    req.rec.out.send = stream_write;
+    req.rec.out.close = stream_close;
+
+#if CONFIG_NET_VDIEO_GAP_ENABLE
+    req.rec.tlp_time = db_select("gap");
+    if (req.rec.tlp_time) {
+        req.rec.real_fps = 1000 / req.rec.tlp_time;
+        req.rec.pkg_fps = video_rec_get_fps();
+
+        //audio
+        req.rec.audio.sample_rate = 0;
+        req.rec.audio.channel 	= 0;
+        req.rec.audio.volume    = 0;
+        req.rec.audio.buf = 0;
+        req.rec.audio.buf_len = 0;
+    }
+#endif
+
+    err = server_request(__this_net->net_video_rec2, VIDEO_REQ_REC, &req);
+    if (err != 0) {
+        puts("\n\n\nstart rec2 err\n\n\n");
+        return VREC_ERR_V1_SERVER_OPEN;
+    }
+
+    return 0;
+}
+
+
+#endif
+
+
+#ifdef CONFIG_VIDEO2_ENABLE
+static int net_video_rec2_stop(u8 close)
+{
+    union video_req req = {0};
+    int err;
+
+#if (defined CONFIG_VIDEO2_ENABLE || defined CONFIG_VIDEO3_ENABLE)
+    __this_net->net_state2 = VIDREC_STA_STOPING;
+
+    if (__this_net->net_video_rec2) {
+        req.rec.channel = 2;
+        req.rec.state = VIDEO_STATE_STOP;
+        err = server_request(__this_net->net_video_rec2, VIDEO_REQ_REC, &req);
+
+        if (err != 0) {
+            printf("\nstop rec2 err 0x%x\n", err);
+            return VREC_ERR_V3_REQ_STOP;
+        }
+        if (close) {
+            server_close(__this_net->net_video_rec2);
+            __this_net->net_video_rec2 = NULL;
+        }
+    }
+
+    puts("net_video_rec2_stop\n");
+
+    __this_net->net_state2 = VIDREC_STA_STOP;
+    __this_net->video_id = 0;
+#endif
+
+    return 0;
+}
+
+#endif
 static void net_video_rec_free_buf(void)
 {
     if (__this_net->net_v0_fbuf) {
@@ -1390,7 +1619,51 @@ __start_err1:
 
     return -1;
 }
+#ifdef CONFIG_VIDEO2_ENABLE
+static int net_video2_rec_start(struct intent *it)
+{
+    int err = 0;
 
+
+    if (!__this_net->net_v0_fbuf) {
+        __this_net->net_v0_fbuf = malloc(NET_VREC0_FBUF_SIZE);
+
+        if (!__this_net->net_v0_fbuf) {
+            puts("malloc v1_buf err\n\n");
+            return -1;
+        }
+    }
+    if (!__this_net->audio_buf) {
+        __this_net->audio_buf = malloc(NET_AUDIO_BUF_SIZE);
+
+        if (!__this_net->audio_buf) {
+            free(__this_net->net_v0_fbuf);
+            return -1;
+        }
+    }
+    if (__this->video_online[2] || __this->video_online[3]) {
+        __this_net->net_state2 = VIDREC_STA_STARTING;
+        err = net_video_rec2_start();
+        if (err) {
+            goto __start_err2;
+        }
+
+        __this_net->net_state2 = VIDREC_STA_START;
+    }
+
+    return 0;
+
+__start_err2:
+    puts("\nstart net_video_rec2 err\n");
+    err = net_video_rec2_stop(0);
+    if (err) {
+        printf("\nstop net_video_rec2 wrong2 %x\n", err);
+    }
+
+    return -1;
+}
+
+#endif
 static int net_video_rec_start(u8 mark)
 {
     int err;
@@ -1446,8 +1719,30 @@ static int net_video_rec_start(u8 mark)
 
 #endif
 
+#if (defined CONFIG_VIDEO2_ENABLE || defined CONFIG_VIDEO3_ENABLE)
+
+    if ((__this_net->net_video2_art_on || __this_net->net_video2_vrt_on)
+        && (__this_net->net_state2 != VIDREC_STA_START))	{
+        if (__this->video_online[2] || __this->video_online[3]) {
+            puts("\nnet video rec2 start \n");
+            err = net_video_rec2_start();
+            if (err) {
+                goto __start_err2;
+            }
+            __this_net->net_state2 = VIDREC_STA_START;
+        }
+    }
+
+#endif
     return 0;
 #if (defined CONFIG_VIDEO1_ENABLE || defined CONFIG_VIDEO2_ENABLE)
+__start_err2:
+    puts("\nstart2 err\n");
+    err = net_video_rec2_stop(0);
+
+    if (err) {
+        printf("\nstart wrong2 %x\n", err);
+    }
 __start_err1:
     puts("\nstart1 err\n");
     err = net_video_rec1_stop(0);
@@ -1507,6 +1802,15 @@ int net_video_rec_stop(u8 close)
 #endif
 
     /* __this_net->is_open = FALSE; */
+#if (defined CONFIG_VIDEO2_ENABLE)
+    if (__this_net->net_state2 == VIDREC_STA_START) {
+        __this_net->net_state2 = VIDREC_STA_STOPING;
+        err = net_video_rec2_stop(close);
+        if (err) {
+            puts("\n net stop2 err\n");
+        }
+    }
+#endif
     return err;
 }
 
@@ -1548,6 +1852,7 @@ static int  net_rt_video0_stop(struct intent *it)
     if (!__this_net->is_open) {
         return 0;
     }
+    printf("========================%s  %d\n", __func__, __LINE__);
     __this_net->is_open = FALSE;
 #ifdef CONFIG_VIDEO0_ENABLE
     u8 mark = *((u8 *)it->data);
@@ -1622,7 +1927,69 @@ static int  net_rt_video1_stop(struct intent *it)
     return  ret;
 }
 
+#ifdef CONFIG_VIDEO2_ENABLE
+static int net_rt_video2_open(struct intent *it)
+{
 
+    int ret = 0;
+    printf("=============__this_net->is_open:%d", __this_net->is_open);
+    if (__this_net->is_open) {
+        return 0;
+    }
+    __this_net->is_open = TRUE;
+    if (it) {
+        u8 mark = *((u8 *)it->data);
+        __this_net->net_video2_art_on = (mark | (mark >> 1)) & 0x01;
+        __this_net->net_video2_vrt_on = (mark >> 1) & 0x01 ;
+        rt_stream_cmd_analysis(2, it->exdata);
+    } else {
+        if (__this_net->net_video2_art_on == 0 && __this_net->net_video2_vrt_on == 0) {
+            puts("\nvideo2 rt not open \n");
+            goto exit;
+        }
+    }
+    if (__this_net->net_state2 == VIDREC_STA_STOP || __this_net->net_state2 == VIDREC_STA_IDLE) {
+        puts("\n net rt video2 open\n");
+        ret = net_video2_rec_start(it);
+        if (ret) {
+            __this_net->is_open = FALSE;//启动失败允许重新打开
+        }
+    }
+exit:
+    return ret;
+}
+
+static int  net_rt_video2_stop(struct intent *it)
+{
+    int ret = 0;
+    if (!__this_net->is_open) {
+        return 0;
+    }
+    __this_net->is_open = FALSE;
+    u8 mark = *((u8 *)it->data);
+    __this_net->net_video2_art_on = 0;
+    __this_net->net_video2_vrt_on = 0 ;
+    if (__this_net->net_state2 == VIDREC_STA_START) {
+        ret = net_video_rec2_stop(0);
+        if (ret) {
+            __this_net->is_open = TRUE;
+            printf("net_video_rec2_stop fail \n\n");
+        } else {
+            printf("net_video_rec2_stop suc \n\n");
+        }
+    }
+    return  ret;
+}
+#endif // CONFIG_VIDEO2_ENABLE
+void net_rec_close(void)
+{
+#if NET_REC_FORMAT
+    NET_VIDEO_ERR(strm_video_rec_close());
+    NET_VIDEO_ERR(net_video_rec_stop(0));
+    __this_net->fbuf_fcnt = 0;
+    __this_net->fbuf_ffil = 0;
+#endif
+}
 /*
  * 录像app的录像控制入口, 根据当前状态调用相应的函数
  */
@@ -1711,6 +2078,7 @@ static int net_video_rec_control(void *_run_cmd)
 /*
  *录像的状态机,进入录像app后就是跑这里
  */
+extern void in_app_stop_display(u8 state);
 static int net_video_rec_state_machine(struct application *app, enum app_state state, struct intent *it)
 {
     int err = 0;
@@ -1730,7 +2098,7 @@ static int net_video_rec_state_machine(struct application *app, enum app_state s
 #endif
 
 #ifdef CONFIG_VIDEO1_ENABLE
-        __this->video_online[1] = dev_online("video1.*");
+        __this->video_online[1] = 1;//dev_online("video1.*");
 #endif
 
 #ifdef CONFIG_VIDEO2_ENABLE
@@ -1762,13 +2130,10 @@ static int net_video_rec_state_machine(struct application *app, enum app_state s
             /*printf("----ACTION_VIDEO_REC_GET_PATHL-----\n\n");*/
             video_rec_get_path(it);
         case ACTION_VIDEO0_OPEN_RT_STREAM:
-
+            in_app_stop_display(0);
             printf("----ACTION_VIDEO0_OPEN_RT_STREAM-----\n\n");
             __this_net->fbuf_fcnt = 0;
             __this_net->fbuf_ffil = 0;
-
-
-
             err = net_rt_video0_open(it);
             sprintf(buf, "format:%d,w:%d,h:%d,fps:%d,rate:%d"
                     , __this_net->net_videoreq[0].rec.format
@@ -1789,9 +2154,11 @@ static int net_video_rec_state_machine(struct application *app, enum app_state s
             break;
 
         case ACTION_VIDEO1_OPEN_RT_STREAM:
+            in_app_stop_display(1);
             printf("----ACTION_VIDEO1_OPEN_RT_STREAM----\n\n");
             __this_net->fbuf_fcnt = 0;
             __this_net->fbuf_ffil = 0;
+
             err = net_rt_video1_open(it);
             sprintf(buf, "format:%d,w:%d,h:%d,fps:%d,rate:%d"
                     , __this_net->net_videoreq[1].rec.format
@@ -1802,13 +2169,34 @@ static int net_video_rec_state_machine(struct application *app, enum app_state s
             printf("<<<<<<< : %s\n\n\n\n\n", buf);
             if (err) {
                 printf("ACTION_VIDEO1_OPEN_RT_STREAM err!!!\n\n");
-                CTP_CMD_COMBINED(NULL, CTP_RT_OPEN_FAIL, "OPEN_PULL_RT_STREAM", "NOTIFY", CTP_RT_OPEN_FAIL_MSG);
+                CTP_CMD_COMBINED(NULL, CTP_RT_OPEN_FAIL, "OPEN_THIRD_RT_STREAM", "NOTIFY", CTP_RT_OPEN_FAIL_MSG);
             } else {
-                CTP_CMD_COMBINED(NULL, CTP_NO_ERR, "OPEN_PULL_RT_STREAM", "NOTIFY", buf);
+                CTP_CMD_COMBINED(NULL, CTP_NO_ERR, "OPEN_THIRD_RT_STREAM", "NOTIFY", buf);
                 printf("CTP NOTIFY VIDEO1 OK\n\n");
             }
             break;
+        case ACTION_VIDEO2_OPEN_RT_STREAM:
+            in_app_stop_display(2);
+            printf("----ACTION_VIDEO2_OPEN_RT_STREAM----\n\n");
+            __this_net->fbuf_fcnt = 0;
+            __this_net->fbuf_ffil = 0;
 
+            err = net_rt_video2_open(it);
+            sprintf(buf, "format:%d,w:%d,h:%d,fps:%d,rate:%d"
+                    , __this_net->net_videoreq[2].rec.format
+                    , __this_net->net_videoreq[2].rec.width
+                    , __this_net->net_videoreq[2].rec.height
+                    , __this_net->net_videoreq[2].rec.real_fps
+                    , VIDEO_REC_AUDIO_SAMPLE_RATE);
+            printf("<<<<<<< : %s\n\n\n\n\n", buf);
+            if (err) {
+                printf("ACTION_VIDEO2_OPEN_RT_STREAM err!!!\n\n");
+                CTP_CMD_COMBINED(NULL, CTP_RT_OPEN_FAIL, "OPEN_PULL_RT_STREAM", "NOTIFY", CTP_RT_OPEN_FAIL_MSG);
+            } else {
+                CTP_CMD_COMBINED(NULL, CTP_NO_ERR, "OPEN_PULL_RT_STREAM", "NOTIFY", buf);
+                printf("CTP NOTIFY VIDEO2 OK\n\n");
+            }
+            break;
         case ACTION_VIDEO0_CLOSE_RT_STREAM:
             printf("---ACTION_VIDEO0_CLOSE_RT_STREAM---\n\n");
             err = net_rt_video0_stop(it);
@@ -1834,8 +2222,24 @@ static int net_video_rec_state_machine(struct application *app, enum app_state s
                 strcpy(buf, "status:1");
             }
 
-            CTP_CMD_COMBINED(NULL, CTP_NO_ERR, "CLOSE_PULL_RT_STREAM", "NOTIFY", buf);
+            CTP_CMD_COMBINED(NULL, CTP_NO_ERR, "CLOSE_THIRD_RT_STREAM", "NOTIFY", buf);
             printf("CTP NOTIFY VIDEO1 OK\n\n");
+            __this_net->fbuf_fcnt = 0;
+            __this_net->fbuf_ffil = 0;
+
+            break;
+        case ACTION_VIDEO2_CLOSE_RT_STREAM:
+            printf("---ACTION_VIDEO2_CLOSE_RT_STREAM---\n\n");
+            err =  net_rt_video2_stop(it);
+            if (err) {
+                printf("ACTION_VIDE2_CLOE_RT_STREAM err!!!\n\n");
+                strcpy(buf, "status:0");
+            } else {
+                strcpy(buf, "status:1");
+            }
+
+            CTP_CMD_COMBINED(NULL, CTP_NO_ERR, "CLOSE_PULL_RT_STREAM", "NOTIFY", buf);
+            printf("CTP NOTIFY VIDEO2 OK\n\n");
             __this_net->fbuf_fcnt = 0;
             __this_net->fbuf_ffil = 0;
             break;
@@ -1897,7 +2301,7 @@ static void net_video_rec_ioctl(u32 argv)
     case NET_VIDREC_STA_STOP:
         puts("\n NET_VIDREC_STA_STOP\n");
         if (__this_net->net_state == VIDREC_STA_START || __this_net->net_state1 == VIDREC_STA_START) {
-            net_video_rec_stop(1);
+            net_video_rec_stop(0);          //这个值由1改成0  解决在APP连接出流时，直接断手机热点，再立马打开热点，连接APP重启问题
         }
         if (__this_strm->state == VIDREC_STA_START) {
             printf("\n strm_video_rec_close 1\n");
@@ -2028,5 +2432,6 @@ REGISTER_APPLICATION(app_video_rec) = {
     .ops 	= &net_video_rec_ops,
     .state  = APP_STA_DESTROY,
 };
+
 
 

@@ -769,6 +769,7 @@
 #define TCFG_UDISK_ENABLE                   0              //U盘主机功能
 #define TCFG_HOST_CDC_ENABLE                0              //CDC主机功能
 #define TCFG_HID_HOST_ENABLE                0              //HID主机功能
+#define TCFG_HOST_HUB_ENABLE                0              //HUB主机功能
 #if defined CONFIG_AUDIO_ENABLE
 #define TCFG_HOST_AUDIO_ENABLE              0              //uac主机功能，用户需要自己补充uac_host_demo.c里面的两个函数
 #endif

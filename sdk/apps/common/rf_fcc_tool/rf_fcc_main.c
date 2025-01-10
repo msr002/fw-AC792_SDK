@@ -1123,6 +1123,7 @@ static void fcc_data_deal_task(void *priv)
                 mp_test_pa_mcs_dgain_set(__THIS->tx_rate_tab[tx->rate].phy, __THIS->tx_rate_tab[tx->rate].mcs, tx->pathx_txpower);
 
                 if (tx->cw_flag) {
+#if 0   //TODO 测试复现复位phy层会出现波形不正常
                     val = sdio_mac_rreg(MAC_SYS_CTRL);
                     val = val | 0x00000002;
                     sdio_mac_wreg(MAC_SYS_CTRL, val);
@@ -1130,6 +1131,7 @@ static void fcc_data_deal_task(void *priv)
                     val = sdio_mac_rreg(MAC_SYS_CTRL);
                     val = val & ~(0x00000002);
                     sdio_mac_wreg(MAC_SYS_CTRL, val);
+#endif
 
                     val = sdio_mac_rreg(MAC_SYS_CTRL);
                     val &= ~(1 << 3);
@@ -1139,9 +1141,11 @@ static void fcc_data_deal_task(void *priv)
                     val = val | 0x00000010;
                     sdio_mac_wreg(MAC_SYS_CTRL, val);
 
-                    wf_tx_sine_test_reset(0);
+                    if (!lcw) {
+                        wf_tx_sine_test_reset(0);
+                        lcw = TRUE;
+                    }
                     wf_tx_sine_test();
-                    lcw = TRUE;
                 } else {
                     if (lcw) {
                         lcw = FALSE;

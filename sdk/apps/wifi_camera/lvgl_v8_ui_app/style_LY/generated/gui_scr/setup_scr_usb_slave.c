@@ -2,7 +2,9 @@
 #ifdef CONFIG_UI_STYLE_LY_ENABLE
 /*Generate Code, Do NOT Edit!*/
 #include "lvgl.h"
+#if LV_USE_GUIBUILDER_SIMULATOR
 #include <stdio.h>
+#endif
 #include <stdlib.h>
 #include "../gui_guider.h"
 #include "../gui_events/events_init.h"
@@ -38,11 +40,7 @@ lv_obj_t *setup_scr_usb_slave(lv_ui *ui)
     lv_obj_set_scrollbar_mode(ui->usb_slave_img_icon_pccam, LV_SCROLLBAR_MODE_OFF);
     lv_obj_add_flag(ui->usb_slave_img_icon_pccam, LV_OBJ_FLAG_HIDDEN);
     lv_obj_add_flag(ui->usb_slave_img_icon_pccam, LV_OBJ_FLAG_CLICKABLE);
-#if LV_USE_GUIBUILDER_SIMULATOR
-    lv_img_set_src(ui->usb_slave_img_icon_pccam, "A:\\1111\\ac792\\ui_prj\\dvr_ly_800x480\\import\\image\\video_page\\USB\\s_PC.png");
-#else
-    lv_img_set_src(ui->usb_slave_img_icon_pccam, "mnt/sdfile/EXT_RESERVED/uipackres/ui/5500000b.zip");
-#endif
+    lv_img_set_src(ui->usb_slave_img_icon_pccam, gui_get_res_path(GUI_RES_S_PC_PNG));
     lv_img_set_pivot(ui->usb_slave_img_icon_pccam, 0, 0);
     lv_img_set_angle(ui->usb_slave_img_icon_pccam, 0);
     lv_img_set_zoom(ui->usb_slave_img_icon_pccam, 256);
@@ -62,11 +60,7 @@ lv_obj_t *setup_scr_usb_slave(lv_ui *ui)
     lv_obj_set_scrollbar_mode(ui->usb_slave_img_icon_masstorage, LV_SCROLLBAR_MODE_OFF);
     lv_obj_add_flag(ui->usb_slave_img_icon_masstorage, LV_OBJ_FLAG_HIDDEN);
     lv_obj_add_flag(ui->usb_slave_img_icon_masstorage, LV_OBJ_FLAG_CLICKABLE);
-#if LV_USE_GUIBUILDER_SIMULATOR
-    lv_img_set_src(ui->usb_slave_img_icon_masstorage, "A:\\1111\\ac792\\ui_prj\\dvr_ly_800x480\\import\\image\\video_page\\USB\\s_MASS.png");
-#else
-    lv_img_set_src(ui->usb_slave_img_icon_masstorage, "mnt/sdfile/EXT_RESERVED/uipackres/ui/5500000c.zip");
-#endif
+    lv_img_set_src(ui->usb_slave_img_icon_masstorage, gui_get_res_path(GUI_RES_S_MASS_PNG));
     lv_img_set_pivot(ui->usb_slave_img_icon_masstorage, 0, 0);
     lv_img_set_angle(ui->usb_slave_img_icon_masstorage, 0);
     lv_img_set_zoom(ui->usb_slave_img_icon_masstorage, 256);

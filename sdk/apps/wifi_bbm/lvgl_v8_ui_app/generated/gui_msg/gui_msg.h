@@ -63,9 +63,11 @@ typedef union {
 } gui_msg_data_t;
 
 typedef enum {
+    GUI_FILE_BROWSER_MSG_ID = 0x000C,
     GUI_PAIR_MSG_ID = 0x0001,
     GUI_RT_STREAM_MSG_ID = 0x000A,
-    GUI_FILE_BROWSER_MSG_ID = 0x000C,
+    GUI_VIDEO_PLAY_MSG_ID = 0x000E,
+    GUI_SYS_PROMPT_MSG_ID = 0x0011,
 } gui_msg_id_t;
 
 typedef struct {
@@ -99,11 +101,14 @@ extern gui_msg_data_t *gui_msg_get_data();
 extern void gui_msg_set_imglist_selected_index_by_int32_cb(lv_observer_t *observer, lv_subject_t *subject);
 extern void gui_msg_set_visible_by_bool_cb(lv_observer_t *observer, lv_subject_t *subject);
 extern void gui_msg_set_label_text_by_string_cb(lv_observer_t *observer, lv_subject_t *subject);
+extern void gui_msg_set_bar_bar_value_by_int32_cb(lv_observer_t *observer, lv_subject_t *subject);
 #if LV_USE_OBSERVER
+#include "./gui_file_browser_msg.h"
 #include "./gui_pair_msg.h"
 #include "./gui_rt_stream_msg.h"
-#include "./gui_file_browser_msg.h"
-#define GUI_MSG_MAX_ID 0xd
+#include "./gui_video_play_msg.h"
+#include "./gui_sys_prompt_msg.h"
+#define GUI_MSG_MAX_ID 0x12
 #endif
 
 extern gui_msg_data_t guider_msg_data;

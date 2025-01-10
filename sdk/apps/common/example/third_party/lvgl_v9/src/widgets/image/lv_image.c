@@ -165,6 +165,9 @@ void lv_image_set_src(lv_obj_t *obj, const void *src)
     case LV_IMAGE_SRC_SYMBOL:
         LV_LOG_TRACE("`LV_IMAGE_SRC_SYMBOL` type found");
         break;
+    case LV_IMAGE_SRC_BIN:
+        LV_LOG_TRACE("`LV_IMAGE_SRC_BIN` type found");
+        break;
     default:
         LV_LOG_WARN("unknown type");
     }
@@ -199,14 +202,14 @@ void lv_image_set_src(lv_obj_t *obj, const void *src)
             lv_free((void *)img->src);
         }
         img->src = src;
-    } else if (src_type == LV_IMAGE_SRC_FILE || src_type == LV_IMAGE_SRC_SYMBOL) {
+    } else if (src_type == LV_IMAGE_SRC_FILE || src_type == LV_IMAGE_SRC_SYMBOL || src_type == LV_IMAGE_SRC_BIN) {
         /*If the new and the old src are the same then it was only a refresh.*/
         if (img->src != src) {
             const void *old_src = NULL;
             /*If memory was allocated because of the previous `src_type` then save its pointer and free after allocation.
              *It's important to allocate first to be sure the new data will be on a new address.
              *Else `img_cache` wouldn't see the change in source.*/
-            if (img->src_type == LV_IMAGE_SRC_FILE || img->src_type == LV_IMAGE_SRC_SYMBOL) {
+            if (img->src_type == LV_IMAGE_SRC_FILE || img->src_type == LV_IMAGE_SRC_SYMBOL || src_type == LV_IMAGE_SRC_BIN) {
                 old_src = img->src;
             }
             char *new_str = lv_strdup(src);
@@ -467,6 +470,11 @@ void lv_image_set_inner_align(lv_obj_t *obj, lv_image_align_t align)
     lv_image_t *img = (lv_image_t *)obj;
     if (align == img->align) {
         return;
+    }
+
+    /*If we're removing STRETCH, reset the scale*/
+    if (img->align == LV_IMAGE_ALIGN_STRETCH) {
+        lv_image_set_scale(obj, LV_SCALE_NONE);
     }
 
     img->align = align;
@@ -778,7 +786,7 @@ static void draw_image(lv_event_t *e)
 
         lv_layer_t *layer = lv_event_get_layer(e);
 
-        if (img->src_type == LV_IMAGE_SRC_FILE || img->src_type == LV_IMAGE_SRC_VARIABLE) {
+        if (img->src_type == LV_IMAGE_SRC_FILE || img->src_type == LV_IMAGE_SRC_VARIABLE || img->src_type == LV_IMAGE_SRC_BIN) {
             lv_draw_image_dsc_t draw_dsc;
             lv_draw_image_dsc_init(&draw_dsc);
             lv_obj_init_draw_image_dsc(obj, LV_PART_MAIN, &draw_dsc);
@@ -878,9 +886,11 @@ static void update_align(lv_obj_t *obj)
     if (img->align == LV_IMAGE_ALIGN_STRETCH) {
         lv_image_set_rotation(obj, 0);
         lv_image_set_pivot(obj, 0, 0);
-        int32_t scale_x = lv_obj_get_width(obj) * LV_SCALE_NONE / img->w;
-        int32_t scale_y = lv_obj_get_height(obj) * LV_SCALE_NONE / img->h;
-        scale_update(obj, scale_x, scale_y);
+        if (img->w != 0 && img->h != 0) {
+            int32_t scale_x = lv_obj_get_width(obj) * LV_SCALE_NONE / img->w;
+            int32_t scale_y = lv_obj_get_height(obj) * LV_SCALE_NONE / img->h;
+            scale_update(obj, scale_x, scale_y);
+        }
     } else if (img->align == LV_IMAGE_ALIGN_TILE) {
         lv_image_set_rotation(obj, 0);
         lv_image_set_pivot(obj, 0, 0);

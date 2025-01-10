@@ -70,6 +70,24 @@ int send_ctp_string(int cmd_type, char *buf, const char *_req, void *priv)
     return 0;
 }
 
+void reset_wifi_info()
+{
+    char ssid[32];
+    char pwd[64];
+    u8 mac_addr[6];
+    wifi_get_mac(mac_addr);
+    sprintf(ssid, AP_WIFI_CAM_PREFIX"%02x%02x%02x%02x%02x%02x"
+            , mac_addr[0]
+            , mac_addr[1]
+            , mac_addr[2]
+            , mac_addr[3]
+            , mac_addr[4]
+            , mac_addr[5]);
+    wifi_enter_ap_mode(ssid, AP_WIFI_CAM_WIFI_PWD);
+    wifi_store_mode_info(2, ssid, AP_WIFI_CAM_WIFI_PWD);
+    os_time_dly(200);
+}
+
 //param:
 //字符串集合类似"res:720p,mic:on,par:off"中的以逗号分隔
 static inline int _CTP_CMD_COMBINED(int cmd_type, void *priv, u32 err, const char *_req, const char *mothod, char *str)
@@ -286,6 +304,8 @@ void ctp_cmd_socket_unregister(void *priv)
     }
 }
 //添加命令回调
+extern void in_app_stop_display(u8 state);
+extern void out_app_start_display();
 int cmd_put_app_access(void *priv, char *content)
 {
     json_object *new_obj = NULL; //
@@ -334,16 +354,14 @@ int cmd_put_app_access(void *priv, char *content)
     const char *ver = json_object_get_string(key);
     printf("version : %s\n", ver);
     app = get_current_app();
-    bool usb_app_flag;
-#ifdef CONFIG_UI_ENABLE
-    usb_app_flag = get_usb_app_flag();
-#endif
 
-#if CONFIG_NET_VDIEO_GAP_ENABLE
+    bool usb_app_flag = get_usb_app_flag();
+
+// #if CONFIG_NET_VDIEO_GAP_ENABLE
     int gap = 0;
-#else
-    int gap = db_select("gap");
-#endif
+// #else
+//     int gap = db_select("gap");
+// #endif
 
     if ((!app || !app->name || !strstr(app->name, "video_rec")) && !usb_app_flag && !gap) {
         if (app && app->name) {
@@ -365,15 +383,15 @@ int cmd_put_app_access(void *priv, char *content)
         goto err;
 
     }
-
-#if 0//THREE_WAY_ENABLE
-    if (app && !strcmp(app->name, "video_rec")) {
-        init_intent(&it);
-        it.name = app->name;
-        it.action = ACTION_BACK;
-        start_app(&it);
-    }
-#endif
+    in_app_stop_display(0);
+// #if THREE_WAY_ENABLE
+//     if (app && !strcmp(app->name, "video_rec")) {
+//         init_intent(&it);
+//         it.name = app->name;
+//         it.action = ACTION_BACK;
+//         start_app(&it);
+//     }
+// #endif
 
     printf("access_num : ctp %d , cdp %d \n\n", ctp_srv_get_cli_cnt(), cdp_srv_get_cli_cnt());
     if ((ctp_srv_get_cli_cnt() > ACCESS_NUM || cdp_srv_get_cli_cnt() > ACCESS_NUM) ||
@@ -392,14 +410,15 @@ int cmd_put_app_access(void *priv, char *content)
     info.cli = priv;
 
 err:
-#if 0//THREE_WAY_ENABLE
-    if (app && !strcmp(app->name, "video_rec")) {
-        init_intent(&it);
-        it.name = app->name;
-        it.action = ACTION_BACK;
-        start_app(&it);
-    }
-#endif
+    in_app_stop_display(0);
+// #if THREE_WAY_ENABLE
+//     if (app && !strcmp(app->name, "video_rec")) {
+//         init_intent(&it);
+//         it.name = app->name;
+//         it.action = ACTION_BACK;
+//         start_app(&it);
+//     }
+// #endif
     json_object_put(new_obj);
     return 0;
 }
@@ -523,7 +542,7 @@ int cmd_put_video_param(void *priv,  char *content)
 #endif
     switch (res) {
     case VIDEO_RES_1080P:
-        snprintf(buf, sizeof(buf), "w:%d,h:%d,format:%d,fps:%d,rate:%d", 1920, 1080, 0, net_video_rec_get_fps(), net_video_rec_get_audio_rate());
+        snprintf(buf, sizeof(buf), "w:%d,h:%d,format:%d,fps:%d,rate:%d", 1280, 720, 0, net_video_rec_get_fps(), net_video_rec_get_audio_rate());
         break;
 
     case VIDEO_RES_720P:
@@ -551,27 +570,39 @@ int cmd_get_pull_video_param(void *priv,  char *content)
 {
     struct intent it;
     char buf[128];
-    int res = db_select("res2");
-    res = res > 0 ? res : 0;
-    switch (res) {
-    case VIDEO_RES_1080P:
-        snprintf(buf, sizeof(buf), "w:%d,h:%d,format:%d,fps:%d,rate:%d", 1280, 720, 0, net_video_rec_get_fps(), net_video_rec_get_audio_rate());
-        break;
+    // int res = db_select("res2");
+    // res = res > 0 ? res : 0;
+    // switch (res) {
+    // case VIDEO_RES_1080P:
+    //     snprintf(buf, sizeof(buf), "w:%d,h:%d,format:%d,fps:%d,rate:%d", 1280, 720, 0, net_video_rec_get_fps(), net_video_rec_get_audio_rate());
+    //     break;
 
-    case VIDEO_RES_720P:
-        snprintf(buf, sizeof(buf), "w:%d,h:%d,format:%d,fps:%d,rate:%d", 640, 480, 0, net_video_rec_get_fps(), net_video_rec_get_audio_rate());
-        break;
+    // case VIDEO_RES_720P:
+    snprintf(buf, sizeof(buf), "w:%d,h:%d,format:%d,fps:%d,rate:%d", 640, 480, 0, net_video_rec_get_fps(), net_video_rec_get_audio_rate());
+    //     break;
 
-    case VIDEO_RES_VGA:
-        snprintf(buf, sizeof(buf), "w:%d,h:%d,format:%d,fps:%d,rate:%d", 640, 480, 0, net_video_rec_get_fps(), net_video_rec_get_audio_rate());
-        break;
-    default:
-        snprintf(buf, sizeof(buf), "w:%d,h:%d,format:%d,fps:%d,rate:%d", 640, 480, 0, net_video_rec_get_fps(), net_video_rec_get_audio_rate());
-        break;
-    }
+    // case VIDEO_RES_VGA:
+    //     snprintf(buf, sizeof(buf), "w:%d,h:%d,format:%d,fps:%d,rate:%d", 640, 480, 0, net_video_rec_get_fps(), net_video_rec_get_audio_rate());
+    //     break;
+    // default:
+    //     snprintf(buf, sizeof(buf), "w:%d,h:%d,format:%d,fps:%d,rate:%d", 640, 480, 0, net_video_rec_get_fps(), net_video_rec_get_audio_rate());
+    //     break;
+    // }
 
     printf("buf -> %s\n", buf);
     CTP_CMD_COMBINED(priv, CTP_NO_ERR, "PULL_VIDEO_PARAM", "NOTIFY", buf);
+    return 0;
+
+}
+
+int cmd_get_third_video_param(void *priv,  char *content)
+{
+    struct intent it;
+    char buf[128];
+    snprintf(buf, sizeof(buf), "w:%d,h:%d,format:%d,fps:%d,rate:%d", 640, 480, 0, net_video_rec_get_fps(), net_video_rec_get_audio_rate());
+
+    printf("buf -> %s\n", buf);
+    CTP_CMD_COMBINED(priv, CTP_NO_ERR, "THIRD_VIDEO_PARAM", "NOTIFY", buf);
     return 0;
 
 }
@@ -591,38 +622,61 @@ int cmd_put_pull_video_param(void *priv,  char *content)
     h =  json_object_object_get(parm, "h");
     height = json_object_get_string(h);
 
-    printf("height : %s\n", height);
-    if (strstr(height, "480")) {
-        db_update("res2", VIDEO_RES_VGA);
-    } else if (strstr(height, "720")) {
-        db_update("res2", VIDEO_RES_720P);
-    } else {
-        db_update("res2", VIDEO_RES_1080P);
-    }
-    int res = db_select("res2");
-    res = res > 0 ? res : 0;
-    printf("res->%d \n", res);
+    // printf("height : %s\n", height);
+    // if (strstr(height, "480")) {
+    db_update("res2", VIDEO_RES_VGA);
+    // } else if (strstr(height, "720")) {
+    //     db_update("res2", VIDEO_RES_720P);
+    // } else {
+    //     db_update("res2", VIDEO_RES_1080P);
+    // }
+    // int res = db_select("res2");
+    // res = res > 0 ? res : 0;
+    // printf("res->%d \n", res);
     /* #if defined CONFIG_UI_STYLE_LY_ENABLE */
     /* ui_text_show_index_by_id(TEXT_RES_REC, res); */
     /* #endif */
-    switch (res) {
-    case VIDEO_RES_1080P:
-        snprintf(buf, sizeof(buf), "w:%d,h:%d,format:%d,fps:%d,rate:%d", 1280, 720, 0, net_video_rec_get_fps(), net_video_rec_get_audio_rate());
-        break;
+    // switch (res) {
+    // case VIDEO_RES_1080P:
+    //     snprintf(buf, sizeof(buf), "w:%d,h:%d,format:%d,fps:%d,rate:%d", 1280, 720, 0, net_video_rec_get_fps(), net_video_rec_get_audio_rate());
+    //     break;
 
-    case VIDEO_RES_720P:
-        snprintf(buf, sizeof(buf), "w:%d,h:%d,format:%d,fps:%d,rate:%d", 640, 480, 0, net_video_rec_get_fps(), net_video_rec_get_audio_rate());
-        break;
+    // case VIDEO_RES_720P:
+    //     snprintf(buf, sizeof(buf), "w:%d,h:%d,format:%d,fps:%d,rate:%d", 640, 480, 0, net_video_rec_get_fps(), net_video_rec_get_audio_rate());
+    //     break;
 
-    case VIDEO_RES_VGA:
-        snprintf(buf, sizeof(buf), "w:%d,h:%d,format:%d,fps:%d,rate:%d", 640, 480, 0, net_video_rec_get_fps(), net_video_rec_get_audio_rate());
-        break;
-    default:
-        snprintf(buf, sizeof(buf), "w:%d,h:%d,format:%d,fps:%d,rate:%d", 640, 480, 0, net_video_rec_get_fps(), net_video_rec_get_audio_rate());
-        break;
-    }
+    // case VIDEO_RES_VGA:
+    //     snprintf(buf, sizeof(buf), "w:%d,h:%d,format:%d,fps:%d,rate:%d", 640, 480, 0, net_video_rec_get_fps(), net_video_rec_get_audio_rate());
+    //     break;
+    // default:
+    snprintf(buf, sizeof(buf), "w:%d,h:%d,format:%d,fps:%d,rate:%d", 640, 480, 0, net_video_rec_get_fps(), net_video_rec_get_audio_rate());
+    //     break;
+    // }
 
     CTP_CMD_COMBINED(priv, CTP_NO_ERR, "PULL_VIDEO_PARAM", "NOTIFY", buf);
+
+    json_object_put(new_obj);
+    return 0;
+
+}
+
+int cmd_put_third_video_param(void *priv,  char *content)
+{
+    json_object *new_obj = NULL;
+    json_object *parm = NULL;
+    json_object *h = NULL;
+    struct intent it;
+    char buf[128];
+    const char *height, *width, *format;
+    //分解content字段
+    new_obj = json_tokener_parse(content);
+    parm =  json_object_object_get(new_obj, "param");
+
+    h =  json_object_object_get(parm, "h");
+    height = json_object_get_string(h);
+    snprintf(buf, sizeof(buf), "w:%d,h:%d,format:%d,fps:%d,rate:%d", 640, 480, 0, net_video_rec_get_fps(), net_video_rec_get_audio_rate());
+
+    CTP_CMD_COMBINED(priv, CTP_NO_ERR, "THIRD_VIDEO_PARAM", "NOTIFY", buf);
 
     json_object_put(new_obj);
     return 0;
@@ -804,7 +858,11 @@ int cmd_put_video_ctrl(void *priv, char *content)
         }
     }
 
+#if 0   //暂时无法支持APP录像
+    snprintf(buf, sizeof(buf), "status:%d", 0);
+    CTP_CMD_COMBINED(priv, CTP_NO_ERR, "VIDEO_CTRL", "NOTIFY", buf);
     json_object_put(new_obj);
+#endif
     return 0;
 }
 
@@ -1199,7 +1257,7 @@ int cmd_put_screen_pro(void *priv, char *content)
     const char *pro_value = json_object_get_string(pro);
     printf("ctp pro  %s \n", pro_value);
 
-    db_update("pro", atoi(pro_value));
+    db_update("pro", (atoi(pro_value) * 60));
     json_object_put(new_obj);
     return 0;
 }
@@ -1351,6 +1409,7 @@ int cmd_put_system_default(void *priv, char *content)
     printf("ctp pro  %s \n", def_value);
 
     if (atoi(def_value)) {
+        db_reset();
 #if defined (WIFI_CAM_SUFFIX)
         sprintf(ssid, AP_WIFI_CAM_PREFIX WIFI_CAM_SUFFIX);
 #else
@@ -1544,7 +1603,7 @@ int cmd_put_video_move_check(void *priv, char *content)
     const char *tmp_value = json_object_get_string(tmp);
     printf("ctp pro  %s \n", tmp_value);
     db_update("mot", atoi(tmp_value));
-
+//    video_rec_post_msg("reshow:a=%1",APP_MOTION);
 #if 0 //def CONFIG_UI_ENABLE
     /*video_rec_post_msg("changeMOT");*/
 #endif
@@ -1580,6 +1639,7 @@ int cmd_put_video_mic(void *priv, char *content)
     printf("ctp pro  %s \n", tmp_value);
     db_update("mic", atoi(tmp_value));
     json_object_put(new_obj);
+//    video_rec_post_msg("reshow:a=%1",APP_RECORD);
 #if 0 //def CONFIG_UI_ENABLE
     if (atoi(tmp_value)) {
         video_rec_post_msg("onMIC");
@@ -1639,6 +1699,7 @@ int cmd_put_video_date(void *priv, char *content)
     /*lab_set_function(atoi(tmp_value));*/
 
     json_object_put(new_obj);
+//    video_rec_post_msg("reshow:a=%1",APP_DATE);
     return 0;
 }
 
@@ -1697,6 +1758,7 @@ int cmd_put_gra_sen(void *priv, char *content)
     printf("ctp pro  %s \n", tmp_value);
     db_update("gra", atoi(tmp_value));
     json_object_put(new_obj);
+//    video_rec_post_msg("reshow:a=%1",APP_GSENSOR);
     return 0;
 }
 int cmd_get_video_par_car(void *priv, char *content)
@@ -1724,7 +1786,7 @@ int cmd_put_video_par_car(void *priv, char *content)
     printf("ctp pro  %s \n", tmp_value);
     db_update("par", atoi(tmp_value));
     json_object_put(new_obj);
-
+//    video_rec_post_msg("reshow:a=%1",APP_GUARD);
 #if 0 //def CONFIG_UI_ENABLE
     video_rec_post_msg("changePAR");
 #endif
@@ -2111,22 +2173,12 @@ int cmd_put_open_audio_rt_stream(void *priv, char *content)
 
 int cmd_put_open_pull_rt_stream(void *priv, char *content)
 {
-#if defined (CONFIG_VIDEO1_ENABLE) || defined (CONFIG_VIDEO2_ENABLE)
-#ifdef CONFIG_VIDEO1_ENABLE
-    if (!dev_online("video1.*")) {
-        CTP_CMD_COMBINED(NULL, CTP_PULL_OFFLINE, "OPEN_PULL_RT_STREAM", "NOTIFY", CTP_PULL_OFFLINE_MSG);
-        return 0;
-    }
-#endif
-#ifdef CONFIG_VIDEO2_ENABLE
+#if defined (CONFIG_VIDEO2_ENABLE)
 
     if (!dev_online("uvc")) {
         CTP_CMD_COMBINED(NULL, CTP_PULL_OFFLINE, "OPEN_PULL_RT_STREAM", "NOTIFY", CTP_PULL_OFFLINE_MSG);
         return 0;
     }
-
-#endif
-
 
     json_object *new_obj = NULL;
     json_object *parm = NULL;
@@ -2139,7 +2191,7 @@ int cmd_put_open_pull_rt_stream(void *priv, char *content)
 
     it.name = "net_video_rec";
 //设置参数
-    it.action = ACTION_VIDEO1_OPEN_RT_STREAM;
+    it.action = ACTION_VIDEO2_OPEN_RT_STREAM;
     new_obj = json_tokener_parse(content);
     parm =  json_object_object_get(new_obj, "param");
     h = json_object_get_string(json_object_object_get(parm, "h"));
@@ -2189,35 +2241,74 @@ int cmd_put_open_pull_rt_stream(void *priv, char *content)
     return 0;
 
 }
-int cmd_put_open_pull_audio_rt_stream(void *priv, char *content)
+
+int cmd_put_open_third_rt_stream(void *priv, char *content)
 {
-    printf("no set %s function\n", __func__);
-    /*
+#if defined (CONFIG_VIDEO2_ENABLE)
+
     json_object *new_obj = NULL;
     json_object *parm = NULL;
     char buf[128];
     u8 mark;
-    const char *format, *rate, *width, *channel;
+    const char *h, *w, *format, *fps;
     struct intent it;
     init_intent(&it);
+    net_switch_ui("video_rec");
 
     it.name = "net_video_rec";
-    //设置参数
+//设置参数
     it.action = ACTION_VIDEO1_OPEN_RT_STREAM;
-    new_obj = json_tokener_parse(content);parm =  json_object_object_get(new_obj, "param");
-    rate = json_object_get_string(json_object_object_get(parm, "rate"));
-    width = json_object_get_string(json_object_object_get(parm, "width"));
+    new_obj = json_tokener_parse(content);
+    parm =  json_object_object_get(new_obj, "param");
+    h = json_object_get_string(json_object_object_get(parm, "h"));
+    w = json_object_get_string(json_object_object_get(parm, "w"));
     format = json_object_get_string(json_object_object_get(parm, "format"));
-    channel = json_object_get_string(json_object_object_get(parm, "channel"));
-    //printf("ctp pro  %s \n", h);
+    fps = json_object_get_string(json_object_object_get(parm, "fps"));
+    struct rt_stream_app_info info;
+    info.width = atoi(w);
+    info.height = atoi(h);
+    info.fps    = atoi(fps);
 
-    snprintf(buf, sizeof(buf), "width:%s,rate:%s,format:%s,channel:%s\n", width, rate, format, channel);
-    mark = 0;
-    it.data = (const char *)&mark;//打开音频
-    it.exdata = buf; //音频参数
+
+    if (atoi(format) == 1) {
+        info.type   = NET_VIDEO_FMT_MOV;
+    } else if (atoi(format) == 0) {
+
+        info.type = NET_VIDEO_FMT_AVI;
+    } else {
+
+        info.type   = NET_VIDEO_FMT_MOV;
+        printf("undefined info.type ,default use H264\n");
+    }
+
+
+
+    info.priv = priv;
+    if (info.width == 1920) {
+        db_update("rtb", VIDEO_RES_1080P);
+    } else if (info.width == 1280) {
+        db_update("rtb", VIDEO_RES_720P);
+    } else if (info.width == 640) {
+        db_update("rtb", VIDEO_RES_VGA);
+    }
+
+    mark = 2;
+    it.data = (const char *)&mark;//打开视频
+    it.exdata = (u32) &info; //视频参数
+
     start_app(&it);
+
     json_object_put(new_obj);
-    */
+#else
+    CTP_CMD_COMBINED(priv, CTP_THIRD_NOSUPPORT, "OPEN_THIRD_RT_STREAM", "NOTIFY", CTP_THIRD_NOSUPPORT_MSG);
+#endif
+    return 0;
+
+}
+
+int cmd_put_open_pull_audio_rt_stream(void *priv, char *content)
+{
+    printf("no set %s function\n", __func__);
     return 0;
 
 
@@ -2251,17 +2342,25 @@ void close_rt_stream(struct sockaddr_in *dest)
 
         }
 
+        if (net_rec_handler && net_rec_handler->net_video2_vrt_on) {
+            puts("all rt2 stream close\n");
+            it.action = ACTION_VIDEO2_CLOSE_RT_STREAM;
+            it.data = (char *)&mark;
+            start_app(&it);
+
+        }
+
     }
+    out_app_start_display();
+// #if THREE_WAY_ENABLE
+//     it.action = ACTION_BACK;
+//     start_app(&it);
 
-#if 0//THREE_WAY_ENABLE
-    it.action = ACTION_BACK;
-    start_app(&it);
-
-    init_intent(&it);
-    it.name	= "video_rec";//APP状态机在：video_rec.c
-    it.action = ACTION_VIDEO_REC_MAIN;
-    start_app(&it);
-#endif
+//     init_intent(&it);
+//     it.name	= "video_rec";//APP状态机在：video_rec.c
+//     it.action = ACTION_VIDEO_REC_MAIN;
+//     start_app(&it);
+// #endif
 
 }
 
@@ -2309,23 +2408,49 @@ int cmd_put_close_pull_audio_rt_stream(void *priv, char *content)
 int cmd_put_close_pull_rt_stream(void *priv, char *content)
 {
 
-#if defined (CONFIG_VIDEO1_ENABLE) || defined (CONFIG_VIDEO2_ENABLE)
-
-#ifdef CONFIG_VIDEO1_ENABLE
-    if (!dev_online("video1.*")) {
-        CTP_CMD_COMBINED(NULL, CTP_PULL_OFFLINE, "CLOSE_PULL_RT_STREAM", "NOTIFY", CTP_PULL_OFFLINE_MSG);
-        return 0;
-    }
-#endif
-#ifdef CONFIG_VIDEO2_ENABLE
-
+#if defined (CONFIG_VIDEO2_ENABLE)
     if (!dev_online("uvc")) {
         CTP_CMD_COMBINED(NULL, CTP_PULL_OFFLINE, "CLOSE_PULL_RT_STREAM", "NOTIFY", CTP_PULL_OFFLINE_MSG);
         return 0;
     }
 
-#endif
+    json_object *new_obj = NULL;
+    json_object *parm = NULL;
+    char buf[128];
+    u8 mark;
+    const char *status = NULL;
+    struct intent it;
+    /* sys_key_event_enable(); */
+    init_intent(&it);
+    net_switch_ui("video_rec");
+    it.name = "net_video_rec";
+//设置参数
+    it.action = ACTION_VIDEO2_CLOSE_RT_STREAM;
+    new_obj = json_tokener_parse(content);
+    parm =  json_object_object_get(new_obj, "param");
+    status = json_object_get_string(json_object_object_get(parm, "status"));
 
+    if (atoi(status)) {
+        mark = 2;
+        it.data = (const char *)&mark; //close video param
+        start_app(&it);
+
+    }
+
+    json_object_put(new_obj);
+#else
+
+    CTP_CMD_COMBINED(priv, CTP_PULL_NOSUPPORT, "CLOSE_PULL_RT_STREAM", "NOTIFY", CTP_PULL_NOSUPPORT_MSG);
+#endif
+    return 0;
+
+}
+
+
+int cmd_put_close_third_rt_stream(void *priv, char *content)
+{
+
+#if defined (CONFIG_VIDEO1_ENABLE)
 
     json_object *new_obj = NULL;
     json_object *parm = NULL;
@@ -2353,7 +2478,7 @@ int cmd_put_close_pull_rt_stream(void *priv, char *content)
     json_object_put(new_obj);
 #else
 
-    CTP_CMD_COMBINED(priv, CTP_PULL_NOSUPPORT, "CLOSE_PULL_RT_STREAM", "NOTIFY", CTP_PULL_NOSUPPORT_MSG);
+    CTP_CMD_COMBINED(priv, CTP_PULL_NOSUPPORT, "CLOSE_THIRD_RT_STREAM", "NOTIFY", CTP_PULL_NOSUPPORT_MSG);
 #endif
     return 0;
 
@@ -2425,7 +2550,35 @@ int cmd_get_close_pull_audio_rt_stream(void *priv, char *content)
 }
 int cmd_get_close_pull_rt_stream(void *priv, char *content)
 {
-#if defined (CONFIG_VIDEO1_ENABLE) || defined (CONFIG_VIDEO2_ENABLE)
+#if defined (CONFIG_VIDEO2_ENABLE)
+    struct intent it;
+    char buf[128];
+    init_intent(&it);
+    it.name = "net_video_rec";
+    it.action = ACTION_VIDEO_REC_GET_APP_STATUS;
+
+    start_app(&it);
+    /* struct video_rec_hdl *rec_handler = (struct video_rec_hdl *)it.data; */
+
+    struct net_video_hdl *rec_handler = (struct net_video_hdl *)it.data;
+
+    if (rec_handler && rec_handler->net_video2_vrt_on == 1) {
+        strcpy(buf, "status:1");
+    } else {
+        strcpy(buf, "status:0");
+    }
+
+    CTP_CMD_COMBINED(priv, CTP_NO_ERR, "CLOSE_PULL_RT_STREAM", "NOTIFY", buf);
+#else
+    CTP_CMD_COMBINED(priv, CTP_PULL_NOSUPPORT, "CLOSE_PULL_RT_STREAM", "NOTIFY", CTP_PULL_NOSUPPORT_MSG);
+#endif
+    return 0;
+}
+#endif
+
+int cmd_get_close_third_rt_stream(void *priv, char *content)
+{
+#if defined (CONFIG_VIDEO1_ENABLE)
     struct intent it;
     char buf[128];
     init_intent(&it);
@@ -2443,13 +2596,13 @@ int cmd_get_close_pull_rt_stream(void *priv, char *content)
         strcpy(buf, "status:0");
     }
 
-    CTP_CMD_COMBINED(priv, CTP_NO_ERR, "CLOSE_PULL_RT_STREAM", "NOTIFY", buf);
+    CTP_CMD_COMBINED(priv, CTP_NO_ERR, "CLOSE_THIRD_RT_STREAM", "NOTIFY", buf);
 #else
-    CTP_CMD_COMBINED(priv, CTP_PULL_NOSUPPORT, "CLOSE_PULL_RT_STREAM", "NOTIFY", CTP_PULL_NOSUPPORT_MSG);
+    CTP_CMD_COMBINED(priv, CTP_THIRD_NOSUPPORT, "CLOSE_THIRD_RT_STREAM", "NOTIFY", CTP_THIRD_NOSUPPORT_MSG);
 #endif
     return 0;
 }
-#endif
+
 
 #if 1
 static int cmd_put_make_forward_files_list(void *priv, char *content)
@@ -2572,7 +2725,7 @@ static int cmd_put_make_behind_files_list(void *priv, char *content)
 
 #if defined CONFIG_ENABLE_VLIST
             if (!FILE_INITIND_CHECK()) {
-                FILE_GEN();
+                // FILE_GEN();
                 snprintf(buf, sizeof(buf), "type:1,path:%s", CONFIG_REC_PATH_2"vf_list.txt");
                 CTP_CMD_COMBINED(priv, CTP_NO_ERR, "BEHIND_MEDIA_FILES_LIST", "NOTIFY", buf);
 
@@ -2607,6 +2760,85 @@ static int cmd_put_make_behind_files_list(void *priv, char *content)
     return 0;
 
 }
+
+static int cmd_put_make_third_files_list(void *priv, char *content)
+{
+    char buf[128];
+    char path[64];
+    json_object *new_obj = NULL;
+    json_object *parm = NULL;
+    json_object *tmp = NULL;
+    char type = 0;
+    u32 file_num = 0;
+    new_obj = json_tokener_parse(content);
+    parm =  json_object_object_get(new_obj, "param");
+    tmp =  json_object_object_get(parm, "type");
+
+    const char *tmp_value = json_object_get_string(tmp);
+    printf("ctp type  %s \n", tmp_value);
+
+
+    tmp =  json_object_object_get(parm, "num");
+    if (tmp != NULL) {
+        const char *num = json_object_get_string(tmp);
+        if (num != NULL && atoi(num) != 0) {
+            file_num = atoi(num);
+        }
+    }
+    if (tmp_value == NULL) {
+        type = VID_JPG;
+    } else {
+        type = atoi(tmp_value);
+    }
+    switch (type) {
+    case -1 :
+        CTP_CMD_COMBINED(priv, CTP_SD_OFFLINE, "THIRD_MEDIA_FILES_LIST", "NOTIFY", CTP_SD_OFFLINE_MSG);
+        break;
+    case NONE:
+        snprintf(buf, sizeof(buf), "type:0,path:%s", CONFIG_REC_PATH_1"vf_list.txt");
+        CTP_CMD_COMBINED(priv, CTP_NO_ERR, "THIRD_MEDIA_FILES_LIST", "NOTIFY", buf);
+        break;
+    case VID_JPG:
+        if (!file_num) {
+
+#if defined CONFIG_ENABLE_VLIST
+            if (!FILE_INITIND_CHECK()) {
+                // FILE_GEN();
+                snprintf(buf, sizeof(buf), "type:1,path:%s", CONFIG_REC_PATH_1"vf_list.txt");
+                CTP_CMD_COMBINED(priv, CTP_NO_ERR, "THIRD_MEDIA_FILES_LIST", "NOTIFY", buf);
+
+
+            } else {
+
+                CTP_CMD_COMBINED(priv, CTP_REQUEST, "THIRD_MEDIA_FILES_LIST", "NOTIFY", CTP_REQUEST_MSG);
+            }
+
+        } else {
+            FILE_LIST_INIT_SMALL(file_num);
+            snprintf(buf, sizeof(buf), "type:1,path:%s", CONFIG_REC_PATH_1"vf_list_small.txt");
+            CTP_CMD_COMBINED(priv, CTP_NO_ERR, "THIRD_MEDIA_FILES_LIST", "NOTIFY", buf);
+#endif
+        }
+        break;
+    case VIDEO:
+        vf_list(type, 0, path);
+        snprintf(buf, sizeof(buf), "type:2,path:%s", path);
+        CTP_CMD_COMBINED(priv, CTP_NO_ERR, "THIRD_MEDIA_FILES_LIST", "NOTIFY", buf);
+        break;
+    case JPG:
+        vf_list(type, 0, path);
+        snprintf(buf, sizeof(buf), "type:3,path:%s", path);
+        CTP_CMD_COMBINED(priv, CTP_NO_ERR, "THIRD_MEDIA_FILES_LIST", "NOTIFY", buf);
+        break;
+    default:
+        break;
+    }
+
+    json_object_put(new_obj);
+    return 0;
+
+}
+
 
 #endif
 
@@ -3161,6 +3393,12 @@ static int cmd_put_date_time(void *priv, char *content)
     snprintf(buf, sizeof(buf), "date:%04d%02d%02d%02d%02d%02d", time.year, time.month, time.day, time.hour, time.min, time.sec);
     CTP_CMD_COMBINED(priv, CTP_NO_ERR, "DATE_TIME", "NOTIFY", buf);
     json_object_put(new_obj);
+    db_update("datey", time.year);
+    db_update("datem", time.month);
+    db_update("dated", time.day);
+    db_update("dateh", time.hour);
+    db_update("datemi", time.min);
+    db_update("dates", time.sec);
     return 0;
 }
 
@@ -3323,7 +3561,28 @@ static int cmd_put_soft_reset(void *priv, char *content)
 
     return 0;
 }
+#define VERSION_ID "6.6.6"
+int cmd_get_info_product(void *priv, char *content)
 
+{
+    static u8 buf[128] = {0};
+    u8 *mac;
+//    extern u8 *wifi_get_module_mac_addr(void);
+//    mac = wifi_get_module_mac_addr();
+//    sprintf(buf, "%s", "JL;jl5701;XD36;B112;00;MT02101;01;01;%02x:%02x:%02x:%02x;", mac[2], mac[3], mac[4], mac[5]);
+    memset(buf, 0, 128);
+#ifdef SYS_PARAM_SET_ENABLE
+    if (sys_version_updata_enable2) {
+        sprintf(buf, "%s:%s%s:%s", "sp:XD,model", VERSION_BOARD, ",brand:V02,version", sys_version2);
+    } else
+#endif
+    {
+        sprintf(buf, "%s:%s%s:%s", "sp:XD,model", "CC31", ",brand:V02,version", VERSION_ID);
+    }
+    printf("========cmd_get_info_product:%s\n", buf);
+    CTP_CMD_COMBINED(priv, CTP_NO_ERR, "PRODUCT_INFO", "NOTIFY", buf);
+    return 0;
+}
 static int cmd_put_file_lock(void *priv, char *content)
 {
     char buf[32];
@@ -3394,10 +3653,24 @@ static int cmd_get_generic_cmd(void *priv, char *content)
 
 
 
-
+u8 wifi_app_state = 0;      //wifi连接标志位
 static int cmd_put_ctp_cli_connected(void *priv, char *content)
 {
+    wifi_app_state = 1;
+//    key_event_disable();
+    touch_event_disable();
+    extern void goto_res_page_func(int arg);
+//   lvgl_rpc_post_func(goto_res_page_func, 1, 0);
+    video_rec_post_msg("reshow:a=%1", 12);
+    video_rec_post_msg("msg_win:a=%1", 4);
+    sys_power_auto_shutdown_stop();
+    delay_us(200 * 1000);
     return 0;
+}
+
+void user_ctp_cli_disconnect()
+{
+    cmd_put_ctp_cli_disconnect(info.cli, "NULL");
 }
 
 static int cmd_put_ctp_cli_disconnect(void *priv, char *content)
@@ -3485,9 +3758,57 @@ static int cmd_put_ctp_cli_disconnect(void *priv, char *content)
         it.action = ACTION_VIDEO_DEC_MAIN;
         start_app(&it);
     }
-
+    wifi_app_state = 0;
+    video_rec_post_msg("reshow:a=%1", 12);
+    video_rec_post_msg("msg_win:a=%1", 5);
     puts("|CLI_DISCONNECT OVER...\n\n\n\n");
+    if ((get_now_video_state() == VIDREC_STA_STOP) || (get_now_video_state() == VIDREC_STA_IDLE)) {
+        sys_power_auto_shutdown_start(db_select("aff") * 60);
+    }
+
+    if ((get_now_video_state() == VIDREC_STA_IDLE) || (get_now_video_state() == VIDREC_STA_STOP)) {
+        printf("=========== out app , start rec\n");
+        video_rec_control_start();
+    }
+
     return 0;
+}
+
+
+static int cmd_enter_backstage(void *priv, char *content)
+{
+    char buf[32] = {0};
+    printf("=============== %s\n", __func__);
+    wifi_app_state = 1;
+    video_rec_post_msg("reshow:a=%1", 12);
+    video_rec_post_msg("msg_win:a=%1", 4);
+    strcpy(buf, "status:1");
+    CTP_CMD_COMBINED(priv, CTP_NO_ERR, "CTP_CMD_OPENAPP", "NOTIFY", buf);
+    sys_power_auto_shutdown_stop();
+//    key_event_disable();
+    touch_event_disable();
+}
+
+static int cmd_exit_backstage(void *priv, char *content)
+{
+    char buf[32] = {0};
+    printf("=============== %s\n", __func__);
+    wifi_app_state = 0;
+    key_event_enable();
+    touch_event_enable();
+    video_rec_post_msg("reshow:a=%1", 12);
+    video_rec_post_msg("msg_win:a=%1", 5);
+    strcpy(buf, "status:0");
+    CTP_CMD_COMBINED(priv, CTP_NO_ERR, "CTP_CMD_EXITAPP", "NOTIFY", buf);
+    if ((get_now_video_state() == VIDREC_STA_STOP) || (get_now_video_state() == VIDREC_STA_IDLE)) {
+        sys_power_auto_shutdown_start(db_select("aff") * 60);
+    }
+    key_event_enable();
+    touch_event_enable();
+
+    user_ctp_cli_disconnect();
+
+
 }
 
 
@@ -3547,88 +3868,11 @@ static int cmd_get_pull_video_status(void *priv, char *content)
 {
     char buf[128];
 
-    int res = db_select("res2");
-    res = res > 0 ? res : 0;
-
-    switch (res) {
-    case VIDEO_RES_1080P:
-        snprintf(buf, sizeof(buf), "w:%d,h:%d,format:%d,fps:%d,rate:%d", 1280, 720, 1, net_video_rec_get_fps(), net_video_rec_get_audio_rate());
-        break;
-
-    case VIDEO_RES_720P:
-        snprintf(buf, sizeof(buf), "w:%d,h:%d,format:%d,fps:%d,rate:%d", 640, 480, 1, net_video_rec_get_fps(), net_video_rec_get_audio_rate());
-        break;
-
-    case VIDEO_RES_VGA:
-        snprintf(buf, sizeof(buf), "w:%d,h:%d,format:%d,fps:%d,rate:%d", 640, 480, 1, net_video_rec_get_fps(), net_video_rec_get_audio_rate());
-        break;
-
-    default:
-        snprintf(buf, sizeof(buf), "w:%d,h:%d,format:%d,fps:%d,rate:%d", 640, 480, 1, net_video_rec_get_fps(), net_video_rec_get_audio_rate());
-        break;
-    }
-
-
-
-#ifdef CONFIG_VIDEO1_ENABLE
-#ifdef CONFIG_SPI_VIDEO_ENABLE
-    extern int spi_camera_width_get(void);
-    extern int spi_camera_height_get(void);
-    snprintf(buf, sizeof(buf), "status:1,h:%d,w:%d,fps:%d,rate:%d,format:1", spi_camera_height_get(), spi_camera_width_get(), 15, net_video_rec_get_audio_rate());
-    CTP_CMD_COMBINED(NULL, CTP_NO_ERR, "PULL_VIDEO_STATUS", "NOTIFY", buf);
-    return 0;
-#endif
-    if (dev_online("video1.*")) {
-        switch (res) {
-        case VIDEO_RES_1080P:
-            snprintf(buf, sizeof(buf), "status:1,h:%d,w:%d,fps:%d,rate:%d,format:1", 720, 1280, net_video_rec_get_fps(), net_video_rec_get_audio_rate());
-            break;
-
-        case VIDEO_RES_720P:
-            snprintf(buf, sizeof(buf), "status:1,h:%d,w:%d,fps:%d,rate:%d,format:1", 480, 640, net_video_rec_get_fps(), net_video_rec_get_audio_rate());
-            break;
-
-        case VIDEO_RES_VGA:
-            snprintf(buf, sizeof(buf), "status:1,h:%d,w:%d,fps:%d,rate:%d,format:1", 480, 640, net_video_rec_get_fps(), net_video_rec_get_audio_rate());
-            break;
-
-        default:
-            snprintf(buf, sizeof(buf), "status:1,h:%d,w:%d,fps:%d,rate:%d,format:1", 720, 1280, net_video_rec_get_fps(), net_video_rec_get_audio_rate());
-//       CTP_ERR(CTP_REQUEST);
-            break;
-        }
-
-
-        CTP_CMD_COMBINED(NULL, CTP_NO_ERR, "PULL_VIDEO_STATUS", "NOTIFY", buf);
-    } else {
-
-        strcpy(buf, "status:0");
-        CTP_CMD_COMBINED(NULL, CTP_NO_ERR, "PULL_VIDEO_STATUS", "NOTIFY", buf);
-    }
-#endif
 #ifdef CONFIG_VIDEO2_ENABLE
 
     if (dev_online("uvc")) {
         printf("UVC ON LINE \n\n");
-        switch (res) {
-        case VIDEO_RES_1080P:
-            snprintf(buf, sizeof(buf), "status:1,h:%d,w:%d,fps:%d,rate:%d,format:1", 720, 1280, net_video_rec_get_fps(), net_video_rec_get_audio_rate());
-            break;
-
-        case VIDEO_RES_720P:
-            snprintf(buf, sizeof(buf), "status:1,h:%d,w:%d,fps:%d,rate:%d,format:1", 480, 640, net_video_rec_get_fps(), net_video_rec_get_audio_rate());
-            break;
-
-        case VIDEO_RES_VGA:
-            snprintf(buf, sizeof(buf), "status:1,h:%d,w:%d,fps:%d,rate:%d,format:1", 480, 640, net_video_rec_get_fps(), net_video_rec_get_audio_rate());
-            break;
-
-        default:
-            snprintf(buf, sizeof(buf), "status:1,h:%d,w:%d,fps:%d,rate:%d,format:1", 480, 640, net_video_rec_get_fps(), net_video_rec_get_audio_rate());
-//       CTP_ERR(CTP_REQUEST);
-            break;
-        }
-
+        snprintf(buf, sizeof(buf), "status:1,h:%d,w:%d,fps:%d,rate:%d,format:1", 480, 640, net_video_rec_get_fps(), net_video_rec_get_audio_rate());
         CTP_CMD_COMBINED(NULL, CTP_NO_ERR, "PULL_VIDEO_STATUS", "NOTIFY", buf);
     } else {
         strcpy(buf, "status:0");
@@ -3638,10 +3882,24 @@ static int cmd_get_pull_video_status(void *priv, char *content)
 
 #endif
 
+    return 0;
+}
+
+
+static int cmd_get_third_video_status(void *priv, char *content)
+{
+    char buf[128];
+#ifdef CONFIG_VIDEO1_ENABLE
+    snprintf(buf, sizeof(buf), "status:1,h:%d,w:%d,fps:%d,rate:%d,format:1", 480, 640, net_video_rec_get_fps(), net_video_rec_get_audio_rate());
+    CTP_CMD_COMBINED(NULL, CTP_NO_ERR, "THIRD_VIDEO_STATUS", "NOTIFY", buf);
+#endif
 
 
     return 0;
 }
+
+
+
 /***************************************************************************
 功能：查看设备wifi支持模式、改变设备wifi运行模式
 命令描述
@@ -3848,12 +4106,97 @@ static int cmd_get_app_video_rec(void *priv, char *content)
 #endif // 0
     return 0;
 }
+
+int cmd_get_video_size(void *priv, char *content)
+{
+    char buf[128];
+    /* char str[32] = "4K;2K;1080P"; */
+    char str[32] = "NA;720P;480P";
+    u32 res = db_select("res");
+
+    switch (res) {
+    case VIDEO_RES_1080P:
+        snprintf(buf, sizeof(buf), "str:%s,val:%d", str, 1);
+        break;
+    case VIDEO_RES_720P:
+        snprintf(buf, sizeof(buf), "str:%s,val:%d", str, 1);
+        break;
+    case VIDEO_RES_VGA:
+        snprintf(buf, sizeof(buf), "str:%s,val:%d", str, 2);
+        break;
+    default:
+        snprintf(buf, sizeof(buf), "str:%s,val:%d", str, 2);
+        break;
+    }
+
+    printf("buf -> %s\n", buf);
+    CTP_CMD_COMBINED(priv, CTP_NO_ERR, "VIDEO_SIZE", "NOTIFY", buf);
+    return 0;
+}
+
+int cmd_put_video_size(void *priv,  char *content)
+{
+    json_object *new_obj = NULL;
+    json_object *parm = NULL;
+    json_object *v = NULL;
+    struct intent it;
+    char buf[128];
+    /* const char *height, *width, *format; */
+    const char *val;
+    /* char str[32] = "4K;2K;1080P"; */
+    char str[32] = "NA;720P;480P";
+    //分解content字段
+    new_obj = json_tokener_parse(content);
+    parm =  json_object_object_get(new_obj, "param");
+
+    v =  json_object_object_get(parm, "val");
+    val = json_object_get_string(v);
+
+    printf("val : %s\n", val);
+
+    u32 res = atoi(val);
+    if (res == 1) {
+        db_update("res", VIDEO_RES_720P);
+    } else if (res == 2) {
+        db_update("res", VIDEO_RES_VGA);
+    } else {
+        db_update("res", VIDEO_RES_720P);
+    }
+//    db_flush();
+
+    /* u32 res = db_select("res"); */
+#if 0//def CONFIG_UI_ENABLE
+    net_video_rec_post_msg("changeRES:r=%1", db_select("res"));
+#endif
+//    video_rec_post_msg("reshow:a=%1",APP_RESOLUTION);
+    snprintf(buf, sizeof(buf), "str:%s,val:%d", str, res);
+
+    printf("buf -> %s\n", buf);
+    CTP_CMD_COMBINED(priv, CTP_NO_ERR, "VIDEO_SIZE", "NOTIFY", buf);
+
+    json_object_put(new_obj);
+    return 0;
+}
+
+/* 设备能力集获取 */
+//0-App决定，1-SDK，2-HTTP，3-SDK回放、HTTP下载，4-HTTP回放、SDK下载
+int cmd_get_camera_capability(void *priv, char *content)
+{
+    char buf[128];
+    snprintf(buf, sizeof(buf), "value:%s", "00100100002");
+
+    printf("buf -> %s\n", buf);
+    CTP_CMD_COMBINED(priv, CTP_NO_ERR, "CAMERA_CAPABILITY", "NOTIFY", buf);
+    return 0;
+}
+
 //添加命令和相应的回调
 //前GET后PUT
 //
 //
 /*视频系列命令*/
 const struct ctp_map_entry ctp_video_cmd_tab[] SEC_USED(.ctp_video_cmd) = {
+    {NULL, "VIDEO_SIZE", cmd_get_video_size, cmd_put_video_size},
     {NULL, "VIDEO_PARAM", cmd_get_video_param, cmd_put_video_param},
     {NULL, "VIDEO_CTRL", cmd_get_video_ctrl, cmd_put_video_ctrl},
     {NULL, "VIDEO_FINISH", NULL, NULL}, //特殊命令，只有回复，用于录像完成
@@ -3889,11 +4232,17 @@ const struct ctp_map_entry ctp_video_cmd_tab[] SEC_USED(.ctp_video_cmd) = {
     {NULL, "CLOSE_PULL_RT_STREAM", cmd_get_close_pull_rt_stream, cmd_put_close_pull_rt_stream},
     {NULL, "OPEN_PULL_AUDIO_RT_STREAM", NULL, cmd_put_open_pull_audio_rt_stream},
     {NULL, "CLOSE_PULL_AUDIO_RT_STREAM", cmd_get_close_pull_audio_rt_stream, cmd_put_close_pull_audio_rt_stream},
+
+    {NULL, "OPEN_THIRD_RT_STREAM", NULL, cmd_put_open_third_rt_stream},
+    {NULL, "CLOSE_THIRD_RT_STREAM", cmd_get_close_third_rt_stream, cmd_put_close_third_rt_stream},
+
 #endif
     {NULL, "VIDEO_BUMPING", cmd_get_video_bumping, cmd_put_video_bumping},
 
     {NULL, "PULL_VIDEO_STATUS", cmd_get_pull_video_status, NULL},
+    {NULL, "THIRD_VIDEO_STATUS", cmd_get_third_video_status, NULL},
     {NULL, "PULL_VIDEO_PARAM", cmd_get_pull_video_param, cmd_put_pull_video_param},
+    {NULL, "THIRD_VIDEO_PARAM", cmd_get_third_video_param, cmd_put_third_video_param},
     {NULL, "VIDEO_CYC_SAVEFILE", NULL, cmd_put_video_cyc_savefile},
 #ifdef CONFIG_NET_SCR
     {NULL, "NET_SCR", cmd_get_net_scr, cmd_put_net_scr},
@@ -3909,6 +4258,7 @@ const struct ctp_map_entry ctp_system_cmd_tab[] SEC_USED(.ctp_system_cmd) = {
     {"bat", "BAT_STATUS", cmd_get_bat_status, NULL},
     {"uuid", "UUID", cmd_get_uuid, NULL},
     {"fp", "TF_CAP", cmd_get_sd_size, NULL},
+    {NULL, "PRODUCT_INFO", cmd_get_info_product, NULL},
 #if 0
     {"bvo", "BOARD_VOICE", cmd_get_board_voice, cmd_put_board_voice},
     {"kvo", "KEY_VOICE", cmd_get_key_voice, cmd_put_key_voice},
@@ -3924,6 +4274,7 @@ const struct ctp_map_entry ctp_system_cmd_tab[] SEC_USED(.ctp_system_cmd) = {
 #if defined CONFIG_ENABLE_VLIST
     {NULL, "FORWARD_MEDIA_FILES_LIST", NULL, cmd_put_make_forward_files_list},
     {NULL, "BEHIND_MEDIA_FILES_LIST", NULL, cmd_put_make_behind_files_list},
+    {NULL, "THIRD_MEDIA_FILES_LIST", NULL, cmd_put_make_third_files_list},
 #endif
     {NULL, "FILES_DELETE", NULL, cmd_put_files_delete},
     {NULL, "MULTI_COVER_FIGURE", NULL, cmd_put_multi_cover_figure},
@@ -3935,19 +4286,22 @@ const struct ctp_map_entry ctp_system_cmd_tab[] SEC_USED(.ctp_system_cmd) = {
 
     {NULL, "CTP_CLI_CONNECTED", NULL, cmd_put_ctp_cli_connected},
     {NULL, "GEN_CHK", cmd_get_gen_chk, NULL},
+
+    {NULL, "CTP_CMD_OPENAPP", NULL, cmd_enter_backstage},
+    {NULL, "CTP_CMD_EXITAPP", NULL, cmd_exit_backstage},
 #if 1
     {NULL, "RT_TALK_CTL", cmd_get_rt_talk_ctl, cmd_put_rt_talk_ctl},
     {NULL, "VOICE_TALK_CTL", cmd_get_voice_talk_ctl, cmd_put_voice_talk_ctl},
 #endif
-
+    {NULL, "CAMERA_CAPABILITY", cmd_get_camera_capability, NULL},   /* 设备能力集获取 */
     {NULL, "FILE_LOCK", NULL, cmd_put_file_lock},
     {NULL, "GENERIC_CMD", cmd_get_generic_cmd, cmd_put_generic_cmd},
 
     /**
        CDP控制命令,NULL类型的命令需要自己回复，系统级的命令就不管,已经做好了处理
     */
-    {NULL, "WIND_VELOCITY", cmd_get_wind_velocity, NULL}, //获取风速等级
-    {NULL, "DEVICE_DIRECTION_CONTROL", NULL, cmd_put_device_direction}, //控制设备飞行方向
+    // {NULL, "WIND_VELOCITY", cmd_get_wind_velocity, NULL}, //获取风速等级
+    // {NULL, "DEVICE_DIRECTION_CONTROL", NULL, cmd_put_device_direction}, //控制设备飞行方向
 
     /*
      *  2.4G 和 5G切换
@@ -3960,8 +4314,8 @@ const struct ctp_map_entry ctp_system_cmd_tab[] SEC_USED(.ctp_system_cmd) = {
 
 /*照片系列命令*/
 const struct ctp_map_entry ctp_photo_cmd_tab[] SEC_USED(.ctp_photo_cmd) = {
-    {NULL, "PHOTO_RESO", cmd_get_photo_reso, cmd_put_photo_reso},
-    {"qua", "PHOTO_QUALITY", cmd_get_photo_quality, cmd_put_photo_quality},
+    // {NULL, "PHOTO_RESO", cmd_get_photo_reso, cmd_put_photo_reso},
+    // {"qua", "PHOTO_QUALITY", cmd_get_photo_quality, cmd_put_photo_quality},
     {NULL, "PHOTO_CTRL", NULL, cmd_put_photo_ctrl},
 #if 0
     {"phm", "SELF_TIMER", cmd_get_self_timer, cmd_put_self_timer},
@@ -4038,4 +4392,23 @@ int user_close_rt_stream(void)
 
     return 0;
 }
+int user_close_rt2_stream(void)
+{
+    u8 mark;
+    const char *status = NULL;
+    struct intent it;
+
+    init_intent(&it);
+    net_switch_ui("video_rec");
+    it.name = "net_video_rec";
+//设置参数
+    it.action = ACTION_VIDEO2_CLOSE_RT_STREAM;
+
+    mark = 2;
+    it.data = (const char *)&mark; //close video param
+    start_app(&it);
+
+    return 0;
+}
+
 

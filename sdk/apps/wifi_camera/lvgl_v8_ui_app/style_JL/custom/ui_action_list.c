@@ -171,6 +171,45 @@ static void send_msg2file_num(void)
     lvgl_module_msg_send_ptr(num, 0);
 }
 
+int get_cur_num()
+{
+    int line_ = 0;
+    lv_obj_t *contain = lv_obj_get_child(guider_ui.video_file, 3);
+    cur_scroll_val = lv_obj_get_scroll_y(contain);
+    if (total_file_num % 3) {
+        line_ = total_file_num / 3 - 1;
+    } else {
+        line_ = total_file_num / 3 - 2;
+    }
+    if (line_ <= 0) {
+        line_ = 0;
+    }
+    int cur_file;
+    cur_file = cur_scroll_val / 215;
+    if (cur_file) {
+        if (cur_scroll_val % 215 >= 43) {
+            cur_file = cur_file * 3 + 3 * 3;
+        } else {
+            cur_file = cur_file * 3 + 2 * 3;
+        }
+    } else {
+        if (cur_scroll_val % 215 >= 43) {
+            cur_file = 3 * 3;
+        } else {
+            cur_file = 2 * 3;
+        }
+    }
+
+    /* printf("srcoll val:%d, line_:%d, cur_file:%d", cur_scroll_val, line_, cur_file); */
+    if (line_ * 215 == cur_scroll_val) {
+        cur_file = total_file_num;
+    }
+
+    cur_file = cur_file < total_file_num ? cur_file : total_file_num;
+    return cur_file;
+}
+
+
 static void dec_no_card_return(int dir)
 {
     gui_scr_t *screen = gui_scr_get(GUI_SCREEN_HOME_PAGE);
@@ -800,6 +839,8 @@ void scroll_update_position(int scroll_val)
         }
     }
     last_line = line;
+    edit_lock_file(guider_ui.video_file, 0);
+
 }
 
 void file_list_up(void)

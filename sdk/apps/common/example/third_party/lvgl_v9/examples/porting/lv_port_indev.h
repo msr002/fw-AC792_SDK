@@ -31,6 +31,9 @@ extern "C" {
  * GLOBAL PROTOTYPES
  **********************/
 void lv_port_indev_init(void);
+void lv_indev_timer_read_touch(void *user_data);
+void lv_indev_set_touch_timer_en(int en);
+void lv_indev_timer_read_key(void *user_data);
 
 /**********************
  *      MACROS

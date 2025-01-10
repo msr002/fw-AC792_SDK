@@ -39,10 +39,10 @@ typedef struct {
     // Screen home
     lv_obj_t *home;
     bool      home_del;
-    lv_obj_t *home_imgbtn_1;
-    lv_obj_t *home_imgbtn_1_label;
     lv_obj_t *home_imgbtn_2;
     lv_obj_t *home_imgbtn_2_label;
+    lv_obj_t *home_imgbtn_1;
+    lv_obj_t *home_imgbtn_1_label;
     lv_obj_t *home_imgbtn_3;
     lv_obj_t *home_imgbtn_3_label;
 
@@ -50,14 +50,14 @@ typedef struct {
     lv_obj_t *pair_status;
     bool      pair_status_del;
     lv_obj_t *g_kb_pair_status;
-    lv_obj_t *pair_status_imgbtn_1;
-    lv_obj_t *pair_status_imgbtn_1_label;
     lv_obj_t *pair_status_imglist_1;
     lv_obj_t *pair_status_imglist_2;
     lv_obj_t *pair_status_imglist_3;
     lv_obj_t *pair_status_imglist_4;
     lv_obj_t *pair_status_imglist_5;
     lv_obj_t *pair_status_imglist_6;
+    lv_obj_t *pair_status_imgbtn_1;
+    lv_obj_t *pair_status_imgbtn_1_label;
     lv_obj_t *pair_status_lbl_1;
     lv_obj_t *pair_status_lbl_2;
     lv_obj_t *pair_status_lbl_3;
@@ -74,6 +74,14 @@ typedef struct {
     // Screen file_browser
     lv_obj_t *file_browser;
     bool      file_browser_del;
+    lv_obj_t *file_browser_view_2;
+    lv_obj_t *file_browser_imgbtn_1;
+    lv_obj_t *file_browser_imgbtn_1_label;
+    lv_obj_t *file_browser_imgbtn_2;
+    lv_obj_t *file_browser_imgbtn_2_label;
+    lv_obj_t *file_browser_imgbtn_3;
+    lv_obj_t *file_browser_imgbtn_3_label;
+    lv_obj_t *file_browser_lbl_1;
     lv_obj_t *file_browser_browser_cont;
     lv_obj_t *file_browser_file_cont1;
     lv_obj_t *file_browser_img_1;
@@ -93,14 +101,6 @@ typedef struct {
     lv_obj_t *file_browser_file_cont6;
     lv_obj_t *file_browser_img_6;
     lv_obj_t *file_browser_lbl_7;
-    lv_obj_t *file_browser_view_2;
-    lv_obj_t *file_browser_imgbtn_1;
-    lv_obj_t *file_browser_imgbtn_1_label;
-    lv_obj_t *file_browser_imgbtn_2;
-    lv_obj_t *file_browser_imgbtn_2_label;
-    lv_obj_t *file_browser_imgbtn_3;
-    lv_obj_t *file_browser_imgbtn_3_label;
-    lv_obj_t *file_browser_lbl_1;
 
     // Screen pair_options
     lv_obj_t *pair_options;
@@ -111,8 +111,8 @@ typedef struct {
     lv_obj_t *pair_options_imgbtn_2_label;
     lv_obj_t *pair_options_lbl_1;
     lv_obj_t *pair_options_lbl_2;
-    lv_obj_t *pair_options_imgbtn_3;
-    lv_obj_t *pair_options_imgbtn_3_label;
+    lv_obj_t *pair_options_imgbtn_4;
+    lv_obj_t *pair_options_imgbtn_4_label;
 
     // Screen pairing
     lv_obj_t *pairing;
@@ -129,6 +129,45 @@ typedef struct {
     bool      video_play_del;
     lv_obj_t *video_play_imgbtn_1;
     lv_obj_t *video_play_imgbtn_1_label;
+    lv_obj_t *video_play_view_1;
+    lv_obj_t *video_play_imglist_1;
+    lv_obj_t *video_play_imgbtn_3;
+    lv_obj_t *video_play_imgbtn_3_label;
+    lv_obj_t *video_play_imgbtn_2;
+    lv_obj_t *video_play_imgbtn_2_label;
+    lv_obj_t *video_play_bar_1;
+
+    // Screen sys_prompt
+    lv_obj_t *sys_prompt;
+    bool      sys_prompt_del;
+    lv_obj_t *sys_prompt_view_1;
+    lv_obj_t *sys_prompt_lbl_1;
+    lv_obj_t *sys_prompt_img_1;
+
+    // Screen dir_select
+    lv_obj_t *dir_select;
+    bool      dir_select_del;
+    lv_obj_t *dir_select_view_1;
+    lv_obj_t *dir_select_img_1;
+    lv_obj_t *dir_select_lbl_2;
+    lv_obj_t *dir_select_view_2;
+    lv_obj_t *dir_select_img_2;
+    lv_obj_t *dir_select_lbl_3;
+    lv_obj_t *dir_select_view_3;
+    lv_obj_t *dir_select_img_3;
+    lv_obj_t *dir_select_lbl_4;
+    lv_obj_t *dir_select_view_4;
+    lv_obj_t *dir_select_img_4;
+    lv_obj_t *dir_select_lbl_5;
+    lv_obj_t *dir_select_view_5;
+    lv_obj_t *dir_select_img_5;
+    lv_obj_t *dir_select_lbl_6;
+    lv_obj_t *dir_select_view_6;
+    lv_obj_t *dir_select_img_6;
+    lv_obj_t *dir_select_lbl_7;
+    lv_obj_t *dir_select_lbl_1;
+    lv_obj_t *dir_select_imgbtn_1;
+    lv_obj_t *dir_select_imgbtn_1_label;
 
     lv_group_t *default_group;
 } lv_ui;
@@ -173,6 +212,13 @@ void unload_scr_unpair(lv_ui *ui);
 // Screen video_play
 lv_obj_t *setup_scr_video_play(lv_ui *ui);
 void unload_scr_video_play(lv_ui *ui);
+
+// Screen sys_prompt
+lv_obj_t *setup_scr_sys_prompt(lv_ui *ui);
+void unload_scr_sys_prompt(lv_ui *ui);
+// Screen dir_select
+lv_obj_t *setup_scr_dir_select(lv_ui *ui);
+void unload_scr_dir_select(lv_ui *ui);
 #ifdef __cplusplus
 }
 #endif

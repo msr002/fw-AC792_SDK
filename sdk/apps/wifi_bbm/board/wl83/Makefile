@@ -803,7 +803,9 @@ c_SRC_FILES := \
 	../../../../apps/common/usb/host/aoa.c \
 	../../../../apps/common/usb/host/audio.c \
 	../../../../apps/common/usb/host/hid.c \
+	../../../../apps/common/usb/host/hub.c \
 	../../../../apps/common/usb/host/rndis_host_connectionless.c \
+	../../../../apps/common/usb/host/task_host_husb.c \
 	../../../../apps/common/usb/host/usb_bulk_transfer.c \
 	../../../../apps/common/usb/host/usb_ctrl_transfer.c \
 	../../../../apps/common/usb/host/usb_host.c \
@@ -823,8 +825,19 @@ c_SRC_FILES := \
 	../../../../apps/wifi_bbm/app_database.c \
 	../../../../apps/wifi_bbm/app_main.c \
 	../../../../apps/wifi_bbm/baby_monitor.c \
+	../../../../apps/wifi_bbm/bbm_audio_dec.c \
+	../../../../apps/wifi_bbm/bbm_audio_enc.c \
+	../../../../apps/wifi_bbm/bbm_ctp_client.c \
+	../../../../apps/wifi_bbm/bbm_ctp_cmd.c \
+	../../../../apps/wifi_bbm/bbm_ctp_file.c \
+	../../../../apps/wifi_bbm/bbm_ctp_play.c \
+	../../../../apps/wifi_bbm/bbm_ctp_rt_stream.c \
+	../../../../apps/wifi_bbm/bbm_pair.c \
+	../../../../apps/wifi_bbm/bbm_video_pipeline.c \
+	../../../../apps/wifi_bbm/bbm_video_rec.c \
 	../../../../apps/wifi_bbm/board/wl83/board_develop.c \
 	../../../../apps/wifi_bbm/lvgl_v8_ui_app/custom/custom.c \
+	../../../../apps/wifi_bbm/lvgl_v8_ui_app/custom/ui_action_dir.c \
 	../../../../apps/wifi_bbm/lvgl_v8_ui_app/custom/ui_action_file.c \
 	../../../../apps/wifi_bbm/lvgl_v8_ui_app/custom/ui_action_home.c \
 	../../../../apps/wifi_bbm/lvgl_v8_ui_app/custom/ui_action_pair.c \
@@ -838,6 +851,8 @@ c_SRC_FILES := \
 	../../../../apps/wifi_bbm/lvgl_v8_ui_app/generated/gui_fonts/lv_font_montserratMedium_12.c \
 	../../../../apps/wifi_bbm/lvgl_v8_ui_app/generated/gui_fonts/lv_font_montserratMedium_16.c \
 	../../../../apps/wifi_bbm/lvgl_v8_ui_app/generated/gui_fonts/lv_font_montserratMedium_20.c \
+	../../../../apps/wifi_bbm/lvgl_v8_ui_app/generated/gui_fonts/lv_font_montserratMedium_24.c \
+	../../../../apps/wifi_bbm/lvgl_v8_ui_app/generated/gui_fonts/lv_font_montserratMedium_32.c \
 	../../../../apps/wifi_bbm/lvgl_v8_ui_app/generated/gui_fonts/lv_font_montserratMedium_36.c \
 	../../../../apps/wifi_bbm/lvgl_v8_ui_app/generated/gui_group/gui_group.c \
 	../../../../apps/wifi_bbm/lvgl_v8_ui_app/generated/gui_guider.c \
@@ -845,13 +860,17 @@ c_SRC_FILES := \
 	../../../../apps/wifi_bbm/lvgl_v8_ui_app/generated/gui_msg/gui_msg.c \
 	../../../../apps/wifi_bbm/lvgl_v8_ui_app/generated/gui_msg/gui_pair_msg.c \
 	../../../../apps/wifi_bbm/lvgl_v8_ui_app/generated/gui_msg/gui_rt_stream_msg.c \
+	../../../../apps/wifi_bbm/lvgl_v8_ui_app/generated/gui_msg/gui_sys_prompt_msg.c \
+	../../../../apps/wifi_bbm/lvgl_v8_ui_app/generated/gui_msg/gui_video_play_msg.c \
 	../../../../apps/wifi_bbm/lvgl_v8_ui_app/generated/gui_res/res_common.c \
+	../../../../apps/wifi_bbm/lvgl_v8_ui_app/generated/gui_scr/setup_scr_dir_select.c \
 	../../../../apps/wifi_bbm/lvgl_v8_ui_app/generated/gui_scr/setup_scr_file_browser.c \
 	../../../../apps/wifi_bbm/lvgl_v8_ui_app/generated/gui_scr/setup_scr_home.c \
 	../../../../apps/wifi_bbm/lvgl_v8_ui_app/generated/gui_scr/setup_scr_pair_options.c \
 	../../../../apps/wifi_bbm/lvgl_v8_ui_app/generated/gui_scr/setup_scr_pair_status.c \
 	../../../../apps/wifi_bbm/lvgl_v8_ui_app/generated/gui_scr/setup_scr_pairing.c \
 	../../../../apps/wifi_bbm/lvgl_v8_ui_app/generated/gui_scr/setup_scr_rt_stream.c \
+	../../../../apps/wifi_bbm/lvgl_v8_ui_app/generated/gui_scr/setup_scr_sys_prompt.c \
 	../../../../apps/wifi_bbm/lvgl_v8_ui_app/generated/gui_scr/setup_scr_unpair.c \
 	../../../../apps/wifi_bbm/lvgl_v8_ui_app/generated/gui_scr/setup_scr_video_play.c \
 	../../../../apps/wifi_bbm/lvgl_v8_ui_app/generated/gui_timelines/gui_timelines.c \
@@ -861,19 +880,13 @@ c_SRC_FILES := \
 	../../../../apps/wifi_bbm/protocols/udp_multicast.c \
 	../../../../apps/wifi_bbm/protocols/wifi_adapter.c \
 	../../../../apps/wifi_bbm/ui_action.c \
-	../../../../apps/wifi_bbm/wifi/ctp_cli_recv_stream.c \
-	../../../../apps/wifi_bbm/wifi/ctp_cmd.c \
 	../../../../apps/wifi_bbm/wifi/ftpd_vfs_reg.c \
 	../../../../apps/wifi_bbm/wifi/media_file_list.c \
-	../../../../apps/wifi_bbm/wifi/net_video_rec.c \
 	../../../../apps/wifi_bbm/wifi/network_mssdp.c \
 	../../../../apps/wifi_bbm/wifi/packet.c \
-	../../../../apps/wifi_bbm/wifi/raw_video_stream.c \
 	../../../../apps/wifi_bbm/wifi/stream/video_rt_tcp.c \
 	../../../../apps/wifi_bbm/wifi/stream/video_rt_udp.c \
 	../../../../apps/wifi_bbm/wifi/stream/video_rt_usr.c \
-	../../../../apps/wifi_bbm/wifi/strm_video_rec.c \
-	../../../../apps/wifi_bbm/wifi/tx_camera_cWF/tx_camera_cWF.c \
 	../../../../apps/wifi_bbm/wifi/video_playback.c \
 	../../../../apps/wifi_bbm/wifi/video_preview.c \
 	../../../../apps/wifi_bbm/wifi/wifi_app_task.c \

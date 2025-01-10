@@ -28,7 +28,7 @@
 /* extern int ui_touch_msg_post(struct touch_event *event); */
 /* #endif */
 
-static OS_SEM *tp_drdy_sem;
+static void(*tp_drdy_sem_post_func)(void);
 static void *iic;
 static volatile int cst3240_int_id = -1;
 static u16 cst3240_timer_id = 0;
@@ -261,7 +261,7 @@ static int cst3240_get_fig1_xy(u16 *x, u16 *y)
 
 static void cst3240_interrupt(void *arg, u32 parm)
 {
-    os_sem_post(tp_drdy_sem);
+    tp_drdy_sem_post_func();
 }
 
 
@@ -350,7 +350,7 @@ static int cst3240_check_pid(void)
 }
 
 
-static int cst3240_init(const tp_platform_data_t *pd_data, OS_SEM *sem)
+static int cst3240_init(const tp_platform_data_t *pd_data, void(*post_func)(void))
 {
     log_info(">>>>>init start !!!");
 
@@ -366,7 +366,7 @@ static int cst3240_init(const tp_platform_data_t *pd_data, OS_SEM *sem)
         return -ENODEV;
     }
 
-    tp_drdy_sem = sem;
+    tp_drdy_sem_post_func = post_func;
 
     if (cst3240_int_enable(pd_data)) {
         dev_close(iic);

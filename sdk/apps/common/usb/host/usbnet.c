@@ -302,7 +302,12 @@ s32 usbnet_at_port_parser(struct usb_host_device *host_dev, u8 interface_num, co
                     if (!wireless_dev[usb_id].epin_buf_at) {
                         wireless_dev[usb_id].epin_buf_at = usb_h_alloc_ep_buffer(usb_id, wireless_dev[usb_id].host_epin_at | USB_DIR_IN, wireless_dev[usb_id].rxmaxp_at * 2);
                     }
+#if USB_HUB
+                    usb_hub_rxreg_set(usb_id, wireless_dev[usb_id].host_epin_at, wireless_dev[usb_id].epin_at, &(host_dev->private_data.hub_info));
+#else
                     usb_write_rxfuncaddr(usb_id, wireless_dev[usb_id].host_epin_at, host_dev->private_data.devnum);
+#endif
+                    /* usb_write_rxfuncaddr(usb_id, wireless_dev[usb_id].host_epin_at, host_dev->private_data.devnum); */
                     usb_h_ep_config(usb_id, wireless_dev[usb_id].host_epin_at | USB_DIR_IN, USB_ENDPOINT_XFER_BULK, 1, rx_interval, wireless_dev[usb_id].epin_buf_at, wireless_dev[usb_id].rxmaxp_at);
 
                     usb_h_ep_read_async(usb_id, wireless_dev[usb_id].host_epin_at, wireless_dev[usb_id].epin_at, NULL, 0, USB_ENDPOINT_XFER_BULK, 1);
@@ -326,7 +331,13 @@ s32 usbnet_at_port_parser(struct usb_host_device *host_dev, u8 interface_num, co
                     if (!wireless_dev[usb_id].epout_buf_at) {
                         wireless_dev[usb_id].epout_buf_at = usb_h_alloc_ep_buffer(usb_id, wireless_dev[usb_id].host_epout_at | USB_DIR_OUT, wireless_dev[usb_id].txmaxp_at);
                     }
+#if USB_HUB
+                    usb_hub_txreg_set(usb_id, wireless_dev[usb_id].host_epout_at, wireless_dev[usb_id].epout_at, &(host_dev->private_data.hub_info));
+#else
                     usb_write_txfuncaddr(usb_id, wireless_dev[usb_id].host_epout_at, host_dev->private_data.devnum);
+#endif
+
+                    /* usb_write_txfuncaddr(usb_id, wireless_dev[usb_id].host_epout_at, host_dev->private_data.devnum); */
                     usb_h_ep_config(usb_id, wireless_dev[usb_id].host_epout_at | USB_DIR_OUT, USB_ENDPOINT_XFER_BULK, 0, 0, wireless_dev[usb_id].epout_buf_at, wireless_dev[usb_id].txmaxp_at);
                 }
             }
@@ -443,13 +454,25 @@ __set_config:
                 if (!wireless_dev[usb_id].inbuf) {
                     wireless_dev[usb_id].inbuf = malloc(wireless_dev[usb_id].rxmaxp);
                 }
+#if USB_HUB
+                usb_hub_rxreg_set(usb_id, wireless_dev[usb_id].host_epin, wireless_dev[usb_id].epin, &(host_dev->private_data.hub_info));
+#else
                 usb_write_rxfuncaddr(usb_id, wireless_dev[usb_id].host_epin, host_dev->private_data.devnum);
+#endif
+                /* usb_write_rxfuncaddr(usb_id, wireless_dev[usb_id].host_epin, host_dev->private_data.devnum); */
                 usb_h_ep_config(usb_id, wireless_dev[usb_id].host_epin | USB_DIR_IN, USB_ENDPOINT_XFER_BULK, 1, rx_interval, wireless_dev[usb_id].epin_buf, wireless_dev[usb_id].rxmaxp);
 
                 if (!wireless_dev[usb_id].epout_buf) {
                     wireless_dev[usb_id].epout_buf = usb_h_alloc_ep_buffer(usb_id, wireless_dev[usb_id].host_epout | USB_DIR_OUT, wireless_dev[usb_id].txmaxp);
                 }
+
+#if USB_HUB
+                usb_hub_txreg_set(usb_id, wireless_dev[usb_id].host_epout, wireless_dev[usb_id].epout, &(host_dev->private_data.hub_info));
+#else
                 usb_write_txfuncaddr(usb_id, wireless_dev[usb_id].host_epout, host_dev->private_data.devnum);
+#endif
+
+                /* usb_write_txfuncaddr(usb_id, wireless_dev[usb_id].host_epout, host_dev->private_data.devnum); */
                 usb_h_ep_config(usb_id, wireless_dev[usb_id].host_epout | USB_DIR_OUT, USB_ENDPOINT_XFER_BULK, 0, 0, wireless_dev[usb_id].epout_buf, wireless_dev[usb_id].txmaxp);
 
                 /* usb_h_ep_read_async(usb_id, wireless_dev[usb_id].host_epin, wireless_dev[usb_id].epin, NULL, 0, USB_ENDPOINT_XFER_BULK, 1); */

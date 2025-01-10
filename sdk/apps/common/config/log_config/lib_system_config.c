@@ -46,7 +46,11 @@ const int FILE_TIME_HIDDEN_ENABLE = 0;  //是否隐藏文件时间
 const int FILE_TIME_USER_DEFINE_ENABLE = 0; //用户自行通过fat_set_datetime_info设置文件系统的时间
 const int FATFS_TIMESORT_TURN_ENABLE = 0; //时排序翻转，由默认从小到大变成从大到小
 const int FATFS_TIMESORT_NUM = 128; //按时间排序,记录文件数量
+#if TCFG_JLFAT_SUPPORT_OVERSECTOR_RW_ENABLE
+const int FATFS_SUPPORT_OVERSECTOR_RW = 1; //是否支持超过一个sector向设备拿数
+#else
 const int FATFS_SUPPORT_OVERSECTOR_RW = 0; //是否支持超过一个sector向设备拿数
+#endif
 const int FATFS_RW_MAX_CACHE = 256 * 1024; //设置读写申请的最大cache大小，小于512会被默认不生效
 const int FILE_AUTO_RENAME_NUM = 1;  //自动重命名文件数量限制最大FILE_AUTO_RENAME_NUM * 8192个如果文件数量超最大以最大命名
 const int FATFS_SUPPORT_WRITE_SAVE_MEANTIME = 0; //每次写同步目录项使能，会降低连续写速度。未fclose文件掉电场景使用
@@ -56,7 +60,7 @@ const int FATFS_GET_SPACE_USE_RAM = 0; //获取剩余容量使用大Buf缓存, �
 //================================================//
 //                  dev使用异步读使能             //
 //================================================//
-#ifdef TCFG_DEVICE_BULK_READ_ASYNC_ENABLE
+#if TCFG_DEVICE_BULK_READ_ASYNC_ENABLE
 const int device_bulk_read_async_enable = 1;
 #else
 const int device_bulk_read_async_enable = 0;

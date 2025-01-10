@@ -329,6 +329,7 @@
 //                                  路径配置                                       //
 //*********************************************************************************//
 #define CONFIG_JLFAT_ENABLE
+#define TCFG_JLFAT_SUPPORT_OVERSECTOR_RW_ENABLE 1
 
 #if TCFG_SD0_ENABLE
 #define CONFIG_STORAGE_PATH                         "storage/sd0"   //定义对应SD0的路径

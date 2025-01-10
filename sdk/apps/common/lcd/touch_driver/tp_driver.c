@@ -14,6 +14,7 @@
 
 #if TCFG_TP_DRIVER_ENABLE
 
+#define TP_USE_TASK     1                      ///< TP是否使用任务
 
 #define TP_RESOLUTION_SCALE_ENABLE   0         ///< TP与显示屏分辨率不一致时，可使能TP坐标缩放，有一定误差，仅调试用
 #if TP_RESOLUTION_SCALE_ENABLE
@@ -24,9 +25,13 @@
 
 #define TP_REPOST_DATA_TO_UI_TIME    2         ///< UI接收不过来数据，TP重新发送数据给UI的时间间隔
 #define TP_FILTER_SAME_COORDINATE    0         ///< 过滤相同坐标。如果UI没有长按事件的需求，可打开减少消息发送消耗
-#define TP_TASK_NAME                 "tp_task" ///< 触摸面板任务名
 
+
+#if TP_USE_TASK
+#define TP_TASK_NAME                 "tp_task" ///< 触摸面板任务名
 static OS_SEM tp_drdy_sem;                     ///< 表示TP芯片数据ready的信号
+#endif
+
 static const tp_platform_data_t *tp_pd_data;   ///< 指向板级里注册的驱动配置
 static const tp_driver_t *tp_driver;           ///< 指向注册的TP芯片驱动接口
 #define __this tp_driver
@@ -240,6 +245,9 @@ int __attribute__((weak)) lcd_touch_interrupt_event(const char *tp_task_name, u1
 }
 
 
+
+#if TP_USE_TASK
+
 static void tp_task(void *arg)
 {
     int sem_timeout = 0;
@@ -323,6 +331,72 @@ __tp_post_xy_to_ui:
     }
 }
 
+#else
+
+static void tp_interrupt_cb(void)
+{
+    tp_info_t tp_data;
+    __this->get_xy_and_status(&tp_data);
+
+    if (tp_data.status == TP_STATUS_PRESS || tp_data.status == TP_STATUS_RELEASE) {
+        tp_xy_calc(&tp_data, &tp_latest_info);
+    } else {
+        return;
+    }
+
+    if (!tp_post_enable) {
+        if (tp_latest_info.status == TP_STATUS_RELEASE) {
+            goto __tp_post_xy_to_ui;
+        }
+        return;
+    }
+
+    // 发送触摸事件，根据返回值决定是否将坐标发送给UI
+    if (tp_event_notify_sys(tp_latest_info.x, tp_latest_info.y, tp_latest_info.act) < 0) {
+        log_debug("touch position x:%d y:%d", tp_latest_info.x, tp_latest_info.y);
+        return;
+    }
+
+    // tp post to ui disable时，只拦截发给ui的按下消息
+    if (!tp_post_to_ui_enable && (tp_latest_info.status == TP_STATUS_PRESS)) {
+        return;
+    }
+
+#if TP_FILTER_SAME_COORDINATE
+    if (tp_last_info.x == tp_latest_info.x && \
+        tp_last_info.y == tp_latest_info.y && \
+        tp_last_info.status == tp_latest_info.status) {
+        log_debug("filter same tp coordinates %d, %d, %d", tp_latest_info.x, tp_latest_info.y, tp_latest_info.status);
+        return;
+    }
+#endif
+
+__tp_post_xy_to_ui:
+    log_debug("ui_x:%d, ui_y: %d, ui_status:%d", tp_latest_info.x, tp_latest_info.y, tp_latest_info.status);
+    if (lcd_touch_interrupt_event(NULL, tp_latest_info.x, tp_latest_info.y, tp_latest_info.status)) {
+        log_debug("post xy data to UI error!!!");
+        return;
+    } else {
+#if TP_FILTER_SAME_COORDINATE
+        tp_last_info.x = tp_latest_info.x;
+        tp_last_info.y = tp_latest_info.y;
+        tp_last_info.status = tp_latest_info.status;
+        tp_last_info.act = tp_latest_info.act;
+#endif
+    }
+
+}
+
+#endif
+
+static void tp_post_drdy_sem(void)
+{
+#if TP_USE_TASK
+    os_sem_post(&tp_drdy_sem);
+#else
+    tp_interrupt_cb();
+#endif
+}
 
 __attribute__((weak)) const tp_platform_data_t *tp_get_platform_data(void)
 {
@@ -341,20 +415,28 @@ int tp_init(void)
         return -ENODEV;
     }
 
+#if TP_USE_TASK
     os_sem_create(&tp_drdy_sem, 0);
+#endif
+
     const tp_driver_t *p;
     list_for_each_tp_driver(p) {
         log_info(">>>>>>>>>>>%s init<<<<<<<<<<<", p->ic_name);
-        if (p->init && !p->init(tp_pd_data, &tp_drdy_sem)) {
-            __this = p;
+        __this = p;
+        if (p->init && !p->init(tp_pd_data, tp_post_drdy_sem)) {
             break;
         } else {
+            __this = NULL;
             log_error("%s init fail!!!!", p->ic_name);
         }
     }
 
     if (!__this) {
+
+#if TP_USE_TASK
         os_sem_del(&tp_drdy_sem, 0);
+#endif
+
         log_error("Can't find any model of tp driver!!");
         return -ENODEV;
     }
@@ -362,7 +444,10 @@ int tp_init(void)
     y_mirror = tp_pd_data->y_mirror;
     x_mirror = tp_pd_data->x_mirror;
     swap_x_y  = tp_pd_data->swap_x_y;
+
+#if TP_USE_TASK
     os_task_create(tp_task, NULL, 29, 256, 32, TP_TASK_NAME);
+#endif
 
     return 0;
 }
@@ -375,8 +460,10 @@ int tp_deinit(void)
         __this->deinit(tp_pd_data);
     }
 
+#if TP_USE_TASK
     os_task_del(TP_TASK_NAME);
     os_sem_del(&tp_drdy_sem, 0);
+#endif
     return 0;
 }
 

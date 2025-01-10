@@ -9,6 +9,7 @@
 // #include "usb_config.h"
 
 
+// #define USB_HUB      1
 
 /**@struct  usb_private_data
   * @brief  usb_private_data私有数据结构体\n
@@ -19,7 +20,10 @@ struct usb_private_data {
     u8 status; ///<当前状态,如：0:上线 ; 1:下线
     u8 devnum; ///<设备编号
     u8 ep0_max_packet_size;///<端点0最大包长，单位：byte
-    ///
+// #if USB_HUB
+    struct usb_hub_info hub_info;
+// #endif
+
     u8 speed; ///<传输速度
     u16 vendor_id; ///<供应商
     u16 product_id; ///<产品id号
@@ -55,6 +59,7 @@ struct usb_interface_info {
         struct audio_device_t *audio;
         struct wireless_device_t *wireless;
         struct h_usb_cdc *cdc;
+        struct hub_device_t *hub;
         void *p;
     } dev;
 };
@@ -64,9 +69,9 @@ struct usb_interface_info {
   *@brief   usb_host_device
   */
 struct usb_host_device {
-#if USB_HUB
+// #if USB_HUB
     struct usb_host_device *father;
-#endif
+// #endif
     OS_SEM *sem;
     struct usb_private_data private_data;
     const struct usb_interface_info *interface_info[MAX_HOST_INTERFACE];
@@ -197,7 +202,7 @@ u32 usb_h_set_intr_hander(const usb_dev usb_id, u32 ep, usb_h_interrupt hander);
   * usb_host_mount(usb_id , 5 , 10 , 1000 );
   * @encode
   */
-int usb_host_mount(const usb_dev usb_id, u32 retry, u32 reset_delay, u32 mount_timeout);
+u32 usb_host_mount(const usb_dev id, u32 port, u32 retry, u32 reset_delay, u32 mount_timeout);
 
 /**@brief   USB主机模式卸载
   * @param[in]  usb_id USB的id号
@@ -207,7 +212,7 @@ int usb_host_mount(const usb_dev usb_id, u32 retry, u32 reset_delay, u32 mount_t
   * usb_host_unmount(usb_id);
   * @encode
   */
-int usb_host_unmount(const usb_dev usb_id);
+u32 usb_host_unmount(const usb_dev usb_id, u32 port);
 
 /**@brief   USB主机模式重新挂载
   * @param[in]  usb_id USB的id号
@@ -221,7 +226,7 @@ int usb_host_unmount(const usb_dev usb_id);
   * usb_host_remount(usb_id , 5 , 10 , 1000 , 1);
   * @encode
   */
-int usb_host_remount(const usb_dev usb_id, u32 retry, u32 delay, u32 ot, u8 notify);
+u32 usb_host_remount(const usb_dev usb_id, u32 port, u32 retry, u32 delay, u32 ot, u8 notify);
 
 /**@brief   USB主机模式挂起
   * @param[in]  usb_id USB的id号

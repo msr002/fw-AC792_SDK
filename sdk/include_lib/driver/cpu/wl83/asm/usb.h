@@ -21,6 +21,15 @@
 #define     EP0_SETUP_LEN           0x40
 #define USB_MAX_HW_EPNUM    5
 
+struct usb_hub_info {
+    u8 parent_devnum;
+    u8 child_devnum;
+    u8 speed;
+    u8 port;
+    u8 protocol;
+    u8 port_map;
+};
+
 typedef struct {
     volatile u32 TXMAXP;
     volatile u32 TXCSR1;

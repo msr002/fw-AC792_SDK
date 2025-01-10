@@ -705,7 +705,8 @@ static void lv_ime_pinyin_kb_event(lv_event_t *e)
             pinyin_ime_clear_data(obj);
         } else if ((pinyin_ime->mode == LV_IME_PINYIN_MODE_K26) && ((txt[0] >= 'a' && txt[0] <= 'z') || (txt[0] >= 'A' &&
                    txt[0] <= 'Z'))) {
-            lv_strcat(pinyin_ime->input_char, txt);
+            uint16_t len = lv_strlen(pinyin_ime->input_char);
+            lv_snprintf(pinyin_ime->input_char + len, sizeof(pinyin_ime->input_char) - len, "%s", txt);
             pinyin_input_proc(obj);
             pinyin_ime->ta_count++;
         }
@@ -879,8 +880,8 @@ static void init_pinyin_dict(lv_obj_t *obj, const lv_pinyin_dict_t *dict)
             offset_count++;
         } else {
             headletter = dict[i].py[0];
+            pinyin_ime->py_num[letter_calc] = offset_count;
             letter_calc = headletter - 'a';
-            pinyin_ime->py_num[letter_calc - 1] = offset_count;
             offset_sum += offset_count;
             pinyin_ime->py_pos[letter_calc] = offset_sum;
 

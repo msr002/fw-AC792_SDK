@@ -1,0 +1,828 @@
+#include "system/includes.h"
+#include "server/video_server.h"
+#include "server/audio_server.h"
+#include "lcd_config.h"
+#include "event/key_event.h"
+#include "event/device_event.h"
+#include "action.h"
+#include "app_config.h"
+#include "vrec_osd.h"
+#include "baby_monitor.h"
+#include "stream_core.h"
+#include "sock_api/sock_api.h"
+
+#define VIDEO_OSD_BUF_SIZE      64                  //水印缓存
+#define VIDEO_RT_BUF_SIZE       200 * 1024          //实时流缓存
+#define VIDEO_REC_BUF_SIZE      1 * 1024 * 1024     //录像视频(JPG)缓存,内存充足的情况下建议给大点
+
+#define AUDIO_BUF_SIZE          64 * 1024           //实时流or录像音频缓存
+#define AUDIO_VOLUME	        100                 //实时流or录像音频音量
+#define AUDIO_RT_INTERVAL_SIZE      640             //实时流音频包大小,尽量设置小一些降低延迟
+#define AUDIO_REC_INTERVAL_SIZE     8192            //录像音频包大小
+
+#define AUDIO_RT_RECV_PORT               9981            //接收数据端口
+#define AUDIO_DEC_BUF_MAX_LEN            2*1024
+#define AUDIO_RT_RECV_BUF_MAX_LEN        200*1024
+
+
+struct video_rec_hdl {
+    struct list_head dev_list_head;
+};
+struct video_rec_hdl rec_handler;
+#define __this 	(&rec_handler)
+
+struct audio_recv_hdl {
+    u8 *recv_buf;
+    u32 recv_buf_len;
+    void *recv_sockfd;
+    int recv_task_pid;
+    u8 task_exit;
+    OS_SEM  dec_data_sem;
+
+    u8 *audio_dec_buf;
+    cbuffer_t audio_dec_save_cbuf;
+    struct server *audio_dec_server;
+};
+
+//id用于区别摄像头设备(板级对应)比如id0(video0)->MIPI摄像头
+//sub_id,在此工程中用于区别同一摄像头设备的实时流/录像
+struct video_dev_hdl {
+    struct list_head entry;
+    struct server *video_server;
+    char *video_osd_buf;
+    char *video_buf;
+    char *audio_buf;
+    struct video_rec_config config;
+    void *file;
+
+    struct audio_recv_hdl *audio_recv_hdl;
+};
+
+
+static int vfs_audio_dec_fread(void *file, void *data, u32 len)
+{
+    u32 rlen = 0;
+    int ret;
+    struct audio_recv_hdl *hdl = file;
+
+    do {
+        ret = os_sem_pend(&hdl->dec_data_sem, 100);
+        if (ret) {
+            return -1;
+        }
+
+        rlen = cbuf_read(&hdl->audio_dec_save_cbuf, data, len);
+        if (rlen == len) {
+            break;
+        }
+    } while (rlen);
+
+    return len;
+}
+
+static int vfs_audio_dec_fclose(void *file)
+{
+    return 0;
+}
+
+static int vfs_audio_dec_flen(void *file)
+{
+    return 0;
+}
+
+static const struct audio_vfs_ops vfs_audio_dec_ops = {
+    .fwrite = NULL,
+    .fread  = vfs_audio_dec_fread,
+    .fclose = vfs_audio_dec_fclose,
+    .flen   = vfs_audio_dec_flen,
+};
+
+
+static int audio_dec_init(struct audio_recv_hdl *hdl)
+{
+    union audio_req req = {0};
+    int err;
+
+    hdl->audio_dec_server = server_open("audio_server", "dec");
+    if (!hdl->audio_dec_server) {
+        printf("open audio_dec_server fail");
+        goto __err;
+    }
+
+    hdl->audio_dec_buf = (u8 *)malloc(AUDIO_DEC_BUF_MAX_LEN);
+    if (hdl->audio_dec_buf == NULL) {
+        printf("audio_dec_buf malloc fail");
+        goto __err;
+
+    }
+    cbuf_init(&hdl->audio_dec_save_cbuf, hdl->audio_dec_buf, AUDIO_DEC_BUF_MAX_LEN);
+
+    os_sem_create(&hdl->dec_data_sem, 0);
+
+    req.dec.cmd             = AUDIO_DEC_OPEN;
+    req.dec.volume          = 100;
+    req.dec.output_buf      = NULL;
+    req.dec.output_buf_len  = 4096;
+    req.dec.channel         = 1;
+    req.dec.sample_rate     = 8000;
+    req.dec.priority        = 1;
+    req.dec.vfs_ops         = &vfs_audio_dec_ops;
+    req.dec.file            = hdl;
+    req.dec.dec_type 		= "pcm";
+    req.dec.sample_source   = "dac";
+
+    err = server_request(hdl->audio_dec_server, AUDIO_REQ_DEC, &req);
+    if (err) {
+        printf("audio server req open err\n");
+        goto __err;
+    }
+
+    req.dec.cmd = AUDIO_DEC_START;
+    err = server_request(hdl->audio_dec_server, AUDIO_REQ_DEC, &req);
+    if (err) {
+        printf("audio server req start err\n");
+        goto __err;
+    }
+
+    return 0;
+
+__err:
+    if (hdl->audio_dec_server) {
+        server_close(hdl->audio_dec_server);
+        hdl->audio_dec_server = NULL;
+    }
+    if (hdl->audio_dec_buf) {
+        free(hdl->audio_dec_buf);
+        hdl->audio_dec_buf = NULL;
+    }
+    return -1;
+}
+
+static int audio_dec_exit(struct audio_recv_hdl *hdl)
+{
+    int ret;
+    union audio_req req = {0};
+
+    os_sem_del(&hdl->dec_data_sem, OS_DEL_ALWAYS);
+
+    if (hdl->audio_dec_server) {
+        req.dec.cmd = AUDIO_DEC_STOP;
+        ret = server_request(hdl->audio_dec_server, AUDIO_REQ_DEC, &req);
+        if (ret) {
+            printf("audio server dec stop err %d \n", ret);
+        }
+
+        server_close(hdl->audio_dec_server);
+        hdl->audio_dec_server = NULL;
+    }
+    if (hdl->audio_dec_buf) {
+        free(hdl->audio_dec_buf);
+        hdl->audio_dec_buf = NULL;
+    }
+
+    return 0;
+}
+
+static int audio_dec_write_cbuf(cbuffer_t *cbuf, u8 *buf, u32 size)
+{
+    u32 cur_size;
+    cur_size =  cbuf_get_data_size(cbuf);
+
+    if (cur_size + size >= AUDIO_DEC_BUF_MAX_LEN) {
+        cbuf_clear(cbuf);
+    }
+
+    cbuf_write(cbuf, buf, size);
+
+    return 0;
+}
+
+static void rt_audio_recv_task(void *priv)
+{
+    int ret;
+    int recv_len = 0;
+
+    struct audio_recv_hdl *hdl = priv;
+
+    sock_set_recv_timeout(hdl->recv_sockfd, 100);
+
+    while (1) {
+        if (hdl->task_exit) {
+            printf("rt audio recv task exit\n");
+            break;
+        }
+
+        recv_len = sock_recvfrom(hdl->recv_sockfd, hdl->recv_buf, hdl->recv_buf_len, 0, NULL, NULL);
+        if (recv_len <= 0) {
+            putchar('e');
+            continue;
+        }
+
+        audio_dec_write_cbuf(&hdl->audio_dec_save_cbuf, hdl->recv_buf, recv_len);
+        os_sem_post(&hdl->dec_data_sem);
+    }
+
+}
+
+static int rt_audio_recv_init(struct audio_recv_hdl *hdl)
+{
+    int ret;
+    struct sockaddr_in conn_addr;
+    conn_addr.sin_family = AF_INET;
+    conn_addr.sin_addr.s_addr = htonl(INADDR_ANY) ;
+    conn_addr.sin_port = htons(AUDIO_RT_RECV_PORT);
+
+    ret = audio_dec_init(hdl);
+    if (ret) {
+        return -1;
+    }
+
+    hdl->recv_sockfd = sock_reg(AF_INET, SOCK_DGRAM, 0, NULL, NULL);
+    if (hdl->recv_sockfd == NULL) {
+        printf("sock_reg err\n");
+        return -1;
+    }
+
+    ret = sock_bind(hdl->recv_sockfd, (struct sockaddr *)&conn_addr, sizeof(struct sockaddr));
+    if (ret) {
+        printf("sock_bind err:%d\n", ret);
+        return -1;
+    }
+
+    hdl->recv_buf_len = AUDIO_RT_RECV_BUF_MAX_LEN;
+    hdl->recv_buf = malloc(hdl->recv_buf_len);
+    if (!hdl->recv_buf) {
+        printf("ctp recv malloc recv buff err \n");
+        sock_unreg(hdl->recv_sockfd);
+        hdl->recv_sockfd = NULL;
+        return -1;
+    }
+
+    thread_fork("thread_socket_recv", 15, 2048, 2048, &hdl->recv_task_pid, rt_audio_recv_task, hdl);
+
+    return 0;
+}
+
+static int rt_audio_recv_exit(struct audio_recv_hdl *hdl)
+{
+
+    if (hdl->recv_task_pid) {
+        hdl->task_exit = 1;
+        thread_kill(&hdl->recv_task_pid, KILL_WAIT);
+        hdl->task_exit = 0;
+    }
+
+    audio_dec_exit(hdl);
+
+    if (hdl->recv_buf) {
+        free(hdl->recv_buf);
+        hdl->recv_buf = NULL;
+    }
+
+    if (hdl->recv_sockfd) {
+        sock_unreg(hdl->recv_sockfd);
+        hdl->recv_sockfd = NULL;
+    }
+
+
+    return 0;
+}
+
+static int video_rec_close_file(struct video_dev_hdl *dev_hdl)
+{
+    int ret;
+    char fname[32];
+    char path[128];
+
+    if (!dev_hdl->file) {
+        printf("close file is null \n");
+        return 0;
+    }
+
+    ret = fget_name(dev_hdl->file, fname, ARRAY_SIZE(fname));
+    if (ret <= 0) {
+        printf("fget_name err\n");
+        fclose(dev_hdl->file);
+        return -1;
+    }
+    strcpy(path, CONFIG_REC_PATH_0);
+    strcat(path, fname);
+
+    fclose(dev_hdl->file);
+    dev_hdl->file = NULL;
+
+    FILE_LIST_ADD(0, path, 0);
+
+    return 0;
+}
+
+static void rec_dev_server_event_handler(void *priv, int argc, int *argv)
+{
+    switch (argv[0]) {
+    case VIDEO_SERVER_UVM_ERR:
+        printf("APP_UVM_DEAL_ERR\n");
+        break;
+    case VIDEO_SERVER_PKG_ERR:
+        printf("VIDEO_SERVER_PKG_ERR\n");
+        break;
+    case VIDEO_SERVER_PKG_END:
+        printf("VIDEO_SERVER_PKG_END\n");
+        struct video_dev_hdl *hdl = priv;
+        //循环录影
+        video_rec_close_file(hdl);
+        video_rec_create_file(hdl);
+        video_savefile(hdl);
+        break;
+    case VIDEO_SERVER_NET_ERR:
+        printf("VIDEO_SERVER_NET_ERR\n");
+        break;
+    default :
+        printf("unknow rec server cmd %x , %x!\n", argv[0], (int)priv);
+        break;
+    }
+}
+
+static u32 video_rec_get_fsize(u16 abr, u8 cycle_time)
+{
+    u32 fsize;
+
+    fsize = abr * cycle_time * 10000;
+
+    fsize = fsize + fsize / 4;
+
+    return fsize;
+}
+
+static int video_rec_del_first_file(void)
+{
+    struct vfscan *fs = NULL;
+    void *file = NULL;
+
+    fs = fscan(CONFIG_REC_PATH_0, "-d -tPNGBINAVITTLDAT -sn", 2);
+    file = fselect(fs, FSEL_FIRST_FILE, 0);
+    fdelete(file);
+
+    return 0;
+}
+
+static int video_rec_create_file(struct video_dev_hdl *dev_hdl)
+{
+    int i;
+    int err;
+    FILE *file;
+    u32 cur_space;
+    u32 need_space = 0;
+
+    need_space =  video_rec_get_fsize(dev_hdl->config.abr_kbps, dev_hdl->config.cycle_time);
+
+    err = fget_free_space(CONFIG_ROOT_PATH, &cur_space);
+    if (err) {
+        printf("fget free space err\n");
+        return err;
+    }
+
+    printf("video rec cur space: %dMB, need: %dMB\n", cur_space / 1024, need_space / 1024 / 1024);
+
+    //TODO
+    while (cur_space < need_space / 1024) {
+        video_rec_del_first_file();
+
+        err = fget_free_space(CONFIG_ROOT_PATH, &cur_space);
+        if (err) {
+            return err;
+        }
+    }
+
+    file = fopen(CONFIG_REC_PATH_0"VID_****.AVI", "w+");
+    if (!file) {
+        printf("video rec fopen err\n");
+        return -1;
+    }
+    err = fseek(file, need_space, SEEK_SET);
+    if (err) {
+        printf("video rec fseek err \n");
+        fclose(file);
+        return -1;
+    }
+
+    fseek(file, 0, SEEK_SET);
+
+    dev_hdl->file = file;
+
+    return 0;
+}
+
+static int video_savefile(struct video_dev_hdl *dev_hdl)
+{
+    union video_req req = {0};
+    int err;
+
+    req.rec.channel = dev_hdl->config.sub_id;
+    req.rec.width 	= dev_hdl->config.width;
+    req.rec.height 	= dev_hdl->config.height;
+    req.rec.format  = VIDEO_FMT_AVI;
+    req.rec.state 	= VIDEO_STATE_SAVE_FILE;
+    req.rec.file    = dev_hdl->file;
+
+    req.rec.fps 	    = dev_hdl->config.fps;
+    req.rec.real_fps 	= dev_hdl->config.fps;
+    req.rec.abr_kbps    = dev_hdl->config.abr_kbps;
+    req.rec.cycle_time  = dev_hdl->config.cycle_time * 60;
+
+    req.rec.audio.sample_rate = VIDEO_REC_AUDIO_SAMPLE_RATE;
+    req.rec.audio.channel   = 1;
+    req.rec.audio.volume    = AUDIO_VOLUME;
+
+    err = server_request(dev_hdl->video_server, VIDEO_REQ_REC, &req);
+    if (err != 0) {
+        printf("video_save_file: err=%d\n", err);
+        return err;
+    }
+
+    return 0;
+}
+
+static int video_start(struct video_rec_config *config)
+{
+    int ret;
+    char dev_name[20];
+    u8 *osd_buf;
+    union video_req req = {0};
+    struct video_text_osd text_osd;
+    struct video_graph_osd graph_osd;
+    u16 max_one_line_strnum;
+    u16 osd_line_num;
+    u16 osd_max_heigh;
+    struct video_dev_hdl *dev_hdl = NULL;
+
+    u8 id = config->id;
+    u8 sub_id = config->sub_id;
+
+    dev_hdl = malloc(sizeof(struct video_dev_hdl));
+    if (!dev_hdl) {
+        printf("malloc dev_hdl err\n");
+        goto err;
+    }
+    memset(dev_hdl, 0x00, sizeof(struct video_dev_hdl));
+    memcpy(&dev_hdl->config, config, sizeof(struct video_rec_config));
+
+    sprintf(dev_name, "video%d.%d", id, sub_id);
+    printf("video_rec_start: %s \n", dev_name);
+
+    dev_hdl->video_server = server_open("video_server", dev_name);
+    if (!dev_hdl->video_server) {
+        printf("video_server open err \n");
+        goto err;
+    }
+    server_register_event_handler(dev_hdl->video_server, dev_hdl, rec_dev_server_event_handler);
+
+    //video
+    req.rec.channel     = sub_id;
+    req.rec.camera_type = VIDEO_CAMERA_NORMAL;
+    req.rec.state       = VIDEO_STATE_START;
+    req.rec.quality     = VIDEO_MID_Q;
+
+    req.rec.width       = config->width;
+    req.rec.height      = config->height;
+    req.rec.fps         = config->fps;
+    req.rec.real_fps    = config->fps;
+    req.rec.abr_kbps    = config->abr_kbps;
+
+    //区分录像还是实时流
+    if (config->net_path) {
+        //实时流
+        req.rec.buf_len = VIDEO_RT_BUF_SIZE;
+        req.rec.format  = USER_VIDEO_FMT_AVI;
+        req.rec.online  = 1;
+        req.rec.cycle_time = 5 * 60;
+
+        req.rec.audio.aud_interval_size = AUDIO_RT_INTERVAL_SIZE;
+
+        //双向语音
+        dev_hdl->audio_recv_hdl = malloc(sizeof(struct audio_recv_hdl));
+        if (!dev_hdl->audio_recv_hdl) {
+            printf("audio_recv_hdl malloc err\n");
+            goto err;
+        }
+        memset(dev_hdl->audio_recv_hdl, 0x00, sizeof(struct audio_recv_hdl));
+        rt_audio_recv_init(dev_hdl->audio_recv_hdl);
+
+    } else {
+        //录像
+        req.rec.buf_len = VIDEO_REC_BUF_SIZE;
+        req.rec.format  = VIDEO_FMT_AVI;
+        req.rec.online  = 1;
+
+        if (!config->cycle_time) {
+            config->cycle_time = 3;
+        }
+        req.rec.cycle_time = config->cycle_time * 60;
+
+        req.rec.audio.aud_interval_size = AUDIO_REC_INTERVAL_SIZE;
+
+        ret = video_rec_create_file(dev_hdl);
+        if (ret) {
+            goto err;
+        }
+
+        req.rec.file    = dev_hdl->file;
+    }
+
+    dev_hdl->video_buf = malloc(req.rec.buf_len);
+    if (!dev_hdl->video_buf) {
+        printf("malloc video rt buf err\n");
+        goto err;
+    }
+    req.rec.buf = dev_hdl->video_buf;
+
+    //OSD
+    dev_hdl->video_osd_buf = malloc(VIDEO_OSD_BUF_SIZE);
+    if (!dev_hdl->video_osd_buf) {
+        printf("malloc video rt osd buf err\n");
+        goto err;
+    }
+    memset(dev_hdl->video_osd_buf, 0x00, VIDEO_OSD_BUF_SIZE);
+    osd_buf = dev_hdl->video_osd_buf;
+
+    memset(osd_buf, ' ', 8);
+    osd_buf[8] = '\\';
+    memcpy(osd_buf + 9, osd_str_buf, strlen(osd_str_buf));
+    text_osd.font_w = 16;
+    text_osd.font_h = 32;
+    max_one_line_strnum = strlen(osd_buf);
+    osd_line_num = 1;
+    osd_max_heigh = (req.rec.height == 1088) ? 1080 : req.rec.height ;
+    text_osd.x = (req.rec.width - max_one_line_strnum * text_osd.font_w) / 64 * 64;
+    text_osd.y = (osd_max_heigh - text_osd.font_h * osd_line_num) / 16 * 16;
+    text_osd.color[0] = 0x057d88;
+    text_osd.color[1] = 0xe20095;
+    text_osd.color[2] = 0xe20095;
+    text_osd.bit_mode = 2;
+    text_osd.text_format = osd_buf;
+    text_osd.font_matrix_table = osd_str_total;
+    text_osd.font_matrix_base = osd2_str_matrix;
+    text_osd.font_matrix_len = sizeof(osd2_str_matrix);
+    text_osd.direction = 1;
+
+    req.rec.text_osd = &text_osd;
+    req.rec.graph_osd = NULL;//&graph_osd;
+
+    //audio
+    req.rec.audio.sample_rate = VIDEO_REC_AUDIO_SAMPLE_RATE;
+    req.rec.audio.channel   = 1;
+    req.rec.audio.volume    = AUDIO_VOLUME;
+
+    dev_hdl->audio_buf = malloc(AUDIO_BUF_SIZE);
+    if (!dev_hdl->audio_buf) {
+        printf("malloc audio rt buf err \n");
+        goto err;
+    }
+    req.rec.audio.buf = dev_hdl->audio_buf;
+    req.rec.audio.buf_len = AUDIO_BUF_SIZE;
+
+    //实时流
+    if (config->net_path) {
+        strcpy(req.rec.net_par.netpath, config->net_path);
+        printf("\n @@@@@@ path = %s\n", req.rec.net_par.netpath);
+        req.rec.target = VIDEO_TO_OUT;
+        req.rec.out.path = req.rec.net_par.netpath;
+        req.rec.out.arg  = NULL ;
+        req.rec.out.open = stream_open;
+        req.rec.out.send = stream_write;
+        req.rec.out.close = stream_close;
+    }
+
+    ret = server_request(dev_hdl->video_server, VIDEO_REQ_REC, &req);
+    if (ret) {
+        puts("\n\n\nstart rec err\n\n\n");
+        goto err;
+    }
+
+    list_add_tail(&dev_hdl->entry, &__this->dev_list_head);
+
+    return 0;
+
+err:
+    if (dev_hdl) {
+        if (dev_hdl->video_buf) {
+            free(dev_hdl->video_buf);
+        }
+        if (dev_hdl->video_osd_buf) {
+            free(dev_hdl->video_osd_buf);
+        }
+        if (dev_hdl->audio_buf) {
+            free(dev_hdl->audio_buf);
+        }
+        if (dev_hdl->audio_recv_hdl) {
+            free(dev_hdl->audio_recv_hdl);
+        }
+
+        server_close(dev_hdl->video_server);
+
+        free(dev_hdl);
+    }
+    return -1;
+}
+
+static int video_stop(struct video_rec_config *config)
+{
+    struct video_dev_hdl *dev_hdl = NULL;
+
+    union video_req req = {0};
+    int ret;
+    u8 id = config->id;
+    u8 sub_id = config->sub_id;
+    u8 find = 0;
+
+    list_for_each_entry(dev_hdl, &__this->dev_list_head, entry) {
+        if (dev_hdl->config.id == id && dev_hdl->config.sub_id == sub_id) {
+            find = 1;
+            list_del(&dev_hdl->entry);
+            break;
+        }
+    }
+
+    if (!find) {
+        printf(" not found dev hdl  id:%d sub_id:%d \n", id, sub_id);
+        return -1;
+    }
+
+    req.rec.channel = dev_hdl->config.sub_id;
+    req.rec.state = VIDEO_STATE_STOP;
+    ret = server_request(dev_hdl->video_server, VIDEO_REQ_REC, &req);
+    if (ret) {
+        printf("\nstop rec err 0x%x\n", ret);
+        return -1;
+    }
+
+    video_rec_close_file(dev_hdl);
+
+    server_close(dev_hdl->video_server);
+
+    free(dev_hdl->video_buf);
+    free(dev_hdl->video_osd_buf);
+    free(dev_hdl->audio_buf);
+    if (dev_hdl->audio_recv_hdl) {
+        rt_audio_recv_exit(dev_hdl->audio_recv_hdl);
+        free(dev_hdl->audio_recv_hdl);
+    }
+
+
+    free(dev_hdl);
+
+    return 0;
+}
+
+static int video_stop_all(void)
+{
+    struct video_dev_hdl *dev_hdl = NULL;
+    struct video_dev_hdl *n = NULL;
+
+    union video_req req = {0};
+    int ret;
+
+    list_for_each_entry_safe(dev_hdl, n, &__this->dev_list_head, entry) {
+        list_del(&dev_hdl->entry);
+        req.rec.channel = dev_hdl->config.sub_id;
+        req.rec.state = VIDEO_STATE_STOP;
+        ret = server_request(dev_hdl->video_server, VIDEO_REQ_REC, &req);
+        if (ret) {
+            printf("\nstop rec err 0x%x\n", ret);
+            return -1;
+        }
+        video_rec_close_file(dev_hdl);
+
+        server_close(dev_hdl->video_server);
+
+        free(dev_hdl->video_buf);
+        free(dev_hdl->video_osd_buf);
+        free(dev_hdl->audio_buf);
+        if (dev_hdl->audio_recv_hdl) {
+            rt_audio_recv_exit(dev_hdl->audio_recv_hdl);
+            free(dev_hdl->audio_recv_hdl);
+        }
+        free(dev_hdl);
+    }
+
+    return 0;
+}
+
+
+
+static int video_rec_state_machine(struct application *app, enum app_state state, struct intent *it)
+{
+    int ret = 0;
+
+    switch (state) {
+    case APP_STA_CREATE:
+        log_d("\n >>>>>>> video_rec: create\n");
+        memset(__this, 0, sizeof(struct video_rec_hdl));
+        break;
+    case APP_STA_START:
+        if (!it) {
+            break;
+        }
+        switch (it->action) {
+        case ACTION_VIDEO_REC_MAIN:
+            INIT_LIST_HEAD(&__this->dev_list_head);
+            puts("ACTION_VIDEO_REC_MAIN\n");
+            break;
+        case ACTION_VIDEO_START:
+            puts("ACTION_VIDEO_START\n");
+            ret = video_start(it->exdata);
+            break;
+        case ACTION_VIDEO_STOP:
+            puts("ACTION_VIDEO_STOP\n");
+            ret = video_stop(it->exdata);
+            break;
+        case ACTION_VIDEO_STOP_ALL:
+            puts("ACTION_VIDEO_STOP_ALL\n");
+            ret = video_stop_all();
+            break;
+        }
+        break;
+    case APP_STA_PAUSE:
+        puts("--------app_rec: APP_STA_PAUSE\n");
+        break;
+    case APP_STA_RESUME:
+        puts("--------app_rec: APP_STA_RESUME\n");
+        break;
+    case APP_STA_STOP:
+        puts("--------app_rec: APP_STA_STOP\n");
+        break;
+    case APP_STA_DESTROY:
+        break;
+    }
+
+    return ret;
+}
+
+
+static int video_rec_key_event_handler(struct key_event *key)
+{
+    int ret = false;
+    printf("key->action:%d key->value:%d \n", key->action, key->value);
+    if (key->action == KEY_EVENT_CLICK) {
+        ret = true;
+        switch (key->value) {
+        case KEY_POWER:
+            printf("KEY1\n");
+            break;
+        case KEY_MENU:
+            printf("KEY2\n");
+            break;
+        case KEY_UP:
+            printf("KEY3\n");
+            break;
+        case KEY_DOWN:
+            printf("KEY4\n");
+            break;
+        case KEY_OK:
+            printf("KEY5\n");
+            break;
+        default:
+            printf("Unknow KEY\n");
+            break;
+        }
+    }
+
+    return ret;
+}
+
+static int video_rec_device_event_handler(struct sys_event *e)
+{
+    struct device_event *device_eve = (struct device_event *)e->payload;
+
+    return false;
+}
+
+/*录像app的事件总入口*/
+static int video_rec_event_handler(struct application *app, struct sys_event *event)
+{
+    switch (event->type) {
+    case SYS_KEY_EVENT:
+        return video_rec_key_event_handler((struct key_event *)event->payload);
+    case SYS_DEVICE_EVENT:
+        return video_rec_device_event_handler(event);
+    default:
+        return false;
+    }
+}
+
+
+static const struct application_operation video_rec_ops = {
+    .state_machine  = video_rec_state_machine,
+    .event_handler 	= video_rec_event_handler,
+};
+
+REGISTER_APPLICATION(app_video_rec) = {
+    .name 	= "video_rec",
+    .action	= ACTION_VIDEO_REC_MAIN,
+    .ops 	= &video_rec_ops,
+    .state  = APP_STA_DESTROY,
+};
+
+
+
+
+

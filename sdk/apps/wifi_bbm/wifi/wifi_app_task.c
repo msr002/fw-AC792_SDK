@@ -185,6 +185,7 @@ void string_to_mac(const char *mac_str, u8 mac[6])
 
 static int ctp_init(void)
 {
+#ifdef CONFIG_BBM_TX
     ctp = server_open("ctp_server", (void *)&server_info);
     if (!ctp) {
         printf("ctp server fail\n");
@@ -207,6 +208,9 @@ static int ctp_init(void)
 
     void ftpd_server_init(const char *user, const char *pass, const char *ota_name, int fifo_size);
     ftpd_server_init("FTPX", "12345678", "update-ota.ufw", 4096);
+#else
+    ctp_cli_init();
+#endif
 }
 
 void ctp_exit(void)
@@ -583,20 +587,19 @@ static void wifi_raw_init(void *priv)
 #endif
 
 #ifdef CONFIG_BBM_RX
-    thread_fork("bbm_rx_online_task", 10, 2048, 2048
+    thread_fork("bbm_rx_online_task", 16, 2048, 2048
                 , &bbm_rx_online_task_pid, bbm_rx_online_task, NULL);
 
 #else
-    thread_fork("bbm_tx_online_task", 10, 2048, 2048
+    thread_fork("bbm_tx_online_task", 16, 2048, 2048
                 , &bbm_tx_online_task_pid, bbm_tx_online_task, NULL);
 #endif
 
     net_state_timer = sys_timer_add_to_task("app_core", NULL, net_state_timer_func, 5000);
 
-    //TX创建CTP_SERVER
-#ifdef CONFIG_BBM_TX
+    //TX创建CTP_SERVER,RX初始化CTP_CLIENT
     ctp_init();
-#endif
+
 }
 
 #ifdef CONFIG_WIFI_ENABLE

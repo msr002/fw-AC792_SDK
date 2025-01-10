@@ -122,7 +122,7 @@ DEFINES := \
 	-DRLOTTIE_COMMIT_HASH=\"492fbb753924ae7cad27072a2b6ddedde88dc4bd\" \
 	-DFREETYPE_COMMIT_HASH=\"45903920b984540bb629bc89f4c010159c23a89a\" \
 	-DFT2_BUILD_LIBRARY \
-	-DLVGL_COMMIT_HASH=\"release_v9.2_72dfc1d75198a126dd495483d9cbc5b27c6c882b\" \
+	-DLVGL_COMMIT_HASH=\"release_v9.2_c903c1dc0fdfae20bce69d0a48894bdebae278ff\" \
 	-D_XOPEN_SOURCE=700 \
 	-D_GNU_SOURCE \
 	-D__ELF__ \
@@ -606,6 +606,26 @@ c_SRC_FILES := \
 	../../../../../apps/common/example/third_party/lvgl_v9/src/draw/sw/lv_draw_sw_transform.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/src/draw/sw/lv_draw_sw_triangle.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/src/draw/sw/lv_draw_sw_vector.c \
+	../../../../../apps/common/example/third_party/lvgl_v9/src/draw/vg_lite/lv_draw_buf_vg_lite.c \
+	../../../../../apps/common/example/third_party/lvgl_v9/src/draw/vg_lite/lv_draw_vg_lite.c \
+	../../../../../apps/common/example/third_party/lvgl_v9/src/draw/vg_lite/lv_draw_vg_lite_arc.c \
+	../../../../../apps/common/example/third_party/lvgl_v9/src/draw/vg_lite/lv_draw_vg_lite_border.c \
+	../../../../../apps/common/example/third_party/lvgl_v9/src/draw/vg_lite/lv_draw_vg_lite_box_shadow.c \
+	../../../../../apps/common/example/third_party/lvgl_v9/src/draw/vg_lite/lv_draw_vg_lite_fill.c \
+	../../../../../apps/common/example/third_party/lvgl_v9/src/draw/vg_lite/lv_draw_vg_lite_img.c \
+	../../../../../apps/common/example/third_party/lvgl_v9/src/draw/vg_lite/lv_draw_vg_lite_label.c \
+	../../../../../apps/common/example/third_party/lvgl_v9/src/draw/vg_lite/lv_draw_vg_lite_layer.c \
+	../../../../../apps/common/example/third_party/lvgl_v9/src/draw/vg_lite/lv_draw_vg_lite_line.c \
+	../../../../../apps/common/example/third_party/lvgl_v9/src/draw/vg_lite/lv_draw_vg_lite_mask_rect.c \
+	../../../../../apps/common/example/third_party/lvgl_v9/src/draw/vg_lite/lv_draw_vg_lite_triangle.c \
+	../../../../../apps/common/example/third_party/lvgl_v9/src/draw/vg_lite/lv_draw_vg_lite_vector.c \
+	../../../../../apps/common/example/third_party/lvgl_v9/src/draw/vg_lite/lv_vg_lite_decoder.c \
+	../../../../../apps/common/example/third_party/lvgl_v9/src/draw/vg_lite/lv_vg_lite_grad.c \
+	../../../../../apps/common/example/third_party/lvgl_v9/src/draw/vg_lite/lv_vg_lite_math.c \
+	../../../../../apps/common/example/third_party/lvgl_v9/src/draw/vg_lite/lv_vg_lite_path.c \
+	../../../../../apps/common/example/third_party/lvgl_v9/src/draw/vg_lite/lv_vg_lite_pending.c \
+	../../../../../apps/common/example/third_party/lvgl_v9/src/draw/vg_lite/lv_vg_lite_stroke.c \
+	../../../../../apps/common/example/third_party/lvgl_v9/src/draw/vg_lite/lv_vg_lite_utils.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/src/drivers/evdev/lv_evdev.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/src/font/lv_binfont_loader.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/src/font/lv_font.c \

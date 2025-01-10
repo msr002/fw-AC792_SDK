@@ -28,7 +28,7 @@
 /* extern int ui_touch_msg_post(struct touch_event *event); */
 /* #endif */
 
-static OS_SEM *tp_drdy_sem;
+static void(*tp_drdy_sem_post_func)(void);
 static void *iic;
 static volatile int gt9271_int_id = -1;
 static u16 gt9271_timer_id = 0;
@@ -140,7 +140,7 @@ static void get_gt9271_xy(u16 addr, u16 *x, u16 *y)
 
 static void gt9271_interrupt(void *arg, u32 parm)
 {
-    os_sem_post(tp_drdy_sem);
+    tp_drdy_sem_post_func();
 }
 
 
@@ -258,7 +258,7 @@ static int gt9271_check_pid(void)
 }
 
 
-static int gt9271_init(const tp_platform_data_t *pd_data, OS_SEM *sem)
+static int gt9271_init(const tp_platform_data_t *pd_data, void(*post_func)(void))
 {
     log_info(">>>>>init start !!!");
     if ((pd_data->rst_pin != -1) && (pd_data->int_pin != -1)) {
@@ -280,7 +280,7 @@ static int gt9271_init(const tp_platform_data_t *pd_data, OS_SEM *sem)
         return -ENODEV;
     }
 
-    tp_drdy_sem = sem;
+    tp_drdy_sem_post_func = post_func;
 
     if (gt9271_int_enable(pd_data)) {
         dev_close(iic);

@@ -2,7 +2,9 @@
 #ifdef CONFIG_UI_STYLE_JL_ENABLE
 /*Generate Code, Do NOT Edit!*/
 #include "lvgl.h"
+#if LV_USE_GUIBUILDER_SIMULATOR
 #include <stdio.h>
+#endif
 #include <stdlib.h>
 #include "../gui_guider.h"
 #include "../gui_events/events_init.h"
@@ -29,6 +31,10 @@ lv_obj_t *setup_scr_sys_prompt(lv_ui *ui)
     lv_obj_clear_flag(ui->sys_prompt, LV_OBJ_FLAG_CLICKABLE);
     //Write codes sys_prompt_img_warn
     ui->sys_prompt_img_warn = lv_img_create(ui->sys_prompt);
+    lv_img_set_src(ui->sys_prompt_img_warn, gui_get_res_path(GUI_RES_POP_UP_WINDOW_PNG));
+    lv_img_set_pivot(ui->sys_prompt_img_warn, 0, 0);
+    lv_img_set_angle(ui->sys_prompt_img_warn, 0);
+    lv_img_set_zoom(ui->sys_prompt_img_warn, 256);
 
     //Set style for sys_prompt_img_warn. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
     lv_obj_set_style_radius(ui->sys_prompt_img_warn, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -40,16 +46,7 @@ lv_obj_t *setup_scr_sys_prompt(lv_ui *ui)
     lv_obj_set_style_img_opa(ui->sys_prompt_img_warn, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_pos(ui->sys_prompt_img_warn, 186, 122);
     lv_obj_set_size(ui->sys_prompt_img_warn, 390, 200);
-    lv_obj_set_scrollbar_mode(ui->sys_prompt_img_warn, LV_SCROLLBAR_MODE_OFF);
     lv_obj_add_flag(ui->sys_prompt_img_warn, LV_OBJ_FLAG_CLICKABLE);
-#if LV_USE_GUIBUILDER_SIMULATOR
-    lv_img_set_src(ui->sys_prompt_img_warn, "A:\\1111\\ac792\\ui_prj\\dvr_800x480\\import\\image\\video_page\\pop_up_window.png");
-#else
-    lv_img_set_src(ui->sys_prompt_img_warn, "mnt/sdfile/EXT_RESERVED/uipackres/ui/55000045.zip");
-#endif
-    lv_img_set_pivot(ui->sys_prompt_img_warn, 0, 0);
-    lv_img_set_angle(ui->sys_prompt_img_warn, 0);
-    lv_img_set_zoom(ui->sys_prompt_img_warn, 256);
     //Write codes sys_prompt_lbl_warn
     ui->sys_prompt_lbl_warn = lv_label_create(ui->sys_prompt);
     lv_label_set_text(ui->sys_prompt_lbl_warn, _("sd_update"));
@@ -80,6 +77,10 @@ lv_obj_t *setup_scr_sys_prompt(lv_ui *ui)
     lv_obj_set_scrollbar_mode(ui->sys_prompt_lbl_warn, LV_SCROLLBAR_MODE_OFF);
     //Write codes sys_prompt_img_2
     ui->sys_prompt_img_2 = lv_img_create(ui->sys_prompt);
+    lv_img_set_src(ui->sys_prompt_img_2, gui_get_res_path(GUI_RES_FLIG_ON_PNG));
+    lv_img_set_pivot(ui->sys_prompt_img_2, 0, 0);
+    lv_img_set_angle(ui->sys_prompt_img_2, 0);
+    lv_img_set_zoom(ui->sys_prompt_img_2, 256);
 
     //Set style for sys_prompt_img_2. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
     lv_obj_set_style_radius(ui->sys_prompt_img_2, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -91,19 +92,14 @@ lv_obj_t *setup_scr_sys_prompt(lv_ui *ui)
     lv_obj_set_style_img_opa(ui->sys_prompt_img_2, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_pos(ui->sys_prompt_img_2, 284, 122);
     lv_obj_set_size(ui->sys_prompt_img_2, 200, 200);
-    lv_obj_set_scrollbar_mode(ui->sys_prompt_img_2, LV_SCROLLBAR_MODE_OFF);
     lv_obj_add_flag(ui->sys_prompt_img_2, LV_OBJ_FLAG_HIDDEN);
     lv_obj_add_flag(ui->sys_prompt_img_2, LV_OBJ_FLAG_CLICKABLE);
-#if LV_USE_GUIBUILDER_SIMULATOR
-    lv_img_set_src(ui->sys_prompt_img_2, "A:\\1111\\ac792\\ui_prj\\dvr_800x480\\import\\image\\video_page\\flig_on.png");
-#else
-    lv_img_set_src(ui->sys_prompt_img_2, "mnt/sdfile/EXT_RESERVED/uipackres/ui/55000046.zip");
-#endif
-    lv_img_set_pivot(ui->sys_prompt_img_2, 0, 0);
-    lv_img_set_angle(ui->sys_prompt_img_2, 0);
-    lv_img_set_zoom(ui->sys_prompt_img_2, 256);
     //Write codes sys_prompt_img_1
     ui->sys_prompt_img_1 = lv_img_create(ui->sys_prompt);
+    lv_img_set_src(ui->sys_prompt_img_1, gui_get_res_path(GUI_RES_ASTERN_PNG));
+    lv_img_set_pivot(ui->sys_prompt_img_1, 0, 0);
+    lv_img_set_angle(ui->sys_prompt_img_1, 0);
+    lv_img_set_zoom(ui->sys_prompt_img_1, 256);
 
     //Set style for sys_prompt_img_1. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
     lv_obj_set_style_radius(ui->sys_prompt_img_1, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -115,17 +111,8 @@ lv_obj_t *setup_scr_sys_prompt(lv_ui *ui)
     lv_obj_set_style_img_opa(ui->sys_prompt_img_1, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_pos(ui->sys_prompt_img_1, 106, 311);
     lv_obj_set_size(ui->sys_prompt_img_1, 550, 167);
-    lv_obj_set_scrollbar_mode(ui->sys_prompt_img_1, LV_SCROLLBAR_MODE_OFF);
     lv_obj_add_flag(ui->sys_prompt_img_1, LV_OBJ_FLAG_HIDDEN);
     lv_obj_add_flag(ui->sys_prompt_img_1, LV_OBJ_FLAG_CLICKABLE);
-#if LV_USE_GUIBUILDER_SIMULATOR
-    lv_img_set_src(ui->sys_prompt_img_1, "A:\\1111\\ac792\\ui_prj\\dvr_800x480\\import\\image\\video_page\\astern.png");
-#else
-    lv_img_set_src(ui->sys_prompt_img_1, "mnt/sdfile/EXT_RESERVED/uipackres/ui/55000047.zip");
-#endif
-    lv_img_set_pivot(ui->sys_prompt_img_1, 0, 0);
-    lv_img_set_angle(ui->sys_prompt_img_1, 0);
-    lv_img_set_zoom(ui->sys_prompt_img_1, 256);
     //Write codes sys_prompt_lbl_1
     ui->sys_prompt_lbl_1 = lv_label_create(ui->sys_prompt);
     lv_label_set_text(ui->sys_prompt_lbl_1, "准备好了吗~\n电量不足\n未插入卡\n没有文件\n摄像头掉线了\n");

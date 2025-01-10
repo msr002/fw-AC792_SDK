@@ -301,16 +301,18 @@ void app_main()
 #ifdef CONFIG_BBM_RX
     puts("\n\n-------------wifi_bbm RX Mode-------------\n\n");
     struct intent it;
-#ifdef USE_LVGL_V8_UI_DEMO
-    int lvgl_main_task_init(void);
-    lvgl_main_task_init();
-#endif
 
     puts("\n\n-------------wifi_bbm app main-------------\n\n");
     init_intent(&it);
     it.name	= "baby_monitor";
     it.action = ACTION_BBM_MAIN;
     start_app(&it);
+
+#ifdef USE_LVGL_V8_UI_DEMO
+    int lvgl_main_task_init(void);
+    lvgl_main_task_init();
+#endif
+
 #else
     puts("\n\n-------------wifi_bbm TX Mode-------------\n\n");
     if (dev_online(SDX_DEV)) {
@@ -323,6 +325,11 @@ void app_main()
 
     }
 
+    struct intent it;
+    init_intent(&it);
+    it.name	= "video_rec";
+    it.action = ACTION_VIDEO_REC_MAIN;
+    start_app(&it);
 
 #endif /* CONFIG_BBM_RX */
 }

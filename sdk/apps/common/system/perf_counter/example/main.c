@@ -189,7 +189,7 @@ int perf_counter_test(void *arg)
     while (1) {
 
         if (perfc_is_time_out_ms(1000)) {
-            printf("[%d]perfc_is_time_out_ms %d", arg, get_system_ms());
+            printf("perfc_is_time_out_ms %d", get_system_ms());
         }
 
         __cpu_time__(100) {

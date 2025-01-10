@@ -15,18 +15,18 @@ char *gui_get_res_path(int32_t id)
 {
 #if LV_USE_GUIBUILDER_SIMULATOR
     switch (id) {
-    case GUI_RES_LINK_PNG:
-        return "A:\\gitlab-m\\ac792\\ui_prj\\wifi_bbm_800x480\\import\\image\\link.png";
     case GUI_RES_CAMERA_PNG:
         return "A:\\gitlab-m\\ac792\\ui_prj\\wifi_bbm_800x480\\import\\image\\camera.png";
+    case GUI_RES_LINK_PNG:
+        return "A:\\gitlab-m\\ac792\\ui_prj\\wifi_bbm_800x480\\import\\image\\link.png";
     case GUI_RES_DIR_PNG:
         return "A:\\gitlab-m\\ac792\\ui_prj\\wifi_bbm_800x480\\import\\image\\dir.png";
-    case GUI_RES_BACK_PNG:
-        return "A:\\gitlab-m\\ac792\\ui_prj\\wifi_bbm_800x480\\import\\image\\back.png";
     case GUI_RES_UNPAIR_PNG:
         return "A:\\gitlab-m\\ac792\\ui_prj\\wifi_bbm_800x480\\import\\image\\unpair.png";
     case GUI_RES_PAIRED_PNG:
         return "A:\\gitlab-m\\ac792\\ui_prj\\wifi_bbm_800x480\\import\\image\\paired.png";
+    case GUI_RES_BACK_PNG:
+        return "A:\\gitlab-m\\ac792\\ui_prj\\wifi_bbm_800x480\\import\\image\\back.png";
     case GUI_RES_SWITCH_PNG:
         return "A:\\gitlab-m\\ac792\\ui_prj\\wifi_bbm_800x480\\import\\image\\switch.png";
     case GUI_RES_UP_PNG:
@@ -37,6 +37,18 @@ char *gui_get_res_path(int32_t id)
         return "A:\\gitlab-m\\ac792\\ui_prj\\wifi_bbm_800x480\\import\\image\\pair_opt_pair.png";
     case GUI_RES_PAIR_OPT_UNPAIR_PNG:
         return "A:\\gitlab-m\\ac792\\ui_prj\\wifi_bbm_800x480\\import\\image\\pair_opt_unpair.png";
+    case GUI_RES_BACK_WHITE_PNG:
+        return "A:\\gitlab-m\\ac792\\ui_prj\\wifi_bbm_800x480\\import\\image\\back_white.png";
+    case GUI_RES_VIDEO_PLAY_PNG:
+        return "A:\\gitlab-m\\ac792\\ui_prj\\wifi_bbm_800x480\\import\\image\\video_play.png";
+    case GUI_RES_VIDEO_PAUSE_PNG:
+        return "A:\\gitlab-m\\ac792\\ui_prj\\wifi_bbm_800x480\\import\\image\\video_pause.png";
+    case GUI_RES_SKIP_NEXT_PNG:
+        return "A:\\gitlab-m\\ac792\\ui_prj\\wifi_bbm_800x480\\import\\image\\skip_next.png";
+    case GUI_RES_SKIP_PREVIOUS_PNG:
+        return "A:\\gitlab-m\\ac792\\ui_prj\\wifi_bbm_800x480\\import\\image\\skip_previous.png";
+    case GUI_RES_WARN_PNG:
+        return "A:\\gitlab-m\\ac792\\ui_prj\\wifi_bbm_800x480\\import\\image\\warn.png";
     default:
         return NULL;
     }

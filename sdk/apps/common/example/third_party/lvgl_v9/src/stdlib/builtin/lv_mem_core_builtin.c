@@ -140,6 +140,11 @@ void *lv_malloc_core(size_t size)
 {
 #if LV_USE_OS
     lv_mutex_lock(&state.mutex);
+#else
+#if LV_USE_MEM_MONITOR
+    extern int *lvgl_v9_get_task_pid(void);
+    LV_ASSERT_MSG(get_cur_thread_pid() == lvgl_v9_get_task_pid(), "lv_mem_alloc can't multi thread access");
+#endif
 #endif
     void *p = lv_tlsf_malloc(state.tlsf, size);
 

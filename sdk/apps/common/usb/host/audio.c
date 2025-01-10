@@ -1131,7 +1131,13 @@ void usb_audio_start_recorder(const usb_dev usb_id, u8 channel, u8 bit_reso, u32
     }
 
     log_info("H2D ep: %x --> %x  interval: %d", host_ep, as_t->ep, as_t->ep_Interval);
+
+#if USB_HUB
+    usb_hub_txreg_set(usb_id, host_ep, as_t->ep, &(host_dev->private_data.hub_info));
+#else
     usb_write_txfuncaddr(usb_id, host_ep, host_dev->private_data.devnum);
+#endif
+    /* usb_write_txfuncaddr(usb_id, host_ep, host_dev->private_data.devnum); */
 #if UAC_HOST_ISO_TEST
     usb_h_set_ep_isr(host_dev, host_ep, usb_audio_iso_test_tx_isr, host_dev);
 #else
@@ -1745,7 +1751,13 @@ void usb_audio_start_player(const usb_dev usb_id, u8 channel, u8 bit_reso, u32 s
     }
 
     log_info("D2H ep: %x --> %x  interval: %d", as_t->ep, host_ep, as_t->ep_Interval);
+
+#if USB_HUB
+    usb_hub_rxreg_set(usb_id, as_t->host_ep, as_t->ep, &(host_dev->private_data.hub_info));
+#else
     usb_write_rxfuncaddr(usb_id, as_t->host_ep, host_dev->private_data.devnum);
+#endif
+
 #if UAC_HOST_ISO_TEST
     usb_h_set_ep_isr(host_dev, host_ep, usb_audio_iso_test_rx_isr, host_dev);
 #else

@@ -163,12 +163,29 @@ int usb_adb_parser(struct usb_host_device *host_dev, u8 interface_num, const u8 
     if (!adb_bulk_ep_in_buf[usb_id]) {
         adb_bulk_ep_in_buf[usb_id] = usb_h_alloc_ep_buffer(usb_id, adb[usb_id].host_epin | USB_DIR_IN, adb[usb_id].rxmaxp * 2);
     }
+
+#if USB_HUB
+    usb_hub_rxreg_set(usb_id, adb[usb_id].host_epin, adb[usb_id].target_epin, &(host_dev->private_data.hub_info));
+#else
+    usb_write_rxfuncaddr(usb_id, adb[usb_id].host_epin, host_dev->private_data.devnum);
+#endif
+
     usb_h_ep_config(usb_id, adb[usb_id].host_epin | USB_DIR_IN, USB_ENDPOINT_XFER_BULK, 0, 0, adb_bulk_ep_in_buf[usb_id], adb[usb_id].rxmaxp);
+
+
 
     if (!adb_bulk_ep_out_buf[usb_id]) {
         adb_bulk_ep_out_buf[usb_id] = usb_h_alloc_ep_buffer(usb_id, adb[usb_id].host_epout | USB_DIR_OUT, adb[usb_id].txmaxp);
     }
+
+#if USB_HUB
+    usb_hub_txreg_set(usb_id, adb[usb_id].host_epout, adb[usb_id].target_epout, &(host_dev->private_data.hub_info));
+#else
+    usb_write_txfuncaddr(usb_id, adb[usb_id].host_epout, host_dev->private_data.devnum);
+#endif
+
     usb_h_ep_config(usb_id, adb[usb_id].host_epout | USB_DIR_OUT, USB_ENDPOINT_XFER_BULK, 0, 0, adb_bulk_ep_out_buf[usb_id], adb[usb_id].txmaxp);
+
 
     return len;
 }

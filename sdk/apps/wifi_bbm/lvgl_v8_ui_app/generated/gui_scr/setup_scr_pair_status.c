@@ -13,8 +13,8 @@ static const char *pair_status_imglist_1_imgs[2] = {
     "A:\\gitlab-m\\ac792\\ui_prj\\wifi_bbm_800x480\\import\\image\\unpair.png",
     "A:\\gitlab-m\\ac792\\ui_prj\\wifi_bbm_800x480\\import\\image\\paired.png"
 #else
-    "mnt/sdfile/EXT_RESERVED/uipackres/ui/55000004.zip",
-    "mnt/sdfile/EXT_RESERVED/uipackres/ui/55000005.zip"
+    "mnt/sdfile/EXT_RESERVED/uipackres/ui/55000003.zip",
+    "mnt/sdfile/EXT_RESERVED/uipackres/ui/55000004.zip"
 #endif
 };
 static const char *pair_status_imglist_2_imgs[2] = {
@@ -22,8 +22,8 @@ static const char *pair_status_imglist_2_imgs[2] = {
     "A:\\gitlab-m\\ac792\\ui_prj\\wifi_bbm_800x480\\import\\image\\unpair.png",
     "A:\\gitlab-m\\ac792\\ui_prj\\wifi_bbm_800x480\\import\\image\\paired.png"
 #else
-    "mnt/sdfile/EXT_RESERVED/uipackres/ui/55000004.zip",
-    "mnt/sdfile/EXT_RESERVED/uipackres/ui/55000005.zip"
+    "mnt/sdfile/EXT_RESERVED/uipackres/ui/55000003.zip",
+    "mnt/sdfile/EXT_RESERVED/uipackres/ui/55000004.zip"
 #endif
 };
 static const char *pair_status_imglist_3_imgs[2] = {
@@ -31,8 +31,8 @@ static const char *pair_status_imglist_3_imgs[2] = {
     "A:\\gitlab-m\\ac792\\ui_prj\\wifi_bbm_800x480\\import\\image\\unpair.png",
     "A:\\gitlab-m\\ac792\\ui_prj\\wifi_bbm_800x480\\import\\image\\paired.png"
 #else
-    "mnt/sdfile/EXT_RESERVED/uipackres/ui/55000004.zip",
-    "mnt/sdfile/EXT_RESERVED/uipackres/ui/55000005.zip"
+    "mnt/sdfile/EXT_RESERVED/uipackres/ui/55000003.zip",
+    "mnt/sdfile/EXT_RESERVED/uipackres/ui/55000004.zip"
 #endif
 };
 static const char *pair_status_imglist_4_imgs[2] = {
@@ -40,8 +40,8 @@ static const char *pair_status_imglist_4_imgs[2] = {
     "A:\\gitlab-m\\ac792\\ui_prj\\wifi_bbm_800x480\\import\\image\\unpair.png",
     "A:\\gitlab-m\\ac792\\ui_prj\\wifi_bbm_800x480\\import\\image\\paired.png"
 #else
-    "mnt/sdfile/EXT_RESERVED/uipackres/ui/55000004.zip",
-    "mnt/sdfile/EXT_RESERVED/uipackres/ui/55000005.zip"
+    "mnt/sdfile/EXT_RESERVED/uipackres/ui/55000003.zip",
+    "mnt/sdfile/EXT_RESERVED/uipackres/ui/55000004.zip"
 #endif
 };
 static const char *pair_status_imglist_5_imgs[2] = {
@@ -49,8 +49,8 @@ static const char *pair_status_imglist_5_imgs[2] = {
     "A:\\gitlab-m\\ac792\\ui_prj\\wifi_bbm_800x480\\import\\image\\unpair.png",
     "A:\\gitlab-m\\ac792\\ui_prj\\wifi_bbm_800x480\\import\\image\\paired.png"
 #else
-    "mnt/sdfile/EXT_RESERVED/uipackres/ui/55000004.zip",
-    "mnt/sdfile/EXT_RESERVED/uipackres/ui/55000005.zip"
+    "mnt/sdfile/EXT_RESERVED/uipackres/ui/55000003.zip",
+    "mnt/sdfile/EXT_RESERVED/uipackres/ui/55000004.zip"
 #endif
 };
 static const char *pair_status_imglist_6_imgs[2] = {
@@ -58,8 +58,8 @@ static const char *pair_status_imglist_6_imgs[2] = {
     "A:\\gitlab-m\\ac792\\ui_prj\\wifi_bbm_800x480\\import\\image\\unpair.png",
     "A:\\gitlab-m\\ac792\\ui_prj\\wifi_bbm_800x480\\import\\image\\paired.png"
 #else
-    "mnt/sdfile/EXT_RESERVED/uipackres/ui/55000004.zip",
-    "mnt/sdfile/EXT_RESERVED/uipackres/ui/55000005.zip"
+    "mnt/sdfile/EXT_RESERVED/uipackres/ui/55000003.zip",
+    "mnt/sdfile/EXT_RESERVED/uipackres/ui/55000004.zip"
 #endif
 };
 static void kb_pair_status_event_cb(lv_event_t *e)
@@ -107,6 +107,192 @@ lv_obj_t *setup_scr_pair_status(lv_ui *ui)
     lv_obj_set_style_bg_opa(ui->pair_status, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_border_width(ui->pair_status, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_scrollbar_mode(ui->pair_status, LV_SCROLLBAR_MODE_OFF);
+    //Write codes pair_status_imglist_1
+    ui->pair_status_imglist_1 = lv_imglist_create(ui->pair_status);
+
+    //Set style for pair_status_imglist_1. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
+    lv_obj_set_style_radius(ui->pair_status_imglist_1, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_clip_corner(ui->pair_status_imglist_1, true, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(ui->pair_status_imglist_1, lv_color_make(0xff, 0xff, 0xff), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(ui->pair_status_imglist_1, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_img_recolor(ui->pair_status_imglist_1, lv_color_make(0xff, 0xff, 0xff), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_img_recolor_opa(ui->pair_status_imglist_1, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_img_opa(ui->pair_status_imglist_1, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    //Set style for pair_status_imglist_1. Part: LV_PART_MAIN, State: LV_STATE_FOCUS_KEY
+    lv_obj_set_style_radius(ui->pair_status_imglist_1, 0, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+    lv_obj_set_style_clip_corner(ui->pair_status_imglist_1, true, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+    lv_obj_set_style_bg_color(ui->pair_status_imglist_1, lv_color_make(0xff, 0xff, 0xff), LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+    lv_obj_set_style_bg_opa(ui->pair_status_imglist_1, 0, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+    lv_obj_set_style_outline_color(ui->pair_status_imglist_1, lv_color_make(0x21, 0xB4, 0xF6), LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+    lv_obj_set_style_outline_width(ui->pair_status_imglist_1, 4, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+    lv_obj_set_style_outline_opa(ui->pair_status_imglist_1, 255, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+    lv_obj_set_style_outline_pad(ui->pair_status_imglist_1, 2, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+    lv_obj_set_style_img_recolor(ui->pair_status_imglist_1, lv_color_make(0xff, 0xff, 0xff), LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+    lv_obj_set_style_img_recolor_opa(ui->pair_status_imglist_1, 0, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+    lv_obj_set_style_img_opa(ui->pair_status_imglist_1, 255, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+    lv_obj_set_pos(ui->pair_status_imglist_1, 86, 111);
+    lv_obj_set_size(ui->pair_status_imglist_1, 128, 128);
+    lv_obj_set_scrollbar_mode(ui->pair_status_imglist_1, LV_SCROLLBAR_MODE_OFF);
+    lv_obj_add_flag(ui->pair_status_imglist_1, LV_OBJ_FLAG_CLICKABLE);
+    lv_group_add_obj(def_group, ui->pair_status_imglist_1);
+    lv_imglist_set_src(ui->pair_status_imglist_1, (const void **) pair_status_imglist_1_imgs, 2);
+    lv_imglist_set_act(ui->pair_status_imglist_1, 0);
+    //Write codes pair_status_imglist_2
+    ui->pair_status_imglist_2 = lv_imglist_create(ui->pair_status);
+
+    //Set style for pair_status_imglist_2. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
+    lv_obj_set_style_radius(ui->pair_status_imglist_2, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_clip_corner(ui->pair_status_imglist_2, true, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(ui->pair_status_imglist_2, lv_color_make(0xff, 0xff, 0xff), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(ui->pair_status_imglist_2, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_img_recolor(ui->pair_status_imglist_2, lv_color_make(0xff, 0xff, 0xff), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_img_recolor_opa(ui->pair_status_imglist_2, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_img_opa(ui->pair_status_imglist_2, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    //Set style for pair_status_imglist_2. Part: LV_PART_MAIN, State: LV_STATE_FOCUS_KEY
+    lv_obj_set_style_radius(ui->pair_status_imglist_2, 0, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+    lv_obj_set_style_clip_corner(ui->pair_status_imglist_2, true, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+    lv_obj_set_style_bg_color(ui->pair_status_imglist_2, lv_color_make(0xff, 0xff, 0xff), LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+    lv_obj_set_style_bg_opa(ui->pair_status_imglist_2, 0, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+    lv_obj_set_style_outline_color(ui->pair_status_imglist_2, lv_color_make(0x21, 0xB4, 0xF6), LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+    lv_obj_set_style_outline_width(ui->pair_status_imglist_2, 4, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+    lv_obj_set_style_outline_opa(ui->pair_status_imglist_2, 255, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+    lv_obj_set_style_outline_pad(ui->pair_status_imglist_2, 2, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+    lv_obj_set_style_img_recolor(ui->pair_status_imglist_2, lv_color_make(0xff, 0xff, 0xff), LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+    lv_obj_set_style_img_recolor_opa(ui->pair_status_imglist_2, 0, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+    lv_obj_set_style_img_opa(ui->pair_status_imglist_2, 255, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+    lv_obj_set_pos(ui->pair_status_imglist_2, 337, 111);
+    lv_obj_set_size(ui->pair_status_imglist_2, 128, 128);
+    lv_obj_set_scrollbar_mode(ui->pair_status_imglist_2, LV_SCROLLBAR_MODE_OFF);
+    lv_obj_add_flag(ui->pair_status_imglist_2, LV_OBJ_FLAG_CLICKABLE);
+    lv_group_add_obj(def_group, ui->pair_status_imglist_2);
+    lv_imglist_set_src(ui->pair_status_imglist_2, (const void **) pair_status_imglist_2_imgs, 2);
+    lv_imglist_set_act(ui->pair_status_imglist_2, 0);
+    //Write codes pair_status_imglist_3
+    ui->pair_status_imglist_3 = lv_imglist_create(ui->pair_status);
+
+    //Set style for pair_status_imglist_3. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
+    lv_obj_set_style_radius(ui->pair_status_imglist_3, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_clip_corner(ui->pair_status_imglist_3, true, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(ui->pair_status_imglist_3, lv_color_make(0xff, 0xff, 0xff), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(ui->pair_status_imglist_3, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_img_recolor(ui->pair_status_imglist_3, lv_color_make(0xff, 0xff, 0xff), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_img_recolor_opa(ui->pair_status_imglist_3, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_img_opa(ui->pair_status_imglist_3, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    //Set style for pair_status_imglist_3. Part: LV_PART_MAIN, State: LV_STATE_FOCUS_KEY
+    lv_obj_set_style_radius(ui->pair_status_imglist_3, 0, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+    lv_obj_set_style_clip_corner(ui->pair_status_imglist_3, true, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+    lv_obj_set_style_bg_color(ui->pair_status_imglist_3, lv_color_make(0xff, 0xff, 0xff), LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+    lv_obj_set_style_bg_opa(ui->pair_status_imglist_3, 0, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+    lv_obj_set_style_outline_color(ui->pair_status_imglist_3, lv_color_make(0x21, 0xB4, 0xF6), LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+    lv_obj_set_style_outline_width(ui->pair_status_imglist_3, 4, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+    lv_obj_set_style_outline_opa(ui->pair_status_imglist_3, 255, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+    lv_obj_set_style_outline_pad(ui->pair_status_imglist_3, 2, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+    lv_obj_set_style_img_recolor(ui->pair_status_imglist_3, lv_color_make(0xff, 0xff, 0xff), LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+    lv_obj_set_style_img_recolor_opa(ui->pair_status_imglist_3, 0, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+    lv_obj_set_style_img_opa(ui->pair_status_imglist_3, 255, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+    lv_obj_set_pos(ui->pair_status_imglist_3, 590, 111);
+    lv_obj_set_size(ui->pair_status_imglist_3, 128, 128);
+    lv_obj_set_scrollbar_mode(ui->pair_status_imglist_3, LV_SCROLLBAR_MODE_OFF);
+    lv_obj_add_flag(ui->pair_status_imglist_3, LV_OBJ_FLAG_CLICKABLE);
+    lv_group_add_obj(def_group, ui->pair_status_imglist_3);
+    lv_imglist_set_src(ui->pair_status_imglist_3, (const void **) pair_status_imglist_3_imgs, 2);
+    lv_imglist_set_act(ui->pair_status_imglist_3, 0);
+    //Write codes pair_status_imglist_4
+    ui->pair_status_imglist_4 = lv_imglist_create(ui->pair_status);
+
+    //Set style for pair_status_imglist_4. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
+    lv_obj_set_style_radius(ui->pair_status_imglist_4, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_clip_corner(ui->pair_status_imglist_4, true, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(ui->pair_status_imglist_4, lv_color_make(0xff, 0xff, 0xff), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(ui->pair_status_imglist_4, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_img_recolor(ui->pair_status_imglist_4, lv_color_make(0xff, 0xff, 0xff), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_img_recolor_opa(ui->pair_status_imglist_4, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_img_opa(ui->pair_status_imglist_4, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    //Set style for pair_status_imglist_4. Part: LV_PART_MAIN, State: LV_STATE_FOCUS_KEY
+    lv_obj_set_style_radius(ui->pair_status_imglist_4, 0, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+    lv_obj_set_style_clip_corner(ui->pair_status_imglist_4, true, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+    lv_obj_set_style_bg_color(ui->pair_status_imglist_4, lv_color_make(0xff, 0xff, 0xff), LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+    lv_obj_set_style_bg_opa(ui->pair_status_imglist_4, 0, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+    lv_obj_set_style_outline_color(ui->pair_status_imglist_4, lv_color_make(0x21, 0xB4, 0xF6), LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+    lv_obj_set_style_outline_width(ui->pair_status_imglist_4, 4, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+    lv_obj_set_style_outline_opa(ui->pair_status_imglist_4, 255, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+    lv_obj_set_style_outline_pad(ui->pair_status_imglist_4, 2, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+    lv_obj_set_style_img_recolor(ui->pair_status_imglist_4, lv_color_make(0xff, 0xff, 0xff), LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+    lv_obj_set_style_img_recolor_opa(ui->pair_status_imglist_4, 0, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+    lv_obj_set_style_img_opa(ui->pair_status_imglist_4, 255, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+    lv_obj_set_pos(ui->pair_status_imglist_4, 82, 296);
+    lv_obj_set_size(ui->pair_status_imglist_4, 128, 128);
+    lv_obj_set_scrollbar_mode(ui->pair_status_imglist_4, LV_SCROLLBAR_MODE_OFF);
+    lv_obj_add_flag(ui->pair_status_imglist_4, LV_OBJ_FLAG_CLICKABLE);
+    lv_group_add_obj(def_group, ui->pair_status_imglist_4);
+    lv_imglist_set_src(ui->pair_status_imglist_4, (const void **) pair_status_imglist_4_imgs, 2);
+    lv_imglist_set_act(ui->pair_status_imglist_4, 0);
+    //Write codes pair_status_imglist_5
+    ui->pair_status_imglist_5 = lv_imglist_create(ui->pair_status);
+
+    //Set style for pair_status_imglist_5. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
+    lv_obj_set_style_radius(ui->pair_status_imglist_5, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_clip_corner(ui->pair_status_imglist_5, true, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(ui->pair_status_imglist_5, lv_color_make(0xff, 0xff, 0xff), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(ui->pair_status_imglist_5, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_img_recolor(ui->pair_status_imglist_5, lv_color_make(0xff, 0xff, 0xff), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_img_recolor_opa(ui->pair_status_imglist_5, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_img_opa(ui->pair_status_imglist_5, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    //Set style for pair_status_imglist_5. Part: LV_PART_MAIN, State: LV_STATE_FOCUS_KEY
+    lv_obj_set_style_radius(ui->pair_status_imglist_5, 0, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+    lv_obj_set_style_clip_corner(ui->pair_status_imglist_5, true, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+    lv_obj_set_style_bg_color(ui->pair_status_imglist_5, lv_color_make(0xff, 0xff, 0xff), LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+    lv_obj_set_style_bg_opa(ui->pair_status_imglist_5, 0, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+    lv_obj_set_style_outline_color(ui->pair_status_imglist_5, lv_color_make(0x21, 0xB4, 0xF6), LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+    lv_obj_set_style_outline_width(ui->pair_status_imglist_5, 4, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+    lv_obj_set_style_outline_opa(ui->pair_status_imglist_5, 255, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+    lv_obj_set_style_outline_pad(ui->pair_status_imglist_5, 2, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+    lv_obj_set_style_img_recolor(ui->pair_status_imglist_5, lv_color_make(0xff, 0xff, 0xff), LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+    lv_obj_set_style_img_recolor_opa(ui->pair_status_imglist_5, 0, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+    lv_obj_set_style_img_opa(ui->pair_status_imglist_5, 255, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+    lv_obj_set_pos(ui->pair_status_imglist_5, 337, 291);
+    lv_obj_set_size(ui->pair_status_imglist_5, 128, 128);
+    lv_obj_set_scrollbar_mode(ui->pair_status_imglist_5, LV_SCROLLBAR_MODE_OFF);
+    lv_obj_add_flag(ui->pair_status_imglist_5, LV_OBJ_FLAG_CLICKABLE);
+    lv_group_add_obj(def_group, ui->pair_status_imglist_5);
+    lv_imglist_set_src(ui->pair_status_imglist_5, (const void **) pair_status_imglist_5_imgs, 2);
+    lv_imglist_set_act(ui->pair_status_imglist_5, 0);
+    //Write codes pair_status_imglist_6
+    ui->pair_status_imglist_6 = lv_imglist_create(ui->pair_status);
+
+    //Set style for pair_status_imglist_6. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
+    lv_obj_set_style_radius(ui->pair_status_imglist_6, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_clip_corner(ui->pair_status_imglist_6, true, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(ui->pair_status_imglist_6, lv_color_make(0xff, 0xff, 0xff), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(ui->pair_status_imglist_6, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_img_recolor(ui->pair_status_imglist_6, lv_color_make(0xff, 0xff, 0xff), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_img_recolor_opa(ui->pair_status_imglist_6, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_img_opa(ui->pair_status_imglist_6, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    //Set style for pair_status_imglist_6. Part: LV_PART_MAIN, State: LV_STATE_FOCUS_KEY
+    lv_obj_set_style_radius(ui->pair_status_imglist_6, 0, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+    lv_obj_set_style_clip_corner(ui->pair_status_imglist_6, true, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+    lv_obj_set_style_bg_color(ui->pair_status_imglist_6, lv_color_make(0xff, 0xff, 0xff), LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+    lv_obj_set_style_bg_opa(ui->pair_status_imglist_6, 0, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+    lv_obj_set_style_outline_color(ui->pair_status_imglist_6, lv_color_make(0x21, 0xB4, 0xF6), LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+    lv_obj_set_style_outline_width(ui->pair_status_imglist_6, 4, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+    lv_obj_set_style_outline_opa(ui->pair_status_imglist_6, 255, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+    lv_obj_set_style_outline_pad(ui->pair_status_imglist_6, 2, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+    lv_obj_set_style_img_recolor(ui->pair_status_imglist_6, lv_color_make(0xff, 0xff, 0xff), LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+    lv_obj_set_style_img_recolor_opa(ui->pair_status_imglist_6, 0, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+    lv_obj_set_style_img_opa(ui->pair_status_imglist_6, 255, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+    lv_obj_set_pos(ui->pair_status_imglist_6, 590, 295);
+    lv_obj_set_size(ui->pair_status_imglist_6, 128, 128);
+    lv_obj_set_scrollbar_mode(ui->pair_status_imglist_6, LV_SCROLLBAR_MODE_OFF);
+    lv_obj_add_flag(ui->pair_status_imglist_6, LV_OBJ_FLAG_CLICKABLE);
+    lv_group_add_obj(def_group, ui->pair_status_imglist_6);
+    lv_imglist_set_src(ui->pair_status_imglist_6, (const void **) pair_status_imglist_6_imgs, 2);
+    lv_imglist_set_act(ui->pair_status_imglist_6, 0);
     //Write codes pair_status_imgbtn_1
     ui->pair_status_imgbtn_1 = lv_imgbtn_create(ui->pair_status);
 
@@ -124,11 +310,27 @@ lv_obj_t *setup_scr_pair_status(lv_ui *ui)
     lv_obj_set_style_img_recolor_opa(ui->pair_status_imgbtn_1, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_img_opa(ui->pair_status_imgbtn_1, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
 
+    //Set style for pair_status_imgbtn_1. Part: LV_PART_MAIN, State: LV_STATE_FOCUS_KEY
+    lv_obj_set_style_radius(ui->pair_status_imgbtn_1, 0, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+    lv_obj_set_style_clip_corner(ui->pair_status_imgbtn_1, true, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+    lv_obj_set_style_bg_color(ui->pair_status_imgbtn_1, lv_color_make(0xff, 0xff, 0xff), LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+    lv_obj_set_style_bg_opa(ui->pair_status_imgbtn_1, 0, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+    lv_obj_set_style_shadow_width(ui->pair_status_imgbtn_1, 0, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+    lv_obj_set_style_outline_color(ui->pair_status_imgbtn_1, lv_color_make(0x21, 0xB4, 0xF6), LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+    lv_obj_set_style_outline_width(ui->pair_status_imgbtn_1, 4, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+    lv_obj_set_style_outline_opa(ui->pair_status_imgbtn_1, 255, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+    lv_obj_set_style_outline_pad(ui->pair_status_imgbtn_1, 2, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+    lv_obj_set_style_text_color(ui->pair_status_imgbtn_1, lv_color_make(0x00, 0x00, 0x00), LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+    lv_obj_set_style_text_font(ui->pair_status_imgbtn_1, &lv_font_montserratMedium_12, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+    lv_obj_set_style_img_recolor(ui->pair_status_imgbtn_1, lv_color_make(0xff, 0xff, 0xff), LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+    lv_obj_set_style_img_recolor_opa(ui->pair_status_imgbtn_1, 0, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+    lv_obj_set_style_img_opa(ui->pair_status_imgbtn_1, 255, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+
     //Set style for pair_status_imgbtn_1. Part: LV_PART_MAIN, State: LV_STATE_PRESSED
     lv_obj_set_style_radius(ui->pair_status_imgbtn_1, 0, LV_PART_MAIN | LV_STATE_PRESSED);
     lv_obj_set_style_clip_corner(ui->pair_status_imgbtn_1, true, LV_PART_MAIN | LV_STATE_PRESSED);
     lv_obj_set_style_bg_color(ui->pair_status_imgbtn_1, lv_color_make(0xff, 0xff, 0xff), LV_PART_MAIN | LV_STATE_PRESSED);
-    lv_obj_set_style_bg_opa(ui->pair_status_imgbtn_1, 255, LV_PART_MAIN | LV_STATE_PRESSED);
+    lv_obj_set_style_bg_opa(ui->pair_status_imgbtn_1, 0, LV_PART_MAIN | LV_STATE_PRESSED);
     lv_obj_set_style_shadow_width(ui->pair_status_imgbtn_1, 0, LV_PART_MAIN | LV_STATE_PRESSED);
     lv_obj_set_style_text_color(ui->pair_status_imgbtn_1, lv_color_make(0xFF, 0x33, 0xFF), LV_PART_MAIN | LV_STATE_PRESSED);
     lv_obj_set_style_text_font(ui->pair_status_imgbtn_1, &lv_font_montserratMedium_12, LV_PART_MAIN | LV_STATE_PRESSED);
@@ -150,121 +352,26 @@ lv_obj_t *setup_scr_pair_status(lv_ui *ui)
     lv_obj_set_pos(ui->pair_status_imgbtn_1, 19, 14);
     lv_obj_set_size(ui->pair_status_imgbtn_1, 64, 64);
     lv_obj_set_scrollbar_mode(ui->pair_status_imgbtn_1, LV_SCROLLBAR_MODE_OFF);
+    lv_group_add_obj(def_group, ui->pair_status_imgbtn_1);
 #if LV_USE_GUIBUILDER_SIMULATOR
     lv_imgbtn_set_src(ui->pair_status_imgbtn_1, LV_IMGBTN_STATE_RELEASED, NULL, "A:\\gitlab-m\\ac792\\ui_prj\\wifi_bbm_800x480\\import\\image\\back.png", NULL);
+    lv_imgbtn_set_src(ui->pair_status_imgbtn_1, LV_IMGBTN_STATE_PRESSED, NULL, "A:\\gitlab-m\\ac792\\ui_prj\\wifi_bbm_800x480\\import\\image\\back.png", NULL);
+    lv_imgbtn_set_src(ui->pair_status_imgbtn_1, LV_IMGBTN_STATE_CHECKED_RELEASED, NULL, "A:\\gitlab-m\\ac792\\ui_prj\\wifi_bbm_800x480\\import\\image\\back.png", NULL);
+    lv_imgbtn_set_src(ui->pair_status_imgbtn_1, LV_IMGBTN_STATE_CHECKED_PRESSED, NULL, "A:\\gitlab-m\\ac792\\ui_prj\\wifi_bbm_800x480\\import\\image\\back.png", NULL);
 #else
-    lv_imgbtn_set_src(ui->pair_status_imgbtn_1, LV_IMGBTN_STATE_RELEASED, NULL, "mnt/sdfile/EXT_RESERVED/uipackres/ui/55000003.zip", NULL);
+    lv_imgbtn_set_src(ui->pair_status_imgbtn_1, LV_IMGBTN_STATE_RELEASED, NULL, "mnt/sdfile/EXT_RESERVED/uipackres/ui/55000005.zip", NULL);
+    lv_imgbtn_set_src(ui->pair_status_imgbtn_1, LV_IMGBTN_STATE_PRESSED, NULL, "mnt/sdfile/EXT_RESERVED/uipackres/ui/55000005.zip", NULL);
+    lv_imgbtn_set_src(ui->pair_status_imgbtn_1, LV_IMGBTN_STATE_CHECKED_RELEASED, NULL, "mnt/sdfile/EXT_RESERVED/uipackres/ui/55000005.zip", NULL);
+    lv_imgbtn_set_src(ui->pair_status_imgbtn_1, LV_IMGBTN_STATE_CHECKED_PRESSED, NULL, "mnt/sdfile/EXT_RESERVED/uipackres/ui/55000005.zip", NULL);
 #endif
     lv_obj_add_flag(ui->pair_status_imgbtn_1, LV_OBJ_FLAG_CHECKABLE);
     ui->pair_status_imgbtn_1_label = lv_label_create(ui->pair_status_imgbtn_1);
     lv_label_set_text(ui->pair_status_imgbtn_1_label, "");
     lv_obj_set_style_pad_all(ui->pair_status_imgbtn_1, 0, LV_STATE_DEFAULT);
     lv_obj_align(ui->pair_status_imgbtn_1_label, LV_ALIGN_CENTER, 0, 0);
-    //Write codes pair_status_imglist_1
-    ui->pair_status_imglist_1 = lv_imglist_create(ui->pair_status);
-
-    //Set style for pair_status_imglist_1. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
-    lv_obj_set_style_radius(ui->pair_status_imglist_1, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_clip_corner(ui->pair_status_imglist_1, true, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_color(ui->pair_status_imglist_1, lv_color_make(0xff, 0xff, 0xff), LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_opa(ui->pair_status_imglist_1, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_img_recolor(ui->pair_status_imglist_1, lv_color_make(0xff, 0xff, 0xff), LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_img_recolor_opa(ui->pair_status_imglist_1, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_img_opa(ui->pair_status_imglist_1, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_pos(ui->pair_status_imglist_1, 86, 111);
-    lv_obj_set_size(ui->pair_status_imglist_1, 128, 128);
-    lv_obj_set_scrollbar_mode(ui->pair_status_imglist_1, LV_SCROLLBAR_MODE_OFF);
-    lv_obj_add_flag(ui->pair_status_imglist_1, LV_OBJ_FLAG_CLICKABLE);
-    lv_imglist_set_src(ui->pair_status_imglist_1, (const void **) pair_status_imglist_1_imgs, 2);
-    lv_imglist_set_act(ui->pair_status_imglist_1, 0);
-    //Write codes pair_status_imglist_2
-    ui->pair_status_imglist_2 = lv_imglist_create(ui->pair_status);
-
-    //Set style for pair_status_imglist_2. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
-    lv_obj_set_style_radius(ui->pair_status_imglist_2, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_clip_corner(ui->pair_status_imglist_2, true, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_color(ui->pair_status_imglist_2, lv_color_make(0xff, 0xff, 0xff), LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_opa(ui->pair_status_imglist_2, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_img_recolor(ui->pair_status_imglist_2, lv_color_make(0xff, 0xff, 0xff), LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_img_recolor_opa(ui->pair_status_imglist_2, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_img_opa(ui->pair_status_imglist_2, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_pos(ui->pair_status_imglist_2, 337, 111);
-    lv_obj_set_size(ui->pair_status_imglist_2, 128, 128);
-    lv_obj_set_scrollbar_mode(ui->pair_status_imglist_2, LV_SCROLLBAR_MODE_OFF);
-    lv_obj_add_flag(ui->pair_status_imglist_2, LV_OBJ_FLAG_CLICKABLE);
-    lv_imglist_set_src(ui->pair_status_imglist_2, (const void **) pair_status_imglist_2_imgs, 2);
-    lv_imglist_set_act(ui->pair_status_imglist_2, 0);
-    //Write codes pair_status_imglist_3
-    ui->pair_status_imglist_3 = lv_imglist_create(ui->pair_status);
-
-    //Set style for pair_status_imglist_3. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
-    lv_obj_set_style_radius(ui->pair_status_imglist_3, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_clip_corner(ui->pair_status_imglist_3, true, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_color(ui->pair_status_imglist_3, lv_color_make(0xff, 0xff, 0xff), LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_opa(ui->pair_status_imglist_3, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_img_recolor(ui->pair_status_imglist_3, lv_color_make(0xff, 0xff, 0xff), LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_img_recolor_opa(ui->pair_status_imglist_3, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_img_opa(ui->pair_status_imglist_3, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_pos(ui->pair_status_imglist_3, 590, 111);
-    lv_obj_set_size(ui->pair_status_imglist_3, 128, 128);
-    lv_obj_set_scrollbar_mode(ui->pair_status_imglist_3, LV_SCROLLBAR_MODE_OFF);
-    lv_obj_add_flag(ui->pair_status_imglist_3, LV_OBJ_FLAG_CLICKABLE);
-    lv_imglist_set_src(ui->pair_status_imglist_3, (const void **) pair_status_imglist_3_imgs, 2);
-    lv_imglist_set_act(ui->pair_status_imglist_3, 0);
-    //Write codes pair_status_imglist_4
-    ui->pair_status_imglist_4 = lv_imglist_create(ui->pair_status);
-
-    //Set style for pair_status_imglist_4. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
-    lv_obj_set_style_radius(ui->pair_status_imglist_4, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_clip_corner(ui->pair_status_imglist_4, true, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_color(ui->pair_status_imglist_4, lv_color_make(0xff, 0xff, 0xff), LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_opa(ui->pair_status_imglist_4, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_img_recolor(ui->pair_status_imglist_4, lv_color_make(0xff, 0xff, 0xff), LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_img_recolor_opa(ui->pair_status_imglist_4, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_img_opa(ui->pair_status_imglist_4, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_pos(ui->pair_status_imglist_4, 82, 296);
-    lv_obj_set_size(ui->pair_status_imglist_4, 128, 128);
-    lv_obj_set_scrollbar_mode(ui->pair_status_imglist_4, LV_SCROLLBAR_MODE_OFF);
-    lv_obj_add_flag(ui->pair_status_imglist_4, LV_OBJ_FLAG_CLICKABLE);
-    lv_imglist_set_src(ui->pair_status_imglist_4, (const void **) pair_status_imglist_4_imgs, 2);
-    lv_imglist_set_act(ui->pair_status_imglist_4, 0);
-    //Write codes pair_status_imglist_5
-    ui->pair_status_imglist_5 = lv_imglist_create(ui->pair_status);
-
-    //Set style for pair_status_imglist_5. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
-    lv_obj_set_style_radius(ui->pair_status_imglist_5, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_clip_corner(ui->pair_status_imglist_5, true, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_color(ui->pair_status_imglist_5, lv_color_make(0xff, 0xff, 0xff), LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_opa(ui->pair_status_imglist_5, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_img_recolor(ui->pair_status_imglist_5, lv_color_make(0xff, 0xff, 0xff), LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_img_recolor_opa(ui->pair_status_imglist_5, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_img_opa(ui->pair_status_imglist_5, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_pos(ui->pair_status_imglist_5, 337, 291);
-    lv_obj_set_size(ui->pair_status_imglist_5, 128, 128);
-    lv_obj_set_scrollbar_mode(ui->pair_status_imglist_5, LV_SCROLLBAR_MODE_OFF);
-    lv_obj_add_flag(ui->pair_status_imglist_5, LV_OBJ_FLAG_CLICKABLE);
-    lv_imglist_set_src(ui->pair_status_imglist_5, (const void **) pair_status_imglist_5_imgs, 2);
-    lv_imglist_set_act(ui->pair_status_imglist_5, 0);
-    //Write codes pair_status_imglist_6
-    ui->pair_status_imglist_6 = lv_imglist_create(ui->pair_status);
-
-    //Set style for pair_status_imglist_6. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
-    lv_obj_set_style_radius(ui->pair_status_imglist_6, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_clip_corner(ui->pair_status_imglist_6, true, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_color(ui->pair_status_imglist_6, lv_color_make(0xff, 0xff, 0xff), LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_opa(ui->pair_status_imglist_6, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_img_recolor(ui->pair_status_imglist_6, lv_color_make(0xff, 0xff, 0xff), LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_img_recolor_opa(ui->pair_status_imglist_6, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_img_opa(ui->pair_status_imglist_6, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_pos(ui->pair_status_imglist_6, 590, 296);
-    lv_obj_set_size(ui->pair_status_imglist_6, 128, 128);
-    lv_obj_set_scrollbar_mode(ui->pair_status_imglist_6, LV_SCROLLBAR_MODE_OFF);
-    lv_obj_add_flag(ui->pair_status_imglist_6, LV_OBJ_FLAG_CLICKABLE);
-    lv_imglist_set_src(ui->pair_status_imglist_6, (const void **) pair_status_imglist_6_imgs, 2);
-    lv_imglist_set_act(ui->pair_status_imglist_6, 0);
     //Write codes pair_status_lbl_1
     ui->pair_status_lbl_1 = lv_label_create(ui->pair_status);
-    lv_label_set_text(ui->pair_status_lbl_1, "1");
+    lv_label_set_text(ui->pair_status_lbl_1, "CH0");
     lv_label_set_long_mode(ui->pair_status_lbl_1, LV_LABEL_LONG_WRAP);
 
     //Set style for pair_status_lbl_1. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
@@ -287,7 +394,7 @@ lv_obj_t *setup_scr_pair_status(lv_ui *ui)
     lv_obj_set_scrollbar_mode(ui->pair_status_lbl_1, LV_SCROLLBAR_MODE_OFF);
     //Write codes pair_status_lbl_2
     ui->pair_status_lbl_2 = lv_label_create(ui->pair_status);
-    lv_label_set_text(ui->pair_status_lbl_2, "2");
+    lv_label_set_text(ui->pair_status_lbl_2, "CH1");
     lv_label_set_long_mode(ui->pair_status_lbl_2, LV_LABEL_LONG_WRAP);
 
     //Set style for pair_status_lbl_2. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
@@ -310,7 +417,7 @@ lv_obj_t *setup_scr_pair_status(lv_ui *ui)
     lv_obj_set_scrollbar_mode(ui->pair_status_lbl_2, LV_SCROLLBAR_MODE_OFF);
     //Write codes pair_status_lbl_3
     ui->pair_status_lbl_3 = lv_label_create(ui->pair_status);
-    lv_label_set_text(ui->pair_status_lbl_3, "3");
+    lv_label_set_text(ui->pair_status_lbl_3, "CH2");
     lv_label_set_long_mode(ui->pair_status_lbl_3, LV_LABEL_LONG_WRAP);
 
     //Set style for pair_status_lbl_3. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
@@ -333,7 +440,7 @@ lv_obj_t *setup_scr_pair_status(lv_ui *ui)
     lv_obj_set_scrollbar_mode(ui->pair_status_lbl_3, LV_SCROLLBAR_MODE_OFF);
     //Write codes pair_status_lbl_4
     ui->pair_status_lbl_4 = lv_label_create(ui->pair_status);
-    lv_label_set_text(ui->pair_status_lbl_4, "4");
+    lv_label_set_text(ui->pair_status_lbl_4, "CH3");
     lv_label_set_long_mode(ui->pair_status_lbl_4, LV_LABEL_LONG_WRAP);
 
     //Set style for pair_status_lbl_4. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
@@ -356,7 +463,7 @@ lv_obj_t *setup_scr_pair_status(lv_ui *ui)
     lv_obj_set_scrollbar_mode(ui->pair_status_lbl_4, LV_SCROLLBAR_MODE_OFF);
     //Write codes pair_status_lbl_5
     ui->pair_status_lbl_5 = lv_label_create(ui->pair_status);
-    lv_label_set_text(ui->pair_status_lbl_5, "5");
+    lv_label_set_text(ui->pair_status_lbl_5, "CH4");
     lv_label_set_long_mode(ui->pair_status_lbl_5, LV_LABEL_LONG_WRAP);
 
     //Set style for pair_status_lbl_5. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
@@ -379,7 +486,7 @@ lv_obj_t *setup_scr_pair_status(lv_ui *ui)
     lv_obj_set_scrollbar_mode(ui->pair_status_lbl_5, LV_SCROLLBAR_MODE_OFF);
     //Write codes pair_status_lbl_6
     ui->pair_status_lbl_6 = lv_label_create(ui->pair_status);
-    lv_label_set_text(ui->pair_status_lbl_6, "6");
+    lv_label_set_text(ui->pair_status_lbl_6, "CH5");
     lv_label_set_long_mode(ui->pair_status_lbl_6, LV_LABEL_LONG_WRAP);
 
     //Set style for pair_status_lbl_6. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT

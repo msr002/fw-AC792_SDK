@@ -39,7 +39,9 @@ struct ffmpeg_context_s {
     uint8_t *buf_act;
     uint8_t *buf1_data;
     uint8_t *buf2_data;
+    uint8_t *buf3_data;
     bool auto_cycle;
+    lv_obj_t *parent_obj;
 };
 
 typedef struct {
@@ -48,6 +50,7 @@ typedef struct {
     lv_img_dsc_t imgdsc;
     bool auto_restart;
     struct ffmpeg_context_s *ffmpeg_ctx;
+    void (*autostop_cb)(lv_obj_t *);
 } lv_ffmpeg_player_t;
 
 typedef enum {
@@ -111,7 +114,12 @@ void lv_ffmpeg_player_set_zoom(lv_obj_t *obj, uint16_t zoom);
 /*=====================
  * Other functions
  *====================*/
-
+/**
+ * 注册播完自动暂停回调函数
+ * @param obj pointer to a ffmpeg_player object
+ * @param autostop_cb: cb: void cb(lv_obj_t *obj);
+ */
+void lv_jlffmpeg_set_autostop_cb(lv_obj_t *obj, void (*autostop_cb)(lv_obj_t *));
 /**********************
  *      MACROS
  **********************/

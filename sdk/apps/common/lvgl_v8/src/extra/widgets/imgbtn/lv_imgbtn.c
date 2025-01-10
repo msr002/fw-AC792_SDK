@@ -15,7 +15,7 @@
  *      DEFINES
  *********************/
 #define MY_CLASS &lv_imgbtn_class
-
+#define MALLOC_IMGBTN_SRC 1
 /**********************
  *      TYPEDEFS
  **********************/
@@ -28,7 +28,9 @@ static void draw_main(lv_event_t *e);
 static void lv_imgbtn_event(const lv_obj_class_t *class_p, lv_event_t *e);
 static void refr_img(lv_obj_t *imgbtn);
 static lv_imgbtn_state_t suggest_state(lv_obj_t *imgbtn, lv_imgbtn_state_t state);
-static void lv_imgbtn_destructor(const lv_obj_class_t *class_p, lv_obj_t *obj); //销毁函数;
+#if MALLOC_IMGBTN_SRC
+static void lv_imgbtn_destructor(const lv_obj_class_t *class_p, lv_obj_t *obj);
+#endif
 lv_imgbtn_state_t get_state(const lv_obj_t *imgbtn);
 
 /**********************
@@ -36,7 +38,9 @@ lv_imgbtn_state_t get_state(const lv_obj_t *imgbtn);
  **********************/
 const lv_obj_class_t lv_imgbtn_class = {
     .base_class = &lv_obj_class,
+#if MALLOC_IMGBTN_SRC
     .destructor_cb = lv_imgbtn_destructor,
+#endif
     .instance_size = sizeof(lv_imgbtn_t),
     .constructor_cb = lv_imgbtn_constructor,
     .event_cb = lv_imgbtn_event,
@@ -68,28 +72,28 @@ lv_obj_t *lv_imgbtn_create(lv_obj_t *parent)
  * Setter functions
  *====================*/
 
-//销毁函数
+#if MALLOC_IMGBTN_SRC
 static void lv_imgbtn_destructor(const lv_obj_class_t *class_p, lv_obj_t *obj)
 {
     LV_UNUSED(class_p);
     lv_imgbtn_t *imgbtn = (lv_imgbtn_t *)obj;
-    //释放所有状态的字符内存
     for (int state = 0; state < _LV_IMGBTN_STATE_NUM; state++) {
         if (imgbtn->img_src_left[state]) {
-            lv_mem_free(imgbtn->img_src_left[state]);
+            lv_mem_free((void *)imgbtn->img_src_left[state]);
             imgbtn->img_src_left[state] = NULL;
         }
         if (imgbtn->img_src_mid[state]) {
-            lv_mem_free(imgbtn->img_src_mid[state]);
+            lv_mem_free((void *)imgbtn->img_src_mid[state]);
             imgbtn->img_src_mid[state] = NULL;
         }
         if (imgbtn->img_src_right[state]) {
-            lv_mem_free(imgbtn->img_src_right[state]);
+            lv_mem_free((void *)imgbtn->img_src_right[state]);
             imgbtn->img_src_right[state] = NULL;
         }
 
     }
 }
+#endif
 
 /**
  * Set images for a state of the image button
@@ -109,6 +113,7 @@ void lv_imgbtn_set_src(lv_obj_t *obj, lv_imgbtn_state_t state, const void *src_l
 
     lv_imgbtn_t *imgbtn = (lv_imgbtn_t *)obj;
 
+#if MALLOC_IMGBTN_SRC
     char *src_left_str = NULL;
     char *src_mid_str = NULL;
     char *src_right_str = NULL;
@@ -132,7 +137,13 @@ void lv_imgbtn_set_src(lv_obj_t *obj, lv_imgbtn_state_t state, const void *src_l
     imgbtn->img_src_left[state] = src_left_str;
     imgbtn->img_src_mid[state] = src_mid_str;
     imgbtn->img_src_right[state] = src_right_str;
+#else
 
+    imgbtn->img_src_left[state] = src_left;
+    imgbtn->img_src_mid[state] = src_mid;
+    imgbtn->img_src_right[state] = src_right;
+
+#endif
     refr_img(obj);
 }
 

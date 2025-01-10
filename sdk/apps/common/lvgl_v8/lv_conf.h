@@ -671,7 +671,7 @@
 #define LV_USE_BMP 0
 
 /*JieLi's HW JPEG decoder library*/
-#define LV_USE_JLJPEG 0
+#define LV_USE_JLJPEG 1
 
 /* JPG + split JPG decoder library.
  * Split JPG is a custom format optimized for embedded systems. */
@@ -719,7 +719,11 @@
 #endif
 
 #define LV_USE_JLFFMPEG 1
-#define LV_USE_JLFFMPEG_DOUBLE_BUF_EN 0
+#if LV_USE_JLFFMPEG
+//LV_USE_JLFFMPEG_BUF_NUM == 1:需要1块buf,不可以叠加控件
+//LV_USE_JLFFMPEG_BUF_NUM == 2:需要2块buf,适合所有情况
+#define LV_USE_JLFFMPEG_BUF_NUM 2
+#endif
 
 /*use the jieli GUI components*/
 #define LV_USE_JL_GUI_COMP 1
@@ -730,6 +734,9 @@
 #endif
 
 #define LV_USE_LZ4_INTERNAL 1
+
+/*Enable inertial sliding effect*/
+#define LV_USE_SIM_INERTIAL_SLIDE  0
 
 /*-----------
  * Others

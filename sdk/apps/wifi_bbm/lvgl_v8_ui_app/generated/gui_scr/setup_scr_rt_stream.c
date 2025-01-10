@@ -20,6 +20,7 @@ lv_obj_t *setup_scr_rt_stream(lv_ui *ui)
     lv_obj_set_style_bg_opa(ui->rt_stream, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_border_width(ui->rt_stream, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_scrollbar_mode(ui->rt_stream, LV_SCROLLBAR_MODE_OFF);
+    lv_group_add_obj(def_group, ui->rt_stream);
     //Write codes rt_stream_imgbtn_1
     ui->rt_stream_imgbtn_1 = lv_imgbtn_create(ui->rt_stream);
 
@@ -36,6 +37,22 @@ lv_obj_t *setup_scr_rt_stream(lv_ui *ui)
     lv_obj_set_style_img_recolor(ui->rt_stream_imgbtn_1, lv_color_make(0xff, 0xff, 0xff), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_img_recolor_opa(ui->rt_stream_imgbtn_1, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_img_opa(ui->rt_stream_imgbtn_1, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    //Set style for rt_stream_imgbtn_1. Part: LV_PART_MAIN, State: LV_STATE_FOCUS_KEY
+    lv_obj_set_style_radius(ui->rt_stream_imgbtn_1, 0, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+    lv_obj_set_style_clip_corner(ui->rt_stream_imgbtn_1, true, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+    lv_obj_set_style_bg_color(ui->rt_stream_imgbtn_1, lv_color_make(0xff, 0xff, 0xff), LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+    lv_obj_set_style_bg_opa(ui->rt_stream_imgbtn_1, 0, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+    lv_obj_set_style_shadow_width(ui->rt_stream_imgbtn_1, 0, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+    lv_obj_set_style_outline_color(ui->rt_stream_imgbtn_1, lv_color_make(0x21, 0xB4, 0xF6), LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+    lv_obj_set_style_outline_width(ui->rt_stream_imgbtn_1, 4, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+    lv_obj_set_style_outline_opa(ui->rt_stream_imgbtn_1, 255, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+    lv_obj_set_style_outline_pad(ui->rt_stream_imgbtn_1, 2, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+    lv_obj_set_style_text_color(ui->rt_stream_imgbtn_1, lv_color_make(0x00, 0x00, 0x00), LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+    lv_obj_set_style_text_font(ui->rt_stream_imgbtn_1, &lv_font_montserratMedium_12, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+    lv_obj_set_style_img_recolor(ui->rt_stream_imgbtn_1, lv_color_make(0xff, 0xff, 0xff), LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+    lv_obj_set_style_img_recolor_opa(ui->rt_stream_imgbtn_1, 0, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+    lv_obj_set_style_img_opa(ui->rt_stream_imgbtn_1, 255, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
 
     //Set style for rt_stream_imgbtn_1. Part: LV_PART_MAIN, State: LV_STATE_PRESSED
     lv_obj_set_style_radius(ui->rt_stream_imgbtn_1, 0, LV_PART_MAIN | LV_STATE_PRESSED);
@@ -63,6 +80,7 @@ lv_obj_t *setup_scr_rt_stream(lv_ui *ui)
     lv_obj_set_pos(ui->rt_stream_imgbtn_1, 636, 70);
     lv_obj_set_size(ui->rt_stream_imgbtn_1, 64, 64);
     lv_obj_set_scrollbar_mode(ui->rt_stream_imgbtn_1, LV_SCROLLBAR_MODE_OFF);
+    lv_group_add_obj(def_group, ui->rt_stream_imgbtn_1);
 
     //Hidden for widget rt_stream_imgbtn_1
     lv_obj_add_flag(ui->rt_stream_imgbtn_1, LV_OBJ_FLAG_HIDDEN);

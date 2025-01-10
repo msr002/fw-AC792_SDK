@@ -9,11 +9,6 @@
 #include "../../lvgl.h"
 
 #if LV_USE_TINY_TTF != 0
-#ifndef LV_USE_GUIBUILDER_SIMULATOR
-#include "fs/fs.h"
-#endif
-
-
 #include "../../core/lv_global.h"
 
 #define font_draw_buf_handlers &(LV_GLOBAL_DEFAULT()->font_draw_buf_handlers)
@@ -370,36 +365,12 @@ static lv_font_t *lv_tiny_ttf_create(const char *path, const void *data, size_t 
     }
 #if LV_TINY_TTF_FILE_SUPPORT != 0
     if (path != NULL) {
-#ifndef LV_USE_GUIBUILDER_SIMULATOR
-        if (path[0] == 'm') {
-            u32 addr;
-            u32 data_len;
-            FILE *profile_fp = fopen(path, "r");
-            if (profile_fp == NULL) {
-                lv_free(dsc);
-                LV_LOG_ERROR("tiny_ttf: unable to open %s\n", path);
-                return NULL;
-            }
-            struct vfs_attr file_attr;
-            fget_attrs(profile_fp, &file_attr);
-            addr = file_attr.sclust;
-            data_len = flen(profile_fp);
-            fclose(profile_fp);
-
-            dsc->stream.data = (const uint8_t *)addr;
-            dsc->stream.size = data_len;
-        } else {
-#endif
-            if (LV_FS_RES_OK != lv_fs_open(&dsc->file, path, LV_FS_MODE_RD)) {
-                lv_free(dsc);
-                LV_LOG_ERROR("tiny_ttf: unable to open %s\n", path);
-                return NULL;
-            }
-            dsc->stream.file = &dsc->file;
-
-#ifndef LV_USE_GUIBUILDER_SIMULATOR
+        if (LV_FS_RES_OK != lv_fs_open(&dsc->file, path, LV_FS_MODE_RD)) {
+            lv_free(dsc);
+            LV_LOG_ERROR("tiny_ttf: unable to open %s\n", path);
+            return NULL;
         }
-#endif
+        dsc->stream.file = &dsc->file;
     } else {
         dsc->stream.data = (const uint8_t *)data;
         dsc->stream.size = data_size;

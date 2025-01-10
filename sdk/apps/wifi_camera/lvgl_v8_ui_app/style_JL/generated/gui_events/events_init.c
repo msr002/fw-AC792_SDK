@@ -2,7 +2,9 @@
 #ifdef CONFIG_UI_STYLE_JL_ENABLE
 /*Generate Code, Do NOT Edit!*/
 #include "./events_init.h"
+#if LV_USE_GUIBUILDER_SIMULATOR
 #include <stdio.h>
+#endif
 #include "lvgl.h"
 #include "./callback_handler.h"
 #include "../gui_timelines/gui_timelines.h"
@@ -3603,7 +3605,6 @@ static void video_file_imgbtn_3_event_handler(lv_event_t *e)
         //custom code video_file
         {
             lv_obj_t *dest = ui->video_file;
-            edit_lock_file(dest, 0);
             if (lv_obj_has_flag(guider_ui.video_file_imgbtn_2, LV_OBJ_FLAG_HIDDEN)) {
                 lv_obj_clear_flag(guider_ui.video_file_imgbtn_2, LV_OBJ_FLAG_HIDDEN);
                 lv_obj_add_flag(guider_ui.video_file_imgbtn_5, LV_OBJ_FLAG_HIDDEN);
@@ -3611,6 +3612,7 @@ static void video_file_imgbtn_3_event_handler(lv_event_t *e)
                 lv_obj_clear_flag(guider_ui.video_file_imgbtn_5, LV_OBJ_FLAG_HIDDEN);
                 lv_obj_add_flag(guider_ui.video_file_imgbtn_2, LV_OBJ_FLAG_HIDDEN);
             }
+            edit_lock_file(dest, 0);
         }
     }
     break;
@@ -3731,6 +3733,7 @@ static void video_file_view_3_event_handler(lv_event_t *e)
         break;
     }
 }
+
 static void video_file_screen_event_handler(lv_event_t *e)
 {
     lv_event_code_t code = lv_event_get_code(e);

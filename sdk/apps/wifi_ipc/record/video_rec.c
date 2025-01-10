@@ -59,7 +59,7 @@ static int video_rec_get_abr(u32 width);
 
 static const u16 pic_pix_w[] = {1280, 1920, 2560, 3072};
 static const u16 pic_pix_h[] = {720,  1088, 1600, 2208};
-extern u32 user_uac_audio_read_input(u8 id, u8 *buf, u32 len);
+extern u32 user_uac_audio_read_input(u8 *buf, u32 len);
 
 #ifdef CONFIG_TUYA_SDK_ENABLE
 extern int video_flag;
@@ -83,7 +83,7 @@ int net_video_rec_get_fps(void)
 
 
 
-struct VideoConfig video_configs[] = {
+const struct VideoConfig video_configs[] = {
 
 #ifdef CONFIG_VIDEO0_ENABLE
     {
@@ -239,7 +239,7 @@ struct VideoConfig video_configs[] = {
 #endif
 };
 
-struct VideoConfig video_uvc_configs[] = {
+const struct VideoConfig video_uvc_configs[] = {
 
 #ifdef CONFIG_UVC_VIDEO0_ENABLE
     {
@@ -262,8 +262,6 @@ struct VideoConfig video_uvc_configs[] = {
         .req.rec.pkg_mute.aud_mute = 0,
         .req.rec.enable_dri  = 0,
         .req.rec.online = 0,
-
-
 
         /*
         *码率，I帧和P帧比例，必须是偶数（当录MOV的时候才有效）,
@@ -289,8 +287,8 @@ struct VideoConfig video_uvc_configs[] = {
         .req.rec.format 	    = VIDEO11_REC_FORMAT,
         .req.rec.state 	    = VIDEO_STATE_START,
         .req.rec.quality     = VIDEO_LOW_Q,
-        .req.rec.fps 	    = 15,
-        .req.rec.real_fps 	= 15,
+        .req.rec.fps 	    = 25,
+        .req.rec.real_fps 	= 25,
         .req.rec.audio.sample_rate = 8000,
         .req.rec.audio.channel 	= 1,
         .req.rec.audio.volume    = AUDIO_VOLUME,
@@ -300,15 +298,15 @@ struct VideoConfig video_uvc_configs[] = {
         .req.rec.enable_dri  = 0,
         .req.rec.online = 0,
 
-
         /*
         *码率，I帧和P帧比例，必须是偶数（当录MOV的时候才有效）,
         *roio_xy :值表示宏块坐标， [6:0]左边x坐标 ，[14:8]右边x坐标，[22:16]上边y坐标，[30:24]下边y坐标,写0表示1个宏块有效
         * roio_ratio : 区域比例系数
         */
+        /* .req.rec.abr_kbps = 8000, */
         .req.rec.abr_kbps = 8000,
 
-        .req.rec.cycle_time = 60, //不能超过600,不能为0
+        .req.rec.cycle_time = 60,//60, //不能超过600,不能为0
         .req.rec.buf_len = VREC1_UVC_FBUF_SIZE,
         .req.rec.rec_small_pic   = 0,
     },
@@ -335,9 +333,6 @@ struct VideoConfig video_uvc_configs[] = {
         .req.rec.pkg_mute.aud_mute = 0,
         .req.rec.enable_dri  = 0,
         .req.rec.online = 0,
-
-
-
 
         /*
         *码率，I帧和P帧比例，必须是偶数（当录MOV的时候才有效）,
@@ -516,8 +511,6 @@ static int video_rec_destroy()
             free(__this->audio_uvc_buf[i]);
             __this->audio_uvc_buf[i] = NULL;
         }
-
-
     }
 #endif
 
@@ -1241,19 +1234,27 @@ static void rec_dev_server_event_handler(void *priv, int argc, int *argv)
         if (db_select("cyc") > 0) {
             if (priv >= 10) {
 #ifdef		CONFIG_TUYA_SDK_ENABLE
-                ty_net_video_stop();
+                if (get_camera_state()) {
+                    ty_net_video_stop();
+                }
 #endif
                 video_rec_uvc_savefile((int)priv - 10);
 #ifdef		CONFIG_TUYA_SDK_ENABLE
-                video_convert(video_flag);
+                if (get_camera_state()) {
+                    video_convert(video_flag); //打开实时流
+                }
 #endif
             } else {
 #ifdef		CONFIG_TUYA_SDK_ENABLE
-                ty_net_video_stop();
+                if (get_camera_state()) {
+                    ty_net_video_stop();
+                }
 #endif
                 video_rec_savefile((int)priv);
 #ifdef		CONFIG_TUYA_SDK_ENABLE
-                video_convert(video_flag);
+                if (get_camera_state()) {
+                    video_convert(video_flag); //打开实时流
+                }
 #endif
             }
         } else {
@@ -1276,6 +1277,7 @@ void assign_video_rec_params(union video_req *req, struct video_text_osd *text_o
 
 
     req->rec.channel = config->req.rec.channel;
+    printf("rec channel :%d", config->req.rec.channel);
     req->rec.camera_type    = config->req.rec.camera_type;
     req->rec.width	    = config->req.rec.width;
     req->rec.height 	    = config->req.rec.height;
@@ -1470,6 +1472,7 @@ static int video_set_uvc_rec_start(void)
         req.rec.audio.buf   = __this->audio_buf[channel];
         req.rec.buf         = __this->video_uvc_buf[channel];
 
+        printf("uvc configs index:%d", index);
         assign_video_rec_params(&req, &text_osd, &video_uvc_configs[index]);
         /* #ifdef CONFIG_VIDEO2_ENABLE */
         req.rec.uvc_id      = channel;
@@ -1553,6 +1556,7 @@ redo:
     for (int i = 0; i < uvc_online_num; i++) {
         int channel = video_uvc_configs[i].channel;
 redo_uvc:
+        printf("video_uvc_configs[channel].channel:%d, i:%d", channel, i);
         err = video_rec_del_old_uvc_file(channel);
         if (err) {
             cnt++;
@@ -1569,7 +1573,9 @@ redo_uvc:
     }
 #endif
 #ifdef  CONFIG_TUYA_SDK_ENABLE
-    ty_net_video_stop(); //关闭实时流
+    if (get_camera_state()) {
+        ty_net_video_stop(); //关闭实时流
+    }
 #endif
 
     err = video_set_rec_start();
@@ -1579,7 +1585,9 @@ redo_uvc:
     if (err) {
         video_rec_stop(0);
 #ifdef		CONFIG_TUYA_SDK_ENABLE
-        video_convert(video_flag); //打开实时流
+        if (get_camera_state()) {
+            video_convert(video_flag); //打开实时流
+        }
 #endif
         return err;
     }
@@ -1587,7 +1595,9 @@ redo_uvc:
     log_d("video_rec_start: out )))))))\n");
 
 #ifdef		CONFIG_TUYA_SDK_ENABLE
-    video_convert(video_flag); //打开实时流
+    if (get_camera_state()) {
+        video_convert(video_flag); //打开实时流
+    }
 #endif
     return 0;
 }
@@ -1628,6 +1638,12 @@ static void close_server_device(void *server_dev, int close)
         server_dev = NULL;
     }
 }
+
+typedef struct {
+    int is_active;           // 数组是否在使用
+    int camera_id;           // 对应的摄像头ID
+    /* int* audio_buffer;       // 音频数据缓冲区 */
+} AudioArray;
 
 int video_rec_stop(u8 close)
 {
@@ -1707,6 +1723,19 @@ int video_rec_stop(u8 close)
 #endif
     __this->state = VIDREC_STA_STOP;
     log_info("video_rec_stop: exit\n");
+#if TCFG_HOST_AUDIO_ENABLE
+    extern int get_video_num();
+    extern char *get_audio_array();
+    AudioArray *audio_arrays = get_audio_array();
+    if (audio_arrays) {
+        for (int i = 0; i < get_video_num(); i++) {
+            if (audio_arrays[i].is_active) {
+                audio_arrays[i].is_active = 0;
+            }
+        }
+    }
+#endif
+
     return 0;
 }
 static int video_rec_close()
@@ -2024,7 +2053,7 @@ static int video_rec_device_event_handler(struct sys_event *sys_eve)
             printf("into device event in CONFIG_VIDEO_UVC_NUM:%d uvc_id:%d", CONFIG_VIDEO_UVC_NUM, uvc_host_online());
             u8 open_uvc_flag = 0;
             for (int i = 0; i < CONFIG_VIDEO_UVC_REC_NUM; i++) {
-                printf("online :%d", get_uvc_host_online_status(i));
+                /* printf("online :%d", get_uvc_host_online_status(i)); */
                 __this->video_uvc_online[i] = get_uvc_host_online_status(i);
                 if (__this->video_uvc_online[i]) {
                     log_info("UVC or msd_storage online : %s, id=%d\n", type, i);
@@ -2043,8 +2072,10 @@ static int video_rec_device_event_handler(struct sys_event *sys_eve)
                 video_disp_win_switch(DISP_WIN_SW_DEV_IN, 2);
 #endif
 #ifdef CONFIG_TUYA_SDK_ENABLE
-                video_flag = 1;
-                video_convert(video_flag);
+                if (get_camera_state()) {
+                    video_flag = 1;
+                    video_convert(video_flag); //打开实时流
+                }
 #endif
             }
             break;
@@ -2068,8 +2099,10 @@ static int video_rec_device_event_handler(struct sys_event *sys_eve)
             }
 
 #ifdef CONFIG_TUYA_SDK_ENABLE
-            video_flag = 0;
-            video_convert(video_flag);
+            if (get_camera_state()) {
+                video_flag = 0;
+                video_convert(video_flag); //打开实时流
+            }
 #endif
 
             break;
@@ -2105,4 +2138,5 @@ REGISTER_APPLICATION(app_video_rec) = {
     .ops 	= &video_rec_ops,
     .state  = APP_STA_DESTROY,
 };
+
 

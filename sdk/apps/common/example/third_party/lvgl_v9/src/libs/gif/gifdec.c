@@ -117,9 +117,21 @@ static gd_GIF *gif_open(gd_GIF *gif_base)
     /* Aspect Ratio */
     f_gif_read(gif_base, &aspect, 1);
     /* Create gd_GIF Structure. */
+    if (0 == width || 0 == height) {
+        LV_LOG_WARN("Zero size image");
+        goto fail;
+    }
 #if LV_GIF_CACHE_DECODE_DATA
+    if (0 == (INT_MAX - sizeof(gd_GIF) - LZW_CACHE_SIZE) / width / height / 5) {
+        LV_LOG_WARN("Image dimensions are too large");
+        goto fail;
+    }
     gif = lv_malloc(sizeof(gd_GIF) + 5 * width * height + LZW_CACHE_SIZE);
 #else
+    if (0 == (INT_MAX - sizeof(gd_GIF)) / width / height / 5) {
+        LV_LOG_WARN("Image dimensions are too large");
+        goto fail;
+    }
     gif = lv_malloc(sizeof(gd_GIF) + 5 * width * height);
 #endif
     if (!gif) {
@@ -322,6 +334,8 @@ get_key(gd_GIF *gif, int key_size, uint8_t *sub_len, uint8_t *shift, uint8_t *by
 }
 
 #if LV_GIF_CACHE_DECODE_DATA
+/* Decompress image pixels.
+ * Return 0 on success or -1 on out-of-memory (w.r.t. LZW code table) or parse error. */
 static int
 read_image_data(gd_GIF *gif, int interlace)
 {
@@ -379,6 +393,10 @@ read_image_data(gd_GIF *gif, int interlace)
     while (frm_off < frm_size) {
         /* copy data to frame buffer */
         while (sp > p_stack) {
+            if (frm_off >= frm_size) {
+                LV_LOG_WARN("LZW table token overflows the frame buffer");
+                return -1;
+            }
             *ptr++ = *(--sp);
             frm_off += 1;
             /* read one line */
@@ -540,7 +558,7 @@ interlaced_line_index(int h, int y)
 }
 
 /* Decompress image pixels.
- * Return 0 on success or -1 on out-of-memory (w.r.t. LZW code table). */
+ * Return 0 on success or -1 on out-of-memory (w.r.t. LZW code table) or parse error. */
 static int
 read_image_data(gd_GIF *gif, int interlace)
 {
@@ -597,6 +615,10 @@ read_image_data(gd_GIF *gif, int interlace)
         }
         entry = table->entries[key];
         str_len = entry.length;
+        if (frm_off + str_len >= frm_size) {
+            LV_LOG_WARN("LZW table token overflows the frame buffer");
+            return -1;
+        }
         for (i = 0; i < str_len; i++) {
             p = frm_off + entry.length - 1;
             x = p % gif->fw;
@@ -627,7 +649,7 @@ read_image_data(gd_GIF *gif, int interlace)
 #endif
 
 /* Read image.
- * Return 0 on success or -1 on out-of-memory (w.r.t. LZW code table). */
+ * Return 0 on success or -1 on out-of-memory (w.r.t. LZW code table) or parse error. */
 static int
 read_image(gd_GIF *gif)
 {
@@ -639,6 +661,10 @@ read_image(gd_GIF *gif)
     gif->fy = read_num(gif);
     gif->fw = read_num(gif);
     gif->fh = read_num(gif);
+    if (gif->fx + (uint32_t)gif->fw > gif->width || gif->fy + (uint32_t)gif->fh > gif->height) {
+        LV_LOG_WARN("Frame coordinates out of image bounds");
+        return -1;
+    }
     f_gif_read(gif, &fisrz, 1);
     interlace = fisrz & 0x40;
     /* Ignore Sort Flag. */

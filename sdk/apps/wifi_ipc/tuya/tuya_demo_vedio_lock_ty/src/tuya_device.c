@@ -541,25 +541,25 @@ VOID_T pre_app_init(VOID_T)
 {
     OPERATE_RET op_ret = OPRT_OK;
 
+    SetLogManageAttr(TY_LOG_LEVEL_DEBUG);
 
-
-    /* TY_AUDIO_PARAM audio_param; */
-    /* audio_param.audio_power_off = FALSE; */
-    /* audio_param.bit_dept = 16; */
-    /* audio_param.channel_num = 1; */
-    /* audio_param.sample_rate = 8000;//8000;//8000; */
-    /* tuya_audio_init(&audio_param); */
+    TY_AUDIO_PARAM audio_param;
+    audio_param.audio_power_off = FALSE;
+    audio_param.bit_dept = 16;
+    audio_param.channel_num = 1;
+    audio_param.sample_rate = 8000;//8000;//8000;
+    tuya_audio_init(&audio_param);
 
 
     TY_CAMERA_PARAM carmer_param;
-    carmer_param.video_width = 1280;//CONFIG_VIDEO_IMAGE_W;
-    carmer_param.video_height = 720;//CONFIG_VIDEO_IMAGE_H;
-    carmer_param.video_fps = 15;//10;//10;//10;
+    carmer_param.video_width = 640;//CONFIG_VIDEO_IMAGE_W;
+    carmer_param.video_height = 480;//CONFIG_VIDEO_IMAGE_H;
+    carmer_param.video_fps = 10;//10;//10;//10;
     carmer_param.video_rotat_angle = 180;
     carmer_param.video_power_off = FALSE;
     tuya_video_init(&carmer_param);
 
-    sys_timer_add_to_task("sys_timer", NULL, wifi_app_timer_func, 1 * 1000);
+    /* sys_timer_add_to_task("sys_timer", NULL, wifi_app_timer_func, 1 * 1000); */
 
     op_ret = system_timer_init();
     if (op_ret) {
@@ -629,7 +629,8 @@ VOID __meme_check_tiemr_cb(TIMER_ID timer_id, VOID_T *arg)
 
 VOID pre_device_init(VOID)
 {
-    SetLogManageAttr(TY_LOG_LEVEL_DEBUG);
+    /* SetLogManageAttr(TY_LOG_LEVEL_DEBUG); */
+    SetLogManageAttr(TY_LOG_LEVEL_ERR);
     PR_NOTICE("%s", tuya_iot_get_sdk_info());
     PR_NOTICE("reset_reason:%d", tal_system_get_reset_reason(NULL));
     PR_NOTICE("%s:%s", APP_BIN_NAME, USER_SW_VER);
@@ -806,12 +807,12 @@ OPERATE_RET tuya_prod_info_cloud_handle(VOID)
     iot_info.cfg_mode = GWCM_LOW_POWER;
     iot_info.start_mode = WF_START_AP_ONLY;
     TY_IOT_CB_S ty_iot_cb;
-    ty_iot_cb.gw_reset_cb = __gw_reset_cb;
-    ty_iot_cb.gw_status_cb = __gw_status_cb;
-    ty_iot_cb.gw_ug_cb = __gw_ug_cb;
-    ty_iot_cb.ty_dev_dp_recv_cb = __dev_dp_recv_cb;
-    ty_iot_cb.wf_nw_stat_cb = __wf_net_change;
-    ty_iot_cb.pre_gw_ug_cb = __pre_gw_ug_cb;
+    ty_iot_cb.gw_reset_cb = __gw_reset_cb; //重置回调
+    ty_iot_cb.gw_status_cb = __gw_status_cb;//wifi状态回调
+    ty_iot_cb.gw_ug_cb = __gw_ug_cb; //ota相关
+    ty_iot_cb.ty_dev_dp_recv_cb = __dev_dp_recv_cb;//dp下发回调
+    ty_iot_cb.wf_nw_stat_cb = __wf_net_change; //配网状态
+    ty_iot_cb.pre_gw_ug_cb = __pre_gw_ug_cb; //ota相关
 
     ty_photo_cloudp2p_iot_init();
 

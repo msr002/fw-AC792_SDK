@@ -19,6 +19,7 @@
 #include "adb.h"
 #include "usbnet.h"
 #include "usb_host_cdc.h"
+#include "hub.h"
 #endif
 
 #define LOG_TAG         "[DEVICE_MOUNT]"
@@ -396,7 +397,7 @@ void otg_event_handler(struct device_event *event)
             int usb_id = ((const char *)event->value)[2] - '0';
             log_info("usb%d connect, host mode", usb_id);
 #if TCFG_USB_HOST_ENABLE
-            usb_host_mount(usb_id, MOUNT_RETRY, MOUNT_RESET, MOUNT_TIMEOUT);
+            usb_host_mount(usb_id, 0, MOUNT_RETRY, MOUNT_RESET, MOUNT_TIMEOUT);
 #endif
         } else if (((const char *)event->value)[0] == 'c') {
             incharge = 1;
@@ -407,7 +408,7 @@ void otg_event_handler(struct device_event *event)
             int usb_id = ((const char *)event->value)[2] - '0';
             log_info("usb%d disconnect, host mode", usb_id);
 #if TCFG_USB_HOST_ENABLE
-            usb_host_unmount(usb_id);
+            usb_host_unmount(usb_id, 0);
 #endif
         } else if (((const char *)event->value)[0] == 'c') {
             incharge = 0;
@@ -438,12 +439,15 @@ void usb_host_event_handler(struct device_event *event)
 #if TCFG_HOST_UVC_ENABLE
         extern int usb_host_video_init(const usb_dev usb_id, const u8 sub_id);
         if (!strncmp((const char *)event->value, "uvc", 3)) {
+            int sub_id = ((const char *)event->value)[3] - '0';
             if (usb_id == 1) {
                 if (uvc_host_is_support_h264_fmt()) { /* 判断UVC是否支持h264格式 */
                     u8 uvc_vaild_nums = uvc_host_is_vaild();
                     for (int i = 0; i < uvc_vaild_nums; i++) {
                         usb_host_video_init(1, 1 + i); /* 只接在usb1上 */
                     }
+                } else if (sub_id >= 2) {
+                    usb_host_video_init(1, sub_id - 1); /* hub */
                 } else {
                     usb_host_video_init(usb_id, usb_id);
                 }
@@ -466,6 +470,11 @@ void usb_host_event_handler(struct device_event *event)
         if (!strncmp((const char *)event->value, "cdc", 3)) {
             usb_cdc_init(usb_id);
             //host_cdc_send_demo(usb_id);
+        }
+#endif
+#if TCFG_HOST_HUB_ENABLE
+        if (!strncmp((const char *)event->value, "hub", 3)) {
+            usb_hub_process(usb_id);
         }
 #endif
     } else if (event->event == DEVICE_EVENT_OUT) {
@@ -518,6 +527,12 @@ void usb_host_event_handler(struct device_event *event)
 #if TCFG_HOST_CDC_ENABLE
         if (!strncmp((const char *)event->value, "cdc", 3)) {
             usb_cdc_exit(usb_id);
+        }
+#endif
+#if TCFG_HOST_HUB_ENABLE
+        if (!strncmp((const char *)event->value, "hub", 3)) {
+            /* hub_mount = 0; */
+            log_info("usb_hub offline %d", usb_id);
         }
 #endif
     }

@@ -54,7 +54,7 @@ void lv_jl_extra_init(void)
 #endif
 
 #if LV_USE_JLFFMPEG
-    lv_ffmpeg_init(LV_USE_JLFFMPEG_DOUBLE_BUF_EN);
+    lv_ffmpeg_init(LV_USE_JLFFMPEG_BUF_NUM);
 #endif
 
 #endif

@@ -1854,6 +1854,7 @@ STATIC VOID photo_process(PVOID_T pArg)
                 if (g_pt_ctrl.trigger_type == TRIGGER_TYPE_STREAM) {
                     ty_device_net_audio(FALSE);
                 }
+                tuya_video_ctr(FALSE, 0);
                 sys_stop_timer(g_pt_ctrl.timer);
 
                 PR_NOTICE("PT_DATA_END succ! type=%d", g_pt_ctrl.trigger_type);
@@ -1868,6 +1869,7 @@ STATIC VOID photo_process(PVOID_T pArg)
                 if (FALSE == is_audio_play_open()) {
                     ty_device_net_audio(TRUE);
                 }
+                tuya_video_ctr(TRUE, 0);
                 if (g_pt_ctrl.trigger_type == TRIGGER_TYPE_STREAM) {
                     if (g_photo_info) {
                         memcpy(g_pt_ctrl.tm, g_photo_info->tm, UPLOAD_TIMEBUFF_SIZE);

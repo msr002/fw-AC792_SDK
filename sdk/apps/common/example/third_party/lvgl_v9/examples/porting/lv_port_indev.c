@@ -13,13 +13,14 @@
 #include "src/misc/lv_timer_private.h"
 #include "lv_port_indev.h"
 #include "../../lvgl.h"
-
+#include "ui.h"
+#include "lcd_config.h"
 #ifdef USE_LVGL_V9_UI_DEMO
 
 /*********************
  *      DEFINES
  *********************/
-
+#define ABS(x) ((x)>0?(x):-(x))
 /**********************
  *      TYPEDEFS
  **********************/
@@ -63,6 +64,18 @@ lv_indev_t *indev_button;
 static int32_t encoder_diff;
 static lv_indev_state_t encoder_state;
 
+#if LV_USE_SIM_INERTIAL_SLIDE
+static u8 touch_cnt = 0;            //连续触摸计数
+static lv_indev_data_t g_touch_data;//模拟坐标
+static u8 lv_indev_sim_status = 0;  //是否处于模拟滑动
+
+struct lv_scroll_throw {
+    short final_interval_x; //最后的x间隔
+    short final_interval_y; //最后的y间隔
+    float ratio;
+};
+static struct lv_scroll_throw lv_throw = {0};
+#endif
 /**********************
  *      MACROS
  **********************/
@@ -96,6 +109,9 @@ void lv_port_indev_init(void)
     indev_touchpad = lv_indev_create();
     lv_indev_set_type(indev_touchpad, LV_INDEV_TYPE_POINTER);
     lv_indev_set_read_cb(indev_touchpad, touchpad_read);
+    lv_timer_del(indev_touchpad->read_timer);
+    indev_touchpad->read_timer = NULL;
+
 #if 0
     /*------------------
      * Mouse
@@ -182,6 +198,23 @@ void lv_indev_timer_read_touch(void *user_data)
     indev_touchpad->user_data = user_data;
     lv_indev_read_timer_cb(&timer);
 }
+
+void lv_indev_set_touch_timer_en(int en)
+{
+    if (en) {
+        if (indev_touchpad->read_timer == NULL) {
+            indev_touchpad->read_timer = lv_timer_create(lv_indev_read_timer_cb, LV_DEF_REFR_PERIOD, indev_touchpad);
+        }
+    } else {
+        void lv_set_touch_timer_status(u8 status);
+        lv_set_touch_timer_status(0);
+        if (indev_touchpad->read_timer) {
+            lv_timer_del(indev_touchpad->read_timer);
+            indev_touchpad->read_timer = NULL;
+        }
+    }
+}
+
 void lv_indev_timer_read_key(void *user_data)
 {
     lv_timer_t timer;
@@ -203,32 +236,130 @@ static void touchpad_init(void)
     /*Your code comes here*/
 }
 
-__attribute__((weak))
-void get_touch_x_y_status(lv_coord_t *x, lv_coord_t *y, unsigned char *status)
-{
-    *x = 0;
-    *y = 0;
-    *status = 0;
-}
-
 /*Will be called by the library to read the touchpad*/
 static void touchpad_read(lv_indev_t *indev_drv, lv_indev_data_t *data)
 {
-    int32_t last_x;
-    int32_t last_y;
-    unsigned char status;
+    uint8_t status;
+
+#if LV_USE_SIM_INERTIAL_SLIDE
+    lv_indev_data_t touch_data;
+#endif
 
     /*Save the pressed coordinates and the state*/
-    get_touch_x_y_status(&last_x, &last_y, &status);
+    if (indev_drv->read_timer == NULL) {
+        /* putchar('I'); */
+        extern void lv_port_get_touch_x_y_status(void *user_data, uint16_t *x, uint16_t *y, uint8_t *status);
+        lv_port_get_touch_x_y_status(indev_drv->user_data, &data->point.x, &data->point.y, &status);
+    } else {
+        /* putchar('T'); */
+        extern void get_touch_x_y_status(uint16_t *x, uint16_t *y, uint8_t *status);
+
+#if LV_USE_SIM_INERTIAL_SLIDE
+        get_touch_x_y_status((uint16_t *)&touch_data.point.x, (uint16_t *)&touch_data.point.y, &status);
+
+        //处于模拟惯性滑动且没有再按下:模拟坐标启用
+        if (lv_indev_sim_status && !status) {
+            lv_throw.ratio += 0.2f; //模拟加速
+            g_touch_data.point.x += lv_throw.final_interval_x * lv_throw.ratio; //g_touch_data lvgl内部读取
+            g_touch_data.point.y += lv_throw.final_interval_y * lv_throw.ratio;
+
+            if (g_touch_data.point.x > LCD_W || g_touch_data.point.x < 0 || \
+                g_touch_data.point.y > LCD_H || g_touch_data.point.y < 0 || lv_throw.ratio > 2) {
+
+                g_touch_data.point.x = (g_touch_data.point.x >= 0 && g_touch_data.point.x <= LCD_W) ? \
+                                       g_touch_data.point.x : (g_touch_data.point.x < 0 ? 0 : LCD_W);
+                g_touch_data.point.y = (g_touch_data.point.y >= 0 && g_touch_data.point.y <= LCD_H) ? \
+                                       g_touch_data.point.y : (g_touch_data.point.y < 0 ? 0 : LCD_H);
+                g_touch_data.state = LV_INDEV_STATE_REL;
+
+                //自动退出模拟滑动,删除轮询定时器
+                lv_indev_set_touch_timer_en(0);
+                lv_indev_sim_status = 0;
+                lv_throw.ratio = 1.0f;
+            }
+
+            data->point.x = g_touch_data.point.x;
+            data->point.y = g_touch_data.point.y;
+            data->state = g_touch_data.state;
+
+            printf("---[sim] data->point.x = %d,data->point.y = %d,data->state = %d\n", data->point.x, data->point.y, data->state);
+
+            return;
+        }//if(lv_indev_sim_status && status){
+
+
+        if (!status) { //touch抬起
+
+            printf("---interval_y == %d,interval_x == %d", (ABS(lv_throw.final_interval_y)), (ABS(lv_throw.final_interval_x)));
+
+            if (touch_cnt < 2 || (ABS(lv_throw.final_interval_y) < 20 && ABS(lv_throw.final_interval_x) < 10)) {
+                touch_cnt = 0;
+                //正常抬起,删除轮询定时器
+                lv_indev_set_touch_timer_en(0);
+                goto _GET_DATA_DONE;
+            }
+
+            printf("---entry sim status!!!\n");
+
+            //惯性滑动生效
+            lv_indev_sim_status = 1;
+
+            touch_cnt = 0;
+
+            //lvgl坐标
+            data->point.x = touch_data.point.x + lv_throw.final_interval_x;
+            data->point.y = touch_data.point.y + lv_throw.final_interval_y;
+            data->state = LV_INDEV_STATE_PR;//设置为按下（模拟）
+
+            //模拟坐标
+            g_touch_data.point.x = data->point.x;
+            g_touch_data.point.y = data->point.y;
+            g_touch_data.state = data->state;
+
+            return;
+        } else {//touch按下
+            //若处于模拟惯性即退出
+            if (lv_indev_sim_status) {
+                lv_indev_sim_status = 0;
+                lv_throw.ratio = 1.0f;
+            }
+        }
+
+        //处于按下状态,累加触摸连续次数,计算最后触摸距离
+        touch_cnt++;
+        lv_throw.final_interval_x = touch_data.point.x - g_touch_data.point.x;
+        lv_throw.final_interval_y = touch_data.point.y - g_touch_data.point.y;
+    }
+
+
+_GET_DATA_DONE:
+    //lvgl坐标
+    data->point.x = touch_data.point.x;
+    data->point.y = touch_data.point.y;
     if (status) {
         data->state = LV_INDEV_STATE_PR;
     } else {
         data->state = LV_INDEV_STATE_REL;
     }
+    //模拟坐标
+    g_touch_data.point.x = data->point.x;
+    g_touch_data.point.y = data->point.y;
+    g_touch_data.state = data->state;
 
-    /*Set the last pressed coordinates*/
-    data->point.x = last_x;
-    data->point.y = last_y;
+#else
+
+        get_touch_x_y_status((uint16_t *)&data->point.x, (uint16_t *)&data->point.y, &status);
+    }
+    if (status)
+    {
+        data->state = LV_INDEV_STATE_PR;
+    } else
+    {
+        data->state = LV_INDEV_STATE_REL;
+        //检测到抬起,删除轮询定时器
+        lv_indev_set_touch_timer_en(0);
+    }
+#endif
 }
 
 /*Return true is the touchpad is pressed*/
@@ -299,29 +430,99 @@ static void keypad_init(void)
     /*Your code comes here*/
 }
 
+static bool jl_ui_key_remap_event(uint32_t key)
+{
+    /* 添加实体按键与UI工具事件映射, 此操作可以避免在JL_UI上使用lv_group_add_obj */
+    lv_group_t *g = indev_keypad->group;
+    if (g == NULL) {
+        lv_event_send(lv_scr_act(), LV_EVENT_KEY, &key);
+        return true;
+    }
+    return false;
+}
+
 //=======================================================//
 // LVGL按键值重新映射函数:
-// 用户可以实现该函数把LVGL的按键重新映射
+// 用户可以在custom.c中实现该函数把LVGL的按键重新映射
 // key_value为映射前的键值，key_remap为映射后的键值
 //=======================================================//
-void __attribute__((weak)) lvgl_key_value_remap(u8 key_value, uint32_t *key_remap)
+_WEAK_ lvgl_key_value_remap(u8 key_value, uint32_t *key_remap)
 {
+}
+
+_WEAK_ int ui_scr_key_event_handler_ext(struct key_event *event)
+{
+    //返回1时，则将按键信息交给app core处理
+    return 0;
+}
+
+/* UI页面事件处理函数 */
+static int ui_scr_key_event_handler(struct key_event *key)
+{
+
+    static int key_down_act_screen_id = -1;
+
+    if (key->action == KEY_EVENT_DOWN || key->action == KEY_EVENT_LONG) {
+        //down 和 长按时记录当前页面ID
+        //key_down_act_screen_id = act_screen->id;
+    }
+    for (const struct ui_key_event_handler *p = ui_key_event_handler_begin; p < ui_key_event_handler_end; p++) {
+        if (p->page_id == key_down_act_screen_id) {
+            if (key->action == KEY_EVENT_DOWN || key->action == KEY_EVENT_UP) {
+                return p->key_onchange(key);
+            } else {
+                //将非UP、DOWN事件判断页面的按键回调函数是否处理(返回1则处理），如果处理，则发回给app_core
+                if (p->key_onchange(key)) {
+                    key->key_intercept = 1;
+                    sys_event_notify(SYS_KEY_EVENT, 0, key, sizeof(*key));
+                    return 1;
+                }
+            }
+        }
+    }
+
+    //未注册页面注册函数时，则交由统一的按键处理函数处理
+    if (key->action == KEY_EVENT_DOWN || key->action == KEY_EVENT_UP) {
+        return ui_scr_key_event_handler_ext(key);
+    } else {
+        if (ui_scr_key_event_handler_ext(key)) {
+            key->key_intercept = 1;
+            sys_event_notify(SYS_KEY_EVENT, 0, key, sizeof(*key));
+            return 1;
+        }
+    }
+
+    return 0;
 }
 
 /*Will be called by the library to read the mouse*/
 static void keypad_read(lv_indev_t *indev_drv, lv_indev_data_t *data)
 {
     struct key_event *key_e = (struct key_event *)indev_drv->user_data;
+    if (ui_scr_key_event_handler(key_e)) {
+        //判断事件是否要发给UI
+        //返回1,按键事件发给app_core处理,不发给UI
+        return;
+    }
+    if (key_e->action != KEY_EVENT_UP && key_e->action != KEY_EVENT_DOWN && key_e->action != KEY_EVENT_LONG && key_e->action != KEY_EVENT_HOLD) {
+        //LVGL按键内部不处理非UP、DOWN事件
+        return;
+    }
+    uint32_t key = LV_KEY_ENTER;
+    lvgl_key_value_remap(key_e->value, &key) ;  //若用户没有添加LVGL按键映射，则只配置LV_KEY_ENTER键
     switch (key_e->action) {
     case KEY_EVENT_UP:
         data->state = LV_INDEV_STATE_REL;
         break;
+    case KEY_EVENT_LONG:
+    case KEY_EVENT_HOLD:
     case KEY_EVENT_DOWN:
+        if (jl_ui_key_remap_event(key)) {
+            return;
+        }
         data->state = LV_INDEV_STATE_PR;
         break;
     }
-    uint32_t key = LV_KEY_ENTER;
-    lvgl_key_value_remap(key_e->value, &key);  //若用户没有添加LVGL按键映射，则只配置LV_KEY_ENTER键
     data->key = key;
     LV_LOG_INFO("lv keypad_read = %d, %d", data->key, data->state);
 }
@@ -411,9 +612,11 @@ static bool button_is_pressed(uint8_t id)
 
 //注册一个静态事件句柄
 extern int lvgl_key_event_handler(struct sys_event *event);
+extern int lvgl_key_event_handler_2(struct sys_event *event);
 SYS_EVENT_STATIC_HANDLER_REGISTER(static_lvgl_event_handler, 0) = {
     .event_type     = SYS_KEY_EVENT,
-    .prob_handler   = lvgl_key_event_handler,
+    /* .prob_handler   = lvgl_key_event_handler, */
+    .prob_handler   = lvgl_key_event_handler_2,
     .post_handler   = NULL,
 };
 

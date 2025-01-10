@@ -16,7 +16,10 @@
  UDP 每片数据包 格式:
 |1byte 类型 |  1byte 保留 | 2byte  payload长度 | 4byte 序号 |  4byte  帧大小 |  4byte 偏移  | 4byte 时间戳  |  payload  |
 */
-#define UDP_SEND_BUF_SIZE  (2*1460)
+
+//todo
+//包太小会影响到性能 两发一收分屏显示时
+#define UDP_SEND_BUF_SIZE  (20*1460)
 //#define CONFIG_UDP_STREAM_DROP_ENABLE
 
 
@@ -30,8 +33,6 @@ static u32 old_times = 0;
 static u32 new_times = 0;
 static struct rt_stream_info *rt_info = NULL;
 extern int atoi(const char *__nptr);
-extern int net_video_rec_get_list_vframe(void);
-extern int net_video_buff_set_frame_cnt(void);
 
 static int  path_analyze(struct rt_stream_info *info, const *path)
 {
@@ -64,16 +65,6 @@ static int  path_analyze(struct rt_stream_info *info, const *path)
 
 static int net_rt_pkg_udp_callback(enum sock_api_msg_type type, void *p)
 {
-    //缓存大于2帧丢帧
-    struct rt_stream_info *info = (struct rt_stream_info *)p;
-    int vcnt = net_video_rec_get_list_vframe();
-    int set_cnt = net_video_buff_set_frame_cnt();
-    if (vcnt > set_cnt && set_cnt > 0) {
-        if (info) {
-            info->cb_flag = 1;
-        }
-        return -1;
-    }
     return 0;
 }
 
@@ -226,16 +217,6 @@ int net_rt_send_frame(struct rt_stream_info *info, char *buffer, size_t len, u8 
     }
 #endif
 
-
-    //缓存大于2帧丢帧
-    int vcnt = net_video_rec_get_list_vframe();
-    int set_cnt = net_video_buff_set_frame_cnt();
-    if (vcnt > set_cnt && set_cnt > 0) {
-        os_mutex_post(&info->mutex);
-        return len;
-    }
-
-    info->cb_flag = 0;
 
     frame_head.offset = 0;
     frame_head.frm_sz = len;

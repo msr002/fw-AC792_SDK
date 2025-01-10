@@ -20,6 +20,7 @@ lv_obj_t *setup_scr_unpair(lv_ui *ui)
     lv_obj_set_style_bg_opa(ui->unpair, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_border_width(ui->unpair, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_scrollbar_mode(ui->unpair, LV_SCROLLBAR_MODE_OFF);
+    lv_group_add_obj(def_group, ui->unpair);
     //Write codes unpair_lbl_1
     ui->unpair_lbl_1 = lv_label_create(ui->unpair);
     lv_label_set_text(ui->unpair_lbl_1, "Unpair success ! \n\nPlease click to return");

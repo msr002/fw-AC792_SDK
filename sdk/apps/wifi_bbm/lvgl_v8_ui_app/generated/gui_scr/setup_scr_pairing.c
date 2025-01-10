@@ -20,6 +20,7 @@ lv_obj_t *setup_scr_pairing(lv_ui *ui)
     lv_obj_set_style_bg_opa(ui->pairing, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_border_width(ui->pairing, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_scrollbar_mode(ui->pairing, LV_SCROLLBAR_MODE_OFF);
+    lv_group_add_obj(def_group, ui->pairing);
     //Write codes pairing_lbl_1
     ui->pairing_lbl_1 = lv_label_create(ui->pairing);
     lv_label_set_text(ui->pairing_lbl_1, "Pairing...\n\nPlease press the pairing button of the camera and Make sure the camera is within 30cm");

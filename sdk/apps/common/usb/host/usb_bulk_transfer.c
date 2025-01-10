@@ -111,7 +111,12 @@ s32 usb_bulk_only_receive_async(struct device *device, u8 host_ep, u16 rxmaxp, u
 
     usb_h_set_ep_isr(host_dev, host_ep | USB_DIR_IN, usb_bulk_rx_isr, host_dev);
     usb_set_intr_rxe(usb_id, host_ep);
+
+#if USB_HUB
+    usb_hub_rxreg_set(usb_id, host_ep, target_ep, &(host_dev->private_data.hub_info));
+#else
     usb_write_rxfuncaddr(usb_id, host_ep, devnum);
+#endif
 
     int ret = usb_h_ep_read_async(usb_id, host_ep, target_ep, urb[usb_id].ptr, len, USB_ENDPOINT_XFER_BULK, 1);
     if (ret < 0) {
@@ -161,7 +166,12 @@ s32 usb_bulk_receive_async_no_wait(struct device *device, u8 host_ep, u16 rxmaxp
 
     usb_h_set_ep_isr(host_dev, host_ep | USB_DIR_IN, usb_bulk_rx_isr, host_dev);
     usb_set_intr_rxe(usb_id, host_ep);
+
+#if USB_HUB
+    usb_hub_rxreg_set(usb_id, host_ep, target_ep, &(host_dev->private_data.hub_info));
+#else
     usb_write_rxfuncaddr(usb_id, host_ep, devnum);
+#endif
 
     int ret = usb_h_ep_read_async(usb_id, host_ep, target_ep, urb[usb_id].ptr, len, USB_ENDPOINT_XFER_BULK, 1);
     if (ret < 0) {
@@ -243,7 +253,11 @@ s32 usb_bulk_only_send_async(struct device *device, u8 host_ep, u16 txmaxp, u8 t
     usb_h_set_ep_isr(host_dev, host_ep, usb_bulk_tx_isr, host_dev);
     usb_set_intr_txe(usb_id, host_ep);
 
+#if USB_HUB
+    usb_hub_txreg_set(usb_id, host_ep, target_ep, &(host_dev->private_data.hub_info));
+#else
     usb_write_txfuncaddr(usb_id, host_ep, devnum);
+#endif
 
     int ret = usb_h_ep_write_async(usb_id, host_ep, txmaxp, target_ep, pBuf, min(len, urb[usb_id].txmap), USB_ENDPOINT_XFER_BULK, 1);
     if (ret < 0) {

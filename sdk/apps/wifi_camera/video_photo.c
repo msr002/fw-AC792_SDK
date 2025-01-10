@@ -332,16 +332,16 @@ static int change_capture_col(int col)
 
     switch (col) {
     case PHOTO_COLOR_NORMAL:
-        user_isp_color_switch(0, 0);
+        user_isp_color_switch(__this->camera_id == 0 ? 2 : 0, 0);
         //效果会覆盖,重新设置
         change_capture_wbl(get_camera_setting_value("wbl"));
         change_capture_pexp(get_camera_setting_value("pexp"));
         break;
     case PHOTO_COLOR_WB:
-        user_isp_color_switch(0, 1);
+        user_isp_color_switch(__this->camera_id == 0 ? 2 : 0, 1);
         break;
     case PHOTO_COLOR_OLD:
-        user_isp_color_switch(0, 2);
+        user_isp_color_switch(__this->camera_id == 0 ? 2 : 0, 2);
         break;
     default:
         break;
@@ -997,6 +997,9 @@ static void check_usb_gpio_state(void)
 static void photo_mode_init(void)
 {
     memset(__this, 0, sizeof(__this));
+#if defined(CONFIG_VIDEO0_ENABLE) && defined(CONFIG_VIDEO1_ENABLE)
+    video_photo_post_msg("swWinicon", 1);
+#endif
 
     __this->check_usb_power_timer = sys_timer_add_to_task("app_core", NULL, check_usb_gpio_state, 1000);
 }
@@ -1143,7 +1146,11 @@ static int video_photo_device_event_handler(struct sys_event *e)
             break;
         case DEVICE_EVENT_OUT:
 #ifndef CONFIG_UI_STYLE_LY_ENABLE
+#if defined(CONFIG_VIDEO0_ENABLE) && defined(CONFIG_VIDEO1_ENABLE)
+            video_photo_post_msg("swWinicon", 1);
+#else if defined(CONFIG_VIDEO0_ENABLE) || defined(CONFIG_VIDEO1_ENABLE)
             video_photo_post_msg("swWinicon", 0);
+#endif
 #endif
             if (__this->camera_id == 2) {
                 switch_camera();

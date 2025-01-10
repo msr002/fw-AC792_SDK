@@ -247,6 +247,7 @@ void usb_host_free(usb_dev usb_id)
     if (host_var[usb_id]) {
         memset(host_var[usb_id]->usb_h_interrupt_rx, 0, sizeof(usb_h_interrupt) * MAX_HOST_EP_RX);
         memset(host_var[usb_id]->usb_h_interrupt_tx, 0, sizeof(usb_h_interrupt) * MAX_HOST_EP_TX);
+        /* host_var[usb_id] = NULL; */
         /* __host_var = host_var[usb_id]; */
         /* usb_var_release(usb_id); */	//释放可能有异步问题
         /* host_var[usb_id] = NULL; */	//释放可能有异步问题

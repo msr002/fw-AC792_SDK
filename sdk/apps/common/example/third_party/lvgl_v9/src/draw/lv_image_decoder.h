@@ -36,7 +36,23 @@ typedef enum {
     LV_IMAGE_SRC_FILE, /** File in filesystem*/
     LV_IMAGE_SRC_SYMBOL, /** Symbol (@ref lv_symbol_def.h)*/
     LV_IMAGE_SRC_UNKNOWN, /** Unknown source*/
+    LV_IMAGE_SRC_BIN, /** jl binary image source*/
 } lv_image_src_t;
+
+enum {
+    LV_COMPRESS_NONE = 1,
+    LV_COMPRESS_ZIP,
+    LV_COMPRESS_RLE,
+    LV_COMPRESS_ETC2,
+    LV_COMPRESS_LZ4,
+};
+enum {
+    LV_RAW_BLOCK_64x1 = 0,
+    LV_RAW_BLOCK_8x8 = 1,
+    LV_RAW_BLOCK_256x1 = 2,
+    LV_RAW_BLOCK_16x16 = 3,
+    LV_RAW_BLOCK_NONE = 0xff,
+};
 
 /**
  * Get info from an image and store in the `header`

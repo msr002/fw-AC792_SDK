@@ -92,6 +92,7 @@ static int gui_src_action_wifi_bbm(int action)
 #else
         lv_obj_set_style_bg_opa(guider_ui.rt_stream, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
 #endif
+        gui_bbm_start_stream();
         break;
     case GUI_SCREEN_ACTION_UNLOAD:
         break;
@@ -101,7 +102,6 @@ REGISTER_UI_SCREEN_ACTION_HANDLER(GUI_SCREEN_RT_STREAM)
 .onchange = gui_src_action_wifi_bbm,
 };
 #endif
-
 
 
 

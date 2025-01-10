@@ -104,7 +104,6 @@ DEFINES := \
 	-DCONFIG_THREAD_ENABLE \
 	-D__GCC_PI32V2__ \
 	-DCONFIG_NEW_ECC_ENABLE \
-	-DLIWP_USE_SMALL_MEMORY \
 	-DCONFIG_WIFI_DVR_PROJECT_ENABLE \
 	-DEVENT_HANDLER_NUM_CONFIG=2 \
 	-DEVENT_POOL_SIZE_CONFIG=256 \
@@ -804,7 +803,9 @@ c_SRC_FILES := \
 	../../../../apps/common/usb/host/aoa.c \
 	../../../../apps/common/usb/host/audio.c \
 	../../../../apps/common/usb/host/hid.c \
+	../../../../apps/common/usb/host/hub.c \
 	../../../../apps/common/usb/host/rndis_host_connectionless.c \
+	../../../../apps/common/usb/host/task_host_husb.c \
 	../../../../apps/common/usb/host/usb_bulk_transfer.c \
 	../../../../apps/common/usb/host/usb_ctrl_transfer.c \
 	../../../../apps/common/usb/host/usb_host.c \

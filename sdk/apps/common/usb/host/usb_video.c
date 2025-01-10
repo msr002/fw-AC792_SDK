@@ -50,11 +50,26 @@ struct usb_video_manager {
     u8 *buffer;
     u32 frame_cnt;
     struct device dev;
+    u32 host_ep;
 };
 #define USB_MAX_UVC_NUM 3
 static struct usb_video_manager uvc_manager[USB_MAX_UVC_NUM];
 
 #define     usbpriv_to_usbid(priv)	((usb_dev)(priv->usb_id))
+
+static u8 find_empty_uvc_manager_index(void)
+{
+    for (u8 i = 1; i < USB_MAX_UVC_NUM; i++) {
+        if (uvc_manager[i].dev.private_data == NULL)  {
+            return i;
+        }
+    }
+
+    log_e("not empty uvc manager idx!!\n");
+    return 0;
+
+}
+
 
 static u8 usbdev_to_usbid(struct device *device)
 {
@@ -85,6 +100,10 @@ u32 uvc_host_get_frame(usb_dev usb_id)
 static int uvc_set_power(struct usb_host_device *host_dev, u32 value)
 {
     usb_dev usb_id = usbpriv_to_usbid(usbdev_to_usbpriv(host_dev));
+    if (host_dev->father) {
+        usb_id = host_dev->private_data.hub_info.port_map;
+    }
+
     struct usb_video_manager *hdl = &uvc_manager[usb_id];
     hdl->online = 0;
     return 0;
@@ -92,6 +111,11 @@ static int uvc_set_power(struct usb_host_device *host_dev, u32 value)
 static int uvc_get_power(struct usb_host_device *host_dev, u32 value)
 {
     usb_dev usb_id = usbpriv_to_usbid(usbdev_to_usbpriv(host_dev));
+
+    if (host_dev->father) {
+        usb_id = host_dev->private_data.hub_info.port_map;
+    }
+
     struct usb_video_manager *hdl = &uvc_manager[usb_id];
     return hdl->online;
 }
@@ -121,7 +145,25 @@ static struct usb_interface_info uvc_host_inf[USB_MAX_UVC_NUM] = {
 
 };
 
-#define device_to_uvc(device)     (uvc_host_inf[usb_id].dev.uvc)
+/* #define device_to_uvc(device)     (uvc_host_inf[usb_id].dev.uvc) */
+#define device_to_uvc_from_id(device)     (uvc_host_inf[usb_id].dev.uvc)
+static  struct usb_uvc *device_to_uvc(struct device *device)
+{
+
+    struct usb_host_device *host_dev = device_to_usbdev(device);
+    struct usb_uvc *uvc;
+
+    if (host_dev->father) {
+        usb_dev uvc_id = usbdev_to_usbid(device);
+        uvc = uvc_host_inf[uvc_id].dev.uvc;
+
+    } else {
+        usb_dev usb_id = usbpriv_to_usbid(usbdev_to_usbpriv(host_dev));
+        uvc = uvc_host_inf[usb_id].dev.uvc;
+    }
+
+    return uvc;
+}
 
 /**
  * @brief       usb video 初始化
@@ -142,6 +184,7 @@ int usb_host_video_init(const usb_dev usb_id, const u8 sub_id)
     struct usb_uvc *uvc;
     u32 maxpsize;
     struct usb_video_manager *hdl = &uvc_manager[sub_id];
+    log_info("sub_id =%d", sub_id);
 
     device = &hdl->dev;
     if (!device) {
@@ -214,6 +257,8 @@ int usb_host_video_init(const usb_dev usb_id, const u8 sub_id)
         goto __exit_fail;
     }
 
+    hdl->host_ep = uvc->host_ep;
+    log_info("hdl->host_ep =%d", hdl->host_ep);
     hdl->online = 1;
 
     return DEV_ERR_NONE;
@@ -268,6 +313,13 @@ int usb_uvc_parser(struct usb_host_device *host_dev, u8 interface_num, u8 *pBuf)
     struct usb_uvc *real_uvc = NULL;
     struct usb_private_data *private_data = &host_dev->private_data;
     usb_dev usb_id = private_data->usb_id;
+
+    if (host_dev->father) {
+        u8 idx = find_empty_uvc_manager_index();
+        host_dev->private_data.hub_info.port_map = idx;
+        usb_id = idx;
+    }
+
     if (interface_num) {
         //同一个usb口下另外一个uvc 设备
         //TODO
@@ -785,11 +837,25 @@ static void vs_iso_handler(struct usb_host_device *host_dev, u32 ep)
     static u32 trans_err_cnt[USB_MAX_UVC_NUM] = {0};
     struct device *device;
     struct usb_uvc *uvc;
+    struct usb_video_manager *hdl;
+
     if (!host_dev) {
         return;
     }
     usb_id = host_device2id(host_dev);
-    struct usb_video_manager *hdl = &uvc_manager[usb_id];
+
+    if (host_dev->father) {
+        u8 uvc_id = host_dev->private_data.hub_info.port_map;
+        hdl = &uvc_manager[uvc_id];
+    } else {
+        hdl = &uvc_manager[usb_id];
+    }
+
+    if (!hdl) {
+        return;
+    }
+
+
     device = &hdl->dev;
     if (!device) {
         return;
@@ -884,12 +950,24 @@ static void vs_iso_burst_handler(struct usb_host_device *host_dev, u32 ep)
     static u32 trans_err_cnt[USB_MAX_UVC_NUM] = {0};
     struct device *device;
     struct usb_uvc *uvc;
+    struct usb_video_manager *hdl;
 
     if (!host_dev) {
         return;
     }
     usb_id = host_device2id(host_dev);
-    struct usb_video_manager *hdl = &uvc_manager[usb_id];
+
+    if (host_dev->father) {
+        u8 uvc_id = host_dev->private_data.hub_info.port_map;
+        hdl = &uvc_manager[uvc_id];
+    } else {
+        hdl = &uvc_manager[usb_id];
+    }
+    if (!hdl) {
+        return;
+    }
+
+    /* struct usb_video_manager *hdl = &uvc_manager[usb_id]; */
     device = &hdl->dev;
     if (!device) {
         return;
@@ -1010,17 +1088,33 @@ static void vs_bulk_handler(struct usb_host_device *host_dev, u32 ep)
     u32 maxpsize;
     struct device *device;
     struct usb_uvc *uvc;
+    struct usb_video_manager *hdl;
+
     if (!host_dev) {
         return;
     }
     usb_id = host_device2id(host_dev);
-    struct usb_video_manager *hdl = &uvc_manager[usb_id];
+
+    if (host_dev->father) {
+        u8 uvc_id = host_dev->private_data.hub_info.port_map;
+        hdl = &uvc_manager[uvc_id];
+    } else {
+        hdl = &uvc_manager[usb_id];
+    }
+
+    if (!hdl) {
+        return;
+    }
+
+
+
+    /* struct usb_video_manager *hdl = &uvc_manager[usb_id]; */
     device = &hdl->dev;
     if (!device) {
         return;
     }
     uvc = device_to_uvc(device);
-    if (!host_dev) {
+    if (!uvc) {
         return;
     }
     hdl->in_irq = 1;
@@ -1309,7 +1403,13 @@ static void iso_ep_rx_init(struct device *device)
     struct usb_uvc *uvc = device_to_uvc(device);
     u8 devnum = host_dev->private_data.devnum;
 
+    /* usb_write_rxfuncaddr(usb_id, uvc->host_ep, devnum); */
+#if USB_HUB
+    usb_hub_rxreg_set(usb_id, uvc->host_ep, uvc->ep, &(host_dev->private_data.hub_info));
+#else
     usb_write_rxfuncaddr(usb_id, uvc->host_ep, devnum);
+#endif
+
     if (usb_id == 0) {
         usb_h_set_ep_isr(host_dev, uvc->host_ep | USB_DIR_IN, vs_iso_handler, host_dev);
         usb_h_ep_config(usb_id, uvc->host_ep | USB_DIR_IN, USB_ENDPOINT_XFER_ISOC, 1, uvc->interval, uvc->ep_buffer, uvc->wMaxPacketSize);
@@ -1347,7 +1447,12 @@ static void bulk_ep_rx_init(struct device *device)
     u8 devnum = host_dev->private_data.devnum;
     usb_id = usbpriv_to_usbid(usbdev_to_usbpriv(host_dev));
 
+    /* usb_write_rxfuncaddr(usb_id, uvc->host_ep, devnum); */
+#if USB_HUB
+    usb_hub_rxreg_set(usb_id, uvc->host_ep, uvc->ep, &(host_dev->private_data.hub_info));
+#else
     usb_write_rxfuncaddr(usb_id, uvc->host_ep, devnum);
+#endif
     usb_h_set_ep_isr(host_dev, uvc->host_ep | USB_DIR_IN, bulk_rx_handler, host_dev);
     usb_h_ep_config(usb_id, uvc->host_ep | USB_DIR_IN, USB_ENDPOINT_XFER_BULK, 1, uvc->interval, uvc->ep_buffer, uvc->wMaxPacketSize);
     usb_h_ep_read_async(usb_id, uvc->host_ep, uvc->ep, NULL, 0, USB_ENDPOINT_XFER_BULK, 1);
@@ -1934,7 +2039,8 @@ u8 uvc_host_is_support_h264_fmt(void)
     usb_dev usb_id;
     for (u8 i = 0; i < USB_MAX_UVC_NUM; ++i) {
         usb_id = i;
-        uvc = device_to_uvc(device);
+        /* uvc = device_to_uvc(device); */
+        uvc = device_to_uvc_from_id(device);
         if (uvc && uvc->h264_format_index) {
             return 1;
         }
@@ -1949,7 +2055,8 @@ u8 uvc_host_is_vaild(void)
     u8 usb_vaild_nums = 0;
     for (u8 i = 1; i < USB_MAX_UVC_NUM; ++i) {
         usb_id = i;
-        uvc = device_to_uvc(device);
+        /* uvc = device_to_uvc(device); */
+        uvc = device_to_uvc_from_id(device);
         if (uvc) {
             usb_vaild_nums++;
         }

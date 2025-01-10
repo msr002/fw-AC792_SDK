@@ -31,11 +31,51 @@ struct usb_host_spk_handle {
     u8 task_id;
 };
 
+typedef struct {
+    int is_active;           // 数组是否在使用
+    int camera_id;           // 对应的摄像头ID
+    /* int* audio_buffer;       // 音频数据缓冲区 */
+} AudioArray;
+
 static struct usb_host_spk_handle **uac_host_spk_handle;
 static u8 online_num;
 
 static OS_MUTEX mutex;
 static int init;
+AudioArray *audio_arrays;
+
+// 获取音频数组索引
+int get_video_num()
+{
+    return online_num;
+}
+
+char *get_audio_array()
+{
+    return audio_arrays;
+}
+
+static int get_array_index(AudioArray *arrays, int camera_id)
+{
+    // 先查找camera_id是否已经分配了数组
+    for (int i = 0; i < online_num; i++) {
+        if (arrays[i].is_active && arrays[i].camera_id == camera_id) {
+            return i;
+        }
+    }
+
+    // 如果没有，找一个空闲的位置
+    for (int i = 0; i < online_num; i++) {
+        if (!arrays[i].is_active) {
+            arrays[i].is_active = 1;
+            arrays[i].camera_id = camera_id;
+            return i;
+        }
+    }
+
+    return -1; // 没有可用的数组
+}
+
 
 //获取到usb mic的数据
 static int usb_host_audio_play_put_buf(const usb_dev usb_id, void *ptr, u32 len, u8 channel, u32 sample_rate)
@@ -49,7 +89,7 @@ static int usb_host_audio_play_put_buf(const usb_dev usb_id, void *ptr, u32 len,
         return 0;
     }
     if (!init) {
-        printf("create mutex %s", os_current_task());
+        /* printf("create mutex %s", os_current_task()); */
         os_mutex_create(&mutex);
         init = 1;
     }
@@ -58,7 +98,7 @@ static int usb_host_audio_play_put_buf(const usb_dev usb_id, void *ptr, u32 len,
 #ifdef CONFIG_TUYA_SDK_ENABLE
         usb_audio_set_cfg(channel, 16, sample_rate);
 #endif
-
+        audio_arrays = zalloc(sizeof(AudioArray) * online_num);
         hdl = zalloc(sizeof(struct usb_host_spk_handle *)*online_num);
         uac_host_spk_handle = hdl;
 
@@ -99,13 +139,11 @@ static int usb_host_audio_play_put_buf(const usb_dev usb_id, void *ptr, u32 len,
 }
 
 //传入到video_server封装录像文件
-u32 user_uac_audio_read_input(u8 task_id, u8 *buf, u32 len)
+u32 user_uac_audio_read_input(u8 *buf, u32 len)
 {
 
 #if 1
     int rlen = 0;
-
-    int id = task_id % online_num;
 
     struct usb_host_spk_handle **hdl = uac_host_spk_handle;
 
@@ -115,12 +153,16 @@ u32 user_uac_audio_read_input(u8 task_id, u8 *buf, u32 len)
     }
 
     if (!init) {
-        printf("create mutex %s", os_current_task());
+        /* printf("create mutex %s", os_current_task()); */
         os_mutex_create(&mutex);
         init = 1;
     }
+
     os_mutex_pend(&mutex, 0);
 
+    /* printf(" %s pid:%d", os_current_task(), get_cur_thread_pid()); */
+    int id = get_array_index(audio_arrays, get_cur_thread_pid());
+    /* printf("id:%d", id); */
     while (!rlen) {
         rlen = cbuf_get_data_size(&hdl[id]->play_cbuf);
         if (!rlen) {

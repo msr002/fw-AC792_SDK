@@ -47,6 +47,8 @@ typedef union {
     audio_buffer_meta ameta;
 } meta_t;
 
+#define PIPELINE_BUFFER_FRAME_RESET     (0x1)
+
 typedef struct {
     meta_t meta;
     int64_t dts;

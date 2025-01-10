@@ -38,6 +38,14 @@ void i18n_refresh_texts(const char *page_name)
     if (strcmp(page_name, "video_play") == 0 && !guider_ui.video_play_del) {
 
     }
+
+    if (strcmp(page_name, "sys_prompt") == 0 && !guider_ui.sys_prompt_del) {
+
+    }
+
+    if (strcmp(page_name, "dir_select") == 0 && !guider_ui.dir_select_del) {
+
+    }
 }
 
 void i18n_refresh_all_texts()
@@ -71,6 +79,14 @@ void i18n_refresh_all_texts()
     }
 
     if (!guider_ui.video_play_del) {
+
+    }
+
+    if (!guider_ui.sys_prompt_del) {
+
+    }
+
+    if (!guider_ui.dir_select_del) {
 
     }
 }

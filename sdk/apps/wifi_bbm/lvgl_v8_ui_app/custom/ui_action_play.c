@@ -11,6 +11,21 @@
 static int cur_play_index = 0;
 
 #if !LV_USE_GUIBUILDER_SIMULATOR
+
+void post_video_play_msg_to_ui(const char *msg, int arg)
+{
+    if (!strcmp(msg, "play_time")) {
+        int percent = arg;
+        lvgl_module_msg_send_value(GUI_VIDEO_PLAY_MSG_ID_PROGRESS_BAR, percent, 0);
+    } else if (!strcmp(msg, "play_control")) {
+        //0:暂停图标 1:播放图标
+        lvgl_module_msg_send_value(GUI_VIDEO_PLAY_MSG_ID_PLAY_CONTROL, arg, 1);
+
+    } else {
+        printf("Unknow Msg\n");
+    }
+}
+
 void gui_bbm_set_cur_play_index(int index)
 {
     cur_play_index = index;
@@ -22,7 +37,8 @@ int gui_bbm_play_file_start(void)
     init_intent(&it);
     it.name	= "baby_monitor";
     it.action = ACTION_BBM_FILE_PLAY_START;
-    it.data = cur_play_index;
+    it.data = gui_bbm_get_cur_dir_ch();
+    it.exdata = cur_play_index;
     start_app(&it);
 
     return 0;
@@ -34,29 +50,51 @@ int gui_bbm_play_file_stop(void)
     init_intent(&it);
     it.name	= "baby_monitor";
     it.action = ACTION_BBM_FILE_PLAY_STOP;
+    it.data = gui_bbm_get_cur_dir_ch();
     start_app(&it);
 
     return 0;
 }
 
-int gui_bbm_play_file_pause(void)
+int gui_bbm_play_file_control(void)
 {
     struct intent it;
     init_intent(&it);
     it.name	= "baby_monitor";
-    it.action = ACTION_BBM_FILE_PLAY_PAUSE;
+    it.action = ACTION_BBM_FILE_PLAY_SWITCH;
+    it.data = gui_bbm_get_cur_dir_ch();
+    it.exdata = cur_play_index;
     start_app(&it);
 
     return 0;
 }
 
-int gui_bbm_play_file_resume(void)
+int gui_bbm_play_file_next(void)
 {
-    struct intent it;
-    init_intent(&it);
-    it.name	= "baby_monitor";
-    it.action = ACTION_BBM_FILE_PLAY_RESUME;
-    start_app(&it);
+    int file_total_num;
+
+    gui_bbm_get_file_num(&file_total_num);
+
+    gui_bbm_play_file_stop();
+
+    cur_play_index = (cur_play_index + 1) % file_total_num;
+
+    gui_bbm_play_file_start();
+
+    return 0;
+}
+
+int gui_bbm_play_file_prev(void)
+{
+    int file_total_num;
+
+    gui_bbm_get_file_num(&file_total_num);
+
+    gui_bbm_play_file_stop();
+
+    cur_play_index = (cur_play_index - 1 + file_total_num) % file_total_num;
+
+    gui_bbm_play_file_start();
 
     return 0;
 }
@@ -73,15 +111,26 @@ static int gui_src_action_play(int action)
         gui_bbm_play_file_start();
         break;
     case GUI_SCREEN_ACTION_UNLOAD:
-        gui_bbm_play_file_stop();
         break;
     }
 }
 REGISTER_UI_SCREEN_ACTION_HANDLER(GUI_SCREEN_VIDEO_PLAY)
 .onchange = gui_src_action_play,
 };
-#endif
 
+
+int gui_video_play_msg_progress_bar_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type)
+{
+    if (access == GUI_MSG_ACCESS_GET) {
+        data->value_int = 0;
+    }
+    return 0;
+}
+REGISTER_UI_MODULE_EVENT_HANDLER(GUI_VIDEO_PLAY_MSG_ID_PROGRESS_BAR)
+.onchange = gui_video_play_msg_progress_bar_cb,
+};
+
+#endif
 
 
 

@@ -80,17 +80,19 @@ struct media_file_info {
 
 static struct list_head forward_file_list_head = {NULL, NULL};
 static struct list_head behind_file_list_head = {NULL, NULL};
+#if defined CONFIG_VIDEO2_ENABLE
+static struct list_head third_file_list_head = {NULL, NULL};
+#endif
 static u32 initing = 0;
 static u32 mutex_init = 0;
 static u8 forward_file_mem[MAX_NUM + 2][INFO_LEN] __attribute__((aligned(32)));
-
-#if (defined CONFIG_VIDEO1_ENABLE || defined CONFIG_VIDEO2_ENABLE || defined CONFIG_VIDEO3_ENABLE)
+#if (defined CONFIG_VIDEO2_ENABLE)
 static u8 behind_file_mem[MAX_NUM + 2][INFO_LEN] __attribute__((aligned(32)));
-static struct file_info file_info_tab[MAX_NUM * 2]  __attribute__((aligned(32)));
-#else
-static struct file_info file_info_tab[MAX_NUM]  __attribute__((aligned(32)));
 #endif
-
+#if defined CONFIG_VIDEO2_ENABLE
+static u8 third_file_mem[MAX_NUM + 2][INFO_LEN] __attribute__((aligned(32)));
+#endif
+static struct file_info file_info_tab[MAX_NUM * 3]  __attribute__((aligned(32)));
 static char emf_path[64] __attribute__((aligned(32)));
 static OS_MUTEX file_list_mutex;
 static OS_MUTEX file_list_read_mutex;
@@ -102,8 +104,11 @@ static void file_info_clear(void)
     memset(file_info_tab, 0, sizeof(file_info_tab));
 #ifdef CONFIG_ENABLE_VLIST
     memset(forward_file_mem, 0, (MAX_NUM + 2) * INFO_LEN);
-#if (defined CONFIG_VIDEO1_ENABLE || defined CONFIG_VIDEO2_ENABLE)
+#if (defined CONFIG_VIDEO1_ENABLE)
     memset(behind_file_mem, 0, (MAX_NUM + 2) * INFO_LEN);
+#endif
+#if defined CONFIG_VIDEO2_ENABLE
+    memset(third_file_mem, 0, (MAX_NUM + 2) * INFO_LEN);
 #endif
 #endif
 }
@@ -137,14 +142,26 @@ static u8 *__find_emtry_block_b(struct file_info *info)
     int i = info->id - 1;
     u8 *str = NULL;
     os_mutex_pend(&file_list_mutex, 0);
-#if (defined CONFIG_VIDEO1_ENABLE || defined CONFIG_VIDEO2_ENABLE || defined CONFIG_VIDEO3_ENABLE)
+#if (defined CONFIG_VIDEO2_ENABLE)
     memset(behind_file_mem[i], 0, INFO_LEN);
     str = behind_file_mem[i];
 #endif
     os_mutex_post(&file_list_mutex);
     return str;
 }
-static struct file_info *file_info_find(char behind)
+static u8 *__find_emtry_block_t(struct file_info *info)
+{
+    int i = info->id - 1;
+    u8 *str = NULL;
+    os_mutex_pend(&file_list_mutex, 0);
+#if (defined CONFIG_VIDEO1_ENABLE)
+    memset(third_file_mem[i], 0, INFO_LEN);
+    str = third_file_mem[i];
+#endif
+    os_mutex_post(&file_list_mutex);
+    return str;
+}
+static struct file_info *file_info_find(char behind)        //0 1 2
 {
     int i;
     int num = 0;
@@ -152,6 +169,8 @@ static struct file_info *file_info_find(char behind)
     struct file_info *info = NULL;
     int end = behind ? 2 : 1;
     int start = behind ? MAX_NUM : 0;
+    // int end = behind ? ((behind==1) ? 2 : 3) : 1;
+    // int start = behind ? ( (behind==1) ? MAX_NUM : (MAX_NUM*2) ) : 0;
 
     for (i = start; i < end * MAX_NUM; i++) {
         info = (struct file_info *)&file_info_tab[i];
@@ -425,21 +444,156 @@ static int behind_remove_block_all()
 
 }
 
+static size_t third_write_block(u8 *buffer, size_t len)
+{
+    struct file_info *info = (struct file_info *)file_info_find(2);
+    struct  file_info *__info = NULL;
+    struct list_head *pos = NULL, *node = NULL;
+    if (info == NULL) {
+        return -1;
+    }
+
+    const char *str = "\"e\":\"";
+    char *pstr;
+    pstr = strstr((const char *)buffer, str);
+    if (pstr) {
+        pstr += strlen(str);
+        info->ftime = strtol((const char *)pstr, NULL, 10);
+    } else {
+        info->ftime = 0;
+    }
+    if (info->addlist) {
+        info->len = len;
+        memset(info->fd, 0, INFO_LEN);
+        memcpy(info->fd, buffer, len);
+        return len;
+    }
+
+    u8 *p = __find_emtry_block_t(info);
+    memcpy(p, buffer, len);
+    info->len = len;
+    info->fd = (u8(*)[INFO_LEN])p;
+    info->addlist = 1;
+
+    /* printf("info->fd=%s   info->len=%d\n", info->fd, info->len); */
+    os_mutex_pend(&file_list_mutex, 0);
+    list_add_tail(&info->entry, &third_file_list_head);
+    // list_for_each_safe(pos, node, &third_file_list_head) {
+    //     if (pos) {
+    //         __info = list_entry(pos, struct file_info, entry);
+    //         printf("======= %s",__info->fd);
+    //     }
+    // }
+    os_mutex_post(&file_list_mutex);
+    return len;
+
+}
+
+static int third_remove_block(const char *fname)
+{
+    struct  file_info *__info = NULL;
+    struct list_head *pos = NULL, *node = NULL;
+    os_mutex_pend(&file_list_mutex, 0);
+    if (list_empty(&third_file_list_head)) {
+        os_mutex_post(&file_list_mutex);
+        return -1;
+    }
+
+    list_for_each_safe(pos, node, &third_file_list_head) {
+        if (pos) {
+            __info = list_entry(pos, struct file_info, entry);
+            if (__info) {
+                if (strstr((const char *)__info->fd, fname)) {
+                    memset(__info->fd, 0, __info->len);
+                    list_del(&__info->entry);
+                    __info->id = 0;
+                    __info->addlist = 0;
+                    //free(__info);
+                    os_mutex_post(&file_list_mutex);
+                    return 0;
+                }
+            }
+        }
+    }
+    os_mutex_post(&file_list_mutex);
+    return -1;
+}
+
+static int third_change_block(const char *fname, char attr)
+{
+    struct  file_info *__info = NULL;
+    struct list_head *pos = NULL, *node = NULL;
+
+    char *str = NULL;
+    os_mutex_pend(&file_list_mutex, 0);
+    if (list_empty(&third_file_list_head)) {
+        os_mutex_post(&file_list_mutex);
+        return -1;
+    }
+
+    list_for_each_safe(pos, node, &third_file_list_head) {
+        if (pos) {
+            __info = list_entry(pos, struct file_info, entry);
+            if (__info) {
+                if (memmem(__info->fd, __info->len, fname, strlen(fname))) {
+                    str = memmem(__info->fd, __info->len, "\"y\":", 4);
+                    if (str) {
+                        *(str + 4) = attr;
+                        os_mutex_post(&file_list_mutex);
+                        return 0;
+                    }
+                }
+            }
+        }
+    }
+    os_mutex_post(&file_list_mutex);
+    return -1;
+}
+
+static int third_remove_block_all()
+{
+    struct  file_info *__info = NULL;
+    struct list_head *pos = NULL, *node = NULL;
+    os_mutex_pend(&file_list_mutex, 0);
+    if (list_empty(&third_file_list_head)) {
+        os_mutex_post(&file_list_mutex);
+        return -1;
+    }
+
+    list_for_each_safe(pos, node, &third_file_list_head) {
+        if (pos) {
+            __info = list_entry(pos, struct file_info, entry);
+            if (__info) {
+                list_del(&__info->entry);
+                memset(__info->fd, 0, INFO_LEN);
+                __info->id = 0;
+                __info->addlist = 0;
+                //free(__info);
+            }
+        }
+    }
+    os_mutex_post(&file_list_mutex);
+    return 0;
+}
+
 void FILE_REMOVE_ALL()
 {
 
     if (FILE_INITIND_CHECK()) {
         forward_remove_block_all();
 
-#if defined CONFIG_VIDEO2_ENABLE || defined CONFIG_VIDEO1_ENABLE || defined CONFIG_VIDEO3_ENABLE
+#if defined CONFIG_VIDEO2_ENABLE
         behind_remove_block_all();
+#endif
+#if defined CONFIG_VIDEO1_ENABLE
+        third_remove_block_all();
 #endif
     }
     file_info_clear();
 }
 
 
-void __FILE_LIST_INIT(u8 is_forward, u32 file_num)
+void __FILE_LIST_INIT(u8 id, u32 file_num)
 {
 
     FILE *fd = NULL;
@@ -452,14 +606,18 @@ void __FILE_LIST_INIT(u8 is_forward, u32 file_num)
     struct media_file_info media_info;
 
 #ifdef CONFIG_ENABLE_VLIST
-    if (is_forward) {
+    if (id == 0) {
         strcpy((char *)res, get_rec_path_1());
         INIT_LIST_HEAD(&forward_file_list_head);
         flag = 0;
-    } else {
+    } else if (id == 1) {
         strcpy((char *)res, get_rec_path_2());
-        INIT_LIST_HEAD(&behind_file_list_head);
+        INIT_LIST_HEAD(&third_file_list_head);
         flag = 1;
+    } else if (id == 2) {
+        strcpy((char *)res, get_rec_path_3());
+        INIT_LIST_HEAD(&behind_file_list_head);
+        flag = 2;
     }
 
 
@@ -499,57 +657,6 @@ void __FILE_LIST_INIT(u8 is_forward, u32 file_num)
             continue;
         }
     }
-
-#ifdef  CONFIG_EMR_DIR_ENABLE
-    //扫描紧急文件夹
-    fscan_release(fs);//先释放上一个
-    memset(res, 0, sizeof(res));
-    if (is_forward) {
-        strcpy((char *)res, get_rec_path_1());
-        strcat(res, CONFIG_EMR_REC_DIR);
-        flag = 0;
-    } else {
-        strcpy((char *)res, get_rec_path_2());
-        strcat(res, CONFIG_EMR_REC_DIR);
-        flag = 1;
-    }
-#ifdef CONFIG_NET_PKG_H264
-    fs = fscan(res, "-tMOVJPG -st");
-#else
-#ifdef CONFIG_NET_PKG_JPEG
-    fs = fscan(res, "-tAVIJPG -st");
-#else
-    fs = fscan(res, "-tJPG -st");
-#endif
-#endif
-
-    if (fs == NULL) {
-        return;
-    }
-    count = 0;
-    while (1) {
-        if (fd == NULL) {
-            fd = fselect(fs, FSEL_FIRST_FILE, 0);
-        } else {
-            fd = fselect(fs, FSEL_NEXT_FILE, 0);
-        }
-        if (fd == NULL) {
-            break;
-        }
-        media_info.fd = fd;
-        media_info.channel = flag;
-        media_info.is_emf = 1;
-
-        send_json(&media_info, 0x2);
-        if (media_info.fd) {
-            fclose(fd);
-            media_info.fd = NULL;
-        }
-        if (ret <= 0) {
-            continue;
-        }
-    }
-#endif
 
 close1:
 
@@ -594,14 +701,20 @@ void FILE_DELETE(char *__fname, u8 create_file)
         strcpy((char *)fname, __fname);
         printf("FILE_DELETE file : %s \n", fname);
         forward_remove_block((const char *)fname);
-#if defined CONFIG_VIDEO2_ENABLE || defined CONFIG_VIDEO1_ENABLE || defined CONFIG_VIDEO3_ENABLE
+#if defined CONFIG_VIDEO2_ENABLE
         behind_remove_block((const char *)fname);
+#endif
+#if defined CONFIG_VIDEO1_ENABLE
+        third_remove_block((const char *)fname);
 #endif
     } else {
         printf("FILE_DELETE all file \n");
         forward_remove_block_all();
-#if defined CONFIG_VIDEO2_ENABLE || defined CONFIG_VIDEO1_ENABLE || defined CONFIG_VIDEO3_ENABLE
+#if defined CONFIG_VIDEO2_ENABLE
         behind_remove_block_all();
+#endif
+#if defined CONFIG_VIDEO1_ENABLE
+        third_remove_block_all();
 #endif
         file_info_clear();
     }
@@ -626,8 +739,12 @@ void FILE_CHANGE_ATTR(const char *fname, char attr)
     if (strstr(fname, get_rec_path_1())) {
         forward_change_block(fname, attr);
     } else if (strstr(fname, get_rec_path_2())) {
-#if defined CONFIG_VIDEO2_ENABLE || defined CONFIG_VIDEO1_ENABLE || defined CONFIG_VIDEO3_ENABLE
+#if defined CONFIG_VIDEO2_ENABLE
         behind_change_block(fname, attr);
+#endif
+    } else if (strstr(fname, get_rec_path_3())) {
+#if defined CONFIG_VIDEO1_ENABLE
+        third_change_block(fname, attr);
 #endif
     }
 
@@ -638,6 +755,7 @@ void FILE_GEN(void)
 {
     FILE *fd = NULL;
     FILE *fd2 = NULL;
+    FILE *fd3 = NULL;
     u8 *str_ptr = NULL;
     u8 *str_ptr2 = NULL;
     char path[64];
@@ -732,7 +850,7 @@ redo1:
 #endif
 exit1:
 
-#if defined CONFIG_VIDEO2_ENABLE || defined CONFIG_VIDEO1_ENABLE || defined CONFIG_VIDEO3_ENABLE
+#if defined CONFIG_VIDEO1_ENABLE
         sprintf(path, "%s%s", get_rec_path_2(), "vf_list.txt");
         fd2 = fopen(path, "r");
         if (fd2) {
@@ -746,7 +864,7 @@ exit1:
 
         fwrite(VIDEO_FILE_LIST_JSON_HEAD, strlen(VIDEO_FILE_LIST_JSON_HEAD), 1, fd2);
         fwrite(&enter, sizeof(enter), 1, fd2);
-        list_for_each_safe(pos, node, &behind_file_list_head) {
+        list_for_each_safe(pos, node, &third_file_list_head) {
             if (pos) {
                 __info = list_entry(pos, struct file_info, entry);
                 if (__info) {
@@ -804,15 +922,90 @@ redo2:
             buff = NULL;
         }
 #endif
-
 #endif
 
 exit2:
+#if defined CONFIG_VIDEO2_ENABLE
+        sprintf(path, "%s%s", get_rec_path_3(), "vf_list.txt");
+        fd3 = fopen(path, "r");
+        if (fd3) {
+            fdelete(fd3);
+        }
+        fd3 = fopen(path, "w+");
+        if (!fd3) {
+            printf("open err %s !!!\n\n", path);
+            goto exit3;
+        }
+
+        fwrite(VIDEO_FILE_LIST_JSON_HEAD, strlen(VIDEO_FILE_LIST_JSON_HEAD), 1, fd3);
+        fwrite(&enter, sizeof(enter), 1, fd3);
+        list_for_each_safe(pos, node, &behind_file_list_head) {
+            if (pos) {
+                __info = list_entry(pos, struct file_info, entry);
+                if (__info) {
+                    fwrite(__info->fd, strlen((const char *)__info->fd), 1, fd3);
+                    fwrite(&enter, sizeof(enter), 1, fd3);
+                    last_addr = ftell(fd3);
+                }
+            }
+        }
+        if (last_addr) {
+            fseek(fd3, last_addr - (sizeof(enter) + 1), SEEK_SET);
+        }
+        fwrite(&enter, sizeof(enter), 1, fd3);
+        fwrite(VIDEO_FILE_LIST_JSON_END, strlen(VIDEO_FILE_LIST_JSON_END), 1, fd3);
+        fclose(fd3);
+        last_addr = 0;
+        pos = NULL;
+        node = NULL;
+#ifdef VF_LIST_CHECK
+redo3:
+        //校验
+        sprintf(path, "%s%s", get_rec_path_3(), "vf_list.txt");
+        fd = fopen(path, "r");
+        if (fd) {
+            len = flen(fd);
+            if (!buff) {
+                buff = zalloc(len + 1);
+            }
+            if (!buff) {
+                fclose(fd);
+            } else {
+                ret = fread(fd, buff, len);
+                if (ret != len) {
+                    printf("read list3 file err : %s \n\n", path);
+                }
+                fclose(fd);
+                obj = json_tokener_parse(buff);
+                /*printf("check list3 file : \n%s\n", buff);*/
+                if (!obj) {
+                    printf("check list3 file err , retry again \n");
+                    redo_cnt++;
+                    if (redo_cnt <= 3) {
+                        msleep(100);
+                        goto redo3;
+                    }
+                    redo_cnt = 0;
+                    /*ASSERT(0,"check list3 file err !!!!!!!!! ");*/
+                }
+                json_object_put(obj);
+            }
+        }
+        if (buff) {
+            free(buff);
+            buff = NULL;
+        }
+#endif
+#endif
+exit3:
         os_mutex_post(&file_list_mutex);
         printf("----update file list\n");
     } else {
         printf("SD card no ready !!!!!!!!!!\n\n");
     }
+
+
+
 #endif
 
 }
@@ -862,8 +1055,10 @@ void FILE_LIST_ADD(u32 status, const char *__path, u8 create_file)
 
     if (strstr((const char *)path, get_rec_path_1())) {
         flag = 0;
-    } else {
+    } else if (strstr((const char *)path, get_rec_path_2())) {
         flag = 1;
+    } else if (strstr((const char *)path, get_rec_path_3())) {
+        flag = 2;
     }
 
 #ifdef CONFIG_EMR_DIR_ENABLE
@@ -925,6 +1120,7 @@ int vf_list(u8 type, u8 isforward, char *dir)
     struct vfscan *fs = NULL;
     FILE *vf_fd_forward = NULL;
     FILE *vf_fd_behind = NULL;
+    FILE *vf_fd_third = NULL;
     FILE *fd = NULL;
     u32 open_count = 0;
     union vunpkg_req req;
@@ -948,7 +1144,7 @@ int vf_list(u8 type, u8 isforward, char *dir)
 
 #if 1
 
-    if (isforward) {
+    if (isforward == 1) {
 
         sprintf(path, "%s%s", get_rec_path_1(), "vf_list_a.txt");
         vf_fd_forward = fopen(path, "w+");
@@ -961,7 +1157,7 @@ int vf_list(u8 type, u8 isforward, char *dir)
 
         file_sz += fwrite(VIDEO_FILE_LIST_JSON_HEAD, strlen(VIDEO_FILE_LIST_JSON_HEAD), 1, vf_fd_forward);
         strcpy((char *)dir, path);
-    } else {
+    } else if (isforward == 0) {
 
         sprintf(path, "%s%s", get_rec_path_2(), "vf_list_a.txt");
         vf_fd_behind = fopen(path, "w+");
@@ -973,6 +1169,19 @@ int vf_list(u8 type, u8 isforward, char *dir)
         }
 
         file_sz += fwrite(VIDEO_FILE_LIST_JSON_HEAD, strlen(VIDEO_FILE_LIST_JSON_HEAD), 1, vf_fd_behind);
+        strcpy((char *)dir, path);
+    } else if (isforward == 2) {
+
+        sprintf(path, "%s%s", get_rec_path_3(), "vf_list_a.txt");
+        vf_fd_third = fopen(path, "w+");
+
+        if (vf_fd_third == NULL) {
+            printf("%s  %d fopen fail\n", __func__, __LINE__);
+
+            return -1;
+        }
+
+        file_sz += fwrite(VIDEO_FILE_LIST_JSON_HEAD, strlen(VIDEO_FILE_LIST_JSON_HEAD), 1, vf_fd_third);
         strcpy((char *)dir, path);
     }
 
@@ -994,7 +1203,7 @@ int vf_list(u8 type, u8 isforward, char *dir)
 
     }
 
-    if (isforward) {
+    if (isforward == 1) {
         fs = fscan(get_rec_path_1(), fs_arg, 9);
 
         while (1) {
@@ -1156,7 +1365,7 @@ int vf_list(u8 type, u8 isforward, char *dir)
             fclose(fd);
         }
 
-    } else {
+    } else if (isforward == 0) {
 
 //////////////////////////////////////////////////////////////
 //////////////////////////2号文件夹////////////////////////////////////
@@ -1306,185 +1515,160 @@ int vf_list(u8 type, u8 isforward, char *dir)
         }
 
 #endif
+    } else if (isforward == 2) {
+
+//////////////////////////////////////////////////////////////
+//////////////////////////3号文件夹////////////////////////////////////
+#if 1
+        open_count = 0;
+        fs = fscan(get_rec_path_3(), fs_arg, 9);
+
+        while (1) {
+            if (fd == NULL) {
+                fd = fselect(fs, FSEL_FIRST_FILE, 0);
+            } else {
+                fd = fselect(fs, FSEL_NEXT_FILE, 0);
+            }
+
+
+            if (fd == NULL) {
+                if (open_count > 0) {
+                    fseek(vf_fd_third, file_sz - 1, SEEK_SET);
+                } else {
+                    return NONE;
+                }
+
+                fwrite("]}", 2, 1, vf_fd_third);
+                fclose(vf_fd_third);
+                fscan_release(fs);
+                return type;
+            }
+
+            fget_name(fd, namebuf, 128);
+            int _attr;
+            struct vfs_attr attr;
+            fget_attrs(fd, &attr);
+
+            fget_attr(fd, &_attr);
+            if (!memcmp((namebuf + ret), "mov", 3)) {
+                struct __mov_unpkg_info info;
+
+#ifdef CONFIG_NET_PKG_H264
+                if (is_vaild_mov_file(fd)) {
+                    read_stts(fd, &info);
+                    read_time_scale_dur(fd, &info);
+                    read_height_and_length(fd, &info);
+                    vaild = 1;
+
+                    if (_attr & F_ATTR_RO) {
+                        vaild = 2;
+                    }
+
+                } else
+#endif
+                {
+
+                    vaild = 0;
+                    FILE_DELETE((char *)namebuf, 0);
+                    fdelete(fd);
+                    /*fclose(fd);*/
+                    continue;
+                }
+
+                ret = sprintf(tmp_buf, "{\"y\":%d,\"f\":\"%s%s\",\"t\":\"%04d%02d%02d%02d%02d%02d\",\"d\":\"%d\",\"h\":%d,\"w\":%d,\"p\":%d,\"s\":\"%d\"},"
+                              , vaild
+                              , get_rec_path_3()
+                              , namebuf
+                              , attr.crt_time.year
+                              , attr.crt_time.month
+                              , attr.crt_time.day
+                              , attr.crt_time.hour
+                              , attr.crt_time.min
+                              , attr.crt_time.sec
+                              , info.durition / info.scale
+                              , info.height >> 16
+                              , info.length >> 16
+                              , info.scale / info.sample_duration
+                              , flen(fd)
+                             );
+            } else if (!memcmp((namebuf + ret), "AVI", 3)) {
+#ifdef CONFIG_NET_PKG_JPEG
+                struct __mov_unpkg_info info;
+                u8 state = 0;
+                avi_net_preview_unpkg_init(fd, state);
+                if (!is_vaild_avi_file(fd, state)) {
+                    vaild = 0x0;
+                    printf("err : vf_list not vaild AVI file !!!!\n\n");
+                    FILE_DELETE((char *)namebuf, 0);
+//                    fdelete(fd);
+                    fclose(fd);
+                    continue;
+                }
+                if (avi_get_width_height(fd, (void *)&info, state)) {
+                    vaild = 0x0;
+                    printf("err : vf_list read AVI width and heigt fail !!!!\n\n");
+                    fclose(fd);
+                    continue;
+                }
+                if (_attr & F_ATTR_RO) {
+                    vaild = 0x2;
+                } else {
+                    vaild = 0x1;
+                }
+                info.scale = 1;
+                info.durition = avi_get_file_time(fd, state);
+                info.sample_duration = avi_get_fps(fd, state);
+                avi_net_unpkg_exit(fd, state);
+                ret = sprintf(tmp_buf, "{\"y\":%d,\"f\":\"%s%s\",\"t\":\"%04d%02d%02d%02d%02d%02d\",\"d\":\"%d\",\"h\":%d,\"w\":%d,\"p\":%d,\"s\":\"%d\"},"
+                              , vaild
+                              , get_rec_path_3()
+                              , namebuf
+                              , attr.crt_time.year
+                              , attr.crt_time.month
+                              , attr.crt_time.day
+                              , attr.crt_time.hour
+                              , attr.crt_time.min
+                              , attr.crt_time.sec
+                              , info.durition / info.scale
+                              , info.height
+                              , info.length
+                              , info.sample_duration
+                              , flen(fd)
+                             );
+#endif
+            } else {
+                //       puts("picture\n");
+                u16 height, width;
+                fseek(fd, 0x174, SEEK_SET);
+                fread(&height, 2, 1, fd);
+                fread(&width, 2, 1, fd);
+                height = lwip_htons(height);
+                width  = lwip_htons(width);
+                ret = sprintf(tmp_buf, "{\"f\":\"%s%s\",\"t\":\"%04d%02d%02d%02d%02d%02d\",\"h\":%d,\"w\":%d,\"s\":\"%d\"},"
+                              , get_rec_path_3()
+                              , namebuf
+                              , attr.crt_time.year
+                              , attr.crt_time.month
+                              , attr.crt_time.day
+                              , attr.crt_time.hour
+                              , attr.crt_time.min
+                              , attr.crt_time.sec
+                              , height
+                              , width
+                              , flen(fd)
+                             );
+            }
+
+            open_count++;
+            file_sz += fwrite(tmp_buf, ret, 1, vf_fd_third);
+            fclose(fd);
+        }
+
+#endif
     }
 
     return NONE;
 }
-
-
-
-
-
-
-
-
-void __FILE_LIST_INIT(u8 is_forward, u32 file_num);
-
-extern int send_ctp_string(int cmd_type, char *buf, char *_req, void *priv);
-#if 0
-static int get_and_write_file_attribute(u32 status, FILE *file_list_fd, FILE *fd, u8 flag)
-{
-    char namebuf[20];
-    char tmp_buf[128] = {[0 ... 127] = 0};
-    char tmp_buf2[128] = {[0 ... 127] = 0};
-    int ret;
-    int _attr;
-    struct vfs_attr attr;
-    struct __mov_unpkg_info info;
-    u32 vaild = 0;
-    fget_name(fd, namebuf, 20);
-    ret = strlen((const char *)namebuf) - 3;
-    fget_attrs(fd, &attr);
-    fget_attr(fd, &_attr);
-    char *buf = malloc(256);
-    if (buf == NULL) {
-        return -1;
-    }
-    /* printf("fname -> %s\n", namebuf); */
-    if (!memcmp((namebuf + ret), "MOV", 3)) {
-        /* time1 = timer_get_ms(); */
-        if (is_vaild_mov_file(fd)) {
-            if (read_stts(fd, &info) != 0) {
-                vaild = 0;
-                fclose(fd);
-                continue;
-
-            }
-            if (0 != read_time_scale_dur(fd, &info)) {
-                vaild = 0;
-                fclose(fd);
-                continue;
-            }
-            if (0 != read_height_and_length(fd, &info)) {
-                vaild = 0;
-                fclose(fd);
-                continue;
-            }
-
-
-            vaild = 1;
-
-            if (_attr & F_ATTR_RO) {
-                vaild = 2;
-            }
-
-            /* time2 = timer_get_ms(); */
-            /* printf("use in time:%dms\n",time2 - time1); */
-        } else {
-
-            vaild = 0;
-            printf("Invalid file\n");
-            return -1;
-        }
-
-        ret = sprintf(tmp_buf, "{\"y\":%d,\"f\":\"%s%s\",\"t\":\"%04d%02d%02d%02d%02d%02d\",\"d\":\"%d\",\"h\":%d,\"w\":%d,\"p\":%d,\"s\":\"%d\",\"c\":\"%d\"},"
-                      , vaild
-                      , flag ? get_rec_path_2() : get_rec_path_1()
-                      , namebuf
-                      , attr.crt_time.year
-                      , attr.crt_time.month
-                      , attr.crt_time.day
-                      , attr.crt_time.hour
-                      , attr.crt_time.min
-                      , attr.crt_time.sec
-                      , info.durition / info.scale
-                      , info.height >> 16
-                      , info.length >> 16
-                      , info.scale / info.sample_duration
-                      , flen(fd)
-                      , flag
-                     );
-
-        if (!flag) {
-            forward_write_block(tmp_buf, ret);
-        } else {
-            behind_write_block(tmp_buf, ret);
-        }
-
-        if (status <= 1 && !initing) {
-            ret = sprintf(buf, "{\"op\":\"NOTIFY\",\"param\":{\"status\":\"%d\",\"desc\":\"{\\\"y\\\":%d,\\\"f\\\":\\\"%s%s\\\",\\\"t\\\":\\\"%04d%02d%02d%02d%02d%02d\\\",\\\"d\\\":\\\"%d\\\",\\\"h\\\":%d,\\\"w\\\":%d,\\\"p\\\":%d,\\\"s\\\":\\\"%d\\\",\\\"c\\\":\\\"%d\\\"}\"}}"
-                          , status
-                          , vaild
-                          , flag ? get_rec_path_2() : get_rec_path_1()
-                          , namebuf
-                          , attr.crt_time.year
-                          , attr.crt_time.month
-                          , attr.crt_time.day
-                          , attr.crt_time.hour
-                          , attr.crt_time.min
-                          , attr.crt_time.sec
-                          , info.durition / info.scale
-                          , info.height >> 16
-                          , info.length >> 16
-                          , info.scale / info.sample_duration
-                          , flen(fd)
-                          , flag
-                         );
-            send_ctp_string(CTP_NOTIFY_COMMAND, buf, "VIDEO_FINISH", NULL);
-        } else {
-            free(buffer);
-        }
-    } else {
-        //  puts("picture\n");
-        u16 height, width;
-        fseek(fd, 0x174, SEEK_SET);
-        fread(fd, &height, 2);
-        fread(fd, &width, 2);
-        height = lwip_htons(height);
-        width  = lwip_htons(width);
-        ret = sprintf(tmp_buf, "{\"f\":\"%s%s\",\"t\":\"%04d%02d%02d%02d%02d%02d\",\"h\":%d,\"w\":%d,\"s\":\"%d\",\"c\":\"%d\"},"
-                      , flag ? get_rec_path_2() : get_rec_path_1()
-                      , namebuf
-                      , attr.crt_time.year
-                      , attr.crt_time.month
-                      , attr.crt_time.day
-                      , attr.crt_time.hour
-                      , attr.crt_time.min
-                      , attr.crt_time.sec
-                      , height
-                      , width
-                      , flen(fd)
-                      , flag
-                     );
-
-        /* ret = fwrite(file_list_fd, tmp_buf, ret); */
-        if (!flag) {
-            forward_write_block(tmp_buf, ret);
-        } else {
-            behind_write_block(tmp_buf, ret);
-        }
-
-        if (status <= 1 && !initing) {
-            sprintf(buf, "{\"op\":\"NOTIFY\",\"param\":{\"desc\":\"{\\\"f\\\":\\\"%s%s\\\",\\\"t\\\":\\\"%04d%02d%02d%02d%02d%02d\\\",\\\"h\\\":%d,\\\"w\\\":%d,\\\"s\\\":\\\"%d\\\",\\\"c\\\":\\\"%d\\\"}\"}}"
-                    , flag ? get_rec_path_2() : get_rec_path_1()
-                    , namebuf
-                    , attr.crt_time.year
-                    , attr.crt_time.month
-                    , attr.crt_time.day
-                    , attr.crt_time.hour
-                    , attr.crt_time.min
-                    , attr.crt_time.sec
-                    , height
-                    , width
-                    , flen(fd)
-                    , flag
-                   );
-
-            send_ctp_string(CTP_NOTIFY_COMMAND, buf, "PHOTO_CTRL", NULL);
-        } else {
-            free(buffer);
-        }
-    } else {
-        free(buffer);
-    }
-    return ret;
-
-}
-#endif
-
-
-
-
 
 int get_media_file_info(struct media_file_info *__info)
 {
@@ -1642,14 +1826,15 @@ int send_json(struct media_file_info *__info, u32 status)
     char file_name[15];
     fget_name(__info->fd, file_name, sizeof(file_name));
 
-    printf("%s  start=%d-%d-%d-%d-%d-%d\n"
+    printf("%s  start=%d-%d-%d-%d-%d-%d , channel:%d\n"
            , file_name
            , _tm.tm_year
            , _tm.tm_mon
            , _tm.tm_mday
            , _tm.tm_hour
            , _tm.tm_min
-           , _tm.tm_sec);
+           , _tm.tm_sec
+           , __info->channel);
 
     switch (__info->type) {
     case 0x1:
@@ -1673,9 +1858,11 @@ int send_json(struct media_file_info *__info, u32 status)
                       , mktime(&_tm)
                      );
 
-        if (!__info->channel) {
+        if (__info->channel == 0) {
             forward_write_block((u8 *)buffer, ret);
-        } else {
+        } else if (__info->channel == 1) {
+            third_write_block((u8 *)buffer, ret);
+        } else if (__info->channel == 2) {
             behind_write_block((u8 *)buffer, ret);
         }
 
@@ -1706,7 +1893,7 @@ int send_json(struct media_file_info *__info, u32 status)
         break;
     case 0x2:
         ret = sprintf(buffer, PICTURE_JSON_MEM
-                      , __info->channel ? file_is_emf((char *)get_rec_path_2(), __info->is_emf) : file_is_emf((char *)get_rec_path_1(), __info->is_emf)
+                      , __info->channel ? (__info->channel < 2 ? CONFIG_REC_PATH_1 : CONFIG_REC_PATH_2) : CONFIG_REC_PATH_0
                       , __info->namebuf
                       , __info->attr.crt_time.year
                       , __info->attr.crt_time.month
@@ -1721,15 +1908,17 @@ int send_json(struct media_file_info *__info, u32 status)
                       , mktime(&_tm)
                      );
 
-        if (!__info->channel) {
+        if (__info->channel == 0) {
             forward_write_block((u8 *)buffer, ret);
-        } else {
+        } else if (__info->channel == 1) {
+            third_write_block((u8 *)buffer, ret);
+        } else if (__info->channel == 2) {
             behind_write_block((u8 *)buffer, ret);
         }
 
         if (status <= 1 && !initing) {
             sprintf(buffer, PICTURE_JSON_APP
-                    , __info->channel ? file_is_emf((char *)get_rec_path_2(), __info->is_emf) : file_is_emf((char *)get_rec_path_1(), __info->is_emf)
+                    , __info->channel ? (__info->channel < 2 ? CONFIG_REC_PATH_1 : CONFIG_REC_PATH_2) : CONFIG_REC_PATH_0
                     , __info->namebuf
                     , __info->attr.crt_time.year
                     , __info->attr.crt_time.month
@@ -1752,7 +1941,7 @@ int send_json(struct media_file_info *__info, u32 status)
         incr_date_time(&_tm, __info->info.durition / __info->info.scale);
         ret = sprintf(buffer, VIDEO_JSON_MEM
                       , __info->vaild
-                      , __info->channel ? file_is_emf((char *)get_rec_path_2(), __info->is_emf) : file_is_emf((char *)get_rec_path_1(), __info->is_emf)
+                      , __info->channel ? (__info->channel < 2 ? CONFIG_REC_PATH_1 : CONFIG_REC_PATH_2) : CONFIG_REC_PATH_0
                       , __info->namebuf
                       , __info->attr.crt_time.year
                       , __info->attr.crt_time.month
@@ -1768,10 +1957,12 @@ int send_json(struct media_file_info *__info, u32 status)
                       , __info->channel
                       , mktime(&_tm)
                      );
-
-        if (!__info->channel) {
+        printf("==11== __info->channel:%d , %s\n", __info->channel, buffer);
+        if (__info->channel == 0) {
             forward_write_block((u8 *)buffer, ret);
-        } else {
+        } else if (__info->channel == 1) {
+            third_write_block((u8 *)buffer, ret);
+        } else if (__info->channel == 2) {
             behind_write_block((u8 *)buffer, ret);
         }
 
@@ -1779,7 +1970,7 @@ int send_json(struct media_file_info *__info, u32 status)
             ret = sprintf(buffer, VIDEO_JSON_APP
                           , status
                           , __info->vaild
-                          , __info->channel ? file_is_emf((char *)get_rec_path_2(), __info->is_emf) : file_is_emf((char *)get_rec_path_1(), __info->is_emf)
+                          , __info->channel ? (__info->channel < 2 ? CONFIG_REC_PATH_1 : CONFIG_REC_PATH_2) : CONFIG_REC_PATH_0
                           , __info->namebuf
                           , __info->attr.crt_time.year
                           , __info->attr.crt_time.month
@@ -1795,6 +1986,7 @@ int send_json(struct media_file_info *__info, u32 status)
                           , __info->channel
                           , mktime(&_tm)
                          );
+            printf("==22== __info->channel:%d , %s\n", __info->channel, buffer);
             send_ctp_string(CTP_NOTIFY_COMMAND, buffer, "VIDEO_FINISH", NULL);//内部已free掉buffer
         } else {
             free(buffer);
@@ -1845,21 +2037,30 @@ int FILE_LIST_INIT(u32 flag)
     }
     os_mutex_pend(&file_list_read_mutex, 0);
 
-    __FILE_LIST_INIT(1, MAX_NUM);
-
-#if defined CONFIG_VIDEO2_ENABLE || defined CONFIG_VIDEO1_ENABLE ||defined CONFIG_VIDEO3_ENABLE
     __FILE_LIST_INIT(0, MAX_NUM);
 
+#if defined CONFIG_VIDEO1_ENABLE
+    __FILE_LIST_INIT(1, MAX_NUM);
+
 #endif
+#if defined CONFIG_VIDEO2_ENABLE
+    __FILE_LIST_INIT(2, MAX_NUM);
+#endif
+
 
     if (flag) {
         FILE_GEN();
         sprintf(buf, "type:1,path:%s%s", get_rec_path_1(), "vf_list.txt");
         CTP_CMD_COMBINED(NULL, CTP_NO_ERR, "FORWARD_MEDIA_FILES_LIST", "NOTIFY", buf);
 
-#if defined CONFIG_VIDEO2_ENABLE || defined CONFIG_VIDEO1_ENABLE || defined CONFIG_VIDEO3_ENABLE
+#if defined CONFIG_VIDEO2_ENABLE
         sprintf(buf, "type:1,path:%s%s", get_rec_path_2(), "vf_list.txt");
         CTP_CMD_COMBINED(NULL, CTP_NO_ERR, "BEHIND_MEDIA_FILES_LIST", "NOTIFY", buf);
+#endif
+
+#if defined CONFIG_VIDEO1_ENABLE
+        sprintf(buf, "type:1,path:%s%s", get_rec_path_3(), "vf_list.txt");
+        CTP_CMD_COMBINED(NULL, CTP_NO_ERR, "THIRD_MEDIA_FILES_LIST", "NOTIFY", buf);
 #endif
     }
     initing = 0;
@@ -1867,17 +2068,6 @@ int FILE_LIST_INIT(u32 flag)
 #endif
     return 0;
 }
-
-
-
-void FILE_TEST()
-{
-    puts("FILE_TEST\n\n\n\n");
-    __FILE_LIST_INIT(1, MAX_NUM);
-    __FILE_LIST_INIT(0, MAX_NUM);
-    puts("FILE_TEST\n\n\n\n");
-}
-
 
 void file_list_thread(void *arg)
 {
@@ -1896,12 +2086,9 @@ void file_list_thread(void *arg)
 
 
 
-void FILE_LIST_INIT_SMALL(u32 file_num)
+void FILE_LIST_INIT_SMALL(u32 file_num)     //无功能 不调用
 {
-    __FILE_LIST_INIT(2, file_num);
-#if defined CONFIG_VIDEO2_ENABLE || defined CONFIG_VIDEO1_ENABLE || defined CONFIG_VIDEO3_ENABLE
-    __FILE_LIST_INIT(3, file_num);
-#endif
+    printf("%s not define\n", __func__);
 }
 
 
@@ -1936,4 +2123,5 @@ void FILE_LIST_TASK_INIT(void)
 {
     FILE_LIST_IN_MEM(1);
 }
+
 

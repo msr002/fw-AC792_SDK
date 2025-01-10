@@ -184,6 +184,143 @@ static struct video_rec_hdl *rec_handler = NULL;
 
 extern u32 user_uac_audio_read_input(u8 id, u8 *buf, u32 len);
 
+STATIC OPERATE_RET tuya_send_video_msg(IN CONST UINT_T msgid, IN CONST VOID *data, IN CONST UINT_T len)
+{
+    OPERATE_RET op_ret = OPRT_OK;
+    INT_T msg_num = 0;
+    if (!&g_video_ctrl.msg_que) {
+        return OPRT_MSG_OUT_OF_LMT;
+    }
+
+    TY_VIDEO_CTRL_MSG *msg_data;
+    msg_data = Malloc(sizeof(TY_VIDEO_CTRL_MSG) + 1);
+    if (!msg_data) {
+        return OPRT_MALLOC_FAILED;
+    }
+    memset(msg_data, 0, SIZEOF(TY_VIDEO_CTRL_MSG) + 1);
+    msg_data->cmd = msgid;
+
+    if (data && len) {
+        msg_data->data = Malloc(len + 1);
+        if (!msg_data->data) {
+            if (msg_data) {
+                Free(msg_data);
+            }
+            return OPRT_MALLOC_FAILED;
+        }
+        memset(msg_data->data, 0, len + 1);
+        memcpy(msg_data->data, data, len);
+        msg_data->data_len = len;
+    } else {
+        msg_data->data = NULL;
+    }
+
+    op_ret = os_q_post(&g_video_ctrl.msg_que, msg_data);
+    if (OPRT_OK != op_ret) {
+        if (msg_data->data) {
+            Free(msg_data->data);
+        }
+        if (msg_data) {
+            Free(msg_data);
+        }
+        return op_ret;
+    }
+
+    return OPRT_OK;
+}
+
+VOID_T tuya_video_stop_syn(VOID_T)
+{
+    SEM_HANDLE wait_sem = NULL;
+    OPERATE_RET op_ret = OPRT_OK;
+    op_ret = tuya_hal_semaphore_create_init(&wait_sem, 0, 1);
+    if (OPRT_OK != op_ret) {
+        PR_ERR(" Malloc fail");
+        return;
+    }
+    op_ret = tuya_send_video_msg(MSG_STOP_VIDEO_SYN, &wait_sem, SIZEOF(SEM_HANDLE));
+    if (OPRT_OK != op_ret) {
+        tuya_hal_semaphore_release(wait_sem);
+        PR_ERR(" send fail");
+        return;
+    }
+    tuya_hal_semaphore_wait(wait_sem);
+    //PR_NOTICE("tuya_video_stop_syn");
+    tuya_hal_semaphore_release(wait_sem);
+}
+
+VOID_T tuya_video_stop_new_syn(INT_T force)
+{
+    INT_T send_data[2] ;
+    send_data[0] = force;
+
+    SEM_HANDLE wait_sem = NULL;
+    OPERATE_RET op_ret = OPRT_OK;
+    op_ret = tuya_hal_semaphore_create_init(&wait_sem, 0, 1);
+    if (OPRT_OK != op_ret) {
+        PR_ERR(" Malloc fail");
+        return;
+    }
+    send_data[1] = wait_sem;
+    op_ret =  tuya_send_video_msg(MSG_STOP_VIDEO_NEW_SYN, &send_data, SIZEOF(send_data));
+    if (OPRT_OK != op_ret) {
+        PR_ERR(" send fail");
+        tuya_hal_semaphore_release(wait_sem);
+        return;
+    }
+    tuya_hal_semaphore_wait(wait_sem);
+    //PR_NOTICE("tuya_video_stop_new_syn");
+    tuya_hal_semaphore_release(wait_sem);
+}
+VOID_T tuya_video_start_syn(VOID_T)
+{
+    SEM_HANDLE wait_sem = NULL;
+    OPERATE_RET op_ret = OPRT_OK;
+    op_ret = tuya_hal_semaphore_create_init(&wait_sem, 0, 1);
+    if (OPRT_OK != op_ret) {
+        PR_ERR(" Malloc fail");
+        return;
+    }
+    op_ret = tuya_send_video_msg(MSG_START_VIDEO_SYN, &wait_sem, SIZEOF(SEM_HANDLE));
+    if (OPRT_OK != op_ret) {
+        PR_ERR(" send fail");
+        tuya_hal_semaphore_release(wait_sem);
+        return;
+    }
+    tuya_hal_semaphore_wait(wait_sem);
+    //PR_NOTICE("tuya_video_start_syn");
+    tuya_hal_semaphore_release(wait_sem);
+}
+VOID_T tuya_video_start_syn_without_camer_on(VOID_T)
+{
+    SEM_HANDLE wait_sem = NULL;
+    OPERATE_RET op_ret = OPRT_OK;
+    op_ret = tuya_hal_semaphore_create_init(&wait_sem, 0, 1);
+    if (OPRT_OK != op_ret) {
+        PR_ERR(" Malloc fail");
+        return;
+    }
+    op_ret = tuya_send_video_msg(MSG_START_VIDEO_SYN_WITHOUT_CAMER_ON_STATUS, &wait_sem, SIZEOF(SEM_HANDLE));
+    if (OPRT_OK != op_ret) {
+        PR_ERR(" send fail");
+        tuya_hal_semaphore_release(wait_sem);
+        return;
+    }
+    tuya_hal_semaphore_wait(wait_sem);
+    //PR_NOTICE("tuya_video_start_syn_without_camer_on");
+    tuya_hal_semaphore_release(wait_sem);
+}
+
+VOID_T tuya_video_ctr(BOOL_T status, INT_T force)
+{
+    if (status) {
+        tuya_video_start_syn();
+    } else  {
+        tuya_video_stop_new_syn(force);
+    }
+    return ;
+}
+
 CHAR_T *my_mem_find_str(UCHAR_T *src, UINT_T len, UCHAR_T **p_start, UCHAR_T **p_end, UCHAR_T **p_h264_start, UINT_T *p_h264_len, UINT_T *p_h264_type)
 {
 #define FAST_MAX_DATA_LEN   520    //必须>512
@@ -381,6 +518,7 @@ STATIC INT_T ty_stream_write(void *file,  UCHAR_T *buf, UINT_T size, UCHAR_T typ
     /* PR_NOTICE("into ty video frame cb, buf size:%d", size); */
     static int cnt;
     PR_DEBUG("buf size:%d, %s", size, os_current_task());
+    // printf("buf size:%d, %s", size, os_current_task());
     if (size == 512 || size == 8192 || size == 1024) {
         return size;
     }
@@ -418,7 +556,7 @@ STATIC INT_T ty_stream_write(void *file,  UCHAR_T *buf, UINT_T size, UCHAR_T typ
         }
         jpeg_count++;
         real_size += size;
-        PR_DEBUG("buf size:%d, %s", size, os_current_task());
+        /* PR_DEBUG("buf size:%d, %s", size, os_current_task()); */
         ty_stream_in_queue(buf, size, E_VIDEO_I_FRAME);
     } else if (type == VIDEO_REC_PCM_TYPE_AUDIO) {
         voice_count++;
@@ -562,6 +700,9 @@ INT_T get_image_jpeg(CHAR_T **jpeg_buf, INT_T *real_len, INT_T time_out)
 
 #define SCREEN_W   LCD_W
 #define SCREEN_H   LCD_H
+
+// #define SCREEN_W   800
+// #define SCREEN_H   480
 static struct video_window disp_window[DISP_MAX_WIN][4] = {0};
 
 static void ty_video_set_disp_window()
@@ -705,16 +846,16 @@ int  tuya_video_display(INT_T id, const struct video_window *win)
     if (id != 2) {
         req.display.camera_config   = NULL;
         req.display.camera_type     = VIDEO_CAMERA_NORMAL;
-        req.display.src_w           = CONFIG_VIDEO_IMAGE_W;//640;
-        req.display.src_h           = CONFIG_VIDEO_IMAGE_H;//480;
+        // req.display.src_w           = CONFIG_VIDEO_IMAGE_W;//640;
+        // req.display.src_h           = CONFIG_VIDEO_IMAGE_H;//480;
         req.display.rotate          = 90;
     } else {
         /* #else */
         req.display.uvc_id          = uvc_host_online();
         req.display.camera_config   = NULL;
         req.display.camera_type     = VIDEO_CAMERA_UVC;
-        req.display.src_w           = CONFIG_VIDEO_IMAGE_W;//640;
-        req.display.src_h           = CONFIG_VIDEO_IMAGE_H;//480;
+        // req.display.src_w           = CONFIG_VIDEO_IMAGE_W;//640;
+        // req.display.src_h           = CONFIG_VIDEO_IMAGE_H;//480;
         req.display.rotate          = 90; //usb后视频图像旋转显示
         /* #endif // CONFIG_VIDEO2_ENABLE */
     }
@@ -1106,7 +1247,7 @@ __switch:
 
         req.rec.IP_interval = 0;
         if (id == 2) {
-            req.rec.online = 0;
+            req.rec.online = 0;//0;
         } else {
             req.rec.online = 1;
         }
@@ -1404,6 +1545,10 @@ CHAR_T get_audio_id(VOID_T)
 
 #endif
 
+BOOL_T get_camera_state()
+{
+    return g_video_ctrl.camera_open;
+}
 
 STATIC VOID_T __video_task(PVOID_T pArg)
 {
@@ -1422,128 +1567,66 @@ STATIC VOID_T __video_task(PVOID_T pArg)
             continue;
         }
         msg_data = (TY_VIDEO_CTRL_MSG *)msg[0];
+
+        INT_T flag = 0;
+        INT_T *p = (INT_T *)(msg_data->data);
+        if (p) {
+            flag = p[0];
+        }
         switch (msg_data->cmd) {
         case MSG_START_VIDEO_SYN:
         case MSG_START_VIDEO_SYN_WITHOUT_CAMER_ON_STATUS: {
-#if 0
+#if 1
             if (!g_video_ctrl.camera_open) {
-                if (dev_online("uvc")) {
-                    if (msg_data->cmd != MSG_START_VIDEO_SYN_WITHOUT_CAMER_ON_STATUS) {
-                        g_video_ctrl.camera_open = true;
-                        if (g_video_ctrl.show_page_open) {
-                            /*                                tuya_lcd_play_pic_syn(UI_MSG_CAMERA_SYN);*/
-                            g_video_ctrl.show_page_open = false;
-                        }
-
-                    }
-                    ty_get_camera_pic_w_h_r_f(&w, &h, &r, &f);
-                    uvc_video_satrt(w, h, f);
+                if (msg_data->cmd != MSG_START_VIDEO_SYN_WITHOUT_CAMER_ON_STATUS) {
+                    g_video_ctrl.camera_open = true;
                 }
+                video_flag = 1;
+                video_convert(video_flag);
             } else {
                 PR_NOTICE("camera already open");
             }
 
-//                tuya_hal_semaphore_post((SEM_HANDLE)flag);
-            PR_NOTICE("uvc_video_satrt os_sem_post");
-
+            tuya_hal_semaphore_post((SEM_HANDLE)flag);
+            /* PR_NOTICE("uvc_video_satrt os_sem_post"); */
 #endif
         }
         break;
 
         case MSG_STOP_VIDEO_SYN: {
-#if 0
-            uvc_video_stop();
+#if 1
+            ty_net_video_stop();
             g_video_ctrl.camera_open = false;
-//                tuya_hal_semaphore_post((SEM_HANDLE)flag);
+            tuya_hal_semaphore_post((SEM_HANDLE)flag);
             //PR_NOTICE("uvc_video_stop os_sem_post");
 #endif
         }
         break;
         case MSG_STOP_VIDEO_NEW_SYN: {
-#if 0
+#if 1
             VOID_T *sem;
             INT_T *p = (INT_T *)(msg_data->data);
             p++;
             sem = *p;
             if (flag == 1) {
-                uvc_video_stop();
+                ty_net_video_stop();
                 g_video_ctrl.camera_open = false;
                 goto common_deal;
             } else if (flag == 0) {
                 if (!g_video_ctrl.camera_open) {
-                    uvc_video_stop();
+                    ty_net_video_stop();
                     goto common_deal;
                 }
                 if (ty_get_stream_status()) {
                     goto common_deal;
                 }
-                uvc_video_stop();
+                ty_net_video_stop();
                 g_video_ctrl.camera_open = false;
             }
 common_deal:
             tuya_hal_semaphore_post((SEM_HANDLE)sem);
             PR_NOTICE("uvc_video_satrt os_sem_post");
 #endif // 0
-        }
-        break;
-
-        case MSG_LCD_BL_ON_SYN: {
-#if 0
-            INT_T from_set;
-            INT_T pic;
-            VOID_T *sem;
-            INT_T *p = (INT_T *)(msg_data->data);
-            from_set = *p;
-            p++;
-            pic = *p;
-            p++;
-            sem = *p;
-
-            PR_DEBUG("pic=%d ", pic);
-//                #if 0
-            if (UI_MSG_CONFIG_SET == pic) {
-                tuya_video_lcd_display_status_set(false);
-                if ((false == ty_get_stream_status()) && g_video_ctrl.camera_open) {
-                    uvc_video_stop();
-                    if (camera_power_off) {
-                        tuya_video_power_ctrl(false);
-                    }
-                    g_video_ctrl.camera_open = false;
-                }
-                tuya_lcd_play_pic_syn(UI_MSG_CONFIG_SET_SYN);
-            } else if (UI_MSG_LOGO == pic) {
-                tuya_video_lcd_display_status_set(true);
-                g_video_ctrl.show_page_open = true;
-                PR_NOTICE("show_page_open=%d %d %d", g_video_ctrl.show_page_open, ty_get_stream_status(), g_video_ctrl.camera_open);
-                if (false == ty_get_stream_status() && !g_video_ctrl.camera_open) {
-                    if (dev_online("uvc")) {
-                        tuya_lcd_play_pic_syn(UI_MSG_NULL_SYN);
-                    } else {
-                        tuya_lcd_play_pic_syn(UI_MSG_LOGO_SYN);
-                    }
-                }
-            } else if (UI_MSG_NULL == pic) {
-                tuya_video_lcd_display_status_set(true);
-                g_video_ctrl.show_page_open = true;
-                tuya_lcd_play_pic_syn(UI_MSG_NULL_SYN);
-            } else {
-                tuya_video_lcd_display_status_set(true);
-                g_video_ctrl.show_page_open = true;
-            }
-            os_time_dly(5);    // 上面首页屏显异步 增加延时 防止前一次开屏画面残留。
-            tuya_lcd_back_light_power_ctr(true);
-            if (LCD_FROM_QRCODE != from_set && FALSE == tuya_wifi_is_in_net_cfg()) {
-                tuya_lcd_off_ctrl_start();
-                tuya_low_power_time_set_and_start(0);
-            }
-
-            tuya_hal_semaphore_post((SEM_HANDLE)sem);
-            //PR_NOTICE("uvc_video_satrt os_sem_post");
-#endif // 0
-        }
-        break;
-        case MSG_LCD_BL_OFF_SYN: {
-            PR_NOTICE("uvc_video_satrt os_sem_post");
         }
         break;
 
@@ -1624,15 +1707,17 @@ INT_T tuya_video_init(TY_CAMERA_PARAM *camera_param)
         if (op_ret != OPRT_OK) {
             PR_NOTICE("tal queue creat init error!");
         }
-        video_flag = 0;
+        // video_flag = 0;
         /* video_convert(video_flag); */
         display_convert(0);
-        /* THRD_PARAM_S thrd_param; */
-        /* thrd_param.priority = TRD_PRIO_1; */
-        /* thrd_param.stackDepth = 1024*4; */
-        /* thrd_param.thrdname = TY_VIDEO_TASK_NAME; */
-        /* CreateAndStart(&g_video_ctrl.task_handle,NULL,NULL,__video_task,NULL,&thrd_param);	 */
-        /* stream_protocol_task_create(); */
+
+        THRD_PARAM_S thrd_param;
+        thrd_param.priority = TRD_PRIO_1;
+        thrd_param.stackDepth = 1024 * 4;
+        thrd_param.thrdname = TY_VIDEO_TASK_NAME;
+        CreateAndStart(&g_video_ctrl.task_handle, NULL, NULL, __video_task, NULL, &thrd_param);
+        // stream_protocol_task_create();
+
     }
 
     init = 1;
@@ -1670,7 +1755,7 @@ static int video_event_handler(struct sys_event *e)
             if (!strncmp((const char *)event->value, "uvc", 3)) {
                 PR_DEBUG("video_server[2]:%x", video_server[2]);
                 display_convert(0);
-                video_flag = 1;
+                /* video_flag = 1; */
                 /* video_convert(video_flag); */
 
                 /* printf("\n[ debug ]--func=%s line=%d\n", __func__, __LINE__); */
@@ -1686,7 +1771,7 @@ static int video_event_handler(struct sys_event *e)
             if (!strncmp((const char *)event->value, "uvc", 3)) {
                 /* uvc_online_num = 0; */
                 display_convert(0);
-                video_flag = 0;
+                /* video_flag = 0; */
                 /* video_convert(video_flag); */
                 /* printf("\n[ debug ]--func=%s line=%d\n", __func__, __LINE__); */
             }

@@ -40,6 +40,7 @@ static void ep0_h_isr(struct usb_host_device *host_dev, u32 ep)
  *
  * @return
  */
+static const u8 speed_table[4] = {0, 3, 2, 1};
 static int usb_ctlXfer(struct usb_host_device *host_dev, struct ctlXfer *urb)
 {
     u32 ret = DEV_ERR_NONE;
@@ -51,6 +52,27 @@ static int usb_ctlXfer(struct usb_host_device *host_dev, struct ctlXfer *urb)
 
     usb_write_faddr(usb_id, devnum);
     usb_write_txfuncaddr(usb_id, 0, devnum);
+
+#if USB_HUB
+
+    /* if (host_dev->parent) { //为子设备 */
+    if (host_dev->father) { //为子设备
+        /* usb_write_txfuncaddr(usb_id, 0, devnum); */
+        /* devnum = host_dev->parent->private_data.devnum; */
+        /* if (host_dev->parent->private_data.protocol == 2) { //USB_HUB_PR_HS_MULTI_TT */
+        /*     usb_write_txhubaddr(usb_id, 0, BIT(7)|devnum); */
+        /* } else { //USB_HUB_PR_HS_SINGLE_TT */
+        /*     usb_write_txhubaddr(usb_id, 0, devnum); */
+        /* } */
+        /* usb_write_txhubport(usb_id, 0, host_dev->private_data.port); */
+        /* usb_write_txtype(usb_id, 0, (speed_table[host_dev->private_data.speed] << 6)); */
+        usb_hub_txreg_set(usb_id, 0, 0, &(host_dev->private_data.hub_info));
+        usb_write_txtype(usb_id, 0, (speed_table[host_dev->private_data.hub_info.speed] << 6));
+    } else {
+
+        usb_write_txtype(usb_id, 0, (speed_table[host_dev->private_data.hub_info.speed] << 6));
+    }
+#endif
 
     switch (urb->stage) {
     case USB_PID_SETUP :

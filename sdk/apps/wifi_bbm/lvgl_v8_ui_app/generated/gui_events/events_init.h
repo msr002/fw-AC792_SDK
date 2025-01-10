@@ -17,6 +17,8 @@ void events_init_pair_options(lv_ui *ui);
 void events_init_pairing(lv_ui *ui);
 void events_init_unpair(lv_ui *ui);
 void events_init_video_play(lv_ui *ui);
+void events_init_sys_prompt(lv_ui *ui);
+void events_init_dir_select(lv_ui *ui);
 
 #ifdef __cplusplus
 }

@@ -46,6 +46,18 @@ static const struct ctp_server_info server_info = {
     /*.k_alive_type = CDP_ALIVE,*/
 };
 
+
+void get_ap_wifi_info(char *ssid, char *pwd)
+{
+    struct wifi_mode_info info;
+    info.mode = AP_MODE;
+    wifi_get_mode_cur_info(&info);
+//    printf("ap get ssid:%s   pwd:%s  \n", info.ssid, info.pwd);
+    memcpy(ssid, info.ssid, strlen(info.ssid));
+    memcpy(pwd, info.pwd, strlen(info.pwd));
+    printf("get ssid:%s   pwd:%s  \n", ssid, pwd);
+}
+
 static void wifi_app_timer_func(void *p)
 {
     if (wifi_is_on()) {

@@ -51,6 +51,9 @@ enum {
     DISP_HALF_WIN,      //各半屏
     DISP_FRONT_WIN,     //只前窗
     DISP_BACK_WIN,      //只后窗
+#if THREE_WAY_ENABLE
+    DISP_THREE_WIN,
+#endif
     DISP_PARK_WIN,      //parking win
     DISP_RESET_WIN,
     DISP_FORBIDDEN,     //forbidden

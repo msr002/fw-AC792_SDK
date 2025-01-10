@@ -247,12 +247,26 @@ s32 usb_cdc_init(usb_dev usb_id)
     }
 
     usb_h_ep_config(usb_id, cdc->host_epin | USB_DIR_IN, USB_ENDPOINT_XFER_BULK, 1, 0, cdc->epin_buffer, cdc->rxmaxp);
-    usb_write_rxfuncaddr(usb_id, cdc->host_epin, private_data->devnum);
+
+#if USB_HUB
+    usb_hub_rxreg_set(usb_id, cdc->host_epin, cdc->epin, &(host_dev->private_data.hub_info));
+#else
+    usb_write_txfuncaddr(usb_id, cdc->host_epout, private_data->devnum);
+#endif
+
+    /* usb_write_rxfuncaddr(usb_id, cdc->host_epin, private_data->devnum); */
     usb_h_set_ep_isr(host_dev, cdc->host_epin | USB_DIR_IN, husb_cdc_isr, host_dev);
     log_info("CDC_EP_IN %d(H) <-- %d(D)", cdc->host_epin, cdc->epin);
 
     usb_h_ep_config(usb_id, cdc->host_epout | USB_DIR_OUT, USB_ENDPOINT_XFER_BULK, 0, 0, cdc->epout_buffer, cdc->txmaxp);
+
+#if USB_HUB
+    usb_hub_txreg_set(usb_id, cdc->host_epout, cdc->epout, &(host_dev->private_data.hub_info));
+#else
     usb_write_txfuncaddr(usb_id, cdc->host_epout, private_data->devnum);
+#endif
+    /* usb_write_txfuncaddr(usb_id, cdc->host_epout, private_data->devnum); */
+
     log_info("CDC_EP_OUT %d(H) --> %d(D)", cdc->host_epout, cdc->epout);
 
     ret = usb_control_msg(host_dev,

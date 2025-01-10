@@ -56,7 +56,7 @@ typedef struct {
  */
 typedef struct {
     char *ic_name;                                                  ///< 使用的触摸IC型号
-    int (*init)(const tp_platform_data_t *pd_data, OS_SEM *sem);    ///< 触摸初始化
+    int (*init)(const tp_platform_data_t *pd_data, void(*post_func)(void));    ///< 触摸初始化
     void (*get_xy_and_status)(tp_info_t *);                         ///< 获取当前触摸坐标
     int (*check_online)(void);                                      ///< 检查的触摸是否在线
     int (*deinit)(const tp_platform_data_t *pd_data);               ///< 触摸反初始化

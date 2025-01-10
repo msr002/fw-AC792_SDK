@@ -255,6 +255,18 @@ static void video_set_disp_window()
     disp_window[DISP_BACK_WIN][1].height = 0;
 #endif
 
+
+#if THREE_WAY_ENABLE
+    //DISP_THREE_WIN
+    disp_window[DISP_THREE_WIN][0].width  = (u16) - 1;
+    disp_window[DISP_THREE_WIN][0].height = 0;
+    disp_window[DISP_THREE_WIN][2].width  = (u16) - 1;
+    disp_window[DISP_THREE_WIN][2].height = (u16) - 1;
+    disp_window[DISP_THREE_WIN][1].width  = SCREEN_W;
+    disp_window[DISP_THREE_WIN][1].height = SCREEN_H;
+#endif
+
+
     //DISP_PARK_WIN
     disp_window[DISP_PARK_WIN][0].width  = (u16) - 1;
     disp_window[DISP_PARK_WIN][0].height = 0;
@@ -4727,6 +4739,7 @@ static int video_rec_init()
     __this->video_online[1] = 1;
 #endif
 
+
 #ifdef CONFIG_VIDEO2_ENABLE
     __this->video_online[2] = dev_online("uvc");
     if (__this->video_online[2]) {
@@ -4783,6 +4796,12 @@ static int video_rec_init()
 
 
     ve_server_open(0);
+
+    if (__this->video_online[0] && __this->video_online[1]) {
+        printf("%d, %s", __LINE__, __func__);
+        video_rec_post_msg("swWinicon", 1);
+    }
+
     return err;
 }
 
@@ -5540,7 +5559,11 @@ static int video_rec_device_event_handler(struct sys_event *sys_eve)
             if (__this->video_online[2]) {
                 __this->video_online[2] = false;
 #ifndef CONFIG_UI_STYLE_LY_ENABLE
-                video_rec_post_msg("swWinicon", 0);
+                if (__this->video_online[0] && __this->video_online[1]) {
+                    video_rec_post_msg("swWinicon", 1);
+                } else if (__this->video_online[0] || __this->video_online[1]) {
+                    video_rec_post_msg("swWinicon", 0);
+                }
 #endif
                 video_disp_win_switch(DISP_WIN_SW_DEV_OUT, 0);
 
@@ -5608,6 +5631,41 @@ static int video_rec_device_event_handler(struct sys_event *sys_eve)
     }
 #endif
     return false;
+}
+
+
+
+void in_app_stop_display(u8 state)
+{
+    printf("============ %s , state:%d\n", __func__, state);
+//    video_disp_stop(0);
+//    video_disp_stop(1);
+//    video_disp_stop(2);
+//    if(state == 0){
+//        video_disp_start(0,&disp_window[DISP_FRONT_WIN][0]);
+//        __this->disp_state = DISP_FRONT_WIN;
+//    }else if(state == 1){
+//        video_disp_start(1,&disp_window[DISP_BACK_WIN][1]);
+//        __this->disp_state = DISP_INTERNAL_WIN;
+//    }else if(state == 2){
+//        video_disp_start(2,&disp_window[DISP_BACK_WIN][2]);
+//        __this->disp_state = DISP_BACK_WIN;
+//    }
+}
+
+void out_app_start_display()
+{
+    printf("============ %s\n", __func__);
+//    video_disp_stop(0);
+//    video_disp_start(0,&disp_window[DISP_FRONT_WIN][0]);
+//    video_disp_win_switch(DISP_WIN_SW_SHOW_SMALL,0);
+//    __this->disp_state = DISP_MAIN_WIN;
+}
+
+u8 get_now_video_state()        //获取当前录像状态
+{
+    printf("============ state:%d\n", __this->state);
+    return __this->state;
 }
 
 

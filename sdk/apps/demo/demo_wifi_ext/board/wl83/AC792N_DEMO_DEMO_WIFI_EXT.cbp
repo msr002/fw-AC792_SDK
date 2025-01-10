@@ -216,7 +216,10 @@
 <Unit filename="../../../../../apps/common/usb/host/aoa.h" />
 <Unit filename="../../../../../apps/common/usb/host/audio.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../../apps/common/usb/host/hid.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="../../../../../apps/common/usb/host/hub.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="../../../../../apps/common/usb/host/hub.h" />
 <Unit filename="../../../../../apps/common/usb/host/rndis_host_connectionless.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="../../../../../apps/common/usb/host/task_host_husb.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../../apps/common/usb/host/usb_bulk_transfer.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../../apps/common/usb/host/usb_bulk_transfer.h" />
 <Unit filename="../../../../../apps/common/usb/host/usb_ctrl_transfer.c"><Option compilerVer="CC"/></Unit>
@@ -349,6 +352,7 @@
 <Unit filename="../../../../../include_lib/driver/device/sdio/sdio_host_init.h" />
 <Unit filename="../../../../../include_lib/driver/device/sdio/sdmmc.h" />
 <Unit filename="../../../../../include_lib/driver/device/uart.h" />
+<Unit filename="../../../../../include_lib/driver/device/usb/ch11.h" />
 <Unit filename="../../../../../include_lib/driver/device/usb/ch9.h" />
 <Unit filename="../../../../../include_lib/driver/device/usb/device/custom_hid.h" />
 <Unit filename="../../../../../include_lib/driver/device/usb/device/descriptor.h" />
