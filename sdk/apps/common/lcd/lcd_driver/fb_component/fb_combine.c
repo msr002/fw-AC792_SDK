@@ -94,7 +94,7 @@ int fb_frame_buf_rotate(uint8_t *image_src, uint8_t *image_dst, int src_width, i
                         int dst_width, int dst_height, int dst_stride, int degree, int xoffset, int yoffset,
                         int in_format, int out_format, uint8_t mirror);
 
-int fb_frame_buf_mirror(uint8_t *image_src, uint8_t *image_dst, int src_width, int src_height, int dst_width, int dst_height, int mirror, int src_format, int dst_format);
+int fb_frame_buf_mirror(uint8_t *image_src, uint8_t *image_dst, int src_width, int src_height, int dst_width, int dst_height, int dst_stride, int mirror, int src_format, int dst_format);
 int fb_combine_task(void *priv);
 /********************** DMA2D 图层合成接口 *****************************/
 typedef struct {
@@ -379,7 +379,7 @@ static int combine_layer_process(dma2d_layer_t *in, dma2d_layer_t *out, u8 proce
         if (in->x || in->y) {
             out_data_addr = out->addr + (in->y * out->width + in->x) * (jlvg_get_image_format_bpp(out->format) >> 3);
         }
-        fb_frame_buf_mirror(in->addr, out_data_addr, in->width, in->height, in->width, in->height, 2, in->format, out->format);
+        fb_frame_buf_mirror(in->addr, out_data_addr, in->width, in->height, in->width, in->height, out->width, 2, in->format, out->format);
         return 1;
     }
 

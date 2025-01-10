@@ -485,7 +485,6 @@
                 "CONFIG_THREAD_ENABLE",
                 "__GCC_PI32V2__",
                 "CONFIG_NEW_ECC_ENABLE",
-                "LIWP_USE_SMALL_MEMORY",
                 "CONFIG_WIFI_DVR_PROJECT_ENABLE",
                 "EVENT_HANDLER_NUM_CONFIG=2",
                 "EVENT_POOL_SIZE_CONFIG=256",

@@ -4,10 +4,11 @@
 #include "pipeline_port.h"
 
 #define PLUGIN_SOURCE_ISC_BASE  (0)
-#define PLUGIN_SOURCE_UVC_BASE  (2)
-#define PLUGIN_SOURCE_CSI_BASE  (3)
-
-
+#define PLUGIN_SOURCE_CSI_BASE  (2)
+#define PLUGIN_SOURCE_UVC_BASE  (3)
+#define PLUGIN_SOURCE_MCV_BASE  (5)
+#define PLUGIN_SOURCE_VIR_BASE  (9)
+#define PLUGIN_SOURCE_FILE_BASE (15)
 
 #define PLUGIN_NAME_MAX  (32)
 

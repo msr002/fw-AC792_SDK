@@ -5620,6 +5620,41 @@ static int video_rec_device_event_handler(struct sys_event *sys_eve)
 
 
 
+void in_app_stop_display(u8 state)
+{
+    printf("============ %s , state:%d\n", __func__, state);
+//    video_disp_stop(0);
+//    video_disp_stop(1);
+//    video_disp_stop(2);
+//    if(state == 0){
+//        video_disp_start(0,&disp_window[DISP_FRONT_WIN][0]);
+//        __this->disp_state = DISP_FRONT_WIN;
+//    }else if(state == 1){
+//        video_disp_start(1,&disp_window[DISP_BACK_WIN][1]);
+//        __this->disp_state = DISP_INTERNAL_WIN;
+//    }else if(state == 2){
+//        video_disp_start(2,&disp_window[DISP_BACK_WIN][2]);
+//        __this->disp_state = DISP_BACK_WIN;
+//    }
+}
+
+void out_app_start_display()
+{
+    printf("============ %s\n", __func__);
+//    video_disp_stop(0);
+//    video_disp_start(0,&disp_window[DISP_FRONT_WIN][0]);
+//    video_disp_win_switch(DISP_WIN_SW_SHOW_SMALL,0);
+//    __this->disp_state = DISP_MAIN_WIN;
+}
+
+u8 get_now_video_state()        //获取当前录像状态
+{
+    printf("============ state:%d\n", __this->state);
+    return __this->state;
+}
+
+
+
 
 
 /*录像app的事件总入口*/

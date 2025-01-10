@@ -117,6 +117,8 @@ struct video_capability {
 #define VIDIOC_SET_CAMERA_INFO          _IOW('V', 38, sizeof(struct camera_device_info))
 #define VIDIOC_PAUSE                    _IOW('V', 39, sizeof(int))
 #define VIDIOC_RESUME                   _IOW('V', 40, sizeof(int))
+#define VIDIOC_GET_SOURCE_CH            _IOW('V', 41, sizeof(int))
+
 
 
 enum video_buf_type {

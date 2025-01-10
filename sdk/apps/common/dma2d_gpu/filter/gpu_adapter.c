@@ -143,8 +143,8 @@ static void gpu_task(void *arg)
 
 #else
             //gpu硬件垂直镜像处理
-            int fb_frame_buf_mirror(uint8_t *image_src, uint8_t *image_dst, int src_width, int src_height, int dst_width, int dst_height, int mirror, int src_format, int dst_format);
-            fb_frame_buf_mirror(input_data, hdl->gpu_out_buf, hdl->input_width, hdl->input_height, hdl->output_width, hdl->output_height, 2, hdl->input_format, hdl->input_format);
+            int fb_frame_buf_mirror(uint8_t *image_src, uint8_t *image_dst, int src_width, int src_height, int dst_width, int dst_height, int dst_stride, int mirror, int src_format, int dst_format);
+            fb_frame_buf_mirror(input_data, hdl->gpu_out_buf, hdl->input_width, hdl->input_height, hdl->output_width, hdl->output_height, 0, 2, hdl->input_format, hdl->input_format);
             hdl->buffer_meta->ext_data = hdl->gpu_out_buf;
 #endif
             /* end = get_system_us() - _j; */

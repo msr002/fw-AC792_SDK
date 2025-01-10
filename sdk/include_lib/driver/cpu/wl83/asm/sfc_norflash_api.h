@@ -95,9 +95,30 @@ void norflash_spi_cs(u8 id, char cs);
 void norflash_spi_write_byte(u8 id, unsigned char data);
 u8 norflash_spi_read_byte(u8 id);
 int norflash_wait_busy(u8 id);
-int norflash_eraser_otp(u8 id);
-int norflash_write_otp(u8 id, u8 *buf, int len);
-int norflash_read_otp(u8 id, u8 *buf, int len);
 void MEMCPY_FLASH(void *buf, void *read_addr, u32 size);
+
+/*
+ * 用于flash otp擦除
+ */
+int norflash_eraser_otp(u8 id);
+
+/*
+ * 用于flash otp写
+ * 参数buf 写入数据buffer
+ * 参数len 写入长度，必须以zone_len字节对齐
+ * 参数zone_len 为otp单次写入长度
+ * 返回值小于0 写入失败, 等于0 写入成功
+ */
+int norflash_write_otp(u8 id, u8 *buf, const int len, const int zone_len);
+
+/*
+ * 用于flash otp读
+ * 参数buf 读取数据buffer
+ * 参数len 读取长度
+ * 参数zone_len 为otp单次读取长度
+ * 返回值小于0 读取数据失败, 等于0 读取数据成功
+ */
+int norflash_read_otp(u8 id, u8 *buf, const int len, const int zone_len);
+
 
 #endif

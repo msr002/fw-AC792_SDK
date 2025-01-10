@@ -476,18 +476,20 @@ int fb_frame_buf_rotate(uint8_t *image_src, uint8_t *image_dst, int src_width, i
  * @brief     图层帧buffer镜像处理
  * @param:    image_src  : 源头图层地址
  * @param:    image_dst  : 目标图层地址
- * @param:    width  : 图层宽度
- * @param:    height : 图层高度
+ * @param:    src_width  : 图层宽度
+ * @param:    src_height : 图层高度
+ * @param:    dst_width  : 输出图层宽度
+ * @param:    dst_height : 输出图层高度
+ * @param:    dst_stride : 输出图层跨度
  * @param:    mirror : 图层镜像 1:水平镜像 2:垂直镜像 3:水平+垂直镜像(相当于旋转180)
  * @param:    src_format : 输入图层格式
  * @param:    dst_format : 输出图层格式
  * @return:   0: 成功 -1:失败
  **/
-int fb_frame_buf_mirror(uint8_t *image_src, uint8_t *image_dst, int src_width, int src_height, int dst_width, int dst_height, int mirror, int src_format, int dst_format)
+int fb_frame_buf_mirror(uint8_t *image_src, uint8_t *image_dst, int src_width, int src_height, int dst_width, int dst_height, int dst_stride, int mirror, int src_format, int dst_format)
 {
 
     int src_stride = 0;
-    int dst_stride = 0;
     int dst_size = 0;
 
     int in_rbs = 1;
@@ -500,7 +502,12 @@ int fb_frame_buf_mirror(uint8_t *image_src, uint8_t *image_dst, int src_width, i
     uint32_t in_bpp = dma2d_get_format_bpp(src_format) >> 3;
     uint32_t out_bpp = dma2d_get_format_bpp(dst_format) >> 3;
     src_stride = src_width * in_bpp;
-    dst_stride = dst_width * out_bpp;
+    if (dst_stride == 0) {
+        dst_stride = dst_width * out_bpp;
+    } else {
+        dst_stride *= out_bpp;
+    }
+
 
     jlgpu_init();
 
