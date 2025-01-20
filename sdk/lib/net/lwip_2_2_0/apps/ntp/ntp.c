@@ -631,7 +631,14 @@ static void update_rtc_by_ntp(const char *host)
 
     time_t mt = mktime(&pt);
     set_sys_source_timer(mt);
+    set_time_compensate_sec(timer_get_sec());
+    set_time_compensate_ms(timer_get_ms());
     set_rtc_time_base_on_unix_timestamp(mt);
+
+    struct net_event evt = {0};
+    evt.arg = "net";
+    evt.event = NET_NTP_GET_TIME_SUCC;
+    net_event_notify(NET_EVENT_FROM_USER, &evt);
 }
 
 static void update_rtc_task(void *priv)

@@ -5,7 +5,6 @@
 #pragma code_seg(".adv_anc_voice.text")
 #endif
 #include "app_config.h"
-#include "cpu.h"
 #include "syscfg_id.h"
 #include "user_cfg_id.h"
 #include "ble_rcsp_server.h"

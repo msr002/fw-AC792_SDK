@@ -5,7 +5,6 @@
 #pragma code_seg(".rcsp_misc_drc_setting.text")
 #endif
 #include "app_config.h"
-#include "cpu.h"
 #include "syscfg_id.h"
 
 #include "rcsp_misc_setting.h"

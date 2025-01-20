@@ -344,7 +344,7 @@
 #define TCFG_PAP_READ_ACTIVE_LEVEL          PAP_RD_LEVEL_LOW
 #define TCFG_PAP_READ_ENABLE                0
 #define TCFG_PAP_WE_IO                      IO_PORTA_12
-#define TCFG_PAP_RE_IO                      -1
+#define TCFG_PAP_RE_IO                      IO_PORTA_14
 
 
 //*********************************************************************************//
@@ -352,54 +352,37 @@
 //*********************************************************************************//
 #ifdef CONFIG_UI_ENABLE
 #define TCFG_LCD_ENABLE                     1
-#define TCFG_LCD_DEVICE_NAME                ""
 #define TCFG_LCD_INPUT_FORMAT               LCD_IN_RGB565
+#define TCFG_LCD_SUPPORT_MULTI_DRIVER_EN    0 ///< 多屏驱支持(目前仅支持具有相同分辨率的屏, 适用于
+///< 一个case有多款屏混用的情况，比如因为缺货)
 
-//MCU LCD
-#define TCFG_LCD_MCU_ILI9488_320X480        0
-#define TCFG_LCD_MCU_ILI9481_320X480        0
-
-//MIPI LCD
-#define TCFG_LCD_MIPI_ST7701S_480x800       0
-#define TCFG_LCD_MIPI_ILI9881C_800x1280     0
-
-//RGB_LCD
-#define TCFG_LCD_RGB_480x272                1
-#define TCFG_LCD_RGB_1280x800               0
-#define TCFG_LCD_RGB_720x1280               0
-#define TCFG_LCD_RGB_480x800                0
-#define TCFG_LCD_RGB_800x480                0
-
-#define TCFG_LCD_RGB_24BIT_ENABLE           0
-#define TCFG_LCD_RGB_IO_HD_LEVEL            1
-
+// 屏驱配置使能
+#define TCFG_LCD_MIPI_ST7701S_480x800             1
+#define TCFG_LCD_MIPI_ST7701S_480x800_ROTATE_90   0 ///< mipi ST7701S_480x800竖屏横显的配置
+#include "lcd_board_cfg_template.h"                 ///< WL83开发板标配屏以外的屏驱配置放这里
 
 #if TCFG_LCD_MIPI_ST7701S_480x800
-#define TCFG_LCD_BL_VALUE                   1
-#define TCFG_LCD_RESET_IO                   -1
-#define TCFG_LCD_BL_IO                      -1
-#define TCFG_LCD_RS_IO                      -1
-#define TCFG_LCD_CS_IO                      -1
-#elif TCFG_LCD_MIPI_ILI9881C_800x1280
+#define TCFG_LCD_DEVICE_NAME                "MIPI_480x800_ST7701S"
 #define TCFG_LCD_BL_VALUE                   1
 #define TCFG_LCD_RESET_IO                   IO_PORTB_00
-#define TCFG_LCD_BL_IO                      IO_PORTB_03
+#define TCFG_LCD_BL_IO                      IO_PORTB_01
 #define TCFG_LCD_RS_IO                      -1
 #define TCFG_LCD_CS_IO                      -1
-#elif TCFG_LCD_RGB_720x1280 || TCFG_LCD_RGB_1280x800
+#define TCFG_LCD_TE_ENABLE                  0
+#define TCFG_LCD_TE_IO                      -1
+#define TCFG_LCD_SPI_INTERFACE              NULL
+#endif
+
+#if TCFG_LCD_MIPI_ST7701S_480x800_ROTATE_90
+#define TCFG_LCD_DEVICE_NAME                "MIPI_480x800_ST7701S_ROTATE90"
 #define TCFG_LCD_BL_VALUE                   1
-#define TCFG_LCD_RESET_IO                   -1
-#define TCFG_LCD_BL_IO                      IO_PORTC_02
+#define TCFG_LCD_RESET_IO                   IO_PORTB_00
+#define TCFG_LCD_BL_IO                      IO_PORTB_01
 #define TCFG_LCD_RS_IO                      -1
 #define TCFG_LCD_CS_IO                      -1
-#else
-#define TCFG_LCD_BL_VALUE                   1
-#define TCFG_LCD_RESET_IO                   -1
-#define TCFG_LCD_BL_IO                      -1
-#define TCFG_LCD_RS_IO                      -1
-#define TCFG_LCD_CS_IO                      -1
-#define TCFG_LCD_SDA_IO                     IO_PORTA_04
-#define TCFG_LCD_SCL_IO                     IO_PORTA_11
+#define TCFG_LCD_TE_ENABLE                  0
+#define TCFG_LCD_TE_IO                      -1
+#define TCFG_LCD_SPI_INTERFACE              NULL
 #endif
 
 

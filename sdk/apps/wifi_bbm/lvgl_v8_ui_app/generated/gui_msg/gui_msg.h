@@ -66,8 +66,8 @@ typedef enum {
     GUI_FILE_BROWSER_MSG_ID = 0x000C,
     GUI_PAIR_MSG_ID = 0x0001,
     GUI_RT_STREAM_MSG_ID = 0x000A,
-    GUI_VIDEO_PLAY_MSG_ID = 0x000E,
     GUI_SYS_PROMPT_MSG_ID = 0x0011,
+    GUI_VIDEO_PLAY_MSG_ID = 0x000E,
 } gui_msg_id_t;
 
 typedef struct {
@@ -106,8 +106,8 @@ extern void gui_msg_set_bar_bar_value_by_int32_cb(lv_observer_t *observer, lv_su
 #include "./gui_file_browser_msg.h"
 #include "./gui_pair_msg.h"
 #include "./gui_rt_stream_msg.h"
-#include "./gui_video_play_msg.h"
 #include "./gui_sys_prompt_msg.h"
+#include "./gui_video_play_msg.h"
 #define GUI_MSG_MAX_ID 0x12
 #endif
 

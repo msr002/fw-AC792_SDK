@@ -6,7 +6,6 @@
 #endif
 #include "rcsp_music_info_setting.h"
 #include "rcsp_config.h"
-#include "cpu.h"
 #include "syscfg_id.h"
 #include "ble_rcsp_server.h"
 #include "rcsp_adv_bluetooth.h"

@@ -6,7 +6,6 @@
 #endif
 #include "app_config.h"
 #include "adv_work_setting.h"
-#include "cpu.h"
 #include "syscfg_id.h"
 #include "ble_rcsp_server.h"
 #include "rcsp_adv_bluetooth.h"

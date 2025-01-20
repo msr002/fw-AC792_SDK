@@ -487,13 +487,13 @@ void LV_ATTRIBUTE_FAST_MEM lv_draw_jl_gpu2p5d_img_decoded_with_mask(struct _lv_d
 {
     jlgpu_printf("[ debug ] %s() %d", __func__, __LINE__);
     lv_area_t _blend_area = {0};
-    /* _blend_area.x1 = draw_ctx->clip_area->x1; */
-    /* _blend_area.x2 = draw_ctx->clip_area->x2; */
-    /* _blend_area.y1 = draw_ctx->clip_area->y1; */
-    /* _blend_area.y2 = draw_ctx->clip_area->y2; */
+    _blend_area.x1 = draw_ctx->clip_area->x1;
+    _blend_area.x2 = draw_ctx->clip_area->x2;
+    _blend_area.y1 = draw_ctx->clip_area->y1;
+    _blend_area.y2 = draw_ctx->clip_area->y2;
     lv_draw_sw_blend_dsc_t blend_dsc = {0};
-    lv_area_t *blend_area = draw_area;
-    /* lv_area_t *blend_area = &_blend_area; */
+    /*lv_area_t *blend_area = draw_area;*/
+    lv_area_t *blend_area = &_blend_area;
     blend_dsc.opa = draw_dsc->opa;
     blend_dsc.blend_mode = draw_dsc->blend_mode;
     blend_dsc.blend_area = blend_area;
@@ -847,6 +847,7 @@ jlvg_begin:
     }
     jlvg_image_t *image  = (jlvg_image_t *)lv_mem_alloc(sizeof(jlvg_image_t));
 
+    lv_jl_gpu2p5d_flush_inv_dcache(src_buf, src_width, src_height, src_width, lv_img_cf_get_px_size(cf));
 
     jlvg_image_init(image, src_buf, src_size, src_width, src_height, img_stride, jlvg_img_cf, rle_en, adr_mode, 1, 0);
     /* printf("img info : rle_en:%d; src_width = %d; src_height = %d; src_size = %d; img_stride = %d.", rle_en, src_width, src_height, src_size, img_stride); */

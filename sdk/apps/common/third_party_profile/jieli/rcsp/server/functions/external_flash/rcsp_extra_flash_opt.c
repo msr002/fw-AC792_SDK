@@ -11,7 +11,6 @@
 #include "rcsp_extra_flash_opt.h"
 #include "rcsp_extra_flash_cmd.h"
 /* #include "norflash.h" */
-#include "cpu.h"
 #include "syscfg_id.h"
 #include "update.h"
 #include "rcsp_task.h"

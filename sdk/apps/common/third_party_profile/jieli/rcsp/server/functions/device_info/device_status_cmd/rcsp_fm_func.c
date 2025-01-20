@@ -86,7 +86,7 @@ static void fm_scan_state_func(void *priv)
         return;
     }
     if (fm_scan_timer) {
-        sys_hi_timer_del(fm_scan_timer);
+        sys_timer_del(fm_scan_timer);
         fm_scan_timer = 0;
     }
     // 更新
@@ -154,7 +154,7 @@ bool rcsp_fm_func_set(void *priv, u8 *data, u16 len)
                 break;
             }
             if (0 == fm_scan_timer) {
-                fm_scan_timer = sys_hi_timer_add(NULL, fm_scan_state_func, 1000);
+                fm_scan_timer = sys_timer_add(NULL, fm_scan_state_func, 1000);
             }
         }
         break;

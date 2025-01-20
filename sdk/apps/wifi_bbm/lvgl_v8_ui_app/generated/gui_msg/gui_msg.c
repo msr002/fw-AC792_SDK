@@ -12,8 +12,8 @@ void gui_msg_init(lv_ui *ui)
     gui_file_browser_msg_init(ui);
     gui_pair_msg_init(ui);
     gui_rt_stream_msg_init(ui);
-    gui_video_play_msg_init(ui);
     gui_sys_prompt_msg_init(ui);
+    gui_video_play_msg_init(ui);
 #endif
 }
 void gui_msg_init_ui()
@@ -22,8 +22,8 @@ void gui_msg_init_ui()
     gui_file_browser_msg_init_ui();
     gui_pair_msg_init_ui();
     gui_rt_stream_msg_init_ui();
-    gui_video_play_msg_init_ui();
     gui_sys_prompt_msg_init_ui();
+    gui_video_play_msg_init_ui();
 #endif
 }
 void gui_msg_init_events()
@@ -32,8 +32,8 @@ void gui_msg_init_events()
     gui_file_browser_msg_init_events();
     gui_pair_msg_init_events();
     gui_rt_stream_msg_init_events();
-    gui_video_play_msg_init_events();
     gui_sys_prompt_msg_init_events();
+    gui_video_play_msg_init_events();
 #endif
 }
 void gui_msg_unsubscribe()
@@ -42,8 +42,8 @@ void gui_msg_unsubscribe()
     gui_file_browser_msg_unsubscribe();
     gui_pair_msg_unsubscribe();
     gui_rt_stream_msg_unsubscribe();
-    gui_video_play_msg_unsubscribe();
     gui_sys_prompt_msg_unsubscribe();
+    gui_video_play_msg_unsubscribe();
 #endif
 }
 gui_msg_status_t gui_msg_send(int32_t msg_id, void *value, int32_t len)
@@ -74,14 +74,14 @@ gui_msg_status_t gui_msg_send(int32_t msg_id, void *value, int32_t len)
         gui_msg_send_status = GUI_MSG_SEND_DONE;
         return ret;
 
-    case GUI_VIDEO_PLAY_MSG_ID_PROGRESS_BAR:
-    case GUI_VIDEO_PLAY_MSG_ID_PLAY_CONTROL:
-        ret = gui_video_play_msg_send(msg_id, value, len);
+    case GUI_SYS_PROMPT_MSG_ID_PROMPT_LAB:
+        ret = gui_sys_prompt_msg_send(msg_id, value, len);
         gui_msg_send_status = GUI_MSG_SEND_DONE;
         return ret;
 
-    case GUI_SYS_PROMPT_MSG_ID_PROMPT_LAB:
-        ret = gui_sys_prompt_msg_send(msg_id, value, len);
+    case GUI_VIDEO_PLAY_MSG_ID_PROGRESS_BAR:
+    case GUI_VIDEO_PLAY_MSG_ID_PLAY_CONTROL:
+        ret = gui_video_play_msg_send(msg_id, value, len);
         gui_msg_send_status = GUI_MSG_SEND_DONE;
         return ret;
 
@@ -125,14 +125,14 @@ gui_msg_data_t *gui_msg_get_guider(int32_t msg_id)
     case GUI_RT_STREAM_MSG_ID_CAMERA_SWITCH:
         return gui_rt_stream_msg_get(msg_id);
 
+    case GUI_SYS_PROMPT_MSG_ID:
+    case GUI_SYS_PROMPT_MSG_ID_PROMPT_LAB:
+        return gui_sys_prompt_msg_get(msg_id);
+
     case GUI_VIDEO_PLAY_MSG_ID:
     case GUI_VIDEO_PLAY_MSG_ID_PROGRESS_BAR:
     case GUI_VIDEO_PLAY_MSG_ID_PLAY_CONTROL:
         return gui_video_play_msg_get(msg_id);
-
-    case GUI_SYS_PROMPT_MSG_ID:
-    case GUI_SYS_PROMPT_MSG_ID_PROMPT_LAB:
-        return gui_sys_prompt_msg_get(msg_id);
 
     default:
         break;
@@ -167,14 +167,14 @@ void gui_msg_action_change_guider(int32_t msg_id, gui_msg_action_t access, gui_m
     case GUI_RT_STREAM_MSG_ID_CAMERA_SWITCH:
         return gui_rt_stream_msg_action_change(msg_id, access, data, type);
 
+    case GUI_SYS_PROMPT_MSG_ID:
+    case GUI_SYS_PROMPT_MSG_ID_PROMPT_LAB:
+        return gui_sys_prompt_msg_action_change(msg_id, access, data, type);
+
     case GUI_VIDEO_PLAY_MSG_ID:
     case GUI_VIDEO_PLAY_MSG_ID_PROGRESS_BAR:
     case GUI_VIDEO_PLAY_MSG_ID_PLAY_CONTROL:
         return gui_video_play_msg_action_change(msg_id, access, data, type);
-
-    case GUI_SYS_PROMPT_MSG_ID:
-    case GUI_SYS_PROMPT_MSG_ID_PROMPT_LAB:
-        return gui_sys_prompt_msg_action_change(msg_id, access, data, type);
 
     default:
         break;

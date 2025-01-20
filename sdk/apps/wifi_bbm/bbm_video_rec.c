@@ -484,7 +484,7 @@ static int video_start(struct video_rec_config *config)
 
     req.rec.width       = config->width;
     req.rec.height      = config->height;
-    req.rec.fps         = config->fps;
+    req.rec.fps         = 0;
     req.rec.real_fps    = config->fps;
     req.rec.abr_kbps    = config->abr_kbps;
 
@@ -493,7 +493,8 @@ static int video_start(struct video_rec_config *config)
         //实时流
         req.rec.buf_len = VIDEO_RT_BUF_SIZE;
         req.rec.format  = USER_VIDEO_FMT_AVI;
-        req.rec.online  = 1;
+        //TODO
+        req.rec.online  = 0;
         req.rec.cycle_time = 5 * 60;
 
         req.rec.audio.aud_interval_size = AUDIO_RT_INTERVAL_SIZE;
@@ -598,6 +599,11 @@ static int video_start(struct video_rec_config *config)
         goto err;
     }
 
+    if (config->net_path) {
+        req.rec.state = VIDEO_STATE_RESET_BITS_RATE;
+        server_request(dev_hdl->video_server, VIDEO_REQ_REC, &req);
+    }
+
     list_add_tail(&dev_hdl->entry, &__this->dev_list_head);
 
     return 0;
@@ -659,9 +665,16 @@ static int video_stop(struct video_rec_config *config)
 
     server_close(dev_hdl->video_server);
 
-    free(dev_hdl->video_buf);
-    free(dev_hdl->video_osd_buf);
-    free(dev_hdl->audio_buf);
+
+    if (dev_hdl->video_buf) {
+        free(dev_hdl->video_buf);
+    }
+    if (dev_hdl->video_osd_buf) {
+        free(dev_hdl->video_osd_buf);
+    }
+    if (dev_hdl ->audio_buf) {
+        free(dev_hdl->audio_buf);
+    }
     if (dev_hdl->audio_recv_hdl) {
         rt_audio_recv_exit(dev_hdl->audio_recv_hdl);
         free(dev_hdl->audio_recv_hdl);
@@ -694,9 +707,16 @@ static int video_stop_all(void)
 
         server_close(dev_hdl->video_server);
 
-        free(dev_hdl->video_buf);
-        free(dev_hdl->video_osd_buf);
-        free(dev_hdl->audio_buf);
+        if (dev_hdl->video_buf) {
+            free(dev_hdl->video_buf);
+        }
+        if (dev_hdl->video_osd_buf) {
+            free(dev_hdl->video_osd_buf);
+        }
+        if (dev_hdl ->audio_buf) {
+            free(dev_hdl->audio_buf);
+        }
+
         if (dev_hdl->audio_recv_hdl) {
             rt_audio_recv_exit(dev_hdl->audio_recv_hdl);
             free(dev_hdl->audio_recv_hdl);

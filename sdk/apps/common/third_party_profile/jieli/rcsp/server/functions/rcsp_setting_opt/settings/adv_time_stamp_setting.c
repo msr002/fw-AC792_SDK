@@ -5,7 +5,6 @@
 #pragma code_seg(".adv_time_stamp_setting.text")
 #endif
 #include "rcsp_config.h"
-#include "cpu.h"
 #include "syscfg_id.h"
 #include "ble_rcsp_server.h"
 

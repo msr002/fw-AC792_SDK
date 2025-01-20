@@ -28,6 +28,7 @@
 #define HAVE_LTE_NETIF
 #define HAVE_BT_NETIF
 #define HAVE_EXT_WIRELESS_NETIF
+#define HAVE_WRIELESS_RAW_NETIF
 
 extern const u8 IPV4_ADDR_CONFLICT_DETECT;
 extern char *itoa(int num, char *str, int radix);
@@ -36,6 +37,7 @@ extern err_t ext_wireless_ethernetif_init(struct netif *netif);
 extern err_t wired_ethernetif_init(struct netif *netif);
 extern err_t bt_ethernetif_init(struct netif *netif);
 extern err_t lte_ethernetif_init(struct netif *netif);
+extern err_t wireless_raw_ethernetif_init(struct netif *netif);
 extern void ntp_client_get_time(const char *host);
 extern int netdev_get_mac_addr(u8 *mac_addr);
 static void __lwip_renew(unsigned short parm);
@@ -107,6 +109,44 @@ static struct lan_setting wireless_lan_setting_info = {
     .SUB_NET_MASK4   = 0,
 };
 
+#ifdef HAVE_WRIELESS_RAW_NETIF
+static struct lan_setting wireless_raw_lan_setting_info = {
+    .WIRELESS_IP_ADDR0  = 192,
+    .WIRELESS_IP_ADDR1  = 168,
+    .WIRELESS_IP_ADDR2  = 1,
+    .WIRELESS_IP_ADDR3  = 1,
+
+    .WIRELESS_NETMASK0  = 255,
+    .WIRELESS_NETMASK1  = 255,
+    .WIRELESS_NETMASK2  = 255,
+    .WIRELESS_NETMASK3  = 0,
+
+    .WIRELESS_GATEWAY0  = 192,
+    .WIRELESS_GATEWAY1  = 168,
+    .WIRELESS_GATEWAY2  = 1,
+    .WIRELESS_GATEWAY3  = 1,
+
+    .SERVER_IPADDR1  = 192,
+    .SERVER_IPADDR2  = 168,
+    .SERVER_IPADDR3  = 1,
+    .SERVER_IPADDR4  = 1,
+
+    .CLIENT_IPADDR1  = 192,
+    .CLIENT_IPADDR2  = 168,
+    .CLIENT_IPADDR3  = 1,
+    .CLIENT_IPADDR4  = 101,
+
+    .SUB_NET_MASK1   = 255,
+    .SUB_NET_MASK2   = 255,
+    .SUB_NET_MASK3   = 255,
+    .SUB_NET_MASK4   = 0,
+};
+#endif
+
+
+#ifdef HAVE_WRIELESS_RAW_NETIF
+static struct netif wireless_raw_netif;
+#endif
 static struct netif wireless_netif;
 static u32 wireless_dhcp_timeout_cnt;
 static u8 lwip_static_ip_renew[MAX_NETIF_NUM];
@@ -270,6 +310,13 @@ struct lan_setting *net_get_lan_info(u8_t lwip_netif)
     if (lwip_netif == WIFI_NETIF) {
         return &wireless_lan_setting_info;
     }
+
+#ifdef HAVE_WRIELESS_RAW_NETIF
+    if (lwip_netif == WIFI_RAW_NETIF) {
+        return &wireless_raw_lan_setting_info;
+    }
+#endif
+
 #ifdef HAVE_EXT_WIRELESS_NETIF
     else if (lwip_netif == EXT_WIFI_NETIF) {
         return &ext_wireless_lan_setting_info;
@@ -294,11 +341,18 @@ struct lan_setting *net_get_lan_info(u8_t lwip_netif)
     return NULL;
 }
 
-static struct netif *net_get_netif_handle(u8_t lwip_netif)
+struct netif *net_get_netif_handle(u8_t lwip_netif)
 {
     if (lwip_netif == WIFI_NETIF) {
         return &wireless_netif;
     }
+
+#ifdef HAVE_WRIELESS_RAW_NETIF
+    if (lwip_netif == WIFI_RAW_NETIF) {
+        return &wireless_raw_netif;
+    }
+#endif
+
 #ifdef HAVE_EXT_WIRELESS_NETIF
     else if (lwip_netif == EXT_WIFI_NETIF) {
         return &ext_wireless_netif;
@@ -935,6 +989,29 @@ void lwip_dhcp_release_and_stop(u8_t lwip_netif)
     LWIP_ASSERT("failed to dhcp_release_and_stop tcpip_callback", err == 0);
 }
 
+//添加静态arp映射
+void lwip_etharp_add_static_entry(const char *ip_str, const char mac[])
+{
+    struct eth_addr ethaddr;
+    memcpy(ethaddr.addr, mac, 6);
+
+    ip4_addr_t dest_ipaddr;
+    ip4addr_aton(ip_str, &dest_ipaddr);
+
+    printf("add static entry succeeded. IP=%s", inet_ntoa(dest_ipaddr));
+
+    etharp_add_static_entry(&dest_ipaddr, &ethaddr);
+}
+
+//移除静态arp映射
+void lwip_etharp_remove_static_entry(const char *ip_str)
+{
+    ip4_addr_t ipaddr;
+    ip4addr_aton(ip_str, &ipaddr);
+    printf("remove static entry succeeded. IP=%s", inet_ntoa(ipaddr));
+    etharp_remove_static_entry(&ipaddr);
+}
+
 /**
 * @brief Init_LwIP initialize the LwIP
 */
@@ -978,6 +1055,14 @@ void Init_LwIP(u8_t lwip_netif)
         ethernetif_init = wireless_ethernetif_init;
         sprintf(host_name, "%s", LOCAL_WIRELESS_HOST_NAME);
         break;
+
+#ifdef HAVE_WRIELESS_RAW_NETIF
+    case WIFI_RAW_NETIF:
+        netif = &wireless_raw_netif;
+        ethernetif_init = wireless_raw_ethernetif_init;
+        sprintf(host_name, "%s", LOCAL_WIRELESS_HOST_NAME);
+        break;
+#endif
 
 #ifdef HAVE_EXT_WIRELESS_NETIF
     case EXT_WIFI_NETIF:
@@ -1308,6 +1393,13 @@ int lwip_get_dest_hwaddr(u8_t lwip_netif, ip4_addr_t *ipaddr, struct eth_addr *d
     }
 
     return (ret == -1) ? -1 : 0;
+}
+
+//Change the IP address of a network interface
+void lwip_set_netif_ipaddr(const u8_t lwip_netif, const ip4_addr_t *ipaddr)
+{
+    struct netif *netif = net_get_netif_handle(lwip_netif);
+    netif_set_ipaddr(netif, ipaddr);
 }
 
 void lwip_get_netif_info(u8_t lwip_netif, struct netif_info *info)

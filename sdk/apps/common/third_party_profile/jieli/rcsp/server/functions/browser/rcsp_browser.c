@@ -299,7 +299,7 @@ static void rcsp_browser_task(void *p)
         printf("dev nofound!!!\n");
         goto _EXIT;
     }
-    file_bs_open_handle(&fil_bs, (u8 *)rcsp_browser_file_ext());
+    file_bs_open_handle(&fil_bs, rcsp_browser_file_ext());
 
     u32 dir_file_cnt = browse_open_dir(&fil_bs, (u8 *)browser->path_clust, browser->path_len);
     if (browser->start_num  + browser->read_file_num >= dir_file_cnt) {

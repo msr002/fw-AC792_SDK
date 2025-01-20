@@ -1,6 +1,5 @@
 #include "tuya_uart.h"
 #include "tal_uart.h"
-asdasdasdasdasd
 /**
  * @brief uart init
  *

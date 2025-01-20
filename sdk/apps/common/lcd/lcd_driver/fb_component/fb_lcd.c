@@ -394,7 +394,7 @@ void dmm_vsync_int_handler(void)
             if (lcd_vert_total) {
                 /* if (dmm_frame_period / lcd_vert_total < g_dmm_line_period || statistics_cnt <= 3) { */
                 //g_dmm_line_period =  dmm_frame_period / lcd_vert_total;
-                g_dmm_line_period = (dmm_frame_period + (lcd_vert_total / 2)) / lcd_vert_total;//四舍五入
+                g_dmm_line_period = (dmm_frame_period + lcd_vert_total - 1) / lcd_vert_total; //向前取整
                 /* } */
             }
             /* printf("dmm frame_period = %dus, %d line_period = %dus\n", dmm_frame_period, lcd_vert_total, g_dmm_line_period); */
@@ -598,6 +598,8 @@ void *fb_lcd_device_open(struct fb_out_info *out_info)
             }
         }
 
+    } else {
+        return __this->lcd;
     }
     return fd;
 }

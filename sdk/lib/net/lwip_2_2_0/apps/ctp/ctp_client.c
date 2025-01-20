@@ -46,6 +46,8 @@ static void ctp_cli_recv_thread(void *arg)
     char recv_buf[MAX_TCP_PKT];
     u16 topic_len = 0;
     u32 content_len = 0;
+    char *topic_data = NULL;
+    char *content_data = NULL;
 
     while (1) {
         ret = sock_recv(hdl->sock_hdl, recv_buf, CTP_PREFIX_LEN, MSG_WAITALL);
@@ -59,7 +61,7 @@ static void ctp_cli_recv_thread(void *arg)
             goto EXIT;
         }
 
-        char *topic_data = calloc(topic_len, 1);
+        topic_data = calloc(topic_len, 1);
         if (topic_data == NULL) {
             printf("%s %d->  malloc: %d\n", __FUNCTION__, __LINE__, ret);
             goto EXIT;
@@ -80,7 +82,7 @@ static void ctp_cli_recv_thread(void *arg)
             goto EXIT;
         }
 
-        char *content_data = calloc(content_len, 1);
+        content_data = calloc(content_len, 1);
         if (content_data == NULL) {
             printf("%s %d->  malloc: %d\n", __FUNCTION__, __LINE__, ret);
             goto EXIT;
@@ -95,22 +97,33 @@ static void ctp_cli_recv_thread(void *arg)
         /* printf("####  content_data:%s  content_len:%d\n", content_data, content_len); */
 
 
-        if (!hdl->cb_func && hdl->cb_func(hdl, CTP_CLI_RECV_MSG, topic_data, content_len ? content_data : NULL, hdl->priv)) {
+        if (hdl->cb_func && hdl->cb_func(hdl, CTP_CLI_RECV_MSG, topic_data, content_len ? content_data : NULL, hdl->priv)) {
             goto EXIT;
         }
         if (topic_data != NULL) {
             free(topic_data);
+            topic_data = NULL;
         }
         if (content_data != NULL) {
             free(content_data);
+            content_data = NULL;
         }
 
 
     }
 
 EXIT:
+    if (topic_data != NULL) {
+        free(topic_data);
+        topic_data = NULL;
+    }
+    if (content_data != NULL) {
+        free(content_data);
+        content_data = NULL;
+    }
+
     hdl->state = SERVER_CLOSE;
-    ctp_cli_unreg(hdl);
+    /* ctp_cli_unreg(hdl); */
 
     return;
 }
@@ -189,6 +202,9 @@ void *ctp_cli_reg(u16_t id, struct sockaddr_in *dest_addr, int (*cb_func)(void *
     hdl->cb_func = cb_func;
     hdl->priv = priv;
 
+    //1秒超时
+    sock_set_connect_to(hdl->sock_hdl, 1);
+
     if (sock_connect(hdl->sock_hdl, (struct sockaddr *)&hdl->dest_addr, sizeof(struct sockaddr)) == -1) {
         hdl->cb_func(hdl, CTP_CLI_CONNECT_FAIL, NULL, NULL, hdl->priv);
         printf("%s %d->Error in connect()\n", __FUNCTION__, __LINE__);
@@ -202,7 +218,7 @@ void *ctp_cli_reg(u16_t id, struct sockaddr_in *dest_addr, int (*cb_func)(void *
     }
 #endif
 
-    thread_fork("ctp_cli_recv_thread", ctp_cli.cli_thread_prio, ctp_cli.cli_thread_stk_size, 0, &((struct ctp_hdl *)hdl)->recv_thread_pid, ctp_cli_recv_thread, (void *)hdl);
+    thread_fork(NULL, ctp_cli.cli_thread_prio, ctp_cli.cli_thread_stk_size, 0, &((struct ctp_hdl *)hdl)->recv_thread_pid, ctp_cli_recv_thread, (void *)hdl);
 
     os_mutex_post(&ctp_cli.mutex);
 
@@ -231,6 +247,7 @@ void ctp_cli_unreg(void *handle)
     bool find = 0;
 
     if (!hdl) {
+        printf("ctp hdl is null \n");
         return;
     }
 
@@ -245,6 +262,7 @@ void ctp_cli_unreg(void *handle)
     os_mutex_post(&ctp_cli.mutex);
 
     if (!find) {
+        printf("list del not found \n");
         return;
     }
 
@@ -252,9 +270,9 @@ void ctp_cli_unreg(void *handle)
 
     hdl->state = SERVER_CLOSE;
 
-    thread_kill(&hdl->recv_thread_pid, KILL_WAIT);
-
     sock_unreg(hdl->sock_hdl);
+
+    thread_kill(&hdl->recv_thread_pid, KILL_WAIT);
     free(hdl);
 }
 
@@ -279,9 +297,9 @@ void ctp_cli_uninit(void)
 
         hdl->state = SERVER_CLOSE;
 
-        thread_kill(&hdl->recv_thread_pid, KILL_WAIT);
-
         sock_unreg(hdl->sock_hdl);
+
+        thread_kill(&hdl->recv_thread_pid, KILL_WAIT);
         free(hdl);
     }
 
@@ -362,3 +380,15 @@ struct sockaddr_in *ctp_cli_get_hdl_addr(void *handle)
 
     return &((struct ctp_hdl *)handle)->dest_addr;
 }
+
+void *ctp_cli_get_hdl_priv(void *handle)
+{
+    struct ctp_hdl *hdl = handle;
+    if (!hdl) {
+        return NULL;
+    }
+
+    return hdl->priv;
+}
+
+

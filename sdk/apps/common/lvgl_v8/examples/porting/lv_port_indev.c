@@ -246,6 +246,7 @@ static void touchpad_init(void)
 static void touchpad_read(lv_indev_drv_t *indev_drv, lv_indev_data_t *data)
 {
     uint8_t status;
+    static u32 touch_time = 0; //记录滑动抬起后的时刻
 
 #if LV_USE_SIM_INERTIAL_SLIDE
     lv_indev_data_t touch_data;
@@ -256,6 +257,10 @@ static void touchpad_read(lv_indev_drv_t *indev_drv, lv_indev_data_t *data)
         /* putchar('I'); */
         extern void lv_port_get_touch_x_y_status(void *user_data, uint16_t *x, uint16_t *y, uint8_t *status);
         lv_port_get_touch_x_y_status(indev_drv->user_data, &data->point.x, &data->point.y, &status);
+#if LV_USE_SIM_INERTIAL_SLIDE
+        touch_data.point.x = data->point.x;
+        touch_data.point.y = data->point.y;
+#endif
     } else {
         /* putchar('T'); */
         extern void get_touch_x_y_status(uint16_t *x, uint16_t *y, uint8_t *status);
@@ -278,10 +283,9 @@ static void touchpad_read(lv_indev_drv_t *indev_drv, lv_indev_data_t *data)
                                        g_touch_data.point.y : (g_touch_data.point.y < 0 ? 0 : LCD_H);
                 g_touch_data.state = LV_INDEV_STATE_REL;
 
-                //自动退出模拟滑动,删除轮询定时器
-                lv_indev_set_touch_timer_en(0);
                 lv_indev_sim_status = 0;
                 lv_throw.ratio = 1.0f;
+                touch_time = timer_get_ms();
             }
 
             data->point.x = g_touch_data.point.x;
@@ -292,10 +296,12 @@ static void touchpad_read(lv_indev_drv_t *indev_drv, lv_indev_data_t *data)
 
 
         if (!status) { //touch抬起
+            if (timer_get_ms() - touch_time > 1000 && touch_time != 0) {
+                lv_indev_set_touch_timer_en(0); //抬起后超过1s关闭定时器
+            }
+
             if (touch_cnt < 2 || (ABS(lv_throw.final_interval_y) < 5 && ABS(lv_throw.final_interval_x) < 5)) {
                 touch_cnt = 0;
-                //正常抬起,删除轮询定时器
-                lv_indev_set_touch_timer_en(0);
                 goto _GET_DATA_DONE;
             }
             //惯性滑动生效
@@ -315,11 +321,9 @@ static void touchpad_read(lv_indev_drv_t *indev_drv, lv_indev_data_t *data)
 
             return;
         } else {//touch按下
-            //若处于模拟惯性即退出
-            if (lv_indev_sim_status) {
-                lv_indev_sim_status = 0;
-                lv_throw.ratio = 1.0f;
-            }
+            lv_indev_sim_status = 0;
+            lv_throw.ratio = 1.0f;
+            touch_time = timer_get_ms();
         }
 
         //处于按下状态,累加触摸连续次数,计算最后触摸距离
@@ -350,11 +354,14 @@ _GET_DATA_DONE:
     if (status)
     {
         data->state = LV_INDEV_STATE_PR;
+        touch_time = timer_get_ms();
     } else
     {
         data->state = LV_INDEV_STATE_REL;
-        //检测到抬起,删除轮询定时器
-        lv_indev_set_touch_timer_en(0);
+        //检测到抬起,延时删除轮询定时器
+        if (timer_get_ms() - touch_time > 600 && touch_time != 0) {
+            lv_indev_set_touch_timer_en(0);
+        }
     }
 #endif
 }

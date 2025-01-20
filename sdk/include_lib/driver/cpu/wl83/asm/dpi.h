@@ -257,15 +257,8 @@ struct imd_dpi_timing {
 #define LCD_OUT_RGB888  3
 
 ////显示相关////
-struct te_mode_ctrl {
-    u8 te_mode_en;
-    u8 edge;
-    int gpio;
-};
-
 struct imd_dev {
     struct basic_info info;
-    struct te_mode_ctrl te_mode;
 
     enum LCD_ENDIAN data_out_endian;//输出数据大小端仅输出RGB565支持
     enum NCYCLE ncycle;             //每像素时钟数
@@ -283,7 +276,6 @@ struct imd_dev {
     u8 sync1_set;                   //DE/HSYNC/VSYNC
     u8 sync2_set;                   //DE/HSYNC/VSYNC
     u8 sync3_set;                   //Reversed
-    u8 dpi_open_flag;
     u32 clk_cfg;                    //dpi clk时钟配置
     u32 dclk_cfg;                   //dclk时钟配置
     struct imd_dpi_timing timing;   //时序参数

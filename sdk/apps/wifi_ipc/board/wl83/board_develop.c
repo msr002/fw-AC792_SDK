@@ -10,6 +10,7 @@
 #include "device/gpio.h"
 #include "server/audio_dev.h"
 #include "asm/includes.h"
+#include "asm/exti.h"
 #if TCFG_USB_SLAVE_ENABLE || TCFG_USB_HOST_ENABLE
 #include "otg.h"
 #include "usb_host.h"
@@ -452,13 +453,13 @@ PAP_PLATFORM_DATA_BEGIN(pap_data)
     .port_sel               = PAP_PORT_A,
     .timing_setup           = PAP_TS_0_CLK,
     .timing_hold            = PAP_TH_0_CLK,
-    .timing_width           = PAP_TW_1_CLK,
+    .timing_width           = PAP_TW_3_CLK,
 PAP_PLATFORM_DATA_END();
 #endif
 
 
 #if TCFG_LCD_ENABLE
-LCD_PLATFORM_DATA_BEGIN(lcd_data)
+LCD_PLATFORM_DATA_BEGIN(lcd_bd_cfg)
     .lcd_name               = TCFG_LCD_DEVICE_NAME,
     .lcd_io                 = {
         .backlight          = TCFG_LCD_BL_IO,
@@ -467,7 +468,18 @@ LCD_PLATFORM_DATA_BEGIN(lcd_data)
         .lcd_cs             = TCFG_LCD_CS_IO,
         .lcd_rs             = TCFG_LCD_RS_IO,
     },
+    .te_mode                = {
+        .te_mode_en         = TCFG_LCD_TE_ENABLE,
+        .gpio               = TCFG_LCD_TE_IO,
+        .edge               = EDGE_NEGATIVE,
+    },
+    .spi_lcd_interface      = TCFG_LCD_SPI_INTERFACE,
 LCD_PLATFORM_DATA_END()
+
+static const struct lcd_platform_data lcd_data = {
+    .cfg_num = ARRAY_SIZE(lcd_bd_cfg),
+    .config_ptr = lcd_bd_cfg,
+};
 
 
 #if TCFG_TP_DRIVER_ENABLE
@@ -1046,32 +1058,32 @@ static const struct video_platform_data video3_data = {
 #if defined CONFIG_BT_ENABLE || TCFG_WIFI_ENABLE
 #include "wifi/wifi_connect.h"
 const struct wifi_calibration_param wifi_calibration_param = {
-    .xosc_l     = 0x7,// 调节左晶振电容
-    .xosc_r     = 0x7,// 调节右晶振电容
+    .xosc_l     = 0xb,// 调节左晶振电容
+    .xosc_r     = 0xb,// 调节右晶振电容
     .pa_trim_data = {1, 7, 4, 7, 11, 1, 7},// 根据MP测试生成PA TRIM值
 	.mcs_dgain    = {
-        50,//11B_1M
-        50,//11B_2.2M
-        50,//11B_5.5M
-        50,//11B_11M
+        43,//11B_1M
+        42,//11B_2.2M
+        42,//11B_5.5M
+        41,//11B_11M
 
-        72,//11G_6M
-        72,//11G_9M
-        85,//11G_12M
-        80,//11G_18M
-        64,//11G_24M
-        64,//11G_36M
-        62,//11G_48M
-        52,//11G_54M
+        51,//11G_6M
+        50,//11G_9M
+        60,//11G_12M
+        51,//11G_18M
+        44,//11G_24M
+        44,//11G_36M
+        43,//11G_48M
+        38,//11G_54M
 
-        72,//11N_MCS0
-        90,//11N_MCS1
-        80,//11N_MCS2
-        64,//11N_MCS3
-        64,//11N_MCS4
-        64,//11N_MCS5
-        50,//11N_MCS6
-        43,//11N_MCS7
+        50,//11N_MCS0
+        71,//11N_MCS1
+        52,//11N_MCS2
+        44,//11N_MCS3
+        44,//11N_MCS4
+        43,//11N_MCS5
+        38,//11N_MCS6
+        33,//11N_MCS7
     }
 };
 #endif

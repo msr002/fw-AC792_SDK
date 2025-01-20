@@ -26,7 +26,6 @@
 #include "file_bluk_trans_prepare.h"
 #include "custom_cfg.h"
 /* #include "system/event.h" */
-#include "cpu.h"
 #include "syscfg_id.h"
 #include "JL_rcsp_api.h"
 #include "spp_user.h"
@@ -245,6 +244,9 @@ static void rcsp_ble_disconnect(void)
 #endif
     sport_data_func_release();
     rcsp_timer_contrl(0);
+
+    // 防止上一次接收长度太长且未接收完成就中断，影响到下一次连接后的交互
+    JL_packet_clear();
 }
 
 static void rcsp_ble_connect(void)

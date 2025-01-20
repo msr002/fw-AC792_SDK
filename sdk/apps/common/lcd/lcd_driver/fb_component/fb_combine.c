@@ -456,8 +456,10 @@ static int dma2d_combine_optimize(dma2d_layer_t in[], dma2d_layer_t *out, int fb
         }
     }
 
-    //场景2: UI单独全屏buffer显示, 双路或三路图像同时显示,其中一路全屏显示
-    if (fb_n >= 3) {
+#if 0
+    //FIX ME: 下面场景需要先合成输出到全屏那一路buffer,当全屏那一路sensor帧间隔过短,容易出现合成模块和图像输出竞争同一块buffer的情况,出现显示闪屏
+    //所以如果要使用该加速场景,要求sensor帧间隔尽可能拉长
+    if (fb_n >= 3) {  //场景2: UI单独全屏buffer显示, 双路或三路图像同时显示,其中一路全屏显示
         layer = &in[fb_n - 1];//全屏那路非UI图层
         if ((layer->v_width == out->width && layer->v_height == out->height) && (in[0].v_width == out->width && in[0].v_height == out->height)) {
             other_process = is_combine_layer_need_process(layer, out);  //先判断全屏那路图层需不需要插入处理
@@ -482,6 +484,7 @@ static int dma2d_combine_optimize(dma2d_layer_t in[], dma2d_layer_t *out, int fb
             }
         }
     }
+#endif
 
     return 0;
 }

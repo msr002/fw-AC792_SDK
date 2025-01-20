@@ -6,7 +6,6 @@
 #endif
 #include "rcsp_color_led_setting.h"
 #if (RCSP_MODE && RCSP_ADV_COLOR_LED_SET_ENABLE)
-#include "cpu.h"
 #include "syscfg_id.h"
 #include "user_cfg.h"
 

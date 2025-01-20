@@ -32,6 +32,7 @@
 #include "libs/lodepng/lv_lodepng.h"
 #include "libs/libpng/lv_libpng.h"
 #include "libs/tiny_ttf/lv_tiny_ttf.h"
+#include "libs/jl_bin/lv_jl_bin.h"
 #include "draw/lv_draw.h"
 #include "misc/lv_async.h"
 #include "misc/lv_fs_private.h"

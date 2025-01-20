@@ -10,11 +10,15 @@
 #include "btstack/avctp_user.h"
 /* #include "app_main.h" */
 
-#if (BT_AI_SEL_PROTOCOL & (RCSP_MODE_EN))
+#if (THIRD_PARTY_PROTOCOLS_SEL & (RCSP_MODE_EN | GFPS_EN | MMA_EN | FMNA_EN | REALME_EN | SWIFT_PAIR_EN | DMA_EN | ONLINE_DEBUG_EN | CUSTOM_DEMO_EN))
 
-/* #if (BT_AI_SEL_PROTOCOL & GFPS_EN) */
-/* #include "gfps_platform_api.h" */
-/* #endif */
+#if (THIRD_PARTY_PROTOCOLS_SEL & GFPS_EN)
+#include "gfps_platform_api.h"
+#endif
+
+#if (BT_AI_SEL_PROTOCOL & REALME_EN)
+#include "realme_platform_api.h"
+#endif
 
 #if 0
 #define log_info(x, ...)       printf("[MULTI_PROTOCOL]" x " ", ## __VA_ARGS__)
@@ -34,6 +38,10 @@ void multi_protocol_state_update_callback(void *_hdl, uint8_t state, uint8_t *pa
     case APP_SPP_DISCONNECTION_COMPLETE:
 #if TCFG_USER_TWS_ENABLE
         multi_protocol_tws_sync_send();
+#if (BT_AI_SEL_PROTOCOL & REALME_EN)
+        realme_tws_sync_state_send();
+#endif
+
 #endif
         break;
     };
@@ -50,10 +58,13 @@ void multi_protocol_bt_tws_poweroff_handler(void)
 
     multi_protocol_tws_sync_send();
 
-    /* #if (BT_AI_SEL_PROTOCOL & GFPS_EN) */
-    /* gfps_sync_info_to_new_master(); */
-    /* #endif */
+#if (THIRD_PARTY_PROTOCOLS_SEL & GFPS_EN)
+    gfps_sync_info_to_new_master();
+#endif
 
+#if (BT_AI_SEL_PROTOCOL & REALME_EN)
+    realme_tws_sync_state_send();
+#endif
 }
 
 static int multi_protocol_tws_status_event_handler(int *msg)

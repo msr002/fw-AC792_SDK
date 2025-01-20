@@ -5,7 +5,6 @@
 #pragma code_seg(".adv_led_setting.text")
 #endif
 #include "app_config.h"
-#include "cpu.h"
 #include "syscfg_id.h"
 #include "user_cfg.h"
 #include "ble_rcsp_server.h"

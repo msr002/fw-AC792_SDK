@@ -28,7 +28,7 @@
 #define BT_INFO_ATTR_MUSIC_TIME      	(6)
 #define BT_INFO_ATTR_MUSIC_STATE      	(7)
 #define BT_INFO_ATTR_MUSIC_CURR_TIME    (8)
-#if 1
+
 //设置固件bt行为
 bool rcsp_bt_func_set(void *priv, u8 *data, u16 len)
 {
@@ -87,6 +87,5 @@ u32 rcsp_bt_func_get(void *priv, u8 *buf, u16 buf_size, u32 mask)
 
     return offset;
 }
-#endif
 
 #endif

@@ -5,7 +5,6 @@
 #pragma code_seg(".adv_adaptive_noise_reduction.text")
 #endif
 #include "adv_adaptive_noise_reduction.h"
-#include "cpu.h"
 #include "syscfg_id.h"
 #include "user_cfg_id.h"
 #include "app_config.h"

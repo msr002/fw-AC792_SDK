@@ -36,36 +36,56 @@
 #define IOCTL_LCD_RGB_SET_LINE_ISR_CB           _IOW('F', 5, sizeof(int (*)(int)))
 #define IOCTL_LCD_RGB_WAIT_LINE_FINISH          _IOW('F', 6, sizeof(int))
 
+struct te_mode_ctrl {
+    u8 te_mode_en;              ///< TE功能使能
+    u8 edge;                    ///< TE触发边沿
+    int gpio;                   ///< TE脚IO
+};
+
+struct lcd_board_cfg {
+    char *lcd_name;                ///< 屏驱配置名(用于与屏驱配置匹配)
+    struct {
+        u8 backlight_value;              ///< 背光控制使能电平
+        int backlight;                   ///< 背光控制IO
+        int lcd_reset;                   ///< 复位脚
+        int lcd_cs;                      ///< 片选脚
+        int lcd_rs;                      ///< 屏幕命令/数据脚
+    } lcd_io;
+    struct te_mode_ctrl te_mode;         ///< TE功能配置(仅MCU/SPI类型的屏需要)
+    char *spi_lcd_interface;             ///< spi屏的推屏接口(仅SPI屏需要)
+};
 
 struct lcd_platform_data {
-    const char *lcd_name;
-    struct {
-        u8 backlight_value;
-        int backlight;
-        int lcd_reset;
-        int lcd_cs;
-        int lcd_rs;
-    } lcd_io;
+    u8 cfg_num;                          ///< 板级配置数量
+    struct lcd_board_cfg *config_ptr;    ///< 板级配置地址
 };
 
 #define LCD_PLATFORM_DATA_BEGIN(data) \
-static const struct lcd_platform_data data = {
+static struct lcd_board_cfg data[] = { \
+    {
+
+#define LCD_PLATFORM_DATA_ADD() \
+    },\
+    {
 
 #define LCD_PLATFORM_DATA_END() \
+    },\
 };
 
 struct spi_dev {
     struct basic_info info;
-    struct te_mode_ctrl te_mode;
     enum LCD_ENDIAN data_out_endian;
-    char *interface_name;
-    u8 spi_open_flag;
+};
+
+union lcd_dev_info {
+    struct imd_dev imd;
+    struct mipi_dev mipi;
+    struct spi_dev spi;
 };
 
 #define REGISTER_IMD_DEVICE_BEGIN(info) \
     static union lcd_dev_info info SEC_USED(.lcd_device) = { \
         .imd
-
 #define REGISTER_IMD_DEVICE_END() \
     };
 
@@ -81,24 +101,20 @@ struct spi_dev {
 #define REGISTER_LCD_SPI_DEVICE_END() \
     };
 
-union lcd_dev_info {
-    struct imd_dev imd;
-    struct mipi_dev mipi;
-    struct spi_dev spi;
-};
-
 struct lcd_dev_drive {
     const char *logo;
     enum LCD_IF type;
-    int (*init)(void *_data);
-    int (*draw)(void *_data);
-    int (*uninit)(void *_data);
-    void (*bl_ctrl)(void *_data, u8 onoff);
+    int (*init)(struct lcd_board_cfg *bd_cfg);
+    int (*draw)(void *data);
+    int (*uninit)(struct lcd_board_cfg *bd_cfg);
+    void (*bl_ctrl)(struct lcd_board_cfg *bd_cfg, u8 onoff);
+    int (*check)(struct lcd_board_cfg *bd_cfg);
+    int (*send_init_code)(struct lcd_board_cfg *bd_cfg);
     union lcd_dev_info *dev;
 };
 
 #define REGISTER_LCD_DEVICE_DRIVE(dev) \
-	static const struct lcd_dev_drive dev_drive SEC_USED(.lcd_device_drive)
+	static const struct lcd_dev_drive dev##_drive SEC_USED(.lcd_device_drive)
 
 #define list_for_each_lcd_device_drive(p) \
 	for (p=lcd_device_drive_begin; p < lcd_device_drive_end; p++)
@@ -112,6 +128,7 @@ extern const struct device_operations lcd_dev_ops;
 void lcd_cs_pinstate(u8 state);
 void lcd_rs_pinstate(u8 state);
 void lcd_rst_pinstate(u8 state);
+void ReadDAT(u8 cmd, u8 *buf, u8 len);
 void WriteCOM(u8 cmd);
 void WriteDAT_8(u8 dat);
 void WriteDAT_one_page(u8 *dat, int len);

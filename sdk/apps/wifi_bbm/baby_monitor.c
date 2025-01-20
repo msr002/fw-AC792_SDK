@@ -158,7 +158,6 @@ static int bbm_stop_camera_by_ch(int ch)
     ret = bbm_ctp_rt_stop(__this->bbm_client_hdl[ch]->ctp_cli_hdl);
     if (ret) {
         printf("ch:%d rt stream stop err\n", ch);
-        return -1;
     }
     __this->cur_channel &= ~BIT(ch);
 
@@ -306,6 +305,7 @@ static int bbm_switch_camera(void)
         }
     }
 
+    printf("stop_num:%d \n", stop_num);
     if (stop_num == 2) {
 
         for (i = 0; i < ARRAY_SIZE(start_ch); i++) {

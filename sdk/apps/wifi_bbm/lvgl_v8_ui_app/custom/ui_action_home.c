@@ -32,6 +32,13 @@ void gui_show_sys_prompt(void)
     }
 }
 
+void gui_hide_sys_prompt(void)
+{
+    if (guider_ui.sys_prompt_del == false && lv_obj_is_valid(guider_ui.sys_prompt)) {
+        lv_obj_add_flag(guider_ui.sys_prompt, LV_OBJ_FLAG_HIDDEN);
+    }
+}
+
 void gui_set_sys_prompt_lab(char *text)
 {
     char *lab = lvgl_module_msg_get_ptr(GUI_SYS_PROMPT_MSG_ID_PROMPT_LAB, strlen(text) + 1);

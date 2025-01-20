@@ -10,6 +10,7 @@
 #include "device/gpio.h"
 #include "server/audio_dev.h"
 #include "asm/includes.h"
+#include "asm/exti.h"
 #if TCFG_USB_SLAVE_ENABLE || TCFG_USB_HOST_ENABLE
 #include "otg.h"
 #include "usb_host.h"
@@ -458,13 +459,13 @@ PAP_PLATFORM_DATA_BEGIN(pap_data)
     .port_sel               = PAP_PORT_A,
     .timing_setup           = PAP_TS_0_CLK,
     .timing_hold            = PAP_TH_0_CLK,
-    .timing_width           = PAP_TW_1_CLK,
+    .timing_width           = PAP_TW_3_CLK,
 PAP_PLATFORM_DATA_END();
 #endif
 
 
 #if TCFG_LCD_ENABLE
-LCD_PLATFORM_DATA_BEGIN(lcd_data)
+LCD_PLATFORM_DATA_BEGIN(lcd_bd_cfg)
     .lcd_name               = TCFG_LCD_DEVICE_NAME,
     .lcd_io                 = {
         .backlight          = TCFG_LCD_BL_IO,
@@ -473,7 +474,18 @@ LCD_PLATFORM_DATA_BEGIN(lcd_data)
         .lcd_cs             = TCFG_LCD_CS_IO,
         .lcd_rs             = TCFG_LCD_RS_IO,
     },
+    .te_mode                = {
+        .te_mode_en         = TCFG_LCD_TE_ENABLE,
+        .gpio               = TCFG_LCD_TE_IO,
+        .edge               = EDGE_NEGATIVE,
+    },
+    .spi_lcd_interface      = TCFG_LCD_SPI_INTERFACE,
 LCD_PLATFORM_DATA_END()
+
+static const struct lcd_platform_data lcd_data = {
+    .cfg_num = ARRAY_SIZE(lcd_bd_cfg),
+    .config_ptr = lcd_bd_cfg,
+};
 
 
 #if TCFG_TP_DRIVER_ENABLE
@@ -1124,6 +1136,7 @@ LTE_MODULE_DATA_END()
 
 #if defined CONFIG_BT_ENABLE || TCFG_WIFI_ENABLE
 #include "wifi/wifi_connect.h"
+#if !BBM_WIFI_PA_ENABLE
 const struct wifi_calibration_param wifi_calibration_param = {
     .xosc_l     = 0x7,// 调节左晶振电容
     .xosc_r     = 0x7,// 调节右晶振电容
@@ -1153,6 +1166,40 @@ const struct wifi_calibration_param wifi_calibration_param = {
         43,//11N_MCS7
     }
 };
+#else
+//PA参数
+const struct wifi_calibration_param wifi_calibration_param = {
+    .xosc_l     = 0x0A,// 调节左晶振电容
+    .xosc_r     = 0x0A,// 调节右晶振电容
+    .pa_trim_data = {1, 7, 4, 7, 11, 1, 7},// 根据MP测试生成PA TRIM值
+	.mcs_dgain    = {
+        60,//11B_1M
+        60,//11B_2.2M
+        60,//11B_5.5M
+        60,//11B_11M
+
+        70,//11G_6M
+        70,//11G_9M
+        70,//11G_12M
+        55,//11G_18M
+        48,//11G_24M
+        38,//11G_36M
+        32,//11G_48M
+        29,//11G_54M
+
+        65,//11N_MCS0
+        65,//11N_MCS1
+        55,//11N_MCS2
+        45,//11N_MCS3
+        39,//11N_MCS4
+        34,//11N_MCS5
+        29,//11N_MCS6
+        26,//11N_MCS7
+    }
+};
+
+#endif /* BBM_WIFI_PA_ENABLE */
+
 #endif
 
 
@@ -1700,6 +1747,15 @@ void board_init(void)
 #endif
 #endif
 #endif
+
+    extern const char WIFI_PA_ENABLE;
+    if(WIFI_PA_ENABLE){
+        gpio_set_mode(IO_PORTE_11,GPIO_OUTPUT_LOW);
+        gpio_set_mode(IO_PORTE_12,GPIO_OUTPUT_LOW);
+
+        gpio_och_sel_output_signal(IO_PORTE_11,OUTPUT_CH_SIGNAL_WL_LNAE);   //RX
+        gpio_och_sel_output_signal(IO_PORTE_12,OUTPUT_CH_SIGNAL_WL_AMPE);   //TX
+    }
 
 #if TCFG_ADKEY_ENABLE || (defined CONFIG_BT_ENABLE || TCFG_WIFI_ENABLE) || TCFG_RTC_ENABLE
     adc_init();

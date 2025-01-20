@@ -5,6 +5,7 @@
 #include "device/uart.h"
 #include "device/gpio.h"
 #include "asm/includes.h"
+#include "asm/exti.h"
 #ifdef CONFIG_UI_ENABLE
 #include "lcd_driver.h"
 #include "device/video/fb.h"
@@ -315,13 +316,13 @@ PAP_PLATFORM_DATA_BEGIN(pap_data)
     .port_sel               = PAP_PORT_A,
     .timing_setup           = PAP_TS_0_CLK,
     .timing_hold            = PAP_TH_0_CLK,
-    .timing_width           = PAP_TW_1_CLK,
+    .timing_width           = PAP_TW_3_CLK,
 PAP_PLATFORM_DATA_END();
 #endif
 
 
 #if TCFG_LCD_ENABLE
-LCD_PLATFORM_DATA_BEGIN(lcd_data)
+LCD_PLATFORM_DATA_BEGIN(lcd_bd_cfg)
     .lcd_name               = TCFG_LCD_DEVICE_NAME,
     .lcd_io                 = {
         .backlight          = TCFG_LCD_BL_IO,
@@ -330,7 +331,18 @@ LCD_PLATFORM_DATA_BEGIN(lcd_data)
         .lcd_cs             = TCFG_LCD_CS_IO,
         .lcd_rs             = TCFG_LCD_RS_IO,
     },
+    .te_mode                = {
+        .te_mode_en         = TCFG_LCD_TE_ENABLE,
+        .gpio               = TCFG_LCD_TE_IO,
+        .edge               = EDGE_NEGATIVE,
+    },
+    .spi_lcd_interface      = TCFG_LCD_SPI_INTERFACE,
 LCD_PLATFORM_DATA_END()
+
+static const struct lcd_platform_data lcd_data = {
+    .cfg_num = ARRAY_SIZE(lcd_bd_cfg),
+    .config_ptr = lcd_bd_cfg,
+};
 #endif
 
 

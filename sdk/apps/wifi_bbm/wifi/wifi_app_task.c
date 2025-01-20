@@ -126,6 +126,10 @@ static void net_state_timer_func(void *p)
 
     //内存
     malloc_stats();
+
+    //信号强度
+    char rssi = wifi_raw_rssi_get();
+    printf("rssi:%d \n", rssi);
 }
 
 static int lwip_set_lan_info(struct lan_setting *__lan_setting_info)
@@ -557,7 +561,7 @@ static void wifi_raw_init(void *priv)
     }
 #else
     //BBM_RX端MAC地址，多RX同时用时，MAC地址要不一样
-    u8 src_mac[6] = {0x11, 0x22, 0x33, 0x44, 0x55, 0x66};
+    u8 src_mac[6] = {0x88, 0x22, 0x33, 0x44, 0x55, 0x66};
 #endif
 
     //设置静态IP
@@ -565,6 +569,9 @@ static void wifi_raw_init(void *priv)
 
     //启动wifi_raw
     wifi_raw_on(1);
+
+    //raw不需要退避
+    wifi_edca_parm_set(0, 255, 0, 0, 0);
 
     //过滤掉一些不用的包
     filt_pack_not_need();
@@ -578,28 +585,34 @@ static void wifi_raw_init(void *priv)
     //设置硬件bssid过滤
     wf_asic_set_bssid(bbm_bssid_mac);
 
+    //模拟增益
     wifi_set_pwr(6);
 
 #ifdef CONFIG_BBM_RX
+    //初始化RX端配对表
     arp_static_table_init();
 #else
+    // arp/mac映射
     lwip_etharp_add_static_entry(default_dest_ip, dest_mac);
 #endif
 
 #ifdef CONFIG_BBM_RX
+    //RX设备online处理线程
+    //BBM处理设备上线下线.
     thread_fork("bbm_rx_online_task", 16, 2048, 2048
                 , &bbm_rx_online_task_pid, bbm_rx_online_task, NULL);
-
 #else
+    //TX设备online处理线程
     thread_fork("bbm_tx_online_task", 16, 2048, 2048
                 , &bbm_tx_online_task_pid, bbm_tx_online_task, NULL);
 #endif
 
+    //添加定时器,打印内存及网络信息
     net_state_timer = sys_timer_add_to_task("app_core", NULL, net_state_timer_func, 5000);
 
-    //TX创建CTP_SERVER,RX初始化CTP_CLIENT
+    //TX创建CTP_SERVER
+    //RX初始化CTP_CLIENT
     ctp_init();
-
 }
 
 #ifdef CONFIG_WIFI_ENABLE
@@ -610,6 +623,7 @@ int wireless_net_init(void)
 late_initcall(wireless_net_init);
 #endif
 
+//TODO
 const char *get_root_path(void)
 {
     return CONFIG_ROOT_PATH;

@@ -57,6 +57,8 @@ void lvgl_key_value_remap(u8 key_value, uint32_t *key_remap)
         *key_remap = LV_KEY_ENTER;
         break;
     }
+    //隐藏顶层提示框
+    gui_hide_sys_prompt();
 }
 #endif
 

@@ -19,15 +19,11 @@
 
 #define CONFIG_VIDEO_DEC_ENABLE             1
 
-#define AP_TEST_MODE       0
-#define STA_TEST_MODE      1
-#define MONITOR_TEST_MODE  2
-
-#define EXT_WIFI_TEST_MODE STA_TEST_MODE
-#define EXT_WIFI_AP_SSID   "AC79_EXT_WIFI_"    //配置外挂wifi的AP模式的SSID前缀
-#define EXT_WIFI_AP_PWD    "12345678"          //配置外挂wifi的AP模式的密码
-#define EXT_WIFI_STA_SSID  "zpc23"              //配置外挂wifi的STA模式的SSID前缀
-#define EXT_WIFI_STA_PWD   "abc12345"          //配置外挂wifi的STA模式的密码
+//PA使能
+//注意:wifi_conf.c的WIFI_PA_ENABLE变量要手动置1
+//在board_develop.c中设置对应引脚及增益配置.
+//开发板使用PA时不使用MIPI摄像头(video0)
+#define BBM_WIFI_PA_ENABLE          1
 
 //*********************************************************************************//
 //                                 资源分配相关配置                                //

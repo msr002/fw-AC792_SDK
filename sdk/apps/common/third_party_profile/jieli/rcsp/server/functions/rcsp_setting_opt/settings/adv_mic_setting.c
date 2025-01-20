@@ -5,7 +5,6 @@
 #pragma code_seg(".adv_mic_setting.text")
 #endif
 #include "app_config.h"
-#include "cpu.h"
 #include "syscfg_id.h"
 #include "ble_rcsp_server.h"
 

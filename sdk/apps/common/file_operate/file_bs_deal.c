@@ -1,23 +1,8 @@
-/*
- *********************************************************************************************************
- *                                                AC51
- *                                      fs browser select
- *                                             CODE
- *
- *                          (c) Copyright 2015-2016, ZHUHAI JIELI
- *                                           All Rights Reserved
- *
- * File : *
- * By   : jamin.li
- * DATE : 2015-10-15 build this file
- *********************************************************************************************************
- */
-
 #include "file_bs_deal.h"
 #include "uart.h"
-/* #include "dev_manager.h" *////RCSP TODO
+#include "dev_manager.h"
 
-#define FILE_BS_OPT_DBG
+/* #define FILE_BS_OPT_DBG */
 #ifdef  FILE_BS_OPT_DBG
 
 #define file_bs_puts     puts
@@ -69,7 +54,6 @@ static int find_byte_pos(u8 *buf, u16 buf_len, u8 key, u8 find_type)
     }
     return -1;
 }
-
 
 /*
  *********************************************************************************************************
@@ -231,9 +215,7 @@ void file_comm_change_display_name(char *tpath, LONG_FILE_NAME *disp_file_name, 
         }
 
         //printf_buf(disp_file_name->lfn, 32);
-
     }
-
 
     //取文件夹名字显示
     if (disp_dir_name != NULL) {
@@ -264,6 +246,7 @@ void file_comm_change_display_name(char *tpath, LONG_FILE_NAME *disp_file_name, 
         //printf_buf(disp_dir_name->lfn, 32);
     }
 }
+
 /*
  *********************************************************************************************************
  *
@@ -277,12 +260,11 @@ void file_comm_change_display_name(char *tpath, LONG_FILE_NAME *disp_file_name, 
  *********************************************************************************************************
  */
 //返回根目录dir总数
-u32 file_bs_open_handle(FILE_BS_DEAL *fil_bs, u8 *ext_name)
+u32 file_bs_open_handle(FILE_BS_DEAL *fil_bs, const char *ext_name)
 {
     u32 total_dir;
 
     if (fil_bs == NULL) {
-        puts("*open hdl is null\n");
         return 0;
     }
 
@@ -293,13 +275,13 @@ u32 file_bs_open_handle(FILE_BS_DEAL *fil_bs, u8 *ext_name)
         ext_name = "MP3";//"WAVWMAMP3FLA";
     }
 
-    printf("fil_bs->dev = %x\n", fil_bs->dev);
-    printf("%s, %s, %s, %d\n]", dev_manager_get_root_path(fil_bs->dev), dev_manager_get_logo(fil_bs->dev), __FUNCTION__, __LINE__);
-    fset_ext_type(dev_manager_get_root_path(fil_bs->dev), ext_name);///RCSP TODO
+    file_bs_printf("fil_bs->dev = %p\n", fil_bs->dev);
+    file_bs_printf("%s, %s, %s, %d\n", dev_manager_get_root_path(fil_bs->dev), dev_manager_get_logo(fil_bs->dev), __FUNCTION__, __LINE__);
+    fset_ext_type(dev_manager_get_root_path(fil_bs->dev), (void *)ext_name);///RCSP TODO
     printf("%s, %d\n]", __FUNCTION__, __LINE__);
 
     total_dir = fopen_dir_info(dev_manager_get_root_path(fil_bs->dev), &fil_bs->file, 0);
-    printf("%s, %d\n]", __FUNCTION__, __LINE__);
+    file_bs_printf("%s, %d\n]", __FUNCTION__, __LINE__);
     if (fil_bs->file == 0) {
         file_bs_puts("open bs fail\n");
         return 0;

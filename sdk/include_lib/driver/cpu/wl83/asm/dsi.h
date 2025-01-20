@@ -133,12 +133,10 @@ enum PACKET_TYPE {
 struct mipi_dev {
     struct basic_info info;
     struct pll4_info pll4;
-    struct te_mode_ctrl te_mode;
     struct dsi_lane_mapping lane_mapping;
     struct dsi_video_timing video_timing;
     struct dsi_timing timing;
 
-    u8 dsi_open_flag;
     unsigned int reset_gpio;
     void (*lcd_reset)(unsigned int reset_gpio);
     void (*lcd_reset_release)(unsigned int reset_gpio);

@@ -20,7 +20,6 @@
 #include "classic/tws_api.h"
 #include "rcsp_task.h"
 #include "rcsp_config.h"
-#include "cpu.h"
 #include "syscfg_id.h"
 #include "rcsp_device_status.h"
 #include "JL_rcsp_protocol.h"

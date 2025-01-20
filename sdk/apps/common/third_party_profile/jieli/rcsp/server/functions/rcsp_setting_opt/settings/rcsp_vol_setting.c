@@ -6,7 +6,6 @@
 #endif
 #include "rcsp_config.h"
 
-#include "cpu.h"
 #include "syscfg_id.h"
 
 #include "rcsp_setting_sync.h"

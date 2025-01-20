@@ -6,7 +6,6 @@
 #endif
 #include "app_config.h"
 #include "user_cfg.h"
-#include "cpu.h"
 #include "syscfg_id.h"
 #include "ble_rcsp_server.h"
 

@@ -12,7 +12,6 @@
 #if (RCSP_MODE && RCSP_REVERBERATION_SETTING && TCFG_MIC_EFFECT_ENABLE && RCSP_ADV_EQ_SET_ENABLE)
 
 #include "syscfg_id.h"
-#include "cpu.h"
 #include "rcsp_setting_opt.h"
 #include "ble_rcsp_server.h"
 #include "mic_effect.h"

@@ -261,9 +261,27 @@ static void rcsp_common_event_deal(int msg, int argc, int *argv)
             ret = app_task_switch_to(APP_LINEIN_TASK, NULL_VALUE);
 #endif
 #endif
+            break;
+        /* case FMTX_FUNCTION_MASK: */
+        /*     break; */
+
+        case SPDIF_FUNCTION:
+#if TCFG_APP_SPDIF_EN
+#if (RCSP_MODE == RCSP_MODE_SOUNDBOX)
+            ret = app_task_switch_to(APP_MODE_SPDIF, NULL_VALUE);
+#else
+            ret = app_task_switch_to(APP_SPDIF_TASK, NULL_VALUE);
+#endif
 #endif
             break;
-        case FMTX_FUNCTION_MASK:
+        case PC_FUNCTION:
+#if 0//TCFG_APP_PC_EN
+#if (RCSP_MODE == RCSP_MODE_SOUNDBOX)
+            ret = app_task_switch_to(APP_MODE_PC, NULL_VALUE);
+#else
+            ret = app_task_switch_to(APP_PC_TASK, NULL_VALUE);
+#endif
+#endif
             break;
         }
 #if RCSP_DEVICE_STATUS_ENABLE

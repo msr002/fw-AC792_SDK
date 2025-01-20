@@ -12,6 +12,9 @@
 //*****************************************//
 //                定义屏尺寸               //
 //*****************************************//
+// 多屏驱支持(目前仅支持具有相同分辨率的屏, 适用于一个case有多款屏混用的情况，比如因为缺货)
+#if TCFG_LCD_SUPPORT_MULTI_DRIVER_EN == 0
+
 //MCU LCD
 #if TCFG_LCD_MCU_ILI9488_320X480
 #define LCD_W 320
@@ -65,31 +68,27 @@
 #endif
 
 //RGB_LCD
-#if TCFG_LCD_RGB_480x272
+#if TCFG_LCD_RGB_XXXX_480x272
 #define LCD_W 480
 #define LCD_H 272
 #endif
 
-#if TCFG_LCD_RGB_720x1280
+#if TCFG_LCD_RGB_SSD2828_720x1280
 #define LCD_W 720
 #define LCD_H 1280
 #endif
 
-#if TCFG_LCD_RGB_1280x800
+#if TCFG_LCD_RGB_XXXX_1280x800
 #define LCD_W 1280
 #define LCD_H 800
 #endif
 
-#if TCFG_LCD_RGB_480x800
-/*no rotate or roate180*/
+#if TCFG_LCD_RGB_ST7701S_480x800
 #define LCD_W 480
 #define LCD_H 800
-/*rotate90/270*/
-// #define LCD_W 800
-// #define LCD_H 480
 #endif
 
-#if TCFG_LCD_RGB_800x480
+#if TCFG_LCD_RGB_HX8264_800x480
 #define LCD_W 800
 #define LCD_H 480
 #endif
@@ -109,6 +108,11 @@
 #define LCD_W 142
 #define LCD_H 428
 #endif
+
+#else
+#define LCD_W 480
+#define LCD_H 800
+#endif // TCFG_LCD_SUPPORT_MULTI_DRIVER_EN
 
 //*****************************************//
 //              定义数据类型长度           //

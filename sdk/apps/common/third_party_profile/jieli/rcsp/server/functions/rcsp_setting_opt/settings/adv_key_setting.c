@@ -5,7 +5,6 @@
 #pragma code_seg(".adv_key_setting.text")
 #endif
 #include "app_config.h"
-#include "cpu.h"
 #include "syscfg_id.h"
 /* #include "key_event_deal.h" */
 #include "ble_rcsp_server.h"

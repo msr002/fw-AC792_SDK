@@ -90,7 +90,8 @@ static err_t low_level_output(struct netif *netif, struct pbuf *p)
         memcpy(pos, q->payload, q->len);
         pos += (int)q->len;
     }
-    wifi_send_data(p->tot_len, WIFI_TXRATE_1M);
+
+    wifi_send_data(p->tot_len, WIFI_TXRATE_11M);
 
 #if ETH_PAD_SIZE
     pbuf_header(p, ETH_PAD_SIZE); /* reclaim the padding word */
@@ -188,16 +189,76 @@ static void ethernetif_input(void *param, void *data, int len)
     }
 }
 
+#if 0
+static const u8 pkg_head_fill_magic[] = {
+    ///*dst*/ 0x88, 0x88, 0x88, 0x88, 0x88, 0x88,/*src*/ 0x88, 0x88, 0x88, 0x88, 0x88, 0x88,/*BSSID*/ 0x88, 0x88, 0x88, 0x88, 0x88, 0x88, /*Seq,Frag num*/0x88, 0x88,
+    /*dst*/ 0x88, 0x88, 0x88, 0x88, 0x88, 0x88,/*src*/ 0x88, 0x88, 0x88, 0x88, 0x88, 0x88,/*BSSID*/ 0x88, 0x88, 0x88, 0x88, 0x88, 0x88,
+};
+#else
+static u8 pkg_head_fill_magic[6];
+#endif
+
+void wifi_raw_set_mac(const u8 mac[])
+{
+    memcpy(pkg_head_fill_magic, mac, 6);
+}
+
+void wifi_raw_get_mac(u8 mac[])
+{
+    memcpy(mac, pkg_head_fill_magic, 6);
+}
+
+typedef	struct	GNU_PACKED {
+    /* Word	0 */
+    u32		WirelessCliID: 8;
+    u32		KeyIndex: 2;
+    u32		BSSID: 3;
+    u32		UDF: 3;
+    u32		MPDUtotalByteCount: 12;
+    u32		TID: 4;
+    /* Word	1 */
+    u32		FRAG: 4;
+    u32		SEQUENCE: 12;
+    u32		MCS: 7;
+    u32		BW: 1;
+    u32		ShortGI: 1;
+    u32		STBC: 2;
+    u32		rsv: 3;
+    u32		PHYMODE: 2;             /* 1: this RX frame is unicast to me */
+    /*Word2 */
+    u32		RSSI0: 8;
+    u32		RSSI1: 8;
+    u32		RSSI2: 8;
+    u32		rsv1: 8;
+    /*Word3 */
+    u32		SNR0: 8;
+    u32		SNR1: 8;
+    u32		FOFFSET: 8;
+    u32		rsv2: 8;
+    /*UINT32		rsv2:16;*/
+} RXWI_STRUC, *PRXWI_STRUC;
+
+static char rssi0 = -99;
+/* static char rssi1; */
+/* static char rssi2; */
+
+//获取目标mac的rssi
+char wifi_raw_rssi_get(void)
+{
+    return rssi0;
+}
+
 static void wifi_rx_cb(void *rxwi, struct ieee80211_frame *wh, void *data, u32 len, struct netif *netif)
 {
-    static const u8 pkg_head_fill_magic[] = {
-        /*dst*/ 0x88, 0x88, 0x88, 0x88, 0x88, 0x88,/*src*/ 0x88, 0x88, 0x88, 0x88, 0x88, 0x88,/*BSSID*/ 0x88, 0x88, 0x88, 0x88, 0x88, 0x88, /*Seq,Frag num*/0x88, 0x88,
-    };
-
     if (len < 25 || memcmp(&((u8 *)data)[28], pkg_head_fill_magic, sizeof(pkg_head_fill_magic))) {
+        rssi0 = -99;
         return;
     }
 
+    PRXWI_STRUC	pRxWI = (PRXWI_STRUC)rxwi;
+    rssi0 = pRxWI->RSSI0;
+    /* rssi1 = pRxWI->RSSI1; */
+    /* rssi2 = pRxWI->RSSI2; */
 
     u8 *payload = &((u8 *)data)[48];
     u32 payload_len = len - 24;
@@ -220,7 +281,7 @@ static void wifi_rx_cb(void *rxwi, struct ieee80211_frame *wh, void *data, u32 l
  *         ERR_MEM if private data couldn't be allocated
  *         any other err_t on error
  */
-err_t wireless_ethernetif_init(struct netif *netif)
+err_t wireless_raw_ethernetif_init(struct netif *netif)
 {
 #if LWIP_NETIF_HOSTNAME
     /* Initialize interface hostname */
@@ -256,8 +317,8 @@ err_t wireless_ethernetif_init(struct netif *netif)
     wifi_set_channel(1);
 
     //配置底层重传次数
-    wifi_set_long_retry(0);
-    wifi_set_short_retry(0);
+    wifi_set_long_retry(1);
+    wifi_set_short_retry(1);
 
     wifi_set_frame_cb(wifi_rx_cb, netif); //注册接收802.11数据帧回调
 

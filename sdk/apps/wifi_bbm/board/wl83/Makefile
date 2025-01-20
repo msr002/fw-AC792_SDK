@@ -220,6 +220,7 @@ INCLUDES := \
 c_SRC_FILES := \
 	../../../../apps/common/asr/jlkws/jlkws.c \
 	../../../../apps/common/audio_music/audio_config.c \
+	../../../../apps/common/audio_music/cal_pcm_dB.c \
 	../../../../apps/common/audio_music/usb_audio_api.c \
 	../../../../apps/common/camera/GC1084_DVP/GC1084_DVP.c \
 	../../../../apps/common/camera/GC1084_DVP/GC1084_DVP_ae.c \
@@ -303,24 +304,24 @@ c_SRC_FILES := \
 	../../../../apps/common/lcd/lcd_driver/lcd_driver.c \
 	../../../../apps/common/lcd/lcd_driver/lcd_scenes.c \
 	../../../../apps/common/lcd/lcd_driver/lcd_tools.c \
-	../../../../apps/common/lcd/lcd_driver/mcu_lcd/lcd_320x480_ili9481.c \
-	../../../../apps/common/lcd/lcd_driver/mcu_lcd/lcd_320x480_ili9488.c \
-	../../../../apps/common/lcd/lcd_driver/mipi_lcd/lcd_1024x600_jd9165ba.c \
-	../../../../apps/common/lcd/lcd_driver/mipi_lcd/lcd_480x1280_fl7707.c \
-	../../../../apps/common/lcd/lcd_driver/mipi_lcd/lcd_480x480_st77922.c \
-	../../../../apps/common/lcd/lcd_driver/mipi_lcd/lcd_480x640_st7701s_rotate_90.c \
-	../../../../apps/common/lcd/lcd_driver/mipi_lcd/lcd_480x800_st7701s.c \
-	../../../../apps/common/lcd/lcd_driver/mipi_lcd/lcd_480x800_st7701s_rotate_90.c \
-	../../../../apps/common/lcd/lcd_driver/mipi_lcd/lcd_720x720_st7703.c \
-	../../../../apps/common/lcd/lcd_driver/mipi_lcd/lcd_800x1280_ili9881c.c \
-	../../../../apps/common/lcd/lcd_driver/rgb_lcd/lcd_1280x800.c \
-	../../../../apps/common/lcd/lcd_driver/rgb_lcd/lcd_480x272.c \
-	../../../../apps/common/lcd/lcd_driver/rgb_lcd/lcd_480x800.c \
-	../../../../apps/common/lcd/lcd_driver/rgb_lcd/lcd_720x1280.c \
-	../../../../apps/common/lcd/lcd_driver/rgb_lcd/lcd_800x480.c \
-	../../../../apps/common/lcd/lcd_driver/spi_lcd/lcd_142x428_nv3006a.c \
-	../../../../apps/common/lcd/lcd_driver/spi_lcd/lcd_172x320_gc9307.c \
-	../../../../apps/common/lcd/lcd_driver/spi_lcd/lcd_240x296_gc9307.c \
+	../../../../apps/common/lcd/lcd_driver/mcu_lcd/lcd_mcu_ili9481_320x480.c \
+	../../../../apps/common/lcd/lcd_driver/mcu_lcd/lcd_mcu_ili9488_320x480.c \
+	../../../../apps/common/lcd/lcd_driver/mipi_lcd/lcd_mipi_fl7707_480x1280.c \
+	../../../../apps/common/lcd/lcd_driver/mipi_lcd/lcd_mipi_ili9881c_800x1280.c \
+	../../../../apps/common/lcd/lcd_driver/mipi_lcd/lcd_mipi_jd9165ba_1024x600.c \
+	../../../../apps/common/lcd/lcd_driver/mipi_lcd/lcd_mipi_st7701s_480x640_rotate_90.c \
+	../../../../apps/common/lcd/lcd_driver/mipi_lcd/lcd_mipi_st7701s_480x800.c \
+	../../../../apps/common/lcd/lcd_driver/mipi_lcd/lcd_mipi_st7701s_480x800_rotate_90.c \
+	../../../../apps/common/lcd/lcd_driver/mipi_lcd/lcd_mipi_st7703_720x720.c \
+	../../../../apps/common/lcd/lcd_driver/mipi_lcd/lcd_mipi_st77922_480x480.c \
+	../../../../apps/common/lcd/lcd_driver/rgb_lcd/lcd_rgb_hx8264_800x480.c \
+	../../../../apps/common/lcd/lcd_driver/rgb_lcd/lcd_rgb_ssd2828_720x1280.c \
+	../../../../apps/common/lcd/lcd_driver/rgb_lcd/lcd_rgb_st7701s_480x800.c \
+	../../../../apps/common/lcd/lcd_driver/rgb_lcd/lcd_rgb_xxxx_1280x800.c \
+	../../../../apps/common/lcd/lcd_driver/rgb_lcd/lcd_rgb_xxxx_480x272.c \
+	../../../../apps/common/lcd/lcd_driver/spi_lcd/lcd_spi_gc9307_172x320.c \
+	../../../../apps/common/lcd/lcd_driver/spi_lcd/lcd_spi_gc9307_240x296.c \
+	../../../../apps/common/lcd/lcd_driver/spi_lcd/lcd_spi_nv3006a_142x428.c \
 	../../../../apps/common/lcd/touch_driver/cst3240.c \
 	../../../../apps/common/lcd/touch_driver/cst816d.c \
 	../../../../apps/common/lcd/touch_driver/ft6236.c \
@@ -958,15 +959,13 @@ LFLAGS := \
 	../../../../include_lib/newlib/pi32v2-lib/libm.a \
 	../../../../include_lib/newlib/pi32v2-lib/libc.a \
 	../../../../include_lib/newlib/pi32v2-lib/libcompiler_rt.a \
-	--start-group  \
+	../../../../cpu/wl83/liba/iperf.a \
 	../../../../cpu/wl83/liba/system.a \
 	../../../../cpu/wl83/liba/fs.a \
 	../../../../cpu/wl83/liba/cfg_tool.a \
 	../../../../cpu/wl83/liba/event.a \
-	../../../../cpu/wl83/liba/cpu.a \
 	../../../../cpu/wl83/liba/json.a \
 	../../../../cpu/wl83/liba/update.a \
-	../../../../cpu/wl83/liba/common_lib.a \
 	../../../../cpu/wl83/liba/video_rec_server.a \
 	../../../../cpu/wl83/liba/video_dec_server.a \
 	../../../../cpu/wl83/liba/audio_server.a \
@@ -977,25 +976,28 @@ LFLAGS := \
 	../../../../cpu/wl83/liba/lib_usb_syn.a \
 	../../../../cpu/wl83/liba/video_engine.a \
 	../../../../cpu/wl83/liba/wl_rf_common.a \
-	../../../../cpu/wl83/liba/hsm.a \
 	../../../../cpu/wl83/liba/http_cli.a \
 	../../../../cpu/wl83/liba/https_cli.a \
 	../../../../cpu/wl83/liba/http_server.a \
 	../../../../cpu/wl83/liba/json.a  \
-	../../../../cpu/wl83/liba/iperf.a \
-	../../../../cpu/wl83/liba/libmbedtls_3_4_0.a \
 	../../../../cpu/wl83/liba/libcrypto_mbedtls.a \
 	../../../../cpu/wl83/liba/lwip_2_2_0.a \
 	../../../../cpu/wl83/liba/wl_wifi.a \
 	../../../../cpu/wl83/liba/profile.a \
 	../../../../cpu/wl83/liba/libjlsp_kws_far_keyword.a \
 	../../../../cpu/wl83/liba/libkwscommon.a \
+	--start-group  \
+	../../../../cpu/wl83/liba/libmbedtls_3_4_0.a \
 	../../../../cpu/wl83/liba/wpasupplicant.a \
+	--end-group \
 	../../../../cpu/wl83/liba/stream_media_server.a \
 	../../../../cpu/wl83/liba/ftpserver_new.a \
 	../../../../cpu/wl83/liba/net_server.a \
 	../../../../cpu/wl83/liba/libqrcode.a \
-	--end-group \
+	../../../../cpu/wl83/liba/common_lib.a \
+	../../../../cpu/wl83/liba/libmbedtls_3_4_0.a  \
+	../../../../cpu/wl83/liba/hsm.a \
+	../../../../cpu/wl83/liba/cpu.a \
 	../../../../cpu/wl83/liba/lvgl_v8_extend.a \
 	-T../../../../cpu/wl83/sdk.ld \
 	-M=../../../../cpu/wl83/tools/sdk.map \

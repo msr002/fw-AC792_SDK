@@ -97,7 +97,13 @@ static const func_set set_tab[FUNCTION_MASK_MAX] = {
 #endif
 #if (TCFG_APP_FM_EN)
     [FM_FUNCTION_MASK] = rcsp_fm_func_set,
-    [FMTX_FUNCTION_MASK] = NULL,
+    /* [FMTX_FUNCTION_MASK] = NULL, */
+#endif
+#if (TCFG_APP_SPDIF_EN)
+    [SPDIF_FUNCTION_MASK] = rcsp_spdif_func_set,
+#endif
+#if (TCFG_APP_PC_EN && TCFG_USB_SLAVE_AUDIO_SPK_ENABLE)
+    [PC_FUNCTION_MASK] = rcsp_pc_func_set,
 #endif
 };
 
@@ -114,7 +120,13 @@ static const func_get get_tab[FUNCTION_MASK_MAX] = {
 #endif
 #if (TCFG_APP_FM_EN)
     [FM_FUNCTION_MASK] = rcsp_fm_func_get,
-    [FMTX_FUNCTION_MASK] = NULL,
+    /* [FMTX_FUNCTION_MASK] = NULL, */
+#endif
+#if (TCFG_APP_SPDIF_EN)
+    [SPDIF_FUNCTION_MASK] = rcsp_spdif_func_get,
+#endif
+#if (TCFG_APP_PC_EN && TCFG_USB_SLAVE_AUDIO_SPK_ENABLE)
+    [PC_FUNCTION_MASK] = rcsp_pc_func_get,
 #endif
 };
 
@@ -982,6 +994,12 @@ u8 rcsp_get_cur_mode(u8 app_mode)
     case APP_FM_TASK:
         current_mode = FM_FUNCTION;
         break;
+    case APP_SPDIF_TASK:
+        current_mode = SPDIF_FUNCTION_MASK;
+        break;
+    case APP_PC_TASK:
+        current_mode = PC_FUNCTION_MASK;
+        break;
     case APP_BT_TASK:
     default:
         current_mode = BT_FUNCTION;
@@ -1043,9 +1061,9 @@ void rcsp_device_status_setting_stop(void)
         rcsp_fm_func_stop();
 #endif
         break;
-    case FMTX_FUNCTION:
-        printf("FMTX_FUNCTION STOP\n");
-        break;
+        /* case FMTX_FUNCTION: */
+        /*     printf("FMTX_FUNCTION STOP\n"); */
+        /*     break; */
     }
     // 调用各种设置的release函数
     rcsp_opt_release();

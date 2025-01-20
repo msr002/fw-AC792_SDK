@@ -63,7 +63,9 @@ static int fb_out_dev_open(const char *name, struct device **device, void *arg)
             }
         }
         if (err == 0) {
-            fb_lcd_device_open(NULL); /* 打开lcd设备 */
+            if (!fb_lcd_device_open(NULL)) {
+                return -1;
+            }
             _open_fb++;
             fb_combine_prepare(info, _open_fb); /* fb 合成模块准备工作 */
             goto __exit;
@@ -78,7 +80,9 @@ static int fb_out_dev_open(const char *name, struct device **device, void *arg)
         if (err == 3) {
             out_info.out_addr = p->buf_addr[2];
         }
-        fb_lcd_device_open(&out_info); /* 打开lcd设备 */
+        if (!fb_lcd_device_open(&out_info)) {
+            return -1;
+        }
 
         _open_fb++;
 

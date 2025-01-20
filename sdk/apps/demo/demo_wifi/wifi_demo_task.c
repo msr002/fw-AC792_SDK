@@ -383,6 +383,13 @@ static int wifi_event_callback(void *network_ctx, enum WIFI_EVENT event)
             ret = 1;
         }
 #endif
+
+#if 0
+        u8 txop_limit, cwmin, cwmax, aifsn;
+        wifi_edca_parm_get(0, &txop_limit, &cwmin, &cwmax, &aifsn);
+        printf("txop_limit: %d, cwmin: %d, cwmax: %d, aifsn: %d\n", txop_limit, cwmin, cwmax, aifsn);
+        wifi_edca_parm_set(0, 30, 4, 10, 2);
+#endif
         break;
 
     case WIFI_EVENT_MP_TEST_START:

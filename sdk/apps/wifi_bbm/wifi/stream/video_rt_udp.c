@@ -20,8 +20,6 @@
 //todo
 //包太小会影响到性能 两发一收分屏显示时
 #define UDP_SEND_BUF_SIZE  (20*1460)
-//#define CONFIG_UDP_STREAM_DROP_ENABLE
-
 
 #define MAX_PAYLOAD (1460-sizeof(struct frm_head))//最后4字节属于h264流的
 
@@ -206,16 +204,6 @@ int net_rt_send_frame(struct rt_stream_info *info, char *buffer, size_t len, u8 
         os_mutex_post(&info->mutex);
         return len;
     }
-
-#ifdef CONFIG_UDP_STREAM_DROP_ENABLE
-    static u32 drop_cnt = 0;
-
-    if (drop_cnt++ % 4 == 0) {
-        putchar('D');
-        os_mutex_post(&info->mutex);
-        return len;
-    }
-#endif
 
 
     frame_head.offset = 0;

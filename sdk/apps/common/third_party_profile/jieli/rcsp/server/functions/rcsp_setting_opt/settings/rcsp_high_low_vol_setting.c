@@ -5,7 +5,6 @@
 #pragma code_seg(".rcsp_high_low_vol_setting.text")
 #endif
 #include "app_config.h"
-#include "cpu.h"
 #include "syscfg_id.h"
 
 #include "rcsp_setting_sync.h"

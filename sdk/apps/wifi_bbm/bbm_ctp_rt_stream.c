@@ -6,6 +6,8 @@
 #include "rt_stream_pkg.h"
 #include "video_ioctl.h"
 
+#define RT_AUDIO_SEND_ENABLE       1
+
 #define CTP_RT_RECV_PORT            2224        //实时流接收数据端口
 #define CTP_RT_SEND_PORT            9981        //图传(音频)发送数据端口
 #define CTP_RT_RECV_BUF_SIZE        100 * 1024  //实时流socket接收缓存大小
@@ -129,6 +131,7 @@ static int parse_recv_packet(u8 *recv_buf, int recv_len, struct parse_info *pars
 
             //如果当前的seq小于旧的seq,说明是旧的数据包,跳过不处理
             if (head_info->seq < parse_info->old_frame_seq) {
+                printf("old frame \n");
                 goto continue_deal;
             }
             //如果当前seq大于旧的seq,认为是新的数据包,组包重新初始
@@ -294,6 +297,9 @@ static void rt_stream_dev_task(void *priv)
     int res;
     int msg[8];
     int ret;
+    int time;
+    int fps = 0;
+    int abr = 0;
 
     parse_info.data_buf = malloc(CTP_RT_PARSE_BUF_SIZE);
     if (!parse_info.data_buf) {
@@ -326,11 +332,25 @@ static void rt_stream_dev_task(void *priv)
                     //8字节头部
                     u8 *jpeg_buf = parse_info.data_buf + 8;
                     u32 jpeg_len = parse_info.data_len - 8;
+                    if ((timer_get_ms() - time) >= 1000) {
+                        //调试信息
+                        /* rt_stream_show_num(abr / 1024, fps); */
+                        time = timer_get_ms();
+                        fps = 0;
+                        abr = 0;
+                    }
+                    fps++;
+                    abr += jpeg_len;
                     bbm_pipe_disp_one_frame(rt_dev->pipe_core, jpeg_buf, jpeg_len);
+                    /* printf("v:%d\n",jpeg_len); */
                 } else if (parse_info.packet_type == AUDIO_TYPE_PACKET) {
+                    /* int lev = calculate_db_level(parse_info.data_buf,parse_info.data_len); */
+                    /* printf("lv:%d \n",lev); */
                     bbm_audio_dec_one_frame(parse_info.data_buf, parse_info.data_len);
+                    /* printf("a:%d\n",parse_info.data_len); */
                 } else {
                     //continue parse
+                    printf("c\n");
                 }
                 break;
             case Q_USER:
@@ -481,10 +501,12 @@ static int bbm_rt_dev_init(u32 ip_addr, int disp_mode)
     list_add_tail(&rt_dev->recv_entry, &recv_dev_list_head);
     os_mutex_post(&recv_mutex);
 
+#if RT_AUDIO_SEND_ENABLE
     //send list
     os_mutex_pend(&send_mutex, 0);
     list_add_tail(&rt_dev->send_entry, &send_dev_list_head);
     os_mutex_post(&send_mutex);
+#endif
 
     return 0;
 
@@ -533,6 +555,7 @@ static int bbm_rt_dev_exit(u32 ip_addr)
     }
 
 
+#if RT_AUDIO_SEND_ENABLE
     os_mutex_pend(&send_mutex, 0);
     list_for_each_entry_safe(rt_dev, n, &send_dev_list_head, send_entry) {
         if (rt_dev->ip_addr == ip_addr) {
@@ -541,6 +564,7 @@ static int bbm_rt_dev_exit(u32 ip_addr)
         }
     }
     os_mutex_post(&send_mutex);
+#endif
 
 
     free(rt_dev);
@@ -552,7 +576,7 @@ int bbm_ctp_rt_start(void *ctp_cli_hdl, int disp_mode)
 {
     int ret;
     const char topic_3[] = {"OPEN_RT_STREAM"};
-    const char content_3[] = {"{\"op\":\"PUT\",\"param\":{\"abr\":\"1500\",\"w\":\"640\",\"fps\":\"20\",\"h\":\"480\",\"id\":\"0\",\"sub_id\":\"0\"}}"};
+    const char content_3[] = {"{\"op\":\"PUT\",\"param\":{\"abr\":\"1000\",\"w\":\"640\",\"fps\":\"20\",\"h\":\"480\",\"id\":\"1\",\"sub_id\":\"0\"}}"};
 
     struct sockaddr_in *sockaddr = ctp_cli_get_hdl_addr(ctp_cli_hdl);
     u32 ip_addr = sockaddr->sin_addr.s_addr;
@@ -581,19 +605,17 @@ int bbm_ctp_rt_stop(void *ctp_cli_hdl)
 {
     int ret;
     const char topic_3[] = {"CLOSE_RT_STREAM"};
-    const char content_3[] = {"{\"op\":\"PUT\",\"param\":{\"id\":\"0\",\"sub_id\":\"0\"}}"};
+    const char content_3[] = {"{\"op\":\"PUT\",\"param\":{\"id\":\"1\",\"sub_id\":\"0\"}}"};
     struct sockaddr_in *sockaddr = ctp_cli_get_hdl_addr(ctp_cli_hdl);
     u32 ip_addr =  sockaddr->sin_addr.s_addr;
+
+    bbm_rt_dev_exit(ip_addr);
 
     //发送停止实时流命令
     ret = ctp_cli_send(ctp_cli_hdl, topic_3, content_3);
     if (ret) {
         printf("ctp_cli_send :%s err\n", topic_3);
-        return -1;
     }
-
-    bbm_rt_dev_exit(ip_addr);
-
 
     return 0;
 }
@@ -611,11 +633,13 @@ int bbm_rt_stream_init(void)
     if (ret) {
         return -1;
     }
+#if RT_AUDIO_SEND_ENABLE
     ret = bbm_rt_send_init();
     if (ret) {
         bbm_rt_recv_exit();
         return -1;
     }
+#endif
     rt_stream_init = 1;
 
 
@@ -631,7 +655,10 @@ int bbm_rt_stream_exit(void)
     }
 
     ret = bbm_rt_recv_exit();
+
+#if RT_AUDIO_SEND_ENABLE
     ret = bbm_rt_send_exit();
+#endif
 
     rt_stream_init = 0;
 
@@ -735,7 +762,7 @@ int bbm_ctp_rec_start(void *ctp_cli_hdl)
 {
     int ret;
     const char topic_3[] = {"OPEN_REC"};
-    const char content_3[] = {"{\"op\":\"PUT\",\"param\":{\"w\":\"640\",\"fps\":\"25\",\"h\":\"480\",\"id\":\"0\",\"sub_id\":\"1\",\"abr\":\"4000\",\"cycle_time\":\"1\"}}"};
+    const char content_3[] = {"{\"op\":\"PUT\",\"param\":{\"w\":\"640\",\"fps\":\"25\",\"h\":\"480\",\"id\":\"1\",\"sub_id\":\"1\",\"abr\":\"2000\",\"cycle_time\":\"1\"}}"};
 
     ret = ctp_cli_send(ctp_cli_hdl, topic_3, content_3);
     if (ret) {
@@ -750,7 +777,7 @@ int bbm_ctp_rec_stop(void *ctp_cli_hdl)
 {
     int ret;
     const char topic_3[] = {"CLOSE_REC"};
-    const char content_3[] = {"{\"op\":\"PUT\",\"param\":{\"id\":\"0\",\"sub_id\":\"1\"}}"};
+    const char content_3[] = {"{\"op\":\"PUT\",\"param\":{\"id\":\"1\",\"sub_id\":\"1\"}}"};
 
     ret = ctp_cli_send(ctp_cli_hdl, topic_3, content_3);
     if (ret) {
