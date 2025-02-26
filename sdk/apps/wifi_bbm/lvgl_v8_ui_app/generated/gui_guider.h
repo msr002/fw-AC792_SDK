@@ -169,6 +169,19 @@ typedef struct {
     lv_obj_t *dir_select_imgbtn_1;
     lv_obj_t *dir_select_imgbtn_1_label;
 
+    // Screen device_select
+    lv_obj_t *device_select;
+    bool      device_select_del;
+    lv_obj_t *device_select_view_1;
+    lv_obj_t *device_select_img_1;
+    lv_obj_t *device_select_lbl_2;
+    lv_obj_t *device_select_view_2;
+    lv_obj_t *device_select_img_2;
+    lv_obj_t *device_select_lbl_3;
+    lv_obj_t *device_select_lbl_1;
+    lv_obj_t *device_select_imgbtn_1;
+    lv_obj_t *device_select_imgbtn_1_label;
+
     lv_group_t *default_group;
 } lv_ui;
 
@@ -219,6 +232,9 @@ void unload_scr_sys_prompt(lv_ui *ui);
 // Screen dir_select
 lv_obj_t *setup_scr_dir_select(lv_ui *ui);
 void unload_scr_dir_select(lv_ui *ui);
+// Screen device_select
+lv_obj_t *setup_scr_device_select(lv_ui *ui);
+void unload_scr_device_select(lv_ui *ui);
 #ifdef __cplusplus
 }
 #endif

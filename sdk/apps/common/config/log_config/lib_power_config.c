@@ -20,7 +20,7 @@ const bool pdebug_xosc_resume = 0;
 const bool pdebug_pdown_info = 1;
 
 //使能串口调试低功耗，在pdown、soff模式保持串口, pdebug_pubyte_pdown\pdebug_lp_dump_ram\pdebug_putbyte_soff\log_debug
-const u32 pdebug_uart_lowpower = 1;
+const u32 pdebug_uart_lowpower = 0;
 #ifdef TCFG_DEBUG_UART_TX_PIN
 const u32 pdebug_uart_port = TCFG_DEBUG_UART_TX_PIN;
 #else

@@ -28,7 +28,7 @@ EXT_CFLAGS  := # Windows 下不需要 -D__SHELL__
 export PATH:=$(TOOL_DIR);$(PATH)
 
 ## 后处理脚本
-FIXBAT          := ..\..\..\..\tools\utils\fixbat.exe # 用于处理 utf8->gbk 编码问题
+FIXBAT          := ../../../../tools/utils/fixbat.exe # 用于处理 utf8->gbk 编码问题
 POST_SCRIPT     := ../../../../cpu/wl83/tools/download.bat
 RUN_POST_SCRIPT := ..\..\..\..\cpu\wl83\tools\download.bat
 else
@@ -828,6 +828,7 @@ c_SRC_FILES := \
 	../../../../apps/wifi_camera/board/wl83/board_develop.c \
 	../../../../apps/wifi_camera/key_voice.c \
 	../../../../apps/wifi_camera/lvgl_v8_ui_app/style_JL/custom/custom.c \
+	../../../../apps/wifi_camera/lvgl_v8_ui_app/style_JL/custom/multi_language.c \
 	../../../../apps/wifi_camera/lvgl_v8_ui_app/style_JL/custom/sim_database.c \
 	../../../../apps/wifi_camera/lvgl_v8_ui_app/style_JL/custom/ui_action_animation.c \
 	../../../../apps/wifi_camera/lvgl_v8_ui_app/style_JL/custom/ui_action_linedrift.c \
@@ -869,6 +870,8 @@ c_SRC_FILES := \
 	../../../../apps/wifi_camera/lvgl_v8_ui_app/style_JL/generated/gui_scr/setup_scr_video_photo.c \
 	../../../../apps/wifi_camera/lvgl_v8_ui_app/style_JL/generated/gui_scr/setup_scr_video_play.c \
 	../../../../apps/wifi_camera/lvgl_v8_ui_app/style_JL/generated/gui_scr/setup_scr_video_rec.c \
+	../../../../apps/wifi_camera/lvgl_v8_ui_app/style_JL/generated/gui_scr/ui_scr_manager.c \
+	../../../../apps/wifi_camera/lvgl_v8_ui_app/style_JL/generated/gui_scr/ui_style.c \
 	../../../../apps/wifi_camera/lvgl_v8_ui_app/style_JL/generated/gui_timelines/gui_timelines.c \
 	../../../../apps/wifi_camera/lvgl_v8_ui_app/style_JL/generated/i18n/lv_i18n.c \
 	../../../../apps/wifi_camera/lvgl_v8_ui_app/style_LY/custom/custom.c \
@@ -1125,37 +1128,31 @@ endif
 $(BUILD_DIR)/%.c.o : $(ROOT_PREFIX)/%.c
 	$(info +CC $<)
 	$(QUITE) $(MKDIR) $(@D)
-	$(QUITE) $(CC) $(CFLAGS) $(DEFINES) $(INCLUDES) -MM -MT $@ $< -o $(@:.o=.d)
-	$(QUITE) $(CC) $(CFLAGS) $(DEFINES) $(INCLUDES) -c $< -o $@
+	$(QUITE) $(CC) $(CFLAGS) $(DEFINES) $(INCLUDES) -MMD -MF $(@:.o=.d) -c $< -o $@
 
 $(BUILD_DIR)/%.S.o : $(ROOT_PREFIX)/%.S
 	$(info +AS $<)
 	$(QUITE) $(MKDIR) $(@D)
-	$(QUITE) $(CC) $(CFLAGS) $(DEFINES) $(INCLUDES) -MM -MT $@ $< -o $(@:.o=.d)
-	$(QUITE) $(CC) $(CFLAGS) $(DEFINES) $(INCLUDES) -c $< -o $@
+	$(QUITE) $(CC) $(CFLAGS) $(DEFINES) $(INCLUDES) -MMD -MF $(@:.o=.d) -c $< -o $@
 
 $(BUILD_DIR)/%.s.o : $(ROOT_PREFIX)/%.s
 	$(info +AS $<)
 	$(QUITE) $(MKDIR) $(@D)
-	$(QUITE) $(CC) $(CFLAGS) $(DEFINES) $(INCLUDES) -MM -MT $@ $< -o $(@:.o=.d)
-	$(QUITE) $(CC) $(CFLAGS) $(DEFINES) $(INCLUDES) -c $< -o $@
+	$(QUITE) $(CC) $(CFLAGS) $(DEFINES) $(INCLUDES) -MMD -MF $(@:.o=.d) -c $< -o $@
 
 $(BUILD_DIR)/%.cpp.o : $(ROOT_PREFIX)/%.cpp
 	$(info +CXX $<)
 	$(QUITE) $(MKDIR) $(@D)
-	$(QUITE) $(CXX) $(CXXFLAGS) $(CFLAGS) $(DEFINES) $(INCLUDES) -MM -MT $@ $< -o $(@:.o=.d)
-	$(QUITE) $(CXX) $(CXXFLAGS) $(CFLAGS) $(DEFINES) $(INCLUDES) -c $< -o $@
+	$(QUITE) $(CXX) $(CXXFLAGS) $(CFLAGS) $(DEFINES) $(INCLUDES) -MMD -MF $(@:.o=.d) -c $< -o $@
 
 $(BUILD_DIR)/%.cxx.o : $(ROOT_PREFIX)/%.cxx
 	$(info +CXX $<)
 	$(QUITE) $(MKDIR) $(@D)
-	$(QUITE) $(CXX) $(CXXFLAGS) $(CFLAGS) $(DEFINES) $(INCLUDES) -MM -MT $@ $< -o $(@:.o=.d)
-	$(QUITE) $(CXX) $(CXXFLAGS) $(CFLAGS) $(DEFINES) $(INCLUDES) -c $< -o $@
+	$(QUITE) $(CXX) $(CXXFLAGS) $(CFLAGS) $(DEFINES) $(INCLUDES) -MMD -MF $(@:.o=.d) -c $< -o $@
 
 $(BUILD_DIR)/%.cc.o : $(ROOT_PREFIX)/%.cc
 	$(info +CXX $<)
 	$(QUITE) $(MKDIR) $(@D)
-	$(QUITE) $(CXX) $(CXXFLAGS) $(CFLAGS) $(DEFINES) $(INCLUDES) -MM -MT $@ $< -o $(@:.o=.d)
-	$(QUITE) $(CXX) $(CXXFLAGS) $(CFLAGS) $(DEFINES) $(INCLUDES) -c $< -o $@
+	$(QUITE) $(CXX) $(CXXFLAGS) $(CFLAGS) $(DEFINES) $(INCLUDES) -MMD -MF $(@:.o=.d) -c $< -o $@
 
 -include $(DEP_FILES)

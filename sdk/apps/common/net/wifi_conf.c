@@ -865,6 +865,46 @@ __attribute__((weak)) u8 *lte_module_get_mac_addr(void)
     return NULL;
 }
 
+#define TX_ERR_ADJUST_THRESHOLD 45
+#define TX_ERR_ADJUST_COUNTERS 4
+static int tx_adjust_counters = 0;
+
+void wifi_edca_adjust(u8 ac_type, u8 txop_limit, u8 cwmin, u8 cwmax, u8 aifsn)
+{
+    u8 txop_limit_t, cwmin_t, cwmax_t, aifsn_t;
+    wifi_edca_parm_get(ac_type, &txop_limit_t, &cwmin_t, &cwmax_t, &aifsn_t);
+    //printf("txop_limit: %d, cwmin: %d, cwmax: %d, aifsn: %d\n", txop_limit, cwmin, cwmax, aifsn);
+    if (txop_limit_t != txop_limit || cwmin_t != cwmin || cwmax_t != cwmax || aifsn_t != aifsn) {
+        wifi_edca_parm_set(ac_type, txop_limit, cwmin, cwmax, aifsn);
+    }
+}
+
+void wifi_tx_states_count_callback(unsigned long total_count, unsigned long retransmit_count,
+                                   unsigned long fail_count, unsigned long err_ratio)
+{
+#if 1 //根据错包率调整edca参数
+    if (err_ratio <= TX_ERR_ADJUST_THRESHOLD) {
+        if (tx_adjust_counters) {
+            tx_adjust_counters--;
+        }
+    } else {
+        tx_adjust_counters++;
+    }
+    //printf("err_ratio: %d, total_count: %d, tx_adjust_counters: %d\n", err_ratio,  total_count, tx_adjust_counters);
+
+    if (tx_adjust_counters < TX_ERR_ADJUST_COUNTERS) {
+        wifi_edca_adjust(0, 255, 1, 1, 1);
+    } else {
+        wifi_edca_adjust(0, 0, 4, 10, 3);
+    }
+
+    if (tx_adjust_counters > TX_ERR_ADJUST_COUNTERS + 3) {
+        tx_adjust_counters = TX_ERR_ADJUST_COUNTERS + 3;
+    }
+#endif
+}
+
+
 /**
  * @brief Log (Verbose/Info/Debug/Warn/Error)
  */

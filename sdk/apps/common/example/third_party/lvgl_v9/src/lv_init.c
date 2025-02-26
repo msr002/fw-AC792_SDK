@@ -352,6 +352,10 @@ void lv_init(void)
 #if LV_USE_FREETYPE
     /*Init freetype library*/
     lv_freetype_init(LV_FREETYPE_CACHE_FT_GLYPH_CNT);
+
+#if ((LV_USE_DRAW_JLVG == 1) && (LV_USE_DRAW_JLVG_LABEL_ENABLE == 1))
+    lv_draw_jlvg_freetype_event_init();
+#endif
 #endif
 
     lv_initialized = true;

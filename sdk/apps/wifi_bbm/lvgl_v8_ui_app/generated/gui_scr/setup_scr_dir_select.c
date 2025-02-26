@@ -538,7 +538,7 @@ lv_obj_t *setup_scr_dir_select(lv_ui *ui)
     lv_obj_set_scrollbar_mode(ui->dir_select_lbl_7, LV_SCROLLBAR_MODE_OFF);
     //Write codes dir_select_lbl_1
     ui->dir_select_lbl_1 = lv_label_create(ui->dir_select);
-    lv_label_set_text(ui->dir_select_lbl_1, "Select the device to browser");
+    lv_label_set_text(ui->dir_select_lbl_1, "Select the folder to browser");
     lv_label_set_long_mode(ui->dir_select_lbl_1, LV_LABEL_LONG_WRAP);
 
     //Set style for dir_select_lbl_1. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT

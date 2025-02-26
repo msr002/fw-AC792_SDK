@@ -98,8 +98,14 @@ jlvg_begin:
 
     // 绘制区域非显存区域，即 layer 的绘制流程, 重绘区域需要带透明度，例如 RGB565 -> ARGB565
     if (!is_frame_buf) {
-        jlvg_dest_cf = LV_GPU_COLOR_ALPHA_FORMAT;
-        bytes_per_pixel = LV_IMG_PX_SIZE_ALPHA_BYTE;
+        //针对canvas的处理,判断canvas的buf是否带透明度
+        if (lv_jl_gpu2p5d_check_canvas_buf_format(draw_ctx) == LV_IMG_CF_TRUE_COLOR) {
+            jlvg_dest_cf = LV_GPU_COLOR_FORMAT;
+            bytes_per_pixel = jlvg_get_image_format_bpp(LV_GPU_COLOR_FORMAT) >> 3;
+        } else {
+            jlvg_dest_cf = LV_GPU_COLOR_ALPHA_FORMAT;
+            bytes_per_pixel = LV_IMG_PX_SIZE_ALPHA_BYTE;
+        }
     } else {
         jlvg_dest_cf = LV_GPU_COLOR_FORMAT;
         bytes_per_pixel = jlvg_get_image_format_bpp(LV_GPU_COLOR_FORMAT) >> 3;

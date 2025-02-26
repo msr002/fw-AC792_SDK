@@ -189,11 +189,42 @@ void LV_ATTRIBUTE_FAST_MEM lv_draw_jl_gpu2p5d_letter(lv_draw_ctx_t *draw_ctx, co
 
     // 绘制区域非显存区域，即 layer 的绘制流程, 重绘区域需要带透明度，例如 RGB565 -> ARGB565
     if (!is_frame_buf) {
-        jlvg_dest_cf = LV_GPU_COLOR_ALPHA_FORMAT;
-        bytes_per_pixel = LV_IMG_PX_SIZE_ALPHA_BYTE;
+        //针对canvas的处理,判断canvas的buf是否带透明度
+        if (lv_jl_gpu2p5d_check_canvas_buf_format(draw_ctx) == LV_IMG_CF_TRUE_COLOR) {
+            jlvg_dest_cf = LV_GPU_COLOR_FORMAT;
+            bytes_per_pixel = sizeof(lv_color_t);
 
-        /* 兼容字形本身没有变换相关的配置属性，直接使用裁剪区域作为 VG 的混合区域 */
-        lv_area_copy(&blend_area, &rel_clip_area);
+            if (gpos.x < rel_clip_area.x1) {
+                blend_area.x1 = rel_clip_area.x1;
+            } else {
+                blend_area.x1 = gpos.x;
+            }
+
+            if (gpos.y < rel_clip_area.y1) {
+                blend_area.y1 = rel_clip_area.y1;
+            } else {
+                blend_area.y1 = gpos.y;
+            }
+
+            if ((gpos.x + g.box_w) > rel_clip_area.x2) {
+                blend_area.x2 = rel_clip_area.x2;
+            } else {
+                blend_area.x2 = (gpos.x + g.box_w);
+            }
+
+            if ((gpos.y + g.box_h) > rel_clip_area.y2) {
+                blend_area.y2 = rel_clip_area.y2;
+            } else {
+                blend_area.y2 = (gpos.y + g.box_h);
+            }
+
+        } else {
+            jlvg_dest_cf = LV_GPU_COLOR_ALPHA_FORMAT;
+            bytes_per_pixel = LV_IMG_PX_SIZE_ALPHA_BYTE;
+            /* 兼容字形本身没有变换相关的配置属性，直接使用裁剪区域作为 VG 的混合区域 */
+            lv_area_copy(&blend_area, &rel_clip_area);
+        }
+
     } else {
         jlvg_dest_cf = LV_GPU_COLOR_FORMAT;
         bytes_per_pixel = sizeof(lv_color_t);

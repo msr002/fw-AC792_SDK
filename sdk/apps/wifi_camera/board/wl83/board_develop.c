@@ -982,7 +982,12 @@ UVC_PLATFORM_DATA_BEGIN(uvc_data)
     .height = 720,//480,
 #endif
     .fps = 25,
+#if (__SDRAM_SIZE__ == 16 * 1024 * 1024)
     .mem_size = 200 * 1024,
+#else
+    .mem_size = 100 * 1024,
+#endif
+
     .timeout = 500,//ms
 UVC_PLATFORM_DATA_END()
 

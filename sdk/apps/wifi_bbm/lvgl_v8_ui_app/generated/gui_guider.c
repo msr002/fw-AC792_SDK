@@ -62,6 +62,7 @@ void init_scr_del_flag(lv_ui *ui)
     ui->video_play_del = true;
     ui->sys_prompt_del = true;
     ui->dir_select_del = true;
+    ui->device_select_del = true;
 }
 
 void setup_ui(lv_ui *ui)

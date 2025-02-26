@@ -8,7 +8,7 @@
  *********************/
 #include "../../lv_draw.h"
 #include "lv_gpu_jl_gpu2p5d.h"
-
+#include "lvgl.h"
 #if LV_USE_GPU_JL_GPU2P5D
 
 /*********************
@@ -215,6 +215,22 @@ bool lv_jl_gpu2p5d_check_draw_ctx_buf(uint8_t *buf)
     }
 }
 
+//针对canvas的处理,用作在绘制动作中判断canvas的buf类型
+lv_img_cf_t lv_jl_gpu2p5d_check_canvas_buf_format(lv_draw_ctx_t *draw_ctx)
+{
+#if LV_USE_USER_DATA
+    if (draw_ctx->user_data) {
+        lv_obj_t *obj  = (lv_obj_t *)draw_ctx->user_data;
+        if (lv_obj_check_type(obj, &lv_canvas_class)) {
+            lv_canvas_t *canvas = (lv_canvas_t *)obj;
+            return canvas->dsc.header.cf;
+        } else {
+            return LV_IMG_CF_UNKNOWN;
+        }
+    }
+#endif
+    return LV_IMG_CF_UNKNOWN;
+}
 /**********************
  *   STATIC FUNCTIONS
  **********************/

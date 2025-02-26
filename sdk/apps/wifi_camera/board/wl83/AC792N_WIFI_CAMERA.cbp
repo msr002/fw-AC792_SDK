@@ -1177,6 +1177,8 @@
 <Unit filename="../../../../apps/wifi_camera/key_voice.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/wifi_camera/lvgl_v8_ui_app/style_JL/custom/custom.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/wifi_camera/lvgl_v8_ui_app/style_JL/custom/custom.h" />
+<Unit filename="../../../../apps/wifi_camera/lvgl_v8_ui_app/style_JL/custom/multi_language.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="../../../../apps/wifi_camera/lvgl_v8_ui_app/style_JL/custom/multi_language.h" />
 <Unit filename="../../../../apps/wifi_camera/lvgl_v8_ui_app/style_JL/custom/sim_database.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/wifi_camera/lvgl_v8_ui_app/style_JL/custom/sim_database.h" />
 <Unit filename="../../../../apps/wifi_camera/lvgl_v8_ui_app/style_JL/custom/ui_action_animation.c"><Option compilerVer="CC"/></Unit>
@@ -1239,6 +1241,10 @@
 <Unit filename="../../../../apps/wifi_camera/lvgl_v8_ui_app/style_JL/generated/gui_scr/setup_scr_video_photo.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/wifi_camera/lvgl_v8_ui_app/style_JL/generated/gui_scr/setup_scr_video_play.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/wifi_camera/lvgl_v8_ui_app/style_JL/generated/gui_scr/setup_scr_video_rec.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="../../../../apps/wifi_camera/lvgl_v8_ui_app/style_JL/generated/gui_scr/ui_scr_manager.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="../../../../apps/wifi_camera/lvgl_v8_ui_app/style_JL/generated/gui_scr/ui_scr_manager.h" />
+<Unit filename="../../../../apps/wifi_camera/lvgl_v8_ui_app/style_JL/generated/gui_scr/ui_style.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="../../../../apps/wifi_camera/lvgl_v8_ui_app/style_JL/generated/gui_scr/ui_style.h" />
 <Unit filename="../../../../apps/wifi_camera/lvgl_v8_ui_app/style_JL/generated/gui_timelines/gui_timelines.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/wifi_camera/lvgl_v8_ui_app/style_JL/generated/gui_timelines/gui_timelines.h" />
 <Unit filename="../../../../apps/wifi_camera/lvgl_v8_ui_app/style_JL/generated/i18n/lv_i18n.c"><Option compilerVer="CC"/></Unit>

@@ -284,8 +284,10 @@ nd6_process_autoconfig_prefix(struct netif *netif,
         return; /* no address slots available, try again on next advertisement */
     }
 
+
     /* Assign the new address to the interface. */
     ip_addr_copy_from_ip6(netif->ip6_addr[free_idx], ip6addr);
+    LWIP_DEBUGF(IP6_DEBUG | LWIP_DBG_LEVEL_WARNING, ("offered_ipv6_addr(%s), mode(STATELESS)\n", ip6addr_ntoa(&netif->ip6_addr[free_idx])));
     netif_ip6_addr_set_valid_life(netif, free_idx, valid_life);
     netif_ip6_addr_set_pref_life(netif, free_idx, pref_life);
     netif_ip6_addr_set_state(netif, free_idx, IP6_ADDR_TENTATIVE);
@@ -1131,6 +1133,7 @@ nd6_tmr(void)
                         addr_state = IP6_ADDR_DEPRECATED;
                     }
 #endif /* LWIP_IPV6_ADDRESS_LIFETIMES */
+                    //DAD完成，更改状态
                     netif_ip6_addr_set_state(netif, i, addr_state);
                 } else if (netif_is_up(netif) && netif_is_link_up(netif)) {
                     /* tentative: set next state by increasing by one */

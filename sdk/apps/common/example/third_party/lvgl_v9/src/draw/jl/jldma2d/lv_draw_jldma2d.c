@@ -277,13 +277,15 @@ static int32_t evaluate_cb(lv_draw_unit_t *draw_unit, lv_draw_task_t *task)
     switch (task->type) {
     case LV_DRAW_TASK_TYPE_FILL: {
         lv_draw_fill_dsc_t *dsc = task->draw_dsc;
-        if (!(dsc->radius == 0
-              && dsc->grad.dir == LV_GRAD_DIR_NONE
-              && (dsc->base.layer->color_format == LV_COLOR_FORMAT_ARGB8888
-                  || dsc->base.layer->color_format == LV_COLOR_FORMAT_XRGB8888
-                  || dsc->base.layer->color_format == LV_COLOR_FORMAT_RGB888
-                  || dsc->base.layer->color_format == LV_COLOR_FORMAT_RGB565))) {
-            return 0; // not supported
+        if ((dsc->radius == 0
+             && dsc->grad.dir == LV_GRAD_DIR_NONE
+             && (dsc->base.layer->color_format == LV_COLOR_FORMAT_ARGB8888
+                 || dsc->base.layer->color_format == LV_COLOR_FORMAT_XRGB8888
+                 || dsc->base.layer->color_format == LV_COLOR_FORMAT_RGB888
+                 || dsc->base.layer->color_format == LV_COLOR_FORMAT_RGB565))) {
+
+            task->preferred_draw_unit_id = DRAW_UNIT_ID_JLDMA2D;
+            task->preference_score = 0;
         }
     }
     break;
@@ -398,7 +400,6 @@ static void thread_cb(void *arg)
         }
         //LV_LOG("jldma2d render.\n");
         execute_drawing(u);
-        lv_draw_dispatch_request();
 
         u->task_act->state = LV_DRAW_TASK_STATE_READY;
         u->task_act = NULL;

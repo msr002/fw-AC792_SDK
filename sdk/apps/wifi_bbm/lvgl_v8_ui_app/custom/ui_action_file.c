@@ -48,6 +48,8 @@ struct file_browser_handle {
     OS_SEM pipe_sem;
     pipe_core_t *pipe_core;
 
+    char full_path[128];
+
 };
 static struct file_browser_handle file_hdl;
 #define __this (&file_hdl)
@@ -63,7 +65,8 @@ int gui_bbm_start_file_browser(void)
     init_intent(&it);
     it.name	= "baby_monitor";
     it.action = ACTION_BBM_START_FILE_BROWSER;
-    it.data = gui_bbm_get_cur_dir_ch();
+    sprintf(__this->full_path, "%s%d/", gui_bbm_get_cur_dev_path(), gui_bbm_get_cur_dir_ch());
+    it.data = __this->full_path;
     return start_app(&it);
 }
 
@@ -73,7 +76,7 @@ int gui_bbm_stop_file_browser(void)
     init_intent(&it);
     it.name	= "baby_monitor";
     it.action = ACTION_BBM_STOP_FILE_BROWSER;
-    it.data = gui_bbm_get_cur_dir_ch();
+    it.data = __this->full_path;
 
     return start_app(&it);
 }
@@ -84,7 +87,7 @@ int gui_bbm_get_file_num(int *file_num)
     init_intent(&it);
     it.name	= "baby_monitor";
     it.action = ACTION_BBM_GET_FILE_NUM;
-    it.data = gui_bbm_get_cur_dir_ch();
+    it.data = __this->full_path;
     it.exdata = file_num;
 
     return start_app(&it);
@@ -96,7 +99,7 @@ int gui_bbm_get_file_list(void)
     init_intent(&it);
     it.name	= "baby_monitor";
     it.action = ACTION_BBM_GET_FILE_LIST;
-    it.data = gui_bbm_get_cur_dir_ch();
+    it.data = __this->full_path;
     it.exdata = &__this->file_list;
 
     return start_app(&it);
@@ -130,7 +133,7 @@ int bbm_get_file_thumb_req(int index, int file_num)
     __this->thumb_data.file_buf_list = __this->file_buf_list;
     __this->thumb_data.file_buf_len_list = __this->file_buf_len_list;
 
-    it.data = gui_bbm_get_cur_dir_ch();
+    it.data = __this->full_path;
     it.exdata = &__this->thumb_data;
     start_app(&it);
 
@@ -168,9 +171,15 @@ static int file_browser_update_file_cont(void)
 
         //文件名控件
         lv_obj_t *lab = lv_obj_get_child(contain, 1);
-        char *path = __this->file_list[start_index + i];
-        char *file_name = strrchr(path, '/');
-        lv_label_set_text(lab, ++file_name);
+        if (__this->file_list) {
+            char *path = __this->file_list[start_index + i];
+            char *file_name = strrchr(path, '/');
+            if (file_name) {
+                lv_label_set_text(lab, ++file_name);
+            } else {
+                lv_label_set_text(lab, path);
+            }
+        }
     }
 
     for (i = __this->file_cur_page_num; i < ONE_PAGE_MAX_NUM; i++) {
@@ -301,28 +310,41 @@ static void gui_bbm_thumb_task_exit(void)
 static int file_browser_screen_load(void)
 {
     int ret;
+    char *lab;
 
+    //开启ctp文件流程
+    ret = gui_bbm_start_file_browser();
+    if (ret) {
+        post_home_msg_to_ui("back_home_page", 0);
+        lab = "File Load Error !";
+        post_home_msg_to_ui("show_sys_prompt", lab);
+
+        return -1;
+    }
 
     //获取文件数量
     ret = gui_bbm_get_file_num(&__this->file_total_num);
     if (ret) {
+        post_home_msg_to_ui("back_folder_sel_page", 0);
+        lab = "Folder is empty !";
+        post_home_msg_to_ui("show_sys_prompt", lab);
         return -1;
     }
     //获取文件名列表
     ret = gui_bbm_get_file_list();
     if (ret) {
-        return -1;
-    }
-
-    //开启ctp文件流程
-    ret = gui_bbm_start_file_browser();
-    if (ret) {
+        post_home_msg_to_ui("back_folder_sel_page", 0);
+        lab = "Folder is empty !";
+        post_home_msg_to_ui("show_sys_prompt", lab);
         return -1;
     }
 
     //内存申请
     ret = file_browser_buf_init();
     if (ret) {
+        post_home_msg_to_ui("back_home_page", 0);
+        lab = "File Load Error !";
+        post_home_msg_to_ui("show_sys_prompt", lab);
         return -1;
     }
     //缩略图解码线程
@@ -369,12 +391,7 @@ static int gui_src_action_file_browser(int action)
 
     switch (action) {
     case GUI_SCREEN_ACTION_LOAD:
-        ret = file_browser_screen_load();
-        if (ret) {
-            post_home_msg_to_ui("back_home_page", 0);
-            char *lab = "File Load Error !";
-            post_home_msg_to_ui("show_sys_prompt", lab);
-        }
+        file_browser_screen_load();
         break;
     case GUI_SCREEN_ACTION_UNLOAD:
         file_browser_screen_unload();
@@ -397,6 +414,20 @@ static void clean_thumb_buf(void)
 static void post_func_flush_img(void)
 {
     if (lv_obj_is_valid(guider_ui.file_browser_browser_cont)) {
+        lv_obj_invalidate(guider_ui.file_browser_browser_cont);
+    }
+}
+
+static void post_func_flush_lab(void)
+{
+    int i;
+    if (lv_obj_is_valid(guider_ui.file_browser_browser_cont)) {
+        for (i = 0; i < __this->file_cur_page_num; i++) {
+            lv_obj_t *contain = lv_obj_get_child(guider_ui.file_browser_browser_cont, i);
+            //文件名控件
+            lv_obj_t *lab = lv_obj_get_child(contain, 1);
+            lv_label_set_text(lab, __this->thumb_data.file_name_buf[i]);
+        }
         lv_obj_invalidate(guider_ui.file_browser_browser_cont);
     }
 }
@@ -425,6 +456,11 @@ static void thumb_dec_task(void)
                 int cur_index = (__this->file_cur_page - 1) * ONE_PAGE_MAX_NUM;
                 if (cur_index != start_index) {
                     break;
+                }
+
+                //本地模式
+                if (!__this->file_list) {
+                    lvgl_rpc_post_func(post_func_flush_lab, 0);
                 }
 
                 for (i = 0; i < __this->thumb_data.file_num; i++) {

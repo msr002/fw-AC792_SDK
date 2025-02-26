@@ -80,7 +80,7 @@ struct media_file_info {
 
 static struct list_head forward_file_list_head = {NULL, NULL};
 static struct list_head behind_file_list_head = {NULL, NULL};
-#if defined CONFIG_VIDEO2_ENABLE
+#ifdef CONFIG_VIDEO1_ENABLE
 static struct list_head third_file_list_head = {NULL, NULL};
 #endif
 static u32 initing = 0;
@@ -89,7 +89,7 @@ static u8 forward_file_mem[MAX_NUM + 2][INFO_LEN] __attribute__((aligned(32)));
 #if (defined CONFIG_VIDEO2_ENABLE)
 static u8 behind_file_mem[MAX_NUM + 2][INFO_LEN] __attribute__((aligned(32)));
 #endif
-#if defined CONFIG_VIDEO2_ENABLE
+#ifdef CONFIG_VIDEO1_ENABLE
 static u8 third_file_mem[MAX_NUM + 2][INFO_LEN] __attribute__((aligned(32)));
 #endif
 static struct file_info file_info_tab[MAX_NUM * 3]  __attribute__((aligned(32)));
@@ -107,7 +107,7 @@ static void file_info_clear(void)
 #if (defined CONFIG_VIDEO1_ENABLE)
     memset(behind_file_mem, 0, (MAX_NUM + 2) * INFO_LEN);
 #endif
-#if defined CONFIG_VIDEO2_ENABLE
+#if defined CONFIG_VIDEO1_ENABLE
     memset(third_file_mem, 0, (MAX_NUM + 2) * INFO_LEN);
 #endif
 #endif
@@ -444,6 +444,7 @@ static int behind_remove_block_all()
 
 }
 
+#ifdef CONFIG_VIDEO1_ENABLE
 static size_t third_write_block(u8 *buffer, size_t len)
 {
     struct file_info *info = (struct file_info *)file_info_find(2);
@@ -575,6 +576,7 @@ static int third_remove_block_all()
     os_mutex_post(&file_list_mutex);
     return 0;
 }
+#endif
 
 void FILE_REMOVE_ALL()
 {
@@ -610,11 +612,15 @@ void __FILE_LIST_INIT(u8 id, u32 file_num)
         strcpy((char *)res, get_rec_path_1());
         INIT_LIST_HEAD(&forward_file_list_head);
         flag = 0;
-    } else if (id == 1) {
+    }
+#ifdef CONFIG_VIDEO1_ENABLE
+    else if (id == 1) {
         strcpy((char *)res, get_rec_path_2());
         INIT_LIST_HEAD(&third_file_list_head);
         flag = 1;
-    } else if (id == 2) {
+    }
+#endif
+    else if (id == 2) {
         strcpy((char *)res, get_rec_path_3());
         INIT_LIST_HEAD(&behind_file_list_head);
         flag = 2;
@@ -1860,9 +1866,13 @@ int send_json(struct media_file_info *__info, u32 status)
 
         if (__info->channel == 0) {
             forward_write_block((u8 *)buffer, ret);
-        } else if (__info->channel == 1) {
+        }
+#ifdef CONFIG_VIDEO1_ENABLE
+        else if (__info->channel == 1) {
             third_write_block((u8 *)buffer, ret);
-        } else if (__info->channel == 2) {
+        }
+#endif
+        else if (__info->channel == 2) {
             behind_write_block((u8 *)buffer, ret);
         }
 
@@ -1910,9 +1920,13 @@ int send_json(struct media_file_info *__info, u32 status)
 
         if (__info->channel == 0) {
             forward_write_block((u8 *)buffer, ret);
-        } else if (__info->channel == 1) {
+        }
+#ifdef CONFIG_VIDEO1_ENABLE
+        else if (__info->channel == 1) {
             third_write_block((u8 *)buffer, ret);
-        } else if (__info->channel == 2) {
+        }
+#endif
+        else if (__info->channel == 2) {
             behind_write_block((u8 *)buffer, ret);
         }
 
@@ -1960,9 +1974,13 @@ int send_json(struct media_file_info *__info, u32 status)
         printf("==11== __info->channel:%d , %s\n", __info->channel, buffer);
         if (__info->channel == 0) {
             forward_write_block((u8 *)buffer, ret);
-        } else if (__info->channel == 1) {
+        }
+#ifdef CONFIG_VIDEO1_ENABLE
+        else if (__info->channel == 1) {
             third_write_block((u8 *)buffer, ret);
-        } else if (__info->channel == 2) {
+        }
+#endif
+        else if (__info->channel == 2) {
             behind_write_block((u8 *)buffer, ret);
         }
 

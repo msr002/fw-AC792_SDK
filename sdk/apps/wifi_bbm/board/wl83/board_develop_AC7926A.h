@@ -853,9 +853,9 @@
 //*********************************************************************************//
 #ifdef CONFIG_VIDEO_ENABLE
 
-// #define CONFIG_VIDEO0_ENABLE
+#define CONFIG_VIDEO0_ENABLE
 #define CONFIG_VIDEO1_ENABLE
-// #define CONFIG_VIDEO2_ENABLE
+#define CONFIG_VIDEO2_ENABLE
 // #define CONFIG_VIDEO3_ENABLE
 // #define CONFIG_VIDEO4_ENABLE
 // #define CONFIG_VIDEO5_ENABLE

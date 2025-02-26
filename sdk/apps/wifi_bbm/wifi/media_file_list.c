@@ -76,11 +76,22 @@ struct media_file_info {
     u16 width; // use in jpg
 };
 
+//TODO
+#ifdef CONFIG_VIDEO1_ENABLE
+#undef CONFIG_VIDEO1_ENABLE
+#endif
+#ifdef CONFIG_VIDEO2_ENABLE
+#undef CONFIG_VIDEO2_ENABLE
+#endif
+#ifdef CONFIG_VIDEO3_ENABLE
+#undef CONFIG_VIDEO3_ENABLE
+#endif
 
 
 static struct list_head forward_file_list_head = {NULL, NULL};
 static struct list_head behind_file_list_head = {NULL, NULL};
 static u32 initing = 0;
+static u8 media_file_is_init = 0;
 static u32 mutex_init = 0;
 static u8 forward_file_mem[MAX_NUM + 2][INFO_LEN] __attribute__((aligned(32)));
 
@@ -1813,6 +1824,7 @@ int FILE_LIST_EXIT(void)
     os_mutex_del(&file_list_mutex, OS_DEL_ALWAYS);
     os_mutex_del(&file_list_read_mutex, OS_DEL_ALWAYS);
     mutex_init = 0;
+    media_file_is_init = 0;
     return 0;
 }
 
@@ -1863,6 +1875,7 @@ int FILE_LIST_INIT(u32 flag)
 #endif
     }
     initing = 0;
+    media_file_is_init = 1;
     os_mutex_post(&file_list_read_mutex);
 #endif
     return 0;
@@ -1910,6 +1923,11 @@ void FILE_LIST_INIT_SMALL(u32 file_num)
 int FILE_INITIND_CHECK()
 {
     return initing;
+}
+
+int FILE_IS_INIT_CHECK()
+{
+    return media_file_is_init;
 }
 
 

@@ -12,6 +12,8 @@ extern "C" {
 
 #define LWIP_DONT_PROVIDE_BYTEORDER_FUNCTIONS
 #define LWIP_NO_CTYPE_H 1
+//#define CONFIG_LWIP_IPV6_ENABLE
+
 
 #define LWIP_TIMEVAL_PRIVATE 0
 
@@ -350,7 +352,9 @@ ip4_route2(src, dest)
  */
 #ifdef CONFIG_LWIP_IPV6_ENABLE
 #define LWIP_IPV6               1
-#define LWIP_IPV6_DHCP6         1
+#define LWIP_IPV6_DHCP6         0
+#define LWIP_IPV6_DUP_DETECT_ATTEMPTS   0
+#define LWIP_NETIF_EXT_STATUS_CALLBACK  1
 #else
 #define LWIP_IPV6               0
 #define LWIP_IPV6_DHCP6         0
@@ -662,6 +666,11 @@ extern unsigned char __attribute__((aligned(4)))  __attribute__((section(".memp_
  * if DNS_LOCAL_HOSTLIST_IS_DYNAMIC==1.
  */
 #define MEMP_NUM_LOCALHOSTLIST          8   //2
+
+/**
+ * LWIP_IPV6_DHCP6_STATEFUL==1: enable DHCPv6 stateful address autoconfiguration.
+ */
+#define LWIP_IPV6_DHCP6_STATEFUL        0
 
 #define LOCAL_WIRELESS_HOST_NAME "lwip_wireless_host"
 #define LOCAL_WIRE_HOST_NAME "lwip_wire_host"

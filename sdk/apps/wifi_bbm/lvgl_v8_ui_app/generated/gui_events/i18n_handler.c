@@ -46,6 +46,10 @@ void i18n_refresh_texts(const char *page_name)
     if (strcmp(page_name, "dir_select") == 0 && !guider_ui.dir_select_del) {
 
     }
+
+    if (strcmp(page_name, "device_select") == 0 && !guider_ui.device_select_del) {
+
+    }
 }
 
 void i18n_refresh_all_texts()
@@ -87,6 +91,10 @@ void i18n_refresh_all_texts()
     }
 
     if (!guider_ui.dir_select_del) {
+
+    }
+
+    if (!guider_ui.device_select_del) {
 
     }
 }

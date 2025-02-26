@@ -6,6 +6,7 @@
 #include "rt_stream_pkg.h"
 #include "video_ioctl.h"
 
+#include "avilib.h"
 #define RT_AUDIO_SEND_ENABLE       1
 
 #define CTP_RT_RECV_PORT            2224        //实时流接收数据端口
@@ -16,6 +17,66 @@
 #define CTP_RT_RECV_TIMEOUT         300         //实时流socket接收超时时间设置,单位ms
 
 #define SEND_BUF_MAX_LEN             2 * 1024   //UDP发送缓存,用于BBM_RX发送音频包
+
+#define OPEN_RT_TOPIC "OPEN_RT_STREAM"
+#define OPEN_RT_CONTENT \
+    "{\"op\":\"PUT\",\"param\":{" \
+    "\"abr\":\"%d\",\"w\":\"%d\",\"fps\":\"%d\"," \
+    "\"h\":\"%d\",\"id\":\"%d\",\"sub_id\":\"%d\"}}"
+
+#define CLOSE_RT_TOPIC "CLOSE_RT_STREAM"
+#define CLOSE_RT_CONTENT \
+    "{\"op\":\"PUT\",\"param\":{" \
+    "\"id\":\"%d\",\"sub_id\":\"%d\"}}"
+
+#define OPEN_REC_TOPIC "OPEN_REC"
+#define OPEN_REC_CONTENT \
+    "{\"op\":\"PUT\",\"param\":{" \
+    "\"w\":\"%d\",\"fps\":\"%d\",\"h\":\"%d\"," \
+    "\"id\":\"%d\",\"sub_id\":\"%d\",\"abr\":\"%d\"," \
+    "\"cycle_time\":\"%d\"}}"
+
+#define CLOSE_REC_TOPIC "CLOSE_REC"
+#define CLOSE_REC_CONTENT \
+    "{\"op\":\"PUT\",\"param\":{" \
+    "\"id\":\"%d\",\"sub_id\":\"%d\"}}"
+
+#define SET_ABR_TOPIC "SET_VIDEO_ABR"
+#define SET_ABR_CONTENT \
+    "{\"op\":\"PUT\",\"param\":{" \
+    "\"abr\":\"%d\",\"id\":\"%d\",\"sub_id\":\"%d\"}}"
+
+//默认情况下
+//video0(id:0)对应mipi摄像头
+//video1(id:1)对应dvp摄像头
+//video10(id:10)对应usb摄像头
+//
+//sub_id用于区分实时流/录像,
+//usb摄像头也通过sub_id区分fusb/husb,0-4 -> fusb,5 - x -> husb
+//以上id与board_develop.c文件对应
+//启用对应设备时,TX设备的板级文件要开启对应的宏CONFIG_VIDEO*_ENABLE
+
+//默认实时流参数
+static struct video_rec_config default_rt_config = {
+    .width = 640,
+    .height = 480,
+    .fps = 25,
+    .abr_kbps = 1000,
+    .id = 1,
+    .sub_id = 0,
+};
+
+//默认录像参数
+static struct video_rec_config default_rec_config = {
+    .width = 640,
+    .height = 480,
+    .fps = 25,
+    .abr_kbps = 1000,
+    .id = 1,
+    .sub_id = 1,
+    .cycle_time = 3,
+};
+
 
 //实时流接收
 static int ctp_rt_recv_task_pid;   //实时流接收线程PID
@@ -99,6 +160,10 @@ struct rt_stream_dev {
     //thread
     int task_pid;
     char task_name[64];
+
+    //rec
+    //TODO
+    avi_t *rec_out_fd;
 };
 
 
@@ -183,7 +248,7 @@ static int deal_recv_packet(u8 *recv_buf, int recv_len, u32 ip_addr)
         if (rt_dev->ip_addr == ip_addr) {
             struct lbuf_data_head *lbuf_data = lbuf_alloc(rt_dev->lbuf_handle, recv_len);
             if (!lbuf_data) {
-                printf("rt lbuf_alloc err\n");
+                printf("rt lbuf_alloc err ip:%d \n", ip_addr);
                 return -1;
             }
             lbuf_data->len = recv_len;
@@ -293,6 +358,7 @@ static void rt_stream_dev_task(void *priv)
 {
     struct rt_stream_dev *rt_dev = priv;
     struct parse_info parse_info = {0};
+    struct frm_head  frame_head;
 
     int res;
     int msg[8];
@@ -300,6 +366,7 @@ static void rt_stream_dev_task(void *priv)
     int time;
     int fps = 0;
     int abr = 0;
+    int total = 0;
 
     parse_info.data_buf = malloc(CTP_RT_PARSE_BUF_SIZE);
     if (!parse_info.data_buf) {
@@ -319,8 +386,28 @@ static void rt_stream_dev_task(void *priv)
                     printf("lbuf pop err");
                     break;
                 }
+
+                if ((timer_get_ms() - time) >= 1000) {
+                    //调试信息
+                    printf("total:%d abr:%d  fps:%d \n", total / 1024, abr / 1024, fps);
+                    time = timer_get_ms();
+                    fps = 0;
+                    abr = 0;
+                    total = 0;
+                }
+                total += lbuf_data->len;
+
+                //相同包不处理
+                if (!memcmp(&frame_head, lbuf_data->data, sizeof(struct frm_head))) {
+                    /* printf("old data \n"); */
+                    lbuf_free(lbuf_data);
+                    continue;
+                }
+
                 ret = parse_recv_packet(lbuf_data->data, lbuf_data->len,
                                         &parse_info);
+                memcpy(&frame_head, lbuf_data->data, sizeof(struct frm_head));
+
                 if (ret) {
                     printf("parse_recv_packet err \n");
                     lbuf_free(lbuf_data);
@@ -332,25 +419,26 @@ static void rt_stream_dev_task(void *priv)
                     //8字节头部
                     u8 *jpeg_buf = parse_info.data_buf + 8;
                     u32 jpeg_len = parse_info.data_len - 8;
-                    if ((timer_get_ms() - time) >= 1000) {
-                        //调试信息
-                        /* rt_stream_show_num(abr / 1024, fps); */
-                        time = timer_get_ms();
-                        fps = 0;
-                        abr = 0;
-                    }
                     fps++;
                     abr += jpeg_len;
                     bbm_pipe_disp_one_frame(rt_dev->pipe_core, jpeg_buf, jpeg_len);
+
+                    if (rt_dev->rec_out_fd) {
+                        AVI_write_frame(rt_dev->rec_out_fd, jpeg_buf, jpeg_len, 1);
+                    }
+
                     /* printf("v:%d\n",jpeg_len); */
                 } else if (parse_info.packet_type == AUDIO_TYPE_PACKET) {
                     /* int lev = calculate_db_level(parse_info.data_buf,parse_info.data_len); */
                     /* printf("lv:%d \n",lev); */
                     bbm_audio_dec_one_frame(parse_info.data_buf, parse_info.data_len);
+                    if (rt_dev->rec_out_fd) {
+                        AVI_write_audio(rt_dev->rec_out_fd, parse_info.data_buf, parse_info.data_len);
+                    }
                     /* printf("a:%d\n",parse_info.data_len); */
                 } else {
                     //continue parse
-                    printf("c\n");
+                    /* printf("c\n"); */
                 }
                 break;
             case Q_USER:
@@ -390,7 +478,7 @@ static int bbm_rt_send_init(void)
     INIT_LIST_HEAD(&send_dev_list_head);
     os_mutex_create(&send_mutex);
 
-    thread_fork("thread_socket_send", 12, 2048, 2048, &ctp_rt_send_task_pid, ctp_rt_send_task, NULL);
+    thread_fork("thread_socket_send", 11, 2048, 2048, &ctp_rt_send_task_pid, ctp_rt_send_task, NULL);
 
     return 0;
 }
@@ -454,7 +542,7 @@ static int bbm_rt_recv_exit(void)
     return 0;
 }
 
-static int bbm_rt_dev_init(u32 ip_addr, int disp_mode)
+static int bbm_rt_dev_init(u32 ip_addr, int disp_mode, int src_w, int src_h)
 {
     int ret;
     u8 audio_dec_init = 0;
@@ -472,7 +560,7 @@ static int bbm_rt_dev_init(u32 ip_addr, int disp_mode)
     rt_dev->ip_addr = ip_addr;
 
     //video pipe
-    ret = bbm_video_pipe_init(&rt_dev->pipe_core, &disp_win[disp_mode]);
+    ret = bbm_video_pipe_init(&rt_dev->pipe_core, &disp_win[disp_mode], src_w, src_h);
     if (ret) {
         goto err;
     }
@@ -487,7 +575,7 @@ static int bbm_rt_dev_init(u32 ip_addr, int disp_mode)
 
     //thread
     sprintf(rt_dev->task_name, "rt_dev_task%d", rt_dev_task_name_cnt++);
-    thread_fork(rt_dev->task_name, 15, 2048, 2048, &rt_dev->task_pid, rt_stream_dev_task, rt_dev);
+    thread_fork(rt_dev->task_name, 11, 2048, 2048, &rt_dev->task_pid, rt_stream_dev_task, rt_dev);
 
     //audio dec
     ret = bbm_audio_dec_init();
@@ -554,6 +642,10 @@ static int bbm_rt_dev_exit(u32 ip_addr)
         free(rt_dev->lbuf_ptr);
     }
 
+    if (rt_dev->rec_out_fd) {
+        AVI_close(rt_dev->rec_out_fd);
+        rt_dev->rec_out_fd = NULL;
+    }
 
 #if RT_AUDIO_SEND_ENABLE
     os_mutex_pend(&send_mutex, 0);
@@ -572,19 +664,45 @@ static int bbm_rt_dev_exit(u32 ip_addr)
     return 0;
 }
 
-int bbm_ctp_rt_start(void *ctp_cli_hdl, int disp_mode)
+//reconnect
+int bbm_ctp_send_rt_start(void *priv)
 {
     int ret;
-    const char topic_3[] = {"OPEN_RT_STREAM"};
-    const char content_3[] = {"{\"op\":\"PUT\",\"param\":{\"abr\":\"1000\",\"w\":\"640\",\"fps\":\"20\",\"h\":\"480\",\"id\":\"1\",\"sub_id\":\"0\"}}"};
+    struct bbm_client_hdl *bbm_hdl = priv;
+    void *ctp_cli_hdl = bbm_hdl->ctp_cli_hdl;
 
-    struct sockaddr_in *sockaddr = ctp_cli_get_hdl_addr(ctp_cli_hdl);
-    u32 ip_addr = sockaddr->sin_addr.s_addr;
+    char topic_3[32];
+    char content_3[256];
+    snprintf(topic_3, sizeof(topic_3), OPEN_RT_TOPIC);
+    snprintf(content_3, sizeof(content_3), OPEN_RT_CONTENT,
+             bbm_hdl->rt_config.abr_kbps, bbm_hdl->rt_config.width,
+             bbm_hdl->rt_config.fps, bbm_hdl->rt_config.height,
+             bbm_hdl->rt_config.id, bbm_hdl->rt_config.sub_id);
+    ret = ctp_cli_send(ctp_cli_hdl, topic_3, content_3);
 
-    ret = bbm_ctp_send_access(ctp_cli_hdl);
     if (ret) {
+        printf("ctp_cli_send :%s err\n", topic_3);
         return -1;
     }
+
+    return 0;
+}
+
+int bbm_ctp_rt_start(void *priv, int disp_mode)
+{
+    int ret;
+    char topic_3[32];
+    char content_3[256];
+    struct bbm_client_hdl *bbm_hdl = priv;
+    void *ctp_cli_hdl = bbm_hdl->ctp_cli_hdl;
+
+    memcpy(&bbm_hdl->rt_config, &default_rt_config, sizeof(default_rt_config));
+
+    snprintf(topic_3, sizeof(topic_3), OPEN_RT_TOPIC);
+    snprintf(content_3, sizeof(content_3), OPEN_RT_CONTENT,
+             bbm_hdl->rt_config.abr_kbps, bbm_hdl->rt_config.width,
+             bbm_hdl->rt_config.fps, bbm_hdl->rt_config.height,
+             bbm_hdl->rt_config.id, bbm_hdl->rt_config.sub_id);
 
     ret = ctp_cli_send(ctp_cli_hdl, topic_3, content_3);
     if (ret) {
@@ -592,7 +710,7 @@ int bbm_ctp_rt_start(void *ctp_cli_hdl, int disp_mode)
         return -1;
     }
 
-    ret = bbm_rt_dev_init(ip_addr, disp_mode);
+    ret = bbm_rt_dev_init(bbm_hdl->ip_addr, disp_mode, bbm_hdl->rt_config.width, bbm_hdl->rt_config.height);
     if (ret) {
         return -1;
     }
@@ -601,15 +719,24 @@ int bbm_ctp_rt_start(void *ctp_cli_hdl, int disp_mode)
     return 0;
 }
 
-int bbm_ctp_rt_stop(void *ctp_cli_hdl)
+int bbm_ctp_rt_stop(void *priv)
 {
     int ret;
-    const char topic_3[] = {"CLOSE_RT_STREAM"};
-    const char content_3[] = {"{\"op\":\"PUT\",\"param\":{\"id\":\"1\",\"sub_id\":\"0\"}}"};
-    struct sockaddr_in *sockaddr = ctp_cli_get_hdl_addr(ctp_cli_hdl);
-    u32 ip_addr =  sockaddr->sin_addr.s_addr;
+    char topic_3[32];
+    char content_3[256];
 
-    bbm_rt_dev_exit(ip_addr);
+    struct bbm_client_hdl *bbm_hdl = priv;
+    void *ctp_cli_hdl = bbm_hdl->ctp_cli_hdl;
+
+    snprintf(topic_3, sizeof(topic_3), CLOSE_RT_TOPIC);
+    snprintf(content_3, sizeof(content_3), CLOSE_RT_CONTENT,
+             bbm_hdl->rt_config.id, bbm_hdl->rt_config.sub_id);
+
+    bbm_rt_dev_exit(bbm_hdl->ip_addr);
+
+    if (bbm_hdl->rx_is_recording) {
+        bbm_hdl->rx_is_recording = 0;
+    }
 
     //发送停止实时流命令
     ret = ctp_cli_send(ctp_cli_hdl, topic_3, content_3);
@@ -666,21 +793,27 @@ int bbm_rt_stream_exit(void)
 }
 
 
-static int cal_source_crop(struct video_source_crop *crop, int factor)
+static int cal_source_crop(struct video_source_crop *crop, int factor, int src_width, int src_height)
 {
+    printf("zoom factor:%d \n", factor);
     //限制变焦倍数
-    if (factor < 1 && factor > 4) {
+    if (factor < 1 || factor > 4) {
         printf("zoom factor:%d is invalid \n", factor);
         return -1;
     }
 
-    //TODO
-    //默认VGA
-    int src_width = 640;
-    int src_height = 480;
-
     crop->width = src_width / factor;
     crop->height = src_height / factor;
+
+    //硬件imc最大放大倍数不能超过4
+    if (crop->width < (LCD_W / 4)) {
+        crop->width = LCD_W / 4;
+        crop->width = (crop->width + 15) & ~15;
+    }
+    if (crop->height < (LCD_H / 4)) {
+        crop->height = LCD_H / 4;
+        crop->height = (crop->height + 15) & ~15;
+    }
 
     //居中变焦
     crop->x_offset = (src_width - crop->width) / 2;
@@ -690,19 +823,20 @@ static int cal_source_crop(struct video_source_crop *crop, int factor)
 }
 
 //factor:变焦倍数
-int bbm_rt_stream_digital_zomm(void *ctp_cli_hdl, int factor)
+int bbm_rt_stream_digital_zomm(void *priv, int factor)
 {
     int ret;
     struct video_source_crop crop;
 
-    struct sockaddr_in *sockaddr = ctp_cli_get_hdl_addr(ctp_cli_hdl);
-    u32 ip_addr = sockaddr->sin_addr.s_addr;
+    struct bbm_client_hdl *bbm_hdl = priv;
     struct rt_stream_dev *rt_dev;
     u8 find = 0;
+    int src_w = bbm_hdl->rt_config.width;
+    int src_h = bbm_hdl->rt_config.height;
 
     os_mutex_pend(&recv_mutex, 0);
     list_for_each_entry(rt_dev, &recv_dev_list_head, recv_entry) {
-        if (rt_dev->ip_addr == ip_addr) {
+        if (rt_dev->ip_addr == bbm_hdl->ip_addr) {
             find = 1;
             break;
         }
@@ -714,7 +848,7 @@ int bbm_rt_stream_digital_zomm(void *ctp_cli_hdl, int factor)
         return -1;
     }
 
-    ret = cal_source_crop(&crop, factor);
+    ret = cal_source_crop(&crop, factor, src_w, src_h);
     if (ret) {
         return -1;
     }
@@ -722,17 +856,16 @@ int bbm_rt_stream_digital_zomm(void *ctp_cli_hdl, int factor)
     return bbm_video_pipe_set_zoom(rt_dev->pipe_core, &crop);
 }
 
-int bbm_rt_stream_reset_pipe(void *ctp_cli_hdl, int disp_mode)
+int bbm_rt_stream_reset_pipe(void *priv, int disp_mode)
 {
     struct rt_stream_dev *rt_dev, *n;
     int msg;
 
-    struct sockaddr_in *sockaddr = ctp_cli_get_hdl_addr(ctp_cli_hdl);
-    u32 ip_addr = sockaddr->sin_addr.s_addr;
+    struct bbm_client_hdl *bbm_hdl = priv;
 
     os_mutex_pend(&recv_mutex, 0);
     list_for_each_entry(rt_dev, &recv_dev_list_head, recv_entry) {
-        if (rt_dev->ip_addr == ip_addr) {
+        if (rt_dev->ip_addr == bbm_hdl->ip_addr) {
             list_del(&rt_dev->recv_entry);
             break;
         }
@@ -747,9 +880,9 @@ int bbm_rt_stream_reset_pipe(void *ctp_cli_hdl, int disp_mode)
 
     bbm_video_pipe_exit(&rt_dev->pipe_core);
 
-    bbm_video_pipe_init(&rt_dev->pipe_core, &disp_win[disp_mode]);
+    bbm_video_pipe_init(&rt_dev->pipe_core, &disp_win[disp_mode], bbm_hdl->rt_config.width, bbm_hdl->rt_config.height);
 
-    thread_fork(rt_dev->task_name, 15, 2048, 2048, &rt_dev->task_pid, rt_stream_dev_task, rt_dev);
+    thread_fork(rt_dev->task_name, 11, 2048, 2048, &rt_dev->task_pid, rt_stream_dev_task, rt_dev);
 
     os_mutex_pend(&recv_mutex, 0);
     list_add_tail(&rt_dev->recv_entry, &recv_dev_list_head);
@@ -758,11 +891,23 @@ int bbm_rt_stream_reset_pipe(void *ctp_cli_hdl, int disp_mode)
     return 0;
 }
 
-int bbm_ctp_rec_start(void *ctp_cli_hdl)
+int bbm_ctp_rec_start(void *priv)
 {
     int ret;
-    const char topic_3[] = {"OPEN_REC"};
-    const char content_3[] = {"{\"op\":\"PUT\",\"param\":{\"w\":\"640\",\"fps\":\"25\",\"h\":\"480\",\"id\":\"1\",\"sub_id\":\"1\",\"abr\":\"2000\",\"cycle_time\":\"1\"}}"};
+    char topic_3[32];
+    char content_3[256];
+
+    struct bbm_client_hdl *bbm_hdl = priv;
+    void *ctp_cli_hdl = bbm_hdl->ctp_cli_hdl;
+
+    memcpy(&bbm_hdl->rec_config, &default_rec_config, sizeof(default_rec_config));
+
+    snprintf(topic_3, sizeof(topic_3), OPEN_REC_TOPIC);
+    snprintf(content_3, sizeof(content_3), OPEN_REC_CONTENT,
+             bbm_hdl->rec_config.width, bbm_hdl->rec_config.fps,
+             bbm_hdl->rec_config.height, bbm_hdl->rec_config.id,
+             bbm_hdl->rec_config.sub_id, bbm_hdl->rec_config.abr_kbps,
+             bbm_hdl->rec_config.cycle_time);
 
     ret = ctp_cli_send(ctp_cli_hdl, topic_3, content_3);
     if (ret) {
@@ -773,11 +918,18 @@ int bbm_ctp_rec_start(void *ctp_cli_hdl)
     return 0;
 }
 
-int bbm_ctp_rec_stop(void *ctp_cli_hdl)
+int bbm_ctp_rec_stop(void *priv)
 {
     int ret;
-    const char topic_3[] = {"CLOSE_REC"};
-    const char content_3[] = {"{\"op\":\"PUT\",\"param\":{\"id\":\"1\",\"sub_id\":\"1\"}}"};
+    char topic_3[32];
+    char content_3[256];
+
+    struct bbm_client_hdl *bbm_hdl = priv;
+    void *ctp_cli_hdl = bbm_hdl->ctp_cli_hdl;
+
+    snprintf(topic_3, sizeof(topic_3), CLOSE_REC_TOPIC);
+    snprintf(content_3, sizeof(content_3), CLOSE_REC_CONTENT,
+             bbm_hdl->rec_config.id, bbm_hdl->rec_config.sub_id);
 
     ret = ctp_cli_send(ctp_cli_hdl, topic_3, content_3);
     if (ret) {
@@ -787,6 +939,97 @@ int bbm_ctp_rec_stop(void *ctp_cli_hdl)
 
     return 0;
 }
+
+int bbm_rx_rec_start(void *priv)
+{
+    struct rt_stream_dev *rt_dev;
+
+    struct bbm_client_hdl *bbm_hdl = priv;
+
+    os_mutex_pend(&recv_mutex, 0);
+    list_for_each_entry(rt_dev, &recv_dev_list_head, recv_entry) {
+        if (rt_dev->ip_addr == bbm_hdl->ip_addr) {
+
+            if (rt_dev->rec_out_fd) {
+                printf("rx rec has started ! \n");
+                return -1;
+            }
+
+            char *filename = "storage/sd0/C/DCIM/1/VID_****.AVI";
+            avi_t *out_fd = AVI_open_output_file(filename);
+
+            if (out_fd == NULL) {
+                printf("rx rec open file error\n");
+                os_mutex_post(&recv_mutex);
+                return -1;
+            }
+
+            AVI_set_video(out_fd, bbm_hdl->rt_config.width,
+                          bbm_hdl->rt_config.height, bbm_hdl->rt_config.fps, "MJPG");
+            AVI_set_audio(out_fd, 1, 8000, 16, WAVE_FORMAT_PCM, 0);
+
+            rt_dev->rec_out_fd = out_fd;
+            printf("rx rec start \n");
+
+        }
+    }
+    os_mutex_post(&recv_mutex);
+
+    return 0;
+
+}
+
+int bbm_rx_rec_stop(void *priv)
+{
+    int msg[2];
+    struct rt_stream_dev *rt_dev;
+
+    struct bbm_client_hdl *bbm_hdl = priv;
+
+    os_mutex_pend(&recv_mutex, 0);
+    list_for_each_entry(rt_dev, &recv_dev_list_head, recv_entry) {
+        if (rt_dev->ip_addr == bbm_hdl->ip_addr) {
+
+            if (!rt_dev->rec_out_fd) {
+                printf("rx rec has stopped ! \n");
+                return -1;
+            }
+
+            avi_t *out_fd = rt_dev->rec_out_fd;
+            rt_dev->rec_out_fd = NULL;
+            AVI_close(out_fd);
+            printf("rx rec stop \n");
+        }
+    }
+    os_mutex_post(&recv_mutex);
+
+    return 0;
+}
+
+int bbm_ctp_set_abr(void *priv, int abr_val)
+{
+    int ret;
+    char topic_3[32];
+    char content_3[128];
+    struct bbm_client_hdl *bbm_hdl = priv;
+    void *ctp_cli_hdl = bbm_hdl->ctp_cli_hdl;
+
+    //设置实时流码率
+    snprintf(topic_3, sizeof(topic_3), SET_ABR_TOPIC);
+    snprintf(content_3, sizeof(content_3), SET_ABR_CONTENT,
+             abr_val, bbm_hdl->rt_config.id, bbm_hdl->rt_config.sub_id);
+
+    ret = ctp_cli_send(ctp_cli_hdl, topic_3, content_3);
+    if (ret) {
+        printf("ctp_cli_send :%s err\n", topic_3);
+        return -1;
+    }
+
+    bbm_hdl->rt_config.abr_kbps = abr_val;
+
+    return 0;
+}
+
 
 
 

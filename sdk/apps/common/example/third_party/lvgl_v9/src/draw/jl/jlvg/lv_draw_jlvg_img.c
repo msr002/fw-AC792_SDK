@@ -135,6 +135,7 @@ static void _jlvg_draw_image_normal_helper(lv_draw_unit_t *draw_unit, const lv_d
     uint32_t fb_size;
     uint32_t dest_stride;
     uint8_t *dest_buf;
+    rle_info_t *rle_info;
     lv_color_format_t dest_cf = draw_buf->header.cf;
     uint32_t bytes_per_pixel = lv_color_format_get_size(dest_cf);
 
@@ -158,7 +159,7 @@ static void _jlvg_draw_image_normal_helper(lv_draw_unit_t *draw_unit, const lv_d
     jlvg_matrix_t surface2paint;    // 变换矩阵 surface to paint
 
     jlvg_surface_t surface;     // 绘制的窗口
-    jlvg_rect_t surface_area;   // 绘制的窗口区域:实际就是 layer->buf_area 所在的区域
+    //jlvg_rect_t surface_area;   // 绘制的窗口区域:实际就是 layer->buf_area 所在的区域
     jlvg_rect_t draw_area;      // 在窗口内实际要绘制的区域:实际就是 blend_area
 
     //初始化单位变换矩阵
@@ -293,16 +294,44 @@ static void _jlvg_draw_image_normal_helper(lv_draw_unit_t *draw_unit, const lv_d
 
     //3、获取原始图像数据信息
     const lv_draw_buf_t *decoded = decoder_dsc->decoded;
+    uint8_t adr_mode = 1;
+    uint8_t rle_en = 0;
+    uint8_t compress_type = LV_COMPRESS_NONE;
+    if (decoder_dsc && decoder_dsc->user_data && ((jl_bin_user_data_t *)decoder_dsc->user_data)->compressed) {
+        compress_type = ((jl_bin_user_data_t *)decoder_dsc->user_data)->compressed;
+    }
     const uint8_t *img_buf = decoded->data;
     uint32_t img_stride = decoded->header.stride;
     lv_color_format_t img_cf = decoded->header.cf;
     uint32_t img_bytes_per_pixel = lv_color_format_get_size(img_cf);
+    uint16_t clut_format = VGHW_CLUT_FORMAT_ARGB8888;
     uint8_t *src_buf = img_buf;
+    uint8_t *src_clut = NULL;
     uint32_t src_width = decoded->header.w;
     uint32_t src_height = decoded->header.h;
     uint32_t src_size = src_width * src_height * img_bytes_per_pixel;
     jlvg_hw_imageformat_t jlvg_img_cf = lv_jlvg_get_color_format(img_cf, NULL);
-    jlvg_image_t *image = jlvg_image_create(src_buf, src_size, src_width, src_height, img_stride, jlvg_img_cf, 0, 1, 1, 0);
+    bool has_indexed = (jlvg_img_cf >= VGHW_FORMAT_L8 && jlvg_img_cf <= VGHW_FORMAT_L1) ? true : false;
+    if (compress_type == LV_COMPRESS_RLE) {
+        rle_info = (rle_info_t *)src_buf;
+        rle_en = 1;
+        img_stride = lv_rle_get_stride(rle_info, &adr_mode);
+        src_size = rle_info->len;
+        jlvg_img_cf = rle_info->format;
+        clut_format = rle_info->lut_format;
+        if (has_indexed) {
+            src_clut = (uint8_t *)src_buf + rle_info->lut_addr;
+        }
+        src_buf = (uint8_t *)src_buf + rle_info->addr;
+
+    } else {
+        if (has_indexed) {
+            src_clut = src_buf;
+            src_buf += 1024;//256 * 4
+        }
+    }
+    jlvg_image_t *image = jlvg_image_create(src_buf, src_size, src_width, src_height, img_stride, jlvg_img_cf, rle_en, adr_mode, 1, 0);
+    jlvg_image_set_clut(image, src_clut, clut_format);
     uint8_t blend_mode = lv_jlvg_get_blend_mode(dsc->blend_mode, NULL);
     //printf("img info : src_width = %d; src_height = %d; src_size = %d; img_stride = %d.", src_width, src_height, src_size, img_stride);
 

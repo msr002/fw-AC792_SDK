@@ -899,6 +899,12 @@ static void init_fake_disp(lv_obj_t *canvas, lv_disp_t *disp, lv_disp_drv_t *drv
     if (LV_COLOR_SCREEN_TRANSP && dsc->header.cf != LV_IMG_CF_TRUE_COLOR_ALPHA) {
         drv->screen_transp = 0;
     }
+
+#if LV_USE_USER_DATA
+    //针对canvas的处理,用作在绘制动作中判断canvas的buf类型
+    draw_ctx->user_data = (void *)canvas;
+#endif
+
 }
 
 static void deinit_fake_disp(lv_obj_t *canvas, lv_disp_t *disp)

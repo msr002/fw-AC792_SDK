@@ -130,6 +130,7 @@ enum video_buf_type {
     VIDEO_BUF_TYPE_UVC_CAPTURE,
     VIDEO_BUF_TYPE_ISP_TRAIN,
     VIDEO_BUF_TYPE_QUICK_IMAGE,
+    VIDEO_PIPE_PRE_CREATE,
 };
 
 enum video_three_way_type {

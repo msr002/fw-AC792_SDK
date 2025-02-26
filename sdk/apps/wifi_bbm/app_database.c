@@ -78,74 +78,7 @@ static int task_pid;
 #define    VM_PROC_INDEX                56 //省
 
 static const struct db_cfg config_table[] = {
-    /*
-     *  录像模式配置项
-     */
-    {"mic",     1,   VM_MIC_INDEX,  1},                         // 录音开关
-    {"mot",     1,   VM_MOT_INDEX,  0},                         // 移动侦测开关
-    {"par",     1,   VM_PAR_INDEX,  1},                         // 停车守卫开关
-    {"wdr",     1,   VM_WDR_INDEX,  0},                         // 夜视增强开关
-    {"num",     1,   VM_NUM_INDEX,  0},                         // 车牌开关
-    {"dat",     1,   VM_DAT_INDEX,  1},                         // 时间标签开关
-    {"two",     1,   VM_TWO_INDEX,  1},                         // 双路开关
-    {"gra",     2,   VM_GRA_INDEX,  GRA_SEN_MD},               // 重力感应灵敏度
-    {"gap",     4,      VM_GAP_INDEX, 0},                         // 间隔录影设置
-    {"res",     3,   VM_RES_INDEX,  VIDEO_RES_720P},           // 录像分辨率
-    {"cyc",     4,   VM_CYC_INDEX,  3},                         // 循环录像时间，单位分钟
-    {"exp",     4,   VM_EXP_INDEX,  0},                         // 曝光, 范围-3到+3
-    {"cna",     4,  VM_CNA_INDEX,  CN_PA},                     // 车牌号码--京
-    {"cnb",     4,  VM_CNB_INDEX,  CN_PB},                     // 车牌号码 --A 12
-    {"cnc",     4,  VM_CNC_INDEX,  CN_PC},                     // 车牌号码 --345
-    {"proc",     4,  VM_PROC_INDEX,  0},                     // 车牌号码 --345
-    {"hdr",     4,  VM_HDR_INDEX,  0},                     // HDR
-    /*
-     *  系统模式配置项
-     */
-    {"kvo",     1,  VM_KVO_INDEX,  1},                         // 按键音开关
-    {"lag",     4,  VM_LAG_INDEX,  1},        // 语言设置
-    {"fre",     4,  VM_FRE_INDEX,  50},                        // 灯光频率
-    {"aff",     4,  VM_AFF_INDEX,  0},                         // 自动关机时间, 单位分钟
-    {"pro",     4,  VM_PRO_INDEX,  0},                         // 屏幕保护时间, 单位秒
-    {"tvm",     4,  VM_TVM_INDEX,  TVM_PAL},                   // 电视制式
-    {"lan",     4, VM_LAN_INDEX,  0},                         // 轨道偏移
-    {"hlw",     1,  VM_HLW_INDEX,  0},                         // 前照灯提醒开关
-    {"datey",     4,  VM_DATEY_INDEX,  2024},                         // 年
-    {"datem",     1,  VM_DATEM_INDEX,  5},                         // 月
-    {"dated",     1,  VM_DATED_INDEX,  20},                         //日
-    {"dateh",     1,  VM_DATEH_INDEX,  13},                         // 时
-    {"datemi",     1,  VM_DATEMI_INDEX,  14},                         // 分
-    {"dates",     1,  VM_DATES_INDEX,  10},                         // 秒
 
-    /*
-     *  拍照模式配置项
-     */
-//暂用于BBM配对测试
-#if 0
-    {"sok",     1,  VM_SOK_INDEX,   0},                         // 防手抖开关
-    {"pdat",    1,  VM_PDAT_INDEX,   0},                         // 图片日期标签开关
-    {"cyt",     1,  VM_CYT_INDEX,   0},                         // 连拍开关
-    {"qua",     3,  VM_QUA_INDEX,   PHOTO_QUA_HI},              // 图片质量
-    {"acu",     3,  VM_ACU_INDEX,   PHOTO_ACU_HI},              // 图片锐度
-    {"phm",     4,  VM_PHM_INDEX,   0},                         // 延时拍照， 单位秒
-    {"pres",    4,  VM_PRES_INDEX,   PHOTO_RES_1M},              // 图片分辨率
-    {"wbl",     4,  VM_WBL_INDEX,   PHOTO_WBL_AUTO},            // 白平衡
-    {"col",     4,  VM_COL_INDEX,   PHOTO_COLOR_NORMAL},        // 颜色模式
-    {"sca",     4,  VM_SCA_INDEX,   0},                         // 快速预览时间，单位s
-    {"pexp",    4,  VM_PEXP_INDEX,   0},                         // 曝光设置，范围-3到+3
-    {"iso",     4, VM_ISO_INDEX,   0},                         // iso
-    {"stk",     4,  VM_STK_INDEX,   0},                         // 大头贴索引
-    {"zoom",     4,  VM_ZOOM_INDEX,   10},              // 数字变焦,为了方便传参,实际值除以10
-#endif
-
-    {"dac",     4, VM_DAC_INDEX,   0x55aa},                         // dac_trim
-#ifdef CONFIG_WIFI_ENABLE
-    /* {"res2",    3,      VIDEO_RES_VGA},           // 录像分辨率 */
-    {"rtf",     3,  VM_RTF_INDEX,    VIDEO_RES_720P},            //预览前视分辨率
-    {"rtb",     3,  VM_RTB_INDEX,    VIDEO_RES_VGA},             //预览后视分辨率
-    {"wfo",     1,  VM_WFO_INDEX,    1},                         //wifi开关
-    {"wfmode",  1,  VM_WFMODE_INDEX,    0},                        // wifi运行模式
-    {"bvo",     1,  VM_BVO_INDEX,    1},                         // 开机音开关
-#endif
 };
 
 int db_select(const char *name)

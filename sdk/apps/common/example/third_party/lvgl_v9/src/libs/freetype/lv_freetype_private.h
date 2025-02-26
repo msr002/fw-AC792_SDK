@@ -119,6 +119,12 @@ typedef struct lv_freetype_font_dsc_t {
  * GLOBAL PROTOTYPES
  **********************/
 
+#if ((LV_USE_DRAW_JLVG == 1) && (LV_USE_DRAW_JLVG_LABEL_ENABLE == 1))
+void lv_draw_jlvg_freetype_event_init(void);
+
+bool lv_jlvg_label_freetype_draw_task_create(lv_draw_unit_t *draw_unit, const lv_font_t *font_p, const lv_area_t *coords, lv_jlvg_label_info_t *label_info);
+#endif
+
 /**
  * Get the FreeType context.
  *

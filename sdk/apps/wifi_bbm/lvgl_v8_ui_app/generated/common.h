@@ -38,6 +38,7 @@ typedef enum {
     GUI_SCREEN_VIDEO_PLAY,
     GUI_SCREEN_SYS_PROMPT,
     GUI_SCREEN_DIR_SELECT,
+    GUI_SCREEN_DEVICE_SELECT,
 } gui_screen_id_t;
 
 

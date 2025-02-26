@@ -20,6 +20,7 @@ extern "C" {
 #include "../draw/lv_draw_buf.h"
 #include "../misc/lv_area.h"
 #include "../misc/cache/lv_cache.h"
+#include "../misc/lv_ll.h"
 
 /*********************
  *      DEFINES
@@ -32,6 +33,76 @@ extern "C" {
 /*------------------
  * General types
  *-----------------*/
+
+#if ((LV_USE_DRAW_JLVG == 1) && (LV_USE_DRAW_JLVG_LABEL_ENABLE == 1))
+
+typedef struct _lv_jlvg_path_segment_t {
+    uint8_t type;
+    lv_point_t to;
+    lv_point_t control1;
+    lv_point_t control2;
+} lv_jlvg_path_segment_t;
+
+typedef struct _lv_jlvg_glyph_ori_info_t {
+    // freetype 解析得到的原始的路径信息
+    lv_jlvg_path_segment_t *path_segments;   // 绘制完整的路径描述段
+    uint32_t segments_number;   // 累加路径描述段的数量
+
+    // unicode
+    //uint32_t unicode_letter;
+} lv_jlvg_glyph_ori_info_t;
+
+typedef struct _lv_jlvg_glyph_info_t {
+    // freetype 解析得到的原始的路径信息
+    uint8_t *segments;      // 绘制完整的路径描述段
+    float *points;            // 绘制结束需要的路径描述点
+    uint32_t segments_ofs;  // 累加路径描述段的数量
+    uint32_t points_ofs;    // 累加路径描述点的数量
+
+    // freetype 解析得到的字形的度量信息
+    //uint16_t contour_num;       // 字形的轮廓数, 比如字形 ‘i’ 就有两个闭合轮廓组成
+    //uint16_t point_num;         // 字形的轮廓点数量
+    //int hori_advance;           // 字形水平步进值
+    //void *font_info;            // 指向字库解析信息本身
+    void *label_info;           // 指向文本信息本身
+
+    // unicode
+    //uint32_t unicode_letter;
+    lv_point_t pos;             // 字符相对于 label 在绘制显存区域的起点位置
+} lv_jlvg_glyph_info_t;
+
+typedef struct _lv_jlvg_label_info_t {
+    // 文本信息
+    lv_area_t effective_coords;   // 文本的有效区域
+
+    // 解析的字库信息
+    uint16_t font_size;
+    uint16_t units_per_em;  // FT 中原像素的比例单位, 定义了每个EM方块（EM square）内的字体单位数量
+    float original_scale;   // 原始缩放比例: font_size / units_per_em;
+    short ascender;         // 字体的上行指的是从基线到小写字母顶部（如字母“b”、“d”或“h”的顶部）的距离
+    short descender;        // 字体的下行指的是从基线到底部伸出部分（如字母“g”、“j”或“p”的尾部）的距离
+    short height;           // 两个连续基线之间的垂直距离, 即全局字形的高度, 可以使用ascender - descender来计算
+
+    // 解析的字形信息
+    lv_ll_t glyph_info_list;
+
+    // JLVG 的绘制信息
+    uint32_t fb_width;
+    uint32_t fb_height;
+    uint32_t fb_size;
+    uint32_t dest_stride;
+    uint8_t *dest_buf;
+    lv_color_format_t dest_cf;
+    uint32_t bytes_per_pixel;
+} lv_jlvg_label_info_t;
+
+typedef struct _lv_font_jlvg_privately_t {
+    bool is_vector;
+
+    /** Create the label drawing task callback */
+    bool (*label_draw_task_create_cb)(lv_draw_unit_t *draw_unit, const lv_font_t *font_p, const lv_area_t *coords, lv_jlvg_label_info_t *label_info);
+} lv_font_jlvg_privately_t;
+#endif /*((LV_USE_DRAW_JLVG == 1) && (LV_USE_DRAW_JLVG_LABEL_ENABLE == 1))*/
 
 /** The font format.*/
 typedef enum {
@@ -68,6 +139,11 @@ typedef struct {
         const void *src;      /**< Pointer to the source data used by image fonts*/
     } gid;                    /**< The index of the glyph in the font file. Used by the font cache*/
     lv_cache_entry_t *entry;  /**< The cache entry of the glyph draw data. Used by the font cache*/
+
+#if ((LV_USE_DRAW_JLVG == 1) && (LV_USE_DRAW_JLVG_LABEL_ENABLE == 1))
+    lv_jlvg_label_info_t *label_info;   // 字形所在的标签的信息
+    const lv_point_t *pos;
+#endif
 } lv_font_glyph_dsc_t;
 
 /** The bitmaps might be upscaled by 3 to achieve subpixel rendering.*/
@@ -112,6 +188,22 @@ struct lv_font_t {
 /**********************
  * GLOBAL PROTOTYPES
  **********************/
+
+#if ((LV_USE_DRAW_JLVG == 1) && (LV_USE_DRAW_JLVG_LABEL_ENABLE == 1))
+/* ------------------------------------------------------------------------------------*/
+/**
+ * @brief lv_font_jlvg_draw_check_is_vector
+ *
+ * @Params user_data
+ *
+ * @return
+ */
+/* ------------------------------------------------------------------------------------*/
+bool lv_font_jlvg_draw_check_is_vector(const lv_font_t *font_p);
+
+
+bool lv_jlvg_label_draw_task_create(lv_draw_unit_t *draw_unit, const lv_font_t *font_p, const lv_area_t *coords, lv_jlvg_label_info_t *label_info);
+#endif
 
 /**
  * Return with the bitmap of a font.

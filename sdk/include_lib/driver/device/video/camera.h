@@ -124,6 +124,7 @@ int camera_get_in_format(void *c);
 void sensor_driver_close(int channel, int interface_type);
 void *sensor_driver_open(int channel, int interface_type);
 
+void camera_info_copy(int interface_type, void *camera);
 
 
 int camera_mux_init(const char *name, void *camera_data);

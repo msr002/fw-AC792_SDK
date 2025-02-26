@@ -5,12 +5,130 @@
 #include "baby_monitor.h"
 #include "sock_api/sock_api.h"
 #include "rt_stream_pkg.h"
+#include "fs/fs.h"
 
 #define HTTP_PORT               8080    //HTTP解析vs_list.txt端口
 #define FILE_THUMB_PORT         2226    //缩略图数据端口
 #define CTP_RECV_BUF_MAX_LEN    200 * 1024 //接收缓存,用于接收CTP包
 
 static u32 task_name_cnt;
+
+static const char *fs_get_ext(const char *fn)
+{
+    size_t i;
+    for (i = strlen(fn); i > 0; i--) {
+        if (fn[i] == '.') {
+            return &fn[i + 1];
+        } else if (fn[i] == '/' || fn[i] == '\\') {
+            return ""; /*No extension if a '\' or '/' found*/
+        }
+    }
+
+    return ""; /*Empty string if no '.' in the file name.*/
+}
+static int check_fourcc(u8 *buf, const char *fourcc)
+{
+    return memcmp(buf, fourcc, 4) == 0;
+}
+
+static int read_fourcc_and_size(FILE *fd, u8 *fourcc, u32 *size)
+{
+    if (fread(fourcc, 4, 1, fd) != 4) {
+        return -1;
+    }
+    if (fread(size, 4, 1, fd) != 4) {
+        return -1;
+    }
+    return 0;
+}
+//获取AVI文件的第一帧
+static u8 *get_avi_first_frame(FILE *fd, u32 *jpeg_size)
+{
+    static int read_times = 0;
+    char fourcc[4];
+    u32 size;
+
+    fseek(fd, 0, SEEK_SET);
+
+    if (read_fourcc_and_size(fd, fourcc, &size) != 0  || !check_fourcc(fourcc, "RIFF")) {
+        printf("invalid RIFF header");
+        return NULL;
+    }
+    if (read_fourcc_and_size(fd, fourcc, &size) != 0  || !check_fourcc(fourcc, "AVI ")) {
+        printf("invalid AVI header");
+        return NULL;
+    }
+
+
+    while (read_fourcc_and_size(fd, fourcc, &size) == 0) {
+        if (check_fourcc(fourcc, "LIST")) {
+            char list_type[4];
+            if (fread(list_type, 1, 4, fd) != 4) {
+                printf("invalid LIST type\n");
+                return NULL;
+            }
+            if (check_fourcc(list_type, "movi")) {
+                break;
+            } else {
+                fseek(fd, size - 4, SEEK_CUR);
+            }
+        } else {
+            fseek(fd, size, SEEK_CUR);
+        }
+    }
+
+    while (read_fourcc_and_size(fd, fourcc, &size) == 0) {
+        if (read_times++ > 4) {
+            //避免读太久,直接退出
+            read_times = 0;
+            break;
+        }
+
+        if (check_fourcc(fourcc, "00dc")) {
+            read_times = 0;
+            *jpeg_size = size;
+            u8 *jpeg_buf = malloc(size);
+            if (!jpeg_buf) {
+                printf("jpeg_buf malloc fail\n");
+                return NULL;
+            }
+            if (fread(jpeg_buf, size, 1, fd) != size) {
+                printf("jpeg fread err\n");
+                free(jpeg_buf);
+                return NULL;
+            }
+            return jpeg_buf;
+        } else {
+            //跳过当前块
+            fseek(fd, size, SEEK_CUR);
+        }
+
+    }
+    printf("not found jpeg frame\n");
+    return NULL;
+}
+
+int bbm_clean_file_list(void *priv)
+{
+    struct bbm_client_hdl *bbm_hdl = priv;
+    int i;
+
+    if (bbm_hdl->file_name_list) {
+        for (i = 0; i < bbm_hdl->file_total_num; i++) {
+            if (bbm_hdl->file_name_list[i]) {
+                free(bbm_hdl->file_name_list[i]);
+                bbm_hdl->file_name_list[i] = NULL;
+            }
+        }
+        free(bbm_hdl->file_name_list);
+        bbm_hdl->file_name_list = NULL;
+        bbm_hdl->file_total_num = 0;
+    }
+
+    return 0;
+}
+
+
 
 static int http_get_mothed(const char *url, int (*cb)(char *, void *), void *priv)
 {
@@ -29,7 +147,7 @@ static int http_get_mothed(const char *url, int (*cb)(char *, void *), void *pri
     ctx.url = url;
     ctx.priv = &http_body_buf;
     ctx.connection = "close";
-    ctx.timeout_millsec = 5000;
+    ctx.timeout_millsec = 1000;
     error = httpcli_get(&ctx);
     if (error == HERROR_OK) {
         error = cb(http_body_buf.p, priv);
@@ -110,16 +228,7 @@ static int get_file_name_cb(char *buf, void *priv)
     return 0;
 
 err:
-    if (bbm_hdl->file_name_list) {
-        for (i = 0; i < bbm_hdl->file_total_num; i++) {
-            if (bbm_hdl->file_name_list[i]) {
-                free(bbm_hdl->file_name_list[i]);
-                bbm_hdl->file_name_list[i] = NULL;
-            }
-        }
-        free(bbm_hdl->file_name_list);
-        bbm_hdl->file_name_list = NULL;
-    }
+    bbm_clean_file_list(priv);
     return -1;
 }
 
@@ -133,49 +242,9 @@ static void ctp_get_file_task(void *priv)
     struct sockaddr_in *sockaddr = ctp_cli_get_hdl_addr(bbm_hdl->ctp_cli_hdl);
     u32 ip_addr = sockaddr->sin_addr.s_addr;
 
-    const char topic[] = {"FORWARD_MEDIA_FILES_LIST"};
-    const char content[] = {"{\"op\":\"PUT\",\"param\":{\"type\":\"1\"}}"};
-
-    //TODO
-    //SD ONLINE
-    const char topic_1[] = {"SD_STATUS"};
-    const char content_1[] = {"{\"op\":\"GET\"}"};
-
     timeout_cnt = 0;
-    do {
-        if (bbm_hdl->ctp_get_file_task_exit) {
-            goto exit;
-        }
 
-        if (timeout_cnt > 10) {
-            printf("timeout exit !\n");
-            goto exit;
-        }
-        ret = ctp_cli_send(bbm_hdl->ctp_cli_hdl, topic, content);
-        if (ret) {
-            printf("ctp_cli_send :%s err\n", topic);
-            timeout_cnt++;
-            continue;
-        }
-
-        os_sem_set(&bbm_hdl->ctp_msg_sem, 0);
-        ret = os_sem_pend(&bbm_hdl->ctp_msg_sem, 100);
-        if (ret) {
-            printf("ctp_msg_sem pend err:%d \n", ret);
-            timeout_cnt++;
-            continue;
-        }
-
-        if (!strstr(bbm_hdl->vf_list, "storage/sd")) {
-            ret = -1;
-            printf("vf_list format err:%s \n", bbm_hdl->vf_list);
-            timeout_cnt++;
-            continue;
-        }
-
-    } while (ret);
-
-    timeout_cnt = 0;
+    bbm_clean_file_list(priv);
 
     while (1) {
 
@@ -218,7 +287,7 @@ static void recv_ctp_file_thumb(void *sockfd, void *priv, struct net_ctp_thumb *
         goto exit;
     }
 
-    sock_set_recv_timeout(sockfd, 100);
+    sock_set_recv_timeout(sockfd, 200);
 
     while (1) {
         if (bbm_hdl->ctp_file_thumb_task_exit) {
@@ -361,14 +430,107 @@ exit:
     printf("ctp file thumb task exit \n");
 }
 
+static void local_file_thumb_task(void *priv)
+{
+    int ret = 0;
+    int i;
+    int msg[8];
+    struct net_ctp_thumb *thumb_data;
+    struct bbm_client_hdl *bbm_hdl = priv;
+    char full_path[128];
+
+    while (1) {
+        ret = os_task_pend("taskq", msg, ARRAY_SIZE(msg));
+        switch (ret) {
+        case OS_TASKQ:
+            switch (msg[0]) {
+            case Q_MSG:
+                thumb_data = (struct net_ctp_thumb *)msg[1];
+                break;
+            case Q_USER:
+                //exit
+                goto exit;
+            }
+            break;
+        default:
+            break;
+        }
+
+        for (i = 0; i < thumb_data->file_num; i++) {
+            int num = thumb_data->start_index + i;
+            void *fp = fselect(bbm_hdl->fs, FSEL_BY_NUMBER, bbm_hdl->file_total_num - num);
+            if (!fp) {
+                printf("thumb file open err \n");
+                continue;
+            }
+
+            fget_name(fp, thumb_data->file_name_buf[i], sizeof(thumb_data->file_name_buf[i]));
+            char *file_name = thumb_data->file_name_buf[i];
+
+            if (strcmp(fs_get_ext(file_name), "jpg") == 0 || strcmp(fs_get_ext(file_name), "JPG") == 0) {
+                //JPG
+            } else {
+                //AVI
+                u32 jpeg_size;
+                u8 *jpeg_buf = get_avi_first_frame(fp, &jpeg_size);
+                if (jpeg_buf) {
+                    thumb_data->file_buf_len_list[i] = jpeg_size;
+                    memcpy(thumb_data->file_buf_list[i], jpeg_buf, jpeg_size);
+                    free(jpeg_buf);
+                }
+            }
+            fclose(fp);
+        }
+
+        os_sem_post(&thumb_data->sem);
+    }
+exit:
+    printf("local file thumb task exit \n");
+}
+
+
 
 int ctp_file_thumb_start(void *priv)
 {
     struct bbm_client_hdl *bbm_hdl = priv;
     sprintf(bbm_hdl->ctp_file_thumb_task_name, "file_thumb_task%d", task_name_cnt++);
+    char file_name[64];
+    FILE *fp;
+    int i;
 
-    return thread_fork(bbm_hdl->ctp_file_thumb_task_name, 12, 2048, 2048,
-                       &bbm_hdl->ctp_file_thumb_task_pid, ctp_file_thumb_task, priv);
+    if (bbm_hdl->is_local_dev) {
+
+        if (bbm_hdl->file_name_list) {
+            for (i = 0; i < bbm_hdl->file_total_num; i++) {
+                if (bbm_hdl->file_name_list[i]) {
+                    free(bbm_hdl->file_name_list[i]);
+                    bbm_hdl->file_name_list[i] = NULL;
+                }
+            }
+            free(bbm_hdl->file_name_list);
+            bbm_hdl->file_name_list = NULL;
+        }
+
+        if (bbm_hdl->fs) {
+            fscan_release(bbm_hdl->fs);
+            bbm_hdl->fs = NULL;
+        }
+
+        //fs
+        printf("local_path:%s \n", bbm_hdl->local_path);
+        bbm_hdl->fs = fscan(bbm_hdl->local_path, "-tMOVJPGAVI -sn", 3);
+        if (!bbm_hdl->fs) {
+            printf("file thumb fscan err \n");
+            return -1;
+        }
+        bbm_hdl->file_total_num = bbm_hdl->fs->file_number;
+
+        return thread_fork(bbm_hdl->ctp_file_thumb_task_name, 12, 2048, 2048,
+                           &bbm_hdl->ctp_file_thumb_task_pid, local_file_thumb_task, priv);
+    } else {
+        return thread_fork(bbm_hdl->ctp_file_thumb_task_name, 12, 2048, 2048,
+                           &bbm_hdl->ctp_file_thumb_task_pid, ctp_file_thumb_task, priv);
+    }
 }
 
 int ctp_file_thumb_stop(void *priv)
@@ -407,7 +569,7 @@ int bbm_ctp_file_init(void *priv)
 {
     struct bbm_client_hdl *bbm_hdl = priv;
 
-    return thread_fork(NULL, 10, 2048, 2048
+    return thread_fork(NULL, 12, 2048, 2048
                        , &bbm_hdl->ctp_get_file_task_pid, ctp_get_file_task, priv);
 }
 
@@ -423,16 +585,7 @@ int bbm_ctp_file_exit(void *priv)
         bbm_hdl->ctp_get_file_task_exit = 0;
     }
 
-    if (bbm_hdl->file_name_list) {
-        for (i = 0; i < bbm_hdl->file_total_num; i++) {
-            if (bbm_hdl->file_name_list[i]) {
-                free(bbm_hdl->file_name_list[i]);
-                bbm_hdl->file_name_list[i] = NULL;
-            }
-        }
-        free(bbm_hdl->file_name_list);
-        bbm_hdl->file_name_list = NULL;
-    }
+    bbm_clean_file_list(priv);
 }
 
 

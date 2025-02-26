@@ -163,70 +163,9 @@ const struct task_info task_info_table[] = {
     {0, 0},
 };
 
-
-
-#ifdef CONFIG_NET_ENABLE
-int net_video_event_hander(void *e)
-{
-    struct net_event *event = (struct net_event *)e;
-    struct ctp_arg *event_arg = (struct ctp_arg *)event->arg;
-    /* struct net_event *net = &event->u.net; */
-
-    switch (event->event) {
-    case NET_EVENT_CMD:
-        printf("IN NET_EVENT_CMD\n");
-        ctp_cmd_analysis(event_arg->topic, event_arg->content, event_arg->cli);
-        if (event_arg->content) {
-            free(event_arg->content);
-        }
-        event_arg->content = NULL;
-        if (event_arg) {
-            free(event_arg);
-        }
-        event_arg = NULL;
-        return true;
-        break;
-    case NET_EVENT_DATA:
-        /* printf("IN NET_EVENT_DATA\n"); */
-        break;
-    }
-    return false;
-}
-#endif
-
-static void sd_event_handler(struct device_event *event)
-{
-
-
-    /* struct vfs_partition *part = NULL; */
-    switch (event->event) {
-
-    case DEVICE_EVENT_IN:
-#if defined CONFIG_ENABLE_VLIST
-        FILE_LIST_IN_MEM(1);
-#endif
-        break;
-    case DEVICE_EVENT_OUT:
-#if defined CONFIG_ENABLE_VLIST
-        FILE_LIST_EXIT();
-#endif
-        break;
-
-
-    }
-}
-
 static int device_event_handler(struct sys_event *e)
 {
     struct device_event *event = (struct device_event *)e->payload;
-
-    if (e->from == DEVICE_EVENT_FROM_OTG) {
-    } else if (e->from == DEVICE_EVENT_FROM_SD) {
-#if TCFG_SD0_ENABLE || TCFG_SD1_ENABLE
-        sd_event_handler(event);
-#endif
-    }
-
 
     return 0;
 }
@@ -237,24 +176,6 @@ static int default_key_event_handler(struct key_event *key)
     int ret = false;
     printf("key->action:%d key->value:%d \n", key->action, key->value);
 
-#ifdef CONFIG_BBM_TX
-    switch (key->value) {
-    case KEY_OK:
-        ret = true;
-        if (key->action == KEY_EVENT_DOWN) {
-            printf("KEY5 DOWN\n");
-            //todo
-            //实时流传输时不进配对
-            //todo
-            bbm_tx_enter_pairing();
-
-        } else if (key->action == KEY_EVENT_UP) {
-            printf("KEY5 UP\n");
-            bbm_tx_exit_pairing();
-        }
-        break;
-    }
-#endif
     return ret;
 }
 
@@ -276,9 +197,6 @@ void app_default_event_handler(struct sys_event *event)
         device_event_handler(event);
         break;
     case SYS_NET_EVENT:
-#ifdef CONFIG_NET_ENABLE
-        net_video_event_hander((void *)event->payload);
-#endif
         break;
     case SYS_BT_EVENT:
         break;
@@ -315,15 +233,6 @@ void app_main()
 
 #else
     puts("\n\n-------------wifi_bbm TX Mode-------------\n\n");
-    if (dev_online(SDX_DEV)) {
-        char buf[64];
-#if defined CONFIG_ENABLE_VLIST
-        FILE_LIST_IN_MEM(1);
-#endif
-        strcpy(buf, "online:1");
-        CTP_CMD_COMBINED(NULL, CTP_NO_ERR, "SD_STATUS", "NOTIFY", buf);
-
-    }
 
     struct intent it;
     init_intent(&it);
@@ -332,6 +241,7 @@ void app_main()
     start_app(&it);
 
 #endif /* CONFIG_BBM_RX */
+
 }
 
 

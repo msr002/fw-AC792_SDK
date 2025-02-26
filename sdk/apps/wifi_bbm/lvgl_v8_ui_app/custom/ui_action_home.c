@@ -20,6 +20,26 @@ void gui_load_home_page(void)
     ui_load_scr_anim(&guider_ui, screen, LV_SCR_LOAD_ANIM_NONE, 0, 0, true, true, false);
 }
 
+void gui_load_dev_sel_page(void)
+{
+    gui_scr_t *screen = gui_scr_get(GUI_SCREEN_DEVICE_SELECT);
+    if (screen == NULL) {
+        screen = gui_scr_create(GUI_SCREEN_DEVICE_SELECT, "device_select", guider_ui.device_select, (gui_scr_setup_cb_t)setup_scr_device_select, (gui_scr_unload_cb_t)unload_scr_device_select);
+
+    }
+    ui_load_scr_anim(&guider_ui, screen, LV_SCR_LOAD_ANIM_NONE, 0, 0, true, true, false);
+}
+
+void gui_load_folder_sel_page(void)
+{
+    gui_scr_t *screen = gui_scr_get(GUI_SCREEN_DIR_SELECT);
+    if (screen == NULL) {
+        screen = gui_scr_create(GUI_SCREEN_DIR_SELECT, "dir_select", guider_ui.dir_select, (gui_scr_setup_cb_t)setup_scr_dir_select, (gui_scr_unload_cb_t)unload_scr_dir_select);
+    }
+    ui_load_scr_anim(&guider_ui, screen, LV_SCR_LOAD_ANIM_NONE, 0, 0, true, true, false);
+}
+
+
 void gui_show_sys_prompt(void)
 {
     if (guider_ui.sys_prompt_del == false && lv_obj_is_valid(guider_ui.sys_prompt)) {
@@ -50,6 +70,10 @@ void post_home_msg_to_ui(const char *msg, int arg)
 {
     if (!strcmp(msg, "back_home_page")) {
         lvgl_rpc_post_func(gui_load_home_page, 0);
+    } else if (!strcmp(msg, "back_folder_sel_page")) {
+        lvgl_rpc_post_func(gui_load_folder_sel_page, 0);
+    } else if (!strcmp(msg, "back_dev_sel_page")) {
+        lvgl_rpc_post_func(gui_load_dev_sel_page, 0);
     } else if (!strcmp(msg, "show_sys_prompt")) {
         char *text = (char *)arg;
         gui_set_sys_prompt_lab(text);
@@ -66,6 +90,8 @@ static int gui_src_action_home(int action)
 
     switch (action) {
     case GUI_SCREEN_ACTION_LOAD:
+        //TODO
+        gui_bbm_file_reset_to_play_page();
         break;
     case GUI_SCREEN_ACTION_UNLOAD:
         break;

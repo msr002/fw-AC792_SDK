@@ -31,7 +31,6 @@ typedef struct lv_freetype_outline_node_t {
 /**********************
  *  STATIC PROTOTYPES
  **********************/
-
 static lv_freetype_outline_t outline_create(lv_freetype_context_t *ctx, FT_Face face, FT_UInt glyph_index,
         uint32_t size, uint32_t strength);
 static lv_result_t outline_delete(lv_freetype_context_t *ctx, lv_freetype_outline_t outline);
@@ -123,11 +122,13 @@ static bool freetype_glyph_outline_create_cb(lv_freetype_outline_node_t *node, l
     lv_freetype_outline_t outline;
 
     lv_mutex_lock(&dsc->cache_node->face_lock);
+
     outline = outline_create(dsc->context,
                              dsc->cache_node->face,
                              node->glyph_index,
                              dsc->cache_node->ref_size,
                              dsc->style & LV_FREETYPE_FONT_STYLE_BOLD ? 1 : 0);
+
     lv_mutex_unlock(&dsc->cache_node->face_lock);
 
     if (!outline) {
@@ -155,6 +156,7 @@ static lv_cache_compare_res_t freetype_glyph_outline_cmp_cb(const lv_freetype_ou
     if (node_a->glyph_index == node_b->glyph_index) {
         return 0;
     }
+
     return node_a->glyph_index > node_b->glyph_index ? 1 : -1;
 }
 
@@ -165,10 +167,12 @@ static const void *freetype_get_glyph_bitmap_cb(lv_font_glyph_dsc_t *g_dsc, lv_d
     const lv_font_t *font = g_dsc->resolved_font;
     lv_freetype_font_dsc_t *dsc = (lv_freetype_font_dsc_t *)font->dsc;
     LV_ASSERT_FREETYPE_FONT_DSC(dsc);
+
     lv_cache_entry_t *entry = lv_freetype_outline_lookup(dsc, (FT_UInt)g_dsc->gid.index);
     if (entry == NULL) {
         return NULL;
     }
+
     lv_freetype_outline_node_t *node = lv_cache_entry_get_data(entry);
 
     g_dsc->entry = entry;
@@ -307,7 +311,11 @@ static lv_freetype_outline_t outline_create(
      * Disable AUTOHINT(https://freetype.org/autohinting/hinter.html) to avoid display clipping
      * caused by inconsistent glyph measurement and outline.
      */
+#if ((LV_USE_DRAW_JLVG == 1) && (LV_USE_DRAW_JLVG_LABEL_ENABLE == 1))
+    error = FT_Load_Glyph(face, glyph_index, FT_LOAD_NO_BITMAP | FT_LOAD_NO_SCALE); // 原始路径信息
+#else
     error = FT_Load_Glyph(face, glyph_index, FT_LOAD_DEFAULT | FT_LOAD_NO_BITMAP | FT_LOAD_NO_AUTOHINT);
+#endif
     if (error) {
         FT_ERROR_MSG("FT_Load_Glyph", error);
         return NULL;
@@ -324,10 +332,9 @@ static lv_freetype_outline_t outline_create(
     lv_freetype_outline_event_param_t param;
 
     lv_memzero(&param, sizeof(param));
+
     res = outline_send_event(ctx, LV_EVENT_CREATE, &param);
-
     lv_freetype_outline_t outline = param.outline;
-
     if (res != LV_RESULT_OK || !outline) {
         LV_LOG_ERROR("Outline object create failed");
         return NULL;

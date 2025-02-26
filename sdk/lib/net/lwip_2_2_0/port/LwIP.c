@@ -1,3 +1,4 @@
+
 #define __LW_IP_C
 
 
@@ -741,16 +742,86 @@ void set_wireless_netif_macaddr(const char *mac_addr)
     memcpy(wireless_netif.hwaddr, mac_addr, NETIF_MAX_HWADDR_LEN);
 }
 
+#if LWIP_NETIF_EXT_STATUS_CALLBACK
+static netif_ext_callback_t netif_callback = { .callback_fn = NULL, .next = NULL };
+static void netif_callback_fn(struct netif *netif, netif_nsc_reason_t reason, const netif_ext_callback_args_t *args)
+{
+#if LWIP_IPV6
+    if ((reason & LWIP_NSC_IPV6_ADDR_STATE_CHANGED) && (args != NULL)) {
+        s8_t addr_idx = args->ipv6_addr_state_changed.addr_index;
+
+        //if (netif_ip6_addr_state(netif, addr_idx) & IP6_ADDR_VALID)  {
+        if (netif_ip6_addr_state(netif, addr_idx) & IP6_ADDR_PREFERRED)  {
+            if (!ip6_addr_islinklocal(netif_ip6_addr(netif, addr_idx))\
+                && !ip6_addr_isany(netif_ip6_addr(netif, addr_idx))) {
+                printf("got ipv6[idx:%d]: %s\n", addr_idx, ip6addr_ntoa(netif_ip_addr6(netif, addr_idx)));
+                lwip_event_cb(NULL, LWIP_IP_GOT_IPV6_SUCC);
+            }
+        }
+    }
+#endif /* #if LWIP_IPV6 */
+}
+#endif
+
+static void nd6_netif_cache_cleanup(struct netif *netif)
+{
+#if LWIP_IPV6
+    for (int i = 0; i < LWIP_IPV6_NUM_ADDRESSES; i++) {
+        /* if (!ip6_addr_islinklocal(netif_ip6_addr(netif, i))) */
+        /* { */
+        ip_addr_set_zero_ip6(&netif->ip6_addr[i]);
+        netif->ip6_addr_state[i] = IP6_ADDR_INVALID;
+#if LWIP_IPV6_ADDRESS_LIFETIMES
+        netif->ip6_addr_valid_life[i] = IP6_ADDR_LIFE_STATIC;
+        netif->ip6_addr_pref_life[i] = IP6_ADDR_LIFE_STATIC;
+#endif /* LWIP_IPV6_ADDRESS_LIFETIMES */
+        /* } */
+    }
+
+    nd6_cleanup_netif(netif);
+    nd6_restart_netif(netif);
+#endif
+}
+
+void nd6_renew(struct netif *netif)
+{
+    nd6_netif_cache_cleanup(netif);
+    nd6_cleanup_netif(netif);
+    nd6_restart_netif(netif);
+
+    netif_create_ip6_linklocal_address(netif, 1);
+
+#if LWIP_IPV6_DHCP6
+#if LWIP_IPV6_DHCP6_STATEFUL
+    //如果stateful使能需要先disable掉，再重新使能, 同时需要重新创建linklocal地址
+    dhcp6_disable_stateful(netif);
+    /* netif_create_ip6_linklocal_address(netif, 1); */
+
+    if (tcpip_callback((tcpip_callback_fn)dhcp6_enable_stateful, netif) != ERR_OK) {
+        LWIP_ASSERT("failed to create timeout dhcp6_enable_stateful", 0);
+    }
+#else
+    /* netif_create_ip6_linklocal_address(netif, 1); */
+    if (tcpip_callback((tcpip_callback_fn)dhcp6_enable_stateless, netif) != ERR_OK) {
+        LWIP_ASSERT("failed to create timeout dhcp6_enable_stateless", 0);
+    }
+#endif
+#endif
+}
+
 static void dhcp_renew_ipaddr(struct netif *netif)
 {
+
     ip_addr_set_zero(&netif->ip_addr);
     ip_addr_set_zero(&netif->netmask);
     ip_addr_set_zero(&netif->gw);
+
 
     //dhcp发送和接收需要放在同一线程里做
     if (tcpip_callback((tcpip_callback_fn)dhcp_start, netif) != ERR_OK) {
         LWIP_ASSERT("failed to create timeout dhcp_start", 0);
     }
+
 #if 0
     if (tcpip_callback((tcpip_callback_fn)dhcp_network_changed, netif) != ERR_OK) {
         LWIP_ASSERT("failed to create timeout dhcp_network_changed", 0);
@@ -861,7 +932,18 @@ static void __lwip_renew(unsigned short parm)
     if (lwip_netif == WIFI_NETIF) {
         int wifi_get_mac(u8 * mac);
         wifi_get_mac(wireless_netif.hwaddr);
+
+#if LWIP_NETIF_EXT_STATUS_CALLBACK
+        netif_remove_ext_callback(&netif_callback);
+        netif_add_ext_callback(&netif_callback, netif_callback_fn);
+#endif
+
+#if LWIP_IPV6
+        nd6_renew(&wireless_netif);
+#endif
+
         if (dhcp) {
+
             dhcp_renew_ipaddr(&wireless_netif);
 
             tcpip_untimeout((sys_timeout_handler)network_is_dhcp_bound, &wireless_netif);

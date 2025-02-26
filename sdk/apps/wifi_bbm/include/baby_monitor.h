@@ -9,28 +9,8 @@ struct net_ctp_thumb {
     int file_num;
     u8 **file_buf_list;
     int *file_buf_len_list;
+    char file_name_buf[6][32];
     OS_SEM sem;
-};
-
-struct bbm_client_hdl {
-    OS_SEM ctp_msg_sem;         //CTP接收消息同步信号量
-    int ctp_msg_arg;
-    void *ctp_cli_hdl;          //CTP CLIENT
-    u32 ip_addr;
-
-    int ctp_get_file_task_pid;
-    u8 ctp_get_file_task_exit;
-    char **file_name_list;
-    int  file_total_num;
-    char vf_list[128];
-
-    int ctp_file_thumb_task_pid;
-    u8 ctp_file_thumb_task_exit;
-    char ctp_file_thumb_task_name[64];
-
-    int ctp_file_play_task_pid;
-    u8 ctp_file_play_task_exit;
-    u8 video_play_state;
 };
 
 struct video_rec_config {
@@ -43,9 +23,47 @@ struct video_rec_config {
     u16 abr_kbps;
     u8 cycle_time;
 
+    u16 aud_interval_size;
+
     char *net_path;
     void *priv;
 };
+
+struct bbm_client_hdl {
+    OS_SEM ctp_msg_sem;         //CTP接收消息同步信号量
+    int ctp_msg_arg;
+    void *ctp_cli_hdl;          //CTP句柄
+    u32 ip_addr;                //CTP ip地址
+    u32 ch;                     //设备通道号
+
+    //实时流/录像
+    struct video_rec_config rt_config;      //实时流配置
+    struct video_rec_config rec_config;     //录像配置
+
+    u8 tx_is_recording;
+    u8 rx_is_recording;
+
+    //文件列表
+    int ctp_get_file_task_pid;  //获取文件列表线程PID
+    u8 ctp_get_file_task_exit;  //文件列表线程退出标记
+    char **file_name_list;      //文件列表指针
+    int  file_total_num;        //文件总数量
+    char vf_list[128];          //虚拟文件路径，用于获取网络获取文件列表
+    char local_path[128];       //本地SD卡路径
+    u8 is_local_dev;            //本地设备标记
+    struct vfscan *fs;          //本地文件扫描
+
+    //缩略图
+    int ctp_file_thumb_task_pid;    //缩略图获取线程PID
+    u8 ctp_file_thumb_task_exit;    //缩略图线程退出标记
+    char ctp_file_thumb_task_name[64];//缩略图线程名(taskq使用)
+
+    //回放
+    int ctp_file_play_task_pid;     //文件播放线程PID
+    u8 ctp_file_play_task_exit;     //文件播放线程退出标记
+    u8 video_play_state;            //播放状态
+};
+
 
 enum {
     BBM_FILE_PLAY_STOP = 0,

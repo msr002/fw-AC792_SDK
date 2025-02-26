@@ -638,7 +638,7 @@ static void lv_image_destructor(const lv_obj_class_t *class_p, lv_obj_t *obj)
 {
     LV_UNUSED(class_p);
     lv_image_t *img = (lv_image_t *)obj;
-    if (img->src_type == LV_IMAGE_SRC_FILE || img->src_type == LV_IMAGE_SRC_SYMBOL) {
+    if (img->src_type == LV_IMAGE_SRC_FILE || img->src_type == LV_IMAGE_SRC_BIN || img->src_type == LV_IMAGE_SRC_SYMBOL) {
         lv_free((void *)img->src);
         img->src      = NULL;
         img->src_type = LV_IMAGE_SRC_UNKNOWN;

@@ -115,6 +115,10 @@ void set_default_group_cb()
         gui_group_add_obj(guider_ui.default_group, guider_ui.dir_select_view_5, true);
         gui_group_add_obj(guider_ui.default_group, guider_ui.dir_select_view_6, true);
         gui_group_add_obj(guider_ui.default_group, guider_ui.dir_select_imgbtn_1, true);
+    } else if (act_scr == guider_ui.device_select) {
+        gui_group_add_obj(guider_ui.default_group, guider_ui.device_select_view_1, true);
+        gui_group_add_obj(guider_ui.default_group, guider_ui.device_select_view_2, true);
+        gui_group_add_obj(guider_ui.default_group, guider_ui.device_select_imgbtn_1, true);
     }
     lv_group_set_default(guider_ui.default_group);
 

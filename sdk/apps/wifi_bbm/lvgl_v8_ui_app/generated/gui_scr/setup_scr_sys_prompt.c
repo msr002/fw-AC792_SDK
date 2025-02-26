@@ -29,18 +29,22 @@ lv_obj_t *setup_scr_sys_prompt(lv_ui *ui)
 
     //Set style for sys_prompt_view_1. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
     lv_obj_set_style_radius(ui->sys_prompt_view_1, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_color(ui->sys_prompt_view_1, lv_color_make(0x1D, 0x10, 0x10), LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_opa(ui->sys_prompt_view_1, 230, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(ui->sys_prompt_view_1, lv_color_make(0x33, 0x30, 0x30), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(ui->sys_prompt_view_1, 217, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_shadow_width(ui->sys_prompt_view_1, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_border_color(ui->sys_prompt_view_1, lv_color_make(0x21, 0x95, 0xf6), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_border_width(ui->sys_prompt_view_1, 2, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_border_opa(ui->sys_prompt_view_1, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_border_side(ui->sys_prompt_view_1, LV_BORDER_SIDE_FULL, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_outline_color(ui->sys_prompt_view_1, lv_color_make(0x02, 0x6C, 0xC0), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_outline_width(ui->sys_prompt_view_1, 2, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_outline_opa(ui->sys_prompt_view_1, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_outline_pad(ui->sys_prompt_view_1, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_pad_left(ui->sys_prompt_view_1, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_pad_right(ui->sys_prompt_view_1, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_pad_top(ui->sys_prompt_view_1, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_pad_bottom(ui->sys_prompt_view_1, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_pos(ui->sys_prompt_view_1, 237, 137);
+    lv_obj_set_pos(ui->sys_prompt_view_1, 238, 137);
     lv_obj_set_size(ui->sys_prompt_view_1, 345, 194);
     lv_obj_set_scrollbar_mode(ui->sys_prompt_view_1, LV_SCROLLBAR_MODE_OFF);
     lv_obj_add_flag(ui->sys_prompt_view_1, LV_OBJ_FLAG_EVENT_BUBBLE);

@@ -4,12 +4,14 @@
 #include "lcd_config.h"
 #include "event/key_event.h"
 #include "event/device_event.h"
+#include "event/net_event.h"
 #include "action.h"
 #include "app_config.h"
 #include "vrec_osd.h"
 #include "baby_monitor.h"
 #include "stream_core.h"
 #include "sock_api/sock_api.h"
+#include "ctp_server.h"
 
 #define VIDEO_OSD_BUF_SIZE      64                  //水印缓存
 #define VIDEO_RT_BUF_SIZE       200 * 1024          //实时流缓存
@@ -17,16 +19,21 @@
 
 #define AUDIO_BUF_SIZE          64 * 1024           //实时流or录像音频缓存
 #define AUDIO_VOLUME	        100                 //实时流or录像音频音量
-#define AUDIO_RT_INTERVAL_SIZE      640             //实时流音频包大小,尽量设置小一些降低延迟
+#define AUDIO_RT_INTERVAL_SIZE      2*640             //实时流音频包大小,尽量设置小一些降低延迟
 #define AUDIO_REC_INTERVAL_SIZE     8192            //录像音频包大小
 
 #define AUDIO_RT_RECV_PORT               9981            //接收数据端口
 #define AUDIO_DEC_BUF_MAX_LEN            2*1024
 #define AUDIO_RT_RECV_BUF_MAX_LEN        200*1024
 
+enum {
+    WIFI_RAW_MODE = 0,
+    WIFI_MODE,
+};
 
 struct video_rec_hdl {
     struct list_head dev_list_head;
+    u8 cur_wifi_mode;
 };
 struct video_rec_hdl rec_handler;
 #define __this 	(&rec_handler)
@@ -478,7 +485,6 @@ static int video_start(struct video_rec_config *config)
 
     //video
     req.rec.channel     = sub_id;
-    req.rec.camera_type = VIDEO_CAMERA_NORMAL;
     req.rec.state       = VIDEO_STATE_START;
     req.rec.quality     = VIDEO_MID_Q;
 
@@ -493,11 +499,11 @@ static int video_start(struct video_rec_config *config)
         //实时流
         req.rec.buf_len = VIDEO_RT_BUF_SIZE;
         req.rec.format  = USER_VIDEO_FMT_AVI;
-        //TODO
-        req.rec.online  = 0;
+        req.rec.online  = 1;
         req.rec.cycle_time = 5 * 60;
 
-        req.rec.audio.aud_interval_size = AUDIO_RT_INTERVAL_SIZE;
+        req.rec.audio.aud_interval_size =
+            config->aud_interval_size ? config->aud_interval_size : AUDIO_RT_INTERVAL_SIZE;
 
         //双向语音
         dev_hdl->audio_recv_hdl = malloc(sizeof(struct audio_recv_hdl));
@@ -528,6 +534,25 @@ static int video_start(struct video_rec_config *config)
 
         req.rec.file    = dev_hdl->file;
     }
+
+    //uvc
+    if (id == 10) {
+        req.rec.camera_type = VIDEO_CAMERA_UVC;
+        if (sub_id < 5) {
+            req.rec.uvc_id = 0;
+        } else {
+            req.rec.uvc_id = 1;
+        }
+        if (uvc_host_online() < 0) {
+            printf(" uvc host online err !\n");
+            goto err;
+        }
+        //实时流+录像联动jpeg数量不够
+        req.rec.online  = 0;
+    } else {
+        req.rec.camera_type = VIDEO_CAMERA_NORMAL;
+    }
+
 
     dev_hdl->video_buf = malloc(req.rec.buf_len);
     if (!dev_hdl->video_buf) {
@@ -565,7 +590,12 @@ static int video_start(struct video_rec_config *config)
     text_osd.font_matrix_len = sizeof(osd2_str_matrix);
     text_osd.direction = 1;
 
-    req.rec.text_osd = &text_osd;
+    //实时流不开启水印
+    if (config->net_path) {
+        req.rec.text_osd = NULL;
+    } else {
+        req.rec.text_osd = &text_osd;
+    }
     req.rec.graph_osd = NULL;//&graph_osd;
 
     //audio
@@ -620,6 +650,7 @@ err:
             free(dev_hdl->audio_buf);
         }
         if (dev_hdl->audio_recv_hdl) {
+            rt_audio_recv_exit(dev_hdl->audio_recv_hdl);
             free(dev_hdl->audio_recv_hdl);
         }
 
@@ -727,7 +758,123 @@ static int video_stop_all(void)
     return 0;
 }
 
+static int video_stop_all_rec(void)
+{
+    struct video_dev_hdl *dev_hdl = NULL;
+    struct video_dev_hdl *n = NULL;
 
+    union video_req req = {0};
+    int ret;
+
+    list_for_each_entry_safe(dev_hdl, n, &__this->dev_list_head, entry) {
+        if (!dev_hdl->file) {
+            //实时流
+            continue;
+        }
+
+        list_del(&dev_hdl->entry);
+        req.rec.channel = dev_hdl->config.sub_id;
+        req.rec.state = VIDEO_STATE_STOP;
+        ret = server_request(dev_hdl->video_server, VIDEO_REQ_REC, &req);
+        if (ret) {
+            printf("\nstop rec err 0x%x\n", ret);
+            return -1;
+        }
+        video_rec_close_file(dev_hdl);
+
+        server_close(dev_hdl->video_server);
+
+        if (dev_hdl->video_buf) {
+            free(dev_hdl->video_buf);
+        }
+        if (dev_hdl->video_osd_buf) {
+            free(dev_hdl->video_osd_buf);
+        }
+        if (dev_hdl ->audio_buf) {
+            free(dev_hdl->audio_buf);
+        }
+
+        if (dev_hdl->audio_recv_hdl) {
+            rt_audio_recv_exit(dev_hdl->audio_recv_hdl);
+            free(dev_hdl->audio_recv_hdl);
+        }
+        free(dev_hdl);
+    }
+
+    return 0;
+}
+
+
+static int video_set_abr(struct video_rec_config *config)
+{
+    int ret = 0;
+    union video_req req = {0};
+    u8 find = 0;
+    u8 id = config->id;
+    u8 sub_id = config->sub_id;
+    struct video_dev_hdl *dev_hdl = NULL;
+
+    printf("set abr:%d id:%d  sub_id:%d \n"
+           , config->abr_kbps, config->id, config->sub_id);
+
+    list_for_each_entry(dev_hdl, &__this->dev_list_head, entry) {
+        if (dev_hdl->config.id == id && dev_hdl->config.sub_id == sub_id) {
+            find = 1;
+            break;
+        }
+    }
+
+    if (!find) {
+        printf(" video_set_abr not found dev hdl id:%d sub_id:%d \n", id, sub_id);
+        return -1;
+    }
+
+    req.rec.state = VIDEO_STATE_RESET_BITS_RATE;
+    req.rec.channel     = sub_id;
+    req.rec.abr_kbps    = config->abr_kbps;
+
+    if (dev_hdl->video_server) {
+        ret = server_request(dev_hdl->video_server, VIDEO_REQ_REC, &req);
+        if (ret) {
+            printf("reset bits rate err :%d \n", ret);
+        }
+    }
+
+    return ret;
+}
+
+static int video_get_status(struct video_rec_config *config, int *status)
+{
+    u8 id = config->id;
+    u8 sub_id = config->sub_id;
+    struct video_dev_hdl *dev_hdl = NULL;
+
+    list_for_each_entry(dev_hdl, &__this->dev_list_head, entry) {
+        if (dev_hdl->config.id == id && dev_hdl->config.sub_id == sub_id) {
+            *status = 1;
+            return 0;
+        }
+    }
+
+    *status = 0;
+
+    return 0;
+}
+
+static int switch_wifi_mode(void)
+{
+    if (__this->cur_wifi_mode == WIFI_RAW_MODE) {
+        wifi_raw_exit();
+        wifi_init();
+        __this->cur_wifi_mode = WIFI_MODE;
+        video_stop_all();
+    } else {
+        wifi_exit();
+        wifi_raw_init();
+        __this->cur_wifi_mode = WIFI_RAW_MODE;
+        video_stop_all();
+    }
+}
 
 static int video_rec_state_machine(struct application *app, enum app_state state, struct intent *it)
 {
@@ -759,6 +906,14 @@ static int video_rec_state_machine(struct application *app, enum app_state state
             puts("ACTION_VIDEO_STOP_ALL\n");
             ret = video_stop_all();
             break;
+        case ACTION_VIDEO_SET_ABR:
+            puts("ACTION_VIDEO_SET_ABR\n");
+            ret = video_set_abr(it->exdata);
+            break;
+        case ACTION_VIDEO_GET_STATUS:
+            puts("ACTION_VIDEO_GET_STATUS\n");
+            ret = video_get_status(it->exdata, it->data);
+            break;
         }
         break;
     case APP_STA_PAUSE:
@@ -782,37 +937,97 @@ static int video_rec_key_event_handler(struct key_event *key)
 {
     int ret = false;
     printf("key->action:%d key->value:%d \n", key->action, key->value);
-    if (key->action == KEY_EVENT_CLICK) {
-        ret = true;
-        switch (key->value) {
-        case KEY_POWER:
-            printf("KEY1\n");
-            break;
-        case KEY_MENU:
-            printf("KEY2\n");
-            break;
-        case KEY_UP:
-            printf("KEY3\n");
-            break;
-        case KEY_DOWN:
-            printf("KEY4\n");
-            break;
-        case KEY_OK:
-            printf("KEY5\n");
-            break;
-        default:
-            printf("Unknow KEY\n");
-            break;
+
+#ifdef CONFIG_BBM_TX
+    switch (key->value) {
+    case KEY_POWER:
+        printf("KEY1\n");
+        break;
+    case KEY_MENU:
+        printf("KEY2\n");
+        break;
+    case KEY_UP:
+        printf("KEY3\n");
+        break;
+    case KEY_DOWN:
+        printf("KEY4\n");
+        if (key->action == KEY_EVENT_CLICK) {
+            ret = true;
+            switch_wifi_mode();
         }
+        break;
+    case KEY_OK:
+        ret = true;
+        if (key->action == KEY_EVENT_DOWN) {
+            printf("KEY5 DOWN\n");
+            if (__this->cur_wifi_mode == WIFI_RAW_MODE) {
+                bbm_tx_enter_pairing();
+            }
+        } else if (key->action == KEY_EVENT_UP) {
+            printf("KEY5 UP\n");
+            if (__this->cur_wifi_mode == WIFI_RAW_MODE) {
+                bbm_tx_exit_pairing();
+            }
+        }
+        break;
     }
+#endif
 
     return ret;
 }
 
 static int video_rec_device_event_handler(struct sys_event *e)
 {
+    int ret = false;
+    char buf[16];
     struct device_event *device_eve = (struct device_event *)e->payload;
 
+    if (e->from == DEVICE_EVENT_FROM_SD) {
+        switch (device_eve->event) {
+        case DEVICE_EVENT_IN:
+            FILE_LIST_IN_MEM(1);
+            ret = true;
+            break;
+        case DEVICE_EVENT_OUT:
+            FILE_LIST_EXIT();
+            snprintf(buf, sizeof(buf), "online:0");
+            CTP_CMD_COMBINED(NULL, CTP_NO_ERR, "SD_STATUS", "NOTIFY", buf);
+            ret = true;
+            video_stop_all_rec();
+            break;
+        default:
+            break;
+        }
+    }
+
+
+    return ret;
+}
+
+int video_rec_net_event_hander(void *e)
+{
+    struct net_event *event = (struct net_event *)e;
+    struct ctp_arg *event_arg = (struct ctp_arg *)event->arg;
+    /* struct net_event *net = &event->u.net; */
+
+    switch (event->event) {
+    case NET_EVENT_CMD:
+        printf("IN NET_EVENT_CMD\n");
+        ctp_cmd_analysis(event_arg->topic, event_arg->content, event_arg->cli);
+        if (event_arg->content) {
+            free(event_arg->content);
+        }
+        event_arg->content = NULL;
+        if (event_arg) {
+            free(event_arg);
+        }
+        event_arg = NULL;
+        return true;
+        break;
+    case NET_EVENT_DATA:
+        /* printf("IN NET_EVENT_DATA\n"); */
+        break;
+    }
     return false;
 }
 
@@ -824,6 +1039,8 @@ static int video_rec_event_handler(struct application *app, struct sys_event *ev
         return video_rec_key_event_handler((struct key_event *)event->payload);
     case SYS_DEVICE_EVENT:
         return video_rec_device_event_handler(event);
+    case SYS_NET_EVENT:
+        return video_rec_net_event_hander((void *)event->payload);
     default:
         return false;
     }

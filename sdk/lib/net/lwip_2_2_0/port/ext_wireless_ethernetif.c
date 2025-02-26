@@ -58,13 +58,13 @@ static void low_level_init(struct netif *netif)
     netif->flags = NETIF_FLAG_BROADCAST | NETIF_FLAG_ETHARP | NETIF_FLAG_LINK_UP | NETIF_FLAG_IGMP;
 
 #if LWIP_IPV6
+    netif->flags |= NETIF_FLAG_MLD6;
+    netif->output_ip6 = ethip6_output;
+
+#if LWIP_IPV6_DHCP6
     static struct dhcp6 dhcp6;
     dhcp6_set_struct(netif, &dhcp6);
-    dhcp6_enable_stateless(netif);
-    netif->output_ip6 = ethip6_output;
-    netif->ip6_autoconfig_enabled = 1;
-    netif_create_ip6_linklocal_address(netif, 1);
-    netif->flags |= NETIF_FLAG_MLD6;
+#endif
 #endif
 
     /* Do whatever else is needed to initialize interface. */

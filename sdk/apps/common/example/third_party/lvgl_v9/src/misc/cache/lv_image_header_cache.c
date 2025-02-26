@@ -102,7 +102,7 @@ inline static lv_cache_compare_res_t image_cache_common_compare(const void *lhs_
         const void *rhs_src, lv_image_src_t rhs_src_type)
 {
     if (lhs_src_type == rhs_src_type) {
-        if (lhs_src_type == LV_IMAGE_SRC_FILE) {
+        if (lhs_src_type == LV_IMAGE_SRC_FILE || lhs_src_type == LV_IMAGE_SRC_BIN) {
             int32_t cmp_res = lv_strcmp(lhs_src, rhs_src);
             if (cmp_res != 0) {
                 return cmp_res > 0 ? 1 : -1;
@@ -128,7 +128,7 @@ static void image_header_cache_free_cb(lv_image_header_cache_data_t *entry, void
 {
     LV_UNUSED(user_data); /*Unused*/
 
-    if (entry->src_type == LV_IMAGE_SRC_FILE) {
+    if (entry->src_type == LV_IMAGE_SRC_FILE || entry->src_type == LV_IMAGE_SRC_BIN) {
         lv_free((void *)entry->src);
     }
 }

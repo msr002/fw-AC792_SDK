@@ -69,6 +69,7 @@
 <Add directory="../../../../include_lib/utils/syscfg" />
 <Add directory="../../../../include_lib/utils/event" />
 <Add directory="../../../../apps/wifi_bbm/include" />
+<Add directory="../../../../apps/wifi_bbm/simple_avi" />
 <Add directory="../../../../apps/wifi_bbm/protocols" />
 <Add directory="../../../../include_lib/driver/device/video" />
 <Add directory="../../../../apps" />
@@ -170,13 +171,15 @@
 <Add option="../../../../include_lib/newlib/pi32v2-lib/libm.a" />
 <Add option="../../../../include_lib/newlib/pi32v2-lib/libc.a" />
 <Add option="../../../../include_lib/newlib/pi32v2-lib/libcompiler_rt.a" />
-<Add option="../../../../cpu/wl83/liba/iperf.a" />
+<Add option="--start-group " />
 <Add option="../../../../cpu/wl83/liba/system.a" />
 <Add option="../../../../cpu/wl83/liba/fs.a" />
 <Add option="../../../../cpu/wl83/liba/cfg_tool.a" />
 <Add option="../../../../cpu/wl83/liba/event.a" />
+<Add option="../../../../cpu/wl83/liba/cpu.a" />
 <Add option="../../../../cpu/wl83/liba/json.a" />
 <Add option="../../../../cpu/wl83/liba/update.a" />
+<Add option="../../../../cpu/wl83/liba/common_lib.a" />
 <Add option="../../../../cpu/wl83/liba/video_rec_server.a" />
 <Add option="../../../../cpu/wl83/liba/video_dec_server.a" />
 <Add option="../../../../cpu/wl83/liba/audio_server.a" />
@@ -187,28 +190,25 @@
 <Add option="../../../../cpu/wl83/liba/lib_usb_syn.a" />
 <Add option="../../../../cpu/wl83/liba/video_engine.a" />
 <Add option="../../../../cpu/wl83/liba/wl_rf_common.a" />
+<Add option="../../../../cpu/wl83/liba/hsm.a" />
 <Add option="../../../../cpu/wl83/liba/http_cli.a" />
 <Add option="../../../../cpu/wl83/liba/https_cli.a" />
 <Add option="../../../../cpu/wl83/liba/http_server.a" />
 <Add option="../../../../cpu/wl83/liba/json.a " />
+<Add option="../../../../cpu/wl83/liba/iperf.a" />
+<Add option="../../../../cpu/wl83/liba/libmbedtls_3_4_0.a" />
 <Add option="../../../../cpu/wl83/liba/libcrypto_mbedtls.a" />
 <Add option="../../../../cpu/wl83/liba/lwip_2_2_0.a" />
 <Add option="../../../../cpu/wl83/liba/wl_wifi.a" />
 <Add option="../../../../cpu/wl83/liba/profile.a" />
 <Add option="../../../../cpu/wl83/liba/libjlsp_kws_far_keyword.a" />
 <Add option="../../../../cpu/wl83/liba/libkwscommon.a" />
-<Add option="--start-group " />
-<Add option="../../../../cpu/wl83/liba/libmbedtls_3_4_0.a" />
 <Add option="../../../../cpu/wl83/liba/wpasupplicant.a" />
-<Add option="--end-group" />
 <Add option="../../../../cpu/wl83/liba/stream_media_server.a" />
 <Add option="../../../../cpu/wl83/liba/ftpserver_new.a" />
 <Add option="../../../../cpu/wl83/liba/net_server.a" />
 <Add option="../../../../cpu/wl83/liba/libqrcode.a" />
-<Add option="../../../../cpu/wl83/liba/common_lib.a" />
-<Add option="../../../../cpu/wl83/liba/libmbedtls_3_4_0.a " />
-<Add option="../../../../cpu/wl83/liba/hsm.a" />
-<Add option="../../../../cpu/wl83/liba/cpu.a" />
+<Add option="--end-group" />
 <Add option="../../../../cpu/wl83/liba/lvgl_v8_extend.a" />
 <Add option="-T../../../../cpu/wl83/sdk.ld" />
 <Add option="-M=../../../../cpu/wl83/tools/sdk.map" />
@@ -1179,6 +1179,7 @@
 <Unit filename="../../../../apps/wifi_bbm/include/vrec_osd.h" />
 <Unit filename="../../../../apps/wifi_bbm/lvgl_v8_ui_app/custom/custom.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/wifi_bbm/lvgl_v8_ui_app/custom/custom.h" />
+<Unit filename="../../../../apps/wifi_bbm/lvgl_v8_ui_app/custom/ui_action_dev.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/wifi_bbm/lvgl_v8_ui_app/custom/ui_action_dir.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/wifi_bbm/lvgl_v8_ui_app/custom/ui_action_file.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/wifi_bbm/lvgl_v8_ui_app/custom/ui_action_home.c"><Option compilerVer="CC"/></Unit>
@@ -1221,6 +1222,7 @@
 <Unit filename="../../../../apps/wifi_bbm/lvgl_v8_ui_app/generated/gui_msg/gui_video_play_msg.h" />
 <Unit filename="../../../../apps/wifi_bbm/lvgl_v8_ui_app/generated/gui_res/res_common.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/wifi_bbm/lvgl_v8_ui_app/generated/gui_res/res_common.h" />
+<Unit filename="../../../../apps/wifi_bbm/lvgl_v8_ui_app/generated/gui_scr/setup_scr_device_select.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/wifi_bbm/lvgl_v8_ui_app/generated/gui_scr/setup_scr_dir_select.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/wifi_bbm/lvgl_v8_ui_app/generated/gui_scr/setup_scr_file_browser.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/wifi_bbm/lvgl_v8_ui_app/generated/gui_scr/setup_scr_home.c"><Option compilerVer="CC"/></Unit>
@@ -1243,6 +1245,8 @@
 <Unit filename="../../../../apps/wifi_bbm/protocols/udp_multicast.h" />
 <Unit filename="../../../../apps/wifi_bbm/protocols/wifi_adapter.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/wifi_bbm/protocols/wifi_adapter.h" />
+<Unit filename="../../../../apps/wifi_bbm/simple_avi/avilib.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="../../../../apps/wifi_bbm/simple_avi/avilib.h" />
 <Unit filename="../../../../apps/wifi_bbm/ui_action.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/wifi_bbm/wifi/ftpd_vfs_reg.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/wifi_bbm/wifi/media_file_list.c"><Option compilerVer="CC"/></Unit>

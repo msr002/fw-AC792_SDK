@@ -52,16 +52,12 @@ void lv_draw_jlvg_fill(lv_draw_unit_t *draw_unit, const lv_draw_fill_dsc_t *dsc,
     lv_draw_buf_t *draw_buf = layer->draw_buf;
 
     lv_area_t rel_coords;
-    lv_area_copy(&rel_coords, coords);
-    lv_area_move(&rel_coords, -layer->buf_area.x1, -layer->buf_area.y1);
-    //printf("buf_area (x1,y1) = (%d,%d); (x2,y2) = (%d,%d).", layer->buf_area.x1, layer->buf_area.y1, layer->buf_area.x2, layer->buf_area.y2);
-
     lv_area_t rel_clip_area;
     lv_area_copy(&rel_clip_area, draw_unit->clip_area);
-    lv_area_move(&rel_clip_area, -layer->buf_area.x1, -layer->buf_area.y1);
+    //lv_area_move(&rel_clip_area, -layer->buf_area.x1, -layer->buf_area.y1);
 
     lv_area_t blend_area;   //这个区域无论是帧buff还是行buff都是相对的新的绘制区域
-    if (!lv_area_intersect(&blend_area, &rel_coords, &rel_clip_area)) {
+    if (!lv_area_intersect(&blend_area, coords, &rel_clip_area)) {
         return; /*Fully clipped, nothing to do*/
     }
     //printf("blend_area (x1,y1) = (%d,%d); (x2,y2) = (%d,%d).", blend_area.x1, blend_area.y1, blend_area.x2, blend_area.y2);
@@ -75,6 +71,8 @@ void lv_draw_jlvg_fill(lv_draw_unit_t *draw_unit, const lv_draw_fill_dsc_t *dsc,
     uint8_t *dest_buf;
     lv_color_format_t dest_cf = draw_buf->header.cf;
     uint32_t bytes_per_pixel = lv_color_format_get_size(dest_cf);
+    int dest_x = 0;
+    int dest_y = 0;
 
 #if (JLVG_DRAW_FULL_FB_ENABLE == 1)
     fb_width = layer->buf_area.x2 - layer->buf_area.x1 + 1;     // 显存区域的宽度
@@ -83,13 +81,19 @@ void lv_draw_jlvg_fill(lv_draw_unit_t *draw_unit, const lv_draw_fill_dsc_t *dsc,
     dest_stride = draw_buf->header.stride;
     dest_buf = draw_buf->data;  //最终会更新到屏幕上面的 buff 区域
 #else
-    fb_width = blend_area.x2 - blend_area.x1 + 1;       // 绘制区域的宽度
-    fb_height = blend_area.y2 - blend_area.y1 + 1;      // 绘制区域的高度
-    fb_size = fb_width * fb_height * bytes_per_pixel;   // 绘制区域的buff大小
     dest_stride = draw_buf->header.stride;
-    dest_buf = draw_buf->data + (blend_area.x1 * bytes_per_pixel) + (blend_area.y1 * dest_stride);
+    //dest_buf = draw_buf->data + (blend_area.x1 * bytes_per_pixel) + (blend_area.y1 * dest_stride);
+    //计算目标地址偏移
+    lv_area_intersect(&rel_coords, coords, &layer->buf_area);
+    dest_x = rel_coords.x1 - layer->buf_area.x1;
+    dest_y = rel_coords.y1 - layer->buf_area.y1;
+    fb_width = lv_area_get_width(&rel_coords);
+    fb_height = lv_area_get_height(&rel_coords);
+    fb_size = fb_width * fb_height * bytes_per_pixel;   // 绘制区域的buff大小
+    dest_buf = lv_draw_buf_goto_xy(draw_buf, dest_x, dest_y);
 #endif
-    //printf("fb_width = %d; fb_height = %d; dest_stride = %d.", fb_width, fb_height, dest_stride);
+    //printf("x:%d y:%d fb_width = %d; fb_height = %d; dest_stride = %d.\n", blend_area.x1, blend_area.y1, fb_width, fb_height, dest_stride);
+
 
     jlvg_matrix_t user2surface; // 变换矩阵 user to surface
     jlvg_matrix_t surface2paint;// 变换矩阵 surface to paint
@@ -113,11 +117,11 @@ void lv_draw_jlvg_fill(lv_draw_unit_t *draw_unit, const lv_draw_fill_dsc_t *dsc,
     draw_area.w = blend_area.x2 - blend_area.x1 + 1;
     draw_area.h = blend_area.y2 - blend_area.y1 + 1;
 #else
-    // 即 blend_area 区域
-    draw_area.x = 0;
-    draw_area.y = 0;
-    draw_area.w = fb_width;
-    draw_area.h = fb_height;
+    // path区域
+    draw_area.x = (coords->x1 >= 0) ? 0 : coords->x1;
+    draw_area.y = (coords->y1 >= 0) ? 0 : coords->y1;
+    draw_area.w = lv_area_get_width(coords);
+    draw_area.h = lv_area_get_height(coords);
 #endif
     //printf("draw_area (x,y) = (%d,%d); w = %d, y = %d.", draw_area.x, draw_area.y, draw_area.w, draw_area.h);
 
@@ -128,8 +132,8 @@ void lv_draw_jlvg_fill(lv_draw_unit_t *draw_unit, const lv_draw_fill_dsc_t *dsc,
     float points_over[64];      //绘制结束需要的路径坐标
 
     if (dsc->radius != 0) { /* 有圆角属性 */
-        printf("radius = %d", dsc->radius);
-        ASSERT(0, "There are still exceptions unresolved");
+        /* printf("radius = %d", dsc->radius); */
+        /* ASSERT(0, "There are still exceptions unresolved"); */
         //圆角矩形路径描述
         //确定四个圆弧的圆心位置以及四个起始点 + 四个终点，以左上角圆弧为起点： 1 + 3 + 1 + 3 + 1 + 3 + 1 + 3 + 1   //13, p0 -> p3 顺时针
         int32_t coords_w = lv_area_get_width(coords);
@@ -137,6 +141,11 @@ void lv_draw_jlvg_fill(lv_draw_unit_t *draw_unit, const lv_draw_fill_dsc_t *dsc,
         int32_t short_side = LV_MIN(coords_w, coords_h);
         int32_t rout = LV_MIN(dsc->radius, short_side >> 1);    // 计算圆角的半径
 
+        uint32_t nsegments = 0;
+        int npoints = 0;
+        uint8_t segments[1 + 3 + 1 + 3 + 1 + 3 + 1 + 3 + 1];     //13
+        float points[2 + 2 * 6 + 2 + 2 * 6 + 2 + 2 * 6 + 2 + 2 * 6 + 2];
+#if 1
         jlvg_point2_t p0;
         p0.x = rout + draw_area.x;
         p0.y = rout + draw_area.y;
@@ -191,10 +200,6 @@ void lv_draw_jlvg_fill(lv_draw_unit_t *draw_unit, const lv_draw_fill_dsc_t *dsc,
 
         int nseg_tmp = 0;
         int npoints_tmp = 0;
-        uint32_t nsegments = 0;
-        uint8_t segments[1 + 3 + 1 + 3 + 1 + 3 + 1 + 3 + 1];     //13
-        int npoints = 0;
-        float points[2 + 2 * 6 + 2 + 2 * 6 + 2 + 2 * 6 + 2 + 2 * 6 + 2];
 
         //moveto
         segments[nsegments++] = VGHW_MOVE_TO;   //起点 and 终点
@@ -202,8 +207,8 @@ void lv_draw_jlvg_fill(lv_draw_unit_t *draw_unit, const lv_draw_fill_dsc_t *dsc,
         points[npoints++] = p01.y;
 
         //1st arc
-        jlvg_path_circle2beizer(&segments[nsegments], &nseg_tmp, &points[npoints], &npoints_tmp,
-                                p0.x, p0.y, rout, p01.x, p01.y, p02.x, p02.y, 0, 0);
+        lv_jlvg_path_circle2bezier(&segments[nsegments], &nseg_tmp, &points[npoints], &npoints_tmp,
+                                   p0.x, p0.y, rout, p01.x, p01.y, p02.x, p02.y, 0, 0);
         nsegments += nseg_tmp;
         npoints += npoints_tmp;
 
@@ -213,8 +218,8 @@ void lv_draw_jlvg_fill(lv_draw_unit_t *draw_unit, const lv_draw_fill_dsc_t *dsc,
         points[npoints++] = p11.y;
 
         //2nd arc
-        jlvg_path_circle2beizer(&segments[nsegments], &nseg_tmp, &points[npoints], &npoints_tmp,
-                                p1.x, p1.y, rout, p11.x, p11.y, p12.x, p12.y, 0, 0);
+        lv_jlvg_path_circle2bezier(&segments[nsegments], &nseg_tmp, &points[npoints], &npoints_tmp,
+                                   p1.x, p1.y, rout, p11.x, p11.y, p12.x, p12.y, 0, 0);
         nsegments += nseg_tmp;
         npoints += npoints_tmp;
 
@@ -224,8 +229,8 @@ void lv_draw_jlvg_fill(lv_draw_unit_t *draw_unit, const lv_draw_fill_dsc_t *dsc,
         points[npoints++] = p21.y;
 
         //3rd arc
-        jlvg_path_circle2beizer(&segments[nsegments], &nseg_tmp, &points[npoints], &npoints_tmp,
-                                p2.x, p2.y, rout, p21.x, p21.y, p22.x, p22.y, 0, 0);
+        lv_jlvg_path_circle2bezier(&segments[nsegments], &nseg_tmp, &points[npoints], &npoints_tmp,
+                                   p2.x, p2.y, rout, p21.x, p21.y, p22.x, p22.y, 0, 0);
         nsegments += nseg_tmp;
         npoints += npoints_tmp;
 
@@ -235,8 +240,8 @@ void lv_draw_jlvg_fill(lv_draw_unit_t *draw_unit, const lv_draw_fill_dsc_t *dsc,
         points[npoints++] = p31.y;
 
         //4th arc
-        jlvg_path_circle2beizer(&segments[nsegments], &nseg_tmp, &points[npoints], &npoints_tmp,
-                                p3.x, p3.y, rout, p31.x, p31.y, p32.x, p32.y, 0, 0);
+        lv_jlvg_path_circle2bezier(&segments[nsegments], &nseg_tmp, &points[npoints], &npoints_tmp,
+                                   p3.x, p3.y, rout, p31.x, p31.y, p32.x, p32.y, 0, 0);
         nsegments += nseg_tmp;
         npoints += npoints_tmp;
 
@@ -244,11 +249,25 @@ void lv_draw_jlvg_fill(lv_draw_unit_t *draw_unit, const lv_draw_fill_dsc_t *dsc,
         segments[nsegments++] = VGHW_LINE_TO;
         points[npoints++] = p01.x;
         points[npoints++] = p01.y;
-
+#else
+        create_rounded_rect_jlvg_path(&draw_area, rout, &segments[0], &points[0], &nsegments, &npoints);
+#endif
         nsegments_over = nsegments;
         memcpy(segments_over, segments, nsegments);
-        memcpy(points_over, points, sizeof(points));
-        jlvg_path_init(&rect_path, JLVG_PATH_DATATYPE_F32, nsegments_over, segments_over, sizeof(points) / sizeof(float), points_over);
+        memcpy(points_over, points, npoints * sizeof(float));
+        jlvg_path_init(&rect_path, JLVG_PATH_DATATYPE_F32, nsegments_over, segments_over, npoints, points_over);
+
+
+        //printf("\nX=[ ");
+        //for (int i = 0; i < npoints; i+=2) {
+        //    printf("%f,", points[i]);
+        //}
+        //printf("]\n");
+        //printf("Y=[ ");
+        //for (int i = 0; i < npoints; i += 2) {
+        //    printf("%f,", points[i + 1]);
+        //}
+        //printf("]\n ");
     } else {
         //printf("no radius");
         //常规矩形路径描述
@@ -270,9 +289,9 @@ void lv_draw_jlvg_fill(lv_draw_unit_t *draw_unit, const lv_draw_fill_dsc_t *dsc,
     }
     jlvg_path_update_fill(&rect_path);  //更新路径信息
 
-    jlvg_boundbox_t bbox_out;
-    jlvg_path_transform_boundbox(&bbox_out, &rect_path.bbox, &user2surface);
-    jlvg_bbox2rect(&draw_area, &bbox_out);
+    //jlvg_boundbox_t bbox_out;
+    //jlvg_path_transform_boundbox(&bbox_out, &rect_path.bbox, &user2surface);
+    //jlvg_bbox2rect(&draw_area, &bbox_out);
 
     //3、配置颜色填充
     //渐变属性填充颜色
@@ -322,7 +341,11 @@ void lv_draw_jlvg_fill(lv_draw_unit_t *draw_unit, const lv_draw_fill_dsc_t *dsc,
     // 4、硬件绘制
 
     jlvg_start_frame(g_jlvg, &surface);
-
+    //重新计算bbox区域,(转成相对于实际绘图区域的坐标)
+    draw_area.x = LV_ABS(rel_coords.x1 - blend_area.x1);
+    draw_area.y = LV_ABS(rel_coords.y1 - blend_area.y1);
+    draw_area.w = lv_area_get_width(&blend_area);
+    draw_area.h = lv_area_get_height(&blend_area);
     jlvg_fill_path(g_jlvg, &draw_area, &rect_path, draw_paint, &user2surface, &surface2paint, blend_mode, VGHW_NON_ZERO);
 
     jlvg_end_frame(g_jlvg);

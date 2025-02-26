@@ -894,8 +894,10 @@
 <Unit filename="../../../../../apps/common/example/third_party/lvgl_v9/src/draw/jl/jlvg/lv_draw_jlvg.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../../apps/common/example/third_party/lvgl_v9/src/draw/jl/jlvg/lv_draw_jlvg.h" />
 <Unit filename="../../../../../apps/common/example/third_party/lvgl_v9/src/draw/jl/jlvg/lv_draw_jlvg_common.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="../../../../../apps/common/example/third_party/lvgl_v9/src/draw/jl/jlvg/lv_draw_jlvg_common.h" />
 <Unit filename="../../../../../apps/common/example/third_party/lvgl_v9/src/draw/jl/jlvg/lv_draw_jlvg_fill.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../../apps/common/example/third_party/lvgl_v9/src/draw/jl/jlvg/lv_draw_jlvg_img.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="../../../../../apps/common/example/third_party/lvgl_v9/src/draw/jl/jlvg/lv_draw_jlvg_letter.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../../apps/common/example/third_party/lvgl_v9/src/draw/lv_draw.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../../apps/common/example/third_party/lvgl_v9/src/draw/lv_draw.h" />
 <Unit filename="../../../../../apps/common/example/third_party/lvgl_v9/src/draw/lv_draw_arc.c"><Option compilerVer="CC"/></Unit>
@@ -1057,6 +1059,7 @@
 <Unit filename="../../../../../apps/common/example/third_party/lvgl_v9/src/libs/freetype/lv_freetype.h" />
 <Unit filename="../../../../../apps/common/example/third_party/lvgl_v9/src/libs/freetype/lv_freetype_glyph.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../../apps/common/example/third_party/lvgl_v9/src/libs/freetype/lv_freetype_image.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="../../../../../apps/common/example/third_party/lvgl_v9/src/libs/freetype/lv_freetype_jlvg_ext.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../../apps/common/example/third_party/lvgl_v9/src/libs/freetype/lv_freetype_outline.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../../apps/common/example/third_party/lvgl_v9/src/libs/freetype/lv_freetype_private.h" />
 <Unit filename="../../../../../apps/common/example/third_party/lvgl_v9/src/libs/freetype/lv_ftsystem.c"><Option compilerVer="CC"/></Unit>

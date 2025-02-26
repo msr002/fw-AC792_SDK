@@ -1316,7 +1316,7 @@ static int net_video_rec2_start()
 
     puts("start_video_rec2 \n");
     if (!__this_net->net_video_rec2) {
-        sprintf(name, "video2.%d", __this->uvc_id);
+        sprintf(name, "video10.%d", __this->uvc_id);
         __this_net->net_video_rec2 = server_open("video_server", name);
         if (!__this_net->net_video_rec2) {
             return -EINVAL;
@@ -2175,6 +2175,7 @@ static int net_video_rec_state_machine(struct application *app, enum app_state s
                 printf("CTP NOTIFY VIDEO1 OK\n\n");
             }
             break;
+#ifdef CONFIG_VIDEO2_ENABLE
         case ACTION_VIDEO2_OPEN_RT_STREAM:
             in_app_stop_display(2);
             printf("----ACTION_VIDEO2_OPEN_RT_STREAM----\n\n");
@@ -2197,6 +2198,7 @@ static int net_video_rec_state_machine(struct application *app, enum app_state s
                 printf("CTP NOTIFY VIDEO2 OK\n\n");
             }
             break;
+#endif
         case ACTION_VIDEO0_CLOSE_RT_STREAM:
             printf("---ACTION_VIDEO0_CLOSE_RT_STREAM---\n\n");
             err = net_rt_video0_stop(it);
@@ -2228,6 +2230,7 @@ static int net_video_rec_state_machine(struct application *app, enum app_state s
             __this_net->fbuf_ffil = 0;
 
             break;
+#ifdef CONFIG_VIDEO2_ENABLE
         case ACTION_VIDEO2_CLOSE_RT_STREAM:
             printf("---ACTION_VIDEO2_CLOSE_RT_STREAM---\n\n");
             err =  net_rt_video2_stop(it);
@@ -2243,6 +2246,7 @@ static int net_video_rec_state_machine(struct application *app, enum app_state s
             __this_net->fbuf_fcnt = 0;
             __this_net->fbuf_ffil = 0;
             break;
+#endif
         case ACTION_VIDEO_CYC_SAVEFILE:
 #if 0
             video_cyc_file(0);

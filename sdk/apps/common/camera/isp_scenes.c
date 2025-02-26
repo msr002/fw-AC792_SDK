@@ -99,7 +99,7 @@ unsigned char scane_type[] = {SCENE_NIGHT, SCENE_INDOOR, SCENE_OUTCLUDY, SCENE_O
 #define ISP0_CFG_CAMERA_CHANNEL 0xff
 #define ISP1_CFG_CAMERA_CHANNEL 0xff
 
-#define USE_FILE_SCENES_CHANGE  1
+#define USE_FILE_SCENES_CHANGE  0
 
 static struct user_isp_cfg  isp0_cfg = {
     .channel = ISP0_CFG_CAMERA_CHANNEL,
@@ -366,12 +366,12 @@ static void isp_scene_switch(struct user_isp_cfg *cfg, u8 force)
     if (!ret) {
         cfg->cur_lv = gen_cfg.lv;
     }
-    __isp_cfg_printf("\n cur lv %d\n", cfg->cur_lv);
+    __isp_cfg_printf("\nch%d: cur lv %d\n", cfg->channel, cfg->cur_lv);
     if (force) {
         i = isp_cfg_judge_first(cfg);
     } else {
         i = isp_cfg_judge(cfg);
-        __isp_cfg_printf("\n cur scene %d\n", scane_type[i]);
+        __isp_cfg_printf("\nch%d: cur scene %d\n", cfg->channel, scane_type[i]);
     }
     scene = scane_type[i];
 
@@ -379,7 +379,7 @@ static void isp_scene_switch(struct user_isp_cfg *cfg, u8 force)
         return;
     }
 
-    __isp_cfg_printf("scene %d\n", scene);
+    __isp_cfg_printf("ch%d: scene %d\n", cfg->channel, scene);
     cfg->current_scene = scene;
     flush_isp_cfg(cfg);
 

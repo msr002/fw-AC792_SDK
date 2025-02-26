@@ -133,8 +133,6 @@ void video_pipeline_extern_do(const char *name, int event, void *arg)
     }
 }
 
-#ifdef CONFIG_WIFI_ENABLE
-/******************************用于网络实时流*************************************/
 static void ve_mdet_reset();
 static int video_rec_sd_in();
 static int video_rec_sd_out();
@@ -147,6 +145,8 @@ extern int video_rec_err_notify(const char *method);
 extern int video_rec_state_notify(void);
 extern int video_rec_start_notify(void);
 extern int video_rec_all_stop_notify(void);
+#ifdef CONFIG_WIFI_ENABLE
+/******************************用于网络实时流*************************************/
 extern int net_video_rec_event_notify(void);
 extern int net_video_rec_event_stop(void);
 extern int net_video_rec_event_start(void);
@@ -214,7 +214,6 @@ static void video_set_disp_window()
 #if THREE_WAY_ENABLE
     //右边UI遮挡到摄像头
     u16 ui_width = 75;
-
     disp_window[DISP_MAIN_WIN][1].width  = small_screen_w;
     disp_window[DISP_MAIN_WIN][1].height = small_screen_h;
     disp_window[DISP_MAIN_WIN][1].left   = SCREEN_W - small_screen_w - ui_width;
@@ -298,16 +297,18 @@ static const char *rec_path[][2] = {
     {CONFIG_REC_PATH_1, CONFIG_EMR_REC_PATH_1},
     {CONFIG_REC_PATH_2, CONFIG_EMR_REC_PATH_2},
     {CONFIG_REC_PATH_2, CONFIG_EMR_REC_PATH_2},
+    {CONFIG_REC_PATH_4, CONFIG_EMR_REC_PATH_4},
+    {CONFIG_REC_PATH_5, CONFIG_EMR_REC_PATH_2},
 #else
     {CONFIG_REC_PATH_0, CONFIG_REC_PATH_0},
     {CONFIG_REC_PATH_1, CONFIG_REC_PATH_1},
     {CONFIG_REC_PATH_2, CONFIG_REC_PATH_2},
     {CONFIG_REC_PATH_2, CONFIG_REC_PATH_2},
+    {CONFIG_REC_PATH_4, CONFIG_REC_PATH_4},
+    {CONFIG_REC_PATH_5, CONFIG_REC_PATH_5},
 #endif
 };
 
-#ifdef CONFIG_WIFI_ENABLE
-/******************************用于网络实时流*************************************/
 void *get_video_rec_handler(void)
 {
     return (void *)&rec_handler;
@@ -368,6 +369,8 @@ int video_rec_get_abr_from(u32 width)
 {
     return video_rec_get_abr(width);
 }
+#ifdef CONFIG_WIFI_ENABLE
+/******************************用于网络实时流*************************************/
 
 int net_video_disp_stop(int id)
 {
@@ -576,6 +579,30 @@ static int video_rec_online_nums()
     }
 
     return nums;
+}
+
+//仅支持用于单raw情况下打开, 双raw不支持
+int video_pre_create(int id, int open)
+{
+    int err = 0;
+
+    if (!__this->video_pre[id]) {
+        char dev_name[12] = {0};
+        sprintf(dev_name, "video%d.%d", id, id < 2 ? 0 : __this->uvc_id);
+        __this->video_pre[id] = server_open("video_server", (void *)dev_name);
+        if (!__this->video_pre[id]) {
+            log_e("open video_server: faild, id = %d\n", id);
+            return -EFAULT;
+        }
+    }
+
+    err = server_request(__this->video_pre[id], VIDEO_REQ_PRE_CREATE, &open);
+    if (err) {
+        server_close(__this->video_pre[id]);
+        __this->video_pre[id] = NULL;
+    }
+
+    return err;
 }
 
 #ifndef MULTI_LCD_EN
@@ -921,7 +948,7 @@ static int video_disp_win_switch(int mode, int dev_id)
     }
     for (i = 1; i < CONFIG_VIDEO_REC_NUM; i++) {
         if (__this->video_online[i]) {
-            err = video_disp_start(i, &disp_window[next_win][i]);
+            err = video_disp_start(i, &disp_window[next_win][i >= 4 ? (i - 4) : i]);
         }
     }
     if (i == CONFIG_VIDEO_REC_NUM) {
@@ -1658,12 +1685,12 @@ static int video_rec_del_old_file()
     int i;
     int err;
     FILE *file;
-    int fsize[4] = {0, 0, 0, 0};
+    int fsize[] = {0, 0, 0, 0, 0, 0};
     u32 cur_space;
     u32 need_space = 0;
     u32 gap_time = db_select("gap");
     int cyc_time = db_select("cyc");
-    int format[4] = { VIDEO0_REC_FORMAT, VIDEO1_REC_FORMAT, VIDEO2_REC_FORMAT, VIDEO3_REC_FORMAT};
+    int format[] = { VIDEO0_REC_FORMAT, VIDEO1_REC_FORMAT, VIDEO2_REC_FORMAT, VIDEO3_REC_FORMAT, VIDEO4_REC_FORMAT, VIDEO5_REC_FORMAT};
 
 #ifdef CONFIG_VIDEO0_ENABLE
     if (!__this->new_file[0]) {
@@ -1706,6 +1733,25 @@ static int video_rec_del_old_file()
         }
 #endif
 
+#ifdef CONFIG_VIDEO4_ENABLE
+        if (__this->video_online[4] && !__this->new_file[4]) {
+            fsize[4] =  video_rec_get_fsize(cyc_time, rec_pix_w[db_select("res")], VIDEO4_REC_FORMAT);
+            if (gap_time) {
+                fsize[4] = fsize[4] / (30 * gap_time / 1000);
+            }
+            need_space += fsize[4];
+        }
+#endif
+
+#ifdef CONFIG_VIDEO5_ENABLE
+        if (__this->video_online[5] && !__this->new_file[5]) {
+            fsize[5] =  video_rec_get_fsize(cyc_time, rec_pix_w[db_select("res")], VIDEO5_REC_FORMAT);
+            if (gap_time) {
+                fsize[5] = fsize[5] / (30 * gap_time / 1000);
+            }
+            need_space += fsize[5];
+        }
+#endif
     }
 
 
@@ -2368,8 +2414,12 @@ static int video1_rec_start()
     }
 
     u32 res = db_select("res");
-
+#if THREE_WAY_DOUBLE_RAW
     req.rec.online  = 1;
+#else
+    req.rec.online  = 0;
+#endif
+
     req.rec.enable_dri  = 0;
     req.rec.channel = 0;
     req.rec.camera_type = VIDEO_CAMERA_NORMAL;
@@ -3586,8 +3636,804 @@ static int video3_rec_osd_ctl(u8 onoff)
 }
 #endif
 
+#ifdef CONFIG_VIDEO4_ENABLE
+static int video4_rec_start()
+{
+    int err;
+    union video_req req = {0};
+    struct video_text_osd text_osd;
+    struct video_graph_osd graph_osd;
+    u16 max_one_line_strnum;
+    u16 osd_line_num;
+    u16 osd_max_heigh;
+
+    puts("start_video_rec4 \n");
+    if (!__this->video_rec4) {
+        __this->video_rec4 = server_open("video_server", "video4.0");
+        if (!__this->video_rec4) {
+            return VREC_ERR_V4_SERVER_OPEN;
+        }
+
+        server_register_event_handler(__this->video_rec4, (void *)4, rec_dev_server_event_handler);
+    }
+
+    u32 res = db_select("res");
+
+    req.rec.online  = 1;
+    req.rec.channel = 0;
+    req.rec.enable_dri  = 0;
+    req.rec.camera_type = VIDEO_CAMERA_NORMAL;
+    req.rec.width 	    = rec_pix_w[res];
+    req.rec.height 	    = rec_pix_h[res];
+    req.rec.format 	= VIDEO4_REC_FORMAT;
+    req.rec.state 	= VIDEO_STATE_START;
+    req.rec.file    = __this->file[4];
+    req.rec.quality = VIDEO_LOW_Q;
+#ifdef CONFIG_WIFI_ENABLE
+    req.rec.fps 	    = 0;
+    req.rec.real_fps 	= video_rec_get_fps();
+#else
+    req.rec.fps 	    = 0;
+    req.rec.real_fps 	= 0;
+#endif
 
 
+
+
+    req.rec.audio.sample_rate = 8000;
+    req.rec.audio.channel 	= 1;
+    req.rec.audio.volume    = 100;
+    req.rec.audio.buf = __this->audio_buf[4];
+    req.rec.audio.buf_len = AUDIO4_BUF_SIZE;
+    req.rec.pkg_mute.aud_mute = !db_select("mic");
+
+    req.rec.abr_kbps = video_rec_get_abr(req.rec.width);
+    req.rec.IP_interval = 0;
+
+    /*感兴趣区域为下方 中间 2/6 * 4/6 区域，可以调整
+    	感兴趣区域qp 为其他区域的 70% ，可以调整
+    */
+    /* req.rec.roi.roio_xy = (req.rec.height * 5 / 6 / 16) << 24 | (req.rec.height * 3 / 6 / 16) << 16 | (req.rec.width * 5 / 6 / 16) << 8 | (req.rec.width) * 1 / 6 / 16; */
+    /* req.rec.roi.roio_ratio = 256 * 70 / 100 ; */
+    /* req.rec.roi.roi1_xy = 0; */
+    /* req.rec.roi.roi2_xy = 0; */
+    /* req.rec.roi.roi3_xy = (1 << 24) | (0 << 16) | ((req.rec.width / 16) << 8) | 0; */
+    /* req.rec.roi.roio_ratio1 = 0; */
+    /* req.rec.roi.roio_ratio2 = 0; */
+    /* req.rec.roi.roio_ratio3 = 256 * 80 / 100; */
+
+    /*
+     * osd 相关的参数，注意坐标位置，x要64对齐，y要16对齐,底下例子是根据图像大小偏移到右下
+     */
+    text_osd.font_w = 16;
+    text_osd.font_h = 32;
+    max_one_line_strnum = strlen(video_rec_osd_buf);//21;
+
+    osd_line_num = 1;
+    if (db_select("num")) {
+        osd_line_num = 2;
+    }
+
+    osd_max_heigh = (req.rec.height == 1088) ? 1080 : req.rec.height ;
+    text_osd.x = (req.rec.width - max_one_line_strnum * text_osd.font_w) / 64 * 64;
+    text_osd.y = (osd_max_heigh - text_osd.font_h * osd_line_num) / 16 * 16;
+    text_osd.color[0] = 0x057d88;
+    text_osd.color[1] = 0xe20095;
+    text_osd.color[2] = 0xe20095;
+    text_osd.bit_mode = 2;
+    text_osd.text_format = video_rec_osd_buf;
+    text_osd.font_matrix_table = osd_str_total;
+    text_osd.font_matrix_base = osd2_str_matrix;
+    text_osd.font_matrix_len = sizeof(osd2_str_matrix);
+    text_osd.direction = 1;
+
+#ifdef CONFIG_OSD_LOGO
+    graph_osd.bit_mode = 16;//2bit的osd需要配置3个color
+    graph_osd.x = 0;
+    graph_osd.y = 0;
+    graph_osd.width = 256;
+    graph_osd.height = 256;
+    graph_osd.icon = icon_osd_buf;
+    graph_osd.icon_size = sizeof(icon_osd_buf);
+#endif
+    req.rec.text_osd = NULL;
+    req.rec.graph_osd = NULL;
+    if (db_select("dat")) {
+        req.rec.text_osd = &text_osd;
+#ifdef CONFIG_OSD_LOGO
+        req.rec.graph_osd = &graph_osd;
+#endif
+    }
+
+
+    req.rec.slow_motion = 0;
+    if (req.rec.camera_type != VIDEO_CAMERA_UVC) {
+        req.rec.tlp_time = db_select("gap");
+        if (req.rec.tlp_time) {
+            req.rec.real_fps = 1000 / req.rec.tlp_time;
+            req.rec.pkg_fps = video_rec_get_fps();
+        }
+    } else {
+        req.rec.tlp_time = 0;
+    }
+
+    if (req.rec.slow_motion || req.rec.tlp_time) {
+        req.rec.audio.sample_rate = 0;
+        req.rec.audio.channel 	= 0;
+        req.rec.audio.volume    = 0;
+        req.rec.audio.buf = 0;
+        req.rec.audio.buf_len = 0;
+    }
+    req.rec.buf = __this->video_buf[4];
+    req.rec.buf_len = VREC4_FBUF_SIZE;
+
+#ifdef CONFIG_FILE_PREVIEW_ENABLE
+    req.rec.rec_small_pic 	= 1;
+#else
+    req.rec.rec_small_pic 	= 0;
+#endif
+
+#if (DOUBLE_720 == 1)
+    req.rec.double720 = true;
+#endif
+
+#if (DOUBLE_720_SMALL_SCR == 1)
+    req.rec.double720_small_scr = true;
+#endif
+
+
+    req.rec.cycle_time = db_select("cyc");
+    if (req.rec.cycle_time == 0) {
+        req.rec.cycle_time = 5;
+    }
+
+    req.rec.cycle_time = req.rec.cycle_time * 60;
+
+#if CAMERA_THUMBNAIL_ENABLE
+    struct jpg_thumbnail thumbnails;
+    err = camera_take_thumbnail(4);
+    if (!err) {
+        log_i("add thumbnail\n");
+        thumbnails.enable = 1;
+        thumbnails.buf = __this->thumbnail_img_buf;
+        thumbnails.len = __this->thumbnail_img_size;
+        req.rec.thumbnails = &thumbnails;
+    }
+#endif
+
+
+
+    err = server_request(__this->video_rec4, VIDEO_REQ_REC, &req);
+    if (err != 0) {
+        puts("\n\n\nstart rec4 err\n\n\n");
+        return VREC_ERR_V4_REQ_START;
+    }
+
+    return 0;
+}
+
+static int video4_rec_aud_mute()
+{
+    union video_req req;
+
+    if (!__this->video_rec4) {
+        return -EINVAL;
+    }
+
+    req.rec.channel = 0;
+    req.rec.state 	= VIDEO_STATE_PKG_MUTE;
+    req.rec.pkg_mute.aud_mute = !db_select("mic");
+
+    return server_request(__this->video_rec4, VIDEO_REQ_REC, &req);
+}
+
+static int video4_rec_set_dr()
+{
+    union video_req req = {0};
+
+    if (!__this->video_rec4) {
+        return -EINVAL;
+    }
+
+    req.rec.real_fps = 7;
+    req.rec.channel = 0;
+    req.rec.state 	= VIDEO_STATE_SET_DR;
+
+    return server_request(__this->video_rec4, VIDEO_REQ_REC, &req);
+
+}
+
+
+static int video4_rec_stop(u8 close)
+{
+    union video_req req;
+    int err;
+
+    log_d("video4_rec_stop\n");
+
+    if (__this->video_rec4) {
+        req.rec.channel = 0;
+        req.rec.state = VIDEO_STATE_STOP;
+        err = server_request(__this->video_rec4, VIDEO_REQ_REC, &req);
+        if (err != 0) {
+            printf("\nstop rec4 err 0x%x\n", err);
+            return VREC_ERR_V1_REQ_STOP;
+        }
+    }
+
+    video_rec_close_file(4);
+
+    if (close) {
+        if (__this->video_rec4) {
+            server_close(__this->video_rec4);
+            __this->video_rec4 = NULL;
+        }
+    }
+
+    if (__this->thumb_buf) {
+        free(__this->thumb_buf);
+        __this->thumb_buf = NULL;
+    }
+
+
+    return 0;
+}
+
+static int video4_rec_savefile()
+{
+    union video_req req = {0};
+    int err;
+
+    if (!__this->file[4]) {
+        return -ENOENT;
+    }
+
+    u32 res = db_select("res");
+
+    req.rec.channel = 0;
+    req.rec.width 	= rec_pix_w[res];
+    req.rec.height 	= rec_pix_h[res];
+    req.rec.format 	= VIDEO0_REC_FORMAT;
+    req.rec.state 	= VIDEO_STATE_SAVE_FILE;
+    req.rec.file    = __this->file[4];
+
+#ifdef CONFIG_WIFI_ENABLE
+    req.rec.fps 	    = 0;
+    req.rec.real_fps 	= video_rec_get_fps();
+#else
+    req.rec.fps 	    = 0;
+    req.rec.real_fps 	= 0;
+#endif
+
+    req.rec.cycle_time = db_select("cyc");
+    if (req.rec.cycle_time == 0) {
+        req.rec.cycle_time = 5;
+    }
+
+    req.rec.cycle_time = req.rec.cycle_time * 60;
+
+#if CAMERA_THUMBNAIL_ENABLE
+    struct jpg_thumbnail thumbnails;
+    err = camera_take_thumbnail(4);
+    if (!err) {
+        log_i("add thumbnail\n");
+        thumbnails.enable = 1;
+        thumbnails.buf = __this->thumbnail_img_buf;
+        thumbnails.len = __this->thumbnail_img_size;
+        req.rec.thumbnails = &thumbnails;
+    }
+#endif
+
+
+    /*
+     *采样率，通道数，录像音量，音频使用的循环BUF,录不录声音
+     */
+#ifdef CONFIG_WIFI_ENABLE
+    req.rec.audio.sample_rate = video_rec_get_audio_sampel_rate();
+#else
+    req.rec.audio.sample_rate = 8000;
+#endif
+    req.rec.audio.channel 	= 1;
+    req.rec.audio.volume    = AUDIO_VOLUME;
+    req.rec.pkg_mute.aud_mute = !db_select("mic");
+
+    req.rec.tlp_time = db_select("gap");
+    if (req.rec.tlp_time) {
+        req.rec.real_fps = 1000 / req.rec.tlp_time;
+        req.rec.pkg_fps = video_rec_get_fps();
+    }
+
+    err = server_request(__this->video_rec4, VIDEO_REQ_REC, &req);
+    if (err != 0) {
+        log_e("rec0_save_file: err=%d\n", err);
+        return err;
+    }
+
+    return 0;
+}
+
+static void video4_rec_close()
+{
+    if (__this->video_rec4) {
+        server_close(__this->video_rec4);
+        __this->video_rec4 = NULL;
+    }
+}
+
+
+/*
+ *必须在启动录像之后才可调用该函数，并且确保启动录像时已经打开了osd
+ *新设置的osd的整体结构要和启动录像时一样，只是内容改变!!!
+ */
+static int video4_rec_set_osd_str(char *str)
+{
+    union video_req req;
+    int err;
+    if (!__this->video_rec4) {
+        return -1;
+    }
+
+    req.rec.channel = 0;
+    req.rec.state 	= VIDEO_STATE_SET_OSD_STR;
+    req.rec.new_osd_str = str;
+    err = server_request(__this->video_rec4, VIDEO_REQ_REC, &req);
+    if (err != 0) {
+        printf("\nset osd rec4 str err 0x%x\n", err);
+        return -1;
+    }
+
+    return 0;
+}
+
+static int video4_rec_osd_ctl(u8 onoff)
+{
+    union video_req req;
+    struct video_text_osd text_osd;
+    int err;
+
+    if (__this->video_rec4) {
+        u32 res = db_select("res");
+        req.rec.width 	    = rec_pix_w[res];
+        req.rec.height 	    = rec_pix_h[res];
+
+        text_osd.font_w = 16;
+        text_osd.font_h = 32;
+        text_osd.x = 0;//(req.rec.width - strlen(osd_str_buf) * text_osd.font_w) / 64 * 64;
+        text_osd.y = (req.rec.height - text_osd.font_h) / 16 * 16;
+        /* text_osd.osd_yuv = 0xe20095; */
+        text_osd.color[0] = 0xe20095;
+        /* text_osd.color[0] = 0x057d88; */
+        /* text_osd.color[1] = 0xe20095; */
+        /* text_osd.color[2] = 0xe20095; */
+        text_osd.bit_mode = 1;
+
+
+        text_osd.text_format = osd_str_buf;
+        text_osd.font_matrix_table = osd_str_total;
+        text_osd.font_matrix_base = osd_str_matrix;
+        text_osd.font_matrix_len = sizeof(osd_str_matrix);
+#ifdef __CPU_AC521x__
+        text_osd.direction = 1;
+#else
+        text_osd.direction = 0;
+#endif
+        req.rec.text_osd = 0;
+        if (onoff) {
+            req.rec.text_osd = &text_osd;
+        }
+        req.rec.channel = 0;
+        req.rec.state 	= VIDEO_STATE_SET_OSD;
+
+        err = server_request(__this->video_rec4, VIDEO_REQ_REC, &req);
+        if (err != 0) {
+            printf("\nset osd rec4 err 0x%x\n", err);
+            return -1;
+        }
+    }
+
+    return 0;
+}
+#endif
+
+
+#ifdef CONFIG_VIDEO5_ENABLE
+static int video5_rec_start()
+{
+    int err;
+    union video_req req = {0};
+    struct video_text_osd text_osd;
+    struct video_graph_osd graph_osd;
+    u16 max_one_line_strnum;
+    u16 osd_line_num;
+    u16 osd_max_heigh;
+
+    puts("start_video_rec5 \n");
+    if (!__this->video_rec5) {
+        __this->video_rec5 = server_open("video_server", "video5.0");
+        if (!__this->video_rec5) {
+            return VREC_ERR_V5_SERVER_OPEN;
+        }
+
+        server_register_event_handler(__this->video_rec5, (void *)5, rec_dev_server_event_handler);
+    }
+
+    u32 res = db_select("res");
+
+    req.rec.online  = 1;
+    req.rec.channel = 0;
+    req.rec.enable_dri  = 0;
+    req.rec.camera_type = VIDEO_CAMERA_NORMAL;
+    req.rec.width 	    = rec_pix_w[res];
+    req.rec.height 	    = rec_pix_h[res];
+    req.rec.format 	= VIDEO5_REC_FORMAT;
+    req.rec.state 	= VIDEO_STATE_START;
+    req.rec.file    = __this->file[5];
+    req.rec.quality = VIDEO_LOW_Q;
+#ifdef CONFIG_WIFI_ENABLE
+    req.rec.fps 	    = 0;
+    req.rec.real_fps 	= video_rec_get_fps();
+#else
+    req.rec.fps 	    = 0;
+    req.rec.real_fps 	= 0;
+#endif
+
+
+
+
+    req.rec.audio.sample_rate = 8000;
+    req.rec.audio.channel 	= 1;
+    req.rec.audio.volume    = 100;
+    req.rec.audio.buf = __this->audio_buf[5];
+    req.rec.audio.buf_len = AUDIO5_BUF_SIZE;
+    req.rec.pkg_mute.aud_mute = !db_select("mic");
+
+    req.rec.abr_kbps = video_rec_get_abr(req.rec.width);
+    req.rec.IP_interval = 0;
+
+    /*感兴趣区域为下方 中间 2/6 * 4/6 区域，可以调整
+    	感兴趣区域qp 为其他区域的 70% ，可以调整
+    */
+    /* req.rec.roi.roio_xy = (req.rec.height * 5 / 6 / 16) << 24 | (req.rec.height * 3 / 6 / 16) << 16 | (req.rec.width * 5 / 6 / 16) << 8 | (req.rec.width) * 1 / 6 / 16; */
+    /* req.rec.roi.roio_ratio = 256 * 70 / 100 ; */
+    /* req.rec.roi.roi1_xy = 0; */
+    /* req.rec.roi.roi2_xy = 0; */
+    /* req.rec.roi.roi3_xy = (1 << 24) | (0 << 16) | ((req.rec.width / 16) << 8) | 0; */
+    /* req.rec.roi.roio_ratio1 = 0; */
+    /* req.rec.roi.roio_ratio2 = 0; */
+    /* req.rec.roi.roio_ratio3 = 256 * 80 / 100; */
+
+    /*
+     * osd 相关的参数，注意坐标位置，x要64对齐，y要16对齐,底下例子是根据图像大小偏移到右下
+     */
+    text_osd.font_w = 16;
+    text_osd.font_h = 32;
+    max_one_line_strnum = strlen(video_rec_osd_buf);//21;
+
+    osd_line_num = 1;
+    if (db_select("num")) {
+        osd_line_num = 2;
+    }
+
+    osd_max_heigh = (req.rec.height == 1088) ? 1080 : req.rec.height ;
+    text_osd.x = (req.rec.width - max_one_line_strnum * text_osd.font_w) / 64 * 64;
+    text_osd.y = (osd_max_heigh - text_osd.font_h * osd_line_num) / 16 * 16;
+    text_osd.color[0] = 0x057d88;
+    text_osd.color[1] = 0xe20095;
+    text_osd.color[2] = 0xe20095;
+    text_osd.bit_mode = 2;
+    text_osd.text_format = video_rec_osd_buf;
+    text_osd.font_matrix_table = osd_str_total;
+    text_osd.font_matrix_base = osd2_str_matrix;
+    text_osd.font_matrix_len = sizeof(osd2_str_matrix);
+    text_osd.direction = 1;
+
+#ifdef CONFIG_OSD_LOGO
+    graph_osd.bit_mode = 16;//2bit的osd需要配置3个color
+    graph_osd.x = 0;
+    graph_osd.y = 0;
+    graph_osd.width = 256;
+    graph_osd.height = 256;
+    graph_osd.icon = icon_osd_buf;
+    graph_osd.icon_size = sizeof(icon_osd_buf);
+#endif
+    req.rec.text_osd = NULL;
+    req.rec.graph_osd = NULL;
+    if (db_select("dat")) {
+        req.rec.text_osd = &text_osd;
+#ifdef CONFIG_OSD_LOGO
+        req.rec.graph_osd = &graph_osd;
+#endif
+    }
+
+
+    req.rec.slow_motion = 0;
+    if (req.rec.camera_type != VIDEO_CAMERA_UVC) {
+        req.rec.tlp_time = db_select("gap");
+        if (req.rec.tlp_time) {
+            req.rec.real_fps = 1000 / req.rec.tlp_time;
+            req.rec.pkg_fps = video_rec_get_fps();
+        }
+    } else {
+        req.rec.tlp_time = 0;
+    }
+
+    if (req.rec.slow_motion || req.rec.tlp_time) {
+        req.rec.audio.sample_rate = 0;
+        req.rec.audio.channel 	= 0;
+        req.rec.audio.volume    = 0;
+        req.rec.audio.buf = 0;
+        req.rec.audio.buf_len = 0;
+    }
+    req.rec.buf = __this->video_buf[5];
+    req.rec.buf_len = VREC5_FBUF_SIZE;
+
+#ifdef CONFIG_FILE_PREVIEW_ENABLE
+    req.rec.rec_small_pic 	= 1;
+#else
+    req.rec.rec_small_pic 	= 0;
+#endif
+
+#if (DOUBLE_720 == 1)
+    req.rec.double720 = true;
+#endif
+
+#if (DOUBLE_720_SMALL_SCR == 1)
+    req.rec.double720_small_scr = true;
+#endif
+
+
+    req.rec.cycle_time = db_select("cyc");
+    if (req.rec.cycle_time == 0) {
+        req.rec.cycle_time = 5;
+    }
+
+    req.rec.cycle_time = req.rec.cycle_time * 60;
+
+#if CAMERA_THUMBNAIL_ENABLE
+    struct jpg_thumbnail thumbnails;
+    err = camera_take_thumbnail(5);
+    if (!err) {
+        log_i("add thumbnail\n");
+        thumbnails.enable = 1;
+        thumbnails.buf = __this->thumbnail_img_buf;
+        thumbnails.len = __this->thumbnail_img_size;
+        req.rec.thumbnails = &thumbnails;
+    }
+#endif
+
+
+
+    err = server_request(__this->video_rec5, VIDEO_REQ_REC, &req);
+    if (err != 0) {
+        puts("\n\n\nstart rec5 err\n\n\n");
+        return VREC_ERR_V5_REQ_START;
+    }
+
+    return 0;
+}
+
+static int video5_rec_aud_mute()
+{
+    union video_req req;
+
+    if (!__this->video_rec5) {
+        return -EINVAL;
+    }
+
+    req.rec.channel = 0;
+    req.rec.state 	= VIDEO_STATE_PKG_MUTE;
+    req.rec.pkg_mute.aud_mute = !db_select("mic");
+
+    return server_request(__this->video_rec5, VIDEO_REQ_REC, &req);
+}
+
+static int video5_rec_set_dr()
+{
+    union video_req req = {0};
+
+    if (!__this->video_rec5) {
+        return -EINVAL;
+    }
+
+    req.rec.real_fps = 7;
+    req.rec.channel = 0;
+    req.rec.state 	= VIDEO_STATE_SET_DR;
+
+    return server_request(__this->video_rec5, VIDEO_REQ_REC, &req);
+
+}
+
+
+static int video5_rec_stop(u8 close)
+{
+    union video_req req;
+    int err;
+
+    log_d("video5_rec_stop\n");
+
+    if (__this->video_rec5) {
+        req.rec.channel = 0;
+        req.rec.state = VIDEO_STATE_STOP;
+        err = server_request(__this->video_rec5, VIDEO_REQ_REC, &req);
+        if (err != 0) {
+            printf("\nstop rec5 err 0x%x\n", err);
+            return VREC_ERR_V1_REQ_STOP;
+        }
+    }
+
+    video_rec_close_file(5);
+
+    if (close) {
+        if (__this->video_rec5) {
+            server_close(__this->video_rec5);
+            __this->video_rec5 = NULL;
+        }
+    }
+
+    if (__this->thumb_buf) {
+        free(__this->thumb_buf);
+        __this->thumb_buf = NULL;
+    }
+
+
+    return 0;
+}
+
+static int video5_rec_savefile()
+{
+    union video_req req = {0};
+    int err;
+
+    if (!__this->file[5]) {
+        return -ENOENT;
+    }
+
+    u32 res = db_select("res");
+
+    req.rec.channel = 0;
+    req.rec.width 	= rec_pix_w[res];
+    req.rec.height 	= rec_pix_h[res];
+    req.rec.format 	= VIDEO0_REC_FORMAT;
+    req.rec.state 	= VIDEO_STATE_SAVE_FILE;
+    req.rec.file    = __this->file[5];
+
+#ifdef CONFIG_WIFI_ENABLE
+    req.rec.fps 	    = 0;
+    req.rec.real_fps 	= video_rec_get_fps();
+#else
+    req.rec.fps 	    = 0;
+    req.rec.real_fps 	= 0;
+#endif
+
+    req.rec.cycle_time = db_select("cyc");
+    if (req.rec.cycle_time == 0) {
+        req.rec.cycle_time = 5;
+    }
+
+    req.rec.cycle_time = req.rec.cycle_time * 60;
+
+#if CAMERA_THUMBNAIL_ENABLE
+    struct jpg_thumbnail thumbnails;
+    err = camera_take_thumbnail(5);
+    if (!err) {
+        log_i("add thumbnail\n");
+        thumbnails.enable = 1;
+        thumbnails.buf = __this->thumbnail_img_buf;
+        thumbnails.len = __this->thumbnail_img_size;
+        req.rec.thumbnails = &thumbnails;
+    }
+#endif
+
+
+    /*
+     *采样率，通道数，录像音量，音频使用的循环BUF,录不录声音
+     */
+#ifdef CONFIG_WIFI_ENABLE
+    req.rec.audio.sample_rate = video_rec_get_audio_sampel_rate();
+#else
+    req.rec.audio.sample_rate = 8000;
+#endif
+    req.rec.audio.channel 	= 1;
+    req.rec.audio.volume    = AUDIO_VOLUME;
+    req.rec.pkg_mute.aud_mute = !db_select("mic");
+
+    req.rec.tlp_time = db_select("gap");
+    if (req.rec.tlp_time) {
+        req.rec.real_fps = 1000 / req.rec.tlp_time;
+        req.rec.pkg_fps = video_rec_get_fps();
+    }
+
+    err = server_request(__this->video_rec5, VIDEO_REQ_REC, &req);
+    if (err != 0) {
+        log_e("rec0_save_file: err=%d\n", err);
+        return err;
+    }
+
+    return 0;
+}
+
+static void video5_rec_close()
+{
+    if (__this->video_rec5) {
+        server_close(__this->video_rec5);
+        __this->video_rec5 = NULL;
+    }
+}
+
+
+/*
+ *必须在启动录像之后才可调用该函数，并且确保启动录像时已经打开了osd
+ *新设置的osd的整体结构要和启动录像时一样，只是内容改变!!!
+ */
+static int video5_rec_set_osd_str(char *str)
+{
+    union video_req req;
+    int err;
+    if (!__this->video_rec5) {
+        return -1;
+    }
+
+    req.rec.channel = 0;
+    req.rec.state 	= VIDEO_STATE_SET_OSD_STR;
+    req.rec.new_osd_str = str;
+    err = server_request(__this->video_rec5, VIDEO_REQ_REC, &req);
+    if (err != 0) {
+        printf("\nset osd rec5 str err 0x%x\n", err);
+        return -1;
+    }
+
+    return 0;
+}
+
+static int video5_rec_osd_ctl(u8 onoff)
+{
+    union video_req req;
+    struct video_text_osd text_osd;
+    int err;
+
+    if (__this->video_rec5) {
+        u32 res = db_select("res");
+        req.rec.width 	    = rec_pix_w[res];
+        req.rec.height 	    = rec_pix_h[res];
+
+        text_osd.font_w = 16;
+        text_osd.font_h = 32;
+        text_osd.x = 0;//(req.rec.width - strlen(osd_str_buf) * text_osd.font_w) / 64 * 64;
+        text_osd.y = (req.rec.height - text_osd.font_h) / 16 * 16;
+        /* text_osd.osd_yuv = 0xe20095; */
+        text_osd.color[0] = 0xe20095;
+        /* text_osd.color[0] = 0x057d88; */
+        /* text_osd.color[1] = 0xe20095; */
+        /* text_osd.color[2] = 0xe20095; */
+        text_osd.bit_mode = 1;
+
+
+        text_osd.text_format = osd_str_buf;
+        text_osd.font_matrix_table = osd_str_total;
+        text_osd.font_matrix_base = osd_str_matrix;
+        text_osd.font_matrix_len = sizeof(osd_str_matrix);
+#ifdef __CPU_AC521x__
+        text_osd.direction = 1;
+#else
+        text_osd.direction = 0;
+#endif
+        req.rec.text_osd = 0;
+        if (onoff) {
+            req.rec.text_osd = &text_osd;
+        }
+        req.rec.channel = 0;
+        req.rec.state 	= VIDEO_STATE_SET_OSD;
+
+        err = server_request(__this->video_rec5, VIDEO_REQ_REC, &req);
+        if (err != 0) {
+            printf("\nset osd rec5 err 0x%x\n", err);
+            return -1;
+        }
+    }
+
+    return 0;
+}
+#endif
 
 
 
@@ -3733,6 +4579,18 @@ static int video_rec_start()
     }
 #endif
 
+#ifdef CONFIG_VIDEO4_ENABLE
+    if (__this->video_online[4] && db_select("two")) {
+        err = video4_rec_start();
+    }
+#endif
+
+#ifdef CONFIG_VIDEO5_ENABLE
+    if (__this->video_online[5] && db_select("two")) {
+        err = video5_rec_start();
+    }
+#endif
+
 
 
     if (__this->gsen_lock == 0xff) {
@@ -3829,11 +4687,23 @@ static int video_rec_stop(u8 close)
 #ifdef CONFIG_VIDEO3_ENABLE
     err = video3_rec_stop(close);
     if (err) {
-        puts("\nstop1 err\n");
+        puts("\nstop3 err\n");
     }
 #endif
 
+#ifdef CONFIG_VIDEO4_ENABLE
+    err = video4_rec_stop(close);
+    if (err) {
+        puts("\nstop4 err\n");
+    }
+#endif
 
+#ifdef CONFIG_VIDEO5_ENABLE
+    err = video5_rec_stop(close);
+    if (err) {
+        puts("\nstop5 err\n");
+    }
+#endif
 
     if (__this->disp_state == DISP_BACK_WIN) {
         video_rec_post_msg("HlightOff"); //后视停录像关闭前照灯
@@ -4752,6 +5622,13 @@ static int video_rec_init()
     /* __this->video_online[3] = dev_online("video3.*"); */
 #endif
 
+#ifdef CONFIG_VIDEO4_ENABLE
+    __this->video_online[4] = 1;
+#endif
+
+#ifdef CONFIG_VIDEO5_ENABLE
+    __this->video_online[5] = 1;
+#endif
 
     __this->disp_state = DISP_MAIN_WIN;
     __this->second_disp_dev = 0;

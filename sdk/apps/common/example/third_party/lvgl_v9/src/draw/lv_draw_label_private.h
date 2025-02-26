@@ -50,6 +50,10 @@ struct lv_draw_glyph_dsc_t {
     lv_color_t color;
     lv_opa_t opa;
     lv_draw_buf_t *_draw_buf;  /**< a shared draw buf for get_bitmap, do not use it directly, use glyph_data instead */
+
+#if ((LV_USE_DRAW_JLVG == 1) && (LV_USE_DRAW_JLVG_LABEL_ENABLE == 1))
+    lv_jlvg_label_info_t *label_info;   // 字形所在的标签的信息
+#endif
 };
 
 

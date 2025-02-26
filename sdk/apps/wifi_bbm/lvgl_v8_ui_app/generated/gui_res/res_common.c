@@ -49,6 +49,8 @@ char *gui_get_res_path(int32_t id)
         return "A:\\gitlab-m\\ac792\\ui_prj\\wifi_bbm_800x480\\import\\image\\skip_previous.png";
     case GUI_RES_WARN_PNG:
         return "A:\\gitlab-m\\ac792\\ui_prj\\wifi_bbm_800x480\\import\\image\\warn.png";
+    case GUI_RES_REMOTE_PNG:
+        return "A:\\gitlab-m\\ac792\\ui_prj\\wifi_bbm_800x480\\import\\image\\remote.png";
     default:
         return NULL;
     }

@@ -118,6 +118,16 @@ int CTP_CMD_COMBINED(void *priv, u32 err, const char *_req, const char *mothod, 
     return _CTP_CMD_COMBINED(CTP_NOTIFY_COMMAND, priv, err, _req, mothod, str);
 }
 
+static void __all_get_cmd_run(void *priv, char *content)
+{
+    const struct ctp_map_entry *map = NULL;
+    list_for_ctp_mapping_tab(map) {
+        if (map->get != NULL) {
+            map->get(priv, content);    //执行map中所有get命令
+        }
+    }
+}
+
 int ctp_cmd_analysis(const char *topic, char *content, void *priv)
 {
     struct ctp_map_entry *map = NULL;
@@ -169,6 +179,70 @@ int ctp_cmd_analysis(const char *topic, char *content, void *priv)
 
 }
 
+int cmd_put_app_access(void *priv, char *content)
+{
+    char buf[64];
+    json_object *new_obj = NULL;
+    json_object *parm = NULL;
+    json_object *key = NULL;
+    int type_num;
+
+    new_obj = json_tokener_parse(content);
+    parm =  json_object_object_get(new_obj, "param");
+    key =  json_object_object_get(parm, "type");
+
+    const char *type = json_object_get_string(key);
+    key =  json_object_object_get(parm, "ver");
+    const char *ver = json_object_get_string(key);
+
+    snprintf(buf, sizeof(buf), "type:%s,ver:%s", type, ver);
+    CTP_CMD_COMBINED(NULL, CTP_NO_ERR, "APP_ACCESS", "NOTIFY", buf);
+
+    //区分BBM_RX/手机
+    type_num = atoi(type);
+    if (type_num == 99) {
+        //BBM
+        if (FILE_IS_INIT_CHECK()) {
+            FILE_GEN();
+            snprintf(buf, sizeof(buf), "type:1,path:%s", CONFIG_REC_PATH_0"vf_list.txt");
+            CTP_CMD_COMBINED(priv, CTP_NO_ERR, "FORWARD_MEDIA_FILES_LIST", "NOTIFY", buf);
+        }
+    } else {
+        //手机
+        //app_access命令完成后，随后发送所有get命令
+        __all_get_cmd_run(priv, content);
+    }
+
+    json_object_put(new_obj);
+    return 0;
+}
+
+int cmd_put_modify_txrate(void *priv, char *content)
+{
+    char buf[64];
+    json_object *new_obj = NULL;
+    json_object *parm = NULL;
+    char *txrate;
+    int val;
+
+    new_obj = json_tokener_parse(content);
+    parm =  json_object_object_get(new_obj, "param");
+
+    txrate = json_object_get_string(json_object_object_get(parm, "txrate"));
+
+    val = atoi(txrate);
+
+    printf("modify txrate val:%d  \n", val);
+
+    wifi_raw_set_txrate(val);
+
+    CTP_CMD_COMBINED(NULL, CTP_NO_ERR, "MODIFY_TXRATE", "NOTIFY", buf);
+
+    json_object_put(new_obj);
+
+    return 0;
+}
+
 int cmd_put_open_rt_stream(void *priv, char *content)
 {
     json_object *new_obj = NULL;
@@ -197,10 +271,18 @@ int cmd_put_open_rt_stream(void *priv, char *content)
     config.width       = atoi(w);
     config.height      = atoi(h);
     config.fps         = atoi(fps);
-    config.abr_kbps    = atoi(abr);
-    config.id          = atoi(id);
-    config.sub_id      = atoi(sub_id);
 
+    //TODO
+    //兼容手机DVRunning2命令
+    if (abr && id && sub_id) {
+        config.abr_kbps    = atoi(abr);
+        config.id          = atoi(id);
+        config.sub_id      = atoi(sub_id);
+    } else {
+        config.abr_kbps    = 2000;
+        config.id          = 1;
+        config.sub_id      = 0;
+    }
 
     struct intent it;
     init_intent(&it);
@@ -213,7 +295,7 @@ int cmd_put_open_rt_stream(void *priv, char *content)
         CTP_CMD_COMBINED(NULL, CTP_RT_OPEN_FAIL, "OPEN_RT_STREAM", "NOTIFY", CTP_RT_OPEN_FAIL_MSG);
     } else {
         char buf[128];
-        sprintf(buf, "w:%d h:%d fps:%d abr:%d", config.width, config.height, config.fps, config.abr_kbps);
+        sprintf(buf, "format:0,w:%d,h:%d,fps:%d,rate:8000", config.width, config.height, config.fps);
         CTP_CMD_COMBINED(NULL, CTP_NO_ERR, "OPEN_RT_STREAM", "NOTIFY", buf);
     }
 
@@ -224,6 +306,8 @@ int cmd_put_open_rt_stream(void *priv, char *content)
 
 static int cmd_put_close_rt_stream(void *priv, char *content)
 {
+    int ret;
+    char buf[64];
     json_object *new_obj = NULL;
     json_object *parm = NULL;
     const char *id, *sub_id;
@@ -235,17 +319,31 @@ static int cmd_put_close_rt_stream(void *priv, char *content)
     id = json_object_get_string(json_object_object_get(parm, "id"));
     sub_id = json_object_get_string(json_object_object_get(parm, "sub_id"));
 
-    config.id          = atoi(id);
-    config.sub_id      = atoi(sub_id);
+    //TODO
+    //兼容手机DVRunning2命令
+    if (id && sub_id) {
+        config.id          = atoi(id);
+        config.sub_id      = atoi(sub_id);
+    } else {
+        config.id          = 1;
+        config.sub_id      = 0;
+    }
 
     struct intent it;
     init_intent(&it);
     it.name = "video_rec";
     it.action = ACTION_VIDEO_STOP;
     it.exdata = &config;
-    start_app(&it);
+    ret = start_app(&it);
 
-    CTP_CMD_COMBINED(NULL, CTP_NO_ERR, "CLOSE_RT_STREAM", "NOTIFY", NULL);
+    if (ret) {
+        printf("CLOE_RT_STREAM err!!!\n\n");
+        strcpy(buf, "status:0");
+    } else {
+        strcpy(buf, "status:1");
+    }
+
+    CTP_CMD_COMBINED(NULL, CTP_NO_ERR, "CLOSE_RT_STREAM", "NOTIFY", buf);
 
     json_object_put(new_obj);
 
@@ -330,6 +428,47 @@ static int cmd_put_close_rec(void *priv, char *content)
 
     return 0;
 }
+
+
+int cmd_put_set_video_abr(void *priv, char *content)
+{
+    json_object *new_obj = NULL;
+    json_object *parm = NULL;
+
+    int ret;
+    const char *abr, *id, *sub_id;
+    struct video_rec_config config = {0};
+    char buf[128];
+
+    new_obj = json_tokener_parse(content);
+    parm =  json_object_object_get(new_obj, "param");
+
+    abr = json_object_get_string(json_object_object_get(parm, "abr"));
+    id = json_object_get_string(json_object_object_get(parm, "id"));
+    sub_id = json_object_get_string(json_object_object_get(parm, "sub_id"));
+
+    config.abr_kbps    = atoi(abr);
+    config.id          = atoi(id);
+    config.sub_id      = atoi(sub_id);
+
+    struct intent it;
+    init_intent(&it);
+    it.name = "video_rec";
+    it.action = ACTION_VIDEO_SET_ABR;
+    it.exdata = &config;
+    ret = start_app(&it);
+
+    if (ret) {
+        CTP_CMD_COMBINED(NULL, CTP_SET_PRARM, "SET_VIDEO_ABR", "NOTIFY", buf);
+    } else {
+        CTP_CMD_COMBINED(NULL, CTP_NO_ERR, "SET_VIDEO_ABR", "NOTIFY", buf);
+    }
+
+    json_object_put(new_obj);
+
+    return 0;
+}
+
 
 static int cmd_put_make_forward_files_list(void *priv, char *content)
 {
@@ -632,12 +771,555 @@ static int cmd_put_ctp_cli_disconnect(void *priv, char *content)
     return 0;
 }
 
+static int cmd_put_ap_ssid_info(void *priv, char *content)
+{
+    char buf[128];
+    struct server *net = NULL;
+    json_object *new_obj = NULL;
+    json_object *parm = NULL;
+    json_object *tmp = NULL;
+    struct sys_time time;
+
+    new_obj = json_tokener_parse(content);
+    parm =  json_object_object_get(new_obj, "param");
+    tmp =  json_object_object_get(parm, "ssid");
+    const char *ssid = json_object_get_string(tmp);
+
+    tmp =  json_object_object_get(parm, "pwd");
+
+    const char *pwd = json_object_get_string(tmp);
+    tmp =  json_object_object_get(parm, "status");
+    const char *status = json_object_get_string(tmp);
+
+
+    printf("cmd_put_ap_ssid_info : ssid:%s   pwd:%s \n%s\n", ssid, pwd, content);
+    if (strlen(pwd) == 0) {
+
+        snprintf(buf, sizeof(buf), "ssid:%s,status:%s", ssid,  status);
+    } else {
+        snprintf(buf, sizeof(buf), "ssid:%s,pwd:%s,status:%s", ssid, pwd, status);
+    }
+    if (ssid == NULL || (strlen(pwd) > 0 && strlen(pwd) < 8)
+        || strlen(ssid) >= 32) {
+        printf("ssid is null or pwd is less than 7\n");
+        CTP_CMD_COMBINED(priv, CTP_REQUEST, "AP_SSID_INFO", "NOTIFY", buf);
+        return 0;
+    }
+
+    struct wifi_mode_info info;
+    if (!strcmp("", ssid)) {
+        info.mode = AP_MODE;
+        wifi_get_mode_cur_info(&info);
+    } else {
+        info.ssid = (char *)ssid;
+        info.pwd = (char *)pwd;
+    }
+    wifi_store_mode_info(AP_MODE, info.ssid, info.pwd);
+
+    CTP_CMD_COMBINED(priv, CTP_NO_ERR, "AP_SSID_INFO", "NOTIFY", buf);
+
+    if (atoi(status)) {
+        os_time_dly(300);//重启太快，没回复
+        cpu_reset();
+    }
+
+    json_object_put(new_obj);
+
+    return 0;
+}
+
+int cmd_get_keep_alive_interval(void *priv, char *content)
+{
+    int timeout;
+    char buf[16];
+    //分解content字段
+    timeout = ctp_srv_get_keep_alive_timeout();
+    snprintf(buf, sizeof(buf), "timeout:%d", timeout);
+    CTP_CMD_COMBINED(priv, CTP_NO_ERR, "KEEP_ALIVE_INTERVAL", "NOTIFY", buf);
+
+
+    return 0;
+
+}
+
+//APP使用
+int cmd_put_video_ctrl(void *priv, char *content)
+{
+    char buf[128];
+    json_object *new_obj = NULL;
+    json_object *parm = NULL;
+    struct json_object *sta = NULL;
+    const char *status;
+    new_obj = json_tokener_parse(content);
+    parm =  json_object_object_get(new_obj, "param");
+    sta =  json_object_object_get(parm, "status");
+    int cur_state = 0;
+    int set_state = 0;
+    int ret;
+    struct video_rec_config config = {0};
+
+    printf("cmd_put_video_ctrl : %s \n", content);
+    status = json_object_get_string(sta);
+
+    //录像对应ID
+    config.id = 1;
+    config.sub_id = 1;
+    config.width       = 640;
+    config.height      = 480;
+    config.fps         = 25;
+    config.cycle_time  = 3;
+    config.abr_kbps    = 1000;
+
+    struct intent it;
+    init_intent(&it);
+    it.name = "video_rec";
+    it.action = ACTION_VIDEO_GET_STATUS;
+    it.exdata = &config;
+    it.data = &cur_state;
+    ret = start_app(&it);
+
+    set_state = atoi(status);
+
+    if (set_state) {
+        //开启
+        if (cur_state != set_state) {
+            it.action = ACTION_VIDEO_START;
+            ret = start_app(&it);
+            if (ret) {
+                set_state = cur_state;
+            }
+        }
+    } else {
+        //关闭
+        if (cur_state != set_state) {
+            it.action = ACTION_VIDEO_STOP;
+            ret = start_app(&it);
+            if (ret) {
+                set_state = cur_state;
+            }
+        }
+    }
+
+    snprintf(buf, sizeof(buf), "status:%d", set_state);
+    CTP_CMD_COMBINED(NULL, CTP_NO_ERR, "VIDEO_CTRL", "NOTIFY", buf);
+
+    return 0;
+}
+
+int cmd_get_video_ctrl(void *priv, char *content)
+{
+    char buf[128];
+    int status = 0;;
+    struct video_rec_config config = {0};
+
+    //录像对应ID
+    config.id = 1;
+    config.sub_id = 1;
+
+    struct intent it;
+    init_intent(&it);
+    it.name = "video_rec";
+    it.action = ACTION_VIDEO_GET_STATUS;
+    it.exdata = &config;
+    it.data = &status;
+    start_app(&it);
+
+    snprintf(buf, sizeof(buf), "status:%d", status);
+    CTP_CMD_COMBINED(priv, CTP_NO_ERR, "VIDEO_CTRL", "NOTIFY", buf);
+
+    return 0;
+}
+
+int cmd_get_sd_status(void *priv, char *content)
+{
+    char buf[16];
+
+    snprintf(buf, sizeof(buf), "online:%d", storage_device_ready());
+    CTP_CMD_COMBINED(priv, CTP_NO_ERR, "SD_STATUS", "NOTIFY", buf);
+
+    return 0;
+
+}
+
+int cmd_get_bat_status(void *priv, char *content)
+{
+    char buf[32];
+    //分解content字段
+
+    snprintf(buf, sizeof(buf), "level:%d", 4);
+    CTP_CMD_COMBINED(priv, CTP_NO_ERR, "BAT_STATUS", "NOTIFY", buf); //目前没有电池状态，先写充电中 4
+
+    return 0;
+
+}
+
+int cmd_get_uuid(void *priv, char *content)
+{
+    char buf[128] = {0};
+    u8 mac[6];
+
+    wifi_get_mac(mac);
+    snprintf(buf, sizeof(buf), "uuid:%s%02x%02x%02x%02x%02x%02x", "f2dd3cd7-b026-40aa-aaf4-", mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
+
+    CTP_CMD_COMBINED(priv, CTP_NO_ERR, "UUID", "NOTIFY", buf);
+    return 0;
+}
+
+int cmd_get_sd_size(void *priv, char *content)
+{
+    char buf[32];
+    u32 space;
+    struct vfs_partition *part;
+
+    if (storage_device_ready() == 0) {
+        CTP_CMD_COMBINED(priv, CTP_SD_OFFLINE, "TF_CAP", "NOTIFY", CTP_SD_OFFLINE_MSG);
+    } else {
+        part = fget_partition(CONFIG_ROOT_PATH);
+        fget_free_space(CONFIG_ROOT_PATH, &space);
+        snprintf(buf, sizeof(buf), "left:%d,total:%d", space / 1024, part->total_size / 1024);
+        CTP_CMD_COMBINED(priv, CTP_NO_ERR, "TF_CAP", "NOTIFY", buf);
+
+    }
+
+    return 0;
+}
+
+#define VERSION_ID "6.6.6"
+int cmd_get_info_product(void *priv, char *content)
+
+{
+    static u8 buf[128] = {0};
+    u8 *mac;
+//    extern u8 *wifi_get_module_mac_addr(void);
+//    mac = wifi_get_module_mac_addr();
+//    sprintf(buf, "%s", "JL;jl5701;XD36;B112;00;MT02101;01;01;%02x:%02x:%02x:%02x;", mac[2], mac[3], mac[4], mac[5]);
+    memset(buf, 0, 128);
+#ifdef SYS_PARAM_SET_ENABLE
+    if (sys_version_updata_enable2) {
+        sprintf(buf, "%s:%s%s:%s", "sp:XD,model", VERSION_BOARD, ",brand:V02,version", sys_version2);
+    } else
+#endif
+    {
+        sprintf(buf, "%s:%s%s:%s", "sp:XD,model", "CC31", ",brand:V02,version", VERSION_ID);
+    }
+    printf("========cmd_get_info_product:%s\n", buf);
+    CTP_CMD_COMBINED(priv, CTP_NO_ERR, "PRODUCT_INFO", "NOTIFY", buf);
+    return 0;
+}
+
+static int cmd_get_date_time(void *priv, char *content)
+{
+    struct sys_time time;
+    char buf[128];
+    void *rtc_fd = NULL;
+    rtc_fd = dev_open("rtc", NULL);
+    if (!rtc_fd) {
+        printf("rtc open err !!\n\n");
+        return 0;
+    }
+    dev_ioctl(rtc_fd, IOCTL_GET_SYS_TIME, (u32)&time);
+    dev_close(rtc_fd);
+
+    snprintf(buf, sizeof(buf), "date:%04d%02d%02d%02d%02d%02d", time.year, time.month, time.day, time.hour, time.min, time.sec);
+    CTP_CMD_COMBINED(priv, CTP_NO_ERR, "DATE_TIME", "NOTIFY", buf);
+
+    return 0;
+}
+
+static int cmd_get_sta_ssid_info(void *priv, char *content)
+{
+    char buf[128];
+    struct wifi_mode_info info;
+    info.mode = STA_MODE;
+    wifi_get_mode_cur_info(&info);
+    printf("sta get ssid:%s   pwd:%s  \n", info.ssid, info.pwd);
+    snprintf(buf, sizeof(buf), "ssid:%s,pwd:%s", info.ssid, info.pwd);
+    CTP_CMD_COMBINED(priv, CTP_NO_ERR, "STA_SSID_INFO", "NOTIFY", buf);
+    return 0;
+}
+
+static int cmd_put_sta_ssid_info(void *priv, char *content)
+{
+    char buf[128];
+    struct server *net = NULL;
+    json_object *new_obj = NULL;
+    json_object *parm = NULL;
+    json_object *tmp = NULL;
+    struct sys_time time;
+
+    new_obj = json_tokener_parse(content);
+    parm =  json_object_object_get(new_obj, "param");
+    tmp =  json_object_object_get(parm, "ssid");
+    const char *ssid = json_object_get_string(tmp);
+
+    tmp =  json_object_object_get(parm, "pwd");
+
+    const char *pwd = json_object_get_string(tmp);
+    tmp =  json_object_object_get(parm, "status");
+    const char *status = json_object_get_string(tmp);
+
+
+
+    printf("ssid:%s   pwd:%s \n", ssid, pwd);
+    if (strlen(pwd) == 0) {
+
+        snprintf(buf, sizeof(buf), "ssid:%s,status:%s", ssid, status);
+    } else {
+        snprintf(buf, sizeof(buf), "ssid:%s,pwd:%s,status:%s", ssid, pwd, status);
+    }
+
+    if (ssid == NULL || (strlen(pwd) > 0 && strlen(pwd) < 8)) {
+        printf("ssid is null or pwd is less than 7\n");
+        CTP_CMD_COMBINED(priv, CTP_REQUEST, "STA_SSID_INFO", "NOTIFY", CTP_REQUEST_MSG);
+        return 0;
+    }
+
+    CTP_CMD_COMBINED(priv, CTP_NO_ERR, "STA_SSID_INFO", "NOTIFY", buf);
+
+    //断开所有客户端
+
+    ctp_srv_disconnect_all_cli();
+    cdp_srv_disconnect_all_cli();
+
+    info.dest_addr = NULL;
+
+    if (atoi(status)) {
+        wifi_store_mode_info(STA_MODE, ssid, pwd);
+    }
+
+    //切换WIFI模式到STA模式,切换成功后设备自行连接上热点
+    wifi_enter_sta_mode(ssid, pwd);
+    //选择是否保存当前WIFI模式信息
+    json_object_put(new_obj);
+
+    return 0;
+}
+
+
+static int cmd_get_ap_ssid_info(void *priv, char *content)
+{
+    char buf[128];
+    struct wifi_mode_info info;
+    info.mode = AP_MODE;
+    wifi_get_mode_cur_info(&info);
+    printf("ap get ssid:%s   pwd:%s  \n", info.ssid, info.pwd);
+    snprintf(buf, sizeof(buf), "ssid:%s,pwd:%s", info.ssid, info.pwd);
+    CTP_CMD_COMBINED(priv, CTP_NO_ERR, "AP_SSID_INFO", "NOTIFY", buf);
+    return 0;
+}
+
+/* 设备能力集获取 */
+//0-App决定，1-SDK，2-HTTP，3-SDK回放、HTTP下载，4-HTTP回放、SDK下载
+int cmd_get_camera_capability(void *priv, char *content)
+{
+    char buf[128];
+    snprintf(buf, sizeof(buf), "value:%s", "00100100002");
+
+    printf("buf -> %s\n", buf);
+    CTP_CMD_COMBINED(priv, CTP_NO_ERR, "CAMERA_CAPABILITY", "NOTIFY", buf);
+    return 0;
+}
+
+static void date_time(const char *date, struct sys_time *tm)
+{
+    char *f = NULL;
+    char *b = NULL;
+    char buf[5] = {0};
+
+    memcpy(buf, date, 4);
+    tm->year = atoi(buf);
+    memcpy(buf, date + 4, 2);
+    buf[2] = '\0';
+    tm->month = atoi(buf);
+    memcpy(buf, date + 6, 2);
+    buf[2] = '\0';
+    tm->day = atoi(buf);
+    memcpy(buf, date + 8, 2);
+    buf[2] = '\0';
+    tm->hour = atoi(buf);
+    memcpy(buf, date + 10, 2);
+    buf[2] = '\0';
+    tm->min = atoi(buf);
+    memcpy(buf, date + 12, 2);
+    buf[2] = '\0';
+    tm->sec = atoi(buf);
+
+}
+
+static int cmd_put_date_time(void *priv, char *content)
+{
+    char buf[128];
+    struct server *net = NULL;
+    json_object *new_obj = NULL;
+    json_object *parm = NULL;
+    json_object *tmp = NULL;
+    struct sys_time time;
+    void *rtc_fd = NULL;
+
+
+    new_obj = json_tokener_parse(content);
+    parm =  json_object_object_get(new_obj, "param");
+    tmp =  json_object_object_get(parm, "date");
+    const char *date = json_object_get_string(tmp);
+
+
+
+    printf("date:%s\n", date);
+    if (date != NULL) {
+        date_time(date, &time);
+    }
+    printf("date->year:%04d month:%02d day:%02d hour:%02d min:%02d sec:%02d", time.year, time.month, time.day, time.hour, time.min, time.sec);
+    rtc_fd = dev_open("rtc", NULL);
+    if (!rtc_fd) {
+        printf("open rtd err \n\n");
+        json_object_put(new_obj);
+        return 0;
+    }
+    dev_ioctl(rtc_fd, IOCTL_SET_SYS_TIME, (u32)&time);
+    dev_close(rtc_fd);
+    snprintf(buf, sizeof(buf), "date:%04d%02d%02d%02d%02d%02d", time.year, time.month, time.day, time.hour, time.min, time.sec);
+    CTP_CMD_COMBINED(priv, CTP_NO_ERR, "DATE_TIME", "NOTIFY", buf);
+    json_object_put(new_obj);
+    db_update("datey", time.year);
+    db_update("datem", time.month);
+    db_update("dated", time.day);
+    db_update("dateh", time.hour);
+    db_update("datemi", time.min);
+    db_update("dates", time.sec);
+    return 0;
+}
+
+static int cmd_get_generic_cmd(void *priv, char *content)
+{
+    char buf[32];
+    snprintf(buf, sizeof(buf), "status:%d", 1);
+    printf("GENERIC_CMD  GET\n");
+    CTP_CMD_COMBINED(priv, CTP_NO_ERR, "GENERIC_CMD", "NOTIFY", buf);
+    return 0;
+}
+
+static int cmd_put_generic_cmd(void *priv, char *content)
+{
+    char buf[32];
+    snprintf(buf, sizeof(buf), "status:%d", 1);
+
+    printf("GENERIC_CMD  PUT\n");
+    CTP_CMD_COMBINED(priv, CTP_NO_ERR, "GENERIC_CMD", "NOTIFY", buf);
+
+    return 0;
+}
+
+int cmd_get_video_size(void *priv, char *content)
+{
+    char buf[128];
+    char str[32] = "NA;720P;480P";
+
+    /*     case VIDEO_RES_720P: */
+    /* snprintf(buf, sizeof(buf), "str:%s,val:%d", str, 1); */
+    /* break; */
+    /* case VIDEO_RES_VGA: */
+
+    snprintf(buf, sizeof(buf), "str:%s,val:%d", str, 2);
+
+    printf("buf -> %s\n", buf);
+    CTP_CMD_COMBINED(priv, CTP_NO_ERR, "VIDEO_SIZE", "NOTIFY", buf);
+    return 0;
+}
+
+int cmd_put_video_size(void *priv,  char *content)
+{
+    json_object *new_obj = NULL;
+    json_object *parm = NULL;
+    json_object *v = NULL;
+    struct intent it;
+    char buf[128];
+    /* const char *height, *width, *format; */
+    const char *val;
+    /* char str[32] = "4K;2K;1080P"; */
+    char str[32] = "NA;720P;480P";
+    //分解content字段
+    new_obj = json_tokener_parse(content);
+    parm =  json_object_object_get(new_obj, "param");
+
+    v =  json_object_object_get(parm, "val");
+    val = json_object_get_string(v);
+
+    printf("val : %s\n", val);
+
+    u32 res = atoi(val);
+    if (res == 1) {
+        /* db_update("res", VIDEO_RES_720P); */
+    } else if (res == 2) {
+        /* db_update("res", VIDEO_RES_VGA); */
+    } else {
+        /* db_update("res", VIDEO_RES_720P); */
+    }
+    snprintf(buf, sizeof(buf), "str:%s,val:%d", str, res);
+
+    printf("buf -> %s\n", buf);
+    CTP_CMD_COMBINED(priv, CTP_NO_ERR, "VIDEO_SIZE", "NOTIFY", buf);
+
+    json_object_put(new_obj);
+    return 0;
+}
+
+int cmd_get_video_param(void *priv, char *content)
+{
+    char buf[128];
+
+    /*     case VIDEO_RES_720P: */
+    /* snprintf(buf, sizeof(buf), "w:%d,h:%d,format:0,fps:%d,rate:%d", 640, 480, net_video_rec_get_fps(), net_video_rec_get_audio_rate()); */
+    /* break; */
+    /* case VIDEO_RES_VGA: */
+    snprintf(buf, sizeof(buf), "w:%d,h:%d,format:0,fps:%d,rate:%d", 640, 480, 25, 8000);
+
+    printf("buf -> %s\n", buf);
+    CTP_CMD_COMBINED(priv, CTP_NO_ERR, "VIDEO_PARAM", "NOTIFY", buf);
+    return 0;
+
+}
+
+int cmd_put_video_param(void *priv,  char *content)
+{
+    json_object *new_obj = NULL;
+    json_object *parm = NULL;
+    json_object *h = NULL;
+    json_object *w = NULL;
+    struct intent it;
+    char buf[128];
+    const char *height, *width, *format;
+    //分解content字段
+    new_obj = json_tokener_parse(content);
+    parm =  json_object_object_get(new_obj, "param");
+
+    h =  json_object_object_get(parm, "h");
+    w =  json_object_object_get(parm, "w");
+    width = json_object_get_string(w);
+    height = json_object_get_string(h);
+
+    printf("width :%s height : %s %s\n", width, height);
+
+    snprintf(buf, sizeof(buf), "w:%d,h:%d,format:%d,fps:%d,rate:%d", 640, 480, 0, 25, 8000);
+
+    printf("buf -> %s\n", buf);
+    CTP_CMD_COMBINED(priv, CTP_NO_ERR, "VIDEO_PARAM", "NOTIFY", buf);
+
+    json_object_put(new_obj);
+    return 0;
+
+}
 
 const struct ctp_map_entry ctp_video_cmd_tab[] SEC_USED(.ctp_video_cmd) = {
+    {NULL, "APP_ACCESS", NULL, cmd_put_app_access},
     {NULL, "OPEN_RT_STREAM", NULL, cmd_put_open_rt_stream},
     {NULL, "CLOSE_RT_STREAM", NULL, cmd_put_close_rt_stream},
     {NULL, "OPEN_REC", NULL, cmd_put_open_rec},
     {NULL, "CLOSE_REC", NULL, cmd_put_close_rec},
+    {NULL, "MODIFY_TXRATE", NULL, cmd_put_modify_txrate},
+    {NULL, "SET_VIDEO_ABR", NULL, cmd_put_set_video_abr},
+    {NULL, "VIDEO_SIZE", cmd_get_video_size, cmd_put_video_size},
+    {NULL, "VIDEO_PARAM", cmd_get_video_param, cmd_put_video_param},
+    {NULL, "VIDEO_CTRL", cmd_get_video_ctrl, cmd_put_video_ctrl},
 
     {NULL, "CTP_CLI_DISCONNECT", NULL, cmd_put_ctp_cli_disconnect},
     {NULL, "CTP_CLI_CONNECTED", NULL, cmd_put_ctp_cli_connected},
@@ -648,6 +1330,18 @@ const struct ctp_map_entry ctp_video_cmd_tab[] SEC_USED(.ctp_video_cmd) = {
     {NULL, "MULTI_COVER_FIGURE", NULL, cmd_put_multi_cover_figure},
     {NULL,  "TIME_AXIS_PLAY", NULL, cmd_put_time_axis_play},
     {NULL,  "TIME_AXIS_PLAY_CTRL", NULL, cmd_put_time_axis_play_ctrl},
+
+    {"kep", "KEEP_ALIVE_INTERVAL", cmd_get_keep_alive_interval, NULL},
+    {"sd", "SD_STATUS", cmd_get_sd_status, NULL},
+    {"bat", "BAT_STATUS", cmd_get_bat_status, NULL},
+    {"uuid", "UUID", cmd_get_uuid, NULL},
+    {"fp", "TF_CAP", cmd_get_sd_size, NULL},
+    {NULL, "PRODUCT_INFO", cmd_get_info_product, NULL},
+    {NULL, "DATE_TIME", cmd_get_date_time, cmd_put_date_time},
+    {NULL, "AP_SSID_INFO", cmd_get_ap_ssid_info, cmd_put_ap_ssid_info},
+    {NULL, "STA_SSID_INFO", cmd_get_sta_ssid_info, cmd_put_sta_ssid_info},
+    {NULL, "CAMERA_CAPABILITY", cmd_get_camera_capability, NULL},   /* 设备能力集获取 */
+    {NULL, "GENERIC_CMD", cmd_get_generic_cmd, cmd_put_generic_cmd},
 };
 
 

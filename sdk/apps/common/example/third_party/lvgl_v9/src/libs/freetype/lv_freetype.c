@@ -174,6 +174,23 @@ lv_font_t *lv_freetype_font_create(const char *pathname, lv_freetype_font_render
     font->underline_position = FT_F26DOT6_TO_INT(FT_MulFix(scale, face->underline_position));
     font->underline_thickness = thickness < 1 ? 1 : thickness;
 
+#if ((LV_USE_DRAW_JLVG == 1) && (LV_USE_DRAW_JLVG_LABEL_ENABLE == 1))
+    lv_font_jlvg_privately_t *jlvg_privately = (lv_font_jlvg_privately_t *)lv_malloc_zeroed(sizeof(lv_font_jlvg_privately_t));
+    if (dsc->render_mode == LV_FREETYPE_FONT_RENDER_MODE_BITMAP) {
+        jlvg_privately->is_vector = false;
+        jlvg_privately->label_draw_task_create_cb = NULL;
+    } else if (dsc->render_mode == LV_FREETYPE_FONT_RENDER_MODE_OUTLINE) {
+        jlvg_privately->is_vector = true;
+        jlvg_privately->label_draw_task_create_cb = lv_jlvg_label_freetype_draw_task_create;
+    } else {
+        LV_LOG_ERROR("unknown render mode");
+        return false;
+    }
+    font->user_data = jlvg_privately;
+#else
+    font->user_data = NULL; // todo
+#endif
+
     return font;
 }
 
@@ -192,6 +209,11 @@ void lv_freetype_font_delete(lv_font_t *font)
     lv_freetype_drop_face_id(dsc->context, dsc->face_id);
 
     /* invalidate magic number */
+#if ((LV_USE_DRAW_JLVG == 1) && (LV_USE_DRAW_JLVG_LABEL_ENABLE == 1))
+    lv_font_jlvg_privately_t *jlvg_privately = (lv_font_jlvg_privately_t *)font->user_data;
+    lv_free(jlvg_privately);
+#endif
+
     lv_memzero(dsc, sizeof(lv_freetype_font_dsc_t));
     lv_free(dsc);
 }

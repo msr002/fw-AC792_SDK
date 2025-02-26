@@ -3,18 +3,23 @@
 #include "app_config.h"
 #include "generic/log.h"
 #include "event/key_event.h"
+#include "event/device_event.h"
 #include "lcd_config.h"
 #include "net_event.h"
 #include "udp_multicast.h"
 #include "pairing_data_model.h"
 #include "arp_static_table.h"
 #include "baby_monitor.h"
+#include "fs/fs.h"
+#include "wifi/wifi_connect.h"
 
 #define DEVICE_ONLINE_TIMEOUT   2000            //设备在线超时时间
 
 #define MAX_PAIR_NUM    MAX_ARP_STATIC_ENTRY    //最大配对数量
 #define MIN_PAIR_CH     0                       //0
 #define MAX_PAIR_CH     (MAX_PAIR_NUM - 1)      //6
+
+#define RX_DEVICE_CH    MAX_PAIR_NUM
 
 enum {
     BBM_TX_OFFLINE = 0,
@@ -44,10 +49,114 @@ struct wifi_bbm_hdl {
     int last_opened_ch;                     //上一次开启的通道
     u8 bbm_cur_mode;                        //当前模式,实时流/文件预览/视频文件播放
 
-    struct bbm_client_hdl *bbm_client_hdl[MAX_PAIR_NUM];        //设备client管理句柄
+    struct bbm_client_hdl *bbm_client_hdl[MAX_PAIR_NUM + 1];        //设备client管理句柄
 };
 static struct wifi_bbm_hdl bbm_hdl;
 #define __this (&bbm_hdl)
+
+static int bbm_tx_sd_offline(void *priv)
+{
+    struct bbm_client_hdl *bbm_client_hdl = priv;
+    int ch = bbm_client_hdl->ch;
+
+    switch (__this->bbm_cur_mode) {
+    case BBM_MODE_STREAM:
+        if (bbm_client_hdl->tx_is_recording) {
+            bbm_client_hdl->tx_is_recording = 0;
+        }
+        break;
+    case BBM_MODE_FILE_BROWSER:
+    case BBM_MODE_VIDEO_PLAY:
+        if (__this->cur_channel & BIT(ch)) {
+            post_home_msg_to_ui("back_home_page", 0);
+            char *lab = "SD Card offline !";
+            post_home_msg_to_ui("show_sys_prompt", lab);
+            bbm_quit_cur_mode();
+        }
+        break;
+    default:
+        break;
+    }
+    bbm_clean_file_list(priv);
+}
+
+static int bbm_file_list_update(void *priv, char *fname)
+{
+    struct bbm_client_hdl *bbm_client_hdl = priv;
+
+    bbm_client_hdl->file_total_num++;
+
+    int list_size = bbm_client_hdl->file_total_num * sizeof(char *);
+    bbm_client_hdl->file_name_list = realloc(bbm_client_hdl->file_name_list, list_size);
+    if (!bbm_client_hdl->file_name_list) {
+        printf("file_name_list realloc err \n");
+        return -1;
+    }
+    int list_index = bbm_client_hdl->file_total_num - 1;
+    bbm_client_hdl->file_name_list[list_index] = (char *)malloc(strlen(fname) + 1);
+    if (bbm_client_hdl->file_name_list[list_index] == NULL) {
+        printf("malloc failed for file_list[%d]\n", list_index);
+        return -1;
+    }
+    strcpy(bbm_client_hdl->file_name_list[list_index], fname);
+
+    return 0;
+}
+
+static int bbm_file_list_create(void *priv)
+{
+    return bbm_ctp_file_init(priv);
+}
+
+static int bbm_path_to_ch(char *text)
+{
+    while (*text && !isdigit(*text)) {
+        text++;
+    }
+
+    return atoi(text);
+}
+
+static int bbm_get_dir_num(char *dev_path)
+{
+    int i, ch, num = 0;
+    char name[128];
+    FILE *dir;
+    struct vfscan *fs = NULL;
+
+    if (strstr(dev_path, "storage")) {
+        fs = fscan(CONFIG_DEC_ROOT_PATH, "-d -tPNGBINAVITTLDAT -sn", 2);
+        if (!fs) {
+            printf("fscan err!!");
+            return 0;
+        }
+        dir = fselect(fs, FSEL_FIRST_FILE, 0);
+        for (i = 0; i < fs->file_number; i++) {
+            fget_name(dir, name, sizeof(name));
+            printf("name %s\n", name);
+            ch = bbm_path_to_ch(name);
+
+            num |= BIT(ch);
+
+            fclose(dir);
+            dir = fselect(fs, FSEL_NEXT_FILE, 0);
+        }
+        fscan_release(fs);
+    } else {
+        for (i = 0; i < ARRAY_SIZE(__this->online_table); i++) {
+            if (__this->online_table[i] == BBM_TX_ONLINE) {
+                //在线设备的ch号对应的bit位置1
+                num |= BIT(i);
+            }
+        }
+    }
+
+    //TODO
+    /*     bbm_quit_cur_mode(); */
+    /* __this->bbm_cur_mode = BBM_MODE_FILE_BROWSER; */
+
+    return num;
+}
 
 static int bbm_get_file_num(int ch, int *num)
 {
@@ -80,8 +189,141 @@ static int bbm_get_file_name_list(int ch, char ***list)
     *list = name_list;
 
     if (!name_list) {
-        printf("file list is null !\n");
+        if (__this->bbm_client_hdl[ch]->is_local_dev) {
+            //区分本机设备
+            //拷贝文件名太占用时间
+            printf("is local dev \n");
+        } else {
+            printf("file list is null !\n");
+            return -1;
+        }
+    }
+
+    return 0;
+}
+
+static int bbm_tx_start_rec_all(void)
+{
+    int ch;
+    int ret;
+    if (__this->bbm_cur_mode != BBM_MODE_STREAM) {
+        printf("TX start rec err \n cur mode err :%d ", __this->bbm_cur_mode);
         return -1;
+    }
+
+    for (ch = 0; ch < MAX_PAIR_NUM; ch++) {
+        if (__this->online_table[ch] == BBM_TX_ONLINE) {
+            if (__this->bbm_client_hdl[ch]->tx_is_recording) {
+                printf("ch:%d Tx Device is recording ! \n", ch);
+            } else {
+                ret = bbm_ctp_rec_start(__this->bbm_client_hdl[ch]);
+                if (ret) {
+                    printf("ch:%d Tx Device start rec err \n", ch);
+                } else {
+                    __this->bbm_client_hdl[ch]->tx_is_recording = 1;
+                }
+            }
+        }
+    }
+
+    return 0;
+}
+
+static int bbm_tx_stop_rec_all(void)
+{
+    int ch;
+    int ret;
+    if (__this->bbm_cur_mode != BBM_MODE_STREAM) {
+        printf("TX stop rec err \n cur mode err :%d ", __this->bbm_cur_mode);
+        return -1;
+    }
+
+    for (ch = 0; ch < MAX_PAIR_NUM; ch++) {
+        if (__this->online_table[ch] == BBM_TX_ONLINE) {
+            if (__this->bbm_client_hdl[ch]->tx_is_recording) {
+                ret = bbm_ctp_rec_stop(__this->bbm_client_hdl[ch]);
+                if (ret) {
+                    printf("ch:%d Tx Device stop rec err \n", ch);
+                } else {
+                    __this->bbm_client_hdl[ch]->tx_is_recording = 0;
+                }
+            } else {
+                printf("ch:%d Tx Device  No video recording ! \n", ch);
+            }
+        }
+    }
+
+    return 0;
+}
+
+static int bbm_tx_start_rec_err(void *priv)
+{
+    struct bbm_client_hdl *bbm_client_hdl = priv;
+
+    if (bbm_client_hdl->tx_is_recording) {
+        bbm_client_hdl->tx_is_recording = 0;
+    }
+
+    return 0;
+}
+
+static int bbm_rx_start_rec_all(void)
+{
+    int ch;
+    int ret;
+    if (__this->bbm_cur_mode != BBM_MODE_STREAM) {
+        printf("Rx start rec err \n cur mode err :%d \n", __this->bbm_cur_mode);
+        return -1;
+    }
+
+    for (ch = 0; ch < MAX_PAIR_NUM; ch++) {
+        if (__this->online_table[ch] == BBM_TX_ONLINE) {
+            if (__this->cur_channel & BIT(ch)) {
+                if (__this->bbm_client_hdl[ch]->rx_is_recording) {
+                    printf("ch:%d Rx Device is recording ! \n", ch);
+                } else {
+                    ret = bbm_rx_rec_start(__this->bbm_client_hdl[ch]);
+                    if (ret) {
+                        printf("ch:%d Rx Device start rec err \n", ch);
+                    } else {
+                        __this->bbm_client_hdl[ch]->rx_is_recording = 1;
+                    }
+                }
+            } else {
+                printf("rx start Rec err \n Please open the rt stream of ch:%d first !\n", ch);
+            }
+        }
+    }
+
+    return 0;
+}
+
+static int bbm_rx_stop_rec_all(void)
+{
+    int ch;
+    int ret;
+    if (__this->bbm_cur_mode != BBM_MODE_STREAM) {
+        printf("Rx stop rec err \n cur mode err :%d ", __this->bbm_cur_mode);
+        return -1;
+    }
+
+    for (ch = 0; ch < MAX_PAIR_NUM; ch++) {
+        if (__this->online_table[ch] == BBM_TX_ONLINE) {
+            if (__this->cur_channel & BIT(ch)) {
+                if (__this->bbm_client_hdl[ch]->rx_is_recording) {
+                    ret = bbm_rx_rec_stop(__this->bbm_client_hdl[ch]);
+                    if (ret) {
+                        printf("ch:%d Rx Device stop rec err \n", ch);
+                    } else {
+                        __this->bbm_client_hdl[ch]->rx_is_recording = 0;
+                    }
+                } else {
+                    printf("ch:%d Rx Device  No video recording ! \n", ch);
+                }
+            } else {
+                printf("ch:%d Rx rec has stopped \n", ch);
+            }
+        }
     }
 
     return 0;
@@ -126,7 +368,7 @@ static int bbm_reset_camera_pipe_by_ch(int ch, int disp_mode)
     printf("rt stream reset:%d mode:%d \n", ch, disp_mode);
     int ret;
 
-    ret = bbm_rt_stream_reset_pipe(__this->bbm_client_hdl[ch]->ctp_cli_hdl, disp_mode);
+    ret = bbm_rt_stream_reset_pipe(__this->bbm_client_hdl[ch], disp_mode);
     if (ret) {
         printf("ch:%d rt stream start err\n", ch);
         return -1;
@@ -140,7 +382,9 @@ static int bbm_start_camera_by_ch(int ch, int disp_mode)
     printf("rt stream start:%d mode:%d \n", ch, disp_mode);
     int ret;
 
-    ret = bbm_ctp_rt_start(__this->bbm_client_hdl[ch]->ctp_cli_hdl, disp_mode);
+    //可根据分辨率、码率调整
+    bbm_ctp_send_modify_txrate(__this->bbm_client_hdl[ch]->ctp_cli_hdl, WIFI_TXRATE_5M);
+    ret = bbm_ctp_rt_start(__this->bbm_client_hdl[ch], disp_mode);
     if (ret) {
         printf("ch:%d rt stream start err\n", ch);
         return -1;
@@ -152,10 +396,14 @@ static int bbm_start_camera_by_ch(int ch, int disp_mode)
 
 static int bbm_stop_camera_by_ch(int ch)
 {
+    if (__this->bbm_cur_mode != BBM_MODE_STREAM) {
+        return 0;
+    }
+
     printf("rt stream stop:%d \n", ch);
     int ret;
 
-    ret = bbm_ctp_rt_stop(__this->bbm_client_hdl[ch]->ctp_cli_hdl);
+    ret = bbm_ctp_rt_stop(__this->bbm_client_hdl[ch]);
     if (ret) {
         printf("ch:%d rt stream stop err\n", ch);
     }
@@ -169,6 +417,7 @@ static int bbm_start_thumb_by_ch(int ch)
     printf("file thumb start:%d \n", ch);
     int ret;
 
+    bbm_ctp_send_modify_txrate(__this->bbm_client_hdl[ch]->ctp_cli_hdl, WIFI_TXRATE_11M);
     ret = ctp_file_thumb_start(__this->bbm_client_hdl[ch]);
     if (ret) {
         printf("ch:%d file thumb start err\n", ch);
@@ -181,6 +430,10 @@ static int bbm_start_thumb_by_ch(int ch)
 
 static int bbm_stop_thumb_by_ch(int ch)
 {
+    if (__this->bbm_cur_mode != BBM_MODE_FILE_BROWSER) {
+        return 0;
+    }
+
     printf("rt thumb stop:%d \n", ch);
     int ret;
 
@@ -199,7 +452,8 @@ static int bbm_start_file_play_by_ch(int ch, int arg)
     printf("file play start:%d \n", ch);
     int ret;
 
-    ret = ctp_file_play_start(__this->bbm_client_hdl[ch], arg);
+    bbm_ctp_send_modify_txrate(__this->bbm_client_hdl[ch]->ctp_cli_hdl, WIFI_TXRATE_11M);
+    ret = bbm_file_play_start(__this->bbm_client_hdl[ch], arg);
     if (ret) {
         printf("ch:%d file play start err\n", ch);
         return -1;
@@ -214,7 +468,7 @@ static int bbm_switch_file_play_by_ch(int ch, int arg)
     printf("file play switch:%d \n", ch);
     int ret;
 
-    ret = ctp_file_play_switch(__this->bbm_client_hdl[ch], arg);
+    ret = bbm_file_play_switch(__this->bbm_client_hdl[ch], arg);
     if (ret) {
         printf("ch:%d file play start err\n", ch);
         return -1;
@@ -226,10 +480,14 @@ static int bbm_switch_file_play_by_ch(int ch, int arg)
 
 static int bbm_stop_file_play_by_ch(int ch)
 {
+    if (__this->bbm_cur_mode != BBM_MODE_VIDEO_PLAY) {
+        return 0;
+    }
+
     printf("rt play stop:%d \n", ch);
     int ret;
 
-    ret = ctp_file_play_stop(__this->bbm_client_hdl[ch]);
+    ret = bbm_file_play_stop(__this->bbm_client_hdl[ch]);
     if (ret) {
         printf("ch:%d file play stop err\n", ch);
         return -1;
@@ -244,7 +502,8 @@ static int bbm_stop_file_play_all(void)
     int ret = 0;
     int ch;
 
-    for (ch = 0; ch < MAX_PAIR_NUM; ch++) {
+    //+1本机
+    for (ch = 0; ch < MAX_PAIR_NUM + 1; ch++) {
         if (__this->cur_channel & BIT(ch)) {
             ret = bbm_stop_file_play_by_ch(ch);
         }
@@ -258,7 +517,8 @@ static int bbm_stop_thumb_all(void)
     int ret = 0;
     int ch;
 
-    for (ch = 0; ch < MAX_PAIR_NUM; ch++) {
+    //+1本机
+    for (ch = 0; ch < MAX_PAIR_NUM + 1; ch++) {
         if (__this->cur_channel & BIT(ch)) {
             ret = bbm_stop_thumb_by_ch(ch);
         }
@@ -276,7 +536,7 @@ static int bbm_stop_camera_all(void)
     for (ch = 0; ch < MAX_PAIR_NUM; ch++) {
         if (__this->cur_channel & BIT(ch)) {
             printf("rt stream stop:%d \n", ch);
-            ret = bbm_ctp_rt_stop(__this->bbm_client_hdl[ch]->ctp_cli_hdl);
+            ret = bbm_ctp_rt_stop(__this->bbm_client_hdl[ch]);
             if (ret) {
                 printf("ch:%d rt stream stop err\n", ch);
                 continue;
@@ -379,13 +639,16 @@ static int bbm_quit_cur_mode(void)
 
     switch (__this->bbm_cur_mode) {
     case BBM_MODE_STREAM:
+        printf("bbm quit mode stream \n");
         ret = bbm_stop_camera_all();
         bbm_rt_stream_exit();
         break;
     case BBM_MODE_FILE_BROWSER:
+        printf("bbm quit mode file browser \n");
         ret = bbm_stop_thumb_all();
         break;
     case BBM_MODE_VIDEO_PLAY:
+        printf("bbm quit mode file play \n");
         ret = bbm_stop_file_play_all();
         ctp_file_play_exit();
         break;
@@ -411,6 +674,7 @@ static int bbm_enter_mode(u8 mode, int ch, int arg)
     int ret;
     switch (mode) {
     case BBM_MODE_STREAM:
+        printf("bbm enter mode stream \n");
         bbm_rt_stream_init();
         ret = bbm_switch_camera();
         if (__this->online_dev_cnt > 1) {
@@ -420,10 +684,12 @@ static int bbm_enter_mode(u8 mode, int ch, int arg)
         }
         break;
     case BBM_MODE_FILE_BROWSER:
+        printf("bbm enter mode file browser \n");
         ret = bbm_start_thumb_by_ch(ch);
         break;
     case BBM_MODE_VIDEO_PLAY:
-        ctp_file_play_init();
+        printf("bbm enter mode file play \n");
+        ctp_file_play_init(__this->bbm_client_hdl[ch]);
         ret = bbm_start_file_play_by_ch(ch, arg);
         break;
     case BBM_MODE_IDLE:
@@ -450,12 +716,7 @@ static int bbm_switch_mode(u8 mode, int ch, int arg)
             //nothing
             return 0;
         } else if (__this->bbm_cur_mode == BBM_MODE_FILE_BROWSER) {
-            if (__this->cur_channel & BIT(ch)) {
-                printf("ch %d no need reopen\n", ch);
-            } else {
-                bbm_start_thumb_by_ch(ch);
-            }
-            return 0;
+            //
         }
     }
 
@@ -504,10 +765,12 @@ static int bbm_tx_offline(void *priv)
         break;
     case BBM_MODE_FILE_BROWSER:
     case BBM_MODE_VIDEO_PLAY:
-        post_home_msg_to_ui("back_home_page", 0);
-        char *lab = "Device Not Online !";
-        post_home_msg_to_ui("show_sys_prompt", lab);
-        bbm_quit_cur_mode();
+        if (__this->cur_channel & BIT(ch)) {
+            post_home_msg_to_ui("back_home_page", 0);
+            char *lab = "Device Not Online !";
+            post_home_msg_to_ui("show_sys_prompt", lab);
+            bbm_quit_cur_mode();
+        }
         break;
     case BBM_MODE_IDLE:
         break;
@@ -534,6 +797,8 @@ static int bbm_tx_online(int ch, u32 ip_addr)
         goto err;
     }
     memset(__this->bbm_client_hdl[ch], 0x00, sizeof(struct bbm_client_hdl));
+    __this->bbm_client_hdl[ch]->ch = ch;
+    __this->bbm_client_hdl[ch]->ip_addr = ip_addr;
 
     ret = bbm_ctp_client_init(&__this->bbm_client_hdl[ch]->ctp_cli_hdl,
                               ip_addr, __this->bbm_client_hdl[ch]);
@@ -552,7 +817,6 @@ static int bbm_tx_online(int ch, u32 ip_addr)
                 goto err;
             }
         }
-        __this->bbm_cur_mode = BBM_MODE_STREAM;
         break;
     case BBM_MODE_FILE_BROWSER:
         break;
@@ -635,6 +899,16 @@ static int bbm_rx_init(void)
         }
     }
 
+    __this->bbm_client_hdl[RX_DEVICE_CH]  = malloc(sizeof(struct bbm_client_hdl));
+    if (!__this->bbm_client_hdl[RX_DEVICE_CH]) {
+        printf("ch:%d bbm client malloc err \n", RX_DEVICE_CH);
+        return -1;
+    }
+    memset(__this->bbm_client_hdl[RX_DEVICE_CH], 0x00, sizeof(struct bbm_client_hdl));
+    __this->bbm_client_hdl[RX_DEVICE_CH]->is_local_dev = 1;
+    __this->bbm_client_hdl[RX_DEVICE_CH]->ch = ch;
+
+
     return 0;
 }
 
@@ -643,6 +917,8 @@ static int state_machine(struct application *app, enum app_state state, struct i
     int ret = 0;
     int ch;
     int arg;
+    void *priv;
+    char *path;
     switch (state) {
     case APP_STA_CREATE:
         log_d("\n>>>>> baby_monitor_init <<<<<\n");
@@ -690,44 +966,91 @@ static int state_machine(struct application *app, enum app_state state, struct i
             break;
         case ACTION_BBM_START_FILE_BROWSER:
             log_d("\n>>>>>baby_monitor start file stream <<<<<\n");
-            ch = it->data;
+            path = it->data;
+            if (strstr(path, "storage")) {
+                ch = RX_DEVICE_CH;
+                strcpy(__this->bbm_client_hdl[ch]->local_path, path);
+            } else {
+                ch = bbm_path_to_ch(path);
+            }
             ret = bbm_switch_mode(BBM_MODE_FILE_BROWSER, ch, 0);
             break;
         case ACTION_BBM_STOP_FILE_BROWSER:
             log_d("\n>>>>>baby_monitor stop file stream <<<<<\n");
+            path = it->data;
+            if (strstr(path, "storage")) {
+                ch = RX_DEVICE_CH;
+                strcpy(__this->bbm_client_hdl[ch]->local_path, path);
+            } else {
+                ch = bbm_path_to_ch(path);
+            }
+            bbm_stop_thumb_by_ch(ch);
             break;
         case ACTION_BBM_GET_FILE_NUM:
             log_d("\n>>>>>baby_monitor get_file_browser num <<<<<\n");
-            ch = it->data;
+            path = it->data;
+            if (strstr(path, "storage")) {
+                ch = RX_DEVICE_CH;
+            } else {
+                ch = bbm_path_to_ch(path);
+            }
+
             int *num = it->exdata;
             ret = bbm_get_file_num(ch, num);
             break;
         case ACTION_BBM_GET_FILE_LIST:
             log_d("\n>>>>>baby_monitor get_file_browser list <<<<<\n");
-            ch = it->data;
+            path = it->data;
+            if (strstr(path, "storage")) {
+                ch = RX_DEVICE_CH;
+            } else {
+                ch = bbm_path_to_ch(path);
+            }
+
             char ***list = it->exdata;
             ret = bbm_get_file_name_list(ch, list);
             break;
         case ACTION_BBM_GET_FILE_THUMB_REQ:
             log_d("\n>>>>>baby_monitor get_file_browser thumb <<<<<\n");
-            ch = it->data;
+            path = it->data;
+            if (strstr(path, "storage")) {
+                ch = RX_DEVICE_CH;
+            } else {
+                ch = bbm_path_to_ch(path);
+            }
+
             struct net_ctp_thumb *thumb_data = it->exdata;
             ret = bbm_ctp_get_file_thumb(__this->bbm_client_hdl[ch], thumb_data);
             break;
         case ACTION_BBM_FILE_PLAY_START:
             log_d("\n>>>>>baby_monitor file play start <<<<<\n");
-            ch = it->data;
+            path = it->data;
+            if (strstr(path, "storage")) {
+                ch = RX_DEVICE_CH;
+            } else {
+                ch = bbm_path_to_ch(path);
+            }
             arg = it->exdata;
             ret = bbm_switch_mode(BBM_MODE_VIDEO_PLAY, ch, arg);
             break;
         case ACTION_BBM_FILE_PLAY_STOP:
             log_d("\n>>>>>baby_monitor file play stop <<<<<\n");
-            ch = it->data;
+            path = it->data;
+            if (strstr(path, "storage")) {
+                ch = RX_DEVICE_CH;
+            } else {
+                ch = bbm_path_to_ch(path);
+            }
             bbm_stop_file_play_by_ch(ch);
             break;
         case ACTION_BBM_FILE_PLAY_SWITCH:
             log_d("\n>>>>>baby_monitor file play switch <<<<<\n");
-            ch = it->data;
+            path = it->data;
+            if (strstr(path, "storage")) {
+                ch = RX_DEVICE_CH;
+            } else {
+                ch = bbm_path_to_ch(path);
+            }
             arg = it->exdata;
             ret = bbm_switch_file_play_by_ch(ch, arg);
             break;
@@ -735,14 +1058,26 @@ static int state_machine(struct application *app, enum app_state state, struct i
             bbm_online_event_hander(it);
             break;
         case ACTION_BBM_GET_ONLINE_DEV_STATUS:
+            char *dev_path = it->exdata;
             int *status = it->data;
-            int i;
-            for (i = 0; i < ARRAY_SIZE(__this->online_table); i++) {
-                if (__this->online_table[i] == BBM_TX_ONLINE) {
-                    //在线设备的ch号对应的bit位置1
-                    *status |= BIT(i);
-                }
-            }
+
+            *status = bbm_get_dir_num(dev_path);
+
+            break;
+        case ACTION_BBM_TX_SD_OFFLINE:
+            priv = it->data;
+            ret = bbm_tx_sd_offline(priv);
+            break;
+        case ACTION_BBM_FILE_LIST_UPDATE:
+            ret = bbm_file_list_update(it->data, it->exdata);
+            break;
+        case ACTION_BBM_FILE_LIST_CREATE:
+            priv = it->data;
+            ret = bbm_file_list_create(priv);
+            break;
+        case ACTION_BBM_TX_START_REC_ERR:
+            priv = it->data;
+            ret = bbm_tx_start_rec_err(priv);
             break;
         }
         break;
@@ -783,15 +1118,37 @@ static int baby_monitor_key_event_handler(struct key_event *key)
             break;
         case KEY_DOWN:
             printf("KEY4\n");
-            bbm_ctp_rec_start(__this->bbm_client_hdl[1]->ctp_cli_hdl);
+            //测试
+            //
+            //TX开始录像
+            /* bbm_ctp_rec_start(__this->bbm_client_hdl[1]); */
+            //RX开始录像
+            /* bbm_rx_rec_start(__this->bbm_client_hdl[1]); */
+            //数字变焦
+            /* bbm_rt_stream_digital_zomm(__this->bbm_client_hdl[1], 1); */
+            //设置码率
+            /* bbm_ctp_set_abr(__this->bbm_client_hdl[1], 1000); */
+            //开启全部TX设备录像
+            bbm_tx_start_rec_all();
+            //开启全部RX录像
+            bbm_rx_start_rec_all();
             break;
         case KEY_OK:
             printf("KEY5\n");
-            bbm_ctp_rec_stop(__this->bbm_client_hdl[1]->ctp_cli_hdl);
-            //数字变焦测试
-            /*             if (__this->bbm_cur_mode == BBM_MODE_STREAM && __this->cur_channel & BIT(1)) { */
-            /* bbm_rt_stream_digital_zomm(__this->bbm_client_hdl[1]->ctp_cli_hdl, 2); */
-            /* } */
+            //测试
+            //
+            //TX停止录像
+            /* bbm_ctp_rec_stop(__this->bbm_client_hdl[1]); */
+            //RX停止录像
+            /* bbm_rx_rec_stop(__this->bbm_client_hdl[1]); */
+            //数字变焦
+            /* bbm_rt_stream_digital_zomm(__this->bbm_client_hdl[1], 2); */
+            //设置码率
+            /* bbm_ctp_set_abr(__this->bbm_client_hdl[1], 4000); */
+            //关闭全部TX设备录像
+            bbm_tx_stop_rec_all();
+            //关闭全部RX录像
+            bbm_rx_stop_rec_all();
             break;
         default:
             printf("Unknow KEY\n");
@@ -806,9 +1163,41 @@ static int baby_monitor_key_event_handler(struct key_event *key)
 
 static int baby_monitor_device_event_handler(struct sys_event *e)
 {
+    int ret = false;
     struct device_event *device_eve = (struct device_event *)e->payload;
 
-    return false;
+    /*
+     * SD卡插拔处理
+     */
+    if (e->from == DEVICE_EVENT_FROM_SD) {
+        switch (device_eve->event) {
+        case DEVICE_EVENT_IN:
+            printf("bbm device handler sd in \n");
+            ret = true;
+            break;
+        case DEVICE_EVENT_OUT:
+            printf("bbm device handler sd out \n");
+            ret = true;
+            if (__this->bbm_cur_mode == BBM_MODE_FILE_BROWSER ||
+                __this->bbm_cur_mode == BBM_MODE_VIDEO_PLAY) {
+
+                if (__this->cur_channel & BIT(RX_DEVICE_CH)) {
+                    post_home_msg_to_ui("back_home_page", 0);
+                    char *lab = "SD Card Not Online !";
+                    post_home_msg_to_ui("show_sys_prompt", lab);
+                    bbm_quit_cur_mode();
+                }
+            }
+            break;
+        default:
+            break;
+        }
+
+
+    }
+
+
+    return ret;
 }
 
 static int event_handler(struct application *app, struct sys_event *event)

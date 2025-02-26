@@ -13,8 +13,14 @@ extern "C" {
 
 #if LV_USE_DRAW_JLVG
 #include "../../../display/lv_display_private.h"
+#include "../../lv_image_decoder_private.h"
 #include "../../sw/lv_draw_sw.h"
 #include "../../lv_draw.h"
+#include "../../../misc/lv_types.h"
+#include "src/draw/lv_draw_buf_private.h"
+#include "src/draw/lv_draw_private.h"
+#include "src/draw/sw/lv_draw_sw_private.h"
+#include "../../../libs/jl_bin/lv_jl_bin.h"
 
 #include "lv_draw_jlvg_common.h"
 
@@ -66,6 +72,10 @@ void lv_draw_jlvg_fill(lv_draw_unit_t *draw_unit, const lv_draw_fill_dsc_t *dsc,
 
 #if (LV_USE_DRAW_JLVG_IMG_ENABLE == 1)
 void lv_draw_jlvg_img(lv_draw_unit_t *draw_unit, const lv_draw_image_dsc_t *dsc, const lv_area_t *coords);
+#endif
+
+#if (LV_USE_DRAW_JLVG_LABEL_ENABLE == 1)
+void lv_draw_jlvg_label(lv_draw_unit_t *draw_unit, const lv_draw_label_dsc_t *dsc, const lv_area_t *coords);
 #endif
 
 /**********************

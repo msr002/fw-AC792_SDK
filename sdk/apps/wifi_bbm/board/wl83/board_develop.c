@@ -869,7 +869,7 @@ static const struct otg_dev_data otg_data = {
                             | OTG_HOST_MODE
 #endif
                               ,
-    .detect_time_interval   = 50,
+    .detect_time_interval   = 1,
 };
 
 #if TCFG_HOST_CDC_ENABLE
@@ -1169,32 +1169,32 @@ const struct wifi_calibration_param wifi_calibration_param = {
 #else
 //PA参数
 const struct wifi_calibration_param wifi_calibration_param = {
-    .xosc_l     = 0x0A,// 调节左晶振电容
-    .xosc_r     = 0x0A,// 调节右晶振电容
+    .xosc_l     = 0x09,// 调节左晶振电容
+    .xosc_r     = 0x09,// 调节右晶振电容
     .pa_trim_data = {1, 7, 4, 7, 11, 1, 7},// 根据MP测试生成PA TRIM值
-	.mcs_dgain    = {
-        60,//11B_1M
-        60,//11B_2.2M
-        60,//11B_5.5M
-        60,//11B_11M
+    .mcs_dgain    = {
+        40,//11B_1M
+        39,//11B_2.2M
+        36,//11B_5.5M
+        36,//11B_11M
 
-        70,//11G_6M
-        70,//11G_9M
-        70,//11G_12M
-        55,//11G_18M
-        48,//11G_24M
-        38,//11G_36M
-        32,//11G_48M
-        29,//11G_54M
+        44,//11G_6M
+        43,//11G_9M
+        59,//11G_12M
+        59,//11G_18M
+        42,//11G_24M
+        34,//11G_36M
+        29,//11G_48M
+        25,//11G_54M
 
-        65,//11N_MCS0
-        65,//11N_MCS1
+        43,//11N_MCS0
+        60,//11N_MCS1
         55,//11N_MCS2
-        45,//11N_MCS3
-        39,//11N_MCS4
-        34,//11N_MCS5
-        29,//11N_MCS6
-        26,//11N_MCS7
+        44,//11N_MCS3
+        43,//11N_MCS4
+        30,//11N_MCS5
+        26,//11N_MCS6
+        23,//11N_MCS7
     }
 };
 
@@ -1382,6 +1382,7 @@ REGISTER_DEVICES(device_table) = {
 #ifdef CONFIG_VIDEO2_ENABLE
     {"uvc", &uvc_dev_ops, NULL},
     { "video10.*",  &video_dev_ops, (void *)&video2_data },
+    { "video11.*",  &video_dev_ops, (void *)&video2_data },
 #endif
 
 #ifdef CONFIG_VIDEO3_ENABLE

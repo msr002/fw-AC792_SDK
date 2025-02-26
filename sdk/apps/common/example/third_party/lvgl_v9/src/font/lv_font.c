@@ -42,6 +42,44 @@
  *   GLOBAL FUNCTIONS
  **********************/
 
+#if ((LV_USE_DRAW_JLVG == 1) && (LV_USE_DRAW_JLVG_LABEL_ENABLE == 1))
+/* ------------------------------------------------------------------------------------*/
+/**
+ * @brief lv_font_jlvg_draw_check_is_vector
+ *
+ * @Params user_data
+ *
+ * @return
+ */
+/* ------------------------------------------------------------------------------------*/
+bool lv_font_jlvg_draw_check_is_vector(const lv_font_t *font_p)
+{
+    if (font_p->user_data == NULL) {
+        return false;
+    }
+
+    lv_font_jlvg_privately_t *jlvg_privately = (lv_font_jlvg_privately_t *)font_p->user_data;
+
+    return jlvg_privately->is_vector;
+}
+
+bool lv_jlvg_label_draw_task_create(lv_draw_unit_t *draw_unit, const lv_font_t *font_p, const lv_area_t *coords, lv_jlvg_label_info_t *label_info)
+{
+    LV_ASSERT_NULL(font_p);
+    if (font_p->user_data == NULL) {
+        return false;
+    }
+
+    lv_font_jlvg_privately_t *jlvg_privately = (lv_font_jlvg_privately_t *)font_p->user_data;
+
+    if (jlvg_privately->label_draw_task_create_cb == NULL) {
+        return false;
+    }
+
+    return jlvg_privately->label_draw_task_create_cb(draw_unit, font_p, coords, label_info);
+}
+#endif
+
 const void *lv_font_get_glyph_bitmap(lv_font_glyph_dsc_t *g_dsc, lv_draw_buf_t *draw_buf)
 {
     const lv_font_t *font_p = g_dsc->resolved_font;

@@ -28,7 +28,7 @@ EXT_CFLAGS  := # Windows 下不需要 -D__SHELL__
 export PATH:=$(TOOL_DIR);$(PATH)
 
 ## 后处理脚本
-FIXBAT          := ..\..\..\..\tools\utils\fixbat.exe # 用于处理 utf8->gbk 编码问题
+FIXBAT          := ../../../../tools/utils/fixbat.exe # 用于处理 utf8->gbk 编码问题
 POST_SCRIPT     := ../../../../cpu/wl83/tools/download.bat
 RUN_POST_SCRIPT := ..\..\..\..\cpu\wl83\tools\download.bat
 else
@@ -145,6 +145,7 @@ INCLUDES := \
 	-I../../../../include_lib/utils/syscfg \
 	-I../../../../include_lib/utils/event \
 	-I../../../../apps/wifi_bbm/include \
+	-I../../../../apps/wifi_bbm/simple_avi \
 	-I../../../../apps/wifi_bbm/protocols \
 	-I../../../../include_lib/driver/device/video \
 	-I../../../../apps \
@@ -838,6 +839,7 @@ c_SRC_FILES := \
 	../../../../apps/wifi_bbm/bbm_video_rec.c \
 	../../../../apps/wifi_bbm/board/wl83/board_develop.c \
 	../../../../apps/wifi_bbm/lvgl_v8_ui_app/custom/custom.c \
+	../../../../apps/wifi_bbm/lvgl_v8_ui_app/custom/ui_action_dev.c \
 	../../../../apps/wifi_bbm/lvgl_v8_ui_app/custom/ui_action_dir.c \
 	../../../../apps/wifi_bbm/lvgl_v8_ui_app/custom/ui_action_file.c \
 	../../../../apps/wifi_bbm/lvgl_v8_ui_app/custom/ui_action_home.c \
@@ -864,6 +866,7 @@ c_SRC_FILES := \
 	../../../../apps/wifi_bbm/lvgl_v8_ui_app/generated/gui_msg/gui_sys_prompt_msg.c \
 	../../../../apps/wifi_bbm/lvgl_v8_ui_app/generated/gui_msg/gui_video_play_msg.c \
 	../../../../apps/wifi_bbm/lvgl_v8_ui_app/generated/gui_res/res_common.c \
+	../../../../apps/wifi_bbm/lvgl_v8_ui_app/generated/gui_scr/setup_scr_device_select.c \
 	../../../../apps/wifi_bbm/lvgl_v8_ui_app/generated/gui_scr/setup_scr_dir_select.c \
 	../../../../apps/wifi_bbm/lvgl_v8_ui_app/generated/gui_scr/setup_scr_file_browser.c \
 	../../../../apps/wifi_bbm/lvgl_v8_ui_app/generated/gui_scr/setup_scr_home.c \
@@ -880,6 +883,7 @@ c_SRC_FILES := \
 	../../../../apps/wifi_bbm/protocols/pairing_data_model.c \
 	../../../../apps/wifi_bbm/protocols/udp_multicast.c \
 	../../../../apps/wifi_bbm/protocols/wifi_adapter.c \
+	../../../../apps/wifi_bbm/simple_avi/avilib.c \
 	../../../../apps/wifi_bbm/ui_action.c \
 	../../../../apps/wifi_bbm/wifi/ftpd_vfs_reg.c \
 	../../../../apps/wifi_bbm/wifi/media_file_list.c \
@@ -959,13 +963,15 @@ LFLAGS := \
 	../../../../include_lib/newlib/pi32v2-lib/libm.a \
 	../../../../include_lib/newlib/pi32v2-lib/libc.a \
 	../../../../include_lib/newlib/pi32v2-lib/libcompiler_rt.a \
-	../../../../cpu/wl83/liba/iperf.a \
+	--start-group  \
 	../../../../cpu/wl83/liba/system.a \
 	../../../../cpu/wl83/liba/fs.a \
 	../../../../cpu/wl83/liba/cfg_tool.a \
 	../../../../cpu/wl83/liba/event.a \
+	../../../../cpu/wl83/liba/cpu.a \
 	../../../../cpu/wl83/liba/json.a \
 	../../../../cpu/wl83/liba/update.a \
+	../../../../cpu/wl83/liba/common_lib.a \
 	../../../../cpu/wl83/liba/video_rec_server.a \
 	../../../../cpu/wl83/liba/video_dec_server.a \
 	../../../../cpu/wl83/liba/audio_server.a \
@@ -976,28 +982,25 @@ LFLAGS := \
 	../../../../cpu/wl83/liba/lib_usb_syn.a \
 	../../../../cpu/wl83/liba/video_engine.a \
 	../../../../cpu/wl83/liba/wl_rf_common.a \
+	../../../../cpu/wl83/liba/hsm.a \
 	../../../../cpu/wl83/liba/http_cli.a \
 	../../../../cpu/wl83/liba/https_cli.a \
 	../../../../cpu/wl83/liba/http_server.a \
 	../../../../cpu/wl83/liba/json.a  \
+	../../../../cpu/wl83/liba/iperf.a \
+	../../../../cpu/wl83/liba/libmbedtls_3_4_0.a \
 	../../../../cpu/wl83/liba/libcrypto_mbedtls.a \
 	../../../../cpu/wl83/liba/lwip_2_2_0.a \
 	../../../../cpu/wl83/liba/wl_wifi.a \
 	../../../../cpu/wl83/liba/profile.a \
 	../../../../cpu/wl83/liba/libjlsp_kws_far_keyword.a \
 	../../../../cpu/wl83/liba/libkwscommon.a \
-	--start-group  \
-	../../../../cpu/wl83/liba/libmbedtls_3_4_0.a \
 	../../../../cpu/wl83/liba/wpasupplicant.a \
-	--end-group \
 	../../../../cpu/wl83/liba/stream_media_server.a \
 	../../../../cpu/wl83/liba/ftpserver_new.a \
 	../../../../cpu/wl83/liba/net_server.a \
 	../../../../cpu/wl83/liba/libqrcode.a \
-	../../../../cpu/wl83/liba/common_lib.a \
-	../../../../cpu/wl83/liba/libmbedtls_3_4_0.a  \
-	../../../../cpu/wl83/liba/hsm.a \
-	../../../../cpu/wl83/liba/cpu.a \
+	--end-group \
 	../../../../cpu/wl83/liba/lvgl_v8_extend.a \
 	-T../../../../cpu/wl83/sdk.ld \
 	-M=../../../../cpu/wl83/tools/sdk.map \
@@ -1078,37 +1081,31 @@ endif
 $(BUILD_DIR)/%.c.o : $(ROOT_PREFIX)/%.c
 	$(info +CC $<)
 	$(QUITE) $(MKDIR) $(@D)
-	$(QUITE) $(CC) $(CFLAGS) $(DEFINES) $(INCLUDES) -MM -MT $@ $< -o $(@:.o=.d)
-	$(QUITE) $(CC) $(CFLAGS) $(DEFINES) $(INCLUDES) -c $< -o $@
+	$(QUITE) $(CC) $(CFLAGS) $(DEFINES) $(INCLUDES) -MMD -MF $(@:.o=.d) -c $< -o $@
 
 $(BUILD_DIR)/%.S.o : $(ROOT_PREFIX)/%.S
 	$(info +AS $<)
 	$(QUITE) $(MKDIR) $(@D)
-	$(QUITE) $(CC) $(CFLAGS) $(DEFINES) $(INCLUDES) -MM -MT $@ $< -o $(@:.o=.d)
-	$(QUITE) $(CC) $(CFLAGS) $(DEFINES) $(INCLUDES) -c $< -o $@
+	$(QUITE) $(CC) $(CFLAGS) $(DEFINES) $(INCLUDES) -MMD -MF $(@:.o=.d) -c $< -o $@
 
 $(BUILD_DIR)/%.s.o : $(ROOT_PREFIX)/%.s
 	$(info +AS $<)
 	$(QUITE) $(MKDIR) $(@D)
-	$(QUITE) $(CC) $(CFLAGS) $(DEFINES) $(INCLUDES) -MM -MT $@ $< -o $(@:.o=.d)
-	$(QUITE) $(CC) $(CFLAGS) $(DEFINES) $(INCLUDES) -c $< -o $@
+	$(QUITE) $(CC) $(CFLAGS) $(DEFINES) $(INCLUDES) -MMD -MF $(@:.o=.d) -c $< -o $@
 
 $(BUILD_DIR)/%.cpp.o : $(ROOT_PREFIX)/%.cpp
 	$(info +CXX $<)
 	$(QUITE) $(MKDIR) $(@D)
-	$(QUITE) $(CXX) $(CXXFLAGS) $(CFLAGS) $(DEFINES) $(INCLUDES) -MM -MT $@ $< -o $(@:.o=.d)
-	$(QUITE) $(CXX) $(CXXFLAGS) $(CFLAGS) $(DEFINES) $(INCLUDES) -c $< -o $@
+	$(QUITE) $(CXX) $(CXXFLAGS) $(CFLAGS) $(DEFINES) $(INCLUDES) -MMD -MF $(@:.o=.d) -c $< -o $@
 
 $(BUILD_DIR)/%.cxx.o : $(ROOT_PREFIX)/%.cxx
 	$(info +CXX $<)
 	$(QUITE) $(MKDIR) $(@D)
-	$(QUITE) $(CXX) $(CXXFLAGS) $(CFLAGS) $(DEFINES) $(INCLUDES) -MM -MT $@ $< -o $(@:.o=.d)
-	$(QUITE) $(CXX) $(CXXFLAGS) $(CFLAGS) $(DEFINES) $(INCLUDES) -c $< -o $@
+	$(QUITE) $(CXX) $(CXXFLAGS) $(CFLAGS) $(DEFINES) $(INCLUDES) -MMD -MF $(@:.o=.d) -c $< -o $@
 
 $(BUILD_DIR)/%.cc.o : $(ROOT_PREFIX)/%.cc
 	$(info +CXX $<)
 	$(QUITE) $(MKDIR) $(@D)
-	$(QUITE) $(CXX) $(CXXFLAGS) $(CFLAGS) $(DEFINES) $(INCLUDES) -MM -MT $@ $< -o $(@:.o=.d)
-	$(QUITE) $(CXX) $(CXXFLAGS) $(CFLAGS) $(DEFINES) $(INCLUDES) -c $< -o $@
+	$(QUITE) $(CXX) $(CXXFLAGS) $(CFLAGS) $(DEFINES) $(INCLUDES) -MMD -MF $(@:.o=.d) -c $< -o $@
 
 -include $(DEP_FILES)

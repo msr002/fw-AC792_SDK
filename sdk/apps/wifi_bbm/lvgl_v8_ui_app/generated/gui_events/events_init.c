@@ -56,9 +56,9 @@ static void home_imgbtn_3_event_handler(lv_event_t *e)
     lv_obj_t *src = lv_event_get_target(e);
     switch (code) {
     case LV_EVENT_CLICKED: {
-        gui_scr_t *screen = gui_scr_get(GUI_SCREEN_DIR_SELECT);
+        gui_scr_t *screen = gui_scr_get(GUI_SCREEN_DEVICE_SELECT);
         if (screen == NULL) {
-            screen = gui_scr_create(GUI_SCREEN_DIR_SELECT, "dir_select", guider_ui.dir_select, (gui_scr_setup_cb_t)setup_scr_dir_select, (gui_scr_unload_cb_t)unload_scr_dir_select);
+            screen = gui_scr_create(GUI_SCREEN_DEVICE_SELECT, "device_select", guider_ui.device_select, (gui_scr_setup_cb_t)setup_scr_device_select, (gui_scr_unload_cb_t)unload_scr_device_select);
         }
         ui_load_scr_anim(ui, screen, LV_SCR_LOAD_ANIM_NONE, 0, 0, true, true, false);
     }
@@ -714,8 +714,6 @@ static void video_play_imgbtn_1_event_handler(lv_event_t *e)
         {
             lv_obj_t *dest = ui->file_browser;
 #if !LV_USE_GUIBUILDER_SIMULATOR
-            int gui_bbm_play_file_stop(void);
-            gui_bbm_play_file_stop();
 #endif
         }
         gui_scr_t *screen = gui_scr_get(GUI_SCREEN_FILE_BROWSER);
@@ -1058,9 +1056,9 @@ static void dir_select_imgbtn_1_event_handler(lv_event_t *e)
     lv_obj_t *src = lv_event_get_target(e);
     switch (code) {
     case LV_EVENT_CLICKED: {
-        gui_scr_t *screen = gui_scr_get(GUI_SCREEN_HOME);
+        gui_scr_t *screen = gui_scr_get(GUI_SCREEN_DEVICE_SELECT);
         if (screen == NULL) {
-            screen = gui_scr_create(GUI_SCREEN_HOME, "home", guider_ui.home, (gui_scr_setup_cb_t)setup_scr_home, (gui_scr_unload_cb_t)unload_scr_home);
+            screen = gui_scr_create(GUI_SCREEN_DEVICE_SELECT, "device_select", guider_ui.device_select, (gui_scr_setup_cb_t)setup_scr_device_select, (gui_scr_unload_cb_t)unload_scr_device_select);
         }
         ui_load_scr_anim(ui, screen, LV_SCR_LOAD_ANIM_NONE, 0, 0, true, true, false);
     }
@@ -1094,4 +1092,99 @@ void events_init_dir_select(lv_ui *ui)
     lv_obj_add_event_cb(ui->dir_select_view_6, dir_select_view_6_event_handler, LV_EVENT_ALL, ui);
     lv_obj_add_event_cb(ui->dir_select_imgbtn_1, dir_select_imgbtn_1_event_handler, LV_EVENT_ALL, ui);
     lv_obj_add_event_cb(ui->dir_select, dir_select_screen_event_handler, LV_EVENT_ALL, ui);
+}
+
+static void device_select_view_1_event_handler(lv_event_t *e)
+{
+    lv_event_code_t code = lv_event_get_code(e);
+    lv_ui *ui = (lv_ui *) lv_event_get_user_data(e);
+    lv_obj_t *src = lv_event_get_target(e);
+    switch (code) {
+    case LV_EVENT_CLICKED: {
+        //custom code dir_select
+        {
+            lv_obj_t *dest = ui->dir_select;
+#if !LV_USE_GUIBUILDER_SIMULATOR
+            void gui_bbm_set_cur_dev_path(int dev);
+            gui_bbm_set_cur_dev_path(0);
+#endif
+        }
+        gui_scr_t *screen = gui_scr_get(GUI_SCREEN_DIR_SELECT);
+        if (screen == NULL) {
+            screen = gui_scr_create(GUI_SCREEN_DIR_SELECT, "dir_select", guider_ui.dir_select, (gui_scr_setup_cb_t)setup_scr_dir_select, (gui_scr_unload_cb_t)unload_scr_dir_select);
+        }
+        ui_load_scr_anim(ui, screen, LV_SCR_LOAD_ANIM_NONE, 0, 0, true, true, false);
+    }
+    break;
+    default:
+        break;
+    }
+}
+
+static void device_select_view_2_event_handler(lv_event_t *e)
+{
+    lv_event_code_t code = lv_event_get_code(e);
+    lv_ui *ui = (lv_ui *) lv_event_get_user_data(e);
+    lv_obj_t *src = lv_event_get_target(e);
+    switch (code) {
+    case LV_EVENT_CLICKED: {
+        //custom code dir_select
+        {
+            lv_obj_t *dest = ui->dir_select;
+#if !LV_USE_GUIBUILDER_SIMULATOR
+            void gui_bbm_set_cur_dev_path(int dev);
+            gui_bbm_set_cur_dev_path(1);
+#endif
+        }
+        gui_scr_t *screen = gui_scr_get(GUI_SCREEN_DIR_SELECT);
+        if (screen == NULL) {
+            screen = gui_scr_create(GUI_SCREEN_DIR_SELECT, "dir_select", guider_ui.dir_select, (gui_scr_setup_cb_t)setup_scr_dir_select, (gui_scr_unload_cb_t)unload_scr_dir_select);
+        }
+        ui_load_scr_anim(ui, screen, LV_SCR_LOAD_ANIM_NONE, 0, 0, true, true, false);
+    }
+    break;
+    default:
+        break;
+    }
+}
+
+static void device_select_imgbtn_1_event_handler(lv_event_t *e)
+{
+    lv_event_code_t code = lv_event_get_code(e);
+    lv_ui *ui = (lv_ui *) lv_event_get_user_data(e);
+    lv_obj_t *src = lv_event_get_target(e);
+    switch (code) {
+    case LV_EVENT_CLICKED: {
+        gui_scr_t *screen = gui_scr_get(GUI_SCREEN_HOME);
+        if (screen == NULL) {
+            screen = gui_scr_create(GUI_SCREEN_HOME, "home", guider_ui.home, (gui_scr_setup_cb_t)setup_scr_home, (gui_scr_unload_cb_t)unload_scr_home);
+        }
+        ui_load_scr_anim(ui, screen, LV_SCR_LOAD_ANIM_NONE, 0, 0, false, true, false);
+    }
+    break;
+    default:
+        break;
+    }
+}
+static void device_select_screen_event_handler(lv_event_t *e)
+{
+    lv_event_code_t code = lv_event_get_code(e);
+    switch (code) {
+    case LV_EVENT_SCREEN_LOAD_START: {
+        gui_scr_action_cb(GUI_SCREEN_DEVICE_SELECT, GUI_SCREEN_ACTION_LOAD);
+        break;
+    }
+    case LV_EVENT_SCREEN_UNLOADED: {
+        gui_scr_action_cb(GUI_SCREEN_DEVICE_SELECT, GUI_SCREEN_ACTION_UNLOAD);
+        break;
+    }
+    }
+}
+
+void events_init_device_select(lv_ui *ui)
+{
+    lv_obj_add_event_cb(ui->device_select_view_1, device_select_view_1_event_handler, LV_EVENT_ALL, ui);
+    lv_obj_add_event_cb(ui->device_select_view_2, device_select_view_2_event_handler, LV_EVENT_ALL, ui);
+    lv_obj_add_event_cb(ui->device_select_imgbtn_1, device_select_imgbtn_1_event_handler, LV_EVENT_ALL, ui);
+    lv_obj_add_event_cb(ui->device_select, device_select_screen_event_handler, LV_EVENT_ALL, ui);
 }

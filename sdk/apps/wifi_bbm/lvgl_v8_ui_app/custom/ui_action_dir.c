@@ -13,7 +13,7 @@ static int cur_dir_ch = 0;
 
 #if !LV_USE_GUIBUILDER_SIMULATOR
 
-int gui_bbm_get_online_dev_status(void)
+int gui_bbm_get_online_dev_status(char *path)
 {
     int status = 0;
 
@@ -22,6 +22,8 @@ int gui_bbm_get_online_dev_status(void)
     it.name	= "baby_monitor";
     it.action = ACTION_BBM_GET_ONLINE_DEV_STATUS;
     it.data = &status;
+    it.exdata = path;
+
     start_app(&it);
 
     return status;
@@ -44,7 +46,10 @@ static void dir_select_screen_load(void)
     char text[10];
     int num = 0;
     int i = 0, j = 0;
-    status = gui_bbm_get_online_dev_status();
+    char *lab;
+
+    char *dev_path = gui_bbm_get_cur_dev_path();
+    status = gui_bbm_get_online_dev_status(dev_path);
 
     //在线设备的ch号对应的bit位置1
     //统计在线设备数量
@@ -57,8 +62,12 @@ static void dir_select_screen_load(void)
     //无在线设备处理
     if (num == 0) {
         printf("dir no online dev \n");
-        post_home_msg_to_ui("back_home_page", 0);
-        char *lab = "Device Not Online !";
+        post_home_msg_to_ui("back_dev_sel_page", 0);
+        if (strstr(dev_path, "storage")) {
+            lab = "Folder is empty !";
+        } else {
+            lab = "Device Not Online !";
+        }
         post_home_msg_to_ui("show_sys_prompt", lab);
         return;
     }

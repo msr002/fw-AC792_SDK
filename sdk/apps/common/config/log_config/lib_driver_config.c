@@ -409,6 +409,12 @@ const char log_tag_const_i_VIDEO_CAMERA AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(TR
 const char log_tag_const_w_VIDEO_CAMERA AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(FALSE);
 const char log_tag_const_e_VIDEO_CAMERA AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(TRUE);
 
+const char log_tag_const_v_VIDEO_DEC_SERVER AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(FALSE);
+const char log_tag_const_d_VIDEO_DEC_SERVER AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(TRUE);
+const char log_tag_const_i_VIDEO_DEC_SERVER AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(TRUE);
+const char log_tag_const_w_VIDEO_DEC_SERVER AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(FALSE);
+const char log_tag_const_e_VIDEO_DEC_SERVER AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(TRUE);
+
 const char log_tag_const_v_VIDEO_DEC AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(FALSE);
 const char log_tag_const_d_VIDEO_DEC AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(TRUE);
 const char log_tag_const_i_VIDEO_DEC AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(TRUE);
@@ -475,7 +481,7 @@ const char log_tag_const_i_PIPELINE_PLUGIN AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB
 const char log_tag_const_w_PIPELINE_PLUGIN AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(TRUE);
 const char log_tag_const_e_PIPELINE_PLUGIN AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(TRUE);
 
-const char log_tag_const_v_PIPELINE_BUFFER AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(FALSE);
+const char log_tag_const_v_PIPELINE_BUFFER AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(TRUE);
 const char log_tag_const_d_PIPELINE_BUFFER AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(FALSE);
 const char log_tag_const_i_PIPELINE_BUFFER AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(FALSE);
 const char log_tag_const_w_PIPELINE_BUFFER AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(TRUE);

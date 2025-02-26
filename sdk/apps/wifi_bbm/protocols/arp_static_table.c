@@ -1,4 +1,4 @@
-
+#include "app_config.h"
 #include "arp_static_table.h"
 
 static OS_MUTEX g_mutex;
@@ -7,18 +7,25 @@ static OS_MUTEX g_mutex;
 #define ARP_MUTEX_UNLOCK()           os_mutex_post(&g_mutex)
 
 static struct arp_static_table g_arp_table = {0};
-static char g_mac[6] = {0x88, 0x88, 0x88, 0x88, 0x88, 0x80};
+static u8 g_mac[6];
 
 //初始化静态的arp映射表
 void arp_static_table_init(void)
 {
     int i;
+    u8 src_mac[6];
     ARP_MUTEX_INITIALIZE();
     struct arp_static_table *ptr = &g_arp_table;
-    int ret = syscfg_read(CFG_USER_DEFINE_BEGIN, ptr, sizeof(g_arp_table));
+    int ret = syscfg_read(BBM_RX_ARP_INDEX, ptr, sizeof(g_arp_table));
     if (ret < 0) {
         memset(&g_arp_table, 0x00, sizeof(g_arp_table));
     }
+
+    wifi_raw_get_mac(src_mac);
+    for (i = 0; i < ARRAY_SIZE(src_mac); i++) {
+        src_mac[i] += 1;
+    }
+    memcpy(g_mac, src_mac, sizeof(g_mac));
 
     for (i = 0; i < MAX_ARP_STATIC_ENTRY; i++) {
         if (ptr->arp_table[i].state == ARP_STATE_USED) {
@@ -32,11 +39,21 @@ void arp_static_table_update_to_flash(void)
 {
     ARP_MUTEX_LOCK();
     char *ptr = (char *)&g_arp_table;
-    int ret = syscfg_write(CFG_USER_DEFINE_BEGIN, ptr, sizeof(g_arp_table));
+    int ret = syscfg_write(BBM_RX_ARP_INDEX, ptr, sizeof(g_arp_table));
     if (ret < 0) {
         printf("arp_static_table_update_to_flash err!!!\n");
     }
     ARP_MUTEX_UNLOCK();
+}
+
+void arp_static_table_reset_to_flash(void)
+{
+    memset(&g_arp_table, 0x00, sizeof(g_arp_table));
+    char *ptr = (char *)&g_arp_table;
+    int ret = syscfg_write(BBM_RX_ARP_INDEX, ptr, sizeof(g_arp_table));
+    if (ret < 0) {
+        printf("arp_static_table_update_to_flash err!!!\n");
+    }
 }
 
 struct arp_entry_t *arp_static_entry_alloc(unsigned char i)

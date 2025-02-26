@@ -6,6 +6,9 @@
 
 #if LV_USE_DRAW_JLVG
 
+#include "../../lv_draw_buf_private.h"
+#include "../../sw/lv_draw_sw.h"
+
 
 //#define LOG_TAG_CONST       UI
 #define LOG_TAG             "[lv_gpu]"
@@ -52,7 +55,7 @@ static int32_t _jlvg_dispatch(lv_draw_unit_t *draw_unit, lv_layer_t *layer);
  */
 static int32_t _jlvg_delete(lv_draw_unit_t *draw_unit);
 
-#if LV_USE_OS
+#if LV_DRAW_JLVG_ASYNC && LV_USE_OS
 static void _jlvg_render_thread_cb(void *ptr);
 #endif
 
@@ -102,23 +105,18 @@ static int32_t _jlvg_evaluate(lv_draw_unit_t *draw_unit, lv_draw_task_t *task)
 
     lv_draw_jlvg_unit_t *draw_jlvg_unit = (lv_draw_jlvg_unit_t *) draw_unit;
 
-    if (lv_area_get_size(&(task->area)) <= LV_JL_GPU_MIN_AREA_SIZE) {
+    if ((lv_area_get_size(&(task->area)) <= LV_JL_GPU_MIN_AREA_SIZE) && (task->type != LV_DRAW_TASK_TYPE_LABEL)) {
         return 0;   /* 需要渲染的区域太小则放弃使用 GPU */
     }
 
     switch (task->type) {
 
-    case LV_DRAW_TASK_TYPE_FILL:
+    case LV_DRAW_TASK_TYPE_FILL: {
 #if (LV_USE_DRAW_JLVG_FILL_ENABLE == 0)
         return 0;
 #endif
 
         lv_draw_fill_dsc_t *draw_dsc = (lv_draw_fill_dsc_t *)task->draw_dsc;
-
-        if (draw_dsc->radius != 0) {
-            // TODO
-            return 0;
-        }
 
         if (draw_dsc->grad.dir != (lv_grad_dir_t)LV_GRAD_DIR_NONE) {
             // TODO
@@ -130,6 +128,7 @@ static int32_t _jlvg_evaluate(lv_draw_unit_t *draw_unit, lv_draw_task_t *task)
             task->preferred_draw_unit_id = DRAW_UNIT_ID_JLVG;
         }
         return 1;
+    }
     case LV_DRAW_TASK_TYPE_IMAGE: {
 #if (LV_USE_DRAW_JLVG_IMG_ENABLE == 0)
         return 0;
@@ -186,7 +185,22 @@ static int32_t _jlvg_evaluate(lv_draw_unit_t *draw_unit, lv_draw_task_t *task)
         }
         return 1;
     }
+    case LV_DRAW_TASK_TYPE_LABEL: {
+#if (LV_USE_DRAW_JLVG_LABEL_ENABLE == 0)
+        return 0;
+#endif
+        lv_draw_label_dsc_t *draw_dsc = (lv_draw_label_dsc_t *)task->draw_dsc;
 
+        if (lv_font_jlvg_draw_check_is_vector(draw_dsc->font) == false) {
+            return 0;   // 非矢量绘制不走 jlvg 加速
+        }
+
+        if (task->preference_score > 80) {
+            task->preference_score = 80;
+            task->preferred_draw_unit_id = DRAW_UNIT_ID_JLVG;
+        }
+        return 1;
+    }
     default:
         return 0;
     }
@@ -220,7 +234,7 @@ static int32_t _jlvg_dispatch(lv_draw_unit_t *draw_unit, lv_layer_t *layer)
     draw_jlvg_unit->base_unit.clip_area = &t->clip_area;
     draw_jlvg_unit->task_act = t;
 
-#if LV_USE_OS
+#if LV_DRAW_JLVG_ASYNC && LV_USE_OS
     /* Let the render thread work. */
     if (draw_jlvg_unit->inited) {
         lv_thread_sync_signal(&draw_jlvg_unit->sync);
@@ -240,7 +254,7 @@ static int32_t _jlvg_dispatch(lv_draw_unit_t *draw_unit, lv_layer_t *layer)
 
 static int32_t _jlvg_delete(lv_draw_unit_t *draw_unit)
 {
-#if LV_USE_OS
+#if LV_DRAW_JLVG_ASYNC && LV_USE_OS
     lv_draw_jlvg_unit_t *draw_jlvg_unit = (lv_draw_jlvg_unit_t *) draw_unit;
 
     LV_LOG_INFO("Cancel JL GPU draw thread.");
@@ -296,17 +310,23 @@ static void _jlvg_execute_drawing(lv_draw_jlvg_unit_t *u)
         lv_draw_jlvg_img(draw_unit, t->draw_dsc, &t->area);
 #endif
         break;
+    case LV_DRAW_TASK_TYPE_LABEL:
+#if (LV_USE_DRAW_JLVG_LABEL_ENABLE == 1)
+        lv_draw_jlvg_label(draw_unit, t->draw_dsc, &t->area);
+#endif
+        break;
     default:
         break;
     }
 }
 
-#if LV_USE_OS
+#if LV_DRAW_JLVG_ASYNC && LV_USE_OS
 static void _jlvg_render_thread_cb(void *ptr)
 {
     lv_draw_jlvg_unit_t *u = ptr;
 
     lv_thread_sync_init(&u->sync);
+    LV_LOG("jlvg render async thread run\n");
     u->inited = true;
 
     while (1) {
@@ -351,7 +371,7 @@ static void _jlvg_render_thread_cb(void *ptr)
  **********************/
 void lv_draw_jlvg_init(void)
 {
-    lv_draw_buf_jlvg_init_handlers();
+    /* lv_draw_buf_jlvg_init_handlers(); */
 
     lv_draw_jlvg_unit_t *draw_jlvg_unit = lv_draw_create_unit(sizeof(lv_draw_jlvg_unit_t));
     draw_jlvg_unit->base_unit.evaluate_cb = _jlvg_evaluate;
@@ -364,7 +384,7 @@ void lv_draw_jlvg_init(void)
 
     log_info("jl gpu hw init. >>>>>>>>>>>");
 
-#if LV_USE_OS
+#if LV_DRAW_JLVG_ASYNC && LV_USE_OS
     lv_thread_init(&draw_jlvg_unit->thread, LV_THREAD_PRIO_HIGH, _jlvg_render_thread_cb, 8 * 1024, draw_jlvg_unit);
 #endif
     return;

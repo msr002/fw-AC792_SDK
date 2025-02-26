@@ -125,6 +125,13 @@ void /* LV_ATTRIBUTE_FAST_MEM */ lv_draw_character(lv_layer_t *layer, lv_draw_la
 void lv_draw_label_iterate_characters(lv_draw_unit_t *draw_unit, const lv_draw_label_dsc_t *dsc,
                                       const lv_area_t *coords, lv_draw_glyph_cb_t cb);
 
+#if ((LV_USE_DRAW_JLVG == 1) && (LV_USE_DRAW_JLVG_LABEL_ENABLE == 1))
+void lv_draw_label_jlvg_path_collection(lv_draw_unit_t *draw_unit, const lv_draw_label_dsc_t *dsc,
+                                        const lv_area_t *coords,
+                                        lv_draw_glyph_cb_t cb,
+                                        lv_jlvg_label_info_t *curr_label_info);
+#endif
+
 /***********************
  * GLOBAL VARIABLES
  ***********************/

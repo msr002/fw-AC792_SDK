@@ -44,13 +44,13 @@ static void low_level_init(struct netif *netif)
     /* don't set NETIF_FLAG_ETHARP if this device is not an ethernet one */
     netif->flags = NETIF_FLAG_BROADCAST | NETIF_FLAG_ETHARP | NETIF_FLAG_LINK_UP | NETIF_FLAG_IGMP;
 #if LWIP_IPV6
-    static  struct dhcp6 dhcp6;
-    dhcp6_set_struct(netif, &dhcp6);
-    dhcp6_enable_stateless(netif);
-    netif->output_ip6 = ethip6_output;
-    netif->ip6_autoconfig_enabled = 1;
-    netif_create_ip6_linklocal_address(netif, 1);
     netif->flags |= NETIF_FLAG_MLD6;
+    netif->output_ip6 = ethip6_output;
+
+#if LWIP_IPV6_DHCP6
+    static struct dhcp6 dhcp6;
+    dhcp6_set_struct(netif, &dhcp6);
+#endif
 #endif
 
     /* Do whatever else is needed to initialize interface. */
@@ -78,6 +78,14 @@ static void low_level_init(struct netif *netif)
  *       dropped because of memory failure (except for the TCP timers).
  */
 
+static int TxRate = WIFI_TXRATE_5M;
+
+int wifi_raw_set_txrate(int txrate)
+{
+    TxRate = txrate;
+    return 0;
+}
+
 static err_t low_level_output(struct netif *netif, struct pbuf *p)
 {
 #if ETH_PAD_SIZE
@@ -91,7 +99,7 @@ static err_t low_level_output(struct netif *netif, struct pbuf *p)
         pos += (int)q->len;
     }
 
-    wifi_send_data(p->tot_len, WIFI_TXRATE_11M);
+    wifi_send_data(p->tot_len, TxRate);
 
 #if ETH_PAD_SIZE
     pbuf_header(p, ETH_PAD_SIZE); /* reclaim the padding word */
@@ -317,8 +325,8 @@ err_t wireless_raw_ethernetif_init(struct netif *netif)
     wifi_set_channel(1);
 
     //配置底层重传次数
-    wifi_set_long_retry(1);
-    wifi_set_short_retry(1);
+    wifi_set_long_retry(2);
+    wifi_set_short_retry(2);
 
     wifi_set_frame_cb(wifi_rx_cb, netif); //注册接收802.11数据帧回调
 

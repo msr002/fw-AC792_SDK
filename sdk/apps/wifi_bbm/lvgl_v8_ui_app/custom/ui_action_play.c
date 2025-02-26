@@ -9,6 +9,7 @@
 #include "ui.h"
 #endif
 static int cur_play_index = 0;
+static char full_path[128];
 
 #if !LV_USE_GUIBUILDER_SIMULATOR
 
@@ -33,13 +34,20 @@ void gui_bbm_set_cur_play_index(int index)
 
 int gui_bbm_play_file_start(void)
 {
+    int ret;
     struct intent it;
     init_intent(&it);
     it.name	= "baby_monitor";
     it.action = ACTION_BBM_FILE_PLAY_START;
-    it.data = gui_bbm_get_cur_dir_ch();
+    sprintf(full_path, "%s%d/%s", gui_bbm_get_cur_dev_path(), gui_bbm_get_cur_dir_ch());
+    it.data = full_path;
     it.exdata = cur_play_index;
-    start_app(&it);
+    ret = start_app(&it);
+
+    if (ret) {
+        char *lab = "File Error !";
+        post_home_msg_to_ui("show_sys_prompt", lab);
+    }
 
     return 0;
 }
@@ -50,7 +58,7 @@ int gui_bbm_play_file_stop(void)
     init_intent(&it);
     it.name	= "baby_monitor";
     it.action = ACTION_BBM_FILE_PLAY_STOP;
-    it.data = gui_bbm_get_cur_dir_ch();
+    it.data = full_path;
     start_app(&it);
 
     return 0;
@@ -62,7 +70,7 @@ int gui_bbm_play_file_control(void)
     init_intent(&it);
     it.name	= "baby_monitor";
     it.action = ACTION_BBM_FILE_PLAY_SWITCH;
-    it.data = gui_bbm_get_cur_dir_ch();
+    it.data = full_path;
     it.exdata = cur_play_index;
     start_app(&it);
 

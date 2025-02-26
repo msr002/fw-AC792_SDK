@@ -17,6 +17,10 @@
 #define MULTICAST_PORT          12345
 #define MULTICAST_ONLINE_PORT   23456
 
+#define BBM_RX_ARP_INDEX          1
+#define BBM_RX_MAC_INDEX          2
+#define BBM_TX_MAC_INDEX          3
+
 #define CONFIG_VIDEO_DEC_ENABLE             1
 
 //PA使能

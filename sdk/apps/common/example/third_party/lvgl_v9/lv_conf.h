@@ -215,12 +215,13 @@
 #endif
 
 /* Use JieLi's 2.5D GPU on ACxx platforms. */
-#define LV_USE_DRAW_JLVG 0  // 测试阶段
-
+#define LV_USE_DRAW_JLVG 1  // 测试阶段
 #if LV_USE_DRAW_JLVG
+#define LV_DRAW_JLVG_ASYNC 1
 /* The ability to perform rendering */
-#define LV_USE_DRAW_JLVG_FILL_ENABLE 0
-#define LV_USE_DRAW_JLVG_IMG_ENABLE 0
+#define LV_USE_DRAW_JLVG_FILL_ENABLE 1
+#define LV_USE_DRAW_JLVG_IMG_ENABLE 1
+#define LV_USE_DRAW_JLVG_LABEL_ENABLE 1
 #endif
 
 /* Use NXP's VG-Lite GPU on iMX RTxxx platforms. */
@@ -881,7 +882,7 @@
 #endif
 
 /*Enable inertial sliding effect*/
-#define LV_USE_SIM_INERTIAL_SLIDE  0
+#define LV_USE_SIM_INERTIAL_SLIDE  1
 
 /*==================
  * OTHERS

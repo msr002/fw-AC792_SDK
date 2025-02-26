@@ -4,6 +4,7 @@
 #include "baby_monitor.h"
 #include "json_c/json.h"
 #include "json_c/json_tokener.h"
+#include "action.h"
 
 
 #define CTP_CMD_PORT            3333    //CTP命令端口
@@ -88,6 +89,34 @@ static int json_parse_video_finish(const char *parm_list, char *fname)
     return 0;
 }
 
+static int json_parse_err_value(const char *parm_list)
+{
+    json_object *new_obj = NULL;
+    json_object *errno_obj = NULL;
+    const char *tmp_value;
+
+    new_obj = json_tokener_parse(parm_list);
+    errno_obj =  json_object_object_get(new_obj, "errno");
+
+    if (errno_obj == NULL) {
+        return 0;
+    } else {
+        tmp_value = json_object_get_string(errno_obj);
+        return atoi(tmp_value);
+    }
+}
+
+
+static int ctp_recv_cb_action(int action, void *priv, void *arg)
+{
+    struct intent it;
+    init_intent(&it);
+    it.name	= "baby_monitor";
+    it.action = action;
+    it.data = priv;
+    it.exdata = arg;
+    return start_app(&it);
+}
 
 static int bbm_ctp_recv_callback(void *hdl, enum ctp_cli_msg_type type, const char *topic, const char *parm_list, void *priv)
 {
@@ -97,33 +126,39 @@ static int bbm_ctp_recv_callback(void *hdl, enum ctp_cli_msg_type type, const ch
     if (type == CTP_CLI_RECV_MSG) {
         if (strstr(topic, "FORWARD_MEDIA_FILES_LIST")) {
             ret = json_parse_to_path(parm_list, bbm_hdl->vf_list);
-            os_sem_post(&bbm_hdl->ctp_msg_sem);
+            ctp_recv_cb_action(ACTION_BBM_FILE_LIST_CREATE, priv, NULL);
         } else if (strstr(topic, "SD_STATUS")) {
-
+            int status = json_parse_sd_status(parm_list);
+            //offline
+            if (!status) {
+                printf("tx sd offline \n");
+                ctp_recv_cb_action(ACTION_BBM_TX_SD_OFFLINE, priv, NULL);
+            }
         } else if (strstr(topic, "APP_ACCESS")) {
-            os_sem_post(&bbm_hdl->ctp_msg_sem);
+
         } else if (strstr(topic, "VIDEO_FINISH")) {
-            /* printf("parm:%s \n",parm_list); */
             char fname[32];
             ret = json_parse_video_finish(parm_list, fname);
             if (!ret) {
                 printf("update file name list \n");
-                bbm_hdl->file_total_num++;
-
-                int list_size = bbm_hdl->file_total_num * sizeof(char *);
-                bbm_hdl->file_name_list = realloc(bbm_hdl->file_name_list, list_size);
-                if (!bbm_hdl->file_name_list) {
-                    printf("file_name_list realloc err \n");
-                    return -1;
-                }
-                int list_index = bbm_hdl->file_total_num - 1;
-                bbm_hdl->file_name_list[list_index] = (char *)malloc(strlen(fname) + 1);
-                if (bbm_hdl->file_name_list[list_index] == NULL) {
-                    printf("malloc failed for file_list[%d]\n", list_index);
-                    return -1;
-                }
-                strcpy(bbm_hdl->file_name_list[list_index], fname);
+                ctp_recv_cb_action(ACTION_BBM_FILE_LIST_UPDATE, priv, fname);
             }
+        } else if (strstr(topic, "OPEN_RT_STREAM")) {
+            ret = json_parse_err_value(parm_list);
+            if (ret == CTP_RT_OPEN_FAIL) {
+                printf(" open rt stream err :%d \n", ret);
+                bbm_ctp_send_rt_start(priv);
+            } else {
+
+            }
+
+        }  else if (strstr(topic, "OPEN_REC")) {
+            ret = json_parse_err_value(parm_list);
+            if (ret == CTP_REC_OPEN_FAIL) {
+                printf(" open rec err :%d \n", ret);
+                ctp_recv_cb_action(ACTION_BBM_TX_START_REC_ERR, priv, NULL);
+            }
+
         } else {
             /* printf("This msg not deal:topic:%s content:%s\n", topic, parm_list); */
         }
@@ -138,12 +173,9 @@ static int bbm_ctp_recv_callback(void *hdl, enum ctp_cli_msg_type type, const ch
 int bbm_ctp_send_access(void *ctp_cli_hdl)
 {
     int ret = 0;
-    //TODO
-    //BBM_CTP_CMD暂时不需要
-#if 0
-    struct bbm_client_hdl *bbm_hdl = NULL;
     const char topic_1[] = {"APP_ACCESS"};
-    const char content_1[] = {"{\"op\":\"PUT\",\"param\":{\"type\":\"0\",\"ver\":\"20700\"}}"};
+    //区分BBM_RX和手机
+    const char content_1[] = {"{\"op\":\"PUT\",\"param\":{\"type\":\"99\",\"ver\":\"20700\"}}"};
 
     printf("ctp send access \n");
 
@@ -152,21 +184,35 @@ int bbm_ctp_send_access(void *ctp_cli_hdl)
         return -1;
     }
 
-    bbm_hdl = ctp_cli_get_hdl_priv(ctp_cli_hdl);
-
     ret = ctp_cli_send(ctp_cli_hdl, topic_1, content_1);
     if (ret) {
         printf("ctp_cli_send :%s err\n", topic_1);
         return ret;
     }
 
-    os_sem_set(&bbm_hdl->ctp_msg_sem, 0);
-    ret = os_sem_pend(&bbm_hdl->ctp_msg_sem, 200);
+
+    return ret;
+}
+
+int bbm_ctp_send_modify_txrate(void *ctp_cli_hdl, int txrate)
+{
+    int ret = 0;
+    char content_1[128];
+    const char topic_1[] = {"MODIFY_TXRATE"};
+    sprintf(content_1, "{\"op\":\"PUT\",\"param\":{\"txrate\":\"%d\"}}", txrate);
+
+    printf("ctp send txrate val :%d  \n", txrate);
+
+    if (!ctp_cli_hdl) {
+        printf("ctp client hdl invalid\n");
+        return -1;
+    }
+
+    ret = ctp_cli_send(ctp_cli_hdl, topic_1, content_1);
     if (ret) {
-        printf("wait access timeout :%d \n", ret);
+        printf("ctp_cli_send :%s err\n", topic_1);
         return ret;
     }
-#endif
 
     return ret;
 }
@@ -195,7 +241,7 @@ int bbm_ctp_client_init(void **ctp_cli_hdl, u32 dest_ip_addr, void *priv)
 
     *ctp_cli_hdl = hdl;
 
-    bbm_ctp_file_init(priv);
+    bbm_ctp_send_access(hdl);
 
     return 0;
 }

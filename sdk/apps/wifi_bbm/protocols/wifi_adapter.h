@@ -30,6 +30,8 @@ void wf_rx_filt_set(unsigned int reg);
 void wf_rx_filt_reset(unsigned int reg);
 //设置硬件MAC_BSSID寄存器 ,需要在wifi_raw_on后调用
 void wf_asic_set_bssid(unsigned char *bssid);
+//设置本机硬件MAC, 需要在wifi_raw_on后调用
+void wf_asic_set_mac(unsigned char *mac);
 
 #ifdef __cplusplus
 }

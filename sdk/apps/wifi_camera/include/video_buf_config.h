@@ -5,15 +5,30 @@
 #define VIDEO1_REC_FORMAT   VIDEO_FMT_AVI
 #define VIDEO2_REC_FORMAT   VIDEO_FMT_AVI
 #define VIDEO3_REC_FORMAT   VIDEO_FMT_AVI
+#define VIDEO4_REC_FORMAT   VIDEO_FMT_AVI
+#define VIDEO5_REC_FORMAT   VIDEO_FMT_AVI
 
+#if (__SDRAM_SIZE__ == 16 * 1024 * 1024)
 #define VREC0_FBUF_SIZE     (1024*1024)
 #define VREC1_FBUF_SIZE     (1024*1024)
 #define VREC2_FBUF_SIZE     (1024*1024)
 #define VREC3_FBUF_SIZE     (512*1024)
+#define VREC4_FBUF_SIZE     (1024*1024)
+#define VREC5_FBUF_SIZE     (1024*1024)
+#else
+#define VREC0_FBUF_SIZE     (400*1024)
+#define VREC1_FBUF_SIZE     (400*1024)
+#define VREC2_FBUF_SIZE     (300*1024)
+#define VREC3_FBUF_SIZE     (400*1024)
+#define VREC4_FBUF_SIZE     (400*1024)
+#define VREC5_FBUF_SIZE     (400*1024)
+#endif
 #define AUDIO0_BUF_SIZE      (32*1024)
 #define AUDIO1_BUF_SIZE      (32*1024)
 #define AUDIO2_BUF_SIZE      (32*1024)
 #define AUDIO3_BUF_SIZE      (32*1024)
+#define AUDIO4_BUF_SIZE      (32*1024)
+#define AUDIO5_BUF_SIZE      (32*1024)
 
 #define USB_CAMERA_BUF_SIZE (1 * 1024 * 1024) // + 512 * 1024)
 #define CAMERA_CAP_BUF_SIZE (1 * 1024 * 1024)
@@ -49,6 +64,20 @@
 #define VREC3_FBUF_SIZE (0)
 #undef AUDIO3_BUF_SIZE
 #define AUDIO3_BUF_SIZE (0)
+#endif
+
+#ifndef CONFIG_VIDEO4_ENABLE
+#undef VREC4_FBUF_SIZE
+#define VREC4_FBUF_SIZE (0)
+#undef AUDIO4_BUF_SIZE
+#define AUDIO4_BUF_SIZE (0)
+#endif
+
+#ifndef CONFIG_VIDEO5_ENABLE
+#undef VREC5_FBUF_SIZE
+#define VREC5_FBUF_SIZE (0)
+#undef AUDIO5_BUF_SIZE
+#define AUDIO5_BUF_SIZE (0)
 #endif
 
 

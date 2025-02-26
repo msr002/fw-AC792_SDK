@@ -33,6 +33,7 @@ typedef enum {
     GUI_RES_SKIP_NEXT_PNG = 0x5500000E,   //F:\gitlab-m\ac792\ui_prj\wifi_bbm_800x480\import\image\skip_next.png
     GUI_RES_SKIP_PREVIOUS_PNG = 0x5500000F,   //F:\gitlab-m\ac792\ui_prj\wifi_bbm_800x480\import\image\skip_previous.png
     GUI_RES_WARN_PNG = 0x55000010,   //F:\gitlab-m\ac792\ui_prj\wifi_bbm_800x480\import\image\warn.png
+    GUI_RES_REMOTE_PNG = 0x55000011,   //F:\gitlab-m\ac792\ui_prj\wifi_bbm_800x480\import\image\remote.png
 } GUI_RES_ID;
 
 extern char *gui_get_res_path(int32_t id);

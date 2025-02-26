@@ -19,18 +19,26 @@ enum vrec_err_code {
     VREC_ERR_V0_SERVER_OPEN,
     VREC_ERR_V1_SERVER_OPEN,
     VREC_ERR_V3_SERVER_OPEN,
+    VREC_ERR_V4_SERVER_OPEN,
+    VREC_ERR_V5_SERVER_OPEN,
     VREC_ERR_START_FREE_SPACE,
     VREC_ERR_SAVE_FREE_SPACE,
 
     VREC_ERR_V0_REQ_START,
     VREC_ERR_V1_REQ_START,
     VREC_ERR_V3_REQ_START,
+    VREC_ERR_V4_REQ_START,
+    VREC_ERR_V5_REQ_START,
     VREC_ERR_V0_REQ_STOP,
     VREC_ERR_V1_REQ_STOP,
     VREC_ERR_V3_REQ_STOP,
+    VREC_ERR_V4_REQ_STOP,
+    VREC_ERR_V5_REQ_STOP,
     VREC_ERR_V0_REQ_SAVEFILE,
     VREC_ERR_V1_REQ_SAVEFILE,
     VREC_ERR_V3_REQ_SAVEFILE,
+    VREC_ERR_V4_REQ_SAVEFILE,
+    VREC_ERR_V5_REQ_SAVEFILE,
 
     VREC_ERR_PKG,
     VREC_ERR_MKDIR,
@@ -105,6 +113,9 @@ struct video_rec_hdl {
     struct server *video_rec1;
     struct server *video_rec2;
     struct server *video_rec3;
+    struct server *video_rec4;
+    struct server *video_rec5;
+    struct server *video_pre[CONFIG_VIDEO_REC_NUM];
     struct server *video_display[CONFIG_VIDEO_REC_NUM];
     struct server *video2_display[CONFIG_VIDEO_REC_NUM];
     struct server *video_engine;

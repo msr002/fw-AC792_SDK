@@ -243,7 +243,7 @@ lv_cache_entry_t *lv_image_decoder_add_to_cache(lv_image_decoder_t *decoder,
 
     /*Set the cache entry to decoder data*/
     cached_data->decoded = decoded;
-    if (cached_data->src_type == LV_IMAGE_SRC_FILE) {
+    if (cached_data->src_type == LV_IMAGE_SRC_FILE || cached_data->src_type == LV_IMAGE_SRC_BIN) {
         cached_data->src = lv_strdup(cached_data->src);
     }
     cached_data->user_data = user_data; /*Need to free data on cache invalidate instead of decoder_close*/

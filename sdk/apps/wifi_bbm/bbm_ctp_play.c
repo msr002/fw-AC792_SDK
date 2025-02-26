@@ -9,7 +9,7 @@
 
 #define FILE_PLAY_PORT          2223    //视频回放端口
 #define CTP_RECV_BUF_MAX_LEN    200 * 1024 //接收缓存
-#define VIDEO_DEC_BUF_MAX_SIZE       512    //解码服务缓存,单位Kb,申请大小不能小于一帧图像的大小
+#define VIDEO_DEC_BUF_MAX_SIZE       512*1024    //解码服务缓存,申请大小不能小于一帧图像的大小
 #define AUDIO_DEC_BUF_MAX_LEN        2 * 1024   //解码音频缓存
 
 #define CTP_FILE_PLAY_TASK_NAME         "thread_socket_file_play"
@@ -18,6 +18,8 @@ static struct server *video_dec_server;
 static struct server *audio_dec_server;
 static cbuffer_t audio_dec_save_cbuf;
 static u8 *audio_dec_buf;
+
+static union video_dec_req dec_req = {0};
 
 static int vfs_audio_dec_fread(void *file, void *data, u32 len)
 {
@@ -50,10 +52,42 @@ static const struct audio_vfs_ops vfs_audio_dec_ops = {
     .flen   = vfs_audio_dec_flen,
 };
 
-static int video_dec_init(void)
+
+static void dec_server_event_handler(void *priv, int argc, int *argv)
+{
+    switch (argv[0]) {
+    case VIDEO_DEC_EVENT_CURR_TIME:
+        /*
+         *发送当前播放时间给UI
+         */
+        int cur_time = argv[1];
+        printf("cur_time:%d total_time:%d \n", cur_time, dec_req.dec.info.total_time);
+
+        int percent = ((float)cur_time / dec_req.dec.info.total_time) * 100;
+        post_video_play_msg_to_ui("play_time", percent);
+
+        break;
+    case VIDEO_DEC_EVENT_END:
+        /*
+         *解码结束
+         */
+        local_file_play_stop(priv);
+        break;
+    case VIDEO_DEC_EVENT_ERR:
+        /*
+         解码出错
+         */
+        break;
+    }
+}
+
+
+static int video_dec_init(void *priv)
 {
     struct video_dec_arg arg = {0};
     arg.dev_name = "video_dec";
+    //todo
+    arg.audio_buf_size = 64 * 1024;
     arg.video_buf_size = VIDEO_DEC_BUF_MAX_SIZE;
 
     video_dec_server = server_open("video_dec_server", &arg);
@@ -62,13 +96,13 @@ static int video_dec_init(void)
         return -1;
     }
 
+    server_register_event_handler(video_dec_server, priv, dec_server_event_handler);
+
     return 0;
 }
 
 static int video_dec_exit(void)
 {
-    union video_dec_req dec_req = {0};
-
     if (video_dec_server) {
         server_request(video_dec_server, VIDEO_REQ_DEC_STOP, &dec_req);
 
@@ -87,8 +121,9 @@ static int video_dec_one_frame(u8 *buf, u32 size)
         return -1;
     }
 
+    memset(&dec_req, 0x00, sizeof(union video_dec_req));
+
     char fb_name[4];
-    union video_dec_req dec_req = {0};
 
     sprintf(fb_name, "fb%d", 2);
     dec_req.dec.fb = fb_name;
@@ -321,11 +356,13 @@ exit:
     }
 }
 
-int ctp_file_play_start(void *priv, int list_index)
+static int ctp_file_play_start(void *priv, int list_index)
 {
     int ret;
     char topic_1[] = {"TIME_AXIS_PLAY"};
     char content_1[256];
+
+    memset(&dec_req, 0x00, sizeof(union video_dec_req));
 
     struct bbm_client_hdl *bbm_hdl = priv;
 
@@ -358,7 +395,7 @@ int ctp_file_play_start(void *priv, int list_index)
     return thread_fork(CTP_FILE_PLAY_TASK_NAME, 12, 2048, 2048, &bbm_hdl->ctp_file_play_task_pid, ctp_file_play_task, priv);
 }
 
-int ctp_file_play_stop(void *priv)
+static int ctp_file_play_stop(void *priv)
 {
     int ret;
     char topic_1[] = {"TIME_AXIS_PLAY_CTRL"};
@@ -394,7 +431,7 @@ int ctp_file_play_stop(void *priv)
     return 0;
 }
 
-int ctp_file_play_pause(void *priv)
+static int ctp_file_play_pause(void *priv)
 {
     int ret;
     char topic_1[] = {"TIME_AXIS_PLAY_CTRL"};
@@ -420,7 +457,7 @@ int ctp_file_play_pause(void *priv)
     return 0;
 }
 
-int ctp_file_play_resume(void *priv)
+static int ctp_file_play_resume(void *priv)
 {
     int ret;
     char topic_1[] = {"TIME_AXIS_PLAY_CTRL"};
@@ -446,48 +483,25 @@ int ctp_file_play_resume(void *priv)
     return 0;
 }
 
-int ctp_file_play_switch(void *priv, int list_index)
-{
-    int ret = -1;
-    struct bbm_client_hdl *bbm_hdl = priv;
-
-    switch (bbm_hdl->video_play_state) {
-    case BBM_FILE_PLAY_STOP:
-        ret = ctp_file_play_start(priv, list_index);
-        break;
-    case BBM_FILE_PLAY_START:
-    case BBM_FILE_PLAY_RESUME:
-        ret = ctp_file_play_pause(priv);
-        break;
-    case BBM_FILE_PLAY_PAUSE:
-        ret = ctp_file_play_resume(priv);
-        break;
-    case BBM_FILE_PLAY_DONE:
-        ret = ctp_file_play_stop(priv);
-        ret = ctp_file_play_start(priv, list_index);
-        break;
-    default:
-        printf("Unknow state %d \n", bbm_hdl->video_play_state);
-        break;
-    }
-
-    return 0;
-}
-
-int ctp_file_play_init(void)
+int ctp_file_play_init(void *priv)
 {
     int ret;
+    struct bbm_client_hdl *bbm_hdl = priv;
+
     //视频解码服务
-    ret = video_dec_init();
+    ret = video_dec_init(priv);
     if (ret) {
         printf("video_dec_init err");
         goto err;
     }
-    //音频解码服务
-    ret = audio_dec_init();
-    if (ret) {
-        printf("audio_dec_init err");
-        goto err;
+
+    if (!bbm_hdl->is_local_dev) {
+        //音频解码服务
+        ret = audio_dec_init();
+        if (ret) {
+            printf("audio_dec_init err");
+            goto err;
+        }
     }
 
     return 0;
@@ -513,4 +527,180 @@ int ctp_file_play_exit(void)
 
     return 0;
 }
+
+static int local_file_play_start(void *priv, int list_index)
+{
+    int ret;
+    char full_path[128];
+    char fb_name[4];
+    struct bbm_client_hdl *bbm_hdl = priv;
+
+    memset(&dec_req, 0x00, sizeof(union video_dec_req));
+
+    void *fp = fselect(bbm_hdl->fs, FSEL_BY_NUMBER, bbm_hdl->file_total_num - list_index);
+
+    if (!fp) {
+        printf("play1 file open err \n");
+        return -1;
+    }
+
+    dec_req.dec.file = fp;
+
+    sprintf(fb_name, "fb%d", 2);
+    dec_req.dec.fb = fb_name;
+    dec_req.dec.left = 0;
+    dec_req.dec.top = 0;
+    dec_req.dec.width = LCD_W;
+    dec_req.dec.height = LCD_H;
+    dec_req.dec.volume = 100;
+
+    ret = server_request(video_dec_server, VIDEO_REQ_DEC_START, &dec_req);
+    if (ret) {
+        printf("video dec server start err:%d \n", ret);
+        return -1;
+    }
+
+    //重置播放进度条
+    post_video_play_msg_to_ui("play_time", 0);
+
+    //更改UI图标,播放中
+    post_video_play_msg_to_ui("play_control", 1);
+
+    bbm_hdl->video_play_state = BBM_FILE_PLAY_START;
+
+    return 0;
+}
+
+static int local_file_play_stop(void *priv)
+{
+    int ret;
+    struct bbm_client_hdl *bbm_hdl = priv;
+
+    ret = server_request(video_dec_server, VIDEO_REQ_DEC_STOP, &dec_req);
+    if (ret) {
+        printf("video dec server stop err:%d \n", ret);
+        return -1;
+    }
+
+    if (dec_req.dec.file) {
+        fclose(dec_req.dec.file);
+        dec_req.dec.file = NULL;
+    }
+
+    //更改UI图标,停止
+    post_video_play_msg_to_ui("play_control", 0);
+
+    bbm_hdl->video_play_state = BBM_FILE_PLAY_STOP;
+
+    return ret;
+}
+
+static int local_file_play_pause(void *priv)
+{
+    int ret;
+    struct bbm_client_hdl *bbm_hdl = priv;
+
+    ret = server_request(video_dec_server, VIDEO_REQ_DEC_PLAY_PAUSE, &dec_req);
+    if (ret) {
+        printf("video dec server pause err:%d \n", ret);
+        return -1;
+    }
+
+    bbm_hdl->video_play_state = BBM_FILE_PLAY_PAUSE;
+    //更改UI图标,停止
+    post_video_play_msg_to_ui("play_control", 0);
+
+    return 0;
+}
+
+static int local_file_play_resume(void *priv)
+{
+    int ret;
+    struct bbm_client_hdl *bbm_hdl = priv;
+
+
+    ret = server_request(video_dec_server, VIDEO_REQ_DEC_PLAY_PAUSE, &dec_req);
+    if (ret) {
+        printf("video dec server pause(resume) err:%d \n", ret);
+        return -1;
+    }
+
+    bbm_hdl->video_play_state = BBM_FILE_PLAY_RESUME;
+    //更改UI图标,播放中
+    post_video_play_msg_to_ui("play_control", 1);
+
+    return 0;
+}
+
+int bbm_file_play_start(void *priv, int list_index)
+{
+    struct bbm_client_hdl *bbm_hdl = priv;
+
+    if (bbm_hdl->is_local_dev) {
+        return local_file_play_start(priv, list_index);
+    } else {
+        return ctp_file_play_start(priv, list_index);
+    }
+}
+
+int bbm_file_play_stop(void *priv)
+{
+    struct bbm_client_hdl *bbm_hdl = priv;
+
+    if (bbm_hdl->is_local_dev) {
+        return local_file_play_stop(priv);
+    } else {
+        return ctp_file_play_stop(priv);
+    }
+}
+
+int bbm_file_play_pause(void *priv)
+{
+    struct bbm_client_hdl *bbm_hdl = priv;
+
+    if (bbm_hdl->is_local_dev) {
+        return local_file_play_pause(priv);
+    } else {
+        return ctp_file_play_pause(priv);
+    }
+}
+int bbm_file_play_resume(void *priv)
+{
+    struct bbm_client_hdl *bbm_hdl = priv;
+
+    if (bbm_hdl->is_local_dev) {
+        return local_file_play_resume(priv);
+    } else {
+        return ctp_file_play_resume(priv);
+    }
+}
+
+int bbm_file_play_switch(void *priv, int list_index)
+{
+    int ret = -1;
+    struct bbm_client_hdl *bbm_hdl = priv;
+
+    switch (bbm_hdl->video_play_state) {
+    case BBM_FILE_PLAY_STOP:
+        ret = bbm_file_play_start(priv, list_index);
+        break;
+    case BBM_FILE_PLAY_START:
+    case BBM_FILE_PLAY_RESUME:
+        ret = bbm_file_play_pause(priv);
+        break;
+    case BBM_FILE_PLAY_PAUSE:
+        ret = bbm_file_play_resume(priv);
+        break;
+    case BBM_FILE_PLAY_DONE:
+        ret = bbm_file_play_stop(priv);
+        ret = bbm_file_play_start(priv, list_index);
+        break;
+    default:
+        printf("Unknow state %d \n", bbm_hdl->video_play_state);
+        break;
+    }
+
+    return 0;
+}
+
 

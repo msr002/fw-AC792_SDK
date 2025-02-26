@@ -523,6 +523,7 @@
                 "${workspaceFolder}/include_lib/utils/syscfg",
                 "${workspaceFolder}/include_lib/utils/event",
                 "${workspaceFolder}/apps/wifi_bbm/include",
+                "${workspaceFolder}/apps/wifi_bbm/simple_avi",
                 "${workspaceFolder}/apps/wifi_bbm/protocols",
                 "${workspaceFolder}/include_lib/driver/device/video",
                 "${workspaceFolder}/apps",

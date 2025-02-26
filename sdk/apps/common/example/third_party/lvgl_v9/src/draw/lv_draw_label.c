@@ -390,6 +390,244 @@ void lv_draw_label_iterate_characters(lv_draw_unit_t *draw_unit, const lv_draw_l
     LV_ASSERT_MEM_INTEGRITY();
 }
 
+#if ((LV_USE_DRAW_JLVG == 1) && (LV_USE_DRAW_JLVG_LABEL_ENABLE == 1))
+void lv_draw_label_jlvg_path_collection(lv_draw_unit_t *draw_unit, const lv_draw_label_dsc_t *dsc,
+                                        const lv_area_t *coords,
+                                        lv_draw_glyph_cb_t cb,
+                                        lv_jlvg_label_info_t *curr_label_info)
+{
+    const lv_font_t *font = dsc->font;
+    int32_t w;
+
+    lv_area_t clipped_area;
+    bool clip_ok = lv_area_intersect(&clipped_area, coords, draw_unit->clip_area);
+    if (!clip_ok) {
+        return;
+    }
+
+    lv_text_align_t align = dsc->align;
+    lv_base_dir_t base_dir = dsc->bidi_dir;
+
+    lv_bidi_calculate_align(&align, &base_dir, dsc->text);
+
+    if ((dsc->flag & LV_TEXT_FLAG_EXPAND) == 0) {
+        /*Normally use the label's width as width*/
+        w = lv_area_get_width(coords);
+    } else {
+        /*If EXPAND is enabled then not limit the text's width to the object's width*/
+        lv_point_t p;
+        lv_text_get_size(&p, dsc->text, dsc->font, dsc->letter_space, dsc->line_space, LV_COORD_MAX,
+                         dsc->flag);
+        w = p.x;
+    }
+
+    int32_t line_height_font = lv_font_get_line_height(font);
+    int32_t line_height = line_height_font + dsc->line_space;
+
+    /*Init variables for the first line*/
+    int32_t line_width = 0;
+    lv_point_t pos;
+    lv_point_set(&pos, coords->x1, coords->y1);
+
+    int32_t x_ofs = 0;
+    int32_t y_ofs = 0;
+    x_ofs = dsc->ofs_x;
+    y_ofs = dsc->ofs_y;
+    pos.y += y_ofs;
+
+    uint32_t line_start     = 0;
+    int32_t last_line_start = -1;
+
+    /*Check the hint to use the cached info*/
+    if (dsc->hint && y_ofs == 0 && coords->y1 < 0) {
+        /*If the label changed too much recalculate the hint.*/
+        if (LV_ABS(dsc->hint->coord_y - coords->y1) > LV_LABEL_HINT_UPDATE_TH - 2 * line_height) {
+            dsc->hint->line_start = -1;
+        }
+        last_line_start = dsc->hint->line_start;
+    }
+
+    /*Use the hint if it's valid*/
+    if (dsc->hint && last_line_start >= 0) {
+        line_start = last_line_start;
+        pos.y += dsc->hint->y;
+    }
+
+    uint32_t line_end = line_start + lv_text_get_next_line(&dsc->text[line_start], font, dsc->letter_space, w, NULL,
+                        dsc->flag);
+
+    /*Go the first visible line*/
+    while (pos.y + line_height_font < draw_unit->clip_area->y1) {
+        /*Go to next line*/
+        line_start = line_end;
+        line_end += lv_text_get_next_line(&dsc->text[line_start], font, dsc->letter_space, w, NULL, dsc->flag);
+        pos.y += line_height;
+
+        /*Save at the threshold coordinate*/
+        if (dsc->hint && pos.y >= -LV_LABEL_HINT_UPDATE_TH && dsc->hint->line_start < 0) {
+            dsc->hint->line_start = line_start;
+            dsc->hint->y          = pos.y - coords->y1;
+            dsc->hint->coord_y    = coords->y1;
+        }
+
+        if (dsc->text[line_start] == '\0') {
+            return;
+        }
+    }
+
+    /*Align to middle*/
+    if (align == LV_TEXT_ALIGN_CENTER) {
+        line_width = lv_text_get_width(&dsc->text[line_start], line_end - line_start, font, dsc->letter_space);
+
+        pos.x += (lv_area_get_width(coords) - line_width) / 2;
+
+    }
+    /*Align to the right*/
+    else if (align == LV_TEXT_ALIGN_RIGHT) {
+        line_width = lv_text_get_width(&dsc->text[line_start], line_end - line_start, font, dsc->letter_space);
+        pos.x += lv_area_get_width(coords) - line_width;
+    }
+
+    uint32_t sel_start = dsc->sel_start;
+    uint32_t sel_end = dsc->sel_end;
+    if (sel_start > sel_end) {
+        uint32_t tmp = sel_start;
+        sel_start = sel_end;
+        sel_end = tmp;
+    }
+
+    lv_area_t bg_coords;
+    lv_draw_glyph_dsc_t draw_letter_dsc;
+    lv_draw_glyph_dsc_init(&draw_letter_dsc);
+    draw_letter_dsc.opa = dsc->opa;
+    draw_letter_dsc.bg_coords = &bg_coords;
+    draw_letter_dsc.color = dsc->color;
+
+    lv_draw_fill_dsc_t fill_dsc;
+    lv_draw_fill_dsc_init(&fill_dsc);
+    fill_dsc.opa = dsc->opa;
+    int32_t underline_width = font->underline_thickness ? font->underline_thickness : 1;
+    int32_t line_start_x;
+    uint32_t i;
+    int32_t letter_w;
+
+    /*Write out all lines*/
+    while (dsc->text[line_start] != '\0') {
+        pos.x += x_ofs;
+        line_start_x = pos.x;
+
+        /*Write all letter of a line*/
+        i = 0;
+#if LV_USE_BIDI
+        char *bidi_txt = lv_malloc(line_end - line_start + 1);
+        LV_ASSERT_MALLOC(bidi_txt);
+        lv_bidi_process_paragraph(dsc->text + line_start, bidi_txt, line_end - line_start, base_dir, NULL, 0);
+#else
+        const char *bidi_txt = dsc->text + line_start;
+#endif
+
+        while (i < line_end - line_start) {
+            uint32_t logical_char_pos = 0;
+            if (sel_start != 0xFFFF && sel_end != 0xFFFF) {
+#if LV_USE_BIDI
+                logical_char_pos = lv_text_encoded_get_char_id(dsc->text, line_start);
+                uint32_t t = lv_text_encoded_get_char_id(bidi_txt, i);
+                logical_char_pos += lv_bidi_get_logical_pos(bidi_txt, NULL, line_end - line_start, base_dir, t, NULL);
+#else
+                logical_char_pos = lv_text_encoded_get_char_id(dsc->text, line_start + i);
+#endif
+            }
+
+            uint32_t letter;
+            uint32_t letter_next;
+            lv_text_encoded_letter_next_2(bidi_txt, &letter, &letter_next, &i);
+
+            letter_w = lv_font_get_glyph_width(font, letter, letter_next);
+
+            /*Always set the bg_coordinates for placeholder drawing*/
+            bg_coords.x1 = pos.x;
+            bg_coords.y1 = pos.y;
+            bg_coords.x2 = pos.x + letter_w - 1;
+            bg_coords.y2 = pos.y + line_height - 1;
+
+            if (i >= line_end - line_start) {
+                if (dsc->decor & LV_TEXT_DECOR_UNDERLINE) {
+                    lv_area_t fill_area;
+                    fill_area.x1 = line_start_x;
+                    fill_area.x2 = pos.x + letter_w - 1;
+                    fill_area.y1 = pos.y + font->line_height - font->base_line - font->underline_position;
+                    fill_area.y2 = fill_area.y1 + underline_width - 1;
+
+                    fill_dsc.color = dsc->color;
+                    cb(draw_unit, NULL, &fill_dsc, &fill_area);
+                }
+                if (dsc->decor & LV_TEXT_DECOR_STRIKETHROUGH) {
+                    lv_area_t fill_area;
+                    fill_area.x1 = line_start_x;
+                    fill_area.x2 = pos.x + letter_w - 1;
+                    fill_area.y1 = pos.y + (font->line_height - font->base_line) * 2 / 3 + font->underline_thickness / 2;
+                    fill_area.y2 = fill_area.y1 + underline_width - 1;
+
+                    fill_dsc.color = dsc->color;
+                    cb(draw_unit, NULL, &fill_dsc, &fill_area);
+                }
+            }
+
+            if (sel_start != 0xFFFF && sel_end != 0xFFFF && logical_char_pos >= sel_start && logical_char_pos < sel_end) {
+                draw_letter_dsc.color = dsc->sel_color;
+                fill_dsc.color = dsc->sel_bg_color;
+                cb(draw_unit, NULL, &fill_dsc, &bg_coords);
+            } else {
+                draw_letter_dsc.color = dsc->color;
+            }
+
+            draw_letter_dsc.label_info = curr_label_info;
+            draw_letter(draw_unit, &draw_letter_dsc, &pos, font, letter, cb);
+
+            if (letter_w > 0) {
+                pos.x += letter_w + dsc->letter_space;
+            }
+        }
+
+#if LV_USE_BIDI
+        lv_free(bidi_txt);
+        bidi_txt = NULL;
+#endif
+        /*Go to next line*/
+        line_start = line_end;
+        line_end += lv_text_get_next_line(&dsc->text[line_start], font, dsc->letter_space, w, NULL, dsc->flag);
+
+        pos.x = coords->x1;
+        /*Align to middle*/
+        if (align == LV_TEXT_ALIGN_CENTER) {
+            line_width =
+                lv_text_get_width(&dsc->text[line_start], line_end - line_start, font, dsc->letter_space);
+
+            pos.x += (lv_area_get_width(coords) - line_width) / 2;
+        }
+        /*Align to the right*/
+        else if (align == LV_TEXT_ALIGN_RIGHT) {
+            line_width =
+                lv_text_get_width(&dsc->text[line_start], line_end - line_start, font, dsc->letter_space);
+            pos.x += lv_area_get_width(coords) - line_width;
+        }
+
+        /*Go the next line position*/
+        pos.y += line_height;
+
+        if (pos.y > draw_unit->clip_area->y2) {
+            break;
+        }
+    }
+
+    if (draw_letter_dsc._draw_buf) {
+        lv_draw_buf_destroy(draw_letter_dsc._draw_buf);
+    }
+
+    LV_ASSERT_MEM_INTEGRITY();
+}
+#endif
+
 /**********************
  *   STATIC FUNCTIONS
  **********************/
@@ -450,6 +688,10 @@ static void draw_letter(lv_draw_unit_t *draw_unit, lv_draw_glyph_dsc_t *dsc,  co
             }
         }
 
+#if ((LV_USE_DRAW_JLVG == 1) && (LV_USE_DRAW_JLVG_LABEL_ENABLE == 1))
+        g.label_info = dsc->label_info;
+        g.pos = pos;
+#endif
         dsc->glyph_data = (void *) lv_font_get_glyph_bitmap(&g, draw_buf);
         dsc->format = dsc->glyph_data ? g.format : LV_FONT_GLYPH_FORMAT_NONE;
     } else {
