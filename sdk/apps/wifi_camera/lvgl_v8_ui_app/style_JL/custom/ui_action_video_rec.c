@@ -1,5 +1,6 @@
 #include "app_config.h"
 #ifdef CONFIG_UI_STYLE_JL_ENABLE
+
 unsigned char rec_running = 0;
 char video_rec_car_num[64];
 #if !LV_USE_GUIBUILDER_SIMULATOR

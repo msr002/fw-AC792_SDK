@@ -6,10 +6,17 @@
 #define VIDEO2_REC_FORMAT   VIDEO_FMT_AVI
 #define VIDEO3_REC_FORMAT   VIDEO_FMT_AVI
 
+#if (__SDRAM_SIZE__ == 16 * 1024 * 1024)
 #define VREC0_FBUF_SIZE     (512*1024)
 #define VREC1_FBUF_SIZE     (512*1024)
 #define VREC2_FBUF_SIZE     (512*1024)
 #define VREC3_FBUF_SIZE     (512*1024)
+#else
+#define VREC0_FBUF_SIZE     (400*1024)
+#define VREC1_FBUF_SIZE     (400*1024)
+#define VREC2_FBUF_SIZE     (300*1024)
+#define VREC3_FBUF_SIZE     (400*1024)
+#endif
 #define AUDIO0_BUF_SIZE      (32*1024)
 #define AUDIO1_BUF_SIZE      (32*1024)
 #define AUDIO2_BUF_SIZE      (32*1024)

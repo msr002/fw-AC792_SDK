@@ -32,7 +32,22 @@ extern lv_font_t lv_font_montserratMedium_160;
 extern lv_font_t lv_font_FangZhengKaiTiJianTi_1_26;
 extern lv_font_t lv_font_montserratMedium_22;
 extern lv_font_t lv_font_montserratMedium_16;
+extern lv_font_t lv_font_fangsong_16;
+extern lv_font_t lv_font_fangsong_24;
 extern lv_font_t lv_font_FangZhengKaiTiJianTi_1_22;
+extern lv_font_t lv_font_timesnewromanpsmt_16;
+extern lv_font_t lv_font_timesnewromanpsmt_24;
+extern lv_font_t lv_font_timesnewromanpsmt_48;
+extern lv_font_t lv_font_timesnewromanpsmt_22;
+extern lv_font_t lv_font_segoeui_16;
+extern lv_font_t lv_font_segoeui_24;
+extern lv_font_t lv_font_leelawadeeui_16;
+extern lv_font_t lv_font_leelawadeeui_24;
+extern lv_font_t lv_font_malgungothic_16;
+extern lv_font_t lv_font_malgungothic_24;
+extern lv_font_t lv_font_ms_gothic_16;
+extern lv_font_t lv_font_calibri_16;
+extern lv_font_t lv_font_calibri_24;
 
 void init_gui_fonts();
 

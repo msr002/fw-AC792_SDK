@@ -302,7 +302,7 @@
 // #define CONFIG_OPUS_DEC_ENABLE
 // #define CONFIG_AMR_ENC_ENABLE
 // #define CONFIG_AEC_ENC_ENABLE
-#define CONFIG_DNS_ENC_ENABLE
+// #define CONFIG_DNS_ENC_ENABLE
 // #define CONFIG_OGG_VORBIS_DEC_ENABLE
 
 // #define CONFIG_SPECTRUM_FFT_EFFECT_ENABLE    //频谱运算
@@ -788,7 +788,7 @@
  * 3:表示 LCD开3块帧显存,其中2块通过交换的方式来更新推屏数据,另外1块用做合成输出
  * */
 /* 2个宏组合更多详细说明,请移步开源文档 */
-#define LV_DISP_UI_FB_NUM      0
+#define LV_DISP_UI_FB_NUM      1
 #define FB_LCD_BUF_NUM         2
 #if (LV_DISP_UI_FB_NUM)
 #define LV_COLOR_DEPTH_EXTEN   24 //24-适配ARGB8565,需要把LV_DISP_UI_FB_NUM 1/2

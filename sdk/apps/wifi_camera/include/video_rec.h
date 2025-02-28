@@ -102,6 +102,7 @@ struct video_rec_hdl {
     struct server *video_rec1;
     struct server *video_rec2;
     struct server *video_rec3;
+    struct server *video_pre[CONFIG_VIDEO_REC_NUM];
     struct server *video_display[CONFIG_VIDEO_REC_NUM];
     struct server *video2_display[CONFIG_VIDEO_REC_NUM];
     struct server *video_engine;

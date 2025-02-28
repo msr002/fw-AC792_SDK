@@ -128,6 +128,7 @@ enum video_buf_type {
     VIDEO_BUF_TYPE_VIDEO_PLAY,
     VIDEO_BUF_TYPE_YUV_CAPTURE,
     VIDEO_BUF_TYPE_UVC_CAPTURE,
+    VIDEO_PIPE_PRE_CREATE,
 };
 
 enum video_three_way_type {

@@ -64,8 +64,8 @@ void i18n_refresh_texts(const char *page_name)
             }
         }
         if (guider_ui.video_rec_lbl_17 != NULL && lv_obj_is_valid(guider_ui.video_rec_lbl_17)) {
-            lv_label_set_text(guider_ui.video_rec_lbl_17, _("date_s"));
-            const lv_font_t *font = _font("date_s");
+            lv_label_set_text(guider_ui.video_rec_lbl_17, _("date"));
+            const lv_font_t *font = _font("date");
             if (font != NULL) {
                 lv_obj_set_style_text_font(guider_ui.video_rec_lbl_17, font, LV_PART_MAIN | LV_STATE_DEFAULT);
             }
@@ -85,10 +85,53 @@ void i18n_refresh_texts(const char *page_name)
             }
         }
         if (guider_ui.video_rec_lbl_20 != NULL && lv_obj_is_valid(guider_ui.video_rec_lbl_20)) {
-            lv_label_set_text(guider_ui.video_rec_lbl_20, _("carnum_s"));
-            const lv_font_t *font = _font("carnum_s");
+            lv_label_set_text(guider_ui.video_rec_lbl_20, _("carnum"));
+            const lv_font_t *font = _font("carnum");
             if (font != NULL) {
                 lv_obj_set_style_text_font(guider_ui.video_rec_lbl_20, font, LV_PART_MAIN | LV_STATE_DEFAULT);
+            }
+        }
+        if (guider_ui.video_rec_lbl_menu_title != NULL && lv_obj_is_valid(guider_ui.video_rec_lbl_menu_title)) {
+            lv_label_set_text(guider_ui.video_rec_lbl_menu_title, _("language"));
+            const lv_font_t *font = _font("language");
+            if (font != NULL) {
+                lv_obj_set_style_text_font(guider_ui.video_rec_lbl_menu_title, font, LV_PART_MAIN | LV_STATE_DEFAULT);
+            }
+        }
+        if (guider_ui.video_rec_lbl_funkey1_label != NULL && lv_obj_is_valid(guider_ui.video_rec_lbl_funkey1_label)) {
+            lv_label_set_text(guider_ui.video_rec_lbl_funkey1_label, _("YES"));
+            const lv_font_t *font = _font("YES");
+            if (font != NULL) {
+                lv_obj_set_style_text_font(guider_ui.video_rec_lbl_funkey1_label, font, LV_PART_MAIN | LV_STATE_DEFAULT);
+                lv_obj_set_style_text_font(guider_ui.video_rec_lbl_funkey1_label, font, LV_PART_MAIN | LV_STATE_FOCUSED);
+                lv_obj_set_style_text_font(guider_ui.video_rec_lbl_funkey1_label, font, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+            }
+        }
+        if (guider_ui.video_rec_lbl_funkey2_label != NULL && lv_obj_is_valid(guider_ui.video_rec_lbl_funkey2_label)) {
+            lv_label_set_text(guider_ui.video_rec_lbl_funkey2_label, _("YES"));
+            const lv_font_t *font = _font("YES");
+            if (font != NULL) {
+                lv_obj_set_style_text_font(guider_ui.video_rec_lbl_funkey2_label, font, LV_PART_MAIN | LV_STATE_DEFAULT);
+                lv_obj_set_style_text_font(guider_ui.video_rec_lbl_funkey2_label, font, LV_PART_MAIN | LV_STATE_FOCUSED);
+                lv_obj_set_style_text_font(guider_ui.video_rec_lbl_funkey2_label, font, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+            }
+        }
+        if (guider_ui.video_rec_lbl_funkey3_label != NULL && lv_obj_is_valid(guider_ui.video_rec_lbl_funkey3_label)) {
+            lv_label_set_text(guider_ui.video_rec_lbl_funkey3_label, _("YES"));
+            const lv_font_t *font = _font("YES");
+            if (font != NULL) {
+                lv_obj_set_style_text_font(guider_ui.video_rec_lbl_funkey3_label, font, LV_PART_MAIN | LV_STATE_DEFAULT);
+                lv_obj_set_style_text_font(guider_ui.video_rec_lbl_funkey3_label, font, LV_PART_MAIN | LV_STATE_FOCUSED);
+                lv_obj_set_style_text_font(guider_ui.video_rec_lbl_funkey3_label, font, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+            }
+        }
+        if (guider_ui.video_rec_lbl_funkey4_label != NULL && lv_obj_is_valid(guider_ui.video_rec_lbl_funkey4_label)) {
+            lv_label_set_text(guider_ui.video_rec_lbl_funkey4_label, _("YES"));
+            const lv_font_t *font = _font("YES");
+            if (font != NULL) {
+                lv_obj_set_style_text_font(guider_ui.video_rec_lbl_funkey4_label, font, LV_PART_MAIN | LV_STATE_DEFAULT);
+                lv_obj_set_style_text_font(guider_ui.video_rec_lbl_funkey4_label, font, LV_PART_MAIN | LV_STATE_FOCUSED);
+                lv_obj_set_style_text_font(guider_ui.video_rec_lbl_funkey4_label, font, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
             }
         }
     }
@@ -122,87 +165,146 @@ void i18n_refresh_texts(const char *page_name)
 
     if (strcmp(page_name, "sys_setting") == 0 && !guider_ui.sys_setting_del) {
         if (guider_ui.sys_setting_lbl_1 != NULL && lv_obj_is_valid(guider_ui.sys_setting_lbl_1)) {
-            lv_label_set_text(guider_ui.sys_setting_lbl_1, _("lcdprotect_s"));
-            const lv_font_t *font = _font("lcdprotect_s");
+            lv_label_set_text(guider_ui.sys_setting_lbl_1, _("lcdprotect"));
+            const lv_font_t *font = _font("lcdprotect");
             if (font != NULL) {
                 lv_obj_set_style_text_font(guider_ui.sys_setting_lbl_1, font, LV_PART_MAIN | LV_STATE_DEFAULT);
             }
         }
         if (guider_ui.sys_setting_lbl_2 != NULL && lv_obj_is_valid(guider_ui.sys_setting_lbl_2)) {
-            lv_label_set_text(guider_ui.sys_setting_lbl_2, _("poweroff_s"));
-            const lv_font_t *font = _font("poweroff_s");
+            lv_label_set_text(guider_ui.sys_setting_lbl_2, _("poweroff"));
+            const lv_font_t *font = _font("poweroff");
             if (font != NULL) {
                 lv_obj_set_style_text_font(guider_ui.sys_setting_lbl_2, font, LV_PART_MAIN | LV_STATE_DEFAULT);
             }
         }
         if (guider_ui.sys_setting_lbl_3 != NULL && lv_obj_is_valid(guider_ui.sys_setting_lbl_3)) {
-            lv_label_set_text(guider_ui.sys_setting_lbl_3, _("frequency_s"));
-            const lv_font_t *font = _font("frequency_s");
+            lv_label_set_text(guider_ui.sys_setting_lbl_3, _("frequency"));
+            const lv_font_t *font = _font("frequency");
             if (font != NULL) {
                 lv_obj_set_style_text_font(guider_ui.sys_setting_lbl_3, font, LV_PART_MAIN | LV_STATE_DEFAULT);
             }
         }
         if (guider_ui.sys_setting_lbl_4 != NULL && lv_obj_is_valid(guider_ui.sys_setting_lbl_4)) {
-            lv_label_set_text(guider_ui.sys_setting_lbl_4, _("speaker_s"));
-            const lv_font_t *font = _font("speaker_s");
+            lv_label_set_text(guider_ui.sys_setting_lbl_4, _("speaker"));
+            const lv_font_t *font = _font("speaker");
             if (font != NULL) {
                 lv_obj_set_style_text_font(guider_ui.sys_setting_lbl_4, font, LV_PART_MAIN | LV_STATE_DEFAULT);
             }
         }
         if (guider_ui.sys_setting_lbl_5 != NULL && lv_obj_is_valid(guider_ui.sys_setting_lbl_5)) {
-            lv_label_set_text(guider_ui.sys_setting_lbl_5, _("language_s"));
-            const lv_font_t *font = _font("language_s");
+            lv_label_set_text(guider_ui.sys_setting_lbl_5, _("language"));
+            const lv_font_t *font = _font("language");
             if (font != NULL) {
                 lv_obj_set_style_text_font(guider_ui.sys_setting_lbl_5, font, LV_PART_MAIN | LV_STATE_DEFAULT);
             }
         }
         if (guider_ui.sys_setting_lbl_6 != NULL && lv_obj_is_valid(guider_ui.sys_setting_lbl_6)) {
-            lv_label_set_text(guider_ui.sys_setting_lbl_6, _("lamp_s"));
-            const lv_font_t *font = _font("lamp_s");
+            lv_label_set_text(guider_ui.sys_setting_lbl_6, _("lamp"));
+            const lv_font_t *font = _font("lamp");
             if (font != NULL) {
                 lv_obj_set_style_text_font(guider_ui.sys_setting_lbl_6, font, LV_PART_MAIN | LV_STATE_DEFAULT);
             }
         }
         if (guider_ui.sys_setting_lbl_7 != NULL && lv_obj_is_valid(guider_ui.sys_setting_lbl_7)) {
-            lv_label_set_text(guider_ui.sys_setting_lbl_7, _("software_s"));
-            const lv_font_t *font = _font("software_s");
+            lv_label_set_text(guider_ui.sys_setting_lbl_7, _("software"));
+            const lv_font_t *font = _font("software");
             if (font != NULL) {
                 lv_obj_set_style_text_font(guider_ui.sys_setting_lbl_7, font, LV_PART_MAIN | LV_STATE_DEFAULT);
             }
         }
         if (guider_ui.sys_setting_lbl_8 != NULL && lv_obj_is_valid(guider_ui.sys_setting_lbl_8)) {
-            lv_label_set_text(guider_ui.sys_setting_lbl_8, _("carnum_s"));
-            const lv_font_t *font = _font("carnum_s");
+            lv_label_set_text(guider_ui.sys_setting_lbl_8, _("carnum"));
+            const lv_font_t *font = _font("carnum");
             if (font != NULL) {
                 lv_obj_set_style_text_font(guider_ui.sys_setting_lbl_8, font, LV_PART_MAIN | LV_STATE_DEFAULT);
             }
         }
         if (guider_ui.sys_setting_lbl_9 != NULL && lv_obj_is_valid(guider_ui.sys_setting_lbl_9)) {
-            lv_label_set_text(guider_ui.sys_setting_lbl_9, _("roadline_s"));
-            const lv_font_t *font = _font("roadline_s");
+            lv_label_set_text(guider_ui.sys_setting_lbl_9, _("roadline"));
+            const lv_font_t *font = _font("roadline");
             if (font != NULL) {
                 lv_obj_set_style_text_font(guider_ui.sys_setting_lbl_9, font, LV_PART_MAIN | LV_STATE_DEFAULT);
             }
         }
         if (guider_ui.sys_setting_lbl_10 != NULL && lv_obj_is_valid(guider_ui.sys_setting_lbl_10)) {
-            lv_label_set_text(guider_ui.sys_setting_lbl_10, _("formatting_s"));
-            const lv_font_t *font = _font("formatting_s");
+            lv_label_set_text(guider_ui.sys_setting_lbl_10, _("formatting"));
+            const lv_font_t *font = _font("formatting");
             if (font != NULL) {
                 lv_obj_set_style_text_font(guider_ui.sys_setting_lbl_10, font, LV_PART_MAIN | LV_STATE_DEFAULT);
             }
         }
         if (guider_ui.sys_setting_lbl_11 != NULL && lv_obj_is_valid(guider_ui.sys_setting_lbl_11)) {
-            lv_label_set_text(guider_ui.sys_setting_lbl_11, _("reset_s"));
-            const lv_font_t *font = _font("reset_s");
+            lv_label_set_text(guider_ui.sys_setting_lbl_11, _("reset"));
+            const lv_font_t *font = _font("reset");
             if (font != NULL) {
                 lv_obj_set_style_text_font(guider_ui.sys_setting_lbl_11, font, LV_PART_MAIN | LV_STATE_DEFAULT);
             }
         }
         if (guider_ui.sys_setting_lbl_12 != NULL && lv_obj_is_valid(guider_ui.sys_setting_lbl_12)) {
-            lv_label_set_text(guider_ui.sys_setting_lbl_12, _("date_s"));
-            const lv_font_t *font = _font("date_s");
+            lv_label_set_text(guider_ui.sys_setting_lbl_12, _("date"));
+            const lv_font_t *font = _font("date");
             if (font != NULL) {
                 lv_obj_set_style_text_font(guider_ui.sys_setting_lbl_12, font, LV_PART_MAIN | LV_STATE_DEFAULT);
+            }
+        }
+        if (guider_ui.sys_setting_lbl_menu_title != NULL && lv_obj_is_valid(guider_ui.sys_setting_lbl_menu_title)) {
+            lv_label_set_text(guider_ui.sys_setting_lbl_menu_title, _("language"));
+            const lv_font_t *font = _font("language");
+            if (font != NULL) {
+                lv_obj_set_style_text_font(guider_ui.sys_setting_lbl_menu_title, font, LV_PART_MAIN | LV_STATE_DEFAULT);
+            }
+        }
+        if (guider_ui.sys_setting_lbl_funkey4 != NULL && lv_obj_is_valid(guider_ui.sys_setting_lbl_funkey4)) {
+            lv_label_set_text(guider_ui.sys_setting_lbl_funkey4, _("funkey4"));
+            const lv_font_t *font = _font("funkey4");
+            if (font != NULL) {
+                lv_obj_set_style_text_font(guider_ui.sys_setting_lbl_funkey4, font, LV_PART_MAIN | LV_STATE_DEFAULT);
+                lv_obj_set_style_text_font(guider_ui.sys_setting_lbl_funkey4, font, LV_PART_MAIN | LV_STATE_DISABLED);
+                lv_obj_set_style_text_font(guider_ui.sys_setting_lbl_funkey4, font, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+            }
+        }
+        if (guider_ui.sys_setting_lbl_funkey5 != NULL && lv_obj_is_valid(guider_ui.sys_setting_lbl_funkey5)) {
+            lv_label_set_text(guider_ui.sys_setting_lbl_funkey5, _("funkey5"));
+            const lv_font_t *font = _font("funkey5");
+            if (font != NULL) {
+                lv_obj_set_style_text_font(guider_ui.sys_setting_lbl_funkey5, font, LV_PART_MAIN | LV_STATE_DEFAULT);
+                lv_obj_set_style_text_font(guider_ui.sys_setting_lbl_funkey5, font, LV_PART_MAIN | LV_STATE_DISABLED);
+                lv_obj_set_style_text_font(guider_ui.sys_setting_lbl_funkey5, font, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+            }
+        }
+        if (guider_ui.sys_setting_lbl_funkey6 != NULL && lv_obj_is_valid(guider_ui.sys_setting_lbl_funkey6)) {
+            lv_label_set_text(guider_ui.sys_setting_lbl_funkey6, _("funkey6"));
+            const lv_font_t *font = _font("funkey6");
+            if (font != NULL) {
+                lv_obj_set_style_text_font(guider_ui.sys_setting_lbl_funkey6, font, LV_PART_MAIN | LV_STATE_DEFAULT);
+                lv_obj_set_style_text_font(guider_ui.sys_setting_lbl_funkey6, font, LV_PART_MAIN | LV_STATE_DISABLED);
+                lv_obj_set_style_text_font(guider_ui.sys_setting_lbl_funkey6, font, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+            }
+        }
+        if (guider_ui.sys_setting_lbl_funkey7 != NULL && lv_obj_is_valid(guider_ui.sys_setting_lbl_funkey7)) {
+            lv_label_set_text(guider_ui.sys_setting_lbl_funkey7, _("funkey7"));
+            const lv_font_t *font = _font("funkey7");
+            if (font != NULL) {
+                lv_obj_set_style_text_font(guider_ui.sys_setting_lbl_funkey7, font, LV_PART_MAIN | LV_STATE_DEFAULT);
+                lv_obj_set_style_text_font(guider_ui.sys_setting_lbl_funkey7, font, LV_PART_MAIN | LV_STATE_DISABLED);
+                lv_obj_set_style_text_font(guider_ui.sys_setting_lbl_funkey7, font, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+            }
+        }
+        if (guider_ui.sys_setting_lbl_subpage_warning != NULL && lv_obj_is_valid(guider_ui.sys_setting_lbl_subpage_warning)) {
+            lv_label_set_text(guider_ui.sys_setting_lbl_subpage_warning, _("subpagewarning0"));
+            const lv_font_t *font = _font("subpagewarning0");
+            if (font != NULL) {
+                lv_obj_set_style_text_font(guider_ui.sys_setting_lbl_subpage_warning, font, LV_PART_MAIN | LV_STATE_DEFAULT);
+            }
+        }
+        if (guider_ui.sys_setting_lbl_funkey2_label != NULL && lv_obj_is_valid(guider_ui.sys_setting_lbl_funkey2_label)) {
+            lv_label_set_text(guider_ui.sys_setting_lbl_funkey2_label, _("YES"));
+            const lv_font_t *font = _font("YES");
+            if (font != NULL) {
+                lv_obj_set_style_text_font(guider_ui.sys_setting_lbl_funkey2_label, font, LV_PART_MAIN | LV_STATE_DEFAULT);
+                lv_obj_set_style_text_font(guider_ui.sys_setting_lbl_funkey2_label, font, LV_PART_MAIN | LV_STATE_DISABLED);
+                lv_obj_set_style_text_font(guider_ui.sys_setting_lbl_funkey2_label, font, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
             }
         }
     }
@@ -279,10 +381,53 @@ void i18n_refresh_texts(const char *page_name)
             }
         }
         if (guider_ui.video_photo_lbl_20 != NULL && lv_obj_is_valid(guider_ui.video_photo_lbl_20)) {
-            lv_label_set_text(guider_ui.video_photo_lbl_20, _("date_s"));
-            const lv_font_t *font = _font("date_s");
+            lv_label_set_text(guider_ui.video_photo_lbl_20, _("date"));
+            const lv_font_t *font = _font("date");
             if (font != NULL) {
                 lv_obj_set_style_text_font(guider_ui.video_photo_lbl_20, font, LV_PART_MAIN | LV_STATE_DEFAULT);
+            }
+        }
+        if (guider_ui.video_photo_lbl_menu_title != NULL && lv_obj_is_valid(guider_ui.video_photo_lbl_menu_title)) {
+            lv_label_set_text(guider_ui.video_photo_lbl_menu_title, _("language"));
+            const lv_font_t *font = _font("language");
+            if (font != NULL) {
+                lv_obj_set_style_text_font(guider_ui.video_photo_lbl_menu_title, font, LV_PART_MAIN | LV_STATE_DEFAULT);
+            }
+        }
+        if (guider_ui.video_photo_lbl_funkey1_label != NULL && lv_obj_is_valid(guider_ui.video_photo_lbl_funkey1_label)) {
+            lv_label_set_text(guider_ui.video_photo_lbl_funkey1_label, _("YES"));
+            const lv_font_t *font = _font("YES");
+            if (font != NULL) {
+                lv_obj_set_style_text_font(guider_ui.video_photo_lbl_funkey1_label, font, LV_PART_MAIN | LV_STATE_DEFAULT);
+                lv_obj_set_style_text_font(guider_ui.video_photo_lbl_funkey1_label, font, LV_PART_MAIN | LV_STATE_FOCUSED);
+                lv_obj_set_style_text_font(guider_ui.video_photo_lbl_funkey1_label, font, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+            }
+        }
+        if (guider_ui.video_photo_lbl_funkey2_label != NULL && lv_obj_is_valid(guider_ui.video_photo_lbl_funkey2_label)) {
+            lv_label_set_text(guider_ui.video_photo_lbl_funkey2_label, _("YES"));
+            const lv_font_t *font = _font("YES");
+            if (font != NULL) {
+                lv_obj_set_style_text_font(guider_ui.video_photo_lbl_funkey2_label, font, LV_PART_MAIN | LV_STATE_DEFAULT);
+                lv_obj_set_style_text_font(guider_ui.video_photo_lbl_funkey2_label, font, LV_PART_MAIN | LV_STATE_FOCUSED);
+                lv_obj_set_style_text_font(guider_ui.video_photo_lbl_funkey2_label, font, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+            }
+        }
+        if (guider_ui.video_photo_lbl_funkey3_label != NULL && lv_obj_is_valid(guider_ui.video_photo_lbl_funkey3_label)) {
+            lv_label_set_text(guider_ui.video_photo_lbl_funkey3_label, _("YES"));
+            const lv_font_t *font = _font("YES");
+            if (font != NULL) {
+                lv_obj_set_style_text_font(guider_ui.video_photo_lbl_funkey3_label, font, LV_PART_MAIN | LV_STATE_DEFAULT);
+                lv_obj_set_style_text_font(guider_ui.video_photo_lbl_funkey3_label, font, LV_PART_MAIN | LV_STATE_FOCUSED);
+                lv_obj_set_style_text_font(guider_ui.video_photo_lbl_funkey3_label, font, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+            }
+        }
+        if (guider_ui.video_photo_lbl_funkey4_label != NULL && lv_obj_is_valid(guider_ui.video_photo_lbl_funkey4_label)) {
+            lv_label_set_text(guider_ui.video_photo_lbl_funkey4_label, _("YES"));
+            const lv_font_t *font = _font("YES");
+            if (font != NULL) {
+                lv_obj_set_style_text_font(guider_ui.video_photo_lbl_funkey4_label, font, LV_PART_MAIN | LV_STATE_DEFAULT);
+                lv_obj_set_style_text_font(guider_ui.video_photo_lbl_funkey4_label, font, LV_PART_MAIN | LV_STATE_FOCUSED);
+                lv_obj_set_style_text_font(guider_ui.video_photo_lbl_funkey4_label, font, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
             }
         }
     }
@@ -420,8 +565,8 @@ void i18n_refresh_all_texts()
             }
         }
         if (guider_ui.video_rec_lbl_17 != NULL && lv_obj_is_valid(guider_ui.video_rec_lbl_17)) {
-            lv_label_set_text(guider_ui.video_rec_lbl_17, _("date_s"));
-            const lv_font_t *font = _font("date_s");
+            lv_label_set_text(guider_ui.video_rec_lbl_17, _("date"));
+            const lv_font_t *font = _font("date");
             if (font != NULL) {
                 lv_obj_set_style_text_font(guider_ui.video_rec_lbl_17, font, LV_PART_MAIN | LV_STATE_DEFAULT);
             }
@@ -441,10 +586,53 @@ void i18n_refresh_all_texts()
             }
         }
         if (guider_ui.video_rec_lbl_20 != NULL && lv_obj_is_valid(guider_ui.video_rec_lbl_20)) {
-            lv_label_set_text(guider_ui.video_rec_lbl_20, _("carnum_s"));
-            const lv_font_t *font = _font("carnum_s");
+            lv_label_set_text(guider_ui.video_rec_lbl_20, _("carnum"));
+            const lv_font_t *font = _font("carnum");
             if (font != NULL) {
                 lv_obj_set_style_text_font(guider_ui.video_rec_lbl_20, font, LV_PART_MAIN | LV_STATE_DEFAULT);
+            }
+        }
+        if (guider_ui.video_rec_lbl_menu_title != NULL && lv_obj_is_valid(guider_ui.video_rec_lbl_menu_title)) {
+            lv_label_set_text(guider_ui.video_rec_lbl_menu_title, _("language"));
+            const lv_font_t *font = _font("language");
+            if (font != NULL) {
+                lv_obj_set_style_text_font(guider_ui.video_rec_lbl_menu_title, font, LV_PART_MAIN | LV_STATE_DEFAULT);
+            }
+        }
+        if (guider_ui.video_rec_lbl_funkey1_label != NULL && lv_obj_is_valid(guider_ui.video_rec_lbl_funkey1_label)) {
+            lv_label_set_text(guider_ui.video_rec_lbl_funkey1_label, _("YES"));
+            const lv_font_t *font = _font("YES");
+            if (font != NULL) {
+                lv_obj_set_style_text_font(guider_ui.video_rec_lbl_funkey1_label, font, LV_PART_MAIN | LV_STATE_DEFAULT);
+                lv_obj_set_style_text_font(guider_ui.video_rec_lbl_funkey1_label, font, LV_PART_MAIN | LV_STATE_FOCUSED);
+                lv_obj_set_style_text_font(guider_ui.video_rec_lbl_funkey1_label, font, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+            }
+        }
+        if (guider_ui.video_rec_lbl_funkey2_label != NULL && lv_obj_is_valid(guider_ui.video_rec_lbl_funkey2_label)) {
+            lv_label_set_text(guider_ui.video_rec_lbl_funkey2_label, _("YES"));
+            const lv_font_t *font = _font("YES");
+            if (font != NULL) {
+                lv_obj_set_style_text_font(guider_ui.video_rec_lbl_funkey2_label, font, LV_PART_MAIN | LV_STATE_DEFAULT);
+                lv_obj_set_style_text_font(guider_ui.video_rec_lbl_funkey2_label, font, LV_PART_MAIN | LV_STATE_FOCUSED);
+                lv_obj_set_style_text_font(guider_ui.video_rec_lbl_funkey2_label, font, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+            }
+        }
+        if (guider_ui.video_rec_lbl_funkey3_label != NULL && lv_obj_is_valid(guider_ui.video_rec_lbl_funkey3_label)) {
+            lv_label_set_text(guider_ui.video_rec_lbl_funkey3_label, _("YES"));
+            const lv_font_t *font = _font("YES");
+            if (font != NULL) {
+                lv_obj_set_style_text_font(guider_ui.video_rec_lbl_funkey3_label, font, LV_PART_MAIN | LV_STATE_DEFAULT);
+                lv_obj_set_style_text_font(guider_ui.video_rec_lbl_funkey3_label, font, LV_PART_MAIN | LV_STATE_FOCUSED);
+                lv_obj_set_style_text_font(guider_ui.video_rec_lbl_funkey3_label, font, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+            }
+        }
+        if (guider_ui.video_rec_lbl_funkey4_label != NULL && lv_obj_is_valid(guider_ui.video_rec_lbl_funkey4_label)) {
+            lv_label_set_text(guider_ui.video_rec_lbl_funkey4_label, _("YES"));
+            const lv_font_t *font = _font("YES");
+            if (font != NULL) {
+                lv_obj_set_style_text_font(guider_ui.video_rec_lbl_funkey4_label, font, LV_PART_MAIN | LV_STATE_DEFAULT);
+                lv_obj_set_style_text_font(guider_ui.video_rec_lbl_funkey4_label, font, LV_PART_MAIN | LV_STATE_FOCUSED);
+                lv_obj_set_style_text_font(guider_ui.video_rec_lbl_funkey4_label, font, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
             }
         }
     }
@@ -478,87 +666,146 @@ void i18n_refresh_all_texts()
 
     if (!guider_ui.sys_setting_del) {
         if (guider_ui.sys_setting_lbl_1 != NULL && lv_obj_is_valid(guider_ui.sys_setting_lbl_1)) {
-            lv_label_set_text(guider_ui.sys_setting_lbl_1, _("lcdprotect_s"));
-            const lv_font_t *font = _font("lcdprotect_s");
+            lv_label_set_text(guider_ui.sys_setting_lbl_1, _("lcdprotect"));
+            const lv_font_t *font = _font("lcdprotect");
             if (font != NULL) {
                 lv_obj_set_style_text_font(guider_ui.sys_setting_lbl_1, font, LV_PART_MAIN | LV_STATE_DEFAULT);
             }
         }
         if (guider_ui.sys_setting_lbl_2 != NULL && lv_obj_is_valid(guider_ui.sys_setting_lbl_2)) {
-            lv_label_set_text(guider_ui.sys_setting_lbl_2, _("poweroff_s"));
-            const lv_font_t *font = _font("poweroff_s");
+            lv_label_set_text(guider_ui.sys_setting_lbl_2, _("poweroff"));
+            const lv_font_t *font = _font("poweroff");
             if (font != NULL) {
                 lv_obj_set_style_text_font(guider_ui.sys_setting_lbl_2, font, LV_PART_MAIN | LV_STATE_DEFAULT);
             }
         }
         if (guider_ui.sys_setting_lbl_3 != NULL && lv_obj_is_valid(guider_ui.sys_setting_lbl_3)) {
-            lv_label_set_text(guider_ui.sys_setting_lbl_3, _("frequency_s"));
-            const lv_font_t *font = _font("frequency_s");
+            lv_label_set_text(guider_ui.sys_setting_lbl_3, _("frequency"));
+            const lv_font_t *font = _font("frequency");
             if (font != NULL) {
                 lv_obj_set_style_text_font(guider_ui.sys_setting_lbl_3, font, LV_PART_MAIN | LV_STATE_DEFAULT);
             }
         }
         if (guider_ui.sys_setting_lbl_4 != NULL && lv_obj_is_valid(guider_ui.sys_setting_lbl_4)) {
-            lv_label_set_text(guider_ui.sys_setting_lbl_4, _("speaker_s"));
-            const lv_font_t *font = _font("speaker_s");
+            lv_label_set_text(guider_ui.sys_setting_lbl_4, _("speaker"));
+            const lv_font_t *font = _font("speaker");
             if (font != NULL) {
                 lv_obj_set_style_text_font(guider_ui.sys_setting_lbl_4, font, LV_PART_MAIN | LV_STATE_DEFAULT);
             }
         }
         if (guider_ui.sys_setting_lbl_5 != NULL && lv_obj_is_valid(guider_ui.sys_setting_lbl_5)) {
-            lv_label_set_text(guider_ui.sys_setting_lbl_5, _("language_s"));
-            const lv_font_t *font = _font("language_s");
+            lv_label_set_text(guider_ui.sys_setting_lbl_5, _("language"));
+            const lv_font_t *font = _font("language");
             if (font != NULL) {
                 lv_obj_set_style_text_font(guider_ui.sys_setting_lbl_5, font, LV_PART_MAIN | LV_STATE_DEFAULT);
             }
         }
         if (guider_ui.sys_setting_lbl_6 != NULL && lv_obj_is_valid(guider_ui.sys_setting_lbl_6)) {
-            lv_label_set_text(guider_ui.sys_setting_lbl_6, _("lamp_s"));
-            const lv_font_t *font = _font("lamp_s");
+            lv_label_set_text(guider_ui.sys_setting_lbl_6, _("lamp"));
+            const lv_font_t *font = _font("lamp");
             if (font != NULL) {
                 lv_obj_set_style_text_font(guider_ui.sys_setting_lbl_6, font, LV_PART_MAIN | LV_STATE_DEFAULT);
             }
         }
         if (guider_ui.sys_setting_lbl_7 != NULL && lv_obj_is_valid(guider_ui.sys_setting_lbl_7)) {
-            lv_label_set_text(guider_ui.sys_setting_lbl_7, _("software_s"));
-            const lv_font_t *font = _font("software_s");
+            lv_label_set_text(guider_ui.sys_setting_lbl_7, _("software"));
+            const lv_font_t *font = _font("software");
             if (font != NULL) {
                 lv_obj_set_style_text_font(guider_ui.sys_setting_lbl_7, font, LV_PART_MAIN | LV_STATE_DEFAULT);
             }
         }
         if (guider_ui.sys_setting_lbl_8 != NULL && lv_obj_is_valid(guider_ui.sys_setting_lbl_8)) {
-            lv_label_set_text(guider_ui.sys_setting_lbl_8, _("carnum_s"));
-            const lv_font_t *font = _font("carnum_s");
+            lv_label_set_text(guider_ui.sys_setting_lbl_8, _("carnum"));
+            const lv_font_t *font = _font("carnum");
             if (font != NULL) {
                 lv_obj_set_style_text_font(guider_ui.sys_setting_lbl_8, font, LV_PART_MAIN | LV_STATE_DEFAULT);
             }
         }
         if (guider_ui.sys_setting_lbl_9 != NULL && lv_obj_is_valid(guider_ui.sys_setting_lbl_9)) {
-            lv_label_set_text(guider_ui.sys_setting_lbl_9, _("roadline_s"));
-            const lv_font_t *font = _font("roadline_s");
+            lv_label_set_text(guider_ui.sys_setting_lbl_9, _("roadline"));
+            const lv_font_t *font = _font("roadline");
             if (font != NULL) {
                 lv_obj_set_style_text_font(guider_ui.sys_setting_lbl_9, font, LV_PART_MAIN | LV_STATE_DEFAULT);
             }
         }
         if (guider_ui.sys_setting_lbl_10 != NULL && lv_obj_is_valid(guider_ui.sys_setting_lbl_10)) {
-            lv_label_set_text(guider_ui.sys_setting_lbl_10, _("formatting_s"));
-            const lv_font_t *font = _font("formatting_s");
+            lv_label_set_text(guider_ui.sys_setting_lbl_10, _("formatting"));
+            const lv_font_t *font = _font("formatting");
             if (font != NULL) {
                 lv_obj_set_style_text_font(guider_ui.sys_setting_lbl_10, font, LV_PART_MAIN | LV_STATE_DEFAULT);
             }
         }
         if (guider_ui.sys_setting_lbl_11 != NULL && lv_obj_is_valid(guider_ui.sys_setting_lbl_11)) {
-            lv_label_set_text(guider_ui.sys_setting_lbl_11, _("reset_s"));
-            const lv_font_t *font = _font("reset_s");
+            lv_label_set_text(guider_ui.sys_setting_lbl_11, _("reset"));
+            const lv_font_t *font = _font("reset");
             if (font != NULL) {
                 lv_obj_set_style_text_font(guider_ui.sys_setting_lbl_11, font, LV_PART_MAIN | LV_STATE_DEFAULT);
             }
         }
         if (guider_ui.sys_setting_lbl_12 != NULL && lv_obj_is_valid(guider_ui.sys_setting_lbl_12)) {
-            lv_label_set_text(guider_ui.sys_setting_lbl_12, _("date_s"));
-            const lv_font_t *font = _font("date_s");
+            lv_label_set_text(guider_ui.sys_setting_lbl_12, _("date"));
+            const lv_font_t *font = _font("date");
             if (font != NULL) {
                 lv_obj_set_style_text_font(guider_ui.sys_setting_lbl_12, font, LV_PART_MAIN | LV_STATE_DEFAULT);
+            }
+        }
+        if (guider_ui.sys_setting_lbl_menu_title != NULL && lv_obj_is_valid(guider_ui.sys_setting_lbl_menu_title)) {
+            lv_label_set_text(guider_ui.sys_setting_lbl_menu_title, _("language"));
+            const lv_font_t *font = _font("language");
+            if (font != NULL) {
+                lv_obj_set_style_text_font(guider_ui.sys_setting_lbl_menu_title, font, LV_PART_MAIN | LV_STATE_DEFAULT);
+            }
+        }
+        if (guider_ui.sys_setting_lbl_funkey4 != NULL && lv_obj_is_valid(guider_ui.sys_setting_lbl_funkey4)) {
+            lv_label_set_text(guider_ui.sys_setting_lbl_funkey4, _("funkey4"));
+            const lv_font_t *font = _font("funkey4");
+            if (font != NULL) {
+                lv_obj_set_style_text_font(guider_ui.sys_setting_lbl_funkey4, font, LV_PART_MAIN | LV_STATE_DEFAULT);
+                lv_obj_set_style_text_font(guider_ui.sys_setting_lbl_funkey4, font, LV_PART_MAIN | LV_STATE_DISABLED);
+                lv_obj_set_style_text_font(guider_ui.sys_setting_lbl_funkey4, font, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+            }
+        }
+        if (guider_ui.sys_setting_lbl_funkey5 != NULL && lv_obj_is_valid(guider_ui.sys_setting_lbl_funkey5)) {
+            lv_label_set_text(guider_ui.sys_setting_lbl_funkey5, _("funkey5"));
+            const lv_font_t *font = _font("funkey5");
+            if (font != NULL) {
+                lv_obj_set_style_text_font(guider_ui.sys_setting_lbl_funkey5, font, LV_PART_MAIN | LV_STATE_DEFAULT);
+                lv_obj_set_style_text_font(guider_ui.sys_setting_lbl_funkey5, font, LV_PART_MAIN | LV_STATE_DISABLED);
+                lv_obj_set_style_text_font(guider_ui.sys_setting_lbl_funkey5, font, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+            }
+        }
+        if (guider_ui.sys_setting_lbl_funkey6 != NULL && lv_obj_is_valid(guider_ui.sys_setting_lbl_funkey6)) {
+            lv_label_set_text(guider_ui.sys_setting_lbl_funkey6, _("funkey6"));
+            const lv_font_t *font = _font("funkey6");
+            if (font != NULL) {
+                lv_obj_set_style_text_font(guider_ui.sys_setting_lbl_funkey6, font, LV_PART_MAIN | LV_STATE_DEFAULT);
+                lv_obj_set_style_text_font(guider_ui.sys_setting_lbl_funkey6, font, LV_PART_MAIN | LV_STATE_DISABLED);
+                lv_obj_set_style_text_font(guider_ui.sys_setting_lbl_funkey6, font, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+            }
+        }
+        if (guider_ui.sys_setting_lbl_funkey7 != NULL && lv_obj_is_valid(guider_ui.sys_setting_lbl_funkey7)) {
+            lv_label_set_text(guider_ui.sys_setting_lbl_funkey7, _("funkey7"));
+            const lv_font_t *font = _font("funkey7");
+            if (font != NULL) {
+                lv_obj_set_style_text_font(guider_ui.sys_setting_lbl_funkey7, font, LV_PART_MAIN | LV_STATE_DEFAULT);
+                lv_obj_set_style_text_font(guider_ui.sys_setting_lbl_funkey7, font, LV_PART_MAIN | LV_STATE_DISABLED);
+                lv_obj_set_style_text_font(guider_ui.sys_setting_lbl_funkey7, font, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+            }
+        }
+        if (guider_ui.sys_setting_lbl_subpage_warning != NULL && lv_obj_is_valid(guider_ui.sys_setting_lbl_subpage_warning)) {
+            lv_label_set_text(guider_ui.sys_setting_lbl_subpage_warning, _("subpagewarning0"));
+            const lv_font_t *font = _font("subpagewarning0");
+            if (font != NULL) {
+                lv_obj_set_style_text_font(guider_ui.sys_setting_lbl_subpage_warning, font, LV_PART_MAIN | LV_STATE_DEFAULT);
+            }
+        }
+        if (guider_ui.sys_setting_lbl_funkey2_label != NULL && lv_obj_is_valid(guider_ui.sys_setting_lbl_funkey2_label)) {
+            lv_label_set_text(guider_ui.sys_setting_lbl_funkey2_label, _("YES"));
+            const lv_font_t *font = _font("YES");
+            if (font != NULL) {
+                lv_obj_set_style_text_font(guider_ui.sys_setting_lbl_funkey2_label, font, LV_PART_MAIN | LV_STATE_DEFAULT);
+                lv_obj_set_style_text_font(guider_ui.sys_setting_lbl_funkey2_label, font, LV_PART_MAIN | LV_STATE_DISABLED);
+                lv_obj_set_style_text_font(guider_ui.sys_setting_lbl_funkey2_label, font, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
             }
         }
     }
@@ -635,10 +882,53 @@ void i18n_refresh_all_texts()
             }
         }
         if (guider_ui.video_photo_lbl_20 != NULL && lv_obj_is_valid(guider_ui.video_photo_lbl_20)) {
-            lv_label_set_text(guider_ui.video_photo_lbl_20, _("date_s"));
-            const lv_font_t *font = _font("date_s");
+            lv_label_set_text(guider_ui.video_photo_lbl_20, _("date"));
+            const lv_font_t *font = _font("date");
             if (font != NULL) {
                 lv_obj_set_style_text_font(guider_ui.video_photo_lbl_20, font, LV_PART_MAIN | LV_STATE_DEFAULT);
+            }
+        }
+        if (guider_ui.video_photo_lbl_menu_title != NULL && lv_obj_is_valid(guider_ui.video_photo_lbl_menu_title)) {
+            lv_label_set_text(guider_ui.video_photo_lbl_menu_title, _("language"));
+            const lv_font_t *font = _font("language");
+            if (font != NULL) {
+                lv_obj_set_style_text_font(guider_ui.video_photo_lbl_menu_title, font, LV_PART_MAIN | LV_STATE_DEFAULT);
+            }
+        }
+        if (guider_ui.video_photo_lbl_funkey1_label != NULL && lv_obj_is_valid(guider_ui.video_photo_lbl_funkey1_label)) {
+            lv_label_set_text(guider_ui.video_photo_lbl_funkey1_label, _("YES"));
+            const lv_font_t *font = _font("YES");
+            if (font != NULL) {
+                lv_obj_set_style_text_font(guider_ui.video_photo_lbl_funkey1_label, font, LV_PART_MAIN | LV_STATE_DEFAULT);
+                lv_obj_set_style_text_font(guider_ui.video_photo_lbl_funkey1_label, font, LV_PART_MAIN | LV_STATE_FOCUSED);
+                lv_obj_set_style_text_font(guider_ui.video_photo_lbl_funkey1_label, font, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+            }
+        }
+        if (guider_ui.video_photo_lbl_funkey2_label != NULL && lv_obj_is_valid(guider_ui.video_photo_lbl_funkey2_label)) {
+            lv_label_set_text(guider_ui.video_photo_lbl_funkey2_label, _("YES"));
+            const lv_font_t *font = _font("YES");
+            if (font != NULL) {
+                lv_obj_set_style_text_font(guider_ui.video_photo_lbl_funkey2_label, font, LV_PART_MAIN | LV_STATE_DEFAULT);
+                lv_obj_set_style_text_font(guider_ui.video_photo_lbl_funkey2_label, font, LV_PART_MAIN | LV_STATE_FOCUSED);
+                lv_obj_set_style_text_font(guider_ui.video_photo_lbl_funkey2_label, font, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+            }
+        }
+        if (guider_ui.video_photo_lbl_funkey3_label != NULL && lv_obj_is_valid(guider_ui.video_photo_lbl_funkey3_label)) {
+            lv_label_set_text(guider_ui.video_photo_lbl_funkey3_label, _("YES"));
+            const lv_font_t *font = _font("YES");
+            if (font != NULL) {
+                lv_obj_set_style_text_font(guider_ui.video_photo_lbl_funkey3_label, font, LV_PART_MAIN | LV_STATE_DEFAULT);
+                lv_obj_set_style_text_font(guider_ui.video_photo_lbl_funkey3_label, font, LV_PART_MAIN | LV_STATE_FOCUSED);
+                lv_obj_set_style_text_font(guider_ui.video_photo_lbl_funkey3_label, font, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+            }
+        }
+        if (guider_ui.video_photo_lbl_funkey4_label != NULL && lv_obj_is_valid(guider_ui.video_photo_lbl_funkey4_label)) {
+            lv_label_set_text(guider_ui.video_photo_lbl_funkey4_label, _("YES"));
+            const lv_font_t *font = _font("YES");
+            if (font != NULL) {
+                lv_obj_set_style_text_font(guider_ui.video_photo_lbl_funkey4_label, font, LV_PART_MAIN | LV_STATE_DEFAULT);
+                lv_obj_set_style_text_font(guider_ui.video_photo_lbl_funkey4_label, font, LV_PART_MAIN | LV_STATE_FOCUSED);
+                lv_obj_set_style_text_font(guider_ui.video_photo_lbl_funkey4_label, font, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
             }
         }
     }

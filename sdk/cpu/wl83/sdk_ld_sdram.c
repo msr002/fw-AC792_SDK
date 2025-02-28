@@ -404,7 +404,7 @@ EXTERN(
     lib_coap_version
     lib_duer_version
     lib_mpeg_version
-    lib_lwip_2_1_3_version
+    lib_lwip_2_2_0_version
     lib_mbedtls_3_4_0_version
     lib_mdns_version
     lib_mongoose_version

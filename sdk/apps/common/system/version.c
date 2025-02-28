@@ -7,7 +7,7 @@ extern char __VERSION_END[];
 
 const char *sdk_version(void)
 {
-    return "AC792N SDK on branch [release/AC792N_SDK_V1] tag AC792N_SDK_V1.2.8_2025-01-10";
+    return "AC792N SDK on branch [release/AC792N_SDK_V1] tag AC792N_SDK_V1.2.9_2025-02-28";
 }
 
 static int app_version_check()

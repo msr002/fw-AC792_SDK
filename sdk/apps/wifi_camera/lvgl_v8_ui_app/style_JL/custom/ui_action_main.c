@@ -320,9 +320,10 @@ int gui_model_main_msg_hide_win_switch_cb(gui_msg_action_t access, gui_msg_data_
         data = &guider_msg_data;
     }
     printf("[chili] %s dev_online(uvc) %d   \n", __func__, dev_online("uvc"));
-    if (dev_online("uvc") || dev_online("video1.*")) {
-        hide_win_switch_var = LV_OBJ_FLAG_CHECKABLE;
-    }
+    /* if (dev_online("uvc") || dev_online("video1.*")) { */
+    /* hide_win_switch_var = LV_OBJ_FLAG_CHECKABLE; */
+    /* printf("%d, %s", __LINE__, __func__); */
+    /* } */
     if (access == GUI_MSG_ACCESS_SET) {
         hide_win_switch_var = data->value_int;
     }
@@ -337,9 +338,9 @@ int gui_model_main_msg_show_win_switch_cb(gui_msg_action_t access, gui_msg_data_
     if (data == NULL) {
         data = &guider_msg_data;
     }
-    if (!dev_online("uvc") && !dev_online("video1.*")) {
-        show_win_switch_var = LV_OBJ_FLAG_CHECKABLE;
-    }
+    /* if (!dev_online("uvc") && !dev_online("video1.*")) { */
+    /* show_win_switch_var = LV_OBJ_FLAG_CHECKABLE; */
+    /* } */
     if (access == GUI_MSG_ACCESS_SET) {
         show_win_switch_var = data->value_int;
     }

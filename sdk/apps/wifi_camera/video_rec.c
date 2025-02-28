@@ -572,6 +572,29 @@ static int video_rec_online_nums()
     return nums;
 }
 
+int video_pre_create(int id, int open)
+{
+    int err = 0;
+
+    if (!__this->video_pre[id]) {
+        char dev_name[12] = {0};
+        sprintf(dev_name, "video%d.%d", id, id < 2 ? 0 : __this->uvc_id);
+        __this->video_pre[id] = server_open("video_server", (void *)dev_name);
+        if (!__this->video_pre[id]) {
+            log_e("open video_server: faild, id = %d\n", id);
+            return -EFAULT;
+        }
+    }
+
+    err = server_request(__this->video_pre[id], VIDEO_REQ_PRE_CREATE, &open);
+    if (err) {
+        server_close(__this->video_pre[id]);
+        __this->video_pre[id] = NULL;
+    }
+
+    return err;
+}
+
 #ifndef MULTI_LCD_EN
 int video_disp_start(int id, const struct video_window *win)
 #else

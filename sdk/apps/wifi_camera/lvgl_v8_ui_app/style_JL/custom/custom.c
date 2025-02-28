@@ -1,6 +1,5 @@
 #include "app_config.h"
 #ifdef CONFIG_UI_STYLE_JL_ENABLE
-
 /**
  * @file custom.c
  *
@@ -983,41 +982,6 @@ void sysmenu_subpage_btnlist_keyevent_cb(lv_ui *ui)
             break;
         }
         lv_group_focus_obj(guider_ui.sys_setting_img_4);
-
-        break;
-
-    case  SUBPAGE_LANGUAGE:
-        switch (subpage_cur_btn) {
-        case SUBPAGE_FUNKEY5:
-            db_update("lag", LANG_ENGLISH);
-            lv_i18n_set_locale("en");
-            break;
-        default:
-            db_update("lag", LANG_CHINESE_SIMP);
-            lv_i18n_set_locale("zh_cn");
-            break;
-        }
-        i18n_refresh_all_texts(); //语言即可生效
-        //刷新菜单子页面标题
-        my_sysmenu_subpage.icon_res_id = (void *)RES_LANGUAGES;
-        my_sysmenu_subpage.title = (void *)_("language");
-        my_sysmenu_subpage.funkey4 = (void *)"简体中文";
-        my_sysmenu_subpage.funkey5 = (void *)"English";
-        switch (db_select("lag")) { //处理高亮样式
-        case LANG_ENGLISH:
-            my_sysmenu_subpage.list_focus_id = 1;
-            break;
-        default:
-            my_sysmenu_subpage.list_focus_id = 0;
-            break;
-        }
-
-        sysmenu_subpage_show(&my_sysmenu_subpage);
-#ifdef USE_LVGL_V8_UI_DEMO
-        lv_group_set_default(def_group);
-        lv_indev_set_group(indev_keypad, def_group);
-#endif
-        lv_group_focus_obj(guider_ui.sys_setting_img_5);
 
         break;
 

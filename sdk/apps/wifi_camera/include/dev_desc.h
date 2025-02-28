@@ -21,7 +21,13 @@
                                 "\"0\""\
                             "],"
 
-#define FORW_REC_SPT        BIHD_SPT\
+//AC521x后视只有720 VGA
+#define THIRD_SPT             BIHD_SPT\
+                            "\"third_support\": ["\
+                                "\"0\""\
+                            "],"
+
+#define FORW_REC_SPT        THIRD_SPT\
                             "\"forward_record_support\": ["\
                                 "\"0\","\
                                 "\"1\""\
@@ -33,8 +39,15 @@
                                 "\"0\""\
                             "],"
 
+
+//AC521x后视录像只有720 VGA
+#define THIRD_REC_SPT        BIHD_REC_SPT\
+                            "\"third_record_support\": ["\
+                                "\"0\""\
+                            "],"
+
 //AC521x RTSP前视
-#define RTSP_FSPT           BIHD_REC_SPT\
+#define RTSP_FSPT           THIRD_REC_SPT\
                             "\"rtsp_forward_support\": ["\
                                 "\"0\","\
                                 "\"1\""\
@@ -46,7 +59,12 @@
                                 "\"0\""\
                             "],"
 
-#define   DEV_TYPE          RTSP_HSPT\
+#define RTSP_TSPT           RTSP_HSPT\
+                            "\"rtsp_third_support\": ["\
+                                "\"0\""\
+                            "],"
+
+#define   DEV_TYPE          RTSP_TSPT\
                             "\"device_type\": \"1\","
 
 //实时流传输协议配置

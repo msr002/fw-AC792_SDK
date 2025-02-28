@@ -4,4 +4,4 @@
 
 include_lib_driver_version:
 
-.asciz "INCLUDE_DRIVER-$63c704b"
+.asciz "INCLUDE_DRIVER-$abdd76c"

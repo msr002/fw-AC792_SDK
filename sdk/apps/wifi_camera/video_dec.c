@@ -10,7 +10,11 @@
 
 #define AUDIO_DEC_BUF_SIZE  64 * 1024
 
+#if __SDRAM_SIZE__ == (16 * 1024 * 1024)
 #define VIDEO_DEC_BUF_SIZE  1 * 1024 * 1024 + 512 * 1024
+#else
+#define VIDEO_DEC_BUF_SIZE  512 * 1024
+#endif
 
 #define DEFAULT_PLAY_VOLUME 100
 

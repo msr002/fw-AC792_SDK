@@ -20,8 +20,29 @@ extern char video_rec_car_num[64];
 
 
 
+static void _layer_top_event_cb(lv_event_t *e)
+{
+    lv_event_code_t code = lv_event_get_code(e);
+    lv_obj_t *obj = lv_event_get_target(e);
+    switch (code) {
+    case LV_EVENT_GESTURE: {
+        uint32_t child_cnt = lv_obj_get_child_cnt(obj);
+        for (uint32_t i = 0; i < child_cnt; i++) {
+            lv_obj_t *child = lv_obj_get_child(obj, i);
+            e->current_target = child;
+            e->target = child;
+            lv_event_send(child, code, e);
+        }
+    }
+    break;
+    default:
+        break;
+    }
+}
+
 void events_init(lv_ui *ui)
 {
+    lv_obj_add_event_cb(lv_layer_top(), _layer_top_event_cb, LV_EVENT_ALL, ui);
 }
 
 static void usb_slave_imgbtn_videorec_event_handler(lv_event_t *e)
@@ -31,11 +52,10 @@ static void usb_slave_imgbtn_videorec_event_handler(lv_event_t *e)
     lv_obj_t *src = lv_event_get_target(e);
     switch (code) {
     case LV_EVENT_CLICKED: {
-        gui_scr_t *screen = gui_scr_get(GUI_SCREEN_VIDEO_REC);
-        if (screen == NULL) {
-            screen = gui_scr_create(GUI_SCREEN_VIDEO_REC, "video_rec", guider_ui.video_rec, (gui_scr_setup_cb_t)setup_scr_video_rec, (gui_scr_unload_cb_t)unload_scr_video_rec);
+        gui_scr_t *screen = ui_get_scr(GUI_SCREEN_VIDEO_REC);
+        if (screen != NULL) {
+            ui_load_scr_anim(ui, screen, LV_SCR_LOAD_ANIM_NONE, 0, 0, true, true, false);
         }
-        ui_load_scr_anim(ui, screen, LV_SCR_LOAD_ANIM_NONE, 0, 0, true, true, false);
     }
     break;
     default:
@@ -130,11 +150,10 @@ static void video_rec_event_handler(lv_event_t *e)
     case LV_EVENT_KEY: {
         uint32_t *key = lv_event_get_param(e);
         if (*key == LV_KEY_DOWN) {
-            gui_scr_t *screen = gui_scr_get(GUI_SCREEN_HOME_PAGE);
-            if (screen == NULL) {
-                screen = gui_scr_create(GUI_SCREEN_HOME_PAGE, "home_page", guider_ui.home_page, (gui_scr_setup_cb_t)setup_scr_home_page, (gui_scr_unload_cb_t)unload_scr_home_page);
+            gui_scr_t *screen = ui_get_scr(GUI_SCREEN_HOME_PAGE);
+            if (screen != NULL) {
+                ui_load_scr_anim(ui, screen, LV_SCR_LOAD_ANIM_NONE, 0, 0, true, true, false);
             }
-            ui_load_scr_anim(ui, screen, LV_SCR_LOAD_ANIM_NONE, 0, 0, true, true, false);
         }
     }
     break;
@@ -207,11 +226,10 @@ static void video_rec_img_15_event_handler(lv_event_t *e)
             }
 #endif
         }
-        gui_scr_t *screen = gui_scr_get(GUI_SCREEN_VIDEO_PHOTO);
-        if (screen == NULL) {
-            screen = gui_scr_create(GUI_SCREEN_VIDEO_PHOTO, "video_photo", guider_ui.video_photo, (gui_scr_setup_cb_t)setup_scr_video_photo, (gui_scr_unload_cb_t)unload_scr_video_photo);
+        gui_scr_t *screen = ui_get_scr(GUI_SCREEN_VIDEO_PHOTO);
+        if (screen != NULL) {
+            ui_load_scr_anim(ui, screen, LV_SCR_LOAD_ANIM_NONE, 0, 0, true, true, false);
         }
-        ui_load_scr_anim(ui, screen, LV_SCR_LOAD_ANIM_NONE, 0, 0, true, true, false);
     }
     break;
     default:
@@ -234,11 +252,10 @@ static void video_rec_img_home_event_handler(lv_event_t *e)
                 rec_control_ontouch();
             }
         }
-        gui_scr_t *screen = gui_scr_get(GUI_SCREEN_HOME_PAGE);
-        if (screen == NULL) {
-            screen = gui_scr_create(GUI_SCREEN_HOME_PAGE, "home_page", guider_ui.home_page, (gui_scr_setup_cb_t)setup_scr_home_page, (gui_scr_unload_cb_t)unload_scr_home_page);
+        gui_scr_t *screen = ui_get_scr(GUI_SCREEN_HOME_PAGE);
+        if (screen != NULL) {
+            ui_load_scr_anim(ui, screen, LV_SCR_LOAD_ANIM_NONE, 0, 0, true, true, false);
         }
-        ui_load_scr_anim(ui, screen, LV_SCR_LOAD_ANIM_NONE, 0, 0, true, true, false);
     }
     break;
     default:
@@ -339,8 +356,8 @@ static void video_rec_view_video_set_event_handler(lv_event_t *e)
             case SUBPAGE_DOUBLE_REC:
                 rec_subpage_data.icon_res_id = (void *)RES_DOUBLE_VIDEO;
                 rec_subpage_data.title = (void *)_("doublerec");
-                rec_subpage_data.funkey2 = (void *)_("close_s");
-                rec_subpage_data.funkey3 = (void *)_("open_s");
+                rec_subpage_data.funkey2 = (void *)_("close");
+                rec_subpage_data.funkey3 = (void *)_("open");
                 switch (db_select("two")) { //处理高亮样式
                 case 1:
                     rec_subpage_data.btn_focus_id = SUBPAGE_FUNKEY3;
@@ -353,8 +370,8 @@ static void video_rec_view_video_set_event_handler(lv_event_t *e)
             case SUBPAGE_HDR:
                 rec_subpage_data.icon_res_id = (void *)RES_HDR;
                 rec_subpage_data.title = (void *)"HDR";
-                rec_subpage_data.funkey2 = (void *)_("close_s");
-                rec_subpage_data.funkey3 = (void *)_("open_s");
+                rec_subpage_data.funkey2 = (void *)_("close");
+                rec_subpage_data.funkey3 = (void *)_("ope");
                 switch (db_select("hdr")) { //处理高亮样式
                 case 1:
                     rec_subpage_data.btn_focus_id = SUBPAGE_FUNKEY3;
@@ -367,8 +384,8 @@ static void video_rec_view_video_set_event_handler(lv_event_t *e)
             case SUBPAGE_MOTION:
                 rec_subpage_data.icon_res_id = (void *)RES_CHECK_SPORT;
                 rec_subpage_data.title = (void *)_("motion");
-                rec_subpage_data.funkey2 = (void *)_("close_s");
-                rec_subpage_data.funkey3 = (void *)_("open_s");
+                rec_subpage_data.funkey2 = (void *)_("close");
+                rec_subpage_data.funkey3 = (void *)_("open");
                 switch (db_select("mot")) { //处理高亮样式
                 case 1:
                     rec_subpage_data.btn_focus_id = SUBPAGE_FUNKEY3;
@@ -382,8 +399,8 @@ static void video_rec_view_video_set_event_handler(lv_event_t *e)
             case SUBPAGE_RECORD:
                 rec_subpage_data.icon_res_id = (void *)GUI_RES_SOUND_PNG;
                 rec_subpage_data.title = (void *)_("record");
-                rec_subpage_data.funkey2 = (void *)_("close_s");
-                rec_subpage_data.funkey3 = (void *)_("open_s");
+                rec_subpage_data.funkey2 = (void *)_("close");
+                rec_subpage_data.funkey3 = (void *)_("open");
                 switch (db_select("mic")) { //处理高亮样式
                 case 1:
                     rec_subpage_data.btn_focus_id = SUBPAGE_FUNKEY3;
@@ -396,8 +413,8 @@ static void video_rec_view_video_set_event_handler(lv_event_t *e)
             case SUBPAGE_GUARD:
                 rec_subpage_data.icon_res_id = (void *)GUI_RES_STOPPING_MONITOR_1_PNG;
                 rec_subpage_data.title = (void *)_("guard");
-                rec_subpage_data.funkey2 = (void *)_("close_s");
-                rec_subpage_data.funkey3 = (void *)_("open_s");
+                rec_subpage_data.funkey2 = (void *)_("close");
+                rec_subpage_data.funkey3 = (void *)_("open");
                 switch (db_select("par")) { //处理高亮样式
                 case 1:
                     rec_subpage_data.btn_focus_id = SUBPAGE_FUNKEY3;
@@ -410,8 +427,8 @@ static void video_rec_view_video_set_event_handler(lv_event_t *e)
             case SUBPAGE_CARNUM:
                 rec_subpage_data.icon_res_id = (void *)GUI_RES_CAR_NUM_PNG;
                 rec_subpage_data.title = (void *)_("carnum");
-                rec_subpage_data.funkey2 = (void *)_("close_s");
-                rec_subpage_data.funkey3 = (void *)_("open_s");
+                rec_subpage_data.funkey2 = (void *)_("close");
+                rec_subpage_data.funkey3 = (void *)_("open");
                 switch (db_select("num")) { //处理高亮样式
                 case 1:
                     rec_subpage_data.btn_focus_id = SUBPAGE_FUNKEY3;
@@ -425,7 +442,7 @@ static void video_rec_view_video_set_event_handler(lv_event_t *e)
             case SUBPAGE_CYC_REC:
                 rec_subpage_data.icon_res_id = (void *)RES_CYCLIC_VIDEO;
                 rec_subpage_data.title = (void *)_("cycrec");
-                rec_subpage_data.funkey1 = (void *)_("close_s");
+                rec_subpage_data.funkey1 = (void *)_("close");
                 rec_subpage_data.funkey2 = (void *)"1min";
                 rec_subpage_data.funkey3 = (void *)"3min";
                 rec_subpage_data.funkey4 = (void *)"10min";
@@ -447,7 +464,7 @@ static void video_rec_view_video_set_event_handler(lv_event_t *e)
             case SUBPAGE_GAP:
                 rec_subpage_data.icon_res_id = (void *)RES_INTERVAL_VIDEO;
                 rec_subpage_data.title = (void *)_("gaprec");
-                rec_subpage_data.funkey1 = (void *)_("close_s");
+                rec_subpage_data.funkey1 = (void *)_("close");
                 rec_subpage_data.funkey2 = (void *)"100ms";
                 rec_subpage_data.funkey3 = (void *)"200ms";
                 rec_subpage_data.funkey4 = (void *)"500ms";
@@ -469,7 +486,7 @@ static void video_rec_view_video_set_event_handler(lv_event_t *e)
             case SUBPAGE_GSENSOR:
                 rec_subpage_data.icon_res_id = (void *)RES_GRAVITY_SENSOR;
                 rec_subpage_data.title = (void *)_("gsensor");
-                rec_subpage_data.funkey1 = (void *)_("close_s");
+                rec_subpage_data.funkey1 = (void *)_("close");
                 rec_subpage_data.funkey2 = (void *)_("Lsensitive");
                 rec_subpage_data.funkey3 = (void *)_("Msensitive");
                 rec_subpage_data.funkey4 = (void *)_("Hsensitive");
@@ -522,9 +539,9 @@ static void video_rec_view_video_set_event_handler(lv_event_t *e)
                 break;
             case SUBPAGE_DATE:
                 rec_subpage_data.icon_res_id = (void *)RES_DATE;
-                rec_subpage_data.title = (void *)_("date_s");
-                rec_subpage_data.funkey2 = (void *)_("close_s");
-                rec_subpage_data.funkey3 = (void *)_("open_s");
+                rec_subpage_data.title = (void *)_("date");
+                rec_subpage_data.funkey2 = (void *)_("close");
+                rec_subpage_data.funkey3 = (void *)_("open");
                 switch (db_select("dat")) { //处理高亮样式
                 case 1:
                     rec_subpage_data.btn_focus_id = SUBPAGE_FUNKEY3;
@@ -1162,11 +1179,10 @@ static void home_page_imgbtn_1_event_handler(lv_event_t *e)
     lv_obj_t *src = lv_event_get_target(e);
     switch (code) {
     case LV_EVENT_CLICKED: {
-        gui_scr_t *screen = gui_scr_get(GUI_SCREEN_VIDEO_REC);
-        if (screen == NULL) {
-            screen = gui_scr_create(GUI_SCREEN_VIDEO_REC, "video_rec", guider_ui.video_rec, (gui_scr_setup_cb_t)setup_scr_video_rec, (gui_scr_unload_cb_t)unload_scr_video_rec);
+        gui_scr_t *screen = ui_get_scr(GUI_SCREEN_VIDEO_REC);
+        if (screen != NULL) {
+            ui_load_scr_anim(ui, screen, LV_SCR_LOAD_ANIM_NONE, 0, 0, true, true, false);
         }
-        ui_load_scr_anim(ui, screen, LV_SCR_LOAD_ANIM_NONE, 0, 0, true, true, false);
     }
     break;
     default:
@@ -1181,11 +1197,10 @@ static void home_page_imgbtn_2_event_handler(lv_event_t *e)
     lv_obj_t *src = lv_event_get_target(e);
     switch (code) {
     case LV_EVENT_CLICKED: {
-        gui_scr_t *screen = gui_scr_get(GUI_SCREEN_VIDEO_DIR);
-        if (screen == NULL) {
-            screen = gui_scr_create(GUI_SCREEN_VIDEO_DIR, "video_dir", guider_ui.video_dir, (gui_scr_setup_cb_t)setup_scr_video_dir, (gui_scr_unload_cb_t)unload_scr_video_dir);
+        gui_scr_t *screen = ui_get_scr(GUI_SCREEN_VIDEO_DIR);
+        if (screen != NULL) {
+            ui_load_scr_anim(ui, screen, LV_SCR_LOAD_ANIM_NONE, 0, 0, true, true, false);
         }
-        ui_load_scr_anim(ui, screen, LV_SCR_LOAD_ANIM_NONE, 0, 0, true, true, false);
     }
     break;
     default:
@@ -1200,11 +1215,10 @@ static void home_page_imgbtn_3_event_handler(lv_event_t *e)
     lv_obj_t *src = lv_event_get_target(e);
     switch (code) {
     case LV_EVENT_CLICKED: {
-        gui_scr_t *screen = gui_scr_get(GUI_SCREEN_SYS_SETTING);
-        if (screen == NULL) {
-            screen = gui_scr_create(GUI_SCREEN_SYS_SETTING, "sys_setting", guider_ui.sys_setting, (gui_scr_setup_cb_t)setup_scr_sys_setting, (gui_scr_unload_cb_t)unload_scr_sys_setting);
+        gui_scr_t *screen = ui_get_scr(GUI_SCREEN_SYS_SETTING);
+        if (screen != NULL) {
+            ui_load_scr_anim(ui, screen, LV_SCR_LOAD_ANIM_NONE, 0, 50, true, true, false);
         }
-        ui_load_scr_anim(ui, screen, LV_SCR_LOAD_ANIM_NONE, 0, 50, true, true, false);
     }
     break;
     default:
@@ -1288,11 +1302,10 @@ static void sys_setting_event_handler(lv_event_t *e)
     case LV_EVENT_KEY: {
         uint32_t *key = lv_event_get_param(e);
         if (*key == LV_KEY_HOME) {
-            gui_scr_t *screen = gui_scr_get(GUI_SCREEN_HOME_PAGE);
-            if (screen == NULL) {
-                screen = gui_scr_create(GUI_SCREEN_HOME_PAGE, "home_page", guider_ui.home_page, (gui_scr_setup_cb_t)setup_scr_home_page, (gui_scr_unload_cb_t)unload_scr_home_page);
+            gui_scr_t *screen = ui_get_scr(GUI_SCREEN_HOME_PAGE);
+            if (screen != NULL) {
+                ui_load_scr_anim(ui, screen, LV_SCR_LOAD_ANIM_NONE, 0, 0, true, true, false);
             }
-            ui_load_scr_anim(ui, screen, LV_SCR_LOAD_ANIM_NONE, 0, 0, true, true, false);
         }
     }
     break;
@@ -1311,6 +1324,8 @@ static void sys_setting_view_menupage_event_handler(lv_event_t *e)
         //custom code
         {
             lv_obj_t *dest = src;
+            //隐藏弹性布局放置18语 label列表
+            hide_flex_language_list();
             //更新菜单子页面内容
             my_sysmenu_subpage.funkey1 = 0;
             my_sysmenu_subpage.funkey2 = 0;
@@ -1412,17 +1427,7 @@ static void sys_setting_view_menupage_event_handler(lv_event_t *e)
             case  SUBPAGE_LANGUAGE:
                 my_sysmenu_subpage.icon_res_id = (void *)RES_LANGUAGES;
                 my_sysmenu_subpage.title = (void *)_("language");
-                my_sysmenu_subpage.funkey4 = (void *)"简体中文";
-                my_sysmenu_subpage.funkey5 = (void *)"English";
-                switch (db_select("lag")) { //处理高亮样式
-                case LANG_ENGLISH:
-                    my_sysmenu_subpage.list_focus_id = 1;
-                    break;
-                default:
-                    my_sysmenu_subpage.list_focus_id = 0;
-                    break;
-                }
-                //lv_group_focus_obj(ui->sys_setting_lbl_funkey4);
+                flex_language_list();
                 break;
 
             case  SUBPAGE_VERSION:
@@ -1817,11 +1822,19 @@ static void sys_setting_img_15_event_handler(lv_event_t *e)
     lv_obj_t *src = lv_event_get_target(e);
     switch (code) {
     case LV_EVENT_CLICKED: {
-        gui_scr_t *screen = gui_scr_get(GUI_SCREEN_VIDEO_REC);
-        if (screen == NULL) {
-            screen = gui_scr_create(GUI_SCREEN_VIDEO_REC, "video_rec", guider_ui.video_rec, (gui_scr_setup_cb_t)setup_scr_video_rec, (gui_scr_unload_cb_t)unload_scr_video_rec);
+        //custom code video_rec
+        {
+            lv_obj_t *dest = ui->video_rec;
+            /*
+            *   隐藏弹性布局放置18语 label列表
+            *
+            */
+            hide_flex_language_list();
         }
-        ui_load_scr_anim(ui, screen, LV_SCR_LOAD_ANIM_NONE, 0, 0, true, true, false);
+        gui_scr_t *screen = ui_get_scr(GUI_SCREEN_VIDEO_REC);
+        if (screen != NULL) {
+            ui_load_scr_anim(ui, screen, LV_SCR_LOAD_ANIM_NONE, 0, 0, true, true, false);
+        }
     }
     break;
     default:
@@ -1836,11 +1849,19 @@ static void sys_setting_img_14_event_handler(lv_event_t *e)
     lv_obj_t *src = lv_event_get_target(e);
     switch (code) {
     case LV_EVENT_CLICKED: {
-        gui_scr_t *screen = gui_scr_get(GUI_SCREEN_VIDEO_DIR);
-        if (screen == NULL) {
-            screen = gui_scr_create(GUI_SCREEN_VIDEO_DIR, "video_dir", guider_ui.video_dir, (gui_scr_setup_cb_t)setup_scr_video_dir, (gui_scr_unload_cb_t)unload_scr_video_dir);
+        //custom code video_dir
+        {
+            lv_obj_t *dest = ui->video_dir;
+            /*
+            *   隐藏弹性布局放置18语 label列表
+            *
+            */
+            hide_flex_language_list();
         }
-        ui_load_scr_anim(ui, screen, LV_SCR_LOAD_ANIM_NONE, 0, 0, true, true, false);
+        gui_scr_t *screen = ui_get_scr(GUI_SCREEN_VIDEO_DIR);
+        if (screen != NULL) {
+            ui_load_scr_anim(ui, screen, LV_SCR_LOAD_ANIM_NONE, 0, 0, true, true, false);
+        }
     }
     break;
     default:
@@ -1855,11 +1876,19 @@ static void sys_setting_img_16_event_handler(lv_event_t *e)
     lv_obj_t *src = lv_event_get_target(e);
     switch (code) {
     case LV_EVENT_CLICKED: {
-        gui_scr_t *screen = gui_scr_get(GUI_SCREEN_HOME_PAGE);
-        if (screen == NULL) {
-            screen = gui_scr_create(GUI_SCREEN_HOME_PAGE, "home_page", guider_ui.home_page, (gui_scr_setup_cb_t)setup_scr_home_page, (gui_scr_unload_cb_t)unload_scr_home_page);
+        //custom code home_page
+        {
+            lv_obj_t *dest = ui->home_page;
+            /*
+            *   隐藏弹性布局放置18语 label列表
+            *
+            */
+            hide_flex_language_list();
         }
-        ui_load_scr_anim(ui, screen, LV_SCR_LOAD_ANIM_NONE, 0, 0, true, true, false);
+        gui_scr_t *screen = ui_get_scr(GUI_SCREEN_HOME_PAGE);
+        if (screen != NULL) {
+            ui_load_scr_anim(ui, screen, LV_SCR_LOAD_ANIM_NONE, 0, 0, true, true, false);
+        }
     }
     break;
     default:
@@ -2109,11 +2138,10 @@ static void video_photo_event_handler(lv_event_t *e)
     case LV_EVENT_KEY: {
         uint32_t *key = lv_event_get_param(e);
         if (*key == LV_KEY_HOME) {
-            gui_scr_t *screen = gui_scr_get(GUI_SCREEN_HOME_PAGE);
-            if (screen == NULL) {
-                screen = gui_scr_create(GUI_SCREEN_HOME_PAGE, "home_page", guider_ui.home_page, (gui_scr_setup_cb_t)setup_scr_home_page, (gui_scr_unload_cb_t)unload_scr_home_page);
+            gui_scr_t *screen = ui_get_scr(GUI_SCREEN_HOME_PAGE);
+            if (screen != NULL) {
+                ui_load_scr_anim(ui, screen, LV_SCR_LOAD_ANIM_NONE, 0, 0, true, true, false);
             }
-            ui_load_scr_anim(ui, screen, LV_SCR_LOAD_ANIM_NONE, 0, 0, true, true, false);
         }
     }
     break;
@@ -2199,11 +2227,10 @@ static void video_photo_img_15_event_handler(lv_event_t *e)
     lv_obj_t *src = lv_event_get_target(e);
     switch (code) {
     case LV_EVENT_CLICKED: {
-        gui_scr_t *screen = gui_scr_get(GUI_SCREEN_VIDEO_REC);
-        if (screen == NULL) {
-            screen = gui_scr_create(GUI_SCREEN_VIDEO_REC, "video_rec", guider_ui.video_rec, (gui_scr_setup_cb_t)setup_scr_video_rec, (gui_scr_unload_cb_t)unload_scr_video_rec);
+        gui_scr_t *screen = ui_get_scr(GUI_SCREEN_VIDEO_REC);
+        if (screen != NULL) {
+            ui_load_scr_anim(ui, screen, LV_SCR_LOAD_ANIM_NONE, 0, 0, true, true, false);
         }
-        ui_load_scr_anim(ui, screen, LV_SCR_LOAD_ANIM_NONE, 0, 0, true, true, false);
     }
     break;
     default:
@@ -2218,11 +2245,10 @@ static void video_photo_img_home_event_handler(lv_event_t *e)
     lv_obj_t *src = lv_event_get_target(e);
     switch (code) {
     case LV_EVENT_CLICKED: {
-        gui_scr_t *screen = gui_scr_get(GUI_SCREEN_HOME_PAGE);
-        if (screen == NULL) {
-            screen = gui_scr_create(GUI_SCREEN_HOME_PAGE, "home_page", guider_ui.home_page, (gui_scr_setup_cb_t)setup_scr_home_page, (gui_scr_unload_cb_t)unload_scr_home_page);
+        gui_scr_t *screen = ui_get_scr(GUI_SCREEN_HOME_PAGE);
+        if (screen != NULL) {
+            ui_load_scr_anim(ui, screen, LV_SCR_LOAD_ANIM_NONE, 0, 0, true, true, false);
         }
-        ui_load_scr_anim(ui, screen, LV_SCR_LOAD_ANIM_NONE, 0, 0, true, true, false);
     }
     break;
     default:
@@ -2309,8 +2335,8 @@ static void video_photo_view_video_set_event_handler(lv_event_t *e)
             case SUBPAGE_SHOTS:
                 photo_subpage_data.icon_res_id = (void *)GUI_RES_CONTINUOUS_PHOTO_PNG;
                 photo_subpage_data.title = (void *)_("shots");
-                photo_subpage_data.funkey2 = (void *)_("close_s");
-                photo_subpage_data.funkey3 = (void *)_("open_s");
+                photo_subpage_data.funkey2 = (void *)_("close");
+                photo_subpage_data.funkey3 = (void *)_("open");
                 switch (db_select("cyt")) { //处理高亮样式
                 case 1:
                     photo_subpage_data.btn_focus_id = 3;
@@ -2447,8 +2473,8 @@ static void video_photo_view_video_set_event_handler(lv_event_t *e)
             case SUBPAGE_HANDSHAKE:
                 photo_subpage_data.icon_res_id = (void *)GUI_RES_HAND_SHAKE_1_PNG;
                 photo_subpage_data.title = (void *)_("handshake");
-                photo_subpage_data.funkey2 = (void *)_("close_s");
-                photo_subpage_data.funkey3 = (void *)_("open_s");
+                photo_subpage_data.funkey2 = (void *)_("close");
+                photo_subpage_data.funkey3 = (void *)_("open");
                 switch (db_select("sok")) { //处理高亮样式
                 case 1:
                     photo_subpage_data.btn_focus_id = 3;
@@ -2461,7 +2487,7 @@ static void video_photo_view_video_set_event_handler(lv_event_t *e)
             case SUBPAGE_PREVIEW:
                 photo_subpage_data.icon_res_id = (void *)GUI_RES_QUICK_SCAN_PNG;
                 photo_subpage_data.title = (void *)_("preview");
-                photo_subpage_data.funkey1 = (void *)_("close_s");
+                photo_subpage_data.funkey1 = (void *)_("close");
                 photo_subpage_data.funkey2 = (void *)"2s";
                 photo_subpage_data.funkey3 = (void *)"5s";
                 //printf("[chili] %s sub user_photo_preview %d   \n",  __func__, user_photo_preview);
@@ -2480,9 +2506,9 @@ static void video_photo_view_video_set_event_handler(lv_event_t *e)
                 break;
             case SUBPAGE_DATE:
                 photo_subpage_data.icon_res_id = (void *)RES_DATE;
-                photo_subpage_data.title = (void *)_("date_s");
-                photo_subpage_data.funkey2 = (void *)_("close_s");
-                photo_subpage_data.funkey3 = (void *)_("open_s");
+                photo_subpage_data.title = (void *)_("date_p");
+                photo_subpage_data.funkey2 = (void *)_("close");
+                photo_subpage_data.funkey3 = (void *)_("open");
                 switch (db_select("pdat")) { //处理高亮样式
                 case 1:
                     photo_subpage_data.btn_focus_id = 3;
@@ -3262,11 +3288,10 @@ static void video_play_event_handler(lv_event_t *e)
             }
         }
         if (*key == LV_KEY_HOME) {
-            gui_scr_t *screen = gui_scr_get(GUI_SCREEN_HOME_PAGE);
-            if (screen == NULL) {
-                screen = gui_scr_create(GUI_SCREEN_HOME_PAGE, "home_page", guider_ui.home_page, (gui_scr_setup_cb_t)setup_scr_home_page, (gui_scr_unload_cb_t)unload_scr_home_page);
+            gui_scr_t *screen = ui_get_scr(GUI_SCREEN_HOME_PAGE);
+            if (screen != NULL) {
+                ui_load_scr_anim(ui, screen, LV_SCR_LOAD_ANIM_NONE, 0, 0, true, true, false);
             }
-            ui_load_scr_anim(ui, screen, LV_SCR_LOAD_ANIM_NONE, 0, 0, true, true, false);
         }
     }
     break;
@@ -3371,11 +3396,10 @@ static void video_play_imgbtn_2_event_handler(lv_event_t *e)
     lv_obj_t *src = lv_event_get_target(e);
     switch (code) {
     case LV_EVENT_CLICKED: {
-        gui_scr_t *screen = gui_scr_get(GUI_SCREEN_VIDEO_FILE);
-        if (screen == NULL) {
-            screen = gui_scr_create(GUI_SCREEN_VIDEO_FILE, "video_file", guider_ui.video_file, (gui_scr_setup_cb_t)setup_scr_video_file, (gui_scr_unload_cb_t)unload_scr_video_file);
+        gui_scr_t *screen = ui_get_scr(GUI_SCREEN_VIDEO_FILE);
+        if (screen != NULL) {
+            ui_load_scr_anim(ui, screen, LV_SCR_LOAD_ANIM_NONE, 0, 0, true, true, false);
         }
-        ui_load_scr_anim(ui, screen, LV_SCR_LOAD_ANIM_NONE, 0, 0, true, true, false);
     }
     break;
     default:
@@ -3519,11 +3543,10 @@ static void video_file_event_handler(lv_event_t *e)
     case LV_EVENT_KEY: {
         uint32_t *key = lv_event_get_param(e);
         if (*key == LV_KEY_HOME) {
-            gui_scr_t *screen = gui_scr_get(GUI_SCREEN_HOME_PAGE);
-            if (screen == NULL) {
-                screen = gui_scr_create(GUI_SCREEN_HOME_PAGE, "home_page", guider_ui.home_page, (gui_scr_setup_cb_t)setup_scr_home_page, (gui_scr_unload_cb_t)unload_scr_home_page);
+            gui_scr_t *screen = ui_get_scr(GUI_SCREEN_HOME_PAGE);
+            if (screen != NULL) {
+                ui_load_scr_anim(ui, screen, LV_SCR_LOAD_ANIM_NONE, 0, 0, true, true, false);
             }
-            ui_load_scr_anim(ui, screen, LV_SCR_LOAD_ANIM_NONE, 0, 0, true, true, false);
         }
     }
     break;
@@ -3539,11 +3562,10 @@ static void video_file_imgbtn_4_event_handler(lv_event_t *e)
     lv_obj_t *src = lv_event_get_target(e);
     switch (code) {
     case LV_EVENT_CLICKED: {
-        gui_scr_t *screen = gui_scr_get(GUI_SCREEN_VIDEO_DIR);
-        if (screen == NULL) {
-            screen = gui_scr_create(GUI_SCREEN_VIDEO_DIR, "video_dir", guider_ui.video_dir, (gui_scr_setup_cb_t)setup_scr_video_dir, (gui_scr_unload_cb_t)unload_scr_video_dir);
+        gui_scr_t *screen = ui_get_scr(GUI_SCREEN_VIDEO_DIR);
+        if (screen != NULL) {
+            ui_load_scr_anim(ui, screen, LV_SCR_LOAD_ANIM_NONE, 0, 0, true, true, false);
         }
-        ui_load_scr_anim(ui, screen, LV_SCR_LOAD_ANIM_NONE, 0, 0, true, true, false);
     }
     break;
     default:
@@ -3605,7 +3627,6 @@ static void video_file_imgbtn_3_event_handler(lv_event_t *e)
         //custom code video_file
         {
             lv_obj_t *dest = ui->video_file;
-            edit_lock_file(dest, 0);
             if (lv_obj_has_flag(guider_ui.video_file_imgbtn_2, LV_OBJ_FLAG_HIDDEN)) {
                 lv_obj_clear_flag(guider_ui.video_file_imgbtn_2, LV_OBJ_FLAG_HIDDEN);
                 lv_obj_add_flag(guider_ui.video_file_imgbtn_5, LV_OBJ_FLAG_HIDDEN);
@@ -3613,6 +3634,7 @@ static void video_file_imgbtn_3_event_handler(lv_event_t *e)
                 lv_obj_clear_flag(guider_ui.video_file_imgbtn_5, LV_OBJ_FLAG_HIDDEN);
                 lv_obj_add_flag(guider_ui.video_file_imgbtn_2, LV_OBJ_FLAG_HIDDEN);
             }
+            edit_lock_file(dest, 0);
         }
     }
     break;
@@ -3650,7 +3672,7 @@ static void video_file_imgbtn_1_event_handler(lv_event_t *e)
             setup_scr_sys_popwin(&guider_ui);
             gui_msg_init_ui();
             gui_msg_init_events();
-            delete_gui_timelines();
+            gui_timelines_delete();
         }
     }
     break;
@@ -3666,11 +3688,10 @@ static void video_file_imgbtn_5_event_handler(lv_event_t *e)
     lv_obj_t *src = lv_event_get_target(e);
     switch (code) {
     case LV_EVENT_CLICKED: {
-        gui_scr_t *screen = gui_scr_get(GUI_SCREEN_HOME_PAGE);
-        if (screen == NULL) {
-            screen = gui_scr_create(GUI_SCREEN_HOME_PAGE, "home_page", guider_ui.home_page, (gui_scr_setup_cb_t)setup_scr_home_page, (gui_scr_unload_cb_t)unload_scr_home_page);
+        gui_scr_t *screen = ui_get_scr(GUI_SCREEN_HOME_PAGE);
+        if (screen != NULL) {
+            ui_load_scr_anim(ui, screen, LV_SCR_LOAD_ANIM_NONE, 0, 0, true, true, false);
         }
-        ui_load_scr_anim(ui, screen, LV_SCR_LOAD_ANIM_NONE, 0, 0, true, true, false);
     }
     break;
     default:
@@ -3702,7 +3723,7 @@ static void video_file_imgbtn_2_event_handler(lv_event_t *e)
             setup_scr_sys_popwin(&guider_ui);
             gui_msg_init_ui();
             gui_msg_init_events();
-            delete_gui_timelines();
+            gui_timelines_delete();
         }
     }
     break;
@@ -3784,11 +3805,10 @@ static void video_dir_event_handler(lv_event_t *e)
     case LV_EVENT_KEY: {
         uint32_t *key = lv_event_get_param(e);
         if (*key == LV_KEY_HOME) {
-            gui_scr_t *screen = gui_scr_get(GUI_SCREEN_HOME_PAGE);
-            if (screen == NULL) {
-                screen = gui_scr_create(GUI_SCREEN_HOME_PAGE, "home_page", guider_ui.home_page, (gui_scr_setup_cb_t)setup_scr_home_page, (gui_scr_unload_cb_t)unload_scr_home_page);
+            gui_scr_t *screen = ui_get_scr(GUI_SCREEN_HOME_PAGE);
+            if (screen != NULL) {
+                ui_load_scr_anim(ui, screen, LV_SCR_LOAD_ANIM_NONE, 0, 0, true, true, false);
             }
-            ui_load_scr_anim(ui, screen, LV_SCR_LOAD_ANIM_NONE, 0, 0, true, true, false);
         }
     }
     break;
@@ -3804,11 +3824,10 @@ static void video_dir_imgbtn_4_event_handler(lv_event_t *e)
     lv_obj_t *src = lv_event_get_target(e);
     switch (code) {
     case LV_EVENT_CLICKED: {
-        gui_scr_t *screen = gui_scr_get(GUI_SCREEN_HOME_PAGE);
-        if (screen == NULL) {
-            screen = gui_scr_create(GUI_SCREEN_HOME_PAGE, "home_page", guider_ui.home_page, (gui_scr_setup_cb_t)setup_scr_home_page, (gui_scr_unload_cb_t)unload_scr_home_page);
+        gui_scr_t *screen = ui_get_scr(GUI_SCREEN_HOME_PAGE);
+        if (screen != NULL) {
+            ui_load_scr_anim(ui, screen, LV_SCR_LOAD_ANIM_NONE, 0, 0, true, true, false);
         }
-        ui_load_scr_anim(ui, screen, LV_SCR_LOAD_ANIM_NONE, 0, 0, true, true, false);
     }
     break;
     default:
@@ -3856,11 +3875,10 @@ static void video_dir_imgbtn_2_event_handler(lv_event_t *e)
     lv_obj_t *src = lv_event_get_target(e);
     switch (code) {
     case LV_EVENT_CLICKED: {
-        gui_scr_t *screen = gui_scr_get(GUI_SCREEN_HOME_PAGE);
-        if (screen == NULL) {
-            screen = gui_scr_create(GUI_SCREEN_HOME_PAGE, "home_page", guider_ui.home_page, (gui_scr_setup_cb_t)setup_scr_home_page, (gui_scr_unload_cb_t)unload_scr_home_page);
+        gui_scr_t *screen = ui_get_scr(GUI_SCREEN_HOME_PAGE);
+        if (screen != NULL) {
+            ui_load_scr_anim(ui, screen, LV_SCR_LOAD_ANIM_NONE, 0, 0, true, true, false);
         }
-        ui_load_scr_anim(ui, screen, LV_SCR_LOAD_ANIM_NONE, 0, 0, true, true, false);
     }
     break;
     default:

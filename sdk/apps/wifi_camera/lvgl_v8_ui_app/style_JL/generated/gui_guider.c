@@ -8,6 +8,7 @@
 #include "./gui_guider.h"
 #include "./gui_timelines/gui_timelines.h"
 #include "./gui_group/gui_group.h"
+#include "./gui_events/events_init.h"
 
 void ui_load_scr_anim(lv_ui *ui, gui_scr_t *screen, lv_scr_load_anim_t anim_type,	uint32_t time,
                       uint32_t delay, bool is_clean, bool auto_del, bool is_push_satck)
@@ -21,12 +22,12 @@ void ui_load_scr_anim(lv_ui *ui, gui_scr_t *screen, lv_scr_load_anim_t anim_type
         return;
     }
 
+    gui_timelines_delete();
     gui_scr_set_act_anim(screen, ui, anim_type, time, delay, is_clean, auto_del);
 
     if (act_screen != NULL && gui_scr_get_act() == screen) {
         gui_msg_init_ui();
         gui_msg_init_events();
-        delete_gui_timelines();
 
         if (is_push_satck) {
             gui_scr_stack_push(act_screen);
@@ -43,6 +44,52 @@ void ui_scr_stack_pop_anim(lv_ui *ui, lv_scr_load_anim_t anim_type, uint32_t tim
     }
 
     ui_load_scr_anim(ui, screen, anim_type, time, delay, is_clean, auto_del, is_push_satck);
+}
+
+gui_scr_t *ui_get_scr(int32_t scr_id)
+{
+    gui_scr_t *screen = gui_scr_get(scr_id);
+    if (screen != NULL) {
+        return screen;
+    }
+
+    if (scr_id == GUI_SCREEN_USB_SLAVE) {
+        return gui_scr_create(GUI_SCREEN_USB_SLAVE, "usb_slave", guider_ui.usb_slave, (gui_scr_setup_cb_t)setup_scr_usb_slave, (gui_scr_unload_cb_t)unload_scr_usb_slave);
+    }
+    if (scr_id == GUI_SCREEN_VIDEO_REC) {
+        return gui_scr_create(GUI_SCREEN_VIDEO_REC, "video_rec", guider_ui.video_rec, (gui_scr_setup_cb_t)setup_scr_video_rec, (gui_scr_unload_cb_t)unload_scr_video_rec);
+    }
+    if (scr_id == GUI_SCREEN_HOME_PAGE) {
+        return gui_scr_create(GUI_SCREEN_HOME_PAGE, "home_page", guider_ui.home_page, (gui_scr_setup_cb_t)setup_scr_home_page, (gui_scr_unload_cb_t)unload_scr_home_page);
+    }
+    if (scr_id == GUI_SCREEN_SYS_PROMPT) {
+        return gui_scr_create(GUI_SCREEN_SYS_PROMPT, "sys_prompt", guider_ui.sys_prompt, (gui_scr_setup_cb_t)setup_scr_sys_prompt, (gui_scr_unload_cb_t)unload_scr_sys_prompt);
+    }
+    if (scr_id == GUI_SCREEN_SYS_SETTING) {
+        return gui_scr_create(GUI_SCREEN_SYS_SETTING, "sys_setting", guider_ui.sys_setting, (gui_scr_setup_cb_t)setup_scr_sys_setting, (gui_scr_unload_cb_t)unload_scr_sys_setting);
+    }
+    if (scr_id == GUI_SCREEN_VIDEO_PHOTO) {
+        return gui_scr_create(GUI_SCREEN_VIDEO_PHOTO, "video_photo", guider_ui.video_photo, (gui_scr_setup_cb_t)setup_scr_video_photo, (gui_scr_unload_cb_t)unload_scr_video_photo);
+    }
+    if (scr_id == GUI_SCREEN_VIDEO_PLAY) {
+        return gui_scr_create(GUI_SCREEN_VIDEO_PLAY, "video_play", guider_ui.video_play, (gui_scr_setup_cb_t)setup_scr_video_play, (gui_scr_unload_cb_t)unload_scr_video_play);
+    }
+    if (scr_id == GUI_SCREEN_VIDEO_FILE) {
+        return gui_scr_create(GUI_SCREEN_VIDEO_FILE, "video_file", guider_ui.video_file, (gui_scr_setup_cb_t)setup_scr_video_file, (gui_scr_unload_cb_t)unload_scr_video_file);
+    }
+    if (scr_id == GUI_SCREEN_VIDEO_DIR) {
+        return gui_scr_create(GUI_SCREEN_VIDEO_DIR, "video_dir", guider_ui.video_dir, (gui_scr_setup_cb_t)setup_scr_video_dir, (gui_scr_unload_cb_t)unload_scr_video_dir);
+    }
+    if (scr_id == GUI_SCREEN_CAR_PARKING) {
+        return gui_scr_create(GUI_SCREEN_CAR_PARKING, "car_parking", guider_ui.car_parking, (gui_scr_setup_cb_t)setup_scr_car_parking, (gui_scr_unload_cb_t)unload_scr_car_parking);
+    }
+    if (scr_id == GUI_SCREEN_LINE_DRIFT) {
+        return gui_scr_create(GUI_SCREEN_LINE_DRIFT, "line_drift", guider_ui.line_drift, (gui_scr_setup_cb_t)setup_scr_line_drift, (gui_scr_unload_cb_t)unload_scr_line_drift);
+    }
+    if (scr_id == GUI_SCREEN_SYS_POPWIN) {
+        return gui_scr_create(GUI_SCREEN_SYS_POPWIN, "sys_popwin", guider_ui.sys_popwin, (gui_scr_setup_cb_t)setup_scr_sys_popwin, (gui_scr_unload_cb_t)unload_scr_sys_popwin);
+    }
+    return NULL;
 }
 
 void ui_init_style(lv_style_t *style)
@@ -75,14 +122,17 @@ void setup_ui(lv_ui *ui)
     lv_i18n_init(lv_i18n_language_pack);
     lv_i18n_set_locale(lv_i18n_get_default_locale());
     init_gui_fonts();
+    ui_style_init();
     init_scr_del_flag(ui);
     gui_scr_t *scr = gui_scr_create(GUI_SCREEN_VIDEO_REC, "video_rec", ui->video_rec, (gui_scr_setup_cb_t)setup_scr_video_rec, (gui_scr_unload_cb_t)unload_scr_video_rec);
     ui_load_scr_anim(ui, scr, LV_SCR_LOAD_ANIM_NONE, 0, 0, false, false, false);
+    events_init(ui);
     gui_group_init();
+    ui_scr_manager_init();
 #if LV_USE_MSG
     gui_msg_init(ui);
 #endif
-    init_gui_timelines(ui);
+    gui_timelines_init(ui);
 }
 void clock_count_with_year(int *year, int *month, int *day, int *hour, int *min, int *sec)
 {

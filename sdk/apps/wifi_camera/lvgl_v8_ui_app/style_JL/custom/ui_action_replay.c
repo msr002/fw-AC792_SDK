@@ -404,13 +404,18 @@ static void cfun_dec_delete_all()
     start_app(&it);
 }
 
+/* extern int get_total_file_num(); */
+extern int get_cur_num();
+extern int get_edit_flag();
+
 void edit_lock_file(lv_obj_t *dest, int dir)
 {
+    uint32_t  num;
     lv_obj_t *src = dest;
     uint32_t child_cnt = 0;
     uint32_t start_index = 0;
     no_select = 1; //清除上一次的标记
-
+    printf("%s, %d", __func__, __LINE__);
     if (dir) {
         src = dest;
         child_cnt = lv_obj_get_child_cnt(src);
@@ -420,21 +425,46 @@ void edit_lock_file(lv_obj_t *dest, int dir)
         child_cnt = lv_obj_get_child_cnt(src);
     }
     printf("child_cnt %d\n", child_cnt);
-    for (uint32_t i = start_index; i < child_cnt; i++) {
+    printf("cur num %d\n", get_cur_num());
+    num = get_cur_num();
+
+    for (uint32_t i = 0; i < child_cnt; i++) {
+        lv_obj_t *child1 = lv_obj_get_child(src, i); // 获取第i个子控件
+        if (child1) {
+            lv_obj_t *edit_obj1 = lv_obj_get_child(child1, 0);
+            lv_obj_clear_state(edit_obj1, LV_STATE_CHECKED);
+            lv_obj_add_flag(edit_obj1, LV_OBJ_FLAG_HIDDEN);
+            /* lv_obj_add_flag(child1, LV_OBJ_FLAG_CLICKABLE); */
+        }
+    }
+
+    for (uint32_t i = start_index; i < num; i++) {
         lv_obj_t *child = lv_obj_get_child(src, i); // 获取第i个子控件}
         if (child) {
             lv_obj_t *edit_obj = lv_obj_get_child(child, 0);
-            if (__this->edit_sel[i] != 0) {
-                __this->edit_sel[i] = 0;  //清除上一次的标记
+
+            if (lv_obj_has_flag(guider_ui.video_file_imgbtn_2, LV_OBJ_FLAG_HIDDEN)) {
+                if (__this->edit_sel[i] != 0) {
+                    __this->edit_sel[i] = 0;  //清除上一次的标记
+                }
             }
+
             lv_obj_clear_state(edit_obj, LV_STATE_CHECKED);
             bool is_hidden = lv_obj_has_flag(edit_obj, LV_OBJ_FLAG_HIDDEN);
+            /* printf("is hidden:%d, %d", is_hidden, get_edit_flag()); */
             if (is_hidden) {
-                // 控件是隐藏的
-                lv_obj_clear_flag(edit_obj, LV_OBJ_FLAG_HIDDEN);
-                lv_obj_clear_flag(child, LV_OBJ_FLAG_CLICKABLE);
+                /* 控件是隐藏的 */
+                if (!lv_obj_has_flag(guider_ui.video_file_imgbtn_2, LV_OBJ_FLAG_HIDDEN)) {
+                    lv_obj_clear_flag(edit_obj, LV_OBJ_FLAG_HIDDEN);
+                    lv_obj_clear_flag(child, LV_OBJ_FLAG_CLICKABLE);
+                    if (__this->edit_sel[i]) {
+                        lv_obj_add_state(edit_obj, LV_STATE_CHECKED);
+                        no_select = 0; //清除上一次的标记
+                        /* __this->edit_sel[i] = 0;  //清除上一次的标记 */
+                    }
+                }
             } else {
-                // 控件不是隐藏的
+                /* 控件不是隐藏的 */
                 lv_obj_add_flag(edit_obj, LV_OBJ_FLAG_HIDDEN);
                 lv_obj_add_flag(child, LV_OBJ_FLAG_CLICKABLE);
             }

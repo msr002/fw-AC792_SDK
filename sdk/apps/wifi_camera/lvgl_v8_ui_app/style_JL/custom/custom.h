@@ -12,7 +12,9 @@ extern "C" {
 #include "lvgl.h"
 #include <time.h>
 #include "../generated/gui_events/screen_handler.h"
+#include "../generated/gui_timelines/gui_timelines.h"
 #include "sim_database.h"//仿真专用数据库
+#include "multi_language.h"//多国语言
 #if !LV_USE_GUIBUILDER_SIMULATOR
 #include "key_event.h"
 #include "sys_time.h"
@@ -83,10 +85,10 @@ enum {//子页面功能键
     SUBPAGE_FUNKEY7
 };
 
-enum {//语言
+/* enum {   //语言
     LANG_CHINESE_SIMP = 1,
     LANG_ENGLISH
-};
+}; */
 
 struct sysmenu_subpage_data {
     void *icon_res_id;//子页面图标资源id
