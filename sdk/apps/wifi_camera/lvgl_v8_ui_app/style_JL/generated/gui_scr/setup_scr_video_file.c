@@ -228,6 +228,7 @@ lv_obj_t *setup_scr_video_file(lv_ui *ui)
     //Set style for video_file_lbl_path. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
     lv_obj_add_style(ui->video_file_lbl_path, &gui_label_main_default_style, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_color(ui->video_file_lbl_path, lv_color_make(0xFF, 0xFF, 0xFF), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui->video_file_lbl_path, &lv_font_montserratMedium_22, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_pos(ui->video_file_lbl_path, 60, 10);
     lv_obj_set_size(ui->video_file_lbl_path, 666, 38);
     lv_obj_set_scrollbar_mode(ui->video_file_lbl_path, LV_SCROLLBAR_MODE_OFF);
@@ -256,6 +257,7 @@ lv_obj_t *setup_scr_video_file(lv_ui *ui)
     lv_obj_set_style_shadow_opa(ui->video_file_lbl_1, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_border_opa(ui->video_file_lbl_1, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_outline_opa(ui->video_file_lbl_1, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui->video_file_lbl_1, &lv_font_montserratMedium_18, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_pos(ui->video_file_lbl_1, 0, 210);
     lv_obj_set_size(ui->video_file_lbl_1, 80, 78);
     lv_obj_set_scrollbar_mode(ui->video_file_lbl_1, LV_SCROLLBAR_MODE_OFF);

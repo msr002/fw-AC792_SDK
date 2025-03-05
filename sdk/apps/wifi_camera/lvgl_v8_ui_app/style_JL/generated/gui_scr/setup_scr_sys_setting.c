@@ -714,7 +714,7 @@ lv_obj_t *setup_scr_sys_setting(lv_ui *ui)
     lv_obj_set_scrollbar_mode(ui->sys_setting_view_carmun, LV_SCROLLBAR_MODE_OFF);
     //Write codes sys_setting_ddlist_1
     ui->sys_setting_ddlist_1 = lv_dropdown_create(ui->sys_setting_view_carmun);
-    lv_dropdown_set_options(ui->sys_setting_ddlist_1, "list1\nlist2\nlist3");
+    lv_dropdown_set_options(ui->sys_setting_ddlist_1, "津\n晋\n冀\n蒙\n辽\n吉\n黑\n苏\n浙\n皖\n闽\n赣\n鲁\n豫\n鄂\n湘\n粤\n桂\n琼\n川\n贵\n滇\n渝\n藏\n陕\n甘\n青\n宁\n新\n台\n港\n澳");
     lv_dropdown_set_dir(ui->sys_setting_ddlist_1, LV_DIR_BOTTOM);
     lv_dropdown_set_symbol(ui->sys_setting_ddlist_1, LV_SYMBOL_DOWN);
     lv_dropdown_set_symbol(ui->sys_setting_ddlist_1, NULL);
@@ -724,21 +724,25 @@ lv_obj_t *setup_scr_sys_setting(lv_ui *ui)
     lv_obj_add_style(ui->sys_setting_ddlist_1, &gui_ddlist_main_default_style, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_border_color(ui->sys_setting_ddlist_1, lv_color_make(0x00, 0x00, 0x00), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_border_width(ui->sys_setting_ddlist_1, 2, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui->sys_setting_ddlist_1, &lv_font_FangZhengKaiTiJianTi_1_48, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_pad_top(ui->sys_setting_ddlist_1, 8, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     //Set style for sys_setting_ddlist_1. Part: LV_PART_MAIN, State: LV_STATE_FOCUS_KEY
     lv_obj_add_style(ui->sys_setting_ddlist_1, &gui_ddlist_main_focus_key_style, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
     lv_obj_set_style_outline_width(ui->sys_setting_ddlist_1, 4, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+    lv_obj_set_style_text_font(ui->sys_setting_ddlist_1, &lv_font_FangZhengKaiTiJianTi_1_48, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
 
     //Set style state: LV_STATE_CHECKED for style_sys_setting_ddlist_1_extra_list_selected_checked
     static lv_style_t style_sys_setting_ddlist_1_extra_list_selected_checked;
     ui_init_style(&style_sys_setting_ddlist_1_extra_list_selected_checked);
+    lv_style_set_text_font(&style_sys_setting_ddlist_1_extra_list_selected_checked, &lv_font_FangZhengKaiTiJianTi_1_48);
     lv_obj_add_style(lv_dropdown_get_list(ui->sys_setting_ddlist_1), &gui_ddlist_selected_checked_style, LV_PART_SELECTED | LV_STATE_CHECKED);
     lv_obj_add_style(lv_dropdown_get_list(ui->sys_setting_ddlist_1), &style_sys_setting_ddlist_1_extra_list_selected_checked, LV_PART_SELECTED | LV_STATE_CHECKED);
 
     //Set style state: LV_STATE_DEFAULT for style_sys_setting_ddlist_1_extra_list_main_default
     static lv_style_t style_sys_setting_ddlist_1_extra_list_main_default;
     ui_init_style(&style_sys_setting_ddlist_1_extra_list_main_default);
+    lv_style_set_text_font(&style_sys_setting_ddlist_1_extra_list_main_default, &lv_font_FangZhengKaiTiJianTi_1_48);
     lv_style_set_max_height(&style_sys_setting_ddlist_1_extra_list_main_default, 210);
     lv_obj_add_style(lv_dropdown_get_list(ui->sys_setting_ddlist_1), &gui_ddlist_dropdown_list_default_style, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_add_style(lv_dropdown_get_list(ui->sys_setting_ddlist_1), &style_sys_setting_ddlist_1_extra_list_main_default, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -753,7 +757,7 @@ lv_obj_t *setup_scr_sys_setting(lv_ui *ui)
     lv_obj_set_scrollbar_mode(ui->sys_setting_ddlist_1, LV_SCROLLBAR_MODE_OFF);
     //Write codes sys_setting_ddlist_2
     ui->sys_setting_ddlist_2 = lv_dropdown_create(ui->sys_setting_view_carmun);
-    lv_dropdown_set_options(ui->sys_setting_ddlist_2, "list1\nlist2\nlist3");
+    lv_dropdown_set_options(ui->sys_setting_ddlist_2, "A\nB\nC\nD\nE\nF\nG\nH\nI\nJ\nK\nL\nM\nN\nO\nP\nQ\nR\nS\nT\nU\nV\nW\nX\nY\nZ");
     lv_dropdown_set_dir(ui->sys_setting_ddlist_2, LV_DIR_BOTTOM);
     lv_dropdown_set_symbol(ui->sys_setting_ddlist_2, LV_SYMBOL_DOWN);
     lv_dropdown_set_symbol(ui->sys_setting_ddlist_2, NULL);
@@ -763,21 +767,25 @@ lv_obj_t *setup_scr_sys_setting(lv_ui *ui)
     lv_obj_add_style(ui->sys_setting_ddlist_2, &gui_ddlist_main_default_style, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_border_color(ui->sys_setting_ddlist_2, lv_color_make(0x00, 0x00, 0x00), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_border_width(ui->sys_setting_ddlist_2, 2, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui->sys_setting_ddlist_2, &lv_font_montserratMedium_48, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_pad_top(ui->sys_setting_ddlist_2, 8, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     //Set style for sys_setting_ddlist_2. Part: LV_PART_MAIN, State: LV_STATE_FOCUS_KEY
     lv_obj_add_style(ui->sys_setting_ddlist_2, &gui_ddlist_main_focus_key_style, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
     lv_obj_set_style_outline_width(ui->sys_setting_ddlist_2, 4, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+    lv_obj_set_style_text_font(ui->sys_setting_ddlist_2, &lv_font_montserratMedium_49, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
 
     //Set style state: LV_STATE_CHECKED for style_sys_setting_ddlist_2_extra_list_selected_checked
     static lv_style_t style_sys_setting_ddlist_2_extra_list_selected_checked;
     ui_init_style(&style_sys_setting_ddlist_2_extra_list_selected_checked);
+    lv_style_set_text_font(&style_sys_setting_ddlist_2_extra_list_selected_checked, &lv_font_montserratMedium_48);
     lv_obj_add_style(lv_dropdown_get_list(ui->sys_setting_ddlist_2), &gui_ddlist_selected_checked_style, LV_PART_SELECTED | LV_STATE_CHECKED);
     lv_obj_add_style(lv_dropdown_get_list(ui->sys_setting_ddlist_2), &style_sys_setting_ddlist_2_extra_list_selected_checked, LV_PART_SELECTED | LV_STATE_CHECKED);
 
     //Set style state: LV_STATE_DEFAULT for style_sys_setting_ddlist_2_extra_list_main_default
     static lv_style_t style_sys_setting_ddlist_2_extra_list_main_default;
     ui_init_style(&style_sys_setting_ddlist_2_extra_list_main_default);
+    lv_style_set_text_font(&style_sys_setting_ddlist_2_extra_list_main_default, &lv_font_montserratMedium_48);
     lv_style_set_max_height(&style_sys_setting_ddlist_2_extra_list_main_default, 210);
     lv_obj_add_style(lv_dropdown_get_list(ui->sys_setting_ddlist_2), &gui_ddlist_dropdown_list_default_style, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_add_style(lv_dropdown_get_list(ui->sys_setting_ddlist_2), &style_sys_setting_ddlist_2_extra_list_main_default, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -792,7 +800,7 @@ lv_obj_t *setup_scr_sys_setting(lv_ui *ui)
     lv_obj_set_scrollbar_mode(ui->sys_setting_ddlist_2, LV_SCROLLBAR_MODE_OFF);
     //Write codes sys_setting_ddlist_3
     ui->sys_setting_ddlist_3 = lv_dropdown_create(ui->sys_setting_view_carmun);
-    lv_dropdown_set_options(ui->sys_setting_ddlist_3, "list1\nlist2\nlist3");
+    lv_dropdown_set_options(ui->sys_setting_ddlist_3, "0\n1\n2\n3\n4\n5\n6\n7\n8\n9");
     lv_dropdown_set_dir(ui->sys_setting_ddlist_3, LV_DIR_BOTTOM);
     lv_dropdown_set_symbol(ui->sys_setting_ddlist_3, LV_SYMBOL_DOWN);
     lv_dropdown_set_symbol(ui->sys_setting_ddlist_3, NULL);
@@ -826,7 +834,7 @@ lv_obj_t *setup_scr_sys_setting(lv_ui *ui)
     lv_obj_set_scrollbar_mode(ui->sys_setting_ddlist_3, LV_SCROLLBAR_MODE_OFF);
     //Write codes sys_setting_ddlist_4
     ui->sys_setting_ddlist_4 = lv_dropdown_create(ui->sys_setting_view_carmun);
-    lv_dropdown_set_options(ui->sys_setting_ddlist_4, "list1\nlist2\nlist3");
+    lv_dropdown_set_options(ui->sys_setting_ddlist_4, "0\n1\n2\n3\n4\n5\n6\n7\n8\n9");
     lv_dropdown_set_dir(ui->sys_setting_ddlist_4, LV_DIR_BOTTOM);
     lv_dropdown_set_symbol(ui->sys_setting_ddlist_4, LV_SYMBOL_DOWN);
     lv_dropdown_set_symbol(ui->sys_setting_ddlist_4, NULL);
@@ -860,7 +868,7 @@ lv_obj_t *setup_scr_sys_setting(lv_ui *ui)
     lv_obj_set_scrollbar_mode(ui->sys_setting_ddlist_4, LV_SCROLLBAR_MODE_OFF);
     //Write codes sys_setting_ddlist_5
     ui->sys_setting_ddlist_5 = lv_dropdown_create(ui->sys_setting_view_carmun);
-    lv_dropdown_set_options(ui->sys_setting_ddlist_5, "list1\nlist2\nlist3");
+    lv_dropdown_set_options(ui->sys_setting_ddlist_5, "0\n1\n2\n3\n4\n5\n6\n7\n8\n9");
     lv_dropdown_set_dir(ui->sys_setting_ddlist_5, LV_DIR_BOTTOM);
     lv_dropdown_set_symbol(ui->sys_setting_ddlist_5, LV_SYMBOL_DOWN);
     lv_dropdown_set_symbol(ui->sys_setting_ddlist_5, NULL);
@@ -894,7 +902,7 @@ lv_obj_t *setup_scr_sys_setting(lv_ui *ui)
     lv_obj_set_scrollbar_mode(ui->sys_setting_ddlist_5, LV_SCROLLBAR_MODE_OFF);
     //Write codes sys_setting_ddlist_6
     ui->sys_setting_ddlist_6 = lv_dropdown_create(ui->sys_setting_view_carmun);
-    lv_dropdown_set_options(ui->sys_setting_ddlist_6, "list1\nlist2\nlist3");
+    lv_dropdown_set_options(ui->sys_setting_ddlist_6, "0\n1\n2\n3\n4\n5\n6\n7\n8\n9");
     lv_dropdown_set_dir(ui->sys_setting_ddlist_6, LV_DIR_BOTTOM);
     lv_dropdown_set_symbol(ui->sys_setting_ddlist_6, LV_SYMBOL_DOWN);
     lv_dropdown_set_symbol(ui->sys_setting_ddlist_6, NULL);
@@ -928,7 +936,7 @@ lv_obj_t *setup_scr_sys_setting(lv_ui *ui)
     lv_obj_set_scrollbar_mode(ui->sys_setting_ddlist_6, LV_SCROLLBAR_MODE_OFF);
     //Write codes sys_setting_ddlist_7
     ui->sys_setting_ddlist_7 = lv_dropdown_create(ui->sys_setting_view_carmun);
-    lv_dropdown_set_options(ui->sys_setting_ddlist_7, "list1\nlist2\nlist3");
+    lv_dropdown_set_options(ui->sys_setting_ddlist_7, "0\n1\n2\n3\n4\n5\n6\n7\n8\n9");
     lv_dropdown_set_dir(ui->sys_setting_ddlist_7, LV_DIR_BOTTOM);
     lv_dropdown_set_symbol(ui->sys_setting_ddlist_7, LV_SYMBOL_DOWN);
     lv_dropdown_set_symbol(ui->sys_setting_ddlist_7, NULL);

@@ -92,6 +92,26 @@ gui_scr_t *ui_get_scr(int32_t scr_id)
     return NULL;
 }
 
+gui_scr_t *ui_get_setup_scr(int32_t scr_id)
+{
+    gui_scr_t *screen = ui_get_scr(scr_id);
+    if (screen == NULL) {
+        return NULL;
+    }
+
+    if (screen->scr == NULL || lv_obj_is_valid(screen->scr) == false) {
+        if (screen->setup_cb != NULL) {
+            screen->scr = screen->setup_cb(&guider_ui);
+            screen->is_del = false;
+            if (screen->scr == NULL || lv_obj_is_valid(screen->scr) == false) {
+                screen->is_del = true;
+                return NULL;
+            }
+        }
+    }
+    return screen;
+}
+
 void ui_init_style(lv_style_t *style)
 {
     if (style->prop_cnt > 1) {

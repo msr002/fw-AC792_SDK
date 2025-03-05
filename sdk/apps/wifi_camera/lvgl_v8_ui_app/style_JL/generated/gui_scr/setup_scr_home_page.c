@@ -146,6 +146,7 @@ lv_obj_t *setup_scr_home_page(lv_ui *ui)
 
     //Set style for home_page_digitclock_1. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
     lv_obj_add_style(ui->home_page_digitclock_1, &gui_digitclock_main_default_style, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui->home_page_digitclock_1, &lv_font_FangZhengKaiTiJianTi_1_54, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_pos(ui->home_page_digitclock_1, 92, 14);
     lv_obj_set_size(ui->home_page_digitclock_1, 613, 75);
     //Write codes home_page_lbl_3

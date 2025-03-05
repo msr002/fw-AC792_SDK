@@ -103,6 +103,8 @@ extern lv_subject_t *gui_msg_get_subject(int32_t msg_id);
 extern gui_msg_sub_t *gui_msg_get_sub(int32_t msg_id);
 extern gui_msg_sub_t *gui_msg_create_sub(int32_t msg_id);
 extern gui_msg_data_t *gui_msg_get_data();
+extern bool gui_msg_has_observer(lv_subject_t *subject, lv_observer_cb_t cb, lv_obj_t *obj, void *user_data);
+extern void gui_msg_setup_component(bool subscribe_enabled, bool event_enabled, lv_subject_t *subject, lv_obj_t *target_obj, gui_msg_data_t *msg_data, lv_observer_cb_t observer_cb, int32_t msg_id, gui_msg_action_t msg_action, gui_msg_data_type_t data_type, lv_event_cb_t event_cb);
 
 extern void gui_msg_set_control_state_by_int32_cb(lv_observer_t *observer, lv_subject_t *subject);
 extern void gui_msg_set_flag_by_int32_cb(lv_observer_t *observer, lv_subject_t *subject);

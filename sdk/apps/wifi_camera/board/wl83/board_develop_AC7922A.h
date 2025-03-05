@@ -121,7 +121,7 @@
 #define TCFG_SD0_DET_MODE                   SD_CLK_DECT    //检测模式:命令检测，时钟检测，IO检测
 #define TCFG_SD0_DET_IO                     IO_PORTD_01    //SD_DET_MODE为SD_IO_DECT时有效
 #define TCFG_SD0_DET_IO_LEVEL               0              //IO检卡上线的电平(0/1),SD_DET_MODE为SD_IO_DECT时有效
-#define TCFG_SD0_CLK                        24000000       //SDIO时钟
+#define TCFG_SD0_CLK                        40000000       //SDIO时钟
 #define TCFG_SD0_HD_LEVEL                   3              //强驱等级
 #define TCFG_SD0_POWER_ENABLE               0
 #define TCFG_SD0_PORTS_GROUP                'B'            //'A''B''C''D'表示使用固定组IO
@@ -140,8 +140,8 @@
 #define TCFG_SD1_DET_MODE                   SD_CMD_DECT    //检测模式:命令检测，时钟检测，IO检测
 #define TCFG_SD1_DET_IO                     -1             //SD_DET_MODE为SD_IO_DECT时有效
 #define TCFG_SD1_DET_IO_LEVEL               0              //IO检卡上线的电平(0/1),SD_DET_MODE为SD_IO_DECT时有效
-#define TCFG_SD1_CLK                        24000000       //SDIO时钟
-#define TCFG_SD1_HD_LEVEL                   0              //强驱等级
+#define TCFG_SD1_CLK                        40000000       //SDIO时钟
+#define TCFG_SD1_HD_LEVEL                   3              //强驱等级
 #define TCFG_SD1_POWER_ENABLE               0
 #define TCFG_SD1_PORTS_GROUP                'A'            //'A''B'表示使用固定组IO
 #define TCFG_SD1_PORTS                      {\
@@ -825,7 +825,7 @@
 #endif
 
 #define TCFG_LOWPOWER_VDDIOW_LEVEL          VDDIOW_VOL_200V//弱VDDIO电压档位
-#define TCFG_LOWPOWER_VDC14_LEVEL           DCVDD_VOL_155V
+#define TCFG_LOWPOWER_VDC14_LEVEL           DCVDD_VOL_145V
 #define TCFG_LOWPOWER_FUNCTION              LOWPOWER_CLOSE
 #define TCFG_LOWPOWER_OSC_TYPE              OSC_TYPE_LRC
 

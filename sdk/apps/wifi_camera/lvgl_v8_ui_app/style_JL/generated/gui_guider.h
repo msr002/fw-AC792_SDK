@@ -363,6 +363,7 @@ void ui_scr_stack_pop_anim(lv_ui *ui, lv_scr_load_anim_t anim_type, uint32_t tim
                            bool is_clean, bool auto_del, bool is_push_satck);
 
 gui_scr_t *ui_get_scr(int32_t scr_id);
+gui_scr_t *ui_get_setup_scr(int32_t scr_id);
 void ui_init_style(lv_style_t *style);
 void init_scr_del_flag(lv_ui *ui);
 void setup_ui(lv_ui *ui);

@@ -31,6 +31,7 @@ lv_obj_t *setup_scr_line_drift(lv_ui *ui)
     //Set style for line_drift_lbl_3. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
     lv_obj_add_style(ui->line_drift_lbl_3, &gui_label_main_default_style, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_opa(ui->line_drift_lbl_3, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui->line_drift_lbl_3, &lv_font_FangZhengKaiTiJianTi_1_24, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_pos(ui->line_drift_lbl_3, 50, 193);
     lv_obj_set_size(ui->line_drift_lbl_3, 190, 60);
     lv_obj_set_scrollbar_mode(ui->line_drift_lbl_3, LV_SCROLLBAR_MODE_OFF);

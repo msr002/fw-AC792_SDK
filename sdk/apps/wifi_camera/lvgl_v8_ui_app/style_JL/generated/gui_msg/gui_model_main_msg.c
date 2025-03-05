@@ -378,14 +378,11 @@ void gui_model_main_msg_init_events()
     lv_subject_t *subject_show_home_btn = gui_msg_get_subject(GUI_MODEL_MAIN_MSG_ID_SHOW_HOME_BTN);
     lv_subject_t *subject_hide_home_btn = gui_msg_get_subject(GUI_MODEL_MAIN_MSG_ID_HIDE_HOME_BTN);
     if (!guider_ui.home_page_del) {
-        gui_model_main_msg_battery_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
-        lv_subject_add_observer_obj(subject_battery, gui_model_main_msg_home_page_img_1_set_img_path_cb, guider_ui.home_page_img_1, &guider_msg_data);
+        gui_msg_setup_component(true, false, subject_battery, guider_ui.home_page_img_1, &guider_msg_data, gui_model_main_msg_home_page_img_1_set_img_path_cb, GUI_MODEL_MAIN_MSG_ID_BATTERY, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
 
-        gui_model_main_msg_systime_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_TIME);
-        lv_subject_add_observer_obj(subject_systime, gui_model_main_msg_home_page_digitclock_1_set_digit_clock_time_cb, guider_ui.home_page_digitclock_1, &guider_msg_data);
+        gui_msg_setup_component(true, false, subject_systime, guider_ui.home_page_digitclock_1, &guider_msg_data, gui_model_main_msg_home_page_digitclock_1_set_digit_clock_time_cb, GUI_MODEL_MAIN_MSG_ID_SYSTIME, GUI_MSG_ACCESS_GET, VALUE_TIME, NULL);
 
-        gui_model_main_msg_weekday_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_STRING);
-        lv_subject_add_observer_obj(subject_weekday, gui_msg_set_label_text_by_string_cb, guider_ui.home_page_lbl_1, &guider_msg_data);
+        gui_msg_setup_component(true, false, subject_weekday, guider_ui.home_page_lbl_1, &guider_msg_data, gui_msg_set_label_text_by_string_cb, GUI_MODEL_MAIN_MSG_ID_WEEKDAY, GUI_MSG_ACCESS_GET, VALUE_STRING, NULL);
 
 
         for (int i = 0; i < 13; i++) {
@@ -403,8 +400,7 @@ void gui_model_main_msg_init_events()
         systime_timer_enable = true;
     }
     if (!guider_ui.sys_prompt_del) {
-        gui_model_main_msg_sys_prompt_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_STRING);
-        lv_subject_add_observer_obj(subject_sys_prompt, gui_msg_set_label_text_by_string_cb, guider_ui.sys_prompt_lbl_warn, &guider_msg_data);
+        gui_msg_setup_component(true, false, subject_sys_prompt, guider_ui.sys_prompt_lbl_warn, &guider_msg_data, gui_msg_set_label_text_by_string_cb, GUI_MODEL_MAIN_MSG_ID_SYS_PROMPT, GUI_MSG_ACCESS_GET, VALUE_STRING, NULL);
 
 
         for (int i = 0; i < 13; i++) {
@@ -414,8 +410,7 @@ void gui_model_main_msg_init_events()
         }
     }
     if (!guider_ui.sys_popwin_del) {
-        gui_model_main_msg_sys_prompt_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_STRING);
-        lv_subject_add_observer_obj(subject_sys_prompt, gui_msg_set_label_text_by_string_cb, guider_ui.sys_popwin_lbl_1, &guider_msg_data);
+        gui_msg_setup_component(true, false, subject_sys_prompt, guider_ui.sys_popwin_lbl_1, &guider_msg_data, gui_msg_set_label_text_by_string_cb, GUI_MODEL_MAIN_MSG_ID_SYS_PROMPT, GUI_MSG_ACCESS_GET, VALUE_STRING, NULL);
 
 
         for (int i = 0; i < 13; i++) {
@@ -425,19 +420,14 @@ void gui_model_main_msg_init_events()
         }
     }
     if (!guider_ui.video_rec_del) {
-        gui_model_main_msg_sd_icon_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
-        lv_subject_add_observer_obj(subject_sd_icon, gui_model_main_msg_video_rec_img_9_set_img_path_cb, guider_ui.video_rec_img_9, &guider_msg_data);
+        gui_msg_setup_component(true, false, subject_sd_icon, guider_ui.video_rec_img_9, &guider_msg_data, gui_model_main_msg_video_rec_img_9_set_img_path_cb, GUI_MODEL_MAIN_MSG_ID_SD_ICON, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
 
-        gui_model_main_msg_battery_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
-        lv_subject_add_observer_obj(subject_battery, gui_model_main_msg_video_rec_img_12_set_img_path_cb, guider_ui.video_rec_img_12, &guider_msg_data);
+        gui_msg_setup_component(true, false, subject_battery, guider_ui.video_rec_img_12, &guider_msg_data, gui_model_main_msg_video_rec_img_12_set_img_path_cb, GUI_MODEL_MAIN_MSG_ID_BATTERY, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
 
-        gui_model_main_msg_systime_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_TIME);
-        lv_subject_add_observer_obj(subject_systime, gui_model_main_msg_video_rec_digitclock_2_set_digit_clock_time_cb, guider_ui.video_rec_digitclock_2, &guider_msg_data);
+        gui_msg_setup_component(true, false, subject_systime, guider_ui.video_rec_digitclock_2, &guider_msg_data, gui_model_main_msg_video_rec_digitclock_2_set_digit_clock_time_cb, GUI_MODEL_MAIN_MSG_ID_SYSTIME, GUI_MSG_ACCESS_GET, VALUE_TIME, NULL);
 
-        gui_model_main_msg_hide_win_switch_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
-        lv_subject_add_observer_obj(subject_hide_win_switch, gui_msg_set_flag_by_int32_cb, guider_ui.video_rec_imgbtn_sw_window, &guider_msg_data);
-        gui_model_main_msg_show_win_switch_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
-        lv_subject_add_observer_obj(subject_show_win_switch, gui_msg_set_clear_flag_by_int32_cb, guider_ui.video_rec_imgbtn_sw_window, &guider_msg_data);
+        gui_msg_setup_component(true, false, subject_hide_win_switch, guider_ui.video_rec_imgbtn_sw_window, &guider_msg_data, gui_msg_set_flag_by_int32_cb, GUI_MODEL_MAIN_MSG_ID_HIDE_WIN_SWITCH, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
+        gui_msg_setup_component(true, false, subject_show_win_switch, guider_ui.video_rec_imgbtn_sw_window, &guider_msg_data, gui_msg_set_clear_flag_by_int32_cb, GUI_MODEL_MAIN_MSG_ID_SHOW_WIN_SWITCH, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
 
 
         for (int i = 0; i < 13; i++) {
@@ -461,19 +451,14 @@ void gui_model_main_msg_init_events()
         systime_timer_enable = true;
     }
     if (!guider_ui.video_photo_del) {
-        gui_model_main_msg_battery_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
-        lv_subject_add_observer_obj(subject_battery, gui_model_main_msg_video_photo_img_12_set_img_path_cb, guider_ui.video_photo_img_12, &guider_msg_data);
+        gui_msg_setup_component(true, false, subject_battery, guider_ui.video_photo_img_12, &guider_msg_data, gui_model_main_msg_video_photo_img_12_set_img_path_cb, GUI_MODEL_MAIN_MSG_ID_BATTERY, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
 
-        gui_model_main_msg_systime_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_TIME);
-        lv_subject_add_observer_obj(subject_systime, gui_model_main_msg_video_photo_digitclock_1_set_digit_clock_time_cb, guider_ui.video_photo_digitclock_1, &guider_msg_data);
+        gui_msg_setup_component(true, false, subject_systime, guider_ui.video_photo_digitclock_1, &guider_msg_data, gui_model_main_msg_video_photo_digitclock_1_set_digit_clock_time_cb, GUI_MODEL_MAIN_MSG_ID_SYSTIME, GUI_MSG_ACCESS_GET, VALUE_TIME, NULL);
 
-        gui_model_main_msg_sd_icon_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
-        lv_subject_add_observer_obj(subject_sd_icon, gui_model_main_msg_video_photo_img_9_set_img_path_cb, guider_ui.video_photo_img_9, &guider_msg_data);
+        gui_msg_setup_component(true, false, subject_sd_icon, guider_ui.video_photo_img_9, &guider_msg_data, gui_model_main_msg_video_photo_img_9_set_img_path_cb, GUI_MODEL_MAIN_MSG_ID_SD_ICON, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
 
-        gui_model_main_msg_hide_win_switch_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
-        lv_subject_add_observer_obj(subject_hide_win_switch, gui_msg_set_flag_by_int32_cb, guider_ui.video_photo_imgbtn_1, &guider_msg_data);
-        gui_model_main_msg_show_win_switch_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
-        lv_subject_add_observer_obj(subject_show_win_switch, gui_msg_set_clear_flag_by_int32_cb, guider_ui.video_photo_imgbtn_1, &guider_msg_data);
+        gui_msg_setup_component(true, false, subject_hide_win_switch, guider_ui.video_photo_imgbtn_1, &guider_msg_data, gui_msg_set_flag_by_int32_cb, GUI_MODEL_MAIN_MSG_ID_HIDE_WIN_SWITCH, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
+        gui_msg_setup_component(true, false, subject_show_win_switch, guider_ui.video_photo_imgbtn_1, &guider_msg_data, gui_msg_set_clear_flag_by_int32_cb, GUI_MODEL_MAIN_MSG_ID_SHOW_WIN_SWITCH, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
 
 
         for (int i = 0; i < 13; i++) {
@@ -497,15 +482,11 @@ void gui_model_main_msg_init_events()
         systime_timer_enable = true;
     }
     if (!guider_ui.video_file_del) {
-        gui_model_main_msg_hide_del_btn_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
-        lv_subject_add_observer_obj(subject_hide_del_btn, gui_msg_set_flag_by_int32_cb, guider_ui.video_file_imgbtn_2, &guider_msg_data);
-        gui_model_main_msg_show_del_btn_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
-        lv_subject_add_observer_obj(subject_show_del_btn, gui_msg_set_clear_flag_by_int32_cb, guider_ui.video_file_imgbtn_2, &guider_msg_data);
+        gui_msg_setup_component(true, false, subject_hide_del_btn, guider_ui.video_file_imgbtn_2, &guider_msg_data, gui_msg_set_flag_by_int32_cb, GUI_MODEL_MAIN_MSG_ID_HIDE_DEL_BTN, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
+        gui_msg_setup_component(true, false, subject_show_del_btn, guider_ui.video_file_imgbtn_2, &guider_msg_data, gui_msg_set_clear_flag_by_int32_cb, GUI_MODEL_MAIN_MSG_ID_SHOW_DEL_BTN, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
 
-        gui_model_main_msg_hide_home_btn_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
-        lv_subject_add_observer_obj(subject_hide_home_btn, gui_msg_set_flag_by_int32_cb, guider_ui.video_file_imgbtn_5, &guider_msg_data);
-        gui_model_main_msg_show_home_btn_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
-        lv_subject_add_observer_obj(subject_show_home_btn, gui_msg_set_clear_flag_by_int32_cb, guider_ui.video_file_imgbtn_5, &guider_msg_data);
+        gui_msg_setup_component(true, false, subject_hide_home_btn, guider_ui.video_file_imgbtn_5, &guider_msg_data, gui_msg_set_flag_by_int32_cb, GUI_MODEL_MAIN_MSG_ID_HIDE_HOME_BTN, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
+        gui_msg_setup_component(true, false, subject_show_home_btn, guider_ui.video_file_imgbtn_5, &guider_msg_data, gui_msg_set_clear_flag_by_int32_cb, GUI_MODEL_MAIN_MSG_ID_SHOW_HOME_BTN, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
 
 
         for (int i = 0; i < 13; i++) {

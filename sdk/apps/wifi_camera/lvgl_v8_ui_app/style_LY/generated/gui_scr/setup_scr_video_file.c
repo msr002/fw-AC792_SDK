@@ -43,6 +43,10 @@ lv_obj_t *setup_scr_video_file(lv_ui *ui)
     lv_obj_set_scrollbar_mode(ui->video_file_view_1, LV_SCROLLBAR_MODE_OFF);
     //Write codes video_file_img_1
     ui->video_file_img_1 = lv_img_create(ui->video_file_view_1);
+    lv_img_set_src(ui->video_file_img_1, gui_get_res_path(GUI_RES_UP_1_PNG));
+    lv_img_set_pivot(ui->video_file_img_1, 0, 0);
+    lv_img_set_angle(ui->video_file_img_1, 0);
+    lv_img_set_zoom(ui->video_file_img_1, 256);
 
     //Set style for video_file_img_1. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
     lv_obj_set_style_radius(ui->video_file_img_1, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -67,14 +71,14 @@ lv_obj_t *setup_scr_video_file(lv_ui *ui)
     lv_obj_set_style_img_opa(ui->video_file_img_1, 255, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
     lv_obj_set_pos(ui->video_file_img_1, 8, 139);
     lv_obj_set_size(ui->video_file_img_1, 64, 64);
-    lv_obj_set_scrollbar_mode(ui->video_file_img_1, LV_SCROLLBAR_MODE_OFF);
+    lv_group_add_obj(def_group, ui->video_file_img_1);
     lv_obj_add_flag(ui->video_file_img_1, LV_OBJ_FLAG_CLICKABLE);
-    lv_img_set_src(ui->video_file_img_1, gui_get_res_path(GUI_RES_UP_1_PNG));
-    lv_img_set_pivot(ui->video_file_img_1, 0, 0);
-    lv_img_set_angle(ui->video_file_img_1, 0);
-    lv_img_set_zoom(ui->video_file_img_1, 256);
     //Write codes video_file_img_2
     ui->video_file_img_2 = lv_img_create(ui->video_file_view_1);
+    lv_img_set_src(ui->video_file_img_2, gui_get_res_path(GUI_RES_DOWN_1_PNG));
+    lv_img_set_pivot(ui->video_file_img_2, 0, 0);
+    lv_img_set_angle(ui->video_file_img_2, 0);
+    lv_img_set_zoom(ui->video_file_img_2, 256);
 
     //Set style for video_file_img_2. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
     lv_obj_set_style_radius(ui->video_file_img_2, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -99,12 +103,8 @@ lv_obj_t *setup_scr_video_file(lv_ui *ui)
     lv_obj_set_style_img_opa(ui->video_file_img_2, 255, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
     lv_obj_set_pos(ui->video_file_img_2, 8, 287);
     lv_obj_set_size(ui->video_file_img_2, 64, 64);
-    lv_obj_set_scrollbar_mode(ui->video_file_img_2, LV_SCROLLBAR_MODE_OFF);
+    lv_group_add_obj(def_group, ui->video_file_img_2);
     lv_obj_add_flag(ui->video_file_img_2, LV_OBJ_FLAG_CLICKABLE);
-    lv_img_set_src(ui->video_file_img_2, gui_get_res_path(GUI_RES_DOWN_1_PNG));
-    lv_img_set_pivot(ui->video_file_img_2, 0, 0);
-    lv_img_set_angle(ui->video_file_img_2, 0);
-    lv_img_set_zoom(ui->video_file_img_2, 256);
     //Write codes video_file_view_8
     ui->video_file_view_8 = lv_obj_create(ui->video_file);
 
@@ -265,6 +265,10 @@ lv_obj_t *setup_scr_video_file(lv_ui *ui)
     lv_group_add_obj(def_group, ui->video_file_view_del);
     //Write codes video_file_img_3
     ui->video_file_img_3 = lv_img_create(ui->video_file_view_del);
+    lv_img_set_src(ui->video_file_img_3, gui_get_res_path(GUI_RES_DELET_PNG));
+    lv_img_set_pivot(ui->video_file_img_3, 0, 0);
+    lv_img_set_angle(ui->video_file_img_3, 0);
+    lv_img_set_zoom(ui->video_file_img_3, 256);
 
     //Set style for video_file_img_3. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
     lv_obj_set_style_radius(ui->video_file_img_3, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -276,12 +280,7 @@ lv_obj_t *setup_scr_video_file(lv_ui *ui)
     lv_obj_set_style_img_opa(ui->video_file_img_3, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_pos(ui->video_file_img_3, 8, 6);
     lv_obj_set_size(ui->video_file_img_3, 29, 29);
-    lv_obj_set_scrollbar_mode(ui->video_file_img_3, LV_SCROLLBAR_MODE_OFF);
     lv_obj_add_flag(ui->video_file_img_3, LV_OBJ_FLAG_CLICKABLE);
-    lv_img_set_src(ui->video_file_img_3, gui_get_res_path(GUI_RES_DELET_PNG));
-    lv_img_set_pivot(ui->video_file_img_3, 0, 0);
-    lv_img_set_angle(ui->video_file_img_3, 0);
-    lv_img_set_zoom(ui->video_file_img_3, 256);
     //Write codes video_file_lbl_2
     ui->video_file_lbl_2 = lv_label_create(ui->video_file_view_del);
     lv_label_set_text(ui->video_file_lbl_2, _("delete"));
@@ -349,6 +348,10 @@ lv_obj_t *setup_scr_video_file(lv_ui *ui)
     lv_group_add_obj(def_group, ui->video_file_view_pro);
     //Write codes video_file_img_4
     ui->video_file_img_4 = lv_img_create(ui->video_file_view_pro);
+    lv_img_set_src(ui->video_file_img_4, gui_get_res_path(GUI_RES_PROTECT_PNG));
+    lv_img_set_pivot(ui->video_file_img_4, 0, 0);
+    lv_img_set_angle(ui->video_file_img_4, 0);
+    lv_img_set_zoom(ui->video_file_img_4, 256);
 
     //Set style for video_file_img_4. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
     lv_obj_set_style_radius(ui->video_file_img_4, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -360,12 +363,7 @@ lv_obj_t *setup_scr_video_file(lv_ui *ui)
     lv_obj_set_style_img_opa(ui->video_file_img_4, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_pos(ui->video_file_img_4, 8, 6);
     lv_obj_set_size(ui->video_file_img_4, 29, 29);
-    lv_obj_set_scrollbar_mode(ui->video_file_img_4, LV_SCROLLBAR_MODE_OFF);
     lv_obj_add_flag(ui->video_file_img_4, LV_OBJ_FLAG_CLICKABLE);
-    lv_img_set_src(ui->video_file_img_4, gui_get_res_path(GUI_RES_PROTECT_PNG));
-    lv_img_set_pivot(ui->video_file_img_4, 0, 0);
-    lv_img_set_angle(ui->video_file_img_4, 0);
-    lv_img_set_zoom(ui->video_file_img_4, 256);
     //Write codes video_file_lbl_3
     ui->video_file_lbl_3 = lv_label_create(ui->video_file_view_pro);
     lv_label_set_text(ui->video_file_lbl_3, _("protection"));
@@ -396,6 +394,10 @@ lv_obj_t *setup_scr_video_file(lv_ui *ui)
     lv_obj_set_scrollbar_mode(ui->video_file_lbl_3, LV_SCROLLBAR_MODE_OFF);
     //Write codes video_file_img_13
     ui->video_file_img_13 = lv_img_create(ui->video_file_view_menu_b);
+    lv_img_set_src(ui->video_file_img_13, gui_get_res_path(GUI_RES_MENU_STA_PNG));
+    lv_img_set_pivot(ui->video_file_img_13, 0, 0);
+    lv_img_set_angle(ui->video_file_img_13, 0);
+    lv_img_set_zoom(ui->video_file_img_13, 256);
 
     //Set style for video_file_img_13. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
     lv_obj_set_style_radius(ui->video_file_img_13, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -407,14 +409,13 @@ lv_obj_t *setup_scr_video_file(lv_ui *ui)
     lv_obj_set_style_img_opa(ui->video_file_img_13, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_pos(ui->video_file_img_13, 0, 0);
     lv_obj_set_size(ui->video_file_img_13, 800, 40);
-    lv_obj_set_scrollbar_mode(ui->video_file_img_13, LV_SCROLLBAR_MODE_OFF);
     lv_obj_add_flag(ui->video_file_img_13, LV_OBJ_FLAG_CLICKABLE);
-    lv_img_set_src(ui->video_file_img_13, gui_get_res_path(GUI_RES_MENU_STA_PNG));
-    lv_img_set_pivot(ui->video_file_img_13, 0, 0);
-    lv_img_set_angle(ui->video_file_img_13, 0);
-    lv_img_set_zoom(ui->video_file_img_13, 256);
     //Write codes video_file_img_14
     ui->video_file_img_14 = lv_img_create(ui->video_file_view_menu_b);
+    lv_img_set_src(ui->video_file_img_14, gui_get_res_path(GUI_RES_MENU_STA_PNG));
+    lv_img_set_pivot(ui->video_file_img_14, 0, 0);
+    lv_img_set_angle(ui->video_file_img_14, 0);
+    lv_img_set_zoom(ui->video_file_img_14, 256);
 
     //Set style for video_file_img_14. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
     lv_obj_set_style_radius(ui->video_file_img_14, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -426,14 +427,13 @@ lv_obj_t *setup_scr_video_file(lv_ui *ui)
     lv_obj_set_style_img_opa(ui->video_file_img_14, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_pos(ui->video_file_img_14, 0, 440);
     lv_obj_set_size(ui->video_file_img_14, 800, 40);
-    lv_obj_set_scrollbar_mode(ui->video_file_img_14, LV_SCROLLBAR_MODE_OFF);
     lv_obj_add_flag(ui->video_file_img_14, LV_OBJ_FLAG_CLICKABLE);
-    lv_img_set_src(ui->video_file_img_14, gui_get_res_path(GUI_RES_MENU_STA_PNG));
-    lv_img_set_pivot(ui->video_file_img_14, 0, 0);
-    lv_img_set_angle(ui->video_file_img_14, 0);
-    lv_img_set_zoom(ui->video_file_img_14, 256);
     //Write codes video_file_img_15
     ui->video_file_img_15 = lv_img_create(ui->video_file_view_menu_b);
+    lv_img_set_src(ui->video_file_img_15, gui_get_res_path(GUI_RES_PLAY_PNG));
+    lv_img_set_pivot(ui->video_file_img_15, 0, 0);
+    lv_img_set_angle(ui->video_file_img_15, 0);
+    lv_img_set_zoom(ui->video_file_img_15, 256);
 
     //Set style for video_file_img_15. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
     lv_obj_set_style_radius(ui->video_file_img_15, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -445,14 +445,13 @@ lv_obj_t *setup_scr_video_file(lv_ui *ui)
     lv_obj_set_style_img_opa(ui->video_file_img_15, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_pos(ui->video_file_img_15, 9, 0);
     lv_obj_set_size(ui->video_file_img_15, 39, 39);
-    lv_obj_set_scrollbar_mode(ui->video_file_img_15, LV_SCROLLBAR_MODE_OFF);
     lv_obj_add_flag(ui->video_file_img_15, LV_OBJ_FLAG_CLICKABLE);
-    lv_img_set_src(ui->video_file_img_15, gui_get_res_path(GUI_RES_PLAY_PNG));
-    lv_img_set_pivot(ui->video_file_img_15, 0, 0);
-    lv_img_set_angle(ui->video_file_img_15, 0);
-    lv_img_set_zoom(ui->video_file_img_15, 256);
     //Write codes video_file_img_16
     ui->video_file_img_16 = lv_img_create(ui->video_file_view_menu_b);
+    lv_img_set_src(ui->video_file_img_16, gui_get_res_path(GUI_RES_SET_PNG));
+    lv_img_set_pivot(ui->video_file_img_16, 0, 0);
+    lv_img_set_angle(ui->video_file_img_16, 0);
+    lv_img_set_zoom(ui->video_file_img_16, 256);
 
     //Set style for video_file_img_16. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
     lv_obj_set_style_radius(ui->video_file_img_16, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -464,14 +463,13 @@ lv_obj_t *setup_scr_video_file(lv_ui *ui)
     lv_obj_set_style_img_opa(ui->video_file_img_16, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_pos(ui->video_file_img_16, 70, 1);
     lv_obj_set_size(ui->video_file_img_16, 37, 37);
-    lv_obj_set_scrollbar_mode(ui->video_file_img_16, LV_SCROLLBAR_MODE_OFF);
     lv_obj_add_flag(ui->video_file_img_16, LV_OBJ_FLAG_CLICKABLE);
-    lv_img_set_src(ui->video_file_img_16, gui_get_res_path(GUI_RES_SET_PNG));
-    lv_img_set_pivot(ui->video_file_img_16, 0, 0);
-    lv_img_set_angle(ui->video_file_img_16, 0);
-    lv_img_set_zoom(ui->video_file_img_16, 256);
     //Write codes video_file_img_17
     ui->video_file_img_17 = lv_img_create(ui->video_file_view_menu_b);
+    lv_img_set_src(ui->video_file_img_17, gui_get_res_path(GUI_RES_LEFT_PNG));
+    lv_img_set_pivot(ui->video_file_img_17, 0, 0);
+    lv_img_set_angle(ui->video_file_img_17, 0);
+    lv_img_set_zoom(ui->video_file_img_17, 256);
 
     //Set style for video_file_img_17. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
     lv_obj_set_style_radius(ui->video_file_img_17, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -483,14 +481,13 @@ lv_obj_t *setup_scr_video_file(lv_ui *ui)
     lv_obj_set_style_img_opa(ui->video_file_img_17, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_pos(ui->video_file_img_17, 200, 445);
     lv_obj_set_size(ui->video_file_img_17, 21, 29);
-    lv_obj_set_scrollbar_mode(ui->video_file_img_17, LV_SCROLLBAR_MODE_OFF);
     lv_obj_add_flag(ui->video_file_img_17, LV_OBJ_FLAG_CLICKABLE);
-    lv_img_set_src(ui->video_file_img_17, gui_get_res_path(GUI_RES_LEFT_PNG));
-    lv_img_set_pivot(ui->video_file_img_17, 0, 0);
-    lv_img_set_angle(ui->video_file_img_17, 0);
-    lv_img_set_zoom(ui->video_file_img_17, 256);
     //Write codes video_file_img_18
     ui->video_file_img_18 = lv_img_create(ui->video_file_view_menu_b);
+    lv_img_set_src(ui->video_file_img_18, gui_get_res_path(GUI_RES_UP_PNG));
+    lv_img_set_pivot(ui->video_file_img_18, 0, 0);
+    lv_img_set_angle(ui->video_file_img_18, 0);
+    lv_img_set_zoom(ui->video_file_img_18, 256);
 
     //Set style for video_file_img_18. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
     lv_obj_set_style_radius(ui->video_file_img_18, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -502,14 +499,13 @@ lv_obj_t *setup_scr_video_file(lv_ui *ui)
     lv_obj_set_style_img_opa(ui->video_file_img_18, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_pos(ui->video_file_img_18, 321, 448);
     lv_obj_set_size(ui->video_file_img_18, 29, 21);
-    lv_obj_set_scrollbar_mode(ui->video_file_img_18, LV_SCROLLBAR_MODE_OFF);
     lv_obj_add_flag(ui->video_file_img_18, LV_OBJ_FLAG_CLICKABLE);
-    lv_img_set_src(ui->video_file_img_18, gui_get_res_path(GUI_RES_UP_PNG));
-    lv_img_set_pivot(ui->video_file_img_18, 0, 0);
-    lv_img_set_angle(ui->video_file_img_18, 0);
-    lv_img_set_zoom(ui->video_file_img_18, 256);
     //Write codes video_file_img_19
     ui->video_file_img_19 = lv_img_create(ui->video_file_view_menu_b);
+    lv_img_set_src(ui->video_file_img_19, gui_get_res_path(GUI_RES_DOWN_PNG));
+    lv_img_set_pivot(ui->video_file_img_19, 0, 0);
+    lv_img_set_angle(ui->video_file_img_19, 0);
+    lv_img_set_zoom(ui->video_file_img_19, 256);
 
     //Set style for video_file_img_19. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
     lv_obj_set_style_radius(ui->video_file_img_19, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -521,14 +517,13 @@ lv_obj_t *setup_scr_video_file(lv_ui *ui)
     lv_obj_set_style_img_opa(ui->video_file_img_19, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_pos(ui->video_file_img_19, 450, 448);
     lv_obj_set_size(ui->video_file_img_19, 29, 21);
-    lv_obj_set_scrollbar_mode(ui->video_file_img_19, LV_SCROLLBAR_MODE_OFF);
     lv_obj_add_flag(ui->video_file_img_19, LV_OBJ_FLAG_CLICKABLE);
-    lv_img_set_src(ui->video_file_img_19, gui_get_res_path(GUI_RES_DOWN_PNG));
-    lv_img_set_pivot(ui->video_file_img_19, 0, 0);
-    lv_img_set_angle(ui->video_file_img_19, 0);
-    lv_img_set_zoom(ui->video_file_img_19, 256);
     //Write codes video_file_img_20
     ui->video_file_img_20 = lv_img_create(ui->video_file_view_menu_b);
+    lv_img_set_src(ui->video_file_img_20, gui_get_res_path(GUI_RES_RIGHT_PNG));
+    lv_img_set_pivot(ui->video_file_img_20, 0, 0);
+    lv_img_set_angle(ui->video_file_img_20, 0);
+    lv_img_set_zoom(ui->video_file_img_20, 256);
 
     //Set style for video_file_img_20. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
     lv_obj_set_style_radius(ui->video_file_img_20, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -540,12 +535,7 @@ lv_obj_t *setup_scr_video_file(lv_ui *ui)
     lv_obj_set_style_img_opa(ui->video_file_img_20, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_pos(ui->video_file_img_20, 579, 445);
     lv_obj_set_size(ui->video_file_img_20, 21, 29);
-    lv_obj_set_scrollbar_mode(ui->video_file_img_20, LV_SCROLLBAR_MODE_OFF);
     lv_obj_add_flag(ui->video_file_img_20, LV_OBJ_FLAG_CLICKABLE);
-    lv_img_set_src(ui->video_file_img_20, gui_get_res_path(GUI_RES_RIGHT_PNG));
-    lv_img_set_pivot(ui->video_file_img_20, 0, 0);
-    lv_img_set_angle(ui->video_file_img_20, 0);
-    lv_img_set_zoom(ui->video_file_img_20, 256);
     //Write codes video_file_view_submenu
     ui->video_file_view_submenu = lv_obj_create(ui->video_file);
 

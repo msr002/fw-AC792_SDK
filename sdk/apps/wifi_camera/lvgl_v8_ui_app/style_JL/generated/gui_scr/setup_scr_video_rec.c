@@ -205,6 +205,7 @@ lv_obj_t *setup_scr_video_rec(lv_ui *ui)
     lv_obj_set_style_radius(ui->video_rec_lbl_2, 35, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_color(ui->video_rec_lbl_2, lv_color_make(0xEA, 0xEE, 0xF1), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_opa(ui->video_rec_lbl_2, 77, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui->video_rec_lbl_2, &lv_font_FangZhengKaiTiJianTi_1_19, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_pad_top(ui->video_rec_lbl_2, 15, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_pos(ui->video_rec_lbl_2, 24, 61);
     lv_obj_set_size(ui->video_rec_lbl_2, 60, 60);
@@ -219,6 +220,7 @@ lv_obj_t *setup_scr_video_rec(lv_ui *ui)
     lv_obj_set_style_radius(ui->video_rec_lbl_3, 35, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_color(ui->video_rec_lbl_3, lv_color_make(0xEA, 0xEE, 0xF1), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_opa(ui->video_rec_lbl_3, 77, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui->video_rec_lbl_3, &lv_font_FangZhengKaiTiJianTi_1_19, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_pad_left(ui->video_rec_lbl_3, 1, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_pad_top(ui->video_rec_lbl_3, 15, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_pos(ui->video_rec_lbl_3, 24, 136);
@@ -231,6 +233,7 @@ lv_obj_t *setup_scr_video_rec(lv_ui *ui)
 
     //Set style for video_rec_lbl_4. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
     lv_obj_add_style(ui->video_rec_lbl_4, &gui_label_main_default_style, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui->video_rec_lbl_4, &lv_font_FangZhengKaiTiJianTi_1_24, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_pos(ui->video_rec_lbl_4, 78, 420);
     lv_obj_set_size(ui->video_rec_lbl_4, 161, 52);
     lv_obj_set_scrollbar_mode(ui->video_rec_lbl_4, LV_SCROLLBAR_MODE_OFF);
@@ -366,6 +369,7 @@ lv_obj_t *setup_scr_video_rec(lv_ui *ui)
     //Set style for video_rec_digitclock_remain_time. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
     lv_obj_add_style(ui->video_rec_digitclock_remain_time, &gui_digitclock_main_default_style, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_color(ui->video_rec_digitclock_remain_time, lv_color_make(0xFF, 0xFF, 0xFF), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui->video_rec_digitclock_remain_time, &lv_font_FangZhengKaiTiJianTi_1_32, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     //Set style for video_rec_digitclock_remain_time. Part: LV_PART_MAIN, State: LV_STATE_DISABLED
     lv_obj_add_style(ui->video_rec_digitclock_remain_time, &gui_digitclock_main_disabled_style, LV_PART_MAIN | LV_STATE_DISABLED);
@@ -381,6 +385,7 @@ lv_obj_t *setup_scr_video_rec(lv_ui *ui)
     //Set style for video_rec_digitclock_record_time. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
     lv_obj_add_style(ui->video_rec_digitclock_record_time, &gui_digitclock_main_default_style, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_color(ui->video_rec_digitclock_record_time, lv_color_make(0xFF, 0xFF, 0xFF), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui->video_rec_digitclock_record_time, &lv_font_FangZhengKaiTiJianTi_1_32, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     //Set style for video_rec_digitclock_record_time. Part: LV_PART_MAIN, State: LV_STATE_DISABLED
     lv_obj_add_style(ui->video_rec_digitclock_record_time, &gui_digitclock_main_disabled_style, LV_PART_MAIN | LV_STATE_DISABLED);

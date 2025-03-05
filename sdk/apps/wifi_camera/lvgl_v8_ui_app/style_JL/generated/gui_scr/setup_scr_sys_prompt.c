@@ -94,6 +94,7 @@ lv_obj_t *setup_scr_sys_prompt(lv_ui *ui)
     //Set style for sys_prompt_lbl_1. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
     lv_obj_add_style(ui->sys_prompt_lbl_1, &gui_label_main_default_style, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_opa(ui->sys_prompt_lbl_1, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui->sys_prompt_lbl_1, &lv_font_FangZhengKaiTiJianTi_1_48, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_pos(ui->sys_prompt_lbl_1, 282, 64);
     lv_obj_set_size(ui->sys_prompt_lbl_1, 202, 46);
     lv_obj_set_scrollbar_mode(ui->sys_prompt_lbl_1, LV_SCROLLBAR_MODE_OFF);

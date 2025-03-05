@@ -529,77 +529,49 @@ void gui_model_video_rec_msg_init_events()
     lv_subject_t *subject_show_record_time = gui_msg_get_subject(GUI_MODEL_VIDEO_REC_MSG_ID_SHOW_RECORD_TIME);
     lv_subject_t *subject_app_connected = gui_msg_get_subject(GUI_MODEL_VIDEO_REC_MSG_ID_APP_CONNECTED);
     if (!guider_ui.video_rec_del) {
-        gui_model_video_rec_msg_hide_car_crashlock_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
-        lv_subject_add_observer_obj(subject_hide_car_crashlock, gui_msg_set_flag_by_int32_cb, guider_ui.video_rec_img_lock_icon, &guider_msg_data);
-        gui_model_video_rec_msg_show_car_crashlock_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
-        lv_subject_add_observer_obj(subject_show_car_crashlock, gui_msg_set_clear_flag_by_int32_cb, guider_ui.video_rec_img_lock_icon, &guider_msg_data);
+        gui_msg_setup_component(true, false, subject_hide_car_crashlock, guider_ui.video_rec_img_lock_icon, &guider_msg_data, gui_msg_set_flag_by_int32_cb, GUI_MODEL_VIDEO_REC_MSG_ID_HIDE_CAR_CRASHLOCK, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
+        gui_msg_setup_component(true, false, subject_show_car_crashlock, guider_ui.video_rec_img_lock_icon, &guider_msg_data, gui_msg_set_clear_flag_by_int32_cb, GUI_MODEL_VIDEO_REC_MSG_ID_SHOW_CAR_CRASHLOCK, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
 
-        gui_model_video_rec_msg_app_connected_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
-        lv_subject_add_observer_obj(subject_app_connected, gui_model_video_rec_msg_video_rec_img_app_set_img_path_cb, guider_ui.video_rec_img_app, &guider_msg_data);
+        gui_msg_setup_component(true, false, subject_app_connected, guider_ui.video_rec_img_app, &guider_msg_data, gui_model_video_rec_msg_video_rec_img_app_set_img_path_cb, GUI_MODEL_VIDEO_REC_MSG_ID_APP_CONNECTED, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
 
-        gui_model_video_rec_msg_flash_headlight_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_BOOL);
-        lv_subject_add_observer_obj(subject_flash_headlight, gui_msg_set_visible_by_bool_cb, guider_ui.video_rec_headlight, &guider_msg_data);
+        gui_msg_setup_component(true, false, subject_flash_headlight, guider_ui.video_rec_headlight, &guider_msg_data, gui_msg_set_visible_by_bool_cb, GUI_MODEL_VIDEO_REC_MSG_ID_FLASH_HEADLIGHT, GUI_MSG_ACCESS_GET, VALUE_BOOL, NULL);
 
-        gui_model_video_rec_msg_delayrec_icon_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
-        lv_subject_add_observer_obj(subject_delayrec_icon, gui_model_video_rec_msg_video_rec_img_11_set_img_path_cb, guider_ui.video_rec_img_11, &guider_msg_data);
+        gui_msg_setup_component(true, false, subject_delayrec_icon, guider_ui.video_rec_img_11, &guider_msg_data, gui_model_video_rec_msg_video_rec_img_11_set_img_path_cb, GUI_MODEL_VIDEO_REC_MSG_ID_DELAYREC_ICON, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
 
-        gui_model_video_rec_msg_car_nunber_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_STRING);
-        lv_subject_add_observer_obj(subject_car_nunber, gui_msg_set_label_text_by_string_cb, guider_ui.video_rec_lbl_4, &guider_msg_data);
-        gui_model_video_rec_msg_hide_car_num_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
-        lv_subject_add_observer_obj(subject_hide_car_num, gui_msg_set_flag_by_int32_cb, guider_ui.video_rec_lbl_4, &guider_msg_data);
-        gui_model_video_rec_msg_show_car_num_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
-        lv_subject_add_observer_obj(subject_show_car_num, gui_msg_set_clear_flag_by_int32_cb, guider_ui.video_rec_lbl_4, &guider_msg_data);
+        gui_msg_setup_component(true, false, subject_car_nunber, guider_ui.video_rec_lbl_4, &guider_msg_data, gui_msg_set_label_text_by_string_cb, GUI_MODEL_VIDEO_REC_MSG_ID_CAR_NUNBER, GUI_MSG_ACCESS_GET, VALUE_STRING, NULL);
+        gui_msg_setup_component(true, false, subject_hide_car_num, guider_ui.video_rec_lbl_4, &guider_msg_data, gui_msg_set_flag_by_int32_cb, GUI_MODEL_VIDEO_REC_MSG_ID_HIDE_CAR_NUM, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
+        gui_msg_setup_component(true, false, subject_show_car_num, guider_ui.video_rec_lbl_4, &guider_msg_data, gui_msg_set_clear_flag_by_int32_cb, GUI_MODEL_VIDEO_REC_MSG_ID_SHOW_CAR_NUM, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
 
-        gui_model_video_rec_msg_hide_hdr_icon_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
-        lv_subject_add_observer_obj(subject_hide_hdr_icon, gui_msg_set_flag_by_int32_cb, guider_ui.video_rec_lbl_3, &guider_msg_data);
-        gui_model_video_rec_msg_show_hdr_icon_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
-        lv_subject_add_observer_obj(subject_show_hdr_icon, gui_msg_set_clear_flag_by_int32_cb, guider_ui.video_rec_lbl_3, &guider_msg_data);
+        gui_msg_setup_component(true, false, subject_hide_hdr_icon, guider_ui.video_rec_lbl_3, &guider_msg_data, gui_msg_set_flag_by_int32_cb, GUI_MODEL_VIDEO_REC_MSG_ID_HIDE_HDR_ICON, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
+        gui_msg_setup_component(true, false, subject_show_hdr_icon, guider_ui.video_rec_lbl_3, &guider_msg_data, gui_msg_set_clear_flag_by_int32_cb, GUI_MODEL_VIDEO_REC_MSG_ID_SHOW_HDR_ICON, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
 
-        gui_model_video_rec_msg_rec_reso_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_STRING);
-        lv_subject_add_observer_obj(subject_rec_reso, gui_msg_set_label_text_by_string_cb, guider_ui.video_rec_lbl_2, &guider_msg_data);
+        gui_msg_setup_component(true, false, subject_rec_reso, guider_ui.video_rec_lbl_2, &guider_msg_data, gui_msg_set_label_text_by_string_cb, GUI_MODEL_VIDEO_REC_MSG_ID_REC_RESO, GUI_MSG_ACCESS_GET, VALUE_STRING, NULL);
 
-        gui_model_video_rec_msg_rec_remain_time_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_TIME);
-        lv_subject_add_observer_obj(subject_rec_remain_time, gui_model_video_rec_msg_video_rec_digitclock_remain_time_set_digit_clock_time_cb, guider_ui.video_rec_digitclock_remain_time, &guider_msg_data);
-        gui_model_video_rec_msg_hide_remain_time_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
-        lv_subject_add_observer_obj(subject_hide_remain_time, gui_msg_set_flag_by_int32_cb, guider_ui.video_rec_digitclock_remain_time, &guider_msg_data);
-        gui_model_video_rec_msg_show_remain_time_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
-        lv_subject_add_observer_obj(subject_show_remain_time, gui_msg_set_clear_flag_by_int32_cb, guider_ui.video_rec_digitclock_remain_time, &guider_msg_data);
+        gui_msg_setup_component(true, false, subject_rec_remain_time, guider_ui.video_rec_digitclock_remain_time, &guider_msg_data, gui_model_video_rec_msg_video_rec_digitclock_remain_time_set_digit_clock_time_cb, GUI_MODEL_VIDEO_REC_MSG_ID_REC_REMAIN_TIME, GUI_MSG_ACCESS_GET, VALUE_TIME, NULL);
+        gui_msg_setup_component(true, false, subject_hide_remain_time, guider_ui.video_rec_digitclock_remain_time, &guider_msg_data, gui_msg_set_flag_by_int32_cb, GUI_MODEL_VIDEO_REC_MSG_ID_HIDE_REMAIN_TIME, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
+        gui_msg_setup_component(true, false, subject_show_remain_time, guider_ui.video_rec_digitclock_remain_time, &guider_msg_data, gui_msg_set_clear_flag_by_int32_cb, GUI_MODEL_VIDEO_REC_MSG_ID_SHOW_REMAIN_TIME, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
 
-        gui_model_video_rec_msg_hide_guard_icon_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
-        lv_subject_add_observer_obj(subject_hide_guard_icon, gui_msg_set_flag_by_int32_cb, guider_ui.video_rec_img_7, &guider_msg_data);
-        gui_model_video_rec_msg_show_guard_icon_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
-        lv_subject_add_observer_obj(subject_show_guard_icon, gui_msg_set_clear_flag_by_int32_cb, guider_ui.video_rec_img_7, &guider_msg_data);
+        gui_msg_setup_component(true, false, subject_hide_guard_icon, guider_ui.video_rec_img_7, &guider_msg_data, gui_msg_set_flag_by_int32_cb, GUI_MODEL_VIDEO_REC_MSG_ID_HIDE_GUARD_ICON, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
+        gui_msg_setup_component(true, false, subject_show_guard_icon, guider_ui.video_rec_img_7, &guider_msg_data, gui_msg_set_clear_flag_by_int32_cb, GUI_MODEL_VIDEO_REC_MSG_ID_SHOW_GUARD_ICON, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
 
-        gui_model_video_rec_msg_hide_motion_icon_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
-        lv_subject_add_observer_obj(subject_hide_motion_icon, gui_msg_set_flag_by_int32_cb, guider_ui.video_rec_img_8, &guider_msg_data);
-        gui_model_video_rec_msg_show_motion_icon_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
-        lv_subject_add_observer_obj(subject_show_motion_icon, gui_msg_set_clear_flag_by_int32_cb, guider_ui.video_rec_img_8, &guider_msg_data);
+        gui_msg_setup_component(true, false, subject_hide_motion_icon, guider_ui.video_rec_img_8, &guider_msg_data, gui_msg_set_flag_by_int32_cb, GUI_MODEL_VIDEO_REC_MSG_ID_HIDE_MOTION_ICON, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
+        gui_msg_setup_component(true, false, subject_show_motion_icon, guider_ui.video_rec_img_8, &guider_msg_data, gui_msg_set_clear_flag_by_int32_cb, GUI_MODEL_VIDEO_REC_MSG_ID_SHOW_MOTION_ICON, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
 
-        gui_model_video_rec_msg_rec_btn_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
-        lv_subject_add_observer_obj(subject_rec_btn, gui_msg_set_control_state_by_int32_cb, guider_ui.video_rec, &guider_msg_data);
+        gui_msg_setup_component(true, false, subject_rec_btn, guider_ui.video_rec, &guider_msg_data, gui_msg_set_control_state_by_int32_cb, GUI_MODEL_VIDEO_REC_MSG_ID_REC_BTN, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
 
-        gui_model_video_rec_msg_rec_time_state_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
-        lv_subject_add_observer_obj(subject_rec_time_state, gui_msg_set_control_state_by_int32_cb, guider_ui.video_rec_digitclock_record_time, &guider_msg_data);
-        gui_model_video_rec_msg_hide_record_time_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
-        lv_subject_add_observer_obj(subject_hide_record_time, gui_msg_set_flag_by_int32_cb, guider_ui.video_rec_digitclock_record_time, &guider_msg_data);
-        gui_model_video_rec_msg_show_record_time_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
-        lv_subject_add_observer_obj(subject_show_record_time, gui_msg_set_clear_flag_by_int32_cb, guider_ui.video_rec_digitclock_record_time, &guider_msg_data);
+        gui_msg_setup_component(true, false, subject_rec_time_state, guider_ui.video_rec_digitclock_record_time, &guider_msg_data, gui_msg_set_control_state_by_int32_cb, GUI_MODEL_VIDEO_REC_MSG_ID_REC_TIME_STATE, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
+        gui_msg_setup_component(true, false, subject_hide_record_time, guider_ui.video_rec_digitclock_record_time, &guider_msg_data, gui_msg_set_flag_by_int32_cb, GUI_MODEL_VIDEO_REC_MSG_ID_HIDE_RECORD_TIME, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
+        gui_msg_setup_component(true, false, subject_show_record_time, guider_ui.video_rec_digitclock_record_time, &guider_msg_data, gui_msg_set_clear_flag_by_int32_cb, GUI_MODEL_VIDEO_REC_MSG_ID_SHOW_RECORD_TIME, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
 
-        gui_model_video_rec_msg_rec_btn_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
-        lv_subject_add_observer_obj(subject_rec_btn, gui_msg_set_control_state_by_int32_cb, guider_ui.video_rec_imgbtn_1, &guider_msg_data);
+        gui_msg_setup_component(true, false, subject_rec_btn, guider_ui.video_rec_imgbtn_1, &guider_msg_data, gui_msg_set_control_state_by_int32_cb, GUI_MODEL_VIDEO_REC_MSG_ID_REC_BTN, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
 
-        gui_model_video_rec_msg_gsensor_icon_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
-        lv_subject_add_observer_obj(subject_gsensor_icon, gui_model_video_rec_msg_video_rec_img_5_set_img_path_cb, guider_ui.video_rec_img_5, &guider_msg_data);
-        gui_model_video_rec_msg_hide_gsensor_icon_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
-        lv_subject_add_observer_obj(subject_hide_gsensor_icon, gui_msg_set_flag_by_int32_cb, guider_ui.video_rec_img_5, &guider_msg_data);
-        gui_model_video_rec_msg_show_gsensor_icon_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
-        lv_subject_add_observer_obj(subject_show_gsensor_icon, gui_msg_set_clear_flag_by_int32_cb, guider_ui.video_rec_img_5, &guider_msg_data);
+        gui_msg_setup_component(true, false, subject_gsensor_icon, guider_ui.video_rec_img_5, &guider_msg_data, gui_model_video_rec_msg_video_rec_img_5_set_img_path_cb, GUI_MODEL_VIDEO_REC_MSG_ID_GSENSOR_ICON, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
+        gui_msg_setup_component(true, false, subject_hide_gsensor_icon, guider_ui.video_rec_img_5, &guider_msg_data, gui_msg_set_flag_by_int32_cb, GUI_MODEL_VIDEO_REC_MSG_ID_HIDE_GSENSOR_ICON, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
+        gui_msg_setup_component(true, false, subject_show_gsensor_icon, guider_ui.video_rec_img_5, &guider_msg_data, gui_msg_set_clear_flag_by_int32_cb, GUI_MODEL_VIDEO_REC_MSG_ID_SHOW_GSENSOR_ICON, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
 
-        gui_model_video_rec_msg_mic_icon_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
-        lv_subject_add_observer_obj(subject_mic_icon, gui_model_video_rec_msg_video_rec_img_6_set_img_path_cb, guider_ui.video_rec_img_6, &guider_msg_data);
+        gui_msg_setup_component(true, false, subject_mic_icon, guider_ui.video_rec_img_6, &guider_msg_data, gui_model_video_rec_msg_video_rec_img_6_set_img_path_cb, GUI_MODEL_VIDEO_REC_MSG_ID_MIC_ICON, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
 
-        gui_model_video_rec_msg_cycrec_icon_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
-        lv_subject_add_observer_obj(subject_cycrec_icon, gui_model_video_rec_msg_video_rec_img_4_set_img_path_cb, guider_ui.video_rec_img_4, &guider_msg_data);
+        gui_msg_setup_component(true, false, subject_cycrec_icon, guider_ui.video_rec_img_4, &guider_msg_data, gui_model_video_rec_msg_video_rec_img_4_set_img_path_cb, GUI_MODEL_VIDEO_REC_MSG_ID_CYCREC_ICON, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
 
 
         for (int i = 0; i < 27; i++) {

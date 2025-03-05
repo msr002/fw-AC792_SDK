@@ -45,6 +45,7 @@ lv_obj_t *setup_scr_video_play(lv_ui *ui)
     //Set style for video_play_lbl_cur_time. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
     lv_obj_add_style(ui->video_play_lbl_cur_time, &gui_label_main_default_style, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_color(ui->video_play_lbl_cur_time, lv_color_make(0x00, 0x00, 0x00), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui->video_play_lbl_cur_time, &lv_font_montserratMedium_24, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_letter_space(ui->video_play_lbl_cur_time, 3, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_pos(ui->video_play_lbl_cur_time, 219, 52);
     lv_obj_set_size(ui->video_play_lbl_cur_time, 106, 47);
@@ -109,13 +110,14 @@ lv_obj_t *setup_scr_video_play(lv_ui *ui)
     //Set style for video_play_lbl_total_time. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
     lv_obj_add_style(ui->video_play_lbl_total_time, &gui_label_main_default_style, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_color(ui->video_play_lbl_total_time, lv_color_make(0x00, 0x00, 0x00), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui->video_play_lbl_total_time, &lv_font_montserratMedium_24, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_letter_space(ui->video_play_lbl_total_time, 3, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_pos(ui->video_play_lbl_total_time, 316, 52);
     lv_obj_set_size(ui->video_play_lbl_total_time, 106, 47);
     lv_obj_set_scrollbar_mode(ui->video_play_lbl_total_time, LV_SCROLLBAR_MODE_OFF);
     //Write codes video_play_ddlist_multi_spped
     ui->video_play_ddlist_multi_spped = lv_dropdown_create(ui->video_play_view_1);
-    lv_dropdown_set_options(ui->video_play_ddlist_multi_spped, "list1\nlist2\nlist3");
+    lv_dropdown_set_options(ui->video_play_ddlist_multi_spped, "2x\n1x\n0.5x");
     lv_dropdown_set_dir(ui->video_play_ddlist_multi_spped, LV_DIR_TOP);
     lv_dropdown_set_symbol(ui->video_play_ddlist_multi_spped, LV_SYMBOL_UP);
     lv_dropdown_set_symbol(ui->video_play_ddlist_multi_spped, NULL);
@@ -129,6 +131,7 @@ lv_obj_t *setup_scr_video_play(lv_ui *ui)
     lv_obj_set_style_bg_opa(ui->video_play_ddlist_multi_spped, 153, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_border_side(ui->video_play_ddlist_multi_spped, LV_BORDER_SIDE_NONE, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_color(ui->video_play_ddlist_multi_spped, lv_color_make(0xFF, 0xFF, 0xFF), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui->video_play_ddlist_multi_spped, &lv_font_montserratMedium_24, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     //Set style for video_play_ddlist_multi_spped. Part: LV_PART_MAIN, State: LV_STATE_FOCUS_KEY
     lv_obj_add_style(ui->video_play_ddlist_multi_spped, &gui_ddlist_main_focus_key_style, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
@@ -138,6 +141,7 @@ lv_obj_t *setup_scr_video_play(lv_ui *ui)
     lv_obj_set_style_border_side(ui->video_play_ddlist_multi_spped, LV_BORDER_SIDE_NONE, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
     lv_obj_set_style_outline_width(ui->video_play_ddlist_multi_spped, 3, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
     lv_obj_set_style_text_color(ui->video_play_ddlist_multi_spped, lv_color_make(0xFF, 0xFF, 0xFF), LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+    lv_obj_set_style_text_font(ui->video_play_ddlist_multi_spped, &lv_font_montserratMedium_24, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
     lv_obj_set_style_pad_top(ui->video_play_ddlist_multi_spped, 12, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
 
     //Set style state: LV_STATE_CHECKED for style_video_play_ddlist_multi_spped_extra_list_selected_checked
@@ -148,6 +152,7 @@ lv_obj_t *setup_scr_video_play(lv_ui *ui)
     lv_style_set_border_color(&style_video_play_ddlist_multi_spped_extra_list_selected_checked, lv_color_make(0x00, 0x00, 0x00));
     lv_style_set_border_width(&style_video_play_ddlist_multi_spped_extra_list_selected_checked, 0);
     lv_style_set_border_side(&style_video_play_ddlist_multi_spped_extra_list_selected_checked, LV_BORDER_SIDE_NONE);
+    lv_style_set_text_font(&style_video_play_ddlist_multi_spped_extra_list_selected_checked, &lv_font_montserratMedium_24);
     lv_obj_add_style(lv_dropdown_get_list(ui->video_play_ddlist_multi_spped), &gui_ddlist_selected_checked_style, LV_PART_SELECTED | LV_STATE_CHECKED);
     lv_obj_add_style(lv_dropdown_get_list(ui->video_play_ddlist_multi_spped), &style_video_play_ddlist_multi_spped_extra_list_selected_checked, LV_PART_SELECTED | LV_STATE_CHECKED);
 
@@ -158,6 +163,7 @@ lv_obj_t *setup_scr_video_play(lv_ui *ui)
     lv_style_set_bg_opa(&style_video_play_ddlist_multi_spped_extra_list_main_default, 153);
     lv_style_set_border_side(&style_video_play_ddlist_multi_spped_extra_list_main_default, LV_BORDER_SIDE_NONE);
     lv_style_set_text_color(&style_video_play_ddlist_multi_spped_extra_list_main_default, lv_color_make(0xFF, 0xFF, 0xFF));
+    lv_style_set_text_font(&style_video_play_ddlist_multi_spped_extra_list_main_default, &lv_font_montserratMedium_24);
     lv_style_set_max_height(&style_video_play_ddlist_multi_spped_extra_list_main_default, 190);
     lv_obj_add_style(lv_dropdown_get_list(ui->video_play_ddlist_multi_spped), &gui_ddlist_dropdown_list_default_style, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_add_style(lv_dropdown_get_list(ui->video_play_ddlist_multi_spped), &style_video_play_ddlist_multi_spped_extra_list_main_default, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -248,6 +254,7 @@ lv_obj_t *setup_scr_video_play(lv_ui *ui)
 
     //Set style for video_play_lbl_msg. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
     lv_obj_add_style(ui->video_play_lbl_msg, &gui_label_main_default_style, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui->video_play_lbl_msg, &lv_font_FangZhengKaiTiJianTi_1_26, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_pad_top(ui->video_play_lbl_msg, 10, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_pos(ui->video_play_lbl_msg, 159, 278);
     lv_obj_set_size(ui->video_play_lbl_msg, 527, 59);

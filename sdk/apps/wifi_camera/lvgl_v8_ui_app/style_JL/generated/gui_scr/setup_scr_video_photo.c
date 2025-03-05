@@ -184,6 +184,7 @@ lv_obj_t *setup_scr_video_photo(lv_ui *ui)
     lv_obj_set_style_radius(ui->video_photo_lbl_3, 24, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_color(ui->video_photo_lbl_3, lv_color_make(0xEA, 0xEE, 0xF1), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_opa(ui->video_photo_lbl_3, 77, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui->video_photo_lbl_3, &lv_font_FangZhengKaiTiJianTi_1_14, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_pad_left(ui->video_photo_lbl_3, 1, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_pad_top(ui->video_photo_lbl_3, 10, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_pos(ui->video_photo_lbl_3, 22, 202);
@@ -196,6 +197,7 @@ lv_obj_t *setup_scr_video_photo(lv_ui *ui)
 
     //Set style for video_photo_lbl_4. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
     lv_obj_add_style(ui->video_photo_lbl_4, &gui_label_main_default_style, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui->video_photo_lbl_4, &lv_font_FangZhengKaiTiJianTi_1_24, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_pos(ui->video_photo_lbl_4, 269, 15);
     lv_obj_set_size(ui->video_photo_lbl_4, 269, 52);
     lv_obj_set_scrollbar_mode(ui->video_photo_lbl_4, LV_SCROLLBAR_MODE_OFF);
@@ -662,13 +664,16 @@ lv_obj_t *setup_scr_video_photo(lv_ui *ui)
 
     //Set style for video_photo_roller_mutifunc. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
     lv_obj_add_style(ui->video_photo_roller_mutifunc, &gui_roller_main_default_style, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui->video_photo_roller_mutifunc, &lv_font_FangZhengKaiTiJianTi_1_24, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     //Set style for video_photo_roller_mutifunc. Part: LV_PART_SELECTED, State: LV_STATE_DEFAULT
     lv_obj_add_style(ui->video_photo_roller_mutifunc, &gui_roller_selected_default_style, LV_PART_SELECTED | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui->video_photo_roller_mutifunc, &lv_font_FangZhengKaiTiJianTi_1_24, LV_PART_SELECTED | LV_STATE_DEFAULT);
 
     //Set style for video_photo_roller_mutifunc. Part: LV_PART_MAIN, State: LV_STATE_FOCUS_KEY
     lv_obj_add_style(ui->video_photo_roller_mutifunc, &gui_roller_main_focus_key_style, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
     lv_obj_set_style_outline_width(ui->video_photo_roller_mutifunc, 2, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+    lv_obj_set_style_text_font(ui->video_photo_roller_mutifunc, &lv_font_FangZhengKaiTiJianTi_1_24, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
     lv_obj_set_pos(ui->video_photo_roller_mutifunc, 159, 58);
     lv_obj_set_size(ui->video_photo_roller_mutifunc, 243, 126);
     lv_obj_set_scrollbar_mode(ui->video_photo_roller_mutifunc, LV_SCROLLBAR_MODE_OFF);
@@ -773,6 +778,7 @@ lv_obj_t *setup_scr_video_photo(lv_ui *ui)
     lv_obj_add_style(ui->video_photo_show_capture_time, &gui_label_main_default_style, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_border_opa(ui->video_photo_show_capture_time, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_outline_opa(ui->video_photo_show_capture_time, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui->video_photo_show_capture_time, &lv_font_montserratMedium_160, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_pos(ui->video_photo_show_capture_time, 300, 140);
     lv_obj_set_size(ui->video_photo_show_capture_time, 200, 200);
     lv_obj_set_scrollbar_mode(ui->video_photo_show_capture_time, LV_SCROLLBAR_MODE_OFF);

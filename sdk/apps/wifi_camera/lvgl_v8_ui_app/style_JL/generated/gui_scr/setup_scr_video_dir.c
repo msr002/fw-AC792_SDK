@@ -79,6 +79,7 @@ lv_obj_t *setup_scr_video_dir(lv_ui *ui)
     //Set style for video_dir_lbl_path. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
     lv_obj_add_style(ui->video_dir_lbl_path, &gui_label_main_default_style, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_color(ui->video_dir_lbl_path, lv_color_make(0xFF, 0xFF, 0xFF), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui->video_dir_lbl_path, &lv_font_montserratMedium_22, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_pad_top(ui->video_dir_lbl_path, 10, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_pos(ui->video_dir_lbl_path, 60, 10);
     lv_obj_set_size(ui->video_dir_lbl_path, 666, 38);

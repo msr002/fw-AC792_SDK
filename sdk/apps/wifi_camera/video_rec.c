@@ -174,7 +174,7 @@ struct video_rec_hdl rec_handler;
 
 
 static const u16 rec_pix_w[] = {1920, 1280, 640};
-static const u16 rec_pix_h[] = {1080, 720,  480};
+static const u16 rec_pix_h[] = {1088, 720,  480};
 static const u16 pic_pix_w[] = {1280, 1920, 2560, 3072};
 static const u16 pic_pix_h[] = {720,  1088, 1600, 2208};
 
@@ -4731,7 +4731,6 @@ static int video_rec_init()
     }
 
     /* ve_server_open(0); */
-
 
 #if (CONFIG_VIDEO_PARK_DECT == 1)
     __this->disp_park_sel = 1;

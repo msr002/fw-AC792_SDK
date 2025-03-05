@@ -522,32 +522,21 @@ void gui_model_global_subpage_msg_init_events()
     lv_subject_t *subject_state_funkey2 = gui_msg_get_subject(GUI_MODEL_GLOBAL_SUBPAGE_MSG_ID_STATE_FUNKEY2);
     lv_subject_t *subject_state_funkey3 = gui_msg_get_subject(GUI_MODEL_GLOBAL_SUBPAGE_MSG_ID_STATE_FUNKEY3);
     if (!guider_ui.sys_setting_del) {
-        gui_model_global_subpage_msg_funckey1_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_STRING);
-        lv_subject_add_observer_obj(subject_funckey1, gui_model_global_subpage_msg_sys_setting_lbl_funkey1_set_text_cb, guider_ui.sys_setting_lbl_funkey1, &guider_msg_data);
-        gui_model_global_subpage_msg_hide_funckey1_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
-        lv_subject_add_observer_obj(subject_hide_funckey1, gui_msg_set_flag_by_int32_cb, guider_ui.sys_setting_lbl_funkey1, &guider_msg_data);
-        gui_model_global_subpage_msg_show_funckey1_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
-        lv_subject_add_observer_obj(subject_show_funckey1, gui_msg_set_clear_flag_by_int32_cb, guider_ui.sys_setting_lbl_funkey1, &guider_msg_data);
+        gui_msg_setup_component(true, false, subject_funckey1, guider_ui.sys_setting_lbl_funkey1, &guider_msg_data, gui_model_global_subpage_msg_sys_setting_lbl_funkey1_set_text_cb, GUI_MODEL_GLOBAL_SUBPAGE_MSG_ID_FUNCKEY1, GUI_MSG_ACCESS_GET, VALUE_STRING, NULL);
+        gui_msg_setup_component(true, false, subject_hide_funckey1, guider_ui.sys_setting_lbl_funkey1, &guider_msg_data, gui_msg_set_flag_by_int32_cb, GUI_MODEL_GLOBAL_SUBPAGE_MSG_ID_HIDE_FUNCKEY1, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
+        gui_msg_setup_component(true, false, subject_show_funckey1, guider_ui.sys_setting_lbl_funkey1, &guider_msg_data, gui_msg_set_clear_flag_by_int32_cb, GUI_MODEL_GLOBAL_SUBPAGE_MSG_ID_SHOW_FUNCKEY1, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
 
-        gui_model_global_subpage_msg_title_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_STRING);
-        lv_subject_add_observer_obj(subject_title, gui_msg_set_label_text_by_string_cb, guider_ui.sys_setting_lbl_menu_title, &guider_msg_data);
+        gui_msg_setup_component(true, false, subject_title, guider_ui.sys_setting_lbl_menu_title, &guider_msg_data, gui_msg_set_label_text_by_string_cb, GUI_MODEL_GLOBAL_SUBPAGE_MSG_ID_TITLE, GUI_MSG_ACCESS_GET, VALUE_STRING, NULL);
 
-        gui_model_global_subpage_msg_funckey3_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_STRING);
-        lv_subject_add_observer_obj(subject_funckey3, gui_model_global_subpage_msg_sys_setting_lbl_funkey3_set_text_cb, guider_ui.sys_setting_lbl_funkey3, &guider_msg_data);
-        gui_model_global_subpage_msg_hide_funckey3_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
-        lv_subject_add_observer_obj(subject_hide_funckey3, gui_msg_set_flag_by_int32_cb, guider_ui.sys_setting_lbl_funkey3, &guider_msg_data);
-        gui_model_global_subpage_msg_show_funckey3_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
-        lv_subject_add_observer_obj(subject_show_funckey3, gui_msg_set_clear_flag_by_int32_cb, guider_ui.sys_setting_lbl_funkey3, &guider_msg_data);
+        gui_msg_setup_component(true, false, subject_funckey3, guider_ui.sys_setting_lbl_funkey3, &guider_msg_data, gui_model_global_subpage_msg_sys_setting_lbl_funkey3_set_text_cb, GUI_MODEL_GLOBAL_SUBPAGE_MSG_ID_FUNCKEY3, GUI_MSG_ACCESS_GET, VALUE_STRING, NULL);
+        gui_msg_setup_component(true, false, subject_hide_funckey3, guider_ui.sys_setting_lbl_funkey3, &guider_msg_data, gui_msg_set_flag_by_int32_cb, GUI_MODEL_GLOBAL_SUBPAGE_MSG_ID_HIDE_FUNCKEY3, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
+        gui_msg_setup_component(true, false, subject_show_funckey3, guider_ui.sys_setting_lbl_funkey3, &guider_msg_data, gui_msg_set_clear_flag_by_int32_cb, GUI_MODEL_GLOBAL_SUBPAGE_MSG_ID_SHOW_FUNCKEY3, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
 
-        gui_model_global_subpage_msg_subpage_icon_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
-        lv_subject_add_observer_obj(subject_subpage_icon, gui_model_global_subpage_msg_sys_setting_img_icon_set_img_path_cb, guider_ui.sys_setting_img_icon, &guider_msg_data);
+        gui_msg_setup_component(true, false, subject_subpage_icon, guider_ui.sys_setting_img_icon, &guider_msg_data, gui_model_global_subpage_msg_sys_setting_img_icon_set_img_path_cb, GUI_MODEL_GLOBAL_SUBPAGE_MSG_ID_SUBPAGE_ICON, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
 
-        gui_model_global_subpage_msg_funckey4_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_STRING);
-        lv_subject_add_observer_obj(subject_funckey4, gui_msg_set_label_text_by_string_cb, guider_ui.sys_setting_lbl_funkey4, &guider_msg_data);
-        gui_model_global_subpage_msg_hide_funckey4_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
-        lv_subject_add_observer_obj(subject_hide_funckey4, gui_msg_set_flag_by_int32_cb, guider_ui.sys_setting_lbl_funkey4, &guider_msg_data);
-        gui_model_global_subpage_msg_show_funckey4_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
-        lv_subject_add_observer_obj(subject_show_funckey4, gui_msg_set_clear_flag_by_int32_cb, guider_ui.sys_setting_lbl_funkey4, &guider_msg_data);
+        gui_msg_setup_component(true, false, subject_funckey4, guider_ui.sys_setting_lbl_funkey4, &guider_msg_data, gui_msg_set_label_text_by_string_cb, GUI_MODEL_GLOBAL_SUBPAGE_MSG_ID_FUNCKEY4, GUI_MSG_ACCESS_GET, VALUE_STRING, NULL);
+        gui_msg_setup_component(true, false, subject_hide_funckey4, guider_ui.sys_setting_lbl_funkey4, &guider_msg_data, gui_msg_set_flag_by_int32_cb, GUI_MODEL_GLOBAL_SUBPAGE_MSG_ID_HIDE_FUNCKEY4, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
+        gui_msg_setup_component(true, false, subject_show_funckey4, guider_ui.sys_setting_lbl_funkey4, &guider_msg_data, gui_msg_set_clear_flag_by_int32_cb, GUI_MODEL_GLOBAL_SUBPAGE_MSG_ID_SHOW_FUNCKEY4, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
 
 
         for (int i = 0; i < 20; i++) {
@@ -587,52 +576,32 @@ void gui_model_global_subpage_msg_init_events()
         }
     }
     if (!guider_ui.video_rec_del) {
-        gui_model_global_subpage_msg_title_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_STRING);
-        lv_subject_add_observer_obj(subject_title, gui_msg_set_label_text_by_string_cb, guider_ui.video_rec_lbl_menu_title, &guider_msg_data);
+        gui_msg_setup_component(true, false, subject_title, guider_ui.video_rec_lbl_menu_title, &guider_msg_data, gui_msg_set_label_text_by_string_cb, GUI_MODEL_GLOBAL_SUBPAGE_MSG_ID_TITLE, GUI_MSG_ACCESS_GET, VALUE_STRING, NULL);
 
-        gui_model_global_subpage_msg_funckey4_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_STRING);
-        lv_subject_add_observer_obj(subject_funckey4, gui_model_global_subpage_msg_video_rec_lbl_funkey4_set_text_cb, guider_ui.video_rec_lbl_funkey4, &guider_msg_data);
-        gui_model_global_subpage_msg_hide_funckey4_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
-        lv_subject_add_observer_obj(subject_hide_funckey4, gui_msg_set_flag_by_int32_cb, guider_ui.video_rec_lbl_funkey4, &guider_msg_data);
-        gui_model_global_subpage_msg_show_funckey4_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
-        lv_subject_add_observer_obj(subject_show_funckey4, gui_msg_set_clear_flag_by_int32_cb, guider_ui.video_rec_lbl_funkey4, &guider_msg_data);
+        gui_msg_setup_component(true, false, subject_funckey4, guider_ui.video_rec_lbl_funkey4, &guider_msg_data, gui_model_global_subpage_msg_video_rec_lbl_funkey4_set_text_cb, GUI_MODEL_GLOBAL_SUBPAGE_MSG_ID_FUNCKEY4, GUI_MSG_ACCESS_GET, VALUE_STRING, NULL);
+        gui_msg_setup_component(true, false, subject_hide_funckey4, guider_ui.video_rec_lbl_funkey4, &guider_msg_data, gui_msg_set_flag_by_int32_cb, GUI_MODEL_GLOBAL_SUBPAGE_MSG_ID_HIDE_FUNCKEY4, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
+        gui_msg_setup_component(true, false, subject_show_funckey4, guider_ui.video_rec_lbl_funkey4, &guider_msg_data, gui_msg_set_clear_flag_by_int32_cb, GUI_MODEL_GLOBAL_SUBPAGE_MSG_ID_SHOW_FUNCKEY4, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
 
-        gui_model_global_subpage_msg_funckey2_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_STRING);
-        lv_subject_add_observer_obj(subject_funckey2, gui_model_global_subpage_msg_video_rec_lbl_funkey2_set_text_cb, guider_ui.video_rec_lbl_funkey2, &guider_msg_data);
-        gui_model_global_subpage_msg_state_funkey2_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
-        lv_subject_add_observer_obj(subject_state_funkey2, gui_msg_set_control_state_by_int32_cb, guider_ui.video_rec_lbl_funkey2, &guider_msg_data);
-        gui_model_global_subpage_msg_hide_funckey2_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
-        lv_subject_add_observer_obj(subject_hide_funckey2, gui_msg_set_flag_by_int32_cb, guider_ui.video_rec_lbl_funkey2, &guider_msg_data);
-        gui_model_global_subpage_msg_show_funckey2_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
-        lv_subject_add_observer_obj(subject_show_funckey2, gui_msg_set_clear_flag_by_int32_cb, guider_ui.video_rec_lbl_funkey2, &guider_msg_data);
+        gui_msg_setup_component(true, false, subject_funckey2, guider_ui.video_rec_lbl_funkey2, &guider_msg_data, gui_model_global_subpage_msg_video_rec_lbl_funkey2_set_text_cb, GUI_MODEL_GLOBAL_SUBPAGE_MSG_ID_FUNCKEY2, GUI_MSG_ACCESS_GET, VALUE_STRING, NULL);
+        gui_msg_setup_component(true, false, subject_state_funkey2, guider_ui.video_rec_lbl_funkey2, &guider_msg_data, gui_msg_set_control_state_by_int32_cb, GUI_MODEL_GLOBAL_SUBPAGE_MSG_ID_STATE_FUNKEY2, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
+        gui_msg_setup_component(true, false, subject_hide_funckey2, guider_ui.video_rec_lbl_funkey2, &guider_msg_data, gui_msg_set_flag_by_int32_cb, GUI_MODEL_GLOBAL_SUBPAGE_MSG_ID_HIDE_FUNCKEY2, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
+        gui_msg_setup_component(true, false, subject_show_funckey2, guider_ui.video_rec_lbl_funkey2, &guider_msg_data, gui_msg_set_clear_flag_by_int32_cb, GUI_MODEL_GLOBAL_SUBPAGE_MSG_ID_SHOW_FUNCKEY2, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
 
-        gui_model_global_subpage_msg_funckey3_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_STRING);
-        lv_subject_add_observer_obj(subject_funckey3, gui_model_global_subpage_msg_video_rec_lbl_funkey3_set_text_cb, guider_ui.video_rec_lbl_funkey3, &guider_msg_data);
-        gui_model_global_subpage_msg_state_funkey3_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
-        lv_subject_add_observer_obj(subject_state_funkey3, gui_msg_set_control_state_by_int32_cb, guider_ui.video_rec_lbl_funkey3, &guider_msg_data);
-        gui_model_global_subpage_msg_hide_funckey3_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
-        lv_subject_add_observer_obj(subject_hide_funckey3, gui_msg_set_flag_by_int32_cb, guider_ui.video_rec_lbl_funkey3, &guider_msg_data);
-        gui_model_global_subpage_msg_show_funckey3_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
-        lv_subject_add_observer_obj(subject_show_funckey3, gui_msg_set_clear_flag_by_int32_cb, guider_ui.video_rec_lbl_funkey3, &guider_msg_data);
+        gui_msg_setup_component(true, false, subject_funckey3, guider_ui.video_rec_lbl_funkey3, &guider_msg_data, gui_model_global_subpage_msg_video_rec_lbl_funkey3_set_text_cb, GUI_MODEL_GLOBAL_SUBPAGE_MSG_ID_FUNCKEY3, GUI_MSG_ACCESS_GET, VALUE_STRING, NULL);
+        gui_msg_setup_component(true, false, subject_state_funkey3, guider_ui.video_rec_lbl_funkey3, &guider_msg_data, gui_msg_set_control_state_by_int32_cb, GUI_MODEL_GLOBAL_SUBPAGE_MSG_ID_STATE_FUNKEY3, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
+        gui_msg_setup_component(true, false, subject_hide_funckey3, guider_ui.video_rec_lbl_funkey3, &guider_msg_data, gui_msg_set_flag_by_int32_cb, GUI_MODEL_GLOBAL_SUBPAGE_MSG_ID_HIDE_FUNCKEY3, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
+        gui_msg_setup_component(true, false, subject_show_funckey3, guider_ui.video_rec_lbl_funkey3, &guider_msg_data, gui_msg_set_clear_flag_by_int32_cb, GUI_MODEL_GLOBAL_SUBPAGE_MSG_ID_SHOW_FUNCKEY3, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
 
-        gui_model_global_subpage_msg_roller_opt_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_STRING);
-        lv_subject_add_observer_obj(subject_roller_opt, gui_msg_set_roller_roller_name_by_string_cb, guider_ui.video_rec_roller_mutifunc, &guider_msg_data);
-        gui_model_global_subpage_msg_hide_roller_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
-        lv_subject_add_observer_obj(subject_hide_roller, gui_msg_set_flag_by_int32_cb, guider_ui.video_rec_roller_mutifunc, &guider_msg_data);
-        gui_model_global_subpage_msg_show_roller_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
-        lv_subject_add_observer_obj(subject_show_roller, gui_msg_set_clear_flag_by_int32_cb, guider_ui.video_rec_roller_mutifunc, &guider_msg_data);
+        gui_msg_setup_component(true, false, subject_roller_opt, guider_ui.video_rec_roller_mutifunc, &guider_msg_data, gui_msg_set_roller_roller_name_by_string_cb, GUI_MODEL_GLOBAL_SUBPAGE_MSG_ID_ROLLER_OPT, GUI_MSG_ACCESS_GET, VALUE_STRING, NULL);
+        gui_msg_setup_component(true, false, subject_hide_roller, guider_ui.video_rec_roller_mutifunc, &guider_msg_data, gui_msg_set_flag_by_int32_cb, GUI_MODEL_GLOBAL_SUBPAGE_MSG_ID_HIDE_ROLLER, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
+        gui_msg_setup_component(true, false, subject_show_roller, guider_ui.video_rec_roller_mutifunc, &guider_msg_data, gui_msg_set_clear_flag_by_int32_cb, GUI_MODEL_GLOBAL_SUBPAGE_MSG_ID_SHOW_ROLLER, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
 
-        gui_model_global_subpage_msg_funckey1_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_STRING);
-        lv_subject_add_observer_obj(subject_funckey1, gui_model_global_subpage_msg_video_rec_lbl_funkey1_set_text_cb, guider_ui.video_rec_lbl_funkey1, &guider_msg_data);
-        gui_model_global_subpage_msg_state_funkey1_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
-        lv_subject_add_observer_obj(subject_state_funkey1, gui_msg_set_control_state_by_int32_cb, guider_ui.video_rec_lbl_funkey1, &guider_msg_data);
-        gui_model_global_subpage_msg_hide_funckey1_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
-        lv_subject_add_observer_obj(subject_hide_funckey1, gui_msg_set_flag_by_int32_cb, guider_ui.video_rec_lbl_funkey1, &guider_msg_data);
-        gui_model_global_subpage_msg_show_funckey1_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
-        lv_subject_add_observer_obj(subject_show_funckey1, gui_msg_set_clear_flag_by_int32_cb, guider_ui.video_rec_lbl_funkey1, &guider_msg_data);
+        gui_msg_setup_component(true, false, subject_funckey1, guider_ui.video_rec_lbl_funkey1, &guider_msg_data, gui_model_global_subpage_msg_video_rec_lbl_funkey1_set_text_cb, GUI_MODEL_GLOBAL_SUBPAGE_MSG_ID_FUNCKEY1, GUI_MSG_ACCESS_GET, VALUE_STRING, NULL);
+        gui_msg_setup_component(true, false, subject_state_funkey1, guider_ui.video_rec_lbl_funkey1, &guider_msg_data, gui_msg_set_control_state_by_int32_cb, GUI_MODEL_GLOBAL_SUBPAGE_MSG_ID_STATE_FUNKEY1, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
+        gui_msg_setup_component(true, false, subject_hide_funckey1, guider_ui.video_rec_lbl_funkey1, &guider_msg_data, gui_msg_set_flag_by_int32_cb, GUI_MODEL_GLOBAL_SUBPAGE_MSG_ID_HIDE_FUNCKEY1, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
+        gui_msg_setup_component(true, false, subject_show_funckey1, guider_ui.video_rec_lbl_funkey1, &guider_msg_data, gui_msg_set_clear_flag_by_int32_cb, GUI_MODEL_GLOBAL_SUBPAGE_MSG_ID_SHOW_FUNCKEY1, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
 
-        gui_model_global_subpage_msg_subpage_icon_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
-        lv_subject_add_observer_obj(subject_subpage_icon, gui_model_global_subpage_msg_video_rec_img_16_set_img_path_cb, guider_ui.video_rec_img_16, &guider_msg_data);
+        gui_msg_setup_component(true, false, subject_subpage_icon, guider_ui.video_rec_img_16, &guider_msg_data, gui_model_global_subpage_msg_video_rec_img_16_set_img_path_cb, GUI_MODEL_GLOBAL_SUBPAGE_MSG_ID_SUBPAGE_ICON, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
 
 
         for (int i = 0; i < 20; i++) {
@@ -699,52 +668,32 @@ void gui_model_global_subpage_msg_init_events()
         }
     }
     if (!guider_ui.video_photo_del) {
-        gui_model_global_subpage_msg_funckey4_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_STRING);
-        lv_subject_add_observer_obj(subject_funckey4, gui_model_global_subpage_msg_video_photo_lbl_funkey4_set_text_cb, guider_ui.video_photo_lbl_funkey4, &guider_msg_data);
-        gui_model_global_subpage_msg_hide_funckey4_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
-        lv_subject_add_observer_obj(subject_hide_funckey4, gui_msg_set_flag_by_int32_cb, guider_ui.video_photo_lbl_funkey4, &guider_msg_data);
-        gui_model_global_subpage_msg_show_funckey4_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
-        lv_subject_add_observer_obj(subject_show_funckey4, gui_msg_set_clear_flag_by_int32_cb, guider_ui.video_photo_lbl_funkey4, &guider_msg_data);
+        gui_msg_setup_component(true, false, subject_funckey4, guider_ui.video_photo_lbl_funkey4, &guider_msg_data, gui_model_global_subpage_msg_video_photo_lbl_funkey4_set_text_cb, GUI_MODEL_GLOBAL_SUBPAGE_MSG_ID_FUNCKEY4, GUI_MSG_ACCESS_GET, VALUE_STRING, NULL);
+        gui_msg_setup_component(true, false, subject_hide_funckey4, guider_ui.video_photo_lbl_funkey4, &guider_msg_data, gui_msg_set_flag_by_int32_cb, GUI_MODEL_GLOBAL_SUBPAGE_MSG_ID_HIDE_FUNCKEY4, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
+        gui_msg_setup_component(true, false, subject_show_funckey4, guider_ui.video_photo_lbl_funkey4, &guider_msg_data, gui_msg_set_clear_flag_by_int32_cb, GUI_MODEL_GLOBAL_SUBPAGE_MSG_ID_SHOW_FUNCKEY4, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
 
-        gui_model_global_subpage_msg_funckey2_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_STRING);
-        lv_subject_add_observer_obj(subject_funckey2, gui_model_global_subpage_msg_video_photo_lbl_funkey2_set_text_cb, guider_ui.video_photo_lbl_funkey2, &guider_msg_data);
-        gui_model_global_subpage_msg_state_funkey2_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
-        lv_subject_add_observer_obj(subject_state_funkey2, gui_msg_set_control_state_by_int32_cb, guider_ui.video_photo_lbl_funkey2, &guider_msg_data);
-        gui_model_global_subpage_msg_hide_funckey2_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
-        lv_subject_add_observer_obj(subject_hide_funckey2, gui_msg_set_flag_by_int32_cb, guider_ui.video_photo_lbl_funkey2, &guider_msg_data);
-        gui_model_global_subpage_msg_show_funckey2_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
-        lv_subject_add_observer_obj(subject_show_funckey2, gui_msg_set_clear_flag_by_int32_cb, guider_ui.video_photo_lbl_funkey2, &guider_msg_data);
+        gui_msg_setup_component(true, false, subject_funckey2, guider_ui.video_photo_lbl_funkey2, &guider_msg_data, gui_model_global_subpage_msg_video_photo_lbl_funkey2_set_text_cb, GUI_MODEL_GLOBAL_SUBPAGE_MSG_ID_FUNCKEY2, GUI_MSG_ACCESS_GET, VALUE_STRING, NULL);
+        gui_msg_setup_component(true, false, subject_state_funkey2, guider_ui.video_photo_lbl_funkey2, &guider_msg_data, gui_msg_set_control_state_by_int32_cb, GUI_MODEL_GLOBAL_SUBPAGE_MSG_ID_STATE_FUNKEY2, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
+        gui_msg_setup_component(true, false, subject_hide_funckey2, guider_ui.video_photo_lbl_funkey2, &guider_msg_data, gui_msg_set_flag_by_int32_cb, GUI_MODEL_GLOBAL_SUBPAGE_MSG_ID_HIDE_FUNCKEY2, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
+        gui_msg_setup_component(true, false, subject_show_funckey2, guider_ui.video_photo_lbl_funkey2, &guider_msg_data, gui_msg_set_clear_flag_by_int32_cb, GUI_MODEL_GLOBAL_SUBPAGE_MSG_ID_SHOW_FUNCKEY2, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
 
-        gui_model_global_subpage_msg_funckey3_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_STRING);
-        lv_subject_add_observer_obj(subject_funckey3, gui_model_global_subpage_msg_video_photo_lbl_funkey3_set_text_cb, guider_ui.video_photo_lbl_funkey3, &guider_msg_data);
-        gui_model_global_subpage_msg_state_funkey3_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
-        lv_subject_add_observer_obj(subject_state_funkey3, gui_msg_set_control_state_by_int32_cb, guider_ui.video_photo_lbl_funkey3, &guider_msg_data);
-        gui_model_global_subpage_msg_hide_funckey3_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
-        lv_subject_add_observer_obj(subject_hide_funckey3, gui_msg_set_flag_by_int32_cb, guider_ui.video_photo_lbl_funkey3, &guider_msg_data);
-        gui_model_global_subpage_msg_show_funckey3_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
-        lv_subject_add_observer_obj(subject_show_funckey3, gui_msg_set_clear_flag_by_int32_cb, guider_ui.video_photo_lbl_funkey3, &guider_msg_data);
+        gui_msg_setup_component(true, false, subject_funckey3, guider_ui.video_photo_lbl_funkey3, &guider_msg_data, gui_model_global_subpage_msg_video_photo_lbl_funkey3_set_text_cb, GUI_MODEL_GLOBAL_SUBPAGE_MSG_ID_FUNCKEY3, GUI_MSG_ACCESS_GET, VALUE_STRING, NULL);
+        gui_msg_setup_component(true, false, subject_state_funkey3, guider_ui.video_photo_lbl_funkey3, &guider_msg_data, gui_msg_set_control_state_by_int32_cb, GUI_MODEL_GLOBAL_SUBPAGE_MSG_ID_STATE_FUNKEY3, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
+        gui_msg_setup_component(true, false, subject_hide_funckey3, guider_ui.video_photo_lbl_funkey3, &guider_msg_data, gui_msg_set_flag_by_int32_cb, GUI_MODEL_GLOBAL_SUBPAGE_MSG_ID_HIDE_FUNCKEY3, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
+        gui_msg_setup_component(true, false, subject_show_funckey3, guider_ui.video_photo_lbl_funkey3, &guider_msg_data, gui_msg_set_clear_flag_by_int32_cb, GUI_MODEL_GLOBAL_SUBPAGE_MSG_ID_SHOW_FUNCKEY3, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
 
-        gui_model_global_subpage_msg_subpage_icon_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
-        lv_subject_add_observer_obj(subject_subpage_icon, gui_model_global_subpage_msg_video_photo_img_16_set_img_path_cb, guider_ui.video_photo_img_16, &guider_msg_data);
+        gui_msg_setup_component(true, false, subject_subpage_icon, guider_ui.video_photo_img_16, &guider_msg_data, gui_model_global_subpage_msg_video_photo_img_16_set_img_path_cb, GUI_MODEL_GLOBAL_SUBPAGE_MSG_ID_SUBPAGE_ICON, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
 
-        gui_model_global_subpage_msg_funckey1_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_STRING);
-        lv_subject_add_observer_obj(subject_funckey1, gui_model_global_subpage_msg_video_photo_lbl_funkey1_set_text_cb, guider_ui.video_photo_lbl_funkey1, &guider_msg_data);
-        gui_model_global_subpage_msg_state_funkey1_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
-        lv_subject_add_observer_obj(subject_state_funkey1, gui_msg_set_control_state_by_int32_cb, guider_ui.video_photo_lbl_funkey1, &guider_msg_data);
-        gui_model_global_subpage_msg_hide_funckey1_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
-        lv_subject_add_observer_obj(subject_hide_funckey1, gui_msg_set_flag_by_int32_cb, guider_ui.video_photo_lbl_funkey1, &guider_msg_data);
-        gui_model_global_subpage_msg_show_funckey1_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
-        lv_subject_add_observer_obj(subject_show_funckey1, gui_msg_set_clear_flag_by_int32_cb, guider_ui.video_photo_lbl_funkey1, &guider_msg_data);
+        gui_msg_setup_component(true, false, subject_funckey1, guider_ui.video_photo_lbl_funkey1, &guider_msg_data, gui_model_global_subpage_msg_video_photo_lbl_funkey1_set_text_cb, GUI_MODEL_GLOBAL_SUBPAGE_MSG_ID_FUNCKEY1, GUI_MSG_ACCESS_GET, VALUE_STRING, NULL);
+        gui_msg_setup_component(true, false, subject_state_funkey1, guider_ui.video_photo_lbl_funkey1, &guider_msg_data, gui_msg_set_control_state_by_int32_cb, GUI_MODEL_GLOBAL_SUBPAGE_MSG_ID_STATE_FUNKEY1, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
+        gui_msg_setup_component(true, false, subject_hide_funckey1, guider_ui.video_photo_lbl_funkey1, &guider_msg_data, gui_msg_set_flag_by_int32_cb, GUI_MODEL_GLOBAL_SUBPAGE_MSG_ID_HIDE_FUNCKEY1, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
+        gui_msg_setup_component(true, false, subject_show_funckey1, guider_ui.video_photo_lbl_funkey1, &guider_msg_data, gui_msg_set_clear_flag_by_int32_cb, GUI_MODEL_GLOBAL_SUBPAGE_MSG_ID_SHOW_FUNCKEY1, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
 
-        gui_model_global_subpage_msg_title_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_STRING);
-        lv_subject_add_observer_obj(subject_title, gui_msg_set_label_text_by_string_cb, guider_ui.video_photo_lbl_menu_title, &guider_msg_data);
+        gui_msg_setup_component(true, false, subject_title, guider_ui.video_photo_lbl_menu_title, &guider_msg_data, gui_msg_set_label_text_by_string_cb, GUI_MODEL_GLOBAL_SUBPAGE_MSG_ID_TITLE, GUI_MSG_ACCESS_GET, VALUE_STRING, NULL);
 
-        gui_model_global_subpage_msg_roller_opt_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_STRING);
-        lv_subject_add_observer_obj(subject_roller_opt, gui_msg_set_roller_roller_name_by_string_cb, guider_ui.video_photo_roller_mutifunc, &guider_msg_data);
-        gui_model_global_subpage_msg_hide_roller_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
-        lv_subject_add_observer_obj(subject_hide_roller, gui_msg_set_flag_by_int32_cb, guider_ui.video_photo_roller_mutifunc, &guider_msg_data);
-        gui_model_global_subpage_msg_show_roller_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
-        lv_subject_add_observer_obj(subject_show_roller, gui_msg_set_clear_flag_by_int32_cb, guider_ui.video_photo_roller_mutifunc, &guider_msg_data);
+        gui_msg_setup_component(true, false, subject_roller_opt, guider_ui.video_photo_roller_mutifunc, &guider_msg_data, gui_msg_set_roller_roller_name_by_string_cb, GUI_MODEL_GLOBAL_SUBPAGE_MSG_ID_ROLLER_OPT, GUI_MSG_ACCESS_GET, VALUE_STRING, NULL);
+        gui_msg_setup_component(true, false, subject_hide_roller, guider_ui.video_photo_roller_mutifunc, &guider_msg_data, gui_msg_set_flag_by_int32_cb, GUI_MODEL_GLOBAL_SUBPAGE_MSG_ID_HIDE_ROLLER, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
+        gui_msg_setup_component(true, false, subject_show_roller, guider_ui.video_photo_roller_mutifunc, &guider_msg_data, gui_msg_set_clear_flag_by_int32_cb, GUI_MODEL_GLOBAL_SUBPAGE_MSG_ID_SHOW_ROLLER, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
 
 
         for (int i = 0; i < 20; i++) {

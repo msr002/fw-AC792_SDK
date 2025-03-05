@@ -34,6 +34,7 @@ extern lv_font_t lv_font_montserratMedium_22;
 extern lv_font_t lv_font_montserratMedium_16;
 extern lv_font_t lv_font_fangsong_16;
 extern lv_font_t lv_font_fangsong_24;
+extern lv_font_t lv_font_fangsong_48;
 extern lv_font_t lv_font_FangZhengKaiTiJianTi_1_22;
 extern lv_font_t lv_font_timesnewromanpsmt_16;
 extern lv_font_t lv_font_timesnewromanpsmt_24;

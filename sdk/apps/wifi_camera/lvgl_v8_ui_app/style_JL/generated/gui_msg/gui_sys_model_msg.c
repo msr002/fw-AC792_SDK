@@ -96,8 +96,7 @@ void gui_sys_model_msg_init_events()
 
     lv_subject_t *subject_sys_time = gui_msg_get_subject(GUI_SYS_MODEL_MSG_ID_SYS_TIME);
     if (!guider_ui.video_photo_del) {
-        gui_sys_model_msg_sys_time_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_TIME);
-        lv_subject_add_observer_obj(subject_sys_time, gui_msg_set_digital_clock_clock_time_by_time_cb, guider_ui.video_photo_digitclock_1, &guider_msg_data);
+        gui_msg_setup_component(true, false, subject_sys_time, guider_ui.video_photo_digitclock_1, &guider_msg_data, gui_msg_set_digital_clock_clock_time_by_time_cb, GUI_SYS_MODEL_MSG_ID_SYS_TIME, GUI_MSG_ACCESS_GET, VALUE_TIME, NULL);
 
 
         for (int i = 0; i < 1; i++) {
