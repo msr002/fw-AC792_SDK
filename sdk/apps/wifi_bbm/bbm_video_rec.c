@@ -843,6 +843,60 @@ static int video_set_abr(struct video_rec_config *config)
     return ret;
 }
 
+static int video_take_photo(struct video_rec_config *config)
+{
+    int ret = -1;
+    int find = 0;
+    char buf[128];
+    char fname[32];
+    union video_req req = {0};
+    struct video_dev_hdl *dev_hdl = NULL;
+    void *fp;
+
+    u8 id = config->id;
+    u8 sub_id = config->sub_id;
+
+    list_for_each_entry(dev_hdl, &__this->dev_list_head, entry) {
+        if (dev_hdl->config.id == id && dev_hdl->config.sub_id == sub_id) {
+            find = 1;
+            break;
+        }
+    }
+
+    if (find) {
+        if (dev_hdl->video_server) {
+            printf("video save frame \n");
+            fp = fopen(CAMERA0_CAP_PATH"img_****.jpg", "w+");
+            if (!fp) {
+                printf("video take photo fopen err \n");
+                return -1;
+            }
+            ret = fget_name(fp, fname, ARRAY_SIZE(fname));
+            if (ret <= 0) {
+                printf("video take photo fget_name err\n");
+                fclose(fp);
+                return -1;
+            }
+            fclose(fp);
+            sprintf(buf, "%s%s", CAMERA0_CAP_PATH, fname);
+            req.rec.rec_save_path = buf;
+
+            ret = server_request(dev_hdl->video_server, VIDEO_REQ_SAVE_FRAME, &req);
+            if (ret) {
+                printf("video save frame err:%d \n", ret);
+            } else {
+#if defined CONFIG_ENABLE_VLIST
+                sprintf(buf, "%s", req.rec.rec_save_path);
+                FILE_LIST_ADD(0, buf, 0);
+#endif
+            }
+        }
+    }
+
+    return ret;
+}
+
+
 static int video_get_status(struct video_rec_config *config, int *status)
 {
     u8 id = config->id;
@@ -913,6 +967,10 @@ static int video_rec_state_machine(struct application *app, enum app_state state
         case ACTION_VIDEO_GET_STATUS:
             puts("ACTION_VIDEO_GET_STATUS\n");
             ret = video_get_status(it->exdata, it->data);
+            break;
+        case ACTION_VIDEO_TAKE_PHOTO:
+            puts("ACTION_VIDEO_TAKE_PHOTO\n");
+            ret = video_take_photo(it->exdata);
             break;
         }
         break;

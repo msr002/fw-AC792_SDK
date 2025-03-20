@@ -611,27 +611,35 @@
 #define MAX_FILE_NAME_LEN       64
 #define FILE_SHOW_NUM           12  /* 一页显示文件数 */
 
-#if (defined CONFIG_VIDEO0_ENABLE) && (defined CONFIG_VIDEO1_ENABLE) && (defined CONFIG_VIDEO2_ENABLE)
-#define THREE_WAY_ENABLE		1
-#define THREE_WAY_DOUBLE_RAW    1
-#define CONFIG_VIDEO_REC_NUM    4
-#elif (defined CONFIG_VIDEO0_ENABLE) && (defined CONFIG_VIDEO1_ENABLE)
-#define THREE_WAY_ENABLE		0
-#define THREE_WAY_DOUBLE_RAW    1
-#define CONFIG_VIDEO_REC_NUM    6
-#elif (defined CONFIG_VIDEO0_ENABLE) && (defined CONFIG_VIDEO2_ENABLE)
+//一旦有VIDEO0/VIDEO1打开, 则不能共存VIDEO4/VIDEO5
+#if (defined CONFIG_VIDEO4_ENABLE) || (defined CONFIG_VIDEO5_ENABLE)
+//二合一功能
 #define THREE_WAY_ENABLE		0
 #define THREE_WAY_DOUBLE_RAW    0
 #define CONFIG_VIDEO_REC_NUM    6
+
+//warning
+#if (defined CONFIG_VIDEO0_ENABLE) || (defined CONFIG_VIDEO1_ENABLE)
+#error "they can not enable at the same time!"
+#endif
+
+#else
+
+#define CONFIG_VIDEO_REC_NUM    4
+#if (defined CONFIG_VIDEO0_ENABLE) && (defined CONFIG_VIDEO1_ENABLE) && (defined CONFIG_VIDEO2_ENABLE)
+//dvp+mipi+uvc
+#define THREE_WAY_ENABLE		1
+#define THREE_WAY_DOUBLE_RAW    1
+#elif (defined CONFIG_VIDEO0_ENABLE) && (defined CONFIG_VIDEO1_ENABLE)
+//dvp+mipi
+#define THREE_WAY_ENABLE		0
+#define THREE_WAY_DOUBLE_RAW    1
 #else
 #define THREE_WAY_ENABLE		0
 #define THREE_WAY_DOUBLE_RAW    0
-#define CONFIG_VIDEO_REC_NUM    6
-
 #endif
 
-
-
+#endif
 
 #if defined CONFIG_VIDEO1_ENABLE
 #define CONFIG_PARK_ENABLE
@@ -835,6 +843,7 @@
 #ifdef CONFIG_UI_ENABLE
 #define CONFIG_UI_STYLE_JL_ENABLE   //JL风格UI，使用触摸UI工程时要打开，按键UI工程注释掉
 // #define CONFIG_UI_STYLE_LY_ENABLE   //LY风格UI，使用按键UI工程时要打开，触摸UI工程注释掉
+#define CONFIG_FILE_PREVIEW_ENABLE
 #endif
 
 

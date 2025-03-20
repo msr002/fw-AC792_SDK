@@ -25,15 +25,16 @@ typedef enum {
     GUI_RES_SWITCH_PNG = 0x55000006,   //F:\gitlab-m\ac792\ui_prj\wifi_bbm_800x480\import\image\switch.png
     GUI_RES_UP_PNG = 0x55000007,   //F:\gitlab-m\ac792\ui_prj\wifi_bbm_800x480\import\image\up.png
     GUI_RES_DOWN_PNG = 0x55000008,   //F:\gitlab-m\ac792\ui_prj\wifi_bbm_800x480\import\image\down.png
-    GUI_RES_PAIR_OPT_PAIR_PNG = 0x55000009,   //F:\gitlab-m\ac792\ui_prj\wifi_bbm_800x480\import\image\pair_opt_pair.png
-    GUI_RES_PAIR_OPT_UNPAIR_PNG = 0x5500000A,   //F:\gitlab-m\ac792\ui_prj\wifi_bbm_800x480\import\image\pair_opt_unpair.png
-    GUI_RES_BACK_WHITE_PNG = 0x5500000B,   //F:\gitlab-m\ac792\ui_prj\wifi_bbm_800x480\import\image\back_white.png
-    GUI_RES_VIDEO_PLAY_PNG = 0x5500000C,   //F:\gitlab-m\ac792\ui_prj\wifi_bbm_800x480\import\image\video_play.png
-    GUI_RES_VIDEO_PAUSE_PNG = 0x5500000D,   //F:\gitlab-m\ac792\ui_prj\wifi_bbm_800x480\import\image\video_pause.png
-    GUI_RES_SKIP_NEXT_PNG = 0x5500000E,   //F:\gitlab-m\ac792\ui_prj\wifi_bbm_800x480\import\image\skip_next.png
-    GUI_RES_SKIP_PREVIOUS_PNG = 0x5500000F,   //F:\gitlab-m\ac792\ui_prj\wifi_bbm_800x480\import\image\skip_previous.png
-    GUI_RES_WARN_PNG = 0x55000010,   //F:\gitlab-m\ac792\ui_prj\wifi_bbm_800x480\import\image\warn.png
-    GUI_RES_REMOTE_PNG = 0x55000011,   //F:\gitlab-m\ac792\ui_prj\wifi_bbm_800x480\import\image\remote.png
+    GUI_RES_DELETE_PNG = 0x55000009,   //F:\gitlab-m\ac792\ui_prj\wifi_bbm_800x480\import\image\delete.png
+    GUI_RES_PAIR_OPT_PAIR_PNG = 0x5500000A,   //F:\gitlab-m\ac792\ui_prj\wifi_bbm_800x480\import\image\pair_opt_pair.png
+    GUI_RES_PAIR_OPT_UNPAIR_PNG = 0x5500000B,   //F:\gitlab-m\ac792\ui_prj\wifi_bbm_800x480\import\image\pair_opt_unpair.png
+    GUI_RES_BACK_WHITE_PNG = 0x5500000C,   //F:\gitlab-m\ac792\ui_prj\wifi_bbm_800x480\import\image\back_white.png
+    GUI_RES_VIDEO_PLAY_PNG = 0x5500000D,   //F:\gitlab-m\ac792\ui_prj\wifi_bbm_800x480\import\image\video_play.png
+    GUI_RES_VIDEO_PAUSE_PNG = 0x5500000E,   //F:\gitlab-m\ac792\ui_prj\wifi_bbm_800x480\import\image\video_pause.png
+    GUI_RES_SKIP_NEXT_PNG = 0x5500000F,   //F:\gitlab-m\ac792\ui_prj\wifi_bbm_800x480\import\image\skip_next.png
+    GUI_RES_SKIP_PREVIOUS_PNG = 0x55000010,   //F:\gitlab-m\ac792\ui_prj\wifi_bbm_800x480\import\image\skip_previous.png
+    GUI_RES_WARN_PNG = 0x55000011,   //F:\gitlab-m\ac792\ui_prj\wifi_bbm_800x480\import\image\warn.png
+    GUI_RES_REMOTE_PNG = 0x55000012,   //F:\gitlab-m\ac792\ui_prj\wifi_bbm_800x480\import\image\remote.png
 } GUI_RES_ID;
 
 extern char *gui_get_res_path(int32_t id);

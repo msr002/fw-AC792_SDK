@@ -45,18 +45,18 @@ extern const int config_btctler_modules;
 extern const int config_stack_modules;
 #define STACK_MODULES_IS_SUPPORT(x)         (config_stack_modules & (x))
 
-#ifdef CONFIG_RF_TEST_ENABLE
+#if (defined TCFG_RF_FCC_TEST_ENABLE && TCFG_RF_FCC_TEST_ENABLE) || (defined TCFG_RF_PRODUCT_TEST_ENABLE && TCFG_RF_PRODUCT_TEST_ENABLE)
 /*
  *-------------------Mode SELECT
  *  brief : 运行时优化（LTO）下，代码空间优化；
  */
 extern int config_btctler_mode;
-#define BT_MODE_IS(x)            (config_btctler_mode & (x))
+#define BT_MODE_IS(x)                       (config_btctler_mode & (x))
 
 /*-----------------------------------------------------------*/
 
 extern int config_btctler_hci_standard;
-#define BT_HCI_STANDARD_IS_SUPPORT(x)        (config_btctler_hci_standard)
+#define BT_HCI_STANDARD_IS_SUPPORT(x)       (config_btctler_hci_standard)
 
 #else
 
@@ -64,13 +64,13 @@ extern int config_btctler_hci_standard;
  *-------------------Mode SELECT
  *  brief : 运行时优化（LTO）下，代码空间优化；
  */
-extern int config_btctler_mode;
-#define BT_MODE_IS(x)            (config_btctler_mode & (x))
+extern const int config_btctler_mode;
+#define BT_MODE_IS(x)                       (config_btctler_mode & (x))
 
 /*-----------------------------------------------------------*/
 
-extern int config_btctler_hci_standard;
-#define BT_HCI_STANDARD_IS_SUPPORT(x)        (config_btctler_hci_standard)
+extern const int config_btctler_hci_standard;
+#define BT_HCI_STANDARD_IS_SUPPORT(x)       (config_btctler_hci_standard)
 
 #endif
 

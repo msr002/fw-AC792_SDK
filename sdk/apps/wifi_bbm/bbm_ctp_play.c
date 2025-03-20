@@ -5,10 +5,11 @@
 #include "server/audio_server.h"
 #include "lcd_config.h"
 #include "rt_stream_pkg.h"
+#include "http/http_cli.h"
 
 
-#define FILE_PLAY_PORT          2223    //视频回放端口
-#define CTP_RECV_BUF_MAX_LEN    200 * 1024 //接收缓存
+#define FILE_PLAY_PORT              2223    //视频回放端口
+#define CTP_RECV_BUF_MAX_LEN        200 * 1024 //接收缓存
 #define VIDEO_DEC_BUF_MAX_SIZE       512*1024    //解码服务缓存,申请大小不能小于一帧图像的大小
 #define AUDIO_DEC_BUF_MAX_LEN        2 * 1024   //解码音频缓存
 
@@ -20,6 +21,20 @@ static cbuffer_t audio_dec_save_cbuf;
 static u8 *audio_dec_buf;
 
 static union video_dec_req dec_req = {0};
+
+static const char *fs_get_ext(const char *fn)
+{
+    size_t i;
+    for (i = strlen(fn); i > 0; i--) {
+        if (fn[i] == '.') {
+            return &fn[i + 1];
+        } else if (fn[i] == '/' || fn[i] == '\\') {
+            return ""; /*No extension if a '\' or '/' found*/
+        }
+    }
+
+    return ""; /*Empty string if no '.' in the file name.*/
+}
 
 static int vfs_audio_dec_fread(void *file, void *data, u32 len)
 {
@@ -250,18 +265,20 @@ static void ctp_file_play_task(void *priv)
         goto exit;
     }
 
-    ctp_file_play_sockfd = sock_reg(AF_INET, SOCK_STREAM, 0, NULL, NULL);
+    ctp_file_play_sockfd = sock_reg(AF_INET, SOCK_DGRAM, 0, NULL, NULL);
     if (ctp_file_play_sockfd == NULL) {
         printf("sock_reg err\n");
         goto exit;
     }
 
-    dest.sin_family = AF_INET;
-    dest.sin_addr.s_addr = ip_addr;
-    dest.sin_port = htons(FILE_PLAY_PORT);
-    sock_set_connect_to(ctp_file_play_sockfd, 1);
-    if (0 != sock_connect(ctp_file_play_sockfd, (struct sockaddr *)&dest, sizeof(struct sockaddr_in))) {
-        printf("sock_connect fail.\n");
+    struct sockaddr_in conn_addr;
+    conn_addr.sin_family = AF_INET;
+    conn_addr.sin_addr.s_addr = htonl(INADDR_ANY);
+    conn_addr.sin_port = htons(FILE_PLAY_PORT);
+
+    ret = sock_bind(ctp_file_play_sockfd, (struct sockaddr *)&conn_addr, sizeof(struct sockaddr));
+    if (ret) {
+        printf("sock_bind err:%d\n", ret);
         goto exit;
     }
 
@@ -356,6 +373,103 @@ exit:
     }
 }
 
+static int get_jpeg_cb(http_body_obj *http_body_buf, void *priv)
+{
+    u8 *in_buf = http_body_buf->p;
+    u32 data_len = http_body_buf->recv_len;
+    int i;
+    int start_idx = -1, end_idx = -1;
+
+    for (i = 0; i < data_len - 1; i++) {
+        if (((unsigned char)in_buf[i] == 0xFF) && ((unsigned char)in_buf[i + 1] == 0xD8)) {
+            start_idx = i;
+            break;
+        }
+    }
+    if (start_idx < 0) {
+        return -1;
+    }
+
+    for (i = start_idx; i < data_len - 1; i++) {
+        if (((unsigned char)in_buf[i] == 0xFF) && ((unsigned char)in_buf[i + 1] == 0xD9)) {
+            end_idx = i + 2;
+            break;
+        }
+    }
+    if (end_idx < 0) {
+        return -1;
+    }
+
+    int jpeg_len = end_idx - start_idx;
+
+    video_dec_one_frame(in_buf + start_idx, jpeg_len);
+    return 0;
+}
+
+static int http_get_mothed(const char *url, int (*cb)(char *, void *), void *priv, int body_buf_size)
+{
+    int error = 0;
+    http_body_obj http_body_buf;
+    httpcli_ctx ctx;
+    printf("profile_get_url->%s\n", url);
+    memset(&http_body_buf, 0x0, sizeof(http_body_obj));
+    memset(&ctx, 0x0, sizeof(httpcli_ctx));
+
+    http_body_buf.recv_len = 0;
+    http_body_buf.buf_len = body_buf_size;
+    http_body_buf.buf_count = 1;
+    http_body_buf.p = (char *) malloc(http_body_buf.buf_len * sizeof(char));
+
+    ctx.url = url;
+    ctx.priv = &http_body_buf;
+    ctx.connection = "close";
+    ctx.timeout_millsec = 1000;
+    error = httpcli_get(&ctx);
+    if (error == HERROR_OK) {
+        error = cb(&http_body_buf, priv);
+    } else {
+        printf("http get err :%d \n", error);
+        error = -1;
+    }
+    //关闭连接
+    httpcli_close(&ctx);
+    if (http_body_buf.p) {
+        free(http_body_buf.p);
+    }
+    return error;
+}
+
+static void ctp_file_jpeg_task(void *priv)
+{
+    int ret;
+    int retry_cnt = 5;
+    char url[100];
+    char ip_str[16];
+
+    struct bbm_client_hdl *bbm_hdl = priv;
+
+    //重置播放进度条
+    post_video_play_msg_to_ui("play_time", 0);
+
+    //更改UI图标,播放中
+    post_video_play_msg_to_ui("play_control", 1);
+
+    u8 *bytes = (u8 *)&bbm_hdl->ip_addr;
+    sprintf(ip_str, "%u.%u.%u.%u", bytes[0], bytes[1], bytes[2], bytes[3]);
+
+    sprintf(url, "http://%s:%d/%s", ip_str, HTTP_PORT, bbm_hdl->file_name_list[bbm_hdl->play_index]);
+
+    do {
+        if (bbm_hdl->ctp_file_play_task_exit) {
+            break;
+        }
+        //在get_jpeg_cb推屏
+        ret = http_get_mothed(url, get_jpeg_cb, NULL, 100 * 1024);
+    } while (ret && retry_cnt--);
+}
+
+
+
 static int ctp_file_play_start(void *priv, int list_index)
 {
     int ret;
@@ -378,21 +492,28 @@ static int ctp_file_play_start(void *priv, int list_index)
     }
 
     file_path = bbm_hdl->file_name_list[list_index];
+    bbm_hdl->play_index = list_index;
     printf("file path:%s \n", file_path);
-
-    //TODO dur_time 参数没有实际效果
-    sprintf(content_1, "{\"op\":\"PUT\",\"param\":{\"path\":\"%s\",\"offset\":0}}",
-            file_path);
-
-    ret = ctp_cli_send(bbm_hdl->ctp_cli_hdl, topic_1, content_1);
-    if (ret) {
-        printf("ctp_cli_send :%s err\n", topic_1);
-        return -1;
-    }
 
     bbm_hdl->video_play_state = BBM_FILE_PLAY_START;
 
-    return thread_fork(CTP_FILE_PLAY_TASK_NAME, 12, 2048, 2048, &bbm_hdl->ctp_file_play_task_pid, ctp_file_play_task, priv);
+    if (strcmp(fs_get_ext(file_path), "jpg") == 0 || strcmp(fs_get_ext(file_path), "JPG") == 0) {
+        //JPG
+        return thread_fork(CTP_FILE_PLAY_TASK_NAME, 12, 2048, 2048, &bbm_hdl->ctp_file_play_task_pid, ctp_file_jpeg_task, priv);
+    } else {
+        //AVI
+        //TODO dur_time 参数没有实际效果
+        sprintf(content_1, "{\"op\":\"PUT\",\"param\":{\"path\":\"%s\",\"offset\":0}}",
+                file_path);
+
+        ret = ctp_cli_send(bbm_hdl->ctp_cli_hdl, topic_1, content_1);
+        if (ret) {
+            printf("ctp_cli_send :%s err\n", topic_1);
+            return -1;
+        }
+        return thread_fork(CTP_FILE_PLAY_TASK_NAME, 12, 2048, 2048, &bbm_hdl->ctp_file_play_task_pid, ctp_file_play_task, priv);
+    }
+
 }
 
 static int ctp_file_play_stop(void *priv)

@@ -11,6 +11,10 @@
 
 #if !LV_USE_GUIBUILDER_SIMULATOR
 
+static void (*global_yes_options_callback)(void) = NULL;
+static void (*global_no_options_callback)(void) = NULL;
+static lv_group_t *top_level_group;
+
 void gui_load_home_page(void)
 {
     gui_scr_t *screen = gui_scr_get(GUI_SCREEN_HOME);
@@ -52,6 +56,49 @@ void gui_show_sys_prompt(void)
     }
 }
 
+void gui_show_sys_options(void)
+{
+    if (guider_ui.sys_options_del == false && lv_obj_is_valid(guider_ui.sys_options)) {
+        lv_obj_clear_flag(guider_ui.sys_options, LV_OBJ_FLAG_HIDDEN);
+    } else {
+        setup_scr_sys_options(&guider_ui);
+        gui_msg_init_ui();
+        gui_msg_init_events();
+        delete_gui_timelines();
+    }
+
+    //按键导航
+    top_level_group = lv_group_create();
+    if (top_level_group) {
+        lv_group_add_obj(top_level_group, guider_ui.sys_options_btn_1);
+        lv_group_add_obj(top_level_group, guider_ui.sys_options_btn_2);
+        lv_indev_t *indev = lv_indev_get_next(NULL);
+        if (indev != NULL) {
+            lv_indev_set_group(indev, top_level_group);
+        }
+    }
+}
+
+void gui_hide_sys_options(void)
+{
+    if (guider_ui.sys_options_del == false && lv_obj_is_valid(guider_ui.sys_options)) {
+        lv_obj_add_flag(guider_ui.sys_options, LV_OBJ_FLAG_HIDDEN);
+
+        lv_indev_t *indev = lv_indev_get_next(NULL);
+        if (indev != NULL) {
+            lv_indev_set_group(indev, lv_group_get_default());
+        }
+
+        if (top_level_group) {
+            lv_group_del(top_level_group);
+            top_level_group = NULL;
+        }
+
+    }
+}
+
+
+
 void gui_hide_sys_prompt(void)
 {
     if (guider_ui.sys_prompt_del == false && lv_obj_is_valid(guider_ui.sys_prompt)) {
@@ -66,6 +113,61 @@ void gui_set_sys_prompt_lab(char *text)
     lvgl_module_msg_send_ptr(lab, 0);
 }
 
+void gui_set_sys_options_lab(char *text)
+{
+    char *lab = lvgl_module_msg_get_ptr(GUI_SYS_PROMPT_MSG_ID_PROMPT_OPT_LAB, strlen(text) + 1);
+    strcpy(lab, text);
+    lvgl_module_msg_send_ptr(lab, 0);
+}
+
+void gui_set_sys_options_yes_cb(void (*cb)(void))
+{
+    global_yes_options_callback = cb;
+
+}
+
+void gui_set_sys_options_no_cb(void (*cb)(void))
+{
+    global_no_options_callback = cb;
+
+}
+
+void gui_sys_options_run_yes_cb(void)
+{
+    if (global_yes_options_callback) {
+        global_yes_options_callback();
+        global_yes_options_callback = NULL;
+    }
+
+    lv_indev_t *indev = lv_indev_get_next(NULL);
+    if (indev != NULL) {
+        lv_indev_set_group(indev, lv_group_get_default());
+    }
+
+    if (top_level_group) {
+        lv_group_del(top_level_group);
+        top_level_group = NULL;
+    }
+}
+
+void gui_sys_options_run_no_cb(void)
+{
+    if (global_no_options_callback) {
+        global_no_options_callback();
+        global_no_options_callback = NULL;
+    }
+
+    lv_indev_t *indev = lv_indev_get_next(NULL);
+    if (indev != NULL) {
+        lv_indev_set_group(indev, lv_group_get_default());
+    }
+
+    if (top_level_group) {
+        lv_group_del(top_level_group);
+        top_level_group = NULL;
+    }
+}
+
 void post_home_msg_to_ui(const char *msg, int arg)
 {
     if (!strcmp(msg, "back_home_page")) {
@@ -78,6 +180,11 @@ void post_home_msg_to_ui(const char *msg, int arg)
         char *text = (char *)arg;
         gui_set_sys_prompt_lab(text);
         lvgl_rpc_post_func(gui_show_sys_prompt, 0);
+        lvgl_rpc_post_func(gui_hide_sys_options, 0);
+    } else if (!strcmp(msg, "show_sys_options")) {
+        char *text = (char *)arg;
+        gui_set_sys_options_lab(text);
+        lvgl_rpc_post_func(gui_show_sys_options, 0);
     } else {
         printf("Unknow Msg\n");
     }

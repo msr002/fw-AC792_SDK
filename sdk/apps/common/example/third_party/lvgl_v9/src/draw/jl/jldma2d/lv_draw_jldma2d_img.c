@@ -81,6 +81,10 @@ static void img_draw_core(lv_draw_unit_t *u_base, const lv_draw_image_dsc_t *dra
         packed_color = dma2d_pack_pixel(col32.alpha, col32.red, col32.green, col32.blue, JLDMA2D_FORMAT_ARGB8888);
     }
 
+    if (src_buf) {
+        DcuFlushRegion(src_buf, header->h * image_stride);
+    }
+
 
     //out
     lv_layer_t *layer = u->base_unit.target_layer;

@@ -3,6 +3,8 @@
 
 #define	STRM_SOURCE_VIDEO0  0x1001
 #define	STRM_SOURCE_VIDEO1  0x1002
+#define	STRM_SOURCE_VIDEO4  0x1004
+#define	STRM_SOURCE_VIDEO5  0x1005
 
 
 #include "system/includes.h"
@@ -35,10 +37,14 @@ struct net_video_hdl {
     enum NET_VIDEO_REC_STA net_state;
     enum NET_VIDEO_REC_STA net_state1;
     enum NET_VIDEO_REC_STA net_state2;
+    enum NET_VIDEO_REC_STA net_state4;
+    enum NET_VIDEO_REC_STA net_state5;
 
     struct server *net_video_rec;
     struct server *net_video_rec1;
     struct server *net_video_rec2;
+    struct server *net_video_rec4;
+    struct server *net_video_rec5;
 
     u8 *net_v0_fbuf;
     u8 *net_v1_fbuf;
@@ -51,8 +57,12 @@ struct net_video_hdl {
     u8 net_video1_art_on;
     u8 net_video2_vrt_on;
     u8 net_video2_art_on;
+    u8 net_video4_vrt_on;
+    u8 net_video4_art_on;
+    u8 net_video5_vrt_on;
+    u8 net_video5_art_on;
     u8 videoram_mark;
-    union video_req net_videoreq[2];
+    union video_req net_videoreq[6];
     struct server *net_disbuf_enc;
 //    u8 *net_v2_fbuf;
     u32 total_frame;

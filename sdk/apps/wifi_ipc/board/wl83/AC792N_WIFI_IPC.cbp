@@ -243,23 +243,17 @@
 <Add option="--plugin-opt=-pi32v2-large-program=true" />
 <Add option="--plugin-opt=-pi32v2-csync-before-rti=true" />
 <Add option="--start-group" />
-<Add option="../../../../include_lib/newlib/pi32v2-lib/libm.a" />
-<Add option="../../../../include_lib/newlib/pi32v2-lib/libc.a" />
-<Add option="../../../../include_lib/newlib/pi32v2-lib/libcompiler_rt.a" />
-<Add option="--start-group " />
+<Add option="../../../../cpu/wl83/liba/iperf.a" />
 <Add option="../../../../cpu/wl83/liba/system.a" />
 <Add option="../../../../cpu/wl83/liba/fs.a" />
 <Add option="../../../../cpu/wl83/liba/cfg_tool.a" />
-<Add option="../../../../cpu/wl83/liba/event.a" />
-<Add option="../../../../cpu/wl83/liba/cpu.a" />
 <Add option="../../../../cpu/wl83/liba/update.a" />
 <Add option="../../../../cpu/wl83/liba/video_rec_server.a" />
 <Add option="../../../../cpu/wl83/liba/wl_rf_common.a" />
-<Add option="../../../../cpu/wl83/liba/common_lib.a" />
 <Add option="../../../../cpu/wl83/liba/video_engine.a" />
-<Add option="../../../../cpu/wl83/liba/libcrypto_mbedtls.a" />
 <Add option="../../../../cpu/wl83/liba/net_server.a" />
 <Add option="../../../../cpu/wl83/liba/audio_server.a" />
+<Add option="../../../../cpu/wl83/liba/media_app.a" />
 <Add option="../../../../cpu/wl83/liba/lib_m4a_dec_seek.a" />
 <Add option="../../../../cpu/wl83/liba/lib_mp3_dec.a" />
 <Add option="../../../../cpu/wl83/liba/lib_mp3_enc.a" />
@@ -268,32 +262,36 @@
 <Add option="../../../../cpu/wl83/liba/libaec.a" />
 <Add option="../../../../cpu/wl83/liba/libdns.a" />
 <Add option="../../../../cpu/wl83/liba/libjlsp.a" />
-<Add option="../../../../cpu/wl83/liba/btctrler.a" />
 <Add option="../../../../cpu/wl83/liba/btstack.a" />
+<Add option="../../../../cpu/wl83/liba/btctrler.a" />
 <Add option="../../../../cpu/wl83/liba/lib_ccm_aes.a" />
 <Add option="../../../../cpu/wl83/liba/crypto_toolbox_Osize.a" />
 <Add option="../../../../cpu/wl83/liba/libtuyaos.a" />
 <Add option="../../../../cpu/wl83/liba/wl_wifi.a" />
+<Add option="--start-group " />
 <Add option="../../../../cpu/wl83/liba/wpasupplicant.a" />
+<Add option="../../../../cpu/wl83/liba/libcrypto_mbedtls.a" />
+<Add option="--end-group" />
 <Add option="../../../../cpu/wl83/liba/lwip_2_2_0.a" />
 <Add option="../../../../cpu/wl83/liba/stream_media_server.a" />
-<Add option="../../../../cpu/wl83/liba/libmbedtls_3_4_0.a" />
-<Add option="../../../../cpu/wl83/liba/iperf.a" />
-<Add option="../../../../cpu/wl83/liba/hsm.a" />
-<Add option="../../../../cpu/wl83/liba/http_cli.a" />
 <Add option="../../../../cpu/wl83/liba/http_server.a" />
-<Add option="../../../../cpu/wl83/liba/https_cli.a" />
 <Add option="../../../../cpu/wl83/liba/json.a" />
 <Add option="../../../../cpu/wl83/liba/ftpserver.a" />
 <Add option="../../../../cpu/wl83/liba/libqrcode.a" />
-<Add option="--end-group" />
+<Add option="../../../../cpu/wl83/liba/http_cli.a" />
+<Add option="../../../../cpu/wl83/liba/https_cli.a" />
+<Add option="../../../../cpu/wl83/liba/common_lib.a" />
+<Add option="../../../../cpu/wl83/liba/libmbedtls_3_4_0.a" />
+<Add option="../../../../cpu/wl83/liba/event.a" />
+<Add option="../../../../cpu/wl83/liba/hsm.a" />
+<Add option="../../../../cpu/wl83/liba/cpu.a" />
 <Add option="../../../../cpu/wl83/liba/lvgl_v8_extend.a" />
-<Add option="../../../../include_lib/c++/libstdc++/ucos/libemutls.a" />
-<Add option="../../../../include_lib/c++/libstdc++/ucos/libc++.a" />
-<Add option="../../../../include_lib/c++/libstdc++/ucos/libc++abi.a" />
+<Add option="../../../../include_lib/newlib/pi32v2-lib/libm.a" />
+<Add option="../../../../include_lib/newlib/pi32v2-lib/libc.a" />
+<Add option="../../../../include_lib/newlib/pi32v2-lib/libcompiler_rt.a" />
+<Add option="--end-group " />
 <Add option="-T../../../../cpu/wl83/sdk.ld" />
 <Add option="-M=../../../../cpu/wl83/tools/sdk.map" />
-<Add option="--end-group " />
 </Linker>
 <ExtraCommands>
 <Add before="$compiler $options $includes -D__LD__ -E -P ..\..\..\..\cpu\wl83\sdk_used_list.c -o ..\..\..\..\cpu\wl83\sdk_used_list.used" />
@@ -447,6 +445,7 @@
 <Unit filename="../../../../apps/common/config/log_config/lib_driver_config.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/common/config/log_config/lib_power_config.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/common/config/log_config/lib_system_config.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="../../../../apps/common/config/log_config/lib_ui_config.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/common/config/log_config/lib_update_config.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/common/config/user_cfg.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/common/debug/debug.c"><Option compilerVer="CC"/></Unit>
@@ -1253,6 +1252,7 @@
 <Unit filename="../../../../apps/common/lvgl_v8/examples/widgets/win/lv_example_win_1.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/common/lvgl_v8/lv_conf.h" />
 <Unit filename="../../../../apps/common/lvgl_v8/lvgl.h" />
+<Unit filename="../../../../apps/common/lvgl_v8/lvgl_main.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/common/lvgl_v8/src/core/lv_disp.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/common/lvgl_v8/src/core/lv_disp.h" />
 <Unit filename="../../../../apps/common/lvgl_v8/src/core/lv_event.c"><Option compilerVer="CC"/></Unit>
@@ -1634,6 +1634,7 @@
 <Unit filename="../../../../apps/common/system/device_mount.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/common/system/flash_write_protect.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/common/system/init.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="../../../../apps/common/system/init_expand.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/common/system/mem_mmu.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/common/system/perf_counter/example/main.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/common/system/perf_counter/perf_counter.c"><Option compilerVer="CC"/></Unit>

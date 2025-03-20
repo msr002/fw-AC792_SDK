@@ -7,12 +7,14 @@
 #include "json_c/json_tokener.h"
 #include "udp_multicast.h"
 
-#define RECV_TIMEOUT             300
+#define RECV_TIMEOUT             1000
 static int pairing_task_pid;
 static int pairing_task_exit;
 
+void bbm_config_arp_entry(struct arp_entry_t *arp_entry);
 
-static void fill_request_data(u8 *data, char *bbm_tx_ip_str, u8 *bbm_tx_mac)
+
+static void fill_request_data(u8 *data, char *bbm_tx_ip_str, u8 *bbm_tx_mac, int wifi_ch)
 {
     //获取本机MAC
     u8 bbm_rx_mac[6];
@@ -29,7 +31,7 @@ static void fill_request_data(u8 *data, char *bbm_tx_ip_str, u8 *bbm_tx_mac)
 
     mac_to_string(bbm_tx_mac_str, bbm_tx_mac);
 
-    sprintf(data, PAIRING_REQUEST, bbm_rx_ip_str, bbm_rx_mac_str, bbm_tx_ip_str, bbm_tx_mac_str);
+    sprintf(data, PAIRING_REQUEST, bbm_rx_ip_str, bbm_rx_mac_str, bbm_tx_ip_str, bbm_tx_mac_str, wifi_ch);
 }
 
 static int deal_pair_respone_package(u8 *payload_buf, char *set_bbm_tx_ip, u8 *set_bbm_tx_mac)
@@ -65,9 +67,11 @@ static int deal_pair_respone_package(u8 *payload_buf, char *set_bbm_tx_ip, u8 *s
 static void config_head_pair(void)
 {
     u8 src_mac[6];
-    u8 dest_mac[6] = {0x88, 0x88, 0x88, 0x88, 0x88, 0x88};
+    extern const u8 bbm_tx_pair_mac[6];
+    extern const int bbm_tx_pair_wifi_channel;
+    wifi_set_channel(bbm_tx_pair_wifi_channel);
     wifi_raw_get_mac(src_mac);
-    config_send_pkg_head(src_mac, dest_mac);
+    config_send_pkg_head(src_mac, bbm_tx_pair_mac);
 }
 
 static int bbm_pairing_task(void *priv)
@@ -110,12 +114,15 @@ static int bbm_pairing_task(void *priv)
     }
     char set_bbm_tx_ip[20];
     u8 set_bbm_tx_mac[6];
+    int set_wifi_channel;
 
     strcpy(set_bbm_tx_ip, inet_ntoa(arp_entry->ipaddr));
     memcpy(set_bbm_tx_mac, arp_entry->ethaddr.addr, sizeof(set_bbm_tx_mac));
 
+    syscfg_read(BBM_WIFI_CH_INDEX, &set_wifi_channel, sizeof(set_wifi_channel));
+
     //填充发送消息
-    fill_request_data(tem_buf, set_bbm_tx_ip, set_bbm_tx_mac);
+    fill_request_data(tem_buf, set_bbm_tx_ip, set_bbm_tx_mac, set_wifi_channel);
     send_len = package_assembly(tem_buf, strlen(tem_buf), send_buf, PACKAGE_MAX_SIZE);
 
     config_head_pair();
@@ -182,6 +189,15 @@ static int bbm_pairing_task(void *priv)
     }
 
 exit:
+    for (int ch = 0; ch < 6; ch++) {
+        struct arp_entry_t *arp_entry  = get_arp_static_entry_by_id(ch);
+        if (arp_entry) {
+            bbm_config_arp_entry(arp_entry);
+            break;
+        }
+    }
+    wifi_set_channel(set_wifi_channel);
+
     if (multi_sock) {
         sock_unreg(multi_sock);
     }

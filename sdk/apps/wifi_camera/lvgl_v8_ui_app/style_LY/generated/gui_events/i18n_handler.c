@@ -387,6 +387,49 @@ void i18n_refresh_texts(const char *page_name)
             }
         }
     }
+
+    if (strcmp(page_name, "video_dec") == 0 && !guider_ui.video_dec_del) {
+        if (guider_ui.video_dec_lbl_1 != NULL && lv_obj_is_valid(guider_ui.video_dec_lbl_1)) {
+            lv_label_set_text(guider_ui.video_dec_lbl_1, _("delete"));
+            const lv_font_t *font = _font("delete");
+            if (font != NULL) {
+                lv_obj_set_style_text_font(guider_ui.video_dec_lbl_1, font, LV_PART_MAIN | LV_STATE_DEFAULT);
+            }
+        }
+        if (guider_ui.video_dec_lbl_2 != NULL && lv_obj_is_valid(guider_ui.video_dec_lbl_2)) {
+            lv_label_set_text(guider_ui.video_dec_lbl_2, _("protection"));
+            const lv_font_t *font = _font("protection");
+            if (font != NULL) {
+                lv_obj_set_style_text_font(guider_ui.video_dec_lbl_2, font, LV_PART_MAIN | LV_STATE_DEFAULT);
+            }
+        }
+    }
+
+    if (strcmp(page_name, "video_dec_options") == 0 && !guider_ui.video_dec_options_del) {
+        if (guider_ui.video_dec_options_lbl_1 != NULL && lv_obj_is_valid(guider_ui.video_dec_options_lbl_1)) {
+            lv_label_set_text(guider_ui.video_dec_options_lbl_1, _("del_file"));
+            const lv_font_t *font = _font("del_file");
+            if (font != NULL) {
+                lv_obj_set_style_text_font(guider_ui.video_dec_options_lbl_1, font, LV_PART_MAIN | LV_STATE_DEFAULT);
+            }
+        }
+        if (guider_ui.video_dec_options_btn_1_label != NULL && lv_obj_is_valid(guider_ui.video_dec_options_btn_1_label)) {
+            lv_label_set_text(guider_ui.video_dec_options_btn_1_label, _("cancel"));
+            const lv_font_t *font = _font("cancel");
+            if (font != NULL) {
+                lv_obj_set_style_text_font(guider_ui.video_dec_options_btn_1_label, font, LV_PART_MAIN | LV_STATE_DEFAULT);
+                lv_obj_set_style_text_font(guider_ui.video_dec_options_btn_1_label, font, LV_PART_MAIN | LV_STATE_FOCUSED);
+            }
+        }
+        if (guider_ui.video_dec_options_btn_2_label != NULL && lv_obj_is_valid(guider_ui.video_dec_options_btn_2_label)) {
+            lv_label_set_text(guider_ui.video_dec_options_btn_2_label, _("ensure"));
+            const lv_font_t *font = _font("ensure");
+            if (font != NULL) {
+                lv_obj_set_style_text_font(guider_ui.video_dec_options_btn_2_label, font, LV_PART_MAIN | LV_STATE_DEFAULT);
+                lv_obj_set_style_text_font(guider_ui.video_dec_options_btn_2_label, font, LV_PART_MAIN | LV_STATE_FOCUSED);
+            }
+        }
+    }
 }
 
 void i18n_refresh_all_texts()
@@ -766,6 +809,49 @@ void i18n_refresh_all_texts()
             if (font != NULL) {
                 lv_obj_set_style_text_font(guider_ui.sys_popwin_btn_2_label, font, LV_PART_MAIN | LV_STATE_DEFAULT);
                 lv_obj_set_style_text_font(guider_ui.sys_popwin_btn_2_label, font, LV_PART_MAIN | LV_STATE_FOCUSED);
+            }
+        }
+    }
+
+    if (!guider_ui.video_dec_del) {
+        if (guider_ui.video_dec_lbl_1 != NULL && lv_obj_is_valid(guider_ui.video_dec_lbl_1)) {
+            lv_label_set_text(guider_ui.video_dec_lbl_1, _("delete"));
+            const lv_font_t *font = _font("delete");
+            if (font != NULL) {
+                lv_obj_set_style_text_font(guider_ui.video_dec_lbl_1, font, LV_PART_MAIN | LV_STATE_DEFAULT);
+            }
+        }
+        if (guider_ui.video_dec_lbl_2 != NULL && lv_obj_is_valid(guider_ui.video_dec_lbl_2)) {
+            lv_label_set_text(guider_ui.video_dec_lbl_2, _("protection"));
+            const lv_font_t *font = _font("protection");
+            if (font != NULL) {
+                lv_obj_set_style_text_font(guider_ui.video_dec_lbl_2, font, LV_PART_MAIN | LV_STATE_DEFAULT);
+            }
+        }
+    }
+
+    if (!guider_ui.video_dec_options_del) {
+        if (guider_ui.video_dec_options_lbl_1 != NULL && lv_obj_is_valid(guider_ui.video_dec_options_lbl_1)) {
+            lv_label_set_text(guider_ui.video_dec_options_lbl_1, _("del_file"));
+            const lv_font_t *font = _font("del_file");
+            if (font != NULL) {
+                lv_obj_set_style_text_font(guider_ui.video_dec_options_lbl_1, font, LV_PART_MAIN | LV_STATE_DEFAULT);
+            }
+        }
+        if (guider_ui.video_dec_options_btn_1_label != NULL && lv_obj_is_valid(guider_ui.video_dec_options_btn_1_label)) {
+            lv_label_set_text(guider_ui.video_dec_options_btn_1_label, _("cancel"));
+            const lv_font_t *font = _font("cancel");
+            if (font != NULL) {
+                lv_obj_set_style_text_font(guider_ui.video_dec_options_btn_1_label, font, LV_PART_MAIN | LV_STATE_DEFAULT);
+                lv_obj_set_style_text_font(guider_ui.video_dec_options_btn_1_label, font, LV_PART_MAIN | LV_STATE_FOCUSED);
+            }
+        }
+        if (guider_ui.video_dec_options_btn_2_label != NULL && lv_obj_is_valid(guider_ui.video_dec_options_btn_2_label)) {
+            lv_label_set_text(guider_ui.video_dec_options_btn_2_label, _("ensure"));
+            const lv_font_t *font = _font("ensure");
+            if (font != NULL) {
+                lv_obj_set_style_text_font(guider_ui.video_dec_options_btn_2_label, font, LV_PART_MAIN | LV_STATE_DEFAULT);
+                lv_obj_set_style_text_font(guider_ui.video_dec_options_btn_2_label, font, LV_PART_MAIN | LV_STATE_FOCUSED);
             }
         }
     }

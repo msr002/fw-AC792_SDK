@@ -11,6 +11,8 @@ extern "C" {
 #include "./common.h"
 #include "./gui_fonts/gui_fonts.h"
 #include "./gui_images/gui_images.h"
+#include "./gui_scr/ui_scr_manager.h"
+#include "./gui_scr/ui_style.h"
 #include "./i18n/lv_i18n.h"
 
 #ifdef JL_GUI_KERNEL_VERSION_MAJOR
@@ -379,6 +381,45 @@ typedef struct {
     lv_obj_t *sys_popwin_btn_2;
     lv_obj_t *sys_popwin_btn_2_label;
 
+    // Screen video_dec
+    lv_obj_t *video_dec;
+    bool      video_dec_del;
+    lv_obj_t *video_dec_view_scan;
+    lv_obj_t *video_dec_imglist_1;
+    lv_obj_t *video_dec_edit_2;
+    lv_obj_t *video_dec_edit_3;
+    lv_obj_t *video_dec_imglist_2;
+    lv_obj_t *video_dec_view_1;
+    lv_obj_t *video_dec_imglist_3;
+    lv_obj_t *video_dec_edit_1;
+    lv_obj_t *video_dec_img_1;
+    lv_obj_t *video_dec_view_5;
+    lv_obj_t *video_dec_view_4;
+    lv_obj_t *video_dec_view_2;
+    lv_obj_t *video_dec_img_2;
+    lv_obj_t *video_dec_lbl_1;
+    lv_obj_t *video_dec_view_3;
+    lv_obj_t *video_dec_img_3;
+    lv_obj_t *video_dec_lbl_2;
+    lv_obj_t *video_dec_img_4;
+    lv_obj_t *video_dec_img_5;
+    lv_obj_t *video_dec_img_6;
+    lv_obj_t *video_dec_img_7;
+    lv_obj_t *video_dec_img_8;
+    lv_obj_t *video_dec_img_9;
+    lv_obj_t *video_dec_img_10;
+    lv_obj_t *video_dec_img_11;
+
+    // Screen video_dec_options
+    lv_obj_t *video_dec_options;
+    bool      video_dec_options_del;
+    lv_obj_t *video_dec_options_view_1;
+    lv_obj_t *video_dec_options_lbl_1;
+    lv_obj_t *video_dec_options_btn_1;
+    lv_obj_t *video_dec_options_btn_1_label;
+    lv_obj_t *video_dec_options_btn_2;
+    lv_obj_t *video_dec_options_btn_2_label;
+
     lv_group_t *default_group;
 } lv_ui;
 
@@ -388,6 +429,8 @@ void ui_load_scr_anim(lv_ui *ui, gui_scr_t *screen, lv_scr_load_anim_t anim_type
 void ui_scr_stack_pop_anim(lv_ui *ui, lv_scr_load_anim_t anim_type, uint32_t time, uint32_t delay,
                            bool is_clean, bool auto_del, bool is_push_satck);
 
+gui_scr_t *ui_get_scr(int32_t scr_id);
+gui_scr_t *ui_get_setup_scr(int32_t scr_id);
 void ui_init_style(lv_style_t *style);
 void init_scr_del_flag(lv_ui *ui);
 void setup_ui(lv_ui *ui);
@@ -427,6 +470,15 @@ void unload_scr_line_drift(lv_ui *ui);
 // Screen sys_popwin
 lv_obj_t *setup_scr_sys_popwin(lv_ui *ui);
 void unload_scr_sys_popwin(lv_ui *ui);
+// Screen video_dec
+lv_obj_t *setup_scr_video_dec(lv_ui *ui);
+void unload_scr_video_dec(lv_ui *ui);
+
+
+
+// Screen video_dec_options
+lv_obj_t *setup_scr_video_dec_options(lv_ui *ui);
+void unload_scr_video_dec_options(lv_ui *ui);
 #ifdef __cplusplus
 }
 #endif

@@ -33,6 +33,8 @@ char *gui_get_res_path(int32_t id)
         return "A:\\gitlab-m\\ac792\\ui_prj\\wifi_bbm_800x480\\import\\image\\up.png";
     case GUI_RES_DOWN_PNG:
         return "A:\\gitlab-m\\ac792\\ui_prj\\wifi_bbm_800x480\\import\\image\\down.png";
+    case GUI_RES_DELETE_PNG:
+        return "A:\\gitlab-m\\ac792\\ui_prj\\wifi_bbm_800x480\\import\\image\\delete.png";
     case GUI_RES_PAIR_OPT_PAIR_PNG:
         return "A:\\gitlab-m\\ac792\\ui_prj\\wifi_bbm_800x480\\import\\image\\pair_opt_pair.png";
     case GUI_RES_PAIR_OPT_UNPAIR_PNG:

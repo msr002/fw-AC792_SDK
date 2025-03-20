@@ -379,6 +379,7 @@ c_SRC_FILES := \
 	../../../../apps/common/config/log_config/lib_driver_config.c \
 	../../../../apps/common/config/log_config/lib_power_config.c \
 	../../../../apps/common/config/log_config/lib_system_config.c \
+	../../../../apps/common/config/log_config/lib_ui_config.c \
 	../../../../apps/common/config/log_config/lib_update_config.c \
 	../../../../apps/common/config/user_cfg.c \
 	../../../../apps/common/debug/debug.c \
@@ -723,6 +724,7 @@ c_SRC_FILES := \
 	../../../../apps/common/lvgl_v8/examples/widgets/textarea/lv_example_textarea_3.c \
 	../../../../apps/common/lvgl_v8/examples/widgets/tileview/lv_example_tileview_1.c \
 	../../../../apps/common/lvgl_v8/examples/widgets/win/lv_example_win_1.c \
+	../../../../apps/common/lvgl_v8/lvgl_main.c \
 	../../../../apps/common/lvgl_v8/src/core/lv_disp.c \
 	../../../../apps/common/lvgl_v8/src/core/lv_event.c \
 	../../../../apps/common/lvgl_v8/src/core/lv_group.c \
@@ -913,6 +915,7 @@ c_SRC_FILES := \
 	../../../../apps/common/system/device_mount.c \
 	../../../../apps/common/system/flash_write_protect.c \
 	../../../../apps/common/system/init.c \
+	../../../../apps/common/system/init_expand.c \
 	../../../../apps/common/system/mem_mmu.c \
 	../../../../apps/common/system/perf_counter/example/main.c \
 	../../../../apps/common/system/perf_counter/perf_counter.c \
@@ -1140,23 +1143,17 @@ LFLAGS := \
 	--plugin-opt=-pi32v2-large-program=true \
 	--plugin-opt=-pi32v2-csync-before-rti=true \
 	--start-group \
-	../../../../include_lib/newlib/pi32v2-lib/libm.a \
-	../../../../include_lib/newlib/pi32v2-lib/libc.a \
-	../../../../include_lib/newlib/pi32v2-lib/libcompiler_rt.a \
-	--start-group  \
+	../../../../cpu/wl83/liba/iperf.a \
 	../../../../cpu/wl83/liba/system.a \
 	../../../../cpu/wl83/liba/fs.a \
 	../../../../cpu/wl83/liba/cfg_tool.a \
-	../../../../cpu/wl83/liba/event.a \
-	../../../../cpu/wl83/liba/cpu.a \
 	../../../../cpu/wl83/liba/update.a \
 	../../../../cpu/wl83/liba/video_rec_server.a \
 	../../../../cpu/wl83/liba/wl_rf_common.a \
-	../../../../cpu/wl83/liba/common_lib.a \
 	../../../../cpu/wl83/liba/video_engine.a \
-	../../../../cpu/wl83/liba/libcrypto_mbedtls.a \
 	../../../../cpu/wl83/liba/net_server.a \
 	../../../../cpu/wl83/liba/audio_server.a \
+	../../../../cpu/wl83/liba/media_app.a \
 	../../../../cpu/wl83/liba/lib_m4a_dec_seek.a \
 	../../../../cpu/wl83/liba/lib_mp3_dec.a \
 	../../../../cpu/wl83/liba/lib_mp3_enc.a \
@@ -1165,32 +1162,36 @@ LFLAGS := \
 	../../../../cpu/wl83/liba/libaec.a \
 	../../../../cpu/wl83/liba/libdns.a \
 	../../../../cpu/wl83/liba/libjlsp.a \
-	../../../../cpu/wl83/liba/btctrler.a \
 	../../../../cpu/wl83/liba/btstack.a \
+	../../../../cpu/wl83/liba/btctrler.a \
 	../../../../cpu/wl83/liba/lib_ccm_aes.a \
 	../../../../cpu/wl83/liba/crypto_toolbox_Osize.a \
 	../../../../cpu/wl83/liba/libtuyaos.a \
 	../../../../cpu/wl83/liba/wl_wifi.a \
+	--start-group  \
 	../../../../cpu/wl83/liba/wpasupplicant.a \
+	../../../../cpu/wl83/liba/libcrypto_mbedtls.a \
+	--end-group \
 	../../../../cpu/wl83/liba/lwip_2_2_0.a \
 	../../../../cpu/wl83/liba/stream_media_server.a \
-	../../../../cpu/wl83/liba/libmbedtls_3_4_0.a \
-	../../../../cpu/wl83/liba/iperf.a \
-	../../../../cpu/wl83/liba/hsm.a \
-	../../../../cpu/wl83/liba/http_cli.a \
 	../../../../cpu/wl83/liba/http_server.a \
-	../../../../cpu/wl83/liba/https_cli.a \
 	../../../../cpu/wl83/liba/json.a \
 	../../../../cpu/wl83/liba/ftpserver.a \
 	../../../../cpu/wl83/liba/libqrcode.a \
-	--end-group \
+	../../../../cpu/wl83/liba/http_cli.a \
+	../../../../cpu/wl83/liba/https_cli.a \
+	../../../../cpu/wl83/liba/common_lib.a \
+	../../../../cpu/wl83/liba/libmbedtls_3_4_0.a \
+	../../../../cpu/wl83/liba/event.a \
+	../../../../cpu/wl83/liba/hsm.a \
+	../../../../cpu/wl83/liba/cpu.a \
 	../../../../cpu/wl83/liba/lvgl_v8_extend.a \
-	../../../../include_lib/c++/libstdc++/ucos/libemutls.a \
-	../../../../include_lib/c++/libstdc++/ucos/libc++.a \
-	../../../../include_lib/c++/libstdc++/ucos/libc++abi.a \
+	../../../../include_lib/newlib/pi32v2-lib/libm.a \
+	../../../../include_lib/newlib/pi32v2-lib/libc.a \
+	../../../../include_lib/newlib/pi32v2-lib/libcompiler_rt.a \
+	--end-group  \
 	-T../../../../cpu/wl83/sdk.ld \
 	-M=../../../../cpu/wl83/tools/sdk.map \
-	--end-group  \
 	--plugin-opt=mcpu=r3 \
 	--plugin-opt=-mattr=+fprev1 \
 

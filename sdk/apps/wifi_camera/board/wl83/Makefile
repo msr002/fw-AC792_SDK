@@ -265,6 +265,7 @@ c_SRC_FILES := \
 	../../../../apps/common/config/log_config/lib_driver_config.c \
 	../../../../apps/common/config/log_config/lib_power_config.c \
 	../../../../apps/common/config/log_config/lib_system_config.c \
+	../../../../apps/common/config/log_config/lib_ui_config.c \
 	../../../../apps/common/config/log_config/lib_update_config.c \
 	../../../../apps/common/config/user_cfg.c \
 	../../../../apps/common/debug/debug.c \
@@ -574,6 +575,7 @@ c_SRC_FILES := \
 	../../../../apps/common/lvgl_v8/examples/widgets/textarea/lv_example_textarea_3.c \
 	../../../../apps/common/lvgl_v8/examples/widgets/tileview/lv_example_tileview_1.c \
 	../../../../apps/common/lvgl_v8/examples/widgets/win/lv_example_win_1.c \
+	../../../../apps/common/lvgl_v8/lvgl_main.c \
 	../../../../apps/common/lvgl_v8/src/core/lv_disp.c \
 	../../../../apps/common/lvgl_v8/src/core/lv_event.c \
 	../../../../apps/common/lvgl_v8/src/core/lv_group.c \
@@ -769,6 +771,7 @@ c_SRC_FILES := \
 	../../../../apps/common/system/device_mount.c \
 	../../../../apps/common/system/flash_write_protect.c \
 	../../../../apps/common/system/init.c \
+	../../../../apps/common/system/init_expand.c \
 	../../../../apps/common/system/mem_mmu.c \
 	../../../../apps/common/system/perf_counter/example/main.c \
 	../../../../apps/common/system/perf_counter/perf_counter.c \
@@ -877,6 +880,7 @@ c_SRC_FILES := \
 	../../../../apps/wifi_camera/lvgl_v8_ui_app/style_LY/custom/custom.c \
 	../../../../apps/wifi_camera/lvgl_v8_ui_app/style_LY/custom/sim_database.c \
 	../../../../apps/wifi_camera/lvgl_v8_ui_app/style_LY/custom/ui_action_animation.c \
+	../../../../apps/wifi_camera/lvgl_v8_ui_app/style_LY/custom/ui_action_dec.c \
 	../../../../apps/wifi_camera/lvgl_v8_ui_app/style_LY/custom/ui_action_linedrift.c \
 	../../../../apps/wifi_camera/lvgl_v8_ui_app/style_LY/custom/ui_action_list.c \
 	../../../../apps/wifi_camera/lvgl_v8_ui_app/style_LY/custom/ui_action_main.c \
@@ -898,6 +902,7 @@ c_SRC_FILES := \
 	../../../../apps/wifi_camera/lvgl_v8_ui_app/style_LY/generated/gui_msg/gui_model_msg.c \
 	../../../../apps/wifi_camera/lvgl_v8_ui_app/style_LY/generated/gui_msg/gui_model_sys_setting_msg.c \
 	../../../../apps/wifi_camera/lvgl_v8_ui_app/style_LY/generated/gui_msg/gui_model_update_msg.c \
+	../../../../apps/wifi_camera/lvgl_v8_ui_app/style_LY/generated/gui_msg/gui_model_video_dec_msg.c \
 	../../../../apps/wifi_camera/lvgl_v8_ui_app/style_LY/generated/gui_msg/gui_model_video_photo_msg.c \
 	../../../../apps/wifi_camera/lvgl_v8_ui_app/style_LY/generated/gui_msg/gui_model_video_rec_msg.c \
 	../../../../apps/wifi_camera/lvgl_v8_ui_app/style_LY/generated/gui_msg/gui_msg.c \
@@ -909,11 +914,15 @@ c_SRC_FILES := \
 	../../../../apps/wifi_camera/lvgl_v8_ui_app/style_LY/generated/gui_scr/setup_scr_sys_prompt.c \
 	../../../../apps/wifi_camera/lvgl_v8_ui_app/style_LY/generated/gui_scr/setup_scr_sys_setting.c \
 	../../../../apps/wifi_camera/lvgl_v8_ui_app/style_LY/generated/gui_scr/setup_scr_usb_slave.c \
+	../../../../apps/wifi_camera/lvgl_v8_ui_app/style_LY/generated/gui_scr/setup_scr_video_dec.c \
+	../../../../apps/wifi_camera/lvgl_v8_ui_app/style_LY/generated/gui_scr/setup_scr_video_dec_options.c \
 	../../../../apps/wifi_camera/lvgl_v8_ui_app/style_LY/generated/gui_scr/setup_scr_video_dir.c \
 	../../../../apps/wifi_camera/lvgl_v8_ui_app/style_LY/generated/gui_scr/setup_scr_video_file.c \
 	../../../../apps/wifi_camera/lvgl_v8_ui_app/style_LY/generated/gui_scr/setup_scr_video_photo.c \
 	../../../../apps/wifi_camera/lvgl_v8_ui_app/style_LY/generated/gui_scr/setup_scr_video_play.c \
 	../../../../apps/wifi_camera/lvgl_v8_ui_app/style_LY/generated/gui_scr/setup_scr_video_rec.c \
+	../../../../apps/wifi_camera/lvgl_v8_ui_app/style_LY/generated/gui_scr/ui_scr_manager.c \
+	../../../../apps/wifi_camera/lvgl_v8_ui_app/style_LY/generated/gui_scr/ui_style.c \
 	../../../../apps/wifi_camera/lvgl_v8_ui_app/style_LY/generated/gui_timelines/gui_timelines.c \
 	../../../../apps/wifi_camera/lvgl_v8_ui_app/style_LY/generated/i18n/lv_i18n.c \
 	../../../../apps/wifi_camera/parking_detect.c \
@@ -1007,9 +1016,6 @@ LFLAGS := \
 	--plugin-opt=-pi32v2-large-program=true \
 	--plugin-opt=-pi32v2-csync-before-rti=true \
 	--start-group \
-	../../../../include_lib/newlib/pi32v2-lib/libm.a \
-	../../../../include_lib/newlib/pi32v2-lib/libc.a \
-	../../../../include_lib/newlib/pi32v2-lib/libcompiler_rt.a \
 	--start-group  \
 	../../../../cpu/wl83/liba/system.a \
 	../../../../cpu/wl83/liba/fs.a \
@@ -1049,9 +1055,12 @@ LFLAGS := \
 	../../../../cpu/wl83/liba/libqrcode.a \
 	--end-group \
 	../../../../cpu/wl83/liba/lvgl_v8_extend.a \
+	../../../../include_lib/newlib/pi32v2-lib/libm.a \
+	../../../../include_lib/newlib/pi32v2-lib/libc.a \
+	../../../../include_lib/newlib/pi32v2-lib/libcompiler_rt.a \
+	--end-group  \
 	-T../../../../cpu/wl83/sdk.ld \
 	-M=../../../../cpu/wl83/tools/sdk.map \
-	--end-group  \
 	--plugin-opt=mcpu=r3 \
 	--plugin-opt=-mattr=+fprev1 \
 

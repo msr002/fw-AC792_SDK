@@ -954,7 +954,7 @@ static void wifi_app_task(void *priv)  //主要是create wifi 线程的
 #endif
 }
 
-#if TCFG_WIFI_ENABLE
+#if TCFG_WIFI_ENABLE && !TCFG_RF_FCC_TEST_ENABLE
 static int wireless_net_init(void)   //主要是create wifi 线程的
 {
     puts("wireless_net_init \n\n");

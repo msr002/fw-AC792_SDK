@@ -7,7 +7,7 @@
  *      INCLUDES
  *********************/
 #include "../../lvgl.h"
-
+#include "app_config.h"
 /*********************
  *      DEFINES
  *********************/
@@ -54,6 +54,16 @@ void lv_jl_extra_init(void)
 #endif
 
 #if LV_USE_JLFFMPEG
+    puts("JLFFMPEG INITING...");
+#if defined(CONFIG_JLFAT_ENABLE) && !defined(TCFG_JLFAT_SUPPORT_OVERSECTOR_RW_ENABLE)
+    LV_LOG_WARN("please define TCFG_JLFAT_SUPPORT_OVERSECTOR_RW_ENABLE to ensure card reading performance!!!");
+#endif
+#if TCFG_SD0_ENABLE && (TCFG_SD0_DAT_WIDTH < 4 || TCFG_SD0_CLK < 48000000)
+    LV_LOG_WARN("SD0 card performance is not configured to the optimal level!!!");
+#endif
+#if TCFG_SD1_ENABLE && (TCFG_SD1_DAT_WIDTH < 4 || TCFG_SD1_CLK < 48000000)
+    LV_LOG_WARN("SD1 card performance is not configured to the optimal level!!!");
+#endif
     lv_ffmpeg_init(LV_USE_JLFFMPEG_BUF_NUM);
 #endif
 

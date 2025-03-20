@@ -168,9 +168,6 @@
 <Add option="--plugin-opt=-pi32v2-large-program=true" />
 <Add option="--plugin-opt=-pi32v2-csync-before-rti=true" />
 <Add option="--start-group" />
-<Add option="../../../../include_lib/newlib/pi32v2-lib/libm.a" />
-<Add option="../../../../include_lib/newlib/pi32v2-lib/libc.a" />
-<Add option="../../../../include_lib/newlib/pi32v2-lib/libcompiler_rt.a" />
 <Add option="--start-group " />
 <Add option="../../../../cpu/wl83/liba/system.a" />
 <Add option="../../../../cpu/wl83/liba/fs.a" />
@@ -210,9 +207,12 @@
 <Add option="../../../../cpu/wl83/liba/libqrcode.a" />
 <Add option="--end-group" />
 <Add option="../../../../cpu/wl83/liba/lvgl_v8_extend.a" />
+<Add option="../../../../include_lib/newlib/pi32v2-lib/libm.a" />
+<Add option="../../../../include_lib/newlib/pi32v2-lib/libc.a" />
+<Add option="../../../../include_lib/newlib/pi32v2-lib/libcompiler_rt.a" />
+<Add option="--end-group " />
 <Add option="-T../../../../cpu/wl83/sdk.ld" />
 <Add option="-M=../../../../cpu/wl83/tools/sdk.map" />
-<Add option="--end-group " />
 </Linker>
 <ExtraCommands>
 <Add before="$compiler $options $includes -D__LD__ -E -P ..\..\..\..\cpu\wl83\sdk_used_list.c -o ..\..\..\..\cpu\wl83\sdk_used_list.used" />
@@ -314,6 +314,7 @@
 <Unit filename="../../../../apps/common/config/log_config/lib_driver_config.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/common/config/log_config/lib_power_config.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/common/config/log_config/lib_system_config.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="../../../../apps/common/config/log_config/lib_ui_config.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/common/config/log_config/lib_update_config.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/common/config/user_cfg.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/common/debug/debug.c"><Option compilerVer="CC"/></Unit>
@@ -681,6 +682,7 @@
 <Unit filename="../../../../apps/common/lvgl_v8/examples/widgets/win/lv_example_win_1.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/common/lvgl_v8/lv_conf.h" />
 <Unit filename="../../../../apps/common/lvgl_v8/lvgl.h" />
+<Unit filename="../../../../apps/common/lvgl_v8/lvgl_main.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/common/lvgl_v8/src/core/lv_disp.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/common/lvgl_v8/src/core/lv_disp.h" />
 <Unit filename="../../../../apps/common/lvgl_v8/src/core/lv_event.c"><Option compilerVer="CC"/></Unit>
@@ -1068,6 +1070,7 @@
 <Unit filename="../../../../apps/common/system/device_mount.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/common/system/flash_write_protect.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/common/system/init.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="../../../../apps/common/system/init_expand.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/common/system/mem_mmu.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/common/system/perf_counter/example/main.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/common/system/perf_counter/perf_counter.c"><Option compilerVer="CC"/></Unit>
@@ -1230,6 +1233,7 @@
 <Unit filename="../../../../apps/wifi_bbm/lvgl_v8_ui_app/generated/gui_scr/setup_scr_pair_status.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/wifi_bbm/lvgl_v8_ui_app/generated/gui_scr/setup_scr_pairing.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/wifi_bbm/lvgl_v8_ui_app/generated/gui_scr/setup_scr_rt_stream.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="../../../../apps/wifi_bbm/lvgl_v8_ui_app/generated/gui_scr/setup_scr_sys_options.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/wifi_bbm/lvgl_v8_ui_app/generated/gui_scr/setup_scr_sys_prompt.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/wifi_bbm/lvgl_v8_ui_app/generated/gui_scr/setup_scr_unpair.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/wifi_bbm/lvgl_v8_ui_app/generated/gui_scr/setup_scr_video_play.c"><Option compilerVer="CC"/></Unit>
@@ -1256,6 +1260,7 @@
 <Unit filename="../../../../apps/wifi_bbm/wifi/stream/video_rt_udp.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/wifi_bbm/wifi/stream/video_rt_usr.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/wifi_bbm/wifi/video_playback.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="../../../../apps/wifi_bbm/wifi/video_playback_udp.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/wifi_bbm/wifi/video_preview.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/wifi_bbm/wifi/wifi_app_task.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../cpu/wl83/adc_api.c"><Option compilerVer="CC"/></Unit>
@@ -1559,6 +1564,7 @@
 <Unit filename="../../../../include_lib/utils/fs/fs_file_name.h" />
 <Unit filename="../../../../include_lib/utils/fs/sdfile.h" />
 <Unit filename="../../../../include_lib/utils/syscfg/syscfg_id.h" />
+<Unit filename="../../../../include_lib/utils/uthash/uthash.h" />
 <Unit filename="../../../../include_lib/utils/version.z.S" />
 <Unit filename="../../../../include_lib/utils/yuv_to_rgb.h" />
 <Unit filename="../../../../lib/net/version.z.S" />

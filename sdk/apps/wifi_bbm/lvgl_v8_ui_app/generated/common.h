@@ -39,6 +39,7 @@ typedef enum {
     GUI_SCREEN_SYS_PROMPT,
     GUI_SCREEN_DIR_SELECT,
     GUI_SCREEN_DEVICE_SELECT,
+    GUI_SCREEN_SYS_OPTIONS,
 } gui_screen_id_t;
 
 

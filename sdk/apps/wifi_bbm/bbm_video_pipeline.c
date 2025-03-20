@@ -47,7 +47,7 @@ int bbm_video_pipe_init(pipe_core_t **pipe_core, struct video_window *win, int s
 {
     int ret;
     pipe_core_t *pipeline_core = NULL;
-    pipe_filter_t *virtual_filter, *jpeg_dec_filter, *rep_filter, *imc_filter, *disp_filter;
+    pipe_filter_t *virtual_filter, *jpeg_dec_filter, *rep_filter, *imc_filter, *disp_filter, *sft_filter;
 
     struct video_format f = {0};
 
@@ -63,28 +63,58 @@ int bbm_video_pipe_init(pipe_core_t **pipe_core, struct video_window *win, int s
         return -1;
     }
 
+    char *rep_name = NULL;
     char *source_name = plugin_factory_find("virtual");
 
     pipeline_core->channel = plugin_source_to_channel(source_name);
     virtual_filter = pipeline_filter_add(pipeline_core, source_name);
-    jpeg_dec_filter = pipeline_filter_add(pipeline_core, plugin_factory_find("jpeg_dec"));
-    rep_filter = pipeline_filter_add(pipeline_core, plugin_factory_find("rep"));
-    imc_filter = pipeline_filter_add(pipeline_core, plugin_factory_find("imc"));
-    disp_filter = pipeline_filter_add(pipeline_core, plugin_factory_find("disp"));
 
+    //todo
+    rep_name = plugin_factory_find("rep");
+    if (rep_name) {
+        rep_filter = pipeline_filter_add(pipeline_core, rep_name);
+        jpeg_dec_filter = pipeline_filter_add(pipeline_core, plugin_factory_find("jpeg_dec"));
+        imc_filter = pipeline_filter_add(pipeline_core, plugin_factory_find("imc"));
+        disp_filter = pipeline_filter_add(pipeline_core, plugin_factory_find("disp"));
 
-    pipeline_param_set(pipeline_core, NULL, PIPELINE_SET_FORMAT, &f);
+        pipeline_param_set(pipeline_core, NULL, PIPELINE_SET_FORMAT, &f);
 
-    int line_cnt = 16;
-    pipeline_param_set(pipeline_core, NULL, PIPELINE_SET_BUFFER_LINE, (int)&line_cnt);
+        int line_cnt = 16;
+        pipeline_param_set(pipeline_core, NULL, PIPELINE_SET_BUFFER_LINE, (int)&line_cnt);
 
-    pipeline_filter_link(virtual_filter, jpeg_dec_filter);
+        pipeline_filter_link(virtual_filter, jpeg_dec_filter);
 
-    pipeline_filter_link(jpeg_dec_filter, rep_filter);
+        pipeline_filter_link(jpeg_dec_filter, rep_filter);
 
-    pipeline_filter_link(rep_filter, imc_filter);
+        pipeline_filter_link(rep_filter, imc_filter);
 
-    pipeline_filter_link(imc_filter, disp_filter);
+        pipeline_filter_link(imc_filter, disp_filter);
+    } else {
+        jpeg_dec_filter = pipeline_filter_add(pipeline_core, plugin_factory_find("jpeg_dec"));
+        sft_filter = pipeline_filter_add(pipeline_core, plugin_factory_find("sft"));
+        disp_filter = pipeline_filter_add(pipeline_core, plugin_factory_find("disp"));
+
+        pipeline_param_set(pipeline_core, NULL, PIPELINE_SET_FORMAT, &f);
+
+        f.three_way_type = 1;
+        pipeline_param_set(pipeline_core, jpeg_dec_filter, PIPELINE_SET_FORMAT, &f);
+
+        //TODO jpeg按行解
+        int line_cnt = 16;
+        pipeline_param_set(pipeline_core, NULL, PIPELINE_SET_BUFFER_LINE, (int)&line_cnt);
+
+        line_cnt = 0;
+        pipeline_param_set(pipeline_core, sft_filter, PIPELINE_SET_BUFFER_LINE, (int)&line_cnt);
+
+        pipeline_filter_link(virtual_filter, jpeg_dec_filter);
+
+        pipeline_filter_link(jpeg_dec_filter, sft_filter);
+
+        pipeline_filter_link(sft_filter, disp_filter);
+
+        line_cnt = 16;
+        pipeline_param_set(pipeline_core, sft_filter, PIPELINE_SET_BUFFER_LINE, (int)&line_cnt);
+    }
 
     pipeline_prepare(pipeline_core);
 

@@ -197,10 +197,6 @@ u8 profile_debug_enable = 0xff;
 u8 ble_debug_enable = 0xff;
 u8 btstack_tws_debug_enable = 0xf;*/
 
-#ifdef CONFIG_RF_TEST_ENABLE
-u8 a2dp_support_delay_report = 1;
-#endif
-
 #else
 const u8 btstack_emitter_support = 0;
 const u8 adt_profile_support = 0;

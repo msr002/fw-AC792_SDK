@@ -31,9 +31,14 @@
 #include "debug.h"
 
 
-#if TCFG_BT_NET_CFG_DUI_EN || TCFG_BT_NET_CFG_DUEROS_EN || TCFG_BT_NET_CFG_TURING_EN || TCFG_BT_NET_CFG_TENCENT_EN
-#undef  TCFG_BT_NET_CFG_EN
-#define TCFG_BT_NET_CFG_EN	1
+#if TCFG_BT_NET_CFG_EN || TCFG_BT_NET_CFG_DUI_EN || TCFG_BT_NET_CFG_DUEROS_EN || TCFG_BT_NET_CFG_TURING_EN || TCFG_BT_NET_CFG_TENCENT_EN
+#define TCFG_OLD_NET_CFG_EN	1
+#define TCFG_BLE_NET_CFG_EN	1
+#endif
+
+#if defined THIRD_PARTY_PROTOCOLS_SEL && (THIRD_PARTY_PROTOCOLS_SEL & MIJIA_EN)
+#define TCFG_OLD_NET_CFG_EN	0
+#define TCFG_BLE_NET_CFG_EN	1
 #endif
 
 static u8 config_network_flag;
@@ -55,7 +60,7 @@ static struct wsc_result {
 } wsc_result;
 #endif
 
-#if TCFG_USER_BLE_ENABLE && TCFG_BT_NET_CFG_EN
+#if TCFG_USER_BLE_ENABLE && TCFG_BLE_NET_CFG_EN
 static struct bt_net_result {
     char ssid[33];
     char pwd[65];
@@ -141,7 +146,7 @@ void config_network_start(void)
     qr_code_net_cfg_init();
 #endif
 
-#if TCFG_USER_BLE_ENABLE && TCFG_BT_NET_CFG_EN
+#if TCFG_USER_BLE_ENABLE && TCFG_BLE_NET_CFG_EN
     memset(&bt_net_result, 0, sizeof(bt_net_result));
     ble_config_complete_flag = 0;
 #if !TCFG_POWER_ON_ENABLE_BLE
@@ -150,8 +155,10 @@ void config_network_start(void)
     bt_master_ble_exit();
     os_time_dly(200);
 #endif
+#if TCFG_OLD_NET_CFG_EN
     extern void bt_ble_init(void);
     bt_ble_init();
+#endif
 #endif
 #endif
 
@@ -174,11 +181,13 @@ void config_network_stop(void)
     /* void wifi_on(void); */
     /* wifi_on(); */
 #endif
-#if TCFG_USER_BLE_ENABLE && TCFG_BT_NET_CFG_EN && !TCFG_POWER_ON_ENABLE_BLE
+#if TCFG_USER_BLE_ENABLE && TCFG_BLE_NET_CFG_EN && !TCFG_POWER_ON_ENABLE_BLE
+#if TCFG_OLD_NET_CFG_EN
     void bt_ble_exit(void);
     if (!ble_config_complete_flag) {
         bt_ble_exit();
     }
+#endif
 #endif
 
 #ifdef CONFIG_LOW_POWER_ENABLE
@@ -186,7 +195,7 @@ void config_network_stop(void)
 #endif
 }
 
-#if TCFG_USER_BLE_ENABLE && TCFG_BT_NET_CFG_EN
+#if TCFG_USER_BLE_ENABLE && TCFG_BLE_NET_CFG_EN
 
 
 #if TCFG_BT_NET_CFG_TENCENT_EN
@@ -342,7 +351,7 @@ int wsc_net_set_ssid_pwd(const char *ssid, const char *pwd, int ssid_len, int pw
 
 void config_network_connect(void)
 {
-#if TCFG_USER_BLE_ENABLE && TCFG_BT_NET_CFG_EN
+#if TCFG_USER_BLE_ENABLE && TCFG_BLE_NET_CFG_EN
 
     if (bt_net_result.ssid[0]) {
         wifi_sta_connect(bt_net_result.ssid, bt_net_result.pwd, 1);

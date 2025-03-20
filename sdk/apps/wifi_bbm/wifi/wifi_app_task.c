@@ -30,13 +30,15 @@
 #include "net_event.h"
 #include "pairing_data_model.h"
 
-#define RSSI_HIGH_THRESHOLD     3
+#define RSSI_HIGH_THRESHOLD     0
 #define RSSI_LOW_THRESHOLD      -5
 #define WIFI_PWR_MIN            1
 #define WIFI_PWR_MAX            6
 
 const u8 bbm_tx_pair_mac[6] = {0x88, 0x88, 0x88, 0x88, 0x88, 0x88};
+const u8 bbm_rx_src_mac[6] = {0x15, 0x81, 0x54, 0x33, 0x13, 0x87};
 const u8 bbm_bssid_mac[6] = {0x88, 0x88, 0x88, 0x99, 0x88, 0x77};
+const int bbm_tx_pair_wifi_channel = 1;
 static int cur_pwr;
 
 #define WIFI_APP_TASK_NAME "wifi_app_task"
@@ -72,6 +74,11 @@ struct bbm_online_packet {
     int rssi;
 };
 
+struct rx_device_check {
+    u32 last_seen;   // 上次收到数据包的时间（可以是系统滴答数或时间戳）
+    u8 online;      // 状态标记，1 表示在线，0 表示离线
+};
+
 
 #define PACKAGE_MAX_SIZE    1024
 
@@ -81,6 +88,7 @@ struct parse_recv_info {
 
     u8 bbm_rx_mac[6];
     u8 bbm_tx_mac[6];
+    int  wifi_channel;
 };
 
 static char default_dest_ip[20];
@@ -205,7 +213,7 @@ void mac_to_string(char *mac_str, const u8 mac[6])
 
 void string_to_mac(const char *mac_str, u8 mac[6])
 {
-    sscanf(mac_str, "%02x:%02x:%02x:%02x:%02x:%02x",
+    sscanf(mac_str, "%hhx:%hhx:%hhx:%hhx:%hhx:%hhx",
            &mac[0], &mac[1], &mac[2], &mac[3], &mac[4], &mac[5]);
 }
 
@@ -226,7 +234,13 @@ static int ctp_init(void)
     video_rt_tcp_server_init(2229);
 #ifdef CONFIG_ENABLE_VLIST
     preview_init(VIDEO_PREVIEW_PORT, NULL); //2226
-    playback_init(VIDEO_PLAYBACK_PORT, NULL);
+
+    if (server_info.k_alive_type = NOT_USE_ALIVE) {
+        //BBM回放使用UDP
+        playback_udp_init();
+    } else {
+        playback_init(VIDEO_PLAYBACK_PORT, NULL);
+    }
 #endif
 
 #else
@@ -250,7 +264,7 @@ static int deal_pair_request_package(u8 *payload_buf, struct parse_recv_info *in
     //解析json
     json_object *new_obj = NULL;
     json_object *data_obj = NULL;
-    char *bbm_rx_ip_str, *bbm_rx_mac_str, *bbm_tx_ip_str, *bbm_tx_mac_str;
+    char *bbm_rx_ip_str, *bbm_rx_mac_str, *bbm_tx_ip_str, *bbm_tx_mac_str, *wifi_ch;
 
     new_obj = json_tokener_parse(payload_buf);
     data_obj =  json_object_object_get(new_obj, "data");
@@ -259,12 +273,16 @@ static int deal_pair_request_package(u8 *payload_buf, struct parse_recv_info *in
     bbm_rx_mac_str = json_object_get_string(json_object_object_get(data_obj, "bbm_rx_mac"));
     bbm_tx_ip_str = json_object_get_string(json_object_object_get(data_obj, "bbm_tx_ip"));
     bbm_tx_mac_str = json_object_get_string(json_object_object_get(data_obj, "bbm_tx_mac"));
+    wifi_ch =  json_object_get_string(json_object_object_get(data_obj, "wifi_channel"));
 
-    printf("request rx ip:%s rx mac:%s tx ip:%s tx mac:%s", bbm_rx_ip_str, bbm_rx_mac_str, bbm_tx_ip_str, bbm_tx_mac_str);
+    printf("request rx ip:%s rx mac:%s tx ip:%s tx mac:%s wifi_ch:%s",
+           bbm_rx_ip_str, bbm_rx_mac_str, bbm_tx_ip_str, bbm_tx_mac_str, wifi_ch);
 
     //ip
     info->bbm_rx_ip = inet_addr(bbm_rx_ip_str);
     info->bbm_tx_ip = inet_addr(bbm_tx_ip_str);
+    //channel
+    info->wifi_channel = atoi(wifi_ch);
     //mac
     string_to_mac(bbm_rx_mac_str, info->bbm_rx_mac);
     string_to_mac(bbm_tx_mac_str, info->bbm_tx_mac);
@@ -288,9 +306,26 @@ static void fill_respone_data(u8 *data)
     sprintf(data, PAIRING_RESPONE, bbm_tx_ip_str, bbm_tx_mac_str);
 }
 
+static void bbm_tx_pair_config(void)
+{
+    int ret;
+    struct parse_recv_info recv_pair_info = {0};
+
+    ret = syscfg_read(BBM_TX_MAC_INDEX, &recv_pair_info, sizeof(struct parse_recv_info));
+    if (ret > 0) {
+        wifi_raw_set_static(recv_pair_info.bbm_tx_ip, recv_pair_info.bbm_tx_mac,
+                            recv_pair_info.bbm_rx_ip, recv_pair_info.bbm_rx_mac);
+        wifi_set_channel(recv_pair_info.wifi_channel);
+    } else {
+        printf("tx pair config err \n");
+    }
+
+}
+
 static void multicast_recv_task(void)
 {
     struct sockaddr_in dstaddr;
+    struct parse_recv_info recv_pair_info = {0};
     u32 addrlen = sizeof(dstaddr);
     int multi_sock = 0;
     u8 *recv_buf = NULL, *send_buf = NULL, *tem_buf = NULL, *payload_buf = NULL;
@@ -320,6 +355,7 @@ static void multicast_recv_task(void)
         }
 
         wifi_raw_set_mac(bbm_tx_pair_mac);
+        wifi_set_channel(bbm_tx_pair_wifi_channel);
 
         recv_len = sock_recvfrom(multi_sock, recv_buf, PACKAGE_MAX_SIZE, 0, &dstaddr, &addrlen);
         if (recv_len <= 0) {
@@ -342,14 +378,15 @@ static void multicast_recv_task(void)
             continue;
         }
 
-        struct parse_recv_info recv_pair_info = {0};
-
         //解析json
         deal_pair_request_package(payload_buf, &recv_pair_info);
 
         //配置网络
         wifi_raw_set_static(recv_pair_info.bbm_tx_ip, recv_pair_info.bbm_tx_mac,
                             recv_pair_info.bbm_rx_ip, recv_pair_info.bbm_rx_mac);
+
+        //等待网络准备就绪
+        os_time_dly(30);
 
         //填充包数据
         fill_respone_data(tem_buf);
@@ -400,6 +437,8 @@ static void multicast_recv_task(void)
     }
 
 exit:
+    bbm_tx_pair_config();
+
     if (multi_sock > 0) {
         sock_unreg(multi_sock);
     }
@@ -443,10 +482,47 @@ void config_send_pkg_head(u8 *src_mac, u8 *dest_mac)
     //设置发送包的802.11头部信息, 设置源mac， 目标mac， seq号等信息
     phead_802_11 pHdr = wifi_get_wifi_send_pkg_ptr() + HEAD_802_11_OFFSET;
     memcpy(pHdr->addr1, dest_mac, 6);
+#ifdef CONFIG_BBM_RX
+    //对于RX设备,此MAC地址固定.用于鉴别是否有其他RX设备在同一信道
+    memcpy(pHdr->addr2, bbm_rx_src_mac, 6);
+#else
     memcpy(pHdr->addr2, src_mac, 6);
+#endif
     memcpy(pHdr->addr3, bbm_bssid_mac, 6);
     pHdr->frag = 8;
 }
+
+#ifdef CONFIG_BBM_RX
+#define OFFLINE_THRESHOLD   3 * 1000 / 10   //3s
+
+static struct rx_device_check rx_dev;
+
+//lwip接收回调调用
+void check_wifi_mac(const u8 *mac)
+{
+    //检查这些包是否有BBM_RX设备
+    if (!memcmp(mac, bbm_rx_src_mac, sizeof(bbm_rx_src_mac))) {
+        rx_dev.online = 1;
+        rx_dev.last_seen = jiffies;
+    }
+}
+
+void check_bbm_rx_devices(void)
+{
+    if (!rx_dev.online || (rx_dev.online && (jiffies - rx_dev.last_seen) > OFFLINE_THRESHOLD)) {
+        rx_dev.online = 0;
+        //没有其他RX设备
+        //TODO
+        //notify app?
+    } else {
+        //有其他RX设备
+        printf("Discover other RX device\n");
+        //TODO
+        //notify app?
+    }
+}
+
+#endif
 
 //TX创建组播线程
 #ifdef CONFIG_BBM_TX
@@ -534,6 +610,7 @@ static void bbm_tx_online_task(void)
         }
         memcpy(&old_pkg, &recv_pkg, sizeof(recv_pkg));
 
+#if BBM_WIFI_PA_ENABLE
         //根据rssi调整wifi模拟增益
         //TODO粗略值
         if (recv_pkg.rssi >= RSSI_HIGH_THRESHOLD) {
@@ -543,6 +620,7 @@ static void bbm_tx_online_task(void)
             cur_pwr = ++cur_pwr > WIFI_PWR_MAX ? WIFI_PWR_MAX : cur_pwr;
             wifi_set_pwr(cur_pwr);
         }
+#endif
     }
 
     sock_unreg(multi_sock);
@@ -596,6 +674,7 @@ static void bbm_rx_online_task(void)
         }
         memcpy(&old_pkg, &recv_pkg, sizeof(recv_pkg));
 
+#if BBM_WIFI_PA_ENABLE
         //根据rssi调整wifi模拟增益
         //TODO粗略值
         if (recv_pkg.rssi >= RSSI_HIGH_THRESHOLD) {
@@ -607,6 +686,7 @@ static void bbm_rx_online_task(void)
             wifi_set_pwr(cur_pwr);
             /* printf("set pwr val:%d \n", cur_pwr); */
         }
+#endif
 
         it.data = dstaddr.sin_addr.s_addr;
         it.exdata = recv_pkg.online_cnt;
@@ -667,6 +747,7 @@ void wifi_raw_init(void)
     strcpy(default_dest_ip, DEST_IP_ADDR);
 
     u8 dest_mac[6] = {0x88, 0x88, 0x88, 0x88, 0x88, 0x88};
+    int wifi_channel;
 
 #ifdef  CONFIG_BBM_TX
     struct parse_recv_info recv_pair_info = {0};
@@ -683,6 +764,7 @@ void wifi_raw_init(void)
 
         memcpy(src_mac, recv_pair_info.bbm_tx_mac, sizeof(src_mac));
         memcpy(dest_mac, recv_pair_info.bbm_rx_mac, sizeof(dest_mac));
+        wifi_channel = recv_pair_info.wifi_channel;
         strcpy(default_dest_ip, inet_ntoa(recv_pair_info.bbm_rx_ip));
         printf("syscfg read ok ! \n ip:%s \n", inet_ntoa(ip_addr));
         printf("src mac: \n");
@@ -719,6 +801,23 @@ void wifi_raw_init(void)
         arp_static_table_reset_to_flash();
     }
 
+    ret = syscfg_read(BBM_WIFI_CH_INDEX, &wifi_channel, sizeof(wifi_channel));
+    if (ret > 0) {
+        //读取成功
+        printf("read flash wifi_channel:%d \n", wifi_channel);
+    } else {
+        //读取失败
+        wifi_channel = bbm_tx_pair_wifi_channel;
+        printf("use default wifi_channel:%d \n", wifi_channel);
+        arp_static_table_reset_to_flash();
+
+        ret = syscfg_write(BBM_WIFI_CH_INDEX, &wifi_channel, sizeof(wifi_channel));
+        if (ret < 0) {
+            printf("wifi channel write flash fail !!!\n");
+        } else {
+            printf("wifi channel write flash success !!!\n");
+        }
+    }
 #endif
 
     //设置静态IP
@@ -731,11 +830,17 @@ void wifi_raw_init(void)
     wifi_raw_on(1);
     lwip_set_default_netif(WIFI_RAW_NETIF);
 
+    //设置信道
+    wifi_set_channel(wifi_channel);
+
     //重发时不降速
     wf_tx_speed_maintain();
 
+#ifdef CONFIG_BBM_TX
     //raw不需要退避
-    wifi_edca_parm_set(0, 255, 0, 0, 0);
+    //会干扰到其他设备,暂不开启
+    /* wifi_edca_parm_set(0, 255, 0, 0, 0); */
+#endif
 
     //过滤掉一些不用的包
     filt_pack_not_need();
@@ -759,6 +864,7 @@ void wifi_raw_init(void)
     //BBM连接不需要心跳包
     server_info.k_alive_type = NOT_USE_ALIVE;
     ctp_init();
+    //ctp_srv_set_keep_alive_timeout(10*1000);
 
 #ifdef CONFIG_BBM_RX
     //初始化RX端配对表
@@ -813,6 +919,7 @@ void wifi_init(void)
     //手机app需要心跳包
     server_info.k_alive_type = CTP_ALIVE;
     ctp_init();
+    //ctp_srv_set_keep_alive_timeout(60*1000);
 
     //添加定时器,打印内存及网络信息
     net_state_timer = sys_timer_add_to_task("app_core", NULL, wifi_state_timer_func, 5 * 1000);

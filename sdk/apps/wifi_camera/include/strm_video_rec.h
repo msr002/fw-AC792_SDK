@@ -20,8 +20,13 @@ struct strm_video_hdl {
 
     struct server *video_rec0;
     struct server *video_rec1;
+    struct server *video_rec2;
+    struct server *video_rec4;
+    struct server *video_rec5;
     struct server *video_display_0;
     struct server *video_display_1;
+    struct server *video_display_4;
+    struct server *video_display_5;
 
     u16 width;
     u16 height;

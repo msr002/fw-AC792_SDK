@@ -2950,17 +2950,26 @@ static int uvc_video_mjpeg_open(int priv)
     }
 #else
 #ifdef CONFIG_USR_VIDEO_ENABLE
-    extern void set_video_rt_cb(void *handle, u32(*cb)(void *, u8 *, u32), void *priv);
-    extern void *user_video_rec_open(const char *video_name);
-    video_info->rt_user_handle = user_video_rec_open(video_info->usb_id ? TCFG_SLAVE_UVC1_JPEG_DATA_SOURCE : TCFG_SLAVE_UVC0_JPEG_DATA_SOURCE);//打开摄像头
+    extern void set_video_rt_cb(void *handle, u32(*cb)(void *, u8 *, u32), void *priv, u8 id);
+    extern void *user_video_rec_open(const char *video_name, u8 id);
+    video_info->rt_user_handle = user_video_rec_open(video_info->usb_id ? TCFG_SLAVE_UVC1_JPEG_DATA_SOURCE : TCFG_SLAVE_UVC0_JPEG_DATA_SOURCE, video_info->usb_id);//打开摄像头
     if (video_info->rt_user_handle) {
-        set_video_rt_cb(video_info->rt_user_handle, uvc_send_buf, video_info);//注册JPEG回调函数
+        set_video_rt_cb(video_info->rt_user_handle, uvc_send_buf, video_info, video_info->usb_id);//注册JPEG回调函数
     }
 #endif
 #endif
 #endif
     video_info->init = true;
     return 0;
+}
+
+void set_uvc_handle_cb(void *handle, u8 id)
+{
+    ASSERT(id == 0 || id == 1);
+
+    struct uvc_video_data *video_info = (struct uvc_video_data *)uvc_video_info[id];
+    video_info->rt_user_handle = handle;
+    set_video_rt_cb(video_info->rt_user_handle, uvc_send_buf, video_info, id);//注册JPEG回调函数
 }
 
 static int uvc_video_mjpeg_close(int priv)
@@ -2974,9 +2983,9 @@ static int uvc_video_mjpeg_close(int priv)
     delete_camera_data_conn();
 #else
 #ifdef CONFIG_USR_VIDEO_ENABLE
-    extern int user_video_rec_close(void *handle);
+    extern int user_video_rec_close(void *handle, u8 id);
     if (video_info->rt_user_handle) {
-        user_video_rec_close(video_info->rt_user_handle);
+        user_video_rec_close(video_info->rt_user_handle, video_info->usb_id);
         video_info->rt_user_handle = NULL;
     }
 #endif

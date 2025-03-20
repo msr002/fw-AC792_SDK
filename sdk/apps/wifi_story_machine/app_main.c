@@ -251,10 +251,12 @@ void app_main()
     lvgl_main_task_init();
 #endif
 
+#if !TCFG_RF_FCC_TEST_ENABLE
     init_intent(&it);
     it.name = "app_music";
     it.action = ACTION_MUSIC_PLAY_MAIN;
     start_app(&it);
+#endif
 
 #if defined CONFIG_BT_ENABLE && !TCFG_WIFI_ENABLE
     extern void bt_ble_module_init(void);

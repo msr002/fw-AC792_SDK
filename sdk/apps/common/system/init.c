@@ -215,14 +215,12 @@ static void app_task_handler(void *p)
     __do_initcall(platform_initcall);
     board_init();
 
-#ifdef RF_FCC_TEST_ENABLE
+#if TCFG_RF_FCC_TEST_ENABLE || TCFG_RF_PRODUCT_TEST_ENABLE
     u8 rf_fcc_test_init(void);
     if (rf_fcc_test_init()) {
-#ifndef RF_FCC_IN_NORNAL_WORK
         while (1) {
             os_time_dly(10);
         }
-#endif
     }
 #endif
 
@@ -230,7 +228,6 @@ static void app_task_handler(void *p)
     __do_initcall(module_initcall);
     app_core_init();
     __do_initcall(late_initcall);
-
 
     app_main();
 
@@ -369,6 +366,29 @@ void local_irq_enable(void)
 }
 
 #endif
+
+static volatile u32 rt_lock_cnt[CPU_CORE_NUM] SEC_USED(.volatile_ram) = {0};
+static spinlock_t rt_lock SEC_USED(.volatile_ram) = {0};
+
+__attribute__((used))
+void __rt_local_irq_disable(void)
+{
+    __local_irq_disable();
+    if (rt_lock_cnt[current_cpu_id()]++ == 0) {
+        arch_spin_lock(&rt_lock);
+    }
+
+}
+
+__attribute__((used))
+void __rt_local_irq_enable(void)
+{
+    if (--rt_lock_cnt[current_cpu_id()] == 0) {
+        arch_spin_unlock(&rt_lock);
+    }
+    __local_irq_enable();
+
+}
 
 #if CONFIG_MEDIA_ENABLE_SPINLOCK && CPU_CORE_NUM > 1
 

@@ -32,6 +32,11 @@ void wf_rx_filt_reset(unsigned int reg);
 void wf_asic_set_bssid(unsigned char *bssid);
 //设置本机硬件MAC, 需要在wifi_raw_on后调用
 void wf_asic_set_mac(unsigned char *mac);
+//使能channel power检测,需要在wifi_raw_on后调用
+void wf_channel_power_detect_enable(void);
+//获取当前channel power
+char get_current_channel_power(void);
+
 
 #ifdef __cplusplus
 }

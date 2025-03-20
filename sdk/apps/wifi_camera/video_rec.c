@@ -47,6 +47,14 @@
 #undef VREC3_FBUF_SIZE
 #define VREC3_FBUF_SIZE   0
 #endif
+#ifndef CONFIG_VIDEO4_ENABLE
+#undef VREC4_FBUF_SIZE
+#define VREC4_FBUF_SIZE   0
+#endif
+#ifndef CONFIG_VIDEO5_ENABLE
+#undef VREC5_FBUF_SIZE
+#define VREC5_FBUF_SIZE   0
+#endif
 
 
 
@@ -168,7 +176,7 @@ struct video_rec_hdl rec_handler;
 
 
 static const u16 rec_pix_w[] = {1920, 1280, 640};
-static const u16 rec_pix_h[] = {1080, 720,  480};
+static const u16 rec_pix_h[] = {1088, 720,  480};
 static const u16 pic_pix_w[] = {1280, 1920, 2560, 3072};
 static const u16 pic_pix_h[] = {720,  1088, 1600, 2208};
 
@@ -283,11 +291,15 @@ static const char *rec_dir[][2] = {
     {CONFIG_REC_DIR_1, CONFIG_EMR_REC_DIR_1},
     {CONFIG_REC_DIR_2, CONFIG_EMR_REC_DIR_2},
     {CONFIG_REC_DIR_2, CONFIG_EMR_REC_DIR_2},
+    {CONFIG_REC_DIR_4, CONFIG_EMR_REC_DIR_4},
+    {CONFIG_REC_DIR_5, CONFIG_EMR_REC_DIR_5},
 #else
     {CONFIG_REC_DIR_0, CONFIG_REC_DIR_0},
     {CONFIG_REC_DIR_1, CONFIG_REC_DIR_1},
     {CONFIG_REC_DIR_2, CONFIG_REC_DIR_2},
     {CONFIG_REC_DIR_2, CONFIG_REC_DIR_2},
+    {CONFIG_REC_DIR_4, CONFIG_REC_DIR_4},
+    {CONFIG_REC_DIR_5, CONFIG_REC_DIR_5},
 #endif
 };
 
@@ -621,23 +633,24 @@ int video_disp_start(int id, struct video_window *win)
         puts("video_disp_hide\n");
         return 0;
     }
+    if (__this->video_display[id]) {
+        return 0;
+    }
 
     sprintf(fb_name, "fb%d", id + 1);
 
     if (id == 2) {
         sprintf(dev_name, "video%d.%d", 10 + __this->uvc_id, id < 2 ? 0 : __this->uvc_id);
     } else {
-        sprintf(dev_name, "video%d.%d", id, id < 2 ? 0 : __this->uvc_id);
+        sprintf(dev_name, "video%d.0", id);
     }
 
+    log_d("%s: %d, %d x %d\n", __func__, id, win->width, win->height);
+    __this->video_display[id] = server_open("video_server", (void *)dev_name);
     if (!__this->video_display[id]) {
-        __this->video_display[id] = server_open("video_server", (void *)dev_name);
-        if (!__this->video_display[id]) {
-            log_e("open video_server: faild, id = %d\n", id);
-            return -EFAULT;
-        }
+        log_e("open video_server: faild, id = %d\n", id);
+        return -EFAULT;
     }
-    log_d("video_disp_start: %d, %d x %d\n", id, win->width, win->height);
 #ifdef MULTI_LCD_EN
     if (!id) {
         switch (win->win_type) {
@@ -711,28 +724,7 @@ int video_disp_start(int id, struct video_window *win)
     req.display.three_way_type = VIDEO_THREE_WAY_DOU_RAW;
 #endif
 
-    if (id == 0) {
-        req.display.camera_config   = NULL;//load_default_camera_config;
-        req.display.camera_type     = VIDEO_CAMERA_NORMAL;
-        /* req.display.mirror = VIDEO_HOR_MIRROR | VIDEO_VER_MIRROR; */
-        /* req.display.rotate = 90; //90/270 */
-        /* req.display.width 	        = win->height; */
-        /* req.display.height 	        = win->width; */
-    } else if (id == 1) {
-        /*if (req.display.width < 1280) {
-            req.display.width 	+= 32;
-            req.display.height 	+= 32;
-
-            req.display.border_left   = 16;
-            req.display.border_top    = 16;
-            req.display.border_right  = 16;
-            req.display.border_bottom = 16;
-        }*/
-
-        req.display.camera_config   = NULL;
-        req.display.camera_type     = VIDEO_CAMERA_NORMAL;
-        /* req.display.mirror = VIDEO_HOR_MIRROR | VIDEO_VER_MIRROR; */
-    } else if (id == 2) {
+    if (id == 2) {
         req.display.uvc_id = __this->uvc_id;
         req.display.camera_config = NULL;
         req.display.camera_type = VIDEO_CAMERA_UVC;
@@ -745,6 +737,9 @@ int video_disp_start(int id, struct video_window *win)
             /* req.display.width 	        = win->height; */
             /* req.display.height 	        = win->width; */
         }
+    } else {
+        req.display.camera_config   = NULL;//load_default_camera_config;
+        req.display.camera_type     = VIDEO_CAMERA_NORMAL;
     }
 
     req.display.state 	        = VIDEO_STATE_START;
@@ -761,15 +756,14 @@ int video_disp_start(int id, struct video_window *win)
         __this->video_display[id] = NULL;
     }
 
-
-    if (id == 0) {
-        /*rec显示重设曝光补偿*/
-        /* __this->exposure_set = 1; */
-        /* video_rec_set_exposure(db_select("exp")); */
-    } else if (id == 2) {
+    if (id == 2) {
 #ifdef CONFIG_VIDEO2_ENABLE
         uvc_parking_enable(1);
 #endif
+    } else {
+        /*rec显示重设曝光补偿*/
+        /* __this->exposure_set = 1; */
+        /* video_rec_set_exposure(db_select("exp")); */
     }
 #endif
 
@@ -859,6 +853,7 @@ static void video_disp_stop(int id)
 
         server_close(__this->video_display[id]);
         __this->video_display[id] = NULL;
+        log_d("%s: %d\n", __func__, id);
 
     }
 #endif
@@ -866,13 +861,13 @@ static void video_disp_stop(int id)
 
 static int video_disp_win_switch(int mode, int dev_id)
 {
-    int i;
     int err = 0;
+#ifdef CONFIG_DISPLAY_ENABLE
+    int i;
     int next_win;
     int curr_win = __this->disp_state;
     int second_disp_dev = __this->second_disp_dev;
 
-#ifdef CONFIG_DISPLAY_ENABLE
     switch (mode) {
     case DISP_WIN_SW_SHOW_PARKING:
         if (!__this->video_online[__this->disp_park_sel]) {
@@ -881,10 +876,10 @@ static int video_disp_win_switch(int mode, int dev_id)
         if (curr_win == DISP_BACK_WIN && second_disp_dev == __this->disp_park_sel) {
             return 0;
         }
-
         next_win        = DISP_PARK_WIN;
         second_disp_dev = __this->disp_park_sel;
         break;
+
     case DISP_WIN_SW_HIDE_PARKING:
         if (curr_win == DISP_BACK_WIN && second_disp_dev == __this->disp_park_sel) {
             return 0;
@@ -892,11 +887,13 @@ static int video_disp_win_switch(int mode, int dev_id)
         next_win = curr_win;
         curr_win = DISP_PARK_WIN;
         break;
+
     case DISP_WIN_SW_SHOW_SMALL:
         curr_win        = DISP_MAIN_WIN;
         next_win        = DISP_MAIN_WIN;
         second_disp_dev = 0;
         break;
+
     case DISP_WIN_SW_SHOW_NEXT:
         if (video_rec_online_nums() < 2) {
             return 0;
@@ -909,9 +906,11 @@ static int video_disp_win_switch(int mode, int dev_id)
             next_win = DISP_MAIN_WIN;
         }
         break;
+
     case DISP_WIN_SW_DEV_IN:
         next_win = curr_win;
         break;
+
     case DISP_WIN_SW_DEV_OUT:
         if (dev_id == 0) {
             curr_win        = -1;
@@ -933,24 +932,23 @@ static int video_disp_win_switch(int mode, int dev_id)
             return 0;
         }
         break;
+
     default:
         return -EINVAL;
     }
 
     printf("disp_win_switch: %d, %d, %d\n", curr_win, next_win, second_disp_dev);
 
-    for (i = 1; i < CONFIG_VIDEO_REC_NUM; i++) {
+    for (i = CONFIG_VIDEO_REC_NUM - 1; i >= 0 ; i--) {
         video_disp_stop(i);
     }
-    if (curr_win != next_win) {
-        video_disp_stop(0);
-        err = video_disp_start(0, &disp_window[next_win][0]);
-    }
-    for (i = 1; i < CONFIG_VIDEO_REC_NUM; i++) {
+
+    for (i = 0; i < CONFIG_VIDEO_REC_NUM; i++) {
         if (__this->video_online[i]) {
-            err = video_disp_start(i, &disp_window[next_win][i >= 4 ? (i - 4) : i]);
+            err = video_disp_start(i, &disp_window[next_win][i == 4 ? 0 : (i == 5 ? 2 : i)]);
         }
     }
+
     if (i == CONFIG_VIDEO_REC_NUM) {
         second_disp_dev = 0;
     }
@@ -969,10 +967,8 @@ static int video_disp_win_switch(int mode, int dev_id)
     }
 
 #endif
-
     return err;
 }
-
 
 static void rec_dev_server_event_handler(void *priv, int argc, int *argv)
 {
@@ -1542,6 +1538,12 @@ static FILE *video_rec_get_first_file(int id)
 #ifdef CONFIG_VIDEO3_ENABLE
     video_rec_fscan_dir(3, lock_dir, rec_path[2][lock_dir]);
 #endif
+#ifdef CONFIG_VIDEO5_ENABLE
+    video_rec_fscan_dir(4, lock_dir, rec_path[4][lock_dir]);
+#endif
+#ifdef CONFIG_VIDEO5_ENABLE
+    video_rec_fscan_dir(5, lock_dir, rec_path[5][lock_dir]);
+#endif
 
 
     for (int i = 0; i < CONFIG_VIDEO_REC_NUM; i++) {
@@ -1701,6 +1703,15 @@ static int video_rec_del_old_file()
         need_space += fsize[0];
     }
 #endif
+#ifdef CONFIG_VIDEO4_ENABLE
+    if (!__this->new_file[0]) {
+        fsize[4] =  video_rec_get_fsize(cyc_time, rec_pix_w[db_select("res")], VIDEO4_REC_FORMAT);
+        if (gap_time) {
+            fsize[4] = fsize[4] / (30 * gap_time / 1000);
+        }
+        need_space += fsize[4];
+    }
+#endif
 
     if (db_select("two")) {
 #ifdef CONFIG_VIDEO1_ENABLE
@@ -1730,16 +1741,6 @@ static int video_rec_del_old_file()
                 fsize[3] = fsize[3] / (30 * gap_time / 1000);
             }
             need_space += fsize[3];
-        }
-#endif
-
-#ifdef CONFIG_VIDEO4_ENABLE
-        if (__this->video_online[4] && !__this->new_file[4]) {
-            fsize[4] =  video_rec_get_fsize(cyc_time, rec_pix_w[db_select("res")], VIDEO4_REC_FORMAT);
-            if (gap_time) {
-                fsize[4] = fsize[4] / (30 * gap_time / 1000);
-            }
-            need_space += fsize[4];
         }
 #endif
 
@@ -2048,11 +2049,7 @@ static int video0_rec_start()
         osd_line_num = 2;
     }
     osd_max_heigh = (req.rec.height == 1088) ? 1080 : req.rec.height ;
-    if (res == VIDEO_RES_1080P) {
-        text_osd.x = (req.rec.width / 2 - max_one_line_strnum * text_osd.font_w) / 64 * 64;
-    } else {
-        text_osd.x = (req.rec.width - max_one_line_strnum * text_osd.font_w) / 64 * 64;
-    }
+    text_osd.x = (req.rec.width - max_one_line_strnum * text_osd.font_w) / 64 * 64;
     text_osd.y = (osd_max_heigh - text_osd.font_h * osd_line_num) / 16 * 16;
     text_osd.color[0] = 0x057d88;
     text_osd.color[1] = 0xe20095;
@@ -2074,8 +2071,8 @@ static int video0_rec_start()
     graph_osd.y = 0;
     graph_osd.width = 256;
     graph_osd.height = 256;
-    graph_osd.icon = icon_osd_buf;
-    graph_osd.icon_size = sizeof(icon_osd_buf);
+    graph_osd.icon = icon_16bit_data;
+    graph_osd.icon_size = sizeof(icon_16bit_data);
 #endif
     req.rec.text_osd = NULL;
     req.rec.graph_osd = NULL;
@@ -2414,12 +2411,8 @@ static int video1_rec_start()
     }
 
     u32 res = db_select("res");
-#if THREE_WAY_DOUBLE_RAW
-    req.rec.online  = 1;
-#else
-    req.rec.online  = 0;
-#endif
 
+    req.rec.online  = 1;
     req.rec.enable_dri  = 0;
     req.rec.channel = 0;
     req.rec.camera_type = VIDEO_CAMERA_NORMAL;
@@ -2497,8 +2490,8 @@ static int video1_rec_start()
     graph_osd.y = 0;
     graph_osd.width = 256;
     graph_osd.height = 256;
-    graph_osd.icon = icon_osd_buf;
-    graph_osd.icon_size = sizeof(icon_osd_buf);
+    graph_osd.icon = icon_16bit_data;
+    graph_osd.icon_size = sizeof(icon_16bit_data);
 #endif
     req.rec.text_osd = NULL;
     req.rec.graph_osd = NULL;
@@ -2955,8 +2948,8 @@ static int video2_rec_start()
     graph_osd.y = 0;
     graph_osd.width = 256;
     graph_osd.height = 256;
-    graph_osd.icon = icon_osd_buf;
-    graph_osd.icon_size = sizeof(icon_osd_buf);
+    graph_osd.icon = icon_16bit_data;
+    graph_osd.icon_size = sizeof(icon_16bit_data);
 #endif
     req.rec.text_osd = NULL;
     req.rec.graph_osd = NULL;
@@ -3337,8 +3330,8 @@ static int video3_rec_start()
     graph_osd.y = 0;
     graph_osd.width = 256;
     graph_osd.height = 256;
-    graph_osd.icon = icon_osd_buf;
-    graph_osd.icon_size = sizeof(icon_osd_buf);
+    graph_osd.icon = icon_16bit_data;
+    graph_osd.icon_size = sizeof(icon_16bit_data);
 #endif
     req.rec.text_osd = NULL;
     req.rec.graph_osd = NULL;
@@ -3733,8 +3726,8 @@ static int video4_rec_start()
     graph_osd.y = 0;
     graph_osd.width = 256;
     graph_osd.height = 256;
-    graph_osd.icon = icon_osd_buf;
-    graph_osd.icon_size = sizeof(icon_osd_buf);
+    graph_osd.icon = icon_16bit_data;
+    graph_osd.icon_size = sizeof(icon_16bit_data);
 #endif
     req.rec.text_osd = NULL;
     req.rec.graph_osd = NULL;
@@ -4133,8 +4126,8 @@ static int video5_rec_start()
     graph_osd.y = 0;
     graph_osd.width = 256;
     graph_osd.height = 256;
-    graph_osd.icon = icon_osd_buf;
-    graph_osd.icon_size = sizeof(icon_osd_buf);
+    graph_osd.icon = icon_16bit_data;
+    graph_osd.icon_size = sizeof(icon_16bit_data);
 #endif
     req.rec.text_osd = NULL;
     req.rec.graph_osd = NULL;
@@ -4644,6 +4637,14 @@ static int video_rec_aud_mute()
     video3_rec_aud_mute();
 #endif
 
+#ifdef CONFIG_VIDEO4_ENABLE
+    video4_rec_aud_mute();
+#endif
+
+#ifdef CONFIG_VIDEO4_ENABLE
+    video4_rec_aud_mute();
+#endif
+
 
     return 0;
 }
@@ -4740,8 +4741,17 @@ static int video_rec_close()
 #ifdef CONFIG_VIDEO2_ENABLE
     video2_rec_close();
 #endif
+
 #ifdef CONFIG_VIDEO3_ENABLE
     video3_rec_close();
+#endif
+
+#ifdef CONFIG_VIDEO4_ENABLE
+    video4_rec_close();
+#endif
+
+#ifdef CONFIG_VIDEO4_ENABLE
+    video4_rec_close();
 #endif
 
 
@@ -4843,6 +4853,15 @@ static int video_rec_savefile(int dev_id)
         }
     }
 #endif
+#ifdef CONFIG_VIDEO4_ENABLE
+    if (__this->video_online[4] && (dev_id == 4)) {
+        err = video4_rec_savefile();
+        if (err) {
+            goto __err;
+        }
+    }
+#endif
+
 
     if (post_msg) {
         video_rec_post_msg("saveREC");
@@ -4878,6 +4897,15 @@ static int video_rec_savefile(int dev_id)
     }
 #endif
 
+#ifdef CONFIG_VIDEO5_ENABLE
+    if (__this->video_online[5] && (dev_id == 5)) {
+        err = video5_rec_savefile();
+        if (err) {
+            goto __err;
+        }
+    }
+#endif
+
 
 
     __this->state = VIDREC_STA_START;
@@ -4894,14 +4922,26 @@ static int video_rec_savefile(int dev_id)
 
 __err:
 
-#ifdef CONFIG_VIDEO3_ENABLE
-    err = video3_rec_stop(0);
+#ifdef CONFIG_VIDEO5_ENABLE
+    err = video5_rec_stop(0);
     if (err) {
-        printf("\nsave wrong2 %x\n", err);
+        printf("\nsave wrong5 %x\n", err);
     }
 #endif
 
+#ifdef CONFIG_VIDEO4_ENABLE
+    err = video4_rec_stop(0);
+    if (err) {
+        printf("\nsave wrong4 %x\n", err);
+    }
+#endif
 
+#ifdef CONFIG_VIDEO3_ENABLE
+    err = video3_rec_stop(0);
+    if (err) {
+        printf("\nsave wrong3 %x\n", err);
+    }
+#endif
 
 #ifdef CONFIG_VIDEO2_ENABLE
     err = video2_rec_stop(0);
@@ -5095,6 +5135,12 @@ static int video_rec_take_photo(void)
 #ifdef CONFIG_VIDEO2_ENABLE
         err = video_rec_capture(2);
 #endif
+#ifdef CONFIG_VIDEO4_ENABLE
+        err = video_rec_capture(4);
+#endif
+#ifdef CONFIG_VIDEO5_ENABLE
+        err = video_rec_capture(5);
+#endif
     } else {
         if (__this->video_rec0) {
             req.rec.rec_save_path = CAMERA0_CAP_PATH"img_****.jpg";
@@ -5105,6 +5151,16 @@ static int video_rec_take_photo(void)
             req.rec.rec_save_path = CAMERA1_CAP_PATH"img_****.jpg";
             err = server_request(__this->video_rec2, VIDEO_REQ_SAVE_FRAME, &req);
             log_i("video2 save frame");
+        }
+        if (__this->video_rec4) {
+            req.rec.rec_save_path = CAMERA4_CAP_PATH"img_****.jpg";
+            err = server_request(__this->video_rec4, VIDEO_REQ_SAVE_FRAME, &req);
+            log_i("video4 save frame");
+        }
+        if (__this->video_rec5) {
+            req.rec.rec_save_path = CAMERA5_CAP_PATH"img_****.jpg";
+            err = server_request(__this->video_rec5, VIDEO_REQ_SAVE_FRAME, &req);
+            log_i("video5 save frame");
         }
     }
 #endif /* THREE_WAY_ENABLE */
@@ -5260,6 +5316,19 @@ static void switch_sticker()
         if (tmp) {
             video_rec_start();
         }
+#elif (defined CONFIG_VIDEO4_ENABLE)
+        get_sticker();
+        video_disp_stop(4);
+        u8 tmp = 0;
+        if (__this->state == VIDREC_STA_START) {
+            video_rec_stop(4);
+            tmp = 1;
+        }
+
+        video_disp_start(4, &disp_window[DISP_MAIN_WIN][0]);
+        if (tmp) {
+            video_rec_start();
+        }
 #endif
         return;
     } else if (__this->sticker_num == 0) {
@@ -5273,6 +5342,20 @@ static void switch_sticker()
         }
         __this->sticker_name  = NULL;
         video_disp_start(0, &disp_window[DISP_MAIN_WIN][0]);
+
+        if (tmp) {
+            video_rec_start();
+        }
+
+#elif (defined CONFIG_VIDEO4_ENABLE)
+        video_disp_stop(4);
+        u8 tmp = 0;
+        if (__this->state == VIDREC_STA_START) {
+            video_rec_stop(4);
+            tmp = 1;
+        }
+        __this->sticker_name  = NULL;
+        video_disp_start(4, &disp_window[DISP_MAIN_WIN][0]);
 
         if (tmp) {
             video_rec_start();
@@ -5548,6 +5631,27 @@ int lane_det_setting_disp()
     err = video_disp_start(0, &win);
     show_lane_set_ui();
 #endif
+#ifdef CONFIG_VIDEO4_ENABLE
+    struct video_window win;
+
+    video_disp_stop(1);
+
+    u16 dis_w = 640 * SCREEN_H / 352 / 16 * 16;
+    dis_w = dis_w > SCREEN_W ? SCREEN_W : dis_w;
+
+    printf("lane dis %d x %d\n", dis_w, SCREEN_H);
+
+    win.top             = 0;
+    win.left            = (SCREEN_H - dis_w) / 2 / 16 * 16;
+    win.width           = dis_w;
+    win.height          = SCREEN_H;
+    win.border_left     = 0;
+    win.border_right    = 0;
+    win.border_top      = 0;
+    win.border_bottom   = 0;
+    err = video_disp_start(4, &win);
+    show_lane_set_ui();
+#endif
     return err;
 }
 
@@ -5582,7 +5686,6 @@ static int video_rec_init()
     }
 
     /* ve_server_open(0); */
-
 
 #if (CONFIG_VIDEO_PARK_DECT == 1)
     __this->disp_park_sel = 1;
@@ -5619,7 +5722,6 @@ static int video_rec_init()
 
 #ifdef CONFIG_VIDEO3_ENABLE
     __this->video_online[3] = 1;
-    /* __this->video_online[3] = dev_online("video3.*"); */
 #endif
 
 #ifdef CONFIG_VIDEO4_ENABLE
@@ -5674,7 +5776,12 @@ static int video_rec_init()
 
     ve_server_open(0);
 
-    if (__this->video_online[0] && __this->video_online[1]) {
+#if (defined CONFIG_VIDEO0_ENABLE && defined CONFIG_VIDEO1_ENABLE)
+    if (__this->video_online[0] && __this->video_online[1])
+#elif (defined CONFIG_VIDEO4_ENABLE && defined CONFIG_VIDEO5_ENABLE)
+    if (__this->video_online[4] && __this->video_online[5])
+#endif
+    {
         printf("%d, %s", __LINE__, __func__);
         video_rec_post_msg("swWinicon", 1);
     }

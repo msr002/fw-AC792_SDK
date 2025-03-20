@@ -300,6 +300,7 @@ int usbnet_host_bulk_only_send(usb_dev usb_id, u8 *buf, u32 len);
 void usbnet_at_port_rx_handler_register(void (*func)(u8 *buf, u32 len));
 void usb_net_stop_process(usb_dev usb_id);
 void usb_net_at_port_stop_process(usb_dev usb_id);
+extern int __attribute__((weak)) rndis_user_handle_packet(struct rndis_data_hdr *hdr, u32 data_size);
 
 #endif	/* __LINUX_USB_RNDIS_HOST_H */
 

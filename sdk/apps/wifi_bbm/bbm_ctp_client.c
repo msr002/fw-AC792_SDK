@@ -68,8 +68,17 @@ static int json_parse_video_finish(const char *parm_list, char *fname)
     json_object *tmp = NULL;
 
     new_obj = json_tokener_parse(parm_list);
+    if (!new_obj) {
+        printf("json_tokener_parse err\n");
+        return -1;
+    }
     parm =  json_object_object_get(new_obj, "param");
     desc =  json_object_object_get(parm, "desc");
+
+    if (!desc) {
+        printf("no desc json obj\n");
+        return -1;
+    }
 
     desc_obj = json_tokener_parse(json_object_get_string(desc));
     tmp =  json_object_object_get(desc_obj, "f");
@@ -99,8 +108,10 @@ static int json_parse_err_value(const char *parm_list)
     errno_obj =  json_object_object_get(new_obj, "errno");
 
     if (errno_obj == NULL) {
+        json_object_put(new_obj);
         return 0;
     } else {
+        json_object_put(new_obj);
         tmp_value = json_object_get_string(errno_obj);
         return atoi(tmp_value);
     }
@@ -136,7 +147,7 @@ static int bbm_ctp_recv_callback(void *hdl, enum ctp_cli_msg_type type, const ch
             }
         } else if (strstr(topic, "APP_ACCESS")) {
 
-        } else if (strstr(topic, "VIDEO_FINISH")) {
+        } else if (strstr(topic, "VIDEO_FINISH") || strstr(topic, "PHOTO_CTRL")) {
             char fname[32];
             ret = json_parse_video_finish(parm_list, fname);
             if (!ret) {
@@ -217,6 +228,21 @@ int bbm_ctp_send_modify_txrate(void *ctp_cli_hdl, int txrate)
     return ret;
 }
 
+void ctp_alive_timer_cb(void *priv)
+{
+    struct bbm_client_hdl *bbm_hdl = priv;
+    const char topic_0[] = {"KEEP_ALIVE_INTERVAL"};
+    const char content_0[] = {"{\"op\":\"GET\"}"};
+
+    if (!bbm_hdl || !bbm_hdl->ctp_cli_hdl) {
+        return;
+    }
+
+    if (ctp_cli_send(bbm_hdl->ctp_cli_hdl, topic_0, content_0)) {
+        printf("ctp send:%s err\n", topic_0);
+    }
+}
+
 int bbm_ctp_client_init(void **ctp_cli_hdl, u32 dest_ip_addr, void *priv)
 {
     int ret;
@@ -243,6 +269,22 @@ int bbm_ctp_client_init(void **ctp_cli_hdl, u32 dest_ip_addr, void *priv)
 
     bbm_ctp_send_access(hdl);
 
+#if 0
+    if (bbm_hdl->alive_timer) {
+        sys_timer_del(bbm_hdl->alive_timer);
+        bbm_hdl->alive_timer = 0;
+    }
+
+    bbm_hdl->alive_timer = sys_timer_add_to_task("app_core", priv, ctp_alive_timer_cb, 1000);
+    if (!bbm_hdl->alive_timer) {
+        printf("ctp alive timer add err \n");
+        ctp_cli_unreg(hdl);
+        os_sem_del(&bbm_hdl->ctp_msg_sem, OS_DEL_ALWAYS);
+        *ctp_cli_hdl = NULL;
+        return -1;
+    }
+#endif
+
     return 0;
 }
 
@@ -254,6 +296,11 @@ int bbm_ctp_client_exit(void **ctp_cli_hdl)
     if (!bbm_hdl) {
         printf(" cli get priv err \n");
         return -1;
+    }
+
+    if (bbm_hdl->alive_timer) {
+        sys_timer_del(bbm_hdl->alive_timer);
+        bbm_hdl->alive_timer = 0;
     }
 
     bbm_ctp_file_exit(bbm_hdl);

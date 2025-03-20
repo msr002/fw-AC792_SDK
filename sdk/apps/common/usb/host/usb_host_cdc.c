@@ -251,7 +251,7 @@ s32 usb_cdc_init(usb_dev usb_id)
 #if USB_HUB
     usb_hub_rxreg_set(usb_id, cdc->host_epin, cdc->epin, &(host_dev->private_data.hub_info));
 #else
-    usb_write_txfuncaddr(usb_id, cdc->host_epout, private_data->devnum);
+    usb_write_rxfuncaddr(usb_id, cdc->host_epin, private_data->devnum);
 #endif
 
     /* usb_write_rxfuncaddr(usb_id, cdc->host_epin, private_data->devnum); */
@@ -653,7 +653,7 @@ void host_cdc_send_demo(u8 usb_id)
         len = dev_write(cdc_dev, buf1, 4);
         printf("len=%d\n", len);
         os_time_dly(10);
-        dev_close(cdc_dev);
+        /* dev_close(cdc_dev); */
     }
 }
 

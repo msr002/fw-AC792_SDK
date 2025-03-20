@@ -1,21 +1,25 @@
 
 #include "rf_fcc_main.h"
 
-#if (defined(RF_FCC_TEST_ENABLE) && defined(CONFIG_BT_ENABLE))
+#if defined(CONFIG_BT_ENABLE) && (TCFG_RF_FCC_TEST_ENABLE || TCFG_RF_PRODUCT_TEST_ENABLE)
 
 #include "btstack/avctp_user.h"
 #include "btcontroller_modules.h"
 #include "btstack/bluetooth.h"
-//#include "btstack/btstack_error.h"
+#include "btstack/a2dp_media_codec.h"
 #include "hci_event.h"
+#if TCFG_USER_TWS_ENABLE
+#include "classic/tws_api.h"
+#endif
+#include "system/timer.h"
 #include "event/bt_event.h"
 
 extern void bredr_close_all_scan(void);
-extern void __set_a2dp_auto_play_flag(u8 auto_en);
-extern void __set_simple_pair_flag(bool flag);
 extern void lmp_private_free_esco_packet(void *packet);
 extern void *lmp_private_get_esco_packet(int *len, u32 *hash);
 extern u32 esco_media_get_packet_num(void);
+extern bool is_1t2_connection(void);
+extern void ble_bqb_test_thread_init(void);
 
 /*开关可发现可连接的函数接口*/
 static void bt_wait_phone_connect_control(u8 enable)
@@ -69,14 +73,6 @@ static void bt_dut_api(u8 value)
 
 static void bredr_handle_register(void)
 {
-#if BT_SUPPORT_MUSIC_VOL_SYNC
-    ///蓝牙音乐和通话音量同步
-    //music_vol_change_handle_register(bt_set_music_device_volume, phone_get_device_vol);
-#endif
-#if BT_SUPPORT_DISPLAY_BAT
-    ///电量显示获取电量的接口
-    get_battery_value_register(bt_get_battery_value);   /*电量显示获取电量的接口*/
-#endif
     ///被测试盒链接上进入快速测试回调
     /* bt_fast_test_handle_register(bt_fast_test_api); */
 
@@ -89,17 +85,11 @@ static void bredr_handle_register(void)
 
 static void bt_function_select_init(void)
 {
-    bt_set_a2dp_auto_play_flag(1); /* 连接高级音频后自动播放歌曲 */
     bt_set_support_msbc_flag(1);
-#if BT_SUPPORT_DISPLAY_BAT
-    __bt_set_update_battery_time(60);
-#else
     bt_set_update_battery_time(0);
-#endif
     bt_set_page_timeout_value(8000); /*回连搜索时间长度设置,可使用该函数注册使用，ms单位,u16*/
     bt_set_super_timeout_value(8000); /*回连时超时参数设置。ms单位。做主机有效*/
 
-    bt_set_simple_pair_flag(1); //是否打开简易配对功能，打开后不需要输入pincode
     ////设置蓝牙加密的level
     //io_capabilities ; /*0: Display only 1: Display YesNo 2: KeyboardOnly 3: NoInputNoOutput*/
     //authentication_requirements: 0:not protect  1 :protect
@@ -107,23 +97,6 @@ static void bt_function_select_init(void)
 
     void lmp_set_sniff_disable(void);
     lmp_set_sniff_disable();
-}
-
-static void a2dp_drop_frame(void *p)
-{
-    int len;
-    u8 *frame;
-    int num = a2dp_media_get_packet_num();
-    if (num > 1) {
-        for (int i = 0; i < (num - 1); i++) {
-            len = a2dp_media_get_packet(&frame);
-            if (len <= 0) {
-                break;
-            }
-            /* log_i("a2dp_drop_frame: %d\n", len); */
-            a2dp_media_free_packet(frame);
-        }
-    }
 }
 
 static void esco_drop_frame(void *p)
@@ -138,7 +111,6 @@ static void esco_drop_frame(void *p)
             if (len <= 0) {
                 break;
             }
-            /* log_i("a2dp_drop_frame: %d\n", len); */
             lmp_private_free_esco_packet(frame);
         }
     }
@@ -148,12 +120,14 @@ void fcc_bt_ble_module_init(void)
 {
     bt_function_select_init();
     bredr_handle_register();
+#if TCFG_USER_TWS_ENABLE
+    tws_profile_init();
+#endif
     btstack_init();
 }
 
 static int bt_connction_status_event_handler(struct bt_event *bt)
 {
-    static u16 a2dp_drop_frame_timer = 0;
     static u16 esco_drop_frame_timer = 0;
     log_i("-----------------------bt_connction_status_event_handler %d\n", bt->event);
 
@@ -224,14 +198,9 @@ static int bt_connction_status_event_handler(struct bt_event *bt)
         break;
     case BT_STATUS_A2DP_MEDIA_START:
         log_i(" BT_STATUS_A2DP_MEDIA_START");
-        a2dp_drop_frame_timer = sys_timer_add(NULL, a2dp_drop_frame, 100);
         break;
     case BT_STATUS_A2DP_MEDIA_STOP:
         log_i(" BT_STATUS_A2DP_MEDIA_STOP");
-        if (a2dp_drop_frame_timer) {
-            sys_timer_del(a2dp_drop_frame_timer);
-            a2dp_drop_frame_timer = 0;
-        }
         break;
     case BT_STATUS_SCO_STATUS_CHANGE:
         log_i(" BT_STATUS_SCO_STATUS_CHANGE len:%d ,type:%d", (bt->value >> 16), (bt->value & 0x0000ffff));
@@ -367,6 +336,9 @@ static int bt_hci_event_handler(struct bt_event *bt)
 
 static s32 bt_event_handler(struct sys_event *event)
 {
+    if (!config_rf_test_enable) {
+        return false;
+    }
     if (event->from == BT_EVENT_FROM_CON) {
         return bt_connction_status_event_handler((struct bt_event *)event->payload);
     } else if (event->from == BT_EVENT_FROM_HCI) {

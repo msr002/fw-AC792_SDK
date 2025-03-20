@@ -869,7 +869,7 @@ static const struct otg_dev_data otg_data = {
                             | OTG_HOST_MODE
 #endif
                               ,
-    .detect_time_interval   = 1,
+    .detect_time_interval   = 50,
 };
 
 #if TCFG_HOST_CDC_ENABLE

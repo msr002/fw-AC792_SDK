@@ -63,9 +63,9 @@
  */
 #define    FCYCLE_LIST			0                 /*!< 全部文件循环模式 */
 #define    FCYCLE_ALL			1                 /*!< unused */
-#define    FCYCLE_ONE			2                 /*!< 当前文件循环模式 */
+#define    FCYCLE_RANDOM		2                 /*!< 随机循环模式 */
 #define    FCYCLE_FOLDER		3                 /*!< 文件夹循环模式 */
-#define    FCYCLE_RANDOM		4                 /*!< 随机循环模式 */
+#define    FCYCLE_ONE			4                 /*!< 当前文件循环模式 */
 #define    FCYCLE_MAX			5                 /*!< unused */
 /* \} name */
 #endif
@@ -188,7 +188,7 @@ struct vfscan {
     u8 attr;						/*!< 文件属性 */
     u8 cycle_mode;					/*!< 扫描的循环模式 */
     char sort;						/*!< 扫描的文件排序 't' 'n' */
-    char ftype[20 * 3 + 1];			/*!< 扫描的文件扩展类型 */
+    char ftype[22 * 3 + 1];			/*!< 扫描的文件扩展类型 */
     u16 file_number;				/*!< 扫描出来的文件总数 */
     u16 file_counter;				/*!< 当前文件序号 */
 

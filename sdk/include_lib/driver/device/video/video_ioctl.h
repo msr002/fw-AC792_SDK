@@ -118,6 +118,8 @@ struct video_capability {
 #define VIDIOC_PAUSE                    _IOW('V', 39, sizeof(int))
 #define VIDIOC_RESUME                   _IOW('V', 40, sizeof(int))
 #define VIDIOC_GET_SOURCE_CH            _IOW('V', 41, sizeof(int))
+#define VIDIOC_SAVE_FILE                _IOW('V', 42, sizeof(int))
+#define VIDIOC_SET_CYC_TIME             _IOW('V', 43, sizeof(int))
 
 
 

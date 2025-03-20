@@ -30,6 +30,7 @@ void **get_user_video_handle(void)
 }
 #endif
 
+void *user_video_rec_open(const char *video_name, u8 id);
 #define USER_VIDEO_PCM  			0x00000000
 #define USER_VIDEO_JPEG 			0x00000002
 #define USER_VIDEO_H264 			0x00000003 //暂时不支持
@@ -44,7 +45,18 @@ struct user_video_hdl {
     struct server *user_video_rec;
     u32(*video_rt_cb)(void *, u8 *, u32);
     void *cb_priv;
+    u8 cur_video_name[10];
+    struct lbuff_head *lbuf_handle;
+    u8 task_kill;
+    int task_pid;
 };
+
+struct video_lbuf_test_head {
+    u32 len;
+    u8 data[0];
+};
+
+static struct user_video_hdl *user_handle[2] = {0};
 
 static const unsigned char user_osd_format_buf[] = "yyyy-nn-dd hh:mm:ss";
 
@@ -103,33 +115,48 @@ static void xclose(void *fd)
 
 #endif //CONFIG_AEC_ENC_ENABLE
 
-void *user_video_rec_open(const char *video_name)
+void *user_video_rec_open(const char *video_name, u8 id)
 {
     int err = 0;
     union video_req req = {0};
     char path[48];
+    struct user_video_hdl *handle = NULL;
+    if (user_handle[id]) {
+        handle = user_handle[id];
+    } else {
+        handle = (struct user_video_hdl *)zalloc(sizeof(struct user_video_hdl));
+    }
 
-    struct user_video_hdl *handle = (struct user_video_hdl *)zalloc(sizeof(struct user_video_hdl));
     if (!handle) {
         return NULL;
     }
 
-    handle->user_video_buf = malloc(CONFIG_USER_VIDEO_SBUF_SIZE);
-    if (!handle->user_video_buf) {
-        log_error("no mem");
-        goto __exit;
+    if (handle->state == true || handle->user_video_rec) {
+        return handle;
     }
 
-    handle->user_isc_buf = malloc(CONFIG_USER_VIDEO_ISC_SBUF_SIZE);
+    if (!handle->user_video_buf) {
+        handle->user_video_buf = malloc(CONFIG_USER_VIDEO_SBUF_SIZE);
+        if (!handle->user_video_buf) {
+            log_error("no mem");
+            goto __exit;
+        }
+    }
+
     if (!handle->user_isc_buf) {
-        log_error("no mem");
-        goto __exit;
+        handle->user_isc_buf = malloc(CONFIG_USER_VIDEO_ISC_SBUF_SIZE);
+        if (!handle->user_isc_buf) {
+            log_error("no mem");
+            goto __exit;
+        }
     }
 
     int major = 0;
     int mijor = 0;
 
     sscanf(video_name, "video%d.%d", &major, &mijor);
+    memset(handle->cur_video_name, 0, sizeof(handle->cur_video_name));
+    strcpy(handle->cur_video_name, video_name);
     if (major == 2) {
         major = 10;
         sprintf(video_name, "video%d.%d", major, mijor);
@@ -170,6 +197,7 @@ void *user_video_rec_open(const char *video_name)
     req.rec.audio.buf = NULL;//音频BUFF
     req.rec.audio.buf_len = 0;//音频BUFF长度
     req.rec.audio.aud_interval_size = 1024;
+
     req.rec.abr_kbps = user_video_rec_get_abr(req.rec.width);//JPEG图片码率
     req.rec.buf = handle->user_video_buf;
     req.rec.buf_len = CONFIG_USER_VIDEO_SBUF_SIZE;
@@ -279,6 +307,7 @@ void *user_video_rec_open(const char *video_name)
 
     log_info("user video rec open ok");
 
+    user_handle[id] = handle;
     return handle;
 
 __exit:
@@ -300,11 +329,35 @@ __exit:
     }
 
     free(handle);
+    user_handle[id] = NULL;
 
     return NULL;
 }
 
-int user_video_rec_close(void *p)
+int user_video_rec_stop(void *p)
+{
+    struct user_video_hdl *handle = (struct user_video_hdl *)p;
+    int err;
+    union video_req req = {0};
+
+    if (handle->user_video_rec) {
+        req.rec.channel = 1;
+        req.rec.state = VIDEO_STATE_STOP;
+        err = server_request(handle->user_video_rec, VIDEO_REQ_REC, &req);
+        if (err != 0) {
+            log_error("stop rec err 0x%x", err);
+        }
+        server_close(handle->user_video_rec);
+
+        handle->user_video_rec = NULL;
+        handle->state = false;
+        log_info("user video rec close ok");
+    }
+
+    return 0;
+}
+
+int user_video_rec_close(void *p, u8 id)
 {
     struct user_video_hdl *handle = (struct user_video_hdl *)p;
     int err;
@@ -332,15 +385,136 @@ int user_video_rec_close(void *p)
         handle->user_isc_buf = NULL;
     }
 
-#ifdef CONFIG_AEC_ENC_ENABLE
-#if AEC_DATA_TO_SD
+#if (defined CONFIG_AEC_ENC_ENABLE) && (AEC_DATA_TO_SD)
     aec_data_to_sd_close();
 #endif
-#endif
 
+    if (handle->task_pid != NULL) {
+        handle->task_kill = 1;
+        thread_kill(&handle->task_pid, KILL_WAIT);
+        handle->task_kill = 0;
+    }
     free(handle);
+    user_handle[id] = NULL;
 
     return 0;
 }
+
+//demo
+int user_video_rec_switch(u8 id)
+{
+    ASSERT(id == 0 || id == 1);
+
+    struct user_video_hdl *handle = (struct user_video_hdl *)user_handle[id];
+    int err;
+    union video_req req = {0};
+    if (!handle || !handle->user_video_rec) {
+        log_error("user video rec haven't open.");
+        return -1;
+    }
+
+    const char *video_name = NULL;
+    video_name = strcmp(handle->cur_video_name, TCFG_SLAVE_UVC0_JPEG_DATA_SOURCE) == 0 ? TCFG_SLAVE_UVC1_JPEG_DATA_SOURCE : TCFG_SLAVE_UVC0_JPEG_DATA_SOURCE;
+
+    user_video_rec_stop(handle);
+    handle = user_video_rec_open(video_name, id);
+    extern void set_uvc_handle_cb(void *handle, u8 id);
+    set_uvc_handle_cb(handle, id);
+
+    return 0;
+}
+//demo
+void virtual_video_send_task(void *p)
+{
+
+    struct user_video_hdl *handle = (struct user_video_hdl *)p;
+    int rlen = 0;
+    int wlen = 0;
+    int ret = 0;
+    int len = 0;
+    struct video_lbuf_test_head *wbuf = NULL;
+    struct video_lbuf_test_head *rbuf = NULL;
+    FILE *fd = NULL;
+    while (1) {
+        if (handle->task_kill) {
+            if (fd != NULL) {
+                fd = NULL;
+            }
+            fclose(fd);
+            lbuf_clear(handle->lbuf_handle);
+            return;
+        }
+
+        fd = fopen(CONFIG_ROOT_PATH"a.jpg", "r");
+
+        if (!fd) {
+            log_error("fopen faild");
+            break;
+        }
+
+        len = flen(fd);
+        if (lbuf_free_space(handle->lbuf_handle) > len) {
+            wbuf = (struct video_lbuf_test_head *)lbuf_alloc(handle->lbuf_handle, len + sizeof(struct video_lbuf_test_head));  //lbuf内申请一块空间
+            if (!wbuf) {
+                return;
+            }
+            wlen =  fread(wbuf->data, 1, len, fd);
+            fclose(fd);
+            wbuf->len = wlen;
+            lbuf_push(wbuf, BIT(0));
+        }
+
+
+        if (!lbuf_empty(handle->lbuf_handle)) {//查询LBUF内是否有数据帧
+            rbuf = (struct video_lbuf_test_head *)lbuf_pop(handle->lbuf_handle, BIT(0));
+            if (!rbuf) {
+                return;
+            }
+
+            rlen = rbuf->len;
+            if (handle->video_rt_cb) {
+                handle->video_rt_cb(handle->cb_priv, (u8 *)rbuf + 4, rlen - 4);
+            }
+
+            if (lbuf_free(rbuf) == 0) { //释放lbuf通道0的数据块
+                printf("lbuf free fail!!!");
+            }
+
+        }
+
+    }
+}
+
+#if 0
+//demo
+void *user_video_rec_open(const char *video_name, u8 id)
+{
+    int err = 0;
+    union video_req req = {0};
+    struct user_video_hdl *handle = NULL;
+    handle = (struct user_video_hdl *)zalloc(sizeof(struct user_video_hdl));
+
+    if (!handle) {
+        return NULL;
+    }
+
+
+    if (!handle->user_video_buf) {
+        handle->user_video_buf = malloc(CONFIG_USER_VIDEO_SBUF_SIZE);
+        if (!handle->user_video_buf) {
+            log_error("no mem");
+            return NULL;
+
+        }
+    }
+
+
+    //lbuf初始化:
+    handle->lbuf_handle = lbuf_init(handle->user_video_buf, CONFIG_USER_VIDEO_SBUF_SIZE, 4, sizeof(struct video_lbuf_test_head));
+
+    thread_fork("virtual_video_send_task", 20, 1024, 32, &handle->task_pid, virtual_video_send_task, handle);
+    return handle;
+}
+#endif
 
 #endif

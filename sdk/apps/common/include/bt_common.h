@@ -34,11 +34,14 @@ extern uint32_t little_endian_read_32(const uint8_t *buffer, int pos);
 extern void swapX(const uint8_t *src, uint8_t *dst, int len);
 
 //common api
-extern void bt_ble_init(void);
-extern void bt_ble_exit(void);
-extern void bt_ble_adv_enable(u8 enable);
-extern void ble_app_disconnect(void);
-extern void bt_master_ble_init(void);
-extern void bt_master_ble_exit(void);
+void bt_ble_init(void);
+void bt_ble_exit(void);
+void bt_ble_adv_enable(u8 enable);
+void ble_app_disconnect(void);
+void bt_master_ble_init(void);
+void bt_master_ble_exit(void);
+const u8 *bt_get_mac_addr(void);
+void bt_update_mac_addr(u8 *addr);
+const char *bt_get_local_name(void);
 
 #endif

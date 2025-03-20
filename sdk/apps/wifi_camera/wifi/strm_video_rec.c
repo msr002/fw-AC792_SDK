@@ -200,6 +200,30 @@ static int fv_video_rec_start(void)
         req.rec.uvc_id = 0;//__this->uvc_id;
         __this_strm->video_id = 2;
 #endif
+    } else if (s_info.type == STRM_SOURCE_VIDEO4) {
+        printf("[STRM]ACTION_VIDEO4_OPEN_RT_STREAM-----\n\n");
+        vd_buflen = NET_VREC4_FBUF_SIZE;
+        sprintf(name, "video4.%d", 2);
+        if (!__this_strm->video_rec4) {
+            __this_strm->video_rec4 = server_open("video_server", name);
+        }
+        if (!__this_strm->video_rec4) {
+            return VREC_ERR_V4_SERVER_OPEN;
+        }
+        __this_strm->video_id = 4;
+        /* server_register_event_handler(__this_strm->video_rec0, NULL, strm_video_rec_server_event_handler); */
+    } else if (s_info.type == STRM_SOURCE_VIDEO5) {
+        printf("[STRM]ACTION_VIDEO5_OPEN_RT_STREAM-----\n\n");
+        vd_buflen = NET_VREC5_FBUF_SIZE;
+        sprintf(name, "video5.%d", 2);
+        if (!__this_strm->video_rec5) {
+            __this_strm->video_rec5 = server_open("video_server", name);
+        }
+        if (!__this_strm->video_rec5) {
+            return VREC_ERR_V5_SERVER_OPEN;
+        }
+        __this_strm->video_id = 5;
+        /* server_register_event_handler(__this_strm->video_rec0, NULL, strm_video_rec_server_event_handler); */
     }
     __this_strm->width = req.rec.width;
     __this_strm->height =  req.rec.height;

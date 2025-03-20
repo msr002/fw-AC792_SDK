@@ -169,6 +169,13 @@ void set_default_group_cb()
     } else if (act_scr == guider_ui.sys_popwin) {
         gui_group_add_obj(guider_ui.default_group, guider_ui.sys_popwin_btn_1, true);
         gui_group_add_obj(guider_ui.default_group, guider_ui.sys_popwin_btn_2, true);
+    } else if (act_scr == guider_ui.video_dec) {
+        gui_group_add_obj(guider_ui.default_group, guider_ui.video_dec_view_scan, true);
+        gui_group_add_obj(guider_ui.default_group, guider_ui.video_dec_view_2, true);
+        gui_group_add_obj(guider_ui.default_group, guider_ui.video_dec_view_3, true);
+    } else if (act_scr == guider_ui.video_dec_options) {
+        gui_group_add_obj(guider_ui.default_group, guider_ui.video_dec_options_btn_1, true);
+        gui_group_add_obj(guider_ui.default_group, guider_ui.video_dec_options_btn_2, true);
     }
     lv_group_set_default(guider_ui.default_group);
 

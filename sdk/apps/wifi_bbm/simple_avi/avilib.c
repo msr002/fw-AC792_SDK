@@ -29,6 +29,7 @@
 //fseek与标准库用法不一致
 //00db 改为 00dc
 //音频包参数修改
+//修改索引表,文件绝对位置改为相对于movi相对位置,兼容simple_avi_unpkg.c
 
 #include "avilib.h"
 //#include <time.h>
@@ -188,7 +189,9 @@ static int avi_add_index_entry(avi_t *AVI, unsigned char *tag, long flags, unsig
 
     memcpy(AVI->idx[AVI->n_idx], tag, 4);
     long2str(AVI->idx[AVI->n_idx] + 4, flags);
-    long2str(AVI->idx[AVI->n_idx] + 8, pos);
+    //TODO
+    //pos - movi_addr
+    long2str(AVI->idx[AVI->n_idx] + 8, pos - (HEADERBYTES - 4));
     long2str(AVI->idx[AVI->n_idx] + 12, len);
 
     /* Update counter */

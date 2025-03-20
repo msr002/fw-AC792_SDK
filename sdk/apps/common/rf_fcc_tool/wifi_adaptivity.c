@@ -8,21 +8,24 @@
 #include "lwip/sockets.h"
 
 char chl_tx_en_detpwr(char en);
-#define INTERVAL_MS 10
-static u16 g_det_timer = 0;
+static u8 exit_flag;
 
-static void det_pwr_status(void *p)
+void det_pwr_status(void)
 {
-    char detpwr = chl_tx_en_detpwr(1);
-    printf("detpwr:%d\n", detpwr);
+    exit_flag = 0;
+    while (1) {
+        chl_tx_en_detpwr(1);
+        os_time_dly(1);
+
+        if (exit_flag) {
+            break;
+        }
+    }
 }
 
-void wifi_adaptivity_timer_del(void)
+void wifi_adaptivity_exit(void)
 {
-    if (g_det_timer) {
-        sys_timer_del(g_det_timer);
-        g_det_timer = 0;
-    }
+    exit_flag = 1;
 }
 
 static void wifi_adaptivity_task(void *priv)
@@ -38,9 +41,7 @@ static void wifi_adaptivity_task(void *priv)
         os_time_dly(100);
     }
 
-    if (!g_det_timer) {
-        g_det_timer = sys_timer_add_to_task("app_core", NULL, det_pwr_status, INTERVAL_MS);
-    }
+    det_pwr_status();
 }
 
 void wifi_adaptivity_start(void)

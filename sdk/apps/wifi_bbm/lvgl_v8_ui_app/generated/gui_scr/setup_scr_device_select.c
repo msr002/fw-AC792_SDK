@@ -164,7 +164,7 @@ lv_obj_t *setup_scr_device_select(lv_ui *ui)
 #if LV_USE_GUIBUILDER_SIMULATOR
     lv_img_set_src(ui->device_select_img_2, "A:\\gitlab-m\\ac792\\ui_prj\\wifi_bbm_800x480\\import\\image\\remote.png");
 #else
-    lv_img_set_src(ui->device_select_img_2, "mnt/sdfile/EXT_RESERVED/uipackres/ui/55000011.zip");
+    lv_img_set_src(ui->device_select_img_2, "mnt/sdfile/EXT_RESERVED/uipackres/ui/55000012.zip");
 #endif
     lv_img_set_pivot(ui->device_select_img_2, 0, 0);
     lv_img_set_angle(ui->device_select_img_2, 0);

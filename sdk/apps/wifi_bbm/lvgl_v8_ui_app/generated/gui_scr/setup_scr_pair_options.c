@@ -83,7 +83,7 @@ lv_obj_t *setup_scr_pair_options(lv_ui *ui)
 #if LV_USE_GUIBUILDER_SIMULATOR
     lv_imgbtn_set_src(ui->pair_options_imgbtn_1, LV_IMGBTN_STATE_RELEASED, NULL, "A:\\gitlab-m\\ac792\\ui_prj\\wifi_bbm_800x480\\import\\image\\pair_opt_pair.png", NULL);
 #else
-    lv_imgbtn_set_src(ui->pair_options_imgbtn_1, LV_IMGBTN_STATE_RELEASED, NULL, "mnt/sdfile/EXT_RESERVED/uipackres/ui/55000009.zip", NULL);
+    lv_imgbtn_set_src(ui->pair_options_imgbtn_1, LV_IMGBTN_STATE_RELEASED, NULL, "mnt/sdfile/EXT_RESERVED/uipackres/ui/5500000a.zip", NULL);
 #endif
     lv_obj_add_flag(ui->pair_options_imgbtn_1, LV_OBJ_FLAG_CHECKABLE);
     ui->pair_options_imgbtn_1_label = lv_label_create(ui->pair_options_imgbtn_1);
@@ -153,7 +153,7 @@ lv_obj_t *setup_scr_pair_options(lv_ui *ui)
 #if LV_USE_GUIBUILDER_SIMULATOR
     lv_imgbtn_set_src(ui->pair_options_imgbtn_2, LV_IMGBTN_STATE_RELEASED, NULL, "A:\\gitlab-m\\ac792\\ui_prj\\wifi_bbm_800x480\\import\\image\\pair_opt_unpair.png", NULL);
 #else
-    lv_imgbtn_set_src(ui->pair_options_imgbtn_2, LV_IMGBTN_STATE_RELEASED, NULL, "mnt/sdfile/EXT_RESERVED/uipackres/ui/5500000a.zip", NULL);
+    lv_imgbtn_set_src(ui->pair_options_imgbtn_2, LV_IMGBTN_STATE_RELEASED, NULL, "mnt/sdfile/EXT_RESERVED/uipackres/ui/5500000b.zip", NULL);
 #endif
     lv_obj_add_flag(ui->pair_options_imgbtn_2, LV_OBJ_FLAG_CHECKABLE);
     ui->pair_options_imgbtn_2_label = lv_label_create(ui->pair_options_imgbtn_2);

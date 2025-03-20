@@ -104,7 +104,7 @@ static void file_info_clear(void)
     memset(file_info_tab, 0, sizeof(file_info_tab));
 #ifdef CONFIG_ENABLE_VLIST
     memset(forward_file_mem, 0, (MAX_NUM + 2) * INFO_LEN);
-#if (defined CONFIG_VIDEO1_ENABLE)
+#if (defined CONFIG_VIDEO2_ENABLE)
     memset(behind_file_mem, 0, (MAX_NUM + 2) * INFO_LEN);
 #endif
 #if defined CONFIG_VIDEO1_ENABLE

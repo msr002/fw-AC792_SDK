@@ -10,9 +10,11 @@ extern "C" {
 
 typedef enum {
     GUI_SYS_PROMPT_MSG_ID_PROMPT_LAB = 0x0012,
+    GUI_SYS_PROMPT_MSG_ID_PROMPT_OPT_LAB = 0x001A,
 } gui_sys_prompt_msg_id_t;
 
 extern int gui_sys_prompt_msg_prompt_lab_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type);
+extern int gui_sys_prompt_msg_prompt_opt_lab_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type);
 
 extern void gui_sys_prompt_msg_init(lv_ui *ui);
 extern void gui_sys_prompt_msg_init_ui();

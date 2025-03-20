@@ -1,7 +1,7 @@
 #include "app_config.h"
 #ifdef CONFIG_UI_STYLE_LY_ENABLE
 /*Generate Code, Do NOT Edit!*/
-#include "./res_common.h"
+#include "../gui_guider.h"
 #include <stdlib.h>
 #include <string.h>
 #if LV_USE_GUIBUILDER_SIMULATOR
@@ -20,27 +20,95 @@ char *gui_get_res_path(int32_t id)
 #if LV_USE_GUIBUILDER_SIMULATOR
     switch (id) {
     case GUI_RES_FANGZHENGKAITIJIANTI_1_22_TTF:
-        return "E:\\1111\\ac792\\ui_prj\\dvr_ly_800x480\\sdk\\ui_res\\rle\\font\\35000000.rle";
+        return "E:\\1111\\ac792\\ui_prj\\dvr_ly_800x480\\sdk\\ui_res\\flash\\rle\\font\\35000000.rle";
     case GUI_RES_FANGZHENGKAITIJIANTI_1_26_TTF:
-        return "E:\\1111\\ac792\\ui_prj\\dvr_ly_800x480\\sdk\\ui_res\\rle\\font\\35000001.rle";
+        return "E:\\1111\\ac792\\ui_prj\\dvr_ly_800x480\\sdk\\ui_res\\flash\\rle\\font\\35000001.rle";
     case GUI_RES_FANGZHENGKAITIJIANTI_1_18_TTF:
-        return "E:\\1111\\ac792\\ui_prj\\dvr_ly_800x480\\sdk\\ui_res\\rle\\font\\35000002.rle";
+        return "E:\\1111\\ac792\\ui_prj\\dvr_ly_800x480\\sdk\\ui_res\\flash\\rle\\font\\35000002.rle";
     case GUI_RES_MONTSERRATMEDIUM_18_TTF:
-        return "E:\\1111\\ac792\\ui_prj\\dvr_ly_800x480\\sdk\\ui_res\\rle\\font\\35000003.rle";
+        return "E:\\1111\\ac792\\ui_prj\\dvr_ly_800x480\\sdk\\ui_res\\flash\\rle\\font\\35000003.rle";
     case GUI_RES_FANGZHENGKAITIJIANTI_1_48_TTF:
-        return "E:\\1111\\ac792\\ui_prj\\dvr_ly_800x480\\sdk\\ui_res\\rle\\font\\35000004.rle";
+        return "E:\\1111\\ac792\\ui_prj\\dvr_ly_800x480\\sdk\\ui_res\\flash\\rle\\font\\35000004.rle";
     case GUI_RES_MONTSERRATMEDIUM_24_TTF:
-        return "E:\\1111\\ac792\\ui_prj\\dvr_ly_800x480\\sdk\\ui_res\\rle\\font\\35000005.rle";
+        return "E:\\1111\\ac792\\ui_prj\\dvr_ly_800x480\\sdk\\ui_res\\flash\\rle\\font\\35000005.rle";
     case GUI_RES_MONTSERRATMEDIUM_12_TTF:
-        return "E:\\1111\\ac792\\ui_prj\\dvr_ly_800x480\\sdk\\ui_res\\rle\\font\\35000006.rle";
+        return "E:\\1111\\ac792\\ui_prj\\dvr_ly_800x480\\sdk\\ui_res\\flash\\rle\\font\\35000006.rle";
     case GUI_RES_MONTSERRATMEDIUM_22_TTF:
-        return "E:\\1111\\ac792\\ui_prj\\dvr_ly_800x480\\sdk\\ui_res\\rle\\font\\35000007.rle";
+        return "E:\\1111\\ac792\\ui_prj\\dvr_ly_800x480\\sdk\\ui_res\\flash\\rle\\font\\35000007.rle";
     case GUI_RES_FANGZHENGKAITIJIANTI_1_24_TTF:
-        return "E:\\1111\\ac792\\ui_prj\\dvr_ly_800x480\\sdk\\ui_res\\rle\\font\\35000008.rle";
+        return "E:\\1111\\ac792\\ui_prj\\dvr_ly_800x480\\sdk\\ui_res\\flash\\rle\\font\\35000008.rle";
     case GUI_RES_FANGZHENGKAITIJIANTI_1_16_TTF:
-        return "E:\\1111\\ac792\\ui_prj\\dvr_ly_800x480\\sdk\\ui_res\\rle\\font\\35000009.rle";
+        return "E:\\1111\\ac792\\ui_prj\\dvr_ly_800x480\\sdk\\ui_res\\flash\\rle\\font\\35000009.rle";
     case GUI_RES_MONTSERRATMEDIUM_16_TTF:
-        return "E:\\1111\\ac792\\ui_prj\\dvr_ly_800x480\\sdk\\ui_res\\rle\\font\\3500000a.rle";
+        return "E:\\1111\\ac792\\ui_prj\\dvr_ly_800x480\\sdk\\ui_res\\flash\\rle\\font\\3500000a.rle";
+    case GUI_RES_MONTSERRATMEDIUM_20_TTF:
+        return "E:\\1111\\ac792\\ui_prj\\dvr_ly_800x480\\sdk\\ui_res\\flash\\rle\\font\\3500000b.rle";
+    case GUI_RES_SIMSUN_22_WOFF:
+        return "E:\\1111\\ac792\\ui_prj\\dvr_ly_800x480\\sdk\\ui_res\\flash\\rle\\font\\3500000c.rle";
+    case GUI_RES_FANGZHENGKAITIJIANTI_1_20_TTF:
+        return "E:\\1111\\ac792\\ui_prj\\dvr_ly_800x480\\sdk\\ui_res\\flash\\rle\\font\\3500000d.rle";
+    case GUI_RES_SIMSUN_48_WOFF:
+        return "E:\\1111\\ac792\\ui_prj\\dvr_ly_800x480\\sdk\\ui_res\\flash\\rle\\font\\3500000e.rle";
+    case GUI_RES_FANGSONG_22_TTF:
+        return "E:\\1111\\ac792\\ui_prj\\dvr_ly_800x480\\sdk\\ui_res\\flash\\rle\\font\\3500000f.rle";
+    case GUI_RES_FANGSONG_20_TTF:
+        return "E:\\1111\\ac792\\ui_prj\\dvr_ly_800x480\\sdk\\ui_res\\flash\\rle\\font\\35000010.rle";
+    case GUI_RES_FANGSONG_24_TTF:
+        return "E:\\1111\\ac792\\ui_prj\\dvr_ly_800x480\\sdk\\ui_res\\flash\\rle\\font\\35000011.rle";
+    case GUI_RES_FANGSONG_48_TTF:
+        return "E:\\1111\\ac792\\ui_prj\\dvr_ly_800x480\\sdk\\ui_res\\flash\\rle\\font\\35000012.rle";
+    case GUI_RES_TIMESNEWROMANPSMT_22_TTF:
+        return "E:\\1111\\ac792\\ui_prj\\dvr_ly_800x480\\sdk\\ui_res\\flash\\rle\\font\\35000013.rle";
+    case GUI_RES_TIMESNEWROMANPSMT_20_TTF:
+        return "E:\\1111\\ac792\\ui_prj\\dvr_ly_800x480\\sdk\\ui_res\\flash\\rle\\font\\35000014.rle";
+    case GUI_RES_TIMESNEWROMANPSMT_24_TTF:
+        return "E:\\1111\\ac792\\ui_prj\\dvr_ly_800x480\\sdk\\ui_res\\flash\\rle\\font\\35000015.rle";
+    case GUI_RES_TIMESNEWROMANPSMT_48_TTF:
+        return "E:\\1111\\ac792\\ui_prj\\dvr_ly_800x480\\sdk\\ui_res\\flash\\rle\\font\\35000016.rle";
+    case GUI_RES_TIMESNEWROMANPSMT_16_TTF:
+        return "E:\\1111\\ac792\\ui_prj\\dvr_ly_800x480\\sdk\\ui_res\\flash\\rle\\font\\35000017.rle";
+    case GUI_RES_SEGOEUI_22_TTF:
+        return "E:\\1111\\ac792\\ui_prj\\dvr_ly_800x480\\sdk\\ui_res\\flash\\rle\\font\\35000018.rle";
+    case GUI_RES_SEGOEUI_20_TTF:
+        return "E:\\1111\\ac792\\ui_prj\\dvr_ly_800x480\\sdk\\ui_res\\flash\\rle\\font\\35000019.rle";
+    case GUI_RES_SEGOEUI_24_TTF:
+        return "E:\\1111\\ac792\\ui_prj\\dvr_ly_800x480\\sdk\\ui_res\\flash\\rle\\font\\3500001a.rle";
+    case GUI_RES_SEGOEUI_48_TTF:
+        return "E:\\1111\\ac792\\ui_prj\\dvr_ly_800x480\\sdk\\ui_res\\flash\\rle\\font\\3500001b.rle";
+    case GUI_RES_ARIALMT_48_TTF:
+        return "E:\\1111\\ac792\\ui_prj\\dvr_ly_800x480\\sdk\\ui_res\\flash\\rle\\font\\3500001c.rle";
+    case GUI_RES_LEELAWADEEUI_22_TTF:
+        return "E:\\1111\\ac792\\ui_prj\\dvr_ly_800x480\\sdk\\ui_res\\flash\\rle\\font\\3500001d.rle";
+    case GUI_RES_LEELAWADEEUI_20_TTF:
+        return "E:\\1111\\ac792\\ui_prj\\dvr_ly_800x480\\sdk\\ui_res\\flash\\rle\\font\\3500001e.rle";
+    case GUI_RES_LEELAWADEEUI_24_TTF:
+        return "E:\\1111\\ac792\\ui_prj\\dvr_ly_800x480\\sdk\\ui_res\\flash\\rle\\font\\3500001f.rle";
+    case GUI_RES_TAHOMA_20_TTF:
+        return "E:\\1111\\ac792\\ui_prj\\dvr_ly_800x480\\sdk\\ui_res\\flash\\rle\\font\\35000020.rle";
+    case GUI_RES_TAHOMA_22_TTF:
+        return "E:\\1111\\ac792\\ui_prj\\dvr_ly_800x480\\sdk\\ui_res\\flash\\rle\\font\\35000021.rle";
+    case GUI_RES_LEELAWADEEUI_48_TTF:
+        return "E:\\1111\\ac792\\ui_prj\\dvr_ly_800x480\\sdk\\ui_res\\flash\\rle\\font\\35000022.rle";
+    case GUI_RES_TAHOMA_48_TTF:
+        return "E:\\1111\\ac792\\ui_prj\\dvr_ly_800x480\\sdk\\ui_res\\flash\\rle\\font\\35000023.rle";
+    case GUI_RES_MALGUNGOTHIC_22_TTF:
+        return "E:\\1111\\ac792\\ui_prj\\dvr_ly_800x480\\sdk\\ui_res\\flash\\rle\\font\\35000024.rle";
+    case GUI_RES_MALGUNGOTHIC_20_TTF:
+        return "E:\\1111\\ac792\\ui_prj\\dvr_ly_800x480\\sdk\\ui_res\\flash\\rle\\font\\35000025.rle";
+    case GUI_RES_MALGUNGOTHIC_24_TTF:
+        return "E:\\1111\\ac792\\ui_prj\\dvr_ly_800x480\\sdk\\ui_res\\flash\\rle\\font\\35000026.rle";
+    case GUI_RES_MALGUNGOTHIC_48_TTF:
+        return "E:\\1111\\ac792\\ui_prj\\dvr_ly_800x480\\sdk\\ui_res\\flash\\rle\\font\\35000027.rle";
+    case GUI_RES_MS_GOTHIC_22_TTF:
+        return "E:\\1111\\ac792\\ui_prj\\dvr_ly_800x480\\sdk\\ui_res\\flash\\rle\\font\\35000028.rle";
+    case GUI_RES_CALIBRI_22_TTF:
+        return "E:\\1111\\ac792\\ui_prj\\dvr_ly_800x480\\sdk\\ui_res\\flash\\rle\\font\\35000029.rle";
+    case GUI_RES_CALIBRI_20_TTF:
+        return "E:\\1111\\ac792\\ui_prj\\dvr_ly_800x480\\sdk\\ui_res\\flash\\rle\\font\\3500002a.rle";
+    case GUI_RES_CALIBRI_24_TTF:
+        return "E:\\1111\\ac792\\ui_prj\\dvr_ly_800x480\\sdk\\ui_res\\flash\\rle\\font\\3500002b.rle";
+    case GUI_RES_CALIBRI_48_TTF:
+        return "E:\\1111\\ac792\\ui_prj\\dvr_ly_800x480\\sdk\\ui_res\\flash\\rle\\font\\3500002c.rle";
     case GUI_RES_S_PC_PNG:
         return "A:\\1111\\ac792\\ui_prj\\dvr_ly_800x480\\import\\image\\video_page\\USB\\s_PC.png";
     case GUI_RES_S_MASS_PNG:
@@ -203,6 +271,16 @@ char *gui_get_res_path(int32_t id)
         return "A:\\1111\\ac792\\ui_prj\\dvr_ly_800x480\\import\\image\\LY_UI\\dec\\protect.png";
     case GUI_RES_PLAY_PNG:
         return "A:\\1111\\ac792\\ui_prj\\dvr_ly_800x480\\import\\image\\LY_UI\\rec\\rec_menu\\play.png";
+    case GUI_RES_VIDEO_PNG:
+        return "A:\\1111\\ac792\\ui_prj\\dvr_ly_800x480\\import\\image\\LY_UI\\dec\\video.png";
+    case GUI_RES_PHOTO_2_PNG:
+        return "A:\\1111\\ac792\\ui_prj\\dvr_ly_800x480\\import\\image\\LY_UI\\dec\\photo.png";
+    case GUI_RES_CARD_OFFLINE_PNG:
+        return "A:\\1111\\ac792\\ui_prj\\dvr_ly_800x480\\import\\image\\LY_UI\\rec\\rec_scan\\card_offline.png";
+    case GUI_RES_PLAY_1_PNG:
+        return "A:\\1111\\ac792\\ui_prj\\dvr_ly_800x480\\import\\image\\LY_UI\\dec\\play.png";
+    case GUI_RES_PAUSE_PNG:
+        return "A:\\1111\\ac792\\ui_prj\\dvr_ly_800x480\\import\\image\\LY_UI\\dec\\pause.png";
     case RES_0:
         return "A:\\1111\\ac792\\ui_prj\\dvr_ly_800x480\\import\\image\\video_page\\battery\\0.png";
     case RES_1:
@@ -446,58 +524,126 @@ char *gui_get_res_path(int32_t id)
     }
 #else
     memset(path_buf, 0, sizeof(path_buf));
-    if (id >= 0x35000000 && id < 0x36000000) {
-        snprintf(path_buf, sizeof(path_buf), "%s%x.rle", flash_dir, id);
-    } else if (id >= 0x39000000 && id < 0x3A000000) {
-        snprintf(path_buf, sizeof(path_buf), "%s%x.json", flash_dir, id);
-    } else if (id >= 0x3D000000 && id < 0x3E000000) {
-        snprintf(path_buf, sizeof(path_buf), "%s%x.mp4", flash_dir, id);
-    } else if (id >= 0x3E000000 && id < 0x3F000000) {
-        snprintf(path_buf, sizeof(path_buf), "%s%x.avi", flash_dir, id);
-    } else if (id >= 0x3F000000 && id < 0x40000000) {
-        snprintf(path_buf, sizeof(path_buf), "%s%x.bin", flash_dir, id);
-    } else if (id >= 0x40000000 && id < 0x41000000) {
-        snprintf(path_buf, sizeof(path_buf), "%s%x.rle", flash_dir, id);
-    } else if (id >= 0x42000000 && id < 0x43000000) {
-        snprintf(path_buf, sizeof(path_buf), "%s%x.gif", flash_dir, id);
-    } else if (id >= 0x46000000 && id < 0x47000000) {
-        snprintf(path_buf, sizeof(path_buf), "%s%x.png", flash_dir, id);
-    } else if (id >= 0x47000000 && id < 0x48000000) {
-        snprintf(path_buf, sizeof(path_buf), "%s%x.jpg", flash_dir, id);
-    } else if (id >= 0x48000000 && id < 0x49000000) {
-        snprintf(path_buf, sizeof(path_buf), "%s%x.jpeg", flash_dir, id);
-    } else if (id >= 0x49000000 && id < 0x4A000000) {
-        snprintf(path_buf, sizeof(path_buf), "%s%x.bmp", flash_dir, id);
-    } else if (id >= 0x4A000000 && id < 0x4B000000) {
-        snprintf(path_buf, sizeof(path_buf), "%s%x.svg", flash_dir, id);
-    } else if (id >= 0x4B000000 && id < 0x4C000000) {
-        snprintf(path_buf, sizeof(path_buf), "%s%x.zip", flash_dir, id);
-    } else if (id >= 0x80000000 && id < 0x90000000) {
-        snprintf(path_buf, sizeof(path_buf), "%s%x.bin", flash_dir, id);
-    } else if (id >= 0x90000000 && id < 0xA0000000) {
-        snprintf(path_buf, sizeof(path_buf), "%s%x.json", flash_dir, id);
-    } else if (id >= 0xA0000000 && id < 0xA1000000) {
-        snprintf(path_buf, sizeof(path_buf), "%s%x.mp4", flash_dir, id);
-    } else if (id >= 0xA1000000 && id < 0xA2000000) {
-        snprintf(path_buf, sizeof(path_buf), "%s%x.avi", flash_dir, id);
-    } else if (id >= 0xA2000000 && id < 0xA3000000) {
-        snprintf(path_buf, sizeof(path_buf), "%s%x.bin", flash_dir, id);
-    } else if (id >= 0xA3000000 && id < 0xA4000000) {
-        snprintf(path_buf, sizeof(path_buf), "%s%x.rle", flash_dir, id);
-    } else if (id >= 0xB0000000 && id < 0xC0000000) {
-        snprintf(path_buf, sizeof(path_buf), "%s%x.gif", flash_dir, id);
-    } else if (id >= 0x6E000000 && id < 0x6F000000) {
-        snprintf(path_buf, sizeof(path_buf), "%s%x.png", flash_dir, id);
-    } else if (id >= 0x6F000000 && id < 0x70000000) {
-        snprintf(path_buf, sizeof(path_buf), "%s%x.jpg", flash_dir, id);
-    } else if (id >= 0x70000000 && id < 0x71000000) {
-        snprintf(path_buf, sizeof(path_buf), "%s%x.jpeg", flash_dir, id);
-    } else if (id >= 0x71000000 && id < 0x72000000) {
-        snprintf(path_buf, sizeof(path_buf), "%s%x.bmp", flash_dir, id);
-    } else if (id >= 0x72000000 && id < 0x73000000) {
-        snprintf(path_buf, sizeof(path_buf), "%s%x.svg", flash_dir, id);
-    } else if (id >= 0x74000000 && id < 0x75000000) {
-        snprintf(path_buf, sizeof(path_buf), "%s%x.zip", flash_dir, id);
+    if (id >= 0x30000000 && id < 0x30800000) {
+        snprintf(path_buf, sizeof(path_buf), "%s%x.%s", flash_dir, id, "ttf");
+    } else if (id >= 0x30800000 && id < 0x31000000) {
+        snprintf(path_buf, sizeof(path_buf), "%s%x.%s", sd_dir, id, "ttf");
+    } else if (id >= 0x31000000 && id < 0x31800000) {
+        snprintf(path_buf, sizeof(path_buf), "%s%x.%s", flash_dir, id, "woff");
+    } else if (id >= 0x31800000 && id < 0x32000000) {
+        snprintf(path_buf, sizeof(path_buf), "%s%x.%s", sd_dir, id, "woff");
+    } else if (id >= 0x32000000 && id < 0x32800000) {
+        snprintf(path_buf, sizeof(path_buf), "%s%x.%s", flash_dir, id, "woff2");
+    } else if (id >= 0x32800000 && id < 0x33000000) {
+        snprintf(path_buf, sizeof(path_buf), "%s%x.%s", sd_dir, id, "woff2");
+    } else if (id >= 0x33000000 && id < 0x33800000) {
+        snprintf(path_buf, sizeof(path_buf), "%s%x.%s", flash_dir, id, "otf");
+    } else if (id >= 0x33800000 && id < 0x34000000) {
+        snprintf(path_buf, sizeof(path_buf), "%s%x.%s", sd_dir, id, "otf");
+    } else if (id >= 0x34000000 && id < 0x34800000) {
+        snprintf(path_buf, sizeof(path_buf), "%s%x.%s", flash_dir, id, "bin");
+    } else if (id >= 0x34800000 && id < 0x35000000) {
+        snprintf(path_buf, sizeof(path_buf), "%s%x.%s", sd_dir, id, "bin");
+    } else if (id >= 0x35000000 && id < 0x35800000) {
+        snprintf(path_buf, sizeof(path_buf), "%s%x.%s", flash_dir, id, "rle");
+    } else if (id >= 0x35800000 && id < 0x36000000) {
+        snprintf(path_buf, sizeof(path_buf), "%s%x.%s", sd_dir, id, "rle");
+    } else if (id >= 0x36000000 && id < 0x36800000) {
+        snprintf(path_buf, sizeof(path_buf), "%s%x.%s", flash_dir, id, "fnt");
+    } else if (id >= 0x36800000 && id < 0x37000000) {
+        snprintf(path_buf, sizeof(path_buf), "%s%x.%s", sd_dir, id, "fnt");
+    } else if (id >= 0x37000000 && id < 0x37800000) {
+        snprintf(path_buf, sizeof(path_buf), "%s%x.%s", flash_dir, id, "lzw");
+    } else if (id >= 0x37800000 && id < 0x38000000) {
+        snprintf(path_buf, sizeof(path_buf), "%s%x.%s", sd_dir, id, "lzw");
+    } else if (id >= 0x39000000 && id < 0x39800000) {
+        snprintf(path_buf, sizeof(path_buf), "%s%x.%s", flash_dir, id, "json");
+    } else if (id >= 0x39800000 && id < 0x3A000000) {
+        snprintf(path_buf, sizeof(path_buf), "%s%x.%s", sd_dir, id, "json");
+    } else if (id >= 0x3A000000 && id < 0x3A800000) {
+        snprintf(path_buf, sizeof(path_buf), "%s%x.%s", flash_dir, id, "bin");
+    } else if (id >= 0x3A800000 && id < 0x3B000000) {
+        snprintf(path_buf, sizeof(path_buf), "%s%x.%s", sd_dir, id, "bin");
+    } else if (id >= 0x3B000000 && id < 0x3B800000) {
+        snprintf(path_buf, sizeof(path_buf), "%s%x.%s", flash_dir, id, "rle");
+    } else if (id >= 0x3B800000 && id < 0x3C000000) {
+        snprintf(path_buf, sizeof(path_buf), "%s%x.%s", sd_dir, id, "rle");
+    } else if (id >= 0x3D000000 && id < 0x3D800000) {
+        snprintf(path_buf, sizeof(path_buf), "%s%x.%s", flash_dir, id, "mp4");
+    } else if (id >= 0x3D800000 && id < 0x3E000000) {
+        snprintf(path_buf, sizeof(path_buf), "%s%x.%s", sd_dir, id, "mp4");
+    } else if (id >= 0x3E000000 && id < 0x3E800000) {
+        snprintf(path_buf, sizeof(path_buf), "%s%x.%s", flash_dir, id, "avi");
+    } else if (id >= 0x3E800000 && id < 0x3F000000) {
+        snprintf(path_buf, sizeof(path_buf), "%s%x.%s", sd_dir, id, "avi");
+    } else if (id >= 0x3F000000 && id < 0x3F800000) {
+        snprintf(path_buf, sizeof(path_buf), "%s%x.%s", flash_dir, id, "bin");
+    } else if (id >= 0x3F800000 && id < 0x40000000) {
+        snprintf(path_buf, sizeof(path_buf), "%s%x.%s", sd_dir, id, "bin");
+    } else if (id >= 0x40000000 && id < 0x40800000) {
+        snprintf(path_buf, sizeof(path_buf), "%s%x.%s", flash_dir, id, "rle");
+    } else if (id >= 0x40800000 && id < 0x41000000) {
+        snprintf(path_buf, sizeof(path_buf), "%s%x.%s", sd_dir, id, "rle");
+    } else if (id >= 0x42000000 && id < 0x42800000) {
+        snprintf(path_buf, sizeof(path_buf), "%s%x.%s", flash_dir, id, "gif");
+    } else if (id >= 0x42800000 && id < 0x43000000) {
+        snprintf(path_buf, sizeof(path_buf), "%s%x.%s", sd_dir, id, "gif");
+    } else if (id >= 0x43000000 && id < 0x43800000) {
+        snprintf(path_buf, sizeof(path_buf), "%s%x.%s", flash_dir, id, "bin");
+    } else if (id >= 0x43800000 && id < 0x44000000) {
+        snprintf(path_buf, sizeof(path_buf), "%s%x.%s", sd_dir, id, "bin");
+    } else if (id >= 0x44000000 && id < 0x44800000) {
+        snprintf(path_buf, sizeof(path_buf), "%s%x.%s", flash_dir, id, "rle");
+    } else if (id >= 0x44800000 && id < 0x45000000) {
+        snprintf(path_buf, sizeof(path_buf), "%s%x.%s", sd_dir, id, "rle");
+    } else if (id >= 0x46000000 && id < 0x46800000) {
+        snprintf(path_buf, sizeof(path_buf), "%s%x.%s", flash_dir, id, "png");
+    } else if (id >= 0x46800000 && id < 0x47000000) {
+        snprintf(path_buf, sizeof(path_buf), "%s%x.%s", sd_dir, id, "png");
+    } else if (id >= 0x47000000 && id < 0x47800000) {
+        snprintf(path_buf, sizeof(path_buf), "%s%x.%s", flash_dir, id, "jpg");
+    } else if (id >= 0x47800000 && id < 0x48000000) {
+        snprintf(path_buf, sizeof(path_buf), "%s%x.%s", sd_dir, id, "jpg");
+    } else if (id >= 0x48000000 && id < 0x48800000) {
+        snprintf(path_buf, sizeof(path_buf), "%s%x.%s", flash_dir, id, "jpeg");
+    } else if (id >= 0x48800000 && id < 0x49000000) {
+        snprintf(path_buf, sizeof(path_buf), "%s%x.%s", sd_dir, id, "jpeg");
+    } else if (id >= 0x49000000 && id < 0x49800000) {
+        snprintf(path_buf, sizeof(path_buf), "%s%x.%s", flash_dir, id, "bmp");
+    } else if (id >= 0x49800000 && id < 0x4A000000) {
+        snprintf(path_buf, sizeof(path_buf), "%s%x.%s", sd_dir, id, "bmp");
+    } else if (id >= 0x4A000000 && id < 0x4A800000) {
+        snprintf(path_buf, sizeof(path_buf), "%s%x.%s", flash_dir, id, "svg");
+    } else if (id >= 0x4A800000 && id < 0x4B000000) {
+        snprintf(path_buf, sizeof(path_buf), "%s%x.%s", sd_dir, id, "svg");
+    } else if (id >= 0x4B000000 && id < 0x4B800000) {
+        snprintf(path_buf, sizeof(path_buf), "%s%x.%s", flash_dir, id, "zip");
+    } else if (id >= 0x4B800000 && id < 0x4C000000) {
+        snprintf(path_buf, sizeof(path_buf), "%s%x.%s", sd_dir, id, "zip");
+    } else if (id >= 0x6E000000 && id < 0x6E800000) {
+        snprintf(path_buf, sizeof(path_buf), "%s%x.%s", flash_dir, id, "png");
+    } else if (id >= 0x6E800000 && id < 0x6F000000) {
+        snprintf(path_buf, sizeof(path_buf), "%s%x.%s", sd_dir, id, "png");
+    } else if (id >= 0x6F000000 && id < 0x6F800000) {
+        snprintf(path_buf, sizeof(path_buf), "%s%x.%s", flash_dir, id, "jpg");
+    } else if (id >= 0x6F800000 && id < 0x70000000) {
+        snprintf(path_buf, sizeof(path_buf), "%s%x.%s", sd_dir, id, "jpg");
+    } else if (id >= 0x70000000 && id < 0x70800000) {
+        snprintf(path_buf, sizeof(path_buf), "%s%x.%s", flash_dir, id, "jpeg");
+    } else if (id >= 0x70800000 && id < 0x71000000) {
+        snprintf(path_buf, sizeof(path_buf), "%s%x.%s", sd_dir, id, "jpeg");
+    } else if (id >= 0x71000000 && id < 0x71800000) {
+        snprintf(path_buf, sizeof(path_buf), "%s%x.%s", flash_dir, id, "bmp");
+    } else if (id >= 0x71800000 && id < 0x72000000) {
+        snprintf(path_buf, sizeof(path_buf), "%s%x.%s", sd_dir, id, "bmp");
+    } else if (id >= 0x72000000 && id < 0x72800000) {
+        snprintf(path_buf, sizeof(path_buf), "%s%x.%s", flash_dir, id, "svg");
+    } else if (id >= 0x72800000 && id < 0x73000000) {
+        snprintf(path_buf, sizeof(path_buf), "%s%x.%s", sd_dir, id, "svg");
+    } else if (id >= 0x74000000 && id < 0x74800000) {
+        snprintf(path_buf, sizeof(path_buf), "%s%x.%s", flash_dir, id, "zip");
+    } else if (id >= 0x74800000 && id < 0x75000000) {
+        snprintf(path_buf, sizeof(path_buf), "%s%x.%s", sd_dir, id, "zip");
     } else {
         return NULL;
     }

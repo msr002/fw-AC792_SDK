@@ -40,11 +40,12 @@ extern int db_select(const char *name);
 extern int db_update(const char *name, u32 value);
 /************************************/
 
-static struct ctp_arg info;
+/* struct ctp_arg ctp_info; */
+struct ctp_arg ctp_info SEC_USED(.bss);
 
 int app_rtsp_use_ffmpeg(void)
 {
-    return (info.num > 0 ? 1 : 0);
+    return (ctp_info.num > 0 ? 1 : 0);
 }
 int send_ctp_string(int cmd_type, char *buf, const char *_req, void *priv)
 {
@@ -60,7 +61,7 @@ int send_ctp_string(int cmd_type, char *buf, const char *_req, void *priv)
     req.topic = _req;
     req.cli = priv;
     if (!priv) {
-        req.cli = info.cli;
+        req.cli = ctp_info.cli;
     }
     printf("buf:%s ", buf);
     if (server_request(ctp, cmd_type, (void *)&req)) {
@@ -137,8 +138,8 @@ static inline int _CTP_CMD_COMBINED(int cmd_type, void *priv, u32 err, const cha
 //打开ctp_server
 //
     void *cli = NULL;
-    if (!strcmp(_req, info.topic) || !priv) {
-        cli = info.cli;
+    if (!strcmp(_req, ctp_info.topic) || !priv) {
+        cli = ctp_info.cli;
     } else {
         cli = priv;
     }
@@ -181,9 +182,9 @@ int ctp_cmd_analysis(const char *topic, char *content, void *priv)
     }
 
 
-    strcpy(info.topic, topic);
-    info.content = NULL;
-    info.cli = priv;
+    strcpy(ctp_info.topic, topic);
+    ctp_info.content = NULL;
+    ctp_info.cli = priv;
 
     list_for_ctp_mapping_tab(map) {
         if (!strcmp(topic, map->ctp_command)) {
@@ -286,7 +287,7 @@ static int sys_key_touch_disable_scan(void *p)
 void ctp_cmd_socket_unregister(void *priv)
 {
     if (!priv) {
-        priv = info.cli;
+        priv = ctp_info.cli;
         if (!priv) {
             return;
         }
@@ -326,13 +327,13 @@ int cmd_put_app_access(void *priv, char *content)
     if (!addr) {
         addr = (void *)cdp_srv_get_cli_addr(priv);
     }
-    if (addr != info.dest_addr) {
-        info.num++;
+    if (addr != ctp_info.dest_addr) {
+        ctp_info.num++;
     }
 
     //分解content字段
     puts("\n\n APP_ACCESS \n");
-    printf("app_accept_num : %d \n", info.num);
+    printf("app_accept_num : %d \n", ctp_info.num);
     key_event_disable();
     touch_event_disable();
     /*app_online_timer = sys_timer_add(NULL, sys_key_touch_disable_scan, 2 * 1000);//添加检查按键和触屏使能*/
@@ -406,8 +407,8 @@ int cmd_put_app_access(void *priv, char *content)
     CTP_CMD_COMBINED(priv, CTP_NO_ERR, "APP_ACCESS", "NOTIFY", buf);
     //app_access命令完成后，随后发送所有get命令
     __all_get_cmd_run(priv, content);
-    info.dest_addr = addr;
-    info.cli = priv;
+    ctp_info.dest_addr = addr;
+    ctp_info.cli = priv;
 
 err:
     in_app_stop_display(0);
@@ -2089,7 +2090,11 @@ int cmd_put_open_rt_stream(void *priv, char *content)
     init_intent(&it);
     it.name = "net_video_rec";
 //设置参数
+#ifdef CONFIG_VIDEO0_ENABLE
     it.action = ACTION_VIDEO0_OPEN_RT_STREAM;
+#elif (defined CONFIG_VIDEO4_ENABLE)
+    it.action = ACTION_VIDEO4_OPEN_RT_STREAM;
+#endif
     new_obj = json_tokener_parse(content);
     parm =  json_object_object_get(new_obj, "param");
     h = json_object_get_string(json_object_object_get(parm, "h"));
@@ -2152,7 +2157,12 @@ int cmd_put_open_audio_rt_stream(void *priv, char *content)
 
     it.name = "net_video_rec";
     //设置参数
+    #ifdef CONFIG_VIDEO0_ENABLE
     it.action = ACTION_VIDEO0_OPEN_RT_STREAM;
+    #endif
+    #ifdef CONFIG_VIDEO4_ENABLE
+    it.action = ACTION_VIDEO4_OPEN_RT_STREAM;
+    #endif
     new_obj = json_tokener_parse(content);parm =  json_object_object_get(new_obj, "param");
     rate = json_object_get_string(json_object_object_get(parm, "rate"));
     width = json_object_get_string(json_object_object_get(parm, "width"));
@@ -2173,12 +2183,7 @@ int cmd_put_open_audio_rt_stream(void *priv, char *content)
 
 int cmd_put_open_pull_rt_stream(void *priv, char *content)
 {
-#if defined (CONFIG_VIDEO2_ENABLE)
-
-    if (!dev_online("uvc")) {
-        CTP_CMD_COMBINED(NULL, CTP_PULL_OFFLINE, "OPEN_PULL_RT_STREAM", "NOTIFY", CTP_PULL_OFFLINE_MSG);
-        return 0;
-    }
+#if defined (CONFIG_VIDEO2_ENABLE) || (defined CONFIG_VIDEO5_ENABLE)
 
     json_object *new_obj = NULL;
     json_object *parm = NULL;
@@ -2191,7 +2196,11 @@ int cmd_put_open_pull_rt_stream(void *priv, char *content)
 
     it.name = "net_video_rec";
 //设置参数
+#if (defined CONFIG_VIDEO2_ENABLE)
     it.action = ACTION_VIDEO2_OPEN_RT_STREAM;
+#elif (defined CONFIG_VIDEO5_ENABLE)
+    it.action = ACTION_VIDEO5_OPEN_RT_STREAM;
+#endif
     new_obj = json_tokener_parse(content);
     parm =  json_object_object_get(new_obj, "param");
     h = json_object_get_string(json_object_object_get(parm, "h"));
@@ -2244,7 +2253,7 @@ int cmd_put_open_pull_rt_stream(void *priv, char *content)
 
 int cmd_put_open_third_rt_stream(void *priv, char *content)
 {
-#if defined (CONFIG_VIDEO2_ENABLE)
+#if defined (CONFIG_VIDEO1_ENABLE)
 
     json_object *new_obj = NULL;
     json_object *parm = NULL;
@@ -2350,6 +2359,22 @@ void close_rt_stream(struct sockaddr_in *dest)
 
         }
 
+        if (net_rec_handler && net_rec_handler->net_video4_vrt_on) {
+            puts("all rt4 stream close\n");
+            it.action = ACTION_VIDEO4_CLOSE_RT_STREAM;
+            it.data = (char *)&mark;
+            start_app(&it);
+
+        }
+
+        if (net_rec_handler && net_rec_handler->net_video5_vrt_on) {
+            puts("all rt5 stream close\n");
+            it.action = ACTION_VIDEO5_CLOSE_RT_STREAM;
+            it.data = (char *)&mark;
+            start_app(&it);
+
+        }
+
     }
     out_app_start_display();
 // #if THREE_WAY_ENABLE
@@ -2378,7 +2403,11 @@ static int cmd_put_close_rt_stream(void *priv, char *content)
     net_switch_ui("video_rec");
     it.name = "net_video_rec";
 //设置参数
+#ifdef CONFIG_VIDEO0_ENABLE
     it.action = ACTION_VIDEO0_CLOSE_RT_STREAM;
+#elif (defined CONFIG_VIDEO4_ENABLE)
+    it.action = ACTION_VIDEO4_CLOSE_RT_STREAM;
+#endif
     new_obj = json_tokener_parse(content);
     parm =  json_object_object_get(new_obj, "param");
     status = json_object_get_string(json_object_object_get(parm, "status"));
@@ -2408,11 +2437,7 @@ int cmd_put_close_pull_audio_rt_stream(void *priv, char *content)
 int cmd_put_close_pull_rt_stream(void *priv, char *content)
 {
 
-#if defined (CONFIG_VIDEO2_ENABLE)
-    if (!dev_online("uvc")) {
-        CTP_CMD_COMBINED(NULL, CTP_PULL_OFFLINE, "CLOSE_PULL_RT_STREAM", "NOTIFY", CTP_PULL_OFFLINE_MSG);
-        return 0;
-    }
+#if defined (CONFIG_VIDEO2_ENABLE) || (defined CONFIG_VIDEO5_ENABLE)
 
     json_object *new_obj = NULL;
     json_object *parm = NULL;
@@ -2425,7 +2450,11 @@ int cmd_put_close_pull_rt_stream(void *priv, char *content)
     net_switch_ui("video_rec");
     it.name = "net_video_rec";
 //设置参数
+#if (defined CONFIG_VIDEO2_ENABLE)
     it.action = ACTION_VIDEO2_CLOSE_RT_STREAM;
+#elif (defined CONFIG_VIDEO5_ENABLE)
+    it.action = ACTION_VIDEO5_CLOSE_RT_STREAM;
+#endif
     new_obj = json_tokener_parse(content);
     parm =  json_object_object_get(new_obj, "param");
     status = json_object_get_string(json_object_object_get(parm, "status"));
@@ -2450,7 +2479,7 @@ int cmd_put_close_pull_rt_stream(void *priv, char *content)
 int cmd_put_close_third_rt_stream(void *priv, char *content)
 {
 
-#if defined (CONFIG_VIDEO1_ENABLE)
+#if (defined CONFIG_VIDEO1_ENABLE)
 
     json_object *new_obj = NULL;
     json_object *parm = NULL;
@@ -2495,7 +2524,7 @@ int cmd_get_close_rt_stream(void *priv, char *content)
     /* struct video_rec_hdl *rec_handler = (struct video_rec_hdl *)it.data; */
     struct net_video_hdl *rec_handler = (struct net_video_hdl *)it.exdata;
 
-    if (rec_handler && rec_handler->net_video0_vrt_on == 1) {
+    if (rec_handler && (rec_handler->net_video0_vrt_on == 1 || rec_handler->net_video4_vrt_on == 1)) {
         strcpy(buf, "status:1");
     } else {
         strcpy(buf, "status:0");
@@ -2550,7 +2579,7 @@ int cmd_get_close_pull_audio_rt_stream(void *priv, char *content)
 }
 int cmd_get_close_pull_rt_stream(void *priv, char *content)
 {
-#if defined (CONFIG_VIDEO2_ENABLE)
+#if defined (CONFIG_VIDEO2_ENABLE) || (defined CONFIG_VIDEO5_ENABLE)
     struct intent it;
     char buf[128];
     init_intent(&it);
@@ -2562,7 +2591,7 @@ int cmd_get_close_pull_rt_stream(void *priv, char *content)
 
     struct net_video_hdl *rec_handler = (struct net_video_hdl *)it.data;
 
-    if (rec_handler && rec_handler->net_video2_vrt_on == 1) {
+    if (rec_handler && (rec_handler->net_video2_vrt_on == 1 || rec_handler->net_video5_vrt_on == 1)) {
         strcpy(buf, "status:1");
     } else {
         strcpy(buf, "status:0");
@@ -2639,7 +2668,11 @@ static int cmd_put_make_forward_files_list(void *priv, char *content)
         break;
     case NONE:
         /*snprintf(buf, sizeof(buf), "type:0,path:%s", CONFIG_REC_PATH_1"vf_list.txt");*/
+#if (defined CONFIG_VIDEO0_ENABLE)
         snprintf(buf, sizeof(buf), "type:0,path:%s", CONFIG_REC_PATH_0"vf_list.txt");
+#elif (defined CONFIG_VIDEO4_ENABLE)
+        snprintf(buf, sizeof(buf), "type:0,path:%s", CONFIG_REC_PATH_4"vf_list.txt");
+#endif
         CTP_CMD_COMBINED(priv, CTP_NO_ERR, "FORWARD_MEDIA_FILES_LIST", "NOTIFY", buf);
         break;
     case VID_JPG:
@@ -2650,7 +2683,11 @@ static int cmd_put_make_forward_files_list(void *priv, char *content)
             if (!FILE_INITIND_CHECK()) {
                 FILE_GEN();
                 /*snprintf(buf, sizeof(buf), "type:1,path:%s", CONFIG_REC_PATH_1"vf_list.txt");*/
+#if (defined CONFIG_VIDEO0_ENABLE)
                 snprintf(buf, sizeof(buf), "type:1,path:%s", CONFIG_REC_PATH_0"vf_list.txt");
+#elif (defined CONFIG_VIDEO4_ENABLE)
+                snprintf(buf, sizeof(buf), "type:1,path:%s", CONFIG_REC_PATH_4"vf_list.txt");
+#endif
                 CTP_CMD_COMBINED(priv, CTP_NO_ERR, "FORWARD_MEDIA_FILES_LIST", "NOTIFY", buf);
 
             } else {
@@ -2659,7 +2696,11 @@ static int cmd_put_make_forward_files_list(void *priv, char *content)
         } else {
             FILE_LIST_INIT_SMALL(file_num);
             /*snprintf(buf, sizeof(buf), "type:1,path:%s", CONFIG_REC_PATH_1"vf_list_small.txt");*/
+#if (defined CONFIG_VIDEO0_ENABLE)
             snprintf(buf, sizeof(buf), "type:1,path:%s", CONFIG_REC_PATH_0"vf_list_small.txt");
+#elif (defined CONFIG_VIDEO4_ENABLE)
+            snprintf(buf, sizeof(buf), "type:1,path:%s", CONFIG_REC_PATH_4"vf_list_small.txt");
+#endif
             CTP_CMD_COMBINED(priv, CTP_NO_ERR, "FORWARD_MEDIA_FILES_LIST", "NOTIFY", buf);
 #endif
         }
@@ -3530,7 +3571,7 @@ static int cmd_put_sta_ssid_info(void *priv, char *content)
     ctp_srv_disconnect_all_cli();
     cdp_srv_disconnect_all_cli();
 
-    info.dest_addr = NULL;
+    ctp_info.dest_addr = NULL;
 
     if (atoi(status)) {
         wifi_store_mode_info(STA_MODE, ssid, pwd);
@@ -3670,7 +3711,7 @@ static int cmd_put_ctp_cli_connected(void *priv, char *content)
 
 void user_ctp_cli_disconnect()
 {
-    cmd_put_ctp_cli_disconnect(info.cli, "NULL");
+    cmd_put_ctp_cli_disconnect(ctp_info.cli, "NULL");
 }
 
 static int cmd_put_ctp_cli_disconnect(void *priv, char *content)
@@ -3682,10 +3723,10 @@ static int cmd_put_ctp_cli_disconnect(void *priv, char *content)
     if (!dest_addr) {
         dest_addr = cdp_srv_get_cli_addr(priv);
     }
-    printf("app_accept_num = %d \n", info.num);
-    if (info.num > 0) {
-        info.num--;
-        if (info.num > 0) {
+    printf("app_accept_num = %d \n", ctp_info.num);
+    if (ctp_info.num > 0) {
+        ctp_info.num--;
+        if (ctp_info.num > 0) {
             list_for_ctp_mapping_tab(map) {
                 map->sync = false;
             }
@@ -3699,8 +3740,8 @@ static int cmd_put_ctp_cli_disconnect(void *priv, char *content)
         }
         return 0;
     }
-    info.dest_addr = NULL;
-    info.cli = NULL;
+    ctp_info.dest_addr = NULL;
+    ctp_info.cli = NULL;
 
     /*extern void stream_media_server_ip_close(struct sockaddr_in * dest_addr);*/
     /*extern void stupid_ftpd_disconnect_cli(struct sockaddr_in * dest_addr);*/
@@ -3806,7 +3847,7 @@ static int cmd_exit_backstage(void *priv, char *content)
     key_event_enable();
     touch_event_enable();
 
-    user_ctp_cli_disconnect();
+    /* user_ctp_cli_disconnect(); */
 
 
 }
@@ -3868,17 +3909,10 @@ static int cmd_get_pull_video_status(void *priv, char *content)
 {
     char buf[128];
 
-#ifdef CONFIG_VIDEO2_ENABLE
+#if (defined CONFIG_VIDEO2_ENABLE) || (defined CONFIG_VIDEO5_ENABLE)
 
-    if (dev_online("uvc")) {
-        printf("UVC ON LINE \n\n");
-        snprintf(buf, sizeof(buf), "status:1,h:%d,w:%d,fps:%d,rate:%d,format:1", 480, 640, net_video_rec_get_fps(), net_video_rec_get_audio_rate());
-        CTP_CMD_COMBINED(NULL, CTP_NO_ERR, "PULL_VIDEO_STATUS", "NOTIFY", buf);
-    } else {
-        strcpy(buf, "status:0");
-        printf("UVC OFF LINE \n\n");
-        CTP_CMD_COMBINED(NULL, CTP_NO_ERR, "PULL_VIDEO_STATUS", "NOTIFY", buf);
-    }
+    snprintf(buf, sizeof(buf), "status:1,h:%d,w:%d,fps:%d,rate:%d,format:1", 480, 640, net_video_rec_get_fps(), net_video_rec_get_audio_rate());
+    CTP_CMD_COMBINED(NULL, CTP_NO_ERR, "PULL_VIDEO_STATUS", "NOTIFY", buf);
 
 #endif
 
@@ -3889,7 +3923,7 @@ static int cmd_get_pull_video_status(void *priv, char *content)
 static int cmd_get_third_video_status(void *priv, char *content)
 {
     char buf[128];
-#ifdef CONFIG_VIDEO1_ENABLE
+#if (defined CONFIG_VIDEO1_ENABLE)
     snprintf(buf, sizeof(buf), "status:1,h:%d,w:%d,fps:%d,rate:%d,format:1", 480, 640, net_video_rec_get_fps(), net_video_rec_get_audio_rate());
     CTP_CMD_COMBINED(NULL, CTP_NO_ERR, "THIRD_VIDEO_STATUS", "NOTIFY", buf);
 #endif
@@ -4344,7 +4378,11 @@ int user_open_rt_stream(void)
     init_intent(&it);
     it.name = "net_video_rec";
 //设置参数
+#if( defined CONFIG_VIDEO0_ENABLE)
     it.action = ACTION_VIDEO0_OPEN_RT_STREAM;
+#elif (defined CONFIG_VIDEO4_ENABLE)
+    it.action = ACTION_VIDEO4_OPEN_RT_STREAM;
+#endif
 
     mark = 2;
     struct rt_stream_app_info info;
@@ -4384,7 +4422,11 @@ int user_close_rt_stream(void)
     net_switch_ui("video_rec");
     it.name = "net_video_rec";
 //设置参数
+#if( defined CONFIG_VIDEO0_ENABLE)
     it.action = ACTION_VIDEO0_CLOSE_RT_STREAM;
+#elif (defined CONFIG_VIDEO4_ENABLE)
+    it.action = ACTION_VIDEO4_CLOSE_RT_STREAM;
+#endif
 
     mark = 2;
     it.data = (const char *)&mark; //close video param

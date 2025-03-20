@@ -36,7 +36,7 @@ const struct irq_info irq_info_table[] = {
     { IRQ_SOFT4_IDX,      7,   1    }, //此中断强制注册到cpu1
     { -2,     			-2,   -2   },//如果加入了该行, 那么只有该行之前的中断注册到对应核, 其他所有中断强制注册到CPU0
 #endif
-
+    { IRQ_WF_IDX,      3,   0    }, //此中断强制注册到cpu1
     { -1,     -1,   -1    },
 };
 
@@ -116,8 +116,8 @@ const struct task_info task_info_table[] = {
 #ifdef CONFIG_WIFI_ENABLE
     {"iperf_test",          15,     1024,   0     },
     {"tcpip_thread",        16,      800,   0     },
-    {"tasklet",             10,     WIFI_TASKLET_STK_SIZE,   0,		 wifi_tasklet_tcb_stk_q	 },//通过调节任务优先级平衡WIFI收发占据总CPU的比重
-    {"RtmpMlmeTask",        17,     WIFI_MLME_STK_SIZE,  	 0, 	 wifi_mlme_tcb_stk_q	 },
+    {"tasklet",             19,     WIFI_TASKLET_STK_SIZE,   0,		 wifi_tasklet_tcb_stk_q	 },//通过调节任务优先级平衡WIFI收发占据总CPU的比重
+    {"RtmpMlmeTask",        28,     WIFI_MLME_STK_SIZE,  	 0, 	 wifi_mlme_tcb_stk_q	 },
     {"RtmpCmdQTask",        17,     WIFI_CMDQ_STK_SIZE,   	 0,  	 wifi_cmdq_tcb_stk_q	 },
     {"wl_rx_irq_thread",    16,     WIFI_RX_STK_SIZE,    	 0,  	 wifi_rx_tcb_stk_q  	 },
 

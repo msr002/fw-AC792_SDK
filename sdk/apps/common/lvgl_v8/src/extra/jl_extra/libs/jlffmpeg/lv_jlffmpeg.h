@@ -22,6 +22,8 @@ extern "C" {
 /**********************
  *      TYPEDEFS
  **********************/
+extern const uint8_t lv_jlffmpeg_debug_time;
+
 struct ffmpeg_context_s;
 
 extern const lv_obj_class_t lv_ffmpeg_player_class;
@@ -120,6 +122,10 @@ void lv_ffmpeg_player_set_zoom(lv_obj_t *obj, uint16_t zoom);
  * @param autostop_cb: cb: void cb(lv_obj_t *obj);
  */
 void lv_jlffmpeg_set_autostop_cb(lv_obj_t *obj, void (*autostop_cb)(lv_obj_t *));
+/**
+ * 获取当前解码器状态
+ */
+lv_ffmpeg_img_decode_status_t lv_ffmpeg_player_get_decode_state(void);
 /**********************
  *      MACROS
  **********************/

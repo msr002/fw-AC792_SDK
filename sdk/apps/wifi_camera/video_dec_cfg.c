@@ -9,7 +9,6 @@
 #include "app_config.h"
 #include "storage_device.h"
 
-#define CONFIG_FILE_PREVIEW_ENABLE
 
 /*
  * 删除当前文件
@@ -158,8 +157,6 @@ static void video_dec_lock_current_file(struct video_dec_hdl *__this, bool lock)
 #endif
 #endif
 
-    fclose(__this->req.dec.file);
-    __this->req.dec.file = NULL;
     video_dec_post_msg("fattr:ro=%1", lock);
 }
 

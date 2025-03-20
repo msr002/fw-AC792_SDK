@@ -319,6 +319,7 @@ c_SRC_FILES := \
 	../../../../apps/common/config/log_config/lib_driver_config.c \
 	../../../../apps/common/config/log_config/lib_power_config.c \
 	../../../../apps/common/config/log_config/lib_system_config.c \
+	../../../../apps/common/config/log_config/lib_ui_config.c \
 	../../../../apps/common/config/log_config/lib_update_config.c \
 	../../../../apps/common/config/new_cfg_tool.c \
 	../../../../apps/common/config/user_cfg.c \
@@ -673,6 +674,7 @@ c_SRC_FILES := \
 	../../../../apps/common/lvgl_v8/examples/widgets/textarea/lv_example_textarea_3.c \
 	../../../../apps/common/lvgl_v8/examples/widgets/tileview/lv_example_tileview_1.c \
 	../../../../apps/common/lvgl_v8/examples/widgets/win/lv_example_win_1.c \
+	../../../../apps/common/lvgl_v8/lvgl_main.c \
 	../../../../apps/common/lvgl_v8/src/core/lv_disp.c \
 	../../../../apps/common/lvgl_v8/src/core/lv_event.c \
 	../../../../apps/common/lvgl_v8/src/core/lv_group.c \
@@ -863,6 +865,7 @@ c_SRC_FILES := \
 	../../../../apps/common/system/device_mount.c \
 	../../../../apps/common/system/flash_write_protect.c \
 	../../../../apps/common/system/init.c \
+	../../../../apps/common/system/init_expand.c \
 	../../../../apps/common/system/mem_mmu.c \
 	../../../../apps/common/system/perf_counter/example/main.c \
 	../../../../apps/common/system/perf_counter/perf_counter.c \
@@ -1068,19 +1071,10 @@ LFLAGS := \
 	--plugin-opt=-pi32v2-large-program=true \
 	--plugin-opt=-pi32v2-csync-before-rti=true \
 	--start-group \
-	../../../../include_lib/newlib/pi32v2-lib/libm.a \
-	../../../../include_lib/newlib/pi32v2-lib/libc.a \
-	../../../../include_lib/newlib/pi32v2-lib/libcompiler_rt.a \
-	--start-group  \
-	../../../../cpu/wl83/liba/event.a \
-	../../../../cpu/wl83/liba/system.a \
-	../../../../cpu/wl83/liba/fs.a \
-	../../../../cpu/wl83/liba/cfg_tool.a \
-	../../../../cpu/wl83/liba/cpu.a \
-	../../../../cpu/wl83/liba/update.a \
-	../../../../cpu/wl83/liba/common_lib.a \
-	../../../../cpu/wl83/liba/lib_esco_repair.a \
 	../../../../cpu/wl83/liba/audio_server.a \
+	../../../../cpu/wl83/liba/media_app.a \
+	../../../../cpu/wl83/liba/update.a \
+	../../../../cpu/wl83/liba/lib_esco_repair.a \
 	../../../../cpu/wl83/liba/echo_server.a \
 	../../../../cpu/wl83/liba/libspeex.a \
 	../../../../cpu/wl83/liba/libvad.a \
@@ -1119,7 +1113,6 @@ LFLAGS := \
 	../../../../cpu/wl83/liba/libcompressor.a \
 	../../../../cpu/wl83/liba/lib_crossover_coff.a \
 	../../../../cpu/wl83/liba/libdrc.a \
-	../../../../cpu/wl83/liba/media_app.a \
 	../../../../cpu/wl83/liba/libauth_aisp.a \
 	../../../../cpu/wl83/liba/libauth.a \
 	../../../../cpu/wl83/liba/aisIntlib_single_xiaoai.a \
@@ -1127,8 +1120,8 @@ LFLAGS := \
 	../../../../cpu/wl83/liba/img_stitch.a \
 	../../../../cpu/wl83/liba/net_server.a \
 	../../../../cpu/wl83/liba/video_rec_server.a \
-	../../../../cpu/wl83/liba/btctrler.a \
 	../../../../cpu/wl83/liba/btstack.a \
+	../../../../cpu/wl83/liba/btctrler.a \
 	../../../../cpu/wl83/liba/rcsp_stack.a \
 	../../../../cpu/wl83/liba/lib_ccm_aes.a \
 	../../../../cpu/wl83/liba/lib_sbc_eng.a \
@@ -1136,20 +1129,23 @@ LFLAGS := \
 	../../../../cpu/wl83/liba/msbc_codec_lib.a \
 	../../../../cpu/wl83/liba/lib_sig_mesh.a \
 	../../../../cpu/wl83/liba/crypto_toolbox_Osize.a \
-	../../../../cpu/wl83/liba/lwip_2_2_0.a \
 	../../../../cpu/wl83/liba/wl_wifi_sta.a \
+	../../../../cpu/wl83/liba/iperf.a \
+	../../../../cpu/wl83/liba/lwip_2_2_0.a \
 	../../../../cpu/wl83/liba/wl_rf_common.a \
 	../../../../cpu/wl83/liba/lte_module.a \
 	../../../../cpu/wl83/liba/ai_server.a \
 	../../../../cpu/wl83/liba/zliblite.a \
 	../../../../cpu/wl83/liba/profile.a \
 	../../../../cpu/wl83/liba/stream_media_server.a \
-	../../../../cpu/wl83/liba/libmbedtls_3_4_0.a \
-	../../../../cpu/wl83/liba/wpasupplicant.a \
-	../../../../cpu/wl83/liba/libcrypto_mbedtls.a \
-	../../../../cpu/wl83/liba/hsm.a \
 	../../../../cpu/wl83/liba/http_cli.a \
 	../../../../cpu/wl83/liba/https_cli.a \
+	--start-group  \
+	../../../../cpu/wl83/liba/wpasupplicant.a \
+	../../../../cpu/wl83/liba/libcrypto_mbedtls.a \
+	--end-group \
+	../../../../cpu/wl83/liba/libmbedtls_3_4_0.a \
+	../../../../cpu/wl83/liba/common_lib.a \
 	../../../../cpu/wl83/liba/http_server.a \
 	../../../../cpu/wl83/liba/json.a \
 	../../../../cpu/wl83/liba/libduer-device.a \
@@ -1162,7 +1158,6 @@ LFLAGS := \
 	../../../../cpu/wl83/liba/libdlna.a \
 	../../../../cpu/wl83/liba/libtencent.a \
 	../../../../cpu/wl83/liba/websocket.a \
-	../../../../cpu/wl83/liba/iperf.a \
 	../../../../cpu/wl83/liba/tmallgenie_todo.a \
 	../../../../cpu/wl83/liba/cJSON.a \
 	../../../../cpu/wl83/liba/ftpserver_new.a \
@@ -1172,14 +1167,20 @@ LFLAGS := \
 	../../../../cpu/wl83/liba/libvtbk.a \
 	../../../../cpu/wl83/liba/tmallgenie.a \
 	../../../../cpu/wl83/liba/libwt.a \
-	--end-group \
+	../../../../cpu/wl83/liba/hsm.a \
+	../../../../cpu/wl83/liba/event.a \
+	../../../../cpu/wl83/liba/system.a \
+	../../../../cpu/wl83/liba/fs.a \
+	../../../../cpu/wl83/liba/cfg_tool.a \
+	../../../../cpu/wl83/liba/update.a  \
+	../../../../cpu/wl83/liba/cpu.a \
 	../../../../cpu/wl83/liba/lvgl_v8_extend.a \
-	../../../../include_lib/c++/libstdc++/ucos/libemutls.a \
-	../../../../include_lib/c++/libstdc++/ucos/libc++.a \
-	../../../../include_lib/c++/libstdc++/ucos/libc++abi.a \
+	../../../../include_lib/newlib/pi32v2-lib/libm.a \
+	../../../../include_lib/newlib/pi32v2-lib/libc.a \
+	../../../../include_lib/newlib/pi32v2-lib/libcompiler_rt.a \
+	--end-group  \
 	-T../../../../cpu/wl83/sdk.ld \
 	-M=../../../../cpu/wl83/tools/sdk.map \
-	--end-group  \
 	--plugin-opt=mcpu=r3 \
 	--plugin-opt=-mattr=+fprev1 \
 

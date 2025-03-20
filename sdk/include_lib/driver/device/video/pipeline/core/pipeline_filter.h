@@ -25,9 +25,9 @@ struct pipeline_filter {
     int (*get_parameter)(pipe_filter_t *filter, int cmd, void *arg, int source_channel);
 };
 
-pipe_filter_t *filter_register(const char *name);
+pipe_filter_t *filter_register(const char *name, int channel);
 
-int filter_pre_unregister(pipe_filter_t *filter);
+int filter_pre_unregister(pipe_filter_t *filter, int channel);
 int filter_unregister(pipe_filter_t *filter);
 
 #endif

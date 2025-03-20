@@ -395,34 +395,24 @@ void gui_model_video_photo_msg_init_events()
     lv_subject_t *subject_shots_icon = gui_msg_get_subject(GUI_MODEL_VIDEO_PHOTO_MSG_ID_SHOTS_ICON);
     lv_subject_t *subject_photo_reso = gui_msg_get_subject(GUI_MODEL_VIDEO_PHOTO_MSG_ID_PHOTO_RESO);
     if (!guider_ui.video_photo_del) {
-        gui_model_video_photo_msg_shots_icon_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_BOOL);
-        lv_subject_add_observer_obj(subject_shots_icon, gui_msg_set_visible_by_bool_cb, guider_ui.video_photo_img_repeat_icon, &guider_msg_data);
+        gui_msg_setup_component(true, false, subject_shots_icon, guider_ui.video_photo_img_repeat_icon, &guider_msg_data, gui_msg_set_visible_by_bool_cb, GUI_MODEL_VIDEO_PHOTO_MSG_ID_SHOTS_ICON, GUI_MSG_ACCESS_GET, VALUE_BOOL, NULL);
 
-        gui_model_video_photo_msg_iso_icon_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
-        lv_subject_add_observer_obj(subject_iso_icon, gui_model_video_photo_msg_video_photo_img_iso_icon_set_img_path_cb, guider_ui.video_photo_img_iso_icon, &guider_msg_data);
+        gui_msg_setup_component(true, false, subject_iso_icon, guider_ui.video_photo_img_iso_icon, &guider_msg_data, gui_model_video_photo_msg_video_photo_img_iso_icon_set_img_path_cb, GUI_MODEL_VIDEO_PHOTO_MSG_ID_ISO_ICON, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
 
-        gui_model_video_photo_msg_handshake_icon_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
-        lv_subject_add_observer_obj(subject_handshake_icon, gui_model_video_photo_msg_video_photo_img_shake_icon_set_img_path_cb, guider_ui.video_photo_img_shake_icon, &guider_msg_data);
+        gui_msg_setup_component(true, false, subject_handshake_icon, guider_ui.video_photo_img_shake_icon, &guider_msg_data, gui_model_video_photo_msg_video_photo_img_shake_icon_set_img_path_cb, GUI_MODEL_VIDEO_PHOTO_MSG_ID_HANDSHAKE_ICON, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
 
-        gui_model_video_photo_msg_pexp_icon_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
-        lv_subject_add_observer_obj(subject_pexp_icon, gui_model_video_photo_msg_video_photo_img_exp_icon_set_img_path_cb, guider_ui.video_photo_img_exp_icon, &guider_msg_data);
+        gui_msg_setup_component(true, false, subject_pexp_icon, guider_ui.video_photo_img_exp_icon, &guider_msg_data, gui_model_video_photo_msg_video_photo_img_exp_icon_set_img_path_cb, GUI_MODEL_VIDEO_PHOTO_MSG_ID_PEXP_ICON, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
 
-        gui_model_video_photo_msg_awb_icon_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
-        lv_subject_add_observer_obj(subject_awb_icon, gui_model_video_photo_msg_video_photo_img_awb_icon_set_img_path_cb, guider_ui.video_photo_img_awb_icon, &guider_msg_data);
+        gui_msg_setup_component(true, false, subject_awb_icon, guider_ui.video_photo_img_awb_icon, &guider_msg_data, gui_model_video_photo_msg_video_photo_img_awb_icon_set_img_path_cb, GUI_MODEL_VIDEO_PHOTO_MSG_ID_AWB_ICON, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
 
-        gui_model_video_photo_msg_quality_icon_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
-        lv_subject_add_observer_obj(subject_quality_icon, gui_model_video_photo_msg_video_photo_img_qua_icon_set_img_path_cb, guider_ui.video_photo_img_qua_icon, &guider_msg_data);
+        gui_msg_setup_component(true, false, subject_quality_icon, guider_ui.video_photo_img_qua_icon, &guider_msg_data, gui_model_video_photo_msg_video_photo_img_qua_icon_set_img_path_cb, GUI_MODEL_VIDEO_PHOTO_MSG_ID_QUALITY_ICON, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
 
-        gui_model_video_photo_msg_delay_icon_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
-        lv_subject_add_observer_obj(subject_delay_icon, gui_model_video_photo_msg_video_photo_img_delay_icon_set_img_path_cb, guider_ui.video_photo_img_delay_icon, &guider_msg_data);
-        gui_model_video_photo_msg_delay_sate_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_BOOL);
-        lv_subject_add_observer_obj(subject_delay_sate, gui_msg_set_visible_by_bool_cb, guider_ui.video_photo_img_delay_icon, &guider_msg_data);
+        gui_msg_setup_component(true, false, subject_delay_icon, guider_ui.video_photo_img_delay_icon, &guider_msg_data, gui_model_video_photo_msg_video_photo_img_delay_icon_set_img_path_cb, GUI_MODEL_VIDEO_PHOTO_MSG_ID_DELAY_ICON, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
+        gui_msg_setup_component(true, false, subject_delay_sate, guider_ui.video_photo_img_delay_icon, &guider_msg_data, gui_msg_set_visible_by_bool_cb, GUI_MODEL_VIDEO_PHOTO_MSG_ID_DELAY_SATE, GUI_MSG_ACCESS_GET, VALUE_BOOL, NULL);
 
-        gui_model_video_photo_msg_photo_reso_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_STRING);
-        lv_subject_add_observer_obj(subject_photo_reso, gui_msg_set_label_text_by_string_cb, guider_ui.video_photo_lbl_photo_reso, &guider_msg_data);
+        gui_msg_setup_component(true, false, subject_photo_reso, guider_ui.video_photo_lbl_photo_reso, &guider_msg_data, gui_msg_set_label_text_by_string_cb, GUI_MODEL_VIDEO_PHOTO_MSG_ID_PHOTO_RESO, GUI_MSG_ACCESS_GET, VALUE_STRING, NULL);
 
-        gui_model_video_photo_msg_photo_remain_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_STRING);
-        lv_subject_add_observer_obj(subject_photo_remain, gui_msg_set_label_text_by_string_cb, guider_ui.video_photo_lbl_remain_pnum, &guider_msg_data);
+        gui_msg_setup_component(true, false, subject_photo_remain, guider_ui.video_photo_lbl_remain_pnum, &guider_msg_data, gui_msg_set_label_text_by_string_cb, GUI_MODEL_VIDEO_PHOTO_MSG_ID_PHOTO_REMAIN, GUI_MSG_ACCESS_GET, VALUE_STRING, NULL);
 
 
         for (int i = 0; i < 18; i++) {

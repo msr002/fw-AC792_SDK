@@ -34,6 +34,16 @@ void exit_sys_setting_menu(void)
             screen = gui_scr_create(GUI_SCREEN_VIDEO_PHOTO, "video_photo", guider_ui.video_photo, (gui_scr_setup_cb_t)setup_scr_video_photo, (gui_scr_unload_cb_t)unload_scr_video_photo);
         }
         ui_load_scr_anim(&guider_ui, screen, LV_SCR_LOAD_ANIM_NONE, 0, 0, true, true, false);
+    } else if (app && !strcmp(app->name, "video_dec")) {
+#ifndef CONFIG_FILE_PREVIEW_ENABLE
+        printf("load video dec page \n");
+        gui_scr_t *screen = gui_scr_get(GUI_SCREEN_VIDEO_DEC);
+        if (screen == NULL) {
+            screen = gui_scr_create(GUI_SCREEN_VIDEO_DEC, "video_dec", guider_ui.video_dec, (gui_scr_setup_cb_t)setup_scr_video_dec, (gui_scr_unload_cb_t)unload_scr_video_dec);
+        }
+        ui_load_scr_anim(&guider_ui, screen, LV_SCR_LOAD_ANIM_NONE, 0, 0, true, true, false);
+#endif /* CONFIG_FILE_PREVIEW_ENABLE */
+
     }
 }
 
@@ -153,62 +163,7 @@ void format_sdcard(void)
 #endif
 }
 
-void set_rtc_time(void)
-{
-    char time_buf[8] = {0};
-    update_date = true;
 
-    printf(">>>set rtc time\n");
-    lv_dropdown_get_selected_str(guider_ui.sys_setting_ddlist_year, &time_buf, 5);
-    printf("year: %s\n", time_buf);
-    db_update("datey", atoi(time_buf));
-    memset(time_buf, 0, sizeof(time_buf));
-    lv_dropdown_get_selected_str(guider_ui.sys_setting_ddlist_month, &time_buf, 3);
-    printf("month: %s\n", time_buf);
-    db_update("datem", atoi(time_buf));
-    memset(time_buf, 0, sizeof(time_buf));
-    lv_dropdown_get_selected_str(guider_ui.sys_setting_ddlist_day, &time_buf, 3);
-    printf("day: %s\n", time_buf);
-    db_update("dated", atoi(time_buf));
-    memset(time_buf, 0, sizeof(time_buf));
-    lv_dropdown_get_selected_str(guider_ui.sys_setting_ddlist_hour, &time_buf, 3);
-    printf("hour: %s\n", time_buf);
-    db_update("dateh", atoi(time_buf));
-    memset(time_buf, 0, sizeof(time_buf));
-    lv_dropdown_get_selected_str(guider_ui.sys_setting_ddlist_min, &time_buf, 3);
-    printf("min: %s\n", time_buf);
-    db_update("datemi", atoi(time_buf));
-    memset(time_buf, 0, sizeof(time_buf));
-    lv_dropdown_get_selected_str(guider_ui.sys_setting_ddlist_sec, &time_buf, 3);
-    printf("sec: %s\n", time_buf);
-    db_update("dates", atoi(time_buf));
-
-}
-
-void setting_reset(void)
-{
-    int reset_err = 0;
-    char *carnumber_cn_init;
-
-    reset_err = db_reset();
-
-    update_date = true;  //rtc时间
-
-    /* 车牌 */
-    carnumber_cn_init = (char *)lvgl_module_msg_get_ptr(GUI_MODEL_VIDEO_REC_MSG_ID_CAR_NUNBER, 16);
-    strcpy(carnumber_cn_init, "京A00000");
-    lvgl_module_msg_send_ptr(carnumber_cn_init, 0);
-
-    /* 语言 */
-    lv_i18n_set_locale("zh_cn");
-    i18n_refresh_all_texts(); //语言即可生效
-
-    if (reset_err < 0) {
-        sys_prompt_show_ctl(3000, (void *)_("sys_reset_failed"));
-    } else {
-        sys_prompt_show_ctl(3000, (void *)_("sys_reset"));
-    }
-}
 
 
 #endif

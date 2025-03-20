@@ -8,10 +8,6 @@
 #if defined CONFIG_BT_ENABLE || TCFG_WIFI_ENABLE
 #include "wifi/wifi_connect.h"
 #endif
-#ifdef CONFIG_RF_TEST_ENABLE
-#include "device/gpio.h"
-#include "device/uart.h"
-#endif
 
 #ifdef PRODUCT_TEST_ENABLE
 #include "product_main.h"
@@ -59,7 +55,7 @@ int btif_item_rewrite_en(u16 id, u16 len)
 {
     int ret;
     switch (id) {
-#ifdef PRODUCT_TEST_ENABLE
+#if (defined PRODUCT_TEST_ENABLE || defined TCFG_RF_FCC_TEST_ENABLE)
     case CFG_BT_MAC_ADDR:
     case CFG_BLE_MAC_ADDR:
     case CFG_PRODUCT_UUID_INDEX:
@@ -93,7 +89,7 @@ extern int bytecmp(unsigned char *p, unsigned char ch, unsigned int num);
 
 #define LOCAL_NAME_LEN	32	/*BD_NAME_LEN_MAX*/
 
-static char edr_name[LOCAL_NAME_LEN];
+static char edr_name[LOCAL_NAME_LEN] = "JL-AC79XX-";
 static char ble_name[LOCAL_NAME_LEN];
 static char pincode[5] = "0000";
 static u8 update_flag;
@@ -114,7 +110,7 @@ const u8 *bt_get_mac_addr(void)
         return mac_addr;
     }
 
-#if TCFG_WIFI_ENABLE && !defined CONFIG_RF_TEST_ENABLE
+#if TCFG_WIFI_ENABLE
     if (wifi_is_on() && !wifi_get_mac(mac_addr) && bytecmp(mac_addr, 0, 6)) {
         return mac_addr;
     } else
@@ -131,7 +127,7 @@ const u8 *bt_get_mac_addr(void)
         //此处用户可自行修改为本地生成mac地址的算法
         mac_addr[0] &= ~((1 << 0) | (1 << 1));
         update_flag = 1;
-#if !TCFG_WIFI_ENABLE || defined CONFIG_RF_TEST_ENABLE
+#if !TCFG_WIFI_ENABLE
         syscfg_write(CFG_BT_MAC_ADDR, mac_addr, 6);
 #endif
         return mac_addr;
@@ -140,9 +136,10 @@ const u8 *bt_get_mac_addr(void)
 
 const char *bt_get_local_name(void)
 {
-#ifndef CONFIG_RF_TEST_ENABLE
-    sprintf(edr_name, "JL-AC79XX-%02X%02X", mac_addr[4], mac_addr[5]);
-#endif
+    int len = strlen(edr_name);
+    if (len + 1 < sizeof(edr_name) && (edr_name[len - 1] == '-' || edr_name[len - 1] == '_')) {
+        snprintf(edr_name + len, sizeof(edr_name) - len, "%02X%02X", mac_addr[4], mac_addr[5]);
+    }
     return edr_name;
 }
 
@@ -308,16 +305,7 @@ typedef struct __RF_PARAM_CONFIG {
 
 static RF_PARAM_CONFIG rf_param_config;
 
-#ifdef CONFIG_RF_TEST_ENABLE
-int init_net_device_mac_addr(char *macaddr, char ap_mode)
-{
-    memcpy(macaddr, bt_get_mac_addr(), 6);
-
-    return 0;
-}
-#endif
-
-#if defined CONFIG_RF_TEST_ENABLE || defined CONFIG_READ_RF_PARAM_FROM_CFGTOOL_ENABLE
+#if defined CONFIG_READ_RF_PARAM_FROM_CFGTOOL_ENABLE
 u8 get_rf_analog_gain(void)
 {
     return rf_param_config.analog_gain;
@@ -433,7 +421,8 @@ void cfg_file_parse(void)
     }
 
     //-------------若存在BT/BLE功率校准值(RF_FCC校准所得)，则使用校准值-----------//
-#ifdef RF_FCC_TEST_ENABLE
+#if TCFG_RF_FCC_TEST_ENABLE || TCFG_RF_PRODUCT_TEST_ENABLE
+    u8 rf_fcc_adj_res_read(char *str, void *data);
     if (rf_fcc_adj_res_read("edr", &bt_power)) {
         log_info("---  [RF_FCC_ADJ]bt_power %d ----", bt_power);
     } else {
@@ -448,8 +437,8 @@ void cfg_file_parse(void)
 #endif
 
     extern void bt_max_pwr_set(u8 pwr, u8 pg_pwr, u8 iq_pwr, u8 ble_pwr);
-#ifdef RF_FCC_TEST_ENABLE
-    bt_max_pwr_set(7, 6, 6, 8);	//0-10 设置蓝牙发射功率
+#if TCFG_RF_FCC_TEST_ENABLE
+    bt_max_pwr_set(8, 6, 6, 8);	//0-10 设置蓝牙发射功率
 #else
     bt_max_pwr_set(bt_power, 6, 6, ble_power);	//0-10 设置蓝牙发射功率
 #endif
@@ -555,7 +544,7 @@ void cfg_file_parse(void)
 #if defined CONFIG_BT_ENABLE || TCFG_WIFI_ENABLE
 __attribute__((weak)) void wifi_get_xosc(u8 *xosc)
 {
-#if defined CONFIG_RF_TEST_ENABLE || defined CONFIG_READ_RF_PARAM_FROM_CFGTOOL_ENABLE
+#if defined CONFIG_READ_RF_PARAM_FROM_CFGTOOL_ENABLE
     xosc[0] = rf_param_config.xosc_l;
     xosc[1] = rf_param_config.xosc_r;
 #else
@@ -569,7 +558,7 @@ __attribute__((weak)) void wifi_get_xosc(u8 *xosc)
 
 __attribute__((weak)) void wifi_get_mcs_dgain(u8 *mcs_dgain)
 {
-#if defined CONFIG_RF_TEST_ENABLE || defined CONFIG_READ_RF_PARAM_FROM_CFGTOOL_ENABLE
+#if defined CONFIG_READ_RF_PARAM_FROM_CFGTOOL_ENABLE
     memcpy(mcs_dgain, rf_param_config.mcs_dgain, sizeof(rf_param_config.mcs_dgain));
 #else
     memcpy(mcs_dgain, wifi_calibration_param.mcs_dgain, sizeof(wifi_calibration_param.mcs_dgain));
@@ -581,7 +570,7 @@ __attribute__((weak)) void wifi_get_mcs_dgain(u8 *mcs_dgain)
 
 __attribute__((weak)) int wifi_get_pa_trim_data(u8 *pa_data)
 {
-#if defined CONFIG_RF_TEST_ENABLE || defined CONFIG_READ_RF_PARAM_FROM_CFGTOOL_ENABLE
+#if defined CONFIG_READ_RF_PARAM_FROM_CFGTOOL_ENABLE
     memcpy(pa_data, rf_param_config.pa_trim_data, sizeof(rf_param_config.pa_trim_data));
 #else
     memcpy(pa_data, wifi_calibration_param.pa_trim_data, sizeof(wifi_calibration_param.pa_trim_data));

@@ -13,8 +13,8 @@ static const char *video_play_imglist_1_imgs[2] = {
     "A:\\gitlab-m\\ac792\\ui_prj\\wifi_bbm_800x480\\import\\image\\video_play.png",
     "A:\\gitlab-m\\ac792\\ui_prj\\wifi_bbm_800x480\\import\\image\\video_pause.png"
 #else
-    "mnt/sdfile/EXT_RESERVED/uipackres/ui/5500000c.zip",
-    "mnt/sdfile/EXT_RESERVED/uipackres/ui/5500000d.zip"
+    "mnt/sdfile/EXT_RESERVED/uipackres/ui/5500000d.zip",
+    "mnt/sdfile/EXT_RESERVED/uipackres/ui/5500000e.zip"
 #endif
 };
 
@@ -95,10 +95,10 @@ lv_obj_t *setup_scr_video_play(lv_ui *ui)
     lv_imgbtn_set_src(ui->video_play_imgbtn_1, LV_IMGBTN_STATE_CHECKED_RELEASED, NULL, "A:\\gitlab-m\\ac792\\ui_prj\\wifi_bbm_800x480\\import\\image\\back_white.png", NULL);
     lv_imgbtn_set_src(ui->video_play_imgbtn_1, LV_IMGBTN_STATE_CHECKED_PRESSED, NULL, "A:\\gitlab-m\\ac792\\ui_prj\\wifi_bbm_800x480\\import\\image\\back_white.png", NULL);
 #else
-    lv_imgbtn_set_src(ui->video_play_imgbtn_1, LV_IMGBTN_STATE_RELEASED, NULL, "mnt/sdfile/EXT_RESERVED/uipackres/ui/5500000b.zip", NULL);
-    lv_imgbtn_set_src(ui->video_play_imgbtn_1, LV_IMGBTN_STATE_PRESSED, NULL, "mnt/sdfile/EXT_RESERVED/uipackres/ui/5500000b.zip", NULL);
-    lv_imgbtn_set_src(ui->video_play_imgbtn_1, LV_IMGBTN_STATE_CHECKED_RELEASED, NULL, "mnt/sdfile/EXT_RESERVED/uipackres/ui/5500000b.zip", NULL);
-    lv_imgbtn_set_src(ui->video_play_imgbtn_1, LV_IMGBTN_STATE_CHECKED_PRESSED, NULL, "mnt/sdfile/EXT_RESERVED/uipackres/ui/5500000b.zip", NULL);
+    lv_imgbtn_set_src(ui->video_play_imgbtn_1, LV_IMGBTN_STATE_RELEASED, NULL, "mnt/sdfile/EXT_RESERVED/uipackres/ui/5500000c.zip", NULL);
+    lv_imgbtn_set_src(ui->video_play_imgbtn_1, LV_IMGBTN_STATE_PRESSED, NULL, "mnt/sdfile/EXT_RESERVED/uipackres/ui/5500000c.zip", NULL);
+    lv_imgbtn_set_src(ui->video_play_imgbtn_1, LV_IMGBTN_STATE_CHECKED_RELEASED, NULL, "mnt/sdfile/EXT_RESERVED/uipackres/ui/5500000c.zip", NULL);
+    lv_imgbtn_set_src(ui->video_play_imgbtn_1, LV_IMGBTN_STATE_CHECKED_PRESSED, NULL, "mnt/sdfile/EXT_RESERVED/uipackres/ui/5500000c.zip", NULL);
 #endif
     lv_obj_add_flag(ui->video_play_imgbtn_1, LV_OBJ_FLAG_CHECKABLE);
     ui->video_play_imgbtn_1_label = lv_label_create(ui->video_play_imgbtn_1);
@@ -194,7 +194,7 @@ lv_obj_t *setup_scr_video_play(lv_ui *ui)
 #if LV_USE_GUIBUILDER_SIMULATOR
     lv_imgbtn_set_src(ui->video_play_imgbtn_3, LV_IMGBTN_STATE_RELEASED, NULL, "A:\\gitlab-m\\ac792\\ui_prj\\wifi_bbm_800x480\\import\\image\\skip_next.png", NULL);
 #else
-    lv_imgbtn_set_src(ui->video_play_imgbtn_3, LV_IMGBTN_STATE_RELEASED, NULL, "mnt/sdfile/EXT_RESERVED/uipackres/ui/5500000e.zip", NULL);
+    lv_imgbtn_set_src(ui->video_play_imgbtn_3, LV_IMGBTN_STATE_RELEASED, NULL, "mnt/sdfile/EXT_RESERVED/uipackres/ui/5500000f.zip", NULL);
 #endif
     lv_obj_add_flag(ui->video_play_imgbtn_3, LV_OBJ_FLAG_CHECKABLE);
     ui->video_play_imgbtn_3_label = lv_label_create(ui->video_play_imgbtn_3);
@@ -240,7 +240,7 @@ lv_obj_t *setup_scr_video_play(lv_ui *ui)
 #if LV_USE_GUIBUILDER_SIMULATOR
     lv_imgbtn_set_src(ui->video_play_imgbtn_2, LV_IMGBTN_STATE_RELEASED, NULL, "A:\\gitlab-m\\ac792\\ui_prj\\wifi_bbm_800x480\\import\\image\\skip_previous.png", NULL);
 #else
-    lv_imgbtn_set_src(ui->video_play_imgbtn_2, LV_IMGBTN_STATE_RELEASED, NULL, "mnt/sdfile/EXT_RESERVED/uipackres/ui/5500000f.zip", NULL);
+    lv_imgbtn_set_src(ui->video_play_imgbtn_2, LV_IMGBTN_STATE_RELEASED, NULL, "mnt/sdfile/EXT_RESERVED/uipackres/ui/55000010.zip", NULL);
 #endif
     lv_obj_add_flag(ui->video_play_imgbtn_2, LV_OBJ_FLAG_CHECKABLE);
     ui->video_play_imgbtn_2_label = lv_label_create(ui->video_play_imgbtn_2);

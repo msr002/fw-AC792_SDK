@@ -1,13 +1,13 @@
-
-#ifndef __RF_FCC_MAIN_H_
-#define __RF_FCC_MAIN_H_
+#ifndef _RF_FCC_MAIN_H_
+#define _RF_FCC_MAIN_H_
 
 #include "app_config.h"
 #include "generic/typedef.h"
 #include "list.h"
 #include "datatype.h"
 
-#ifdef RF_FCC_TEST_ENABLE
+extern const u8 config_rf_test_enable;
+
 #define CMD_DEBUG
 #define IO_TRIGGER_MODE      (0) //"IO检测"方式触发进入RF_FCC测试模式
 #define GPCNT_TRIGGER_MODE   (1) //"脉冲检测"方式触发进入RF_FCC测试模式
@@ -78,7 +78,7 @@ void wifi_tx_data_test(u8 channel, u8 power, u8 rate, u8 *packet, u32 packet_len
  *
  * @note 可在外部定义同名函数，修改返回的通信串口号("uart0"/"uart1"/"uart2")
  */
-__attribute__((weak)) const char *rf_fcc_get_uart(void);
+const char *rf_fcc_get_uart(void);
 
 
 /**
@@ -88,7 +88,7 @@ __attribute__((weak)) const char *rf_fcc_get_uart(void);
  *
  * @note 可在外部定义同名函数，修改触发方式
  */
-__attribute__((weak))u8 fcc_enter_user_def(void);
+u8 fcc_enter_user_def(void);
 
 
 /**
@@ -99,13 +99,11 @@ __attribute__((weak))u8 fcc_enter_user_def(void);
  *
  * @note 可在外部定义同名函数，根据测试结果添加自定义操作
  */
-__attribute__((weak))void fcc_res_handler(u8 res);
+void fcc_res_handler(u8 res);
 
 void fcc_bt_ble_module_init(void);
+
 struct fcc_mode *rf_fcc_bt_adj_info(void);
 
-#endif //RF_FCC_TEST_ENABLE
-
 #endif
-
 

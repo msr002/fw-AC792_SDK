@@ -20,6 +20,7 @@
 #define BBM_RX_ARP_INDEX          1
 #define BBM_RX_MAC_INDEX          2
 #define BBM_TX_MAC_INDEX          3
+#define BBM_WIFI_CH_INDEX         4
 
 #define CONFIG_VIDEO_DEC_ENABLE             1
 

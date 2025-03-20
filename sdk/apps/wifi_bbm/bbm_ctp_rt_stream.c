@@ -46,6 +46,12 @@
     "{\"op\":\"PUT\",\"param\":{" \
     "\"abr\":\"%d\",\"id\":\"%d\",\"sub_id\":\"%d\"}}"
 
+#define TAKE_PHOTO_TOPIC "PHOTO_CTRL"
+#define TAKE_PHOTO_CONTENT \
+    "{\"op\":\"PUT\",\"param\":{" \
+    "\"id\":\"%d\",\"sub_id\":\"%d\"}}"
+
+
 //默认情况下
 //video0(id:0)对应mipi摄像头
 //video1(id:1)对应dvp摄像头
@@ -61,7 +67,7 @@ static struct video_rec_config default_rt_config = {
     .width = 640,
     .height = 480,
     .fps = 25,
-    .abr_kbps = 1000,
+    .abr_kbps = 2000,
     .id = 1,
     .sub_id = 0,
 };
@@ -71,7 +77,7 @@ static struct video_rec_config default_rec_config = {
     .width = 640,
     .height = 480,
     .fps = 25,
-    .abr_kbps = 1000,
+    .abr_kbps = 2000,
     .id = 1,
     .sub_id = 1,
     .cycle_time = 3,
@@ -97,30 +103,88 @@ static u8 rt_stream_init = 0;
 static struct list_head send_dev_list_head;
 static OS_MUTEX send_mutex;
 
-
-struct video_window disp_win[3] = {
-    //Main Win
+/* 1台设备：全屏 */
+struct video_window disp_win_1[1] = {
     {
-        .left 	 = 0,
-        .top  	 = 0,
+        .left   = 0,
+        .top    = 0,
         .width  = LCD_W,
         .height = LCD_H,
         .combine = 1,
     },
-    //Left Half Win
+};
+
+/* 2台设备：左右分屏 */
+struct video_window disp_win_2[2] = {
     {
-        .left 	 = 0,
-        .top  	 = 0,
+        .left   = 0,
+        .top    = 0,
         .width  = LCD_W / 2,
         .height = LCD_H,
         .combine = 1,
     },
-    //Rigth Half Win
     {
-        .left 	 = LCD_W / 2,
-        .top  	 = 0,
+        .left   = LCD_W / 2,
+        .top    = 0,
         .width  = LCD_W / 2,
         .height = LCD_H,
+        .combine = 1,
+    },
+};
+
+/* 3台设备：左半屏 + 右侧上下分屏 */
+struct video_window disp_win_3[3] = {
+    {
+        .left   = 0,
+        .top    = 0,
+        .width  = LCD_W / 2,
+        .height = LCD_H / 2,
+        .combine = 1,
+    },
+    {
+        .left   = LCD_W / 2,
+        .top    = 0,
+        .width  = LCD_W / 2,
+        .height = LCD_H / 2,
+        .combine = 1,
+    },
+    {
+        .left   = LCD_W / 4,
+        .top    = LCD_H / 2,
+        .width  = LCD_W / 2,
+        .height = LCD_H / 2,
+        .combine = 1,
+    },
+};
+
+/* 4台设备：四宫格 */
+struct video_window disp_win_4[4] = {
+    {
+        .left   = 0,
+        .top    = 0,
+        .width  = LCD_W / 2,
+        .height = LCD_H / 2,
+        .combine = 1,
+    },
+    {
+        .left   = LCD_W / 2,
+        .top    = 0,
+        .width  = LCD_W / 2,
+        .height = LCD_H / 2,
+        .combine = 1,
+    },
+    {
+        .left   = 0,
+        .top    = LCD_H / 2,
+        .width  = LCD_W / 2,
+        .height = LCD_H / 2,
+        .combine = 1,
+    },
+    {
+        .left   = LCD_W / 2,
+        .top    = LCD_H / 2,
+        .width  = LCD_W / 2,
+        .height = LCD_H / 2,
         .combine = 1,
     },
 };
@@ -249,6 +313,7 @@ static int deal_recv_packet(u8 *recv_buf, int recv_len, u32 ip_addr)
             struct lbuf_data_head *lbuf_data = lbuf_alloc(rt_dev->lbuf_handle, recv_len);
             if (!lbuf_data) {
                 printf("rt lbuf_alloc err ip:%d \n", ip_addr);
+                lbuf_clear(rt_dev->lbuf_handle);
                 return -1;
             }
             lbuf_data->len = recv_len;
@@ -542,7 +607,7 @@ static int bbm_rt_recv_exit(void)
     return 0;
 }
 
-static int bbm_rt_dev_init(u32 ip_addr, int disp_mode, int src_w, int src_h)
+static int bbm_rt_dev_init(u32 ip_addr, struct video_window *win, int src_w, int src_h)
 {
     int ret;
     u8 audio_dec_init = 0;
@@ -560,7 +625,7 @@ static int bbm_rt_dev_init(u32 ip_addr, int disp_mode, int src_w, int src_h)
     rt_dev->ip_addr = ip_addr;
 
     //video pipe
-    ret = bbm_video_pipe_init(&rt_dev->pipe_core, &disp_win[disp_mode], src_w, src_h);
+    ret = bbm_video_pipe_init(&rt_dev->pipe_core, win, src_w, src_h);
     if (ret) {
         goto err;
     }
@@ -688,7 +753,7 @@ int bbm_ctp_send_rt_start(void *priv)
     return 0;
 }
 
-int bbm_ctp_rt_start(void *priv, int disp_mode)
+int bbm_ctp_rt_start(void *priv, struct video_window *win)
 {
     int ret;
     char topic_3[32];
@@ -697,6 +762,15 @@ int bbm_ctp_rt_start(void *priv, int disp_mode)
     void *ctp_cli_hdl = bbm_hdl->ctp_cli_hdl;
 
     memcpy(&bbm_hdl->rt_config, &default_rt_config, sizeof(default_rt_config));
+
+    //半屏降低摄像头分辨率分辨率
+    if (win != &disp_win_1[0]) {
+        bbm_hdl->rt_config.width = win->width;
+        bbm_hdl->rt_config.height = win->height;
+        /* bbm_hdl->rt_config.width = 192; */
+        /* bbm_hdl->rt_config.height = 160; */
+        bbm_hdl->rt_config.abr_kbps = 1;
+    }
 
     snprintf(topic_3, sizeof(topic_3), OPEN_RT_TOPIC);
     snprintf(content_3, sizeof(content_3), OPEN_RT_CONTENT,
@@ -710,7 +784,7 @@ int bbm_ctp_rt_start(void *priv, int disp_mode)
         return -1;
     }
 
-    ret = bbm_rt_dev_init(bbm_hdl->ip_addr, disp_mode, bbm_hdl->rt_config.width, bbm_hdl->rt_config.height);
+    ret = bbm_rt_dev_init(bbm_hdl->ip_addr, win, bbm_hdl->rt_config.width, bbm_hdl->rt_config.height);
     if (ret) {
         return -1;
     }
@@ -856,6 +930,7 @@ int bbm_rt_stream_digital_zomm(void *priv, int factor)
     return bbm_video_pipe_set_zoom(rt_dev->pipe_core, &crop);
 }
 
+#if 0
 int bbm_rt_stream_reset_pipe(void *priv, int disp_mode)
 {
     struct rt_stream_dev *rt_dev, *n;
@@ -890,6 +965,7 @@ int bbm_rt_stream_reset_pipe(void *priv, int disp_mode)
 
     return 0;
 }
+#endif
 
 int bbm_ctp_rec_start(void *priv)
 {
@@ -930,6 +1006,28 @@ int bbm_ctp_rec_stop(void *priv)
     snprintf(topic_3, sizeof(topic_3), CLOSE_REC_TOPIC);
     snprintf(content_3, sizeof(content_3), CLOSE_REC_CONTENT,
              bbm_hdl->rec_config.id, bbm_hdl->rec_config.sub_id);
+
+    ret = ctp_cli_send(ctp_cli_hdl, topic_3, content_3);
+    if (ret) {
+        printf("ctp_cli_send :%s err\n", topic_3);
+        return -1;
+    }
+
+    return 0;
+}
+
+int bbm_ctp_take_photo(void *priv)
+{
+    int ret;
+    char topic_3[32];
+    char content_3[128];
+
+    struct bbm_client_hdl *bbm_hdl = priv;
+    void *ctp_cli_hdl = bbm_hdl->ctp_cli_hdl;
+
+    snprintf(topic_3, sizeof(topic_3), TAKE_PHOTO_TOPIC);
+    snprintf(content_3, sizeof(content_3), TAKE_PHOTO_CONTENT,
+             bbm_hdl->rt_config.id, bbm_hdl->rt_config.sub_id);
 
     ret = ctp_cli_send(ctp_cli_hdl, topic_3, content_3);
     if (ret) {

@@ -283,8 +283,7 @@ void gui_model_main_msg_init_events()
     lv_subject_t *subject_show_home_btn = gui_msg_get_subject(GUI_MODEL_MAIN_MSG_ID_SHOW_HOME_BTN);
     lv_subject_t *subject_hide_home_btn = gui_msg_get_subject(GUI_MODEL_MAIN_MSG_ID_HIDE_HOME_BTN);
     if (!guider_ui.sys_prompt_del) {
-        gui_model_main_msg_sys_prompt_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_STRING);
-        lv_subject_add_observer_obj(subject_sys_prompt, gui_msg_set_label_text_by_string_cb, guider_ui.sys_prompt_lbl_warn, &guider_msg_data);
+        gui_msg_setup_component(true, false, subject_sys_prompt, guider_ui.sys_prompt_lbl_warn, &guider_msg_data, gui_msg_set_label_text_by_string_cb, GUI_MODEL_MAIN_MSG_ID_SYS_PROMPT, GUI_MSG_ACCESS_GET, VALUE_STRING, NULL);
 
 
         for (int i = 0; i < 10; i++) {
@@ -294,8 +293,7 @@ void gui_model_main_msg_init_events()
         }
     }
     if (!guider_ui.sys_popwin_del) {
-        gui_model_main_msg_sys_prompt_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_STRING);
-        lv_subject_add_observer_obj(subject_sys_prompt, gui_msg_set_label_text_by_string_cb, guider_ui.sys_popwin_lbl_1, &guider_msg_data);
+        gui_msg_setup_component(true, false, subject_sys_prompt, guider_ui.sys_popwin_lbl_1, &guider_msg_data, gui_msg_set_label_text_by_string_cb, GUI_MODEL_MAIN_MSG_ID_SYS_PROMPT, GUI_MSG_ACCESS_GET, VALUE_STRING, NULL);
 
 
         for (int i = 0; i < 10; i++) {
@@ -305,11 +303,9 @@ void gui_model_main_msg_init_events()
         }
     }
     if (!guider_ui.video_rec_del) {
-        gui_model_main_msg_battery_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
-        lv_subject_add_observer_obj(subject_battery, gui_model_main_msg_video_rec_img_bat_set_img_path_cb, guider_ui.video_rec_img_bat, &guider_msg_data);
+        gui_msg_setup_component(true, false, subject_battery, guider_ui.video_rec_img_bat, &guider_msg_data, gui_model_main_msg_video_rec_img_bat_set_img_path_cb, GUI_MODEL_MAIN_MSG_ID_BATTERY, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
 
-        gui_model_main_msg_systime_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_TIME);
-        lv_subject_add_observer_obj(subject_systime, gui_model_main_msg_video_rec_digitclock_1_set_digit_clock_time_cb, guider_ui.video_rec_digitclock_1, &guider_msg_data);
+        gui_msg_setup_component(true, false, subject_systime, guider_ui.video_rec_digitclock_1, &guider_msg_data, gui_model_main_msg_video_rec_digitclock_1_set_digit_clock_time_cb, GUI_MODEL_MAIN_MSG_ID_SYSTIME, GUI_MSG_ACCESS_GET, VALUE_TIME, NULL);
 
 
         for (int i = 0; i < 10; i++) {
@@ -324,11 +320,9 @@ void gui_model_main_msg_init_events()
         systime_timer_enable = true;
     }
     if (!guider_ui.video_photo_del) {
-        gui_model_main_msg_battery_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
-        lv_subject_add_observer_obj(subject_battery, gui_model_main_msg_video_photo_img_bat_icon_set_img_path_cb, guider_ui.video_photo_img_bat_icon, &guider_msg_data);
+        gui_msg_setup_component(true, false, subject_battery, guider_ui.video_photo_img_bat_icon, &guider_msg_data, gui_model_main_msg_video_photo_img_bat_icon_set_img_path_cb, GUI_MODEL_MAIN_MSG_ID_BATTERY, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
 
-        gui_model_main_msg_systime_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_TIME);
-        lv_subject_add_observer_obj(subject_systime, gui_model_main_msg_video_photo_digitclock_1_set_digit_clock_time_cb, guider_ui.video_photo_digitclock_1, &guider_msg_data);
+        gui_msg_setup_component(true, false, subject_systime, guider_ui.video_photo_digitclock_1, &guider_msg_data, gui_model_main_msg_video_photo_digitclock_1_set_digit_clock_time_cb, GUI_MODEL_MAIN_MSG_ID_SYSTIME, GUI_MSG_ACCESS_GET, VALUE_TIME, NULL);
 
 
         for (int i = 0; i < 10; i++) {

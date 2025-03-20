@@ -13,8 +13,8 @@ extern "C" {
 LV_FONT_DECLARE(lv_font_montserratMedium_12);
 LV_FONT_DECLARE(lv_font_montserratMedium_16);
 LV_FONT_DECLARE(lv_font_montserratMedium_20);
-LV_FONT_DECLARE(lv_font_montserratMedium_36);
 LV_FONT_DECLARE(lv_font_montserratMedium_24);
+LV_FONT_DECLARE(lv_font_montserratMedium_36);
 LV_FONT_DECLARE(lv_font_montserratMedium_32);
 
 void init_gui_fonts();

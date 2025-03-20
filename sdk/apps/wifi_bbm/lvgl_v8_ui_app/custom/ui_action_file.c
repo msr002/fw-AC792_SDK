@@ -41,6 +41,9 @@ struct file_browser_handle {
     int file_cur_page_num;
     int to_play_page;
 
+    u8 deleting;
+    file_entry *del_selected_files;
+
     int thumb_dec_task_pid;
 
     struct net_ctp_thumb thumb_data;
@@ -57,6 +60,8 @@ static struct file_browser_handle file_hdl;
 
 static void thumb_dec_task(void);
 static void jpeg2yuv_pipeline_uninit(void);
+static int file_browser_screen_load(void);
+static int file_browser_screen_unload(void);
 
 
 int gui_bbm_start_file_browser(void)
@@ -140,6 +145,150 @@ int bbm_get_file_thumb_req(int index, int file_num)
     return 0;
 }
 
+
+// 添加文件到哈希表
+static void add_file(file_entry **hash_table, int file_no)
+{
+    file_entry *entry = malloc(sizeof(file_entry));
+    if (entry == NULL) {
+
+    }
+    entry->file_no = file_no;
+    HASH_ADD_INT(*hash_table, file_no, entry);
+}
+
+// 查找文件是否已选中
+static file_entry *find_file(file_entry *hash_table, int file_no)
+{
+    file_entry *entry;
+    HASH_FIND_INT(hash_table, &file_no, entry);
+    return entry;
+}
+
+// 从哈希表中删除文件
+static void delete_file(file_entry **hash_table, int file_no)
+{
+    file_entry *entry = find_file(*hash_table, file_no);
+    if (entry) {
+        HASH_DEL(*hash_table, entry);
+        free(entry);
+    }
+}
+
+// 释放整个哈希表
+static void free_all(file_entry **hash_table)
+{
+    file_entry *current, *tmp;
+    HASH_ITER(hh, *hash_table, current, tmp) {
+        HASH_DEL(*hash_table, current);
+        free(current);
+    }
+}
+
+static int file_brwser_enter_del(void)
+{
+    int i;
+    lvgl_module_msg_send_value(GUI_FILE_BROWSER_MSG_ID_CHECK_BOX_DEL, 1, 0);
+
+    for (i = 0; i < ONE_PAGE_MAX_NUM; i++) {
+        lvgl_module_msg_send_value(GUI_FILE_BROWSER_MSG_ID_SEL_CHECK_BOX0 + i, 0, 0);
+    }
+
+    __this->deleting = 1;
+
+    return 0;
+}
+
+static int file_brwser_exit_del(void)
+{
+    lvgl_module_msg_send_value(GUI_FILE_BROWSER_MSG_ID_CHECK_BOX_DEL, 0, 0);
+
+    if (__this->del_selected_files) {
+        free_all(&__this->del_selected_files);
+        __this->del_selected_files = NULL;
+    }
+
+    __this->deleting = 0;
+
+    return 0;
+}
+
+static int flush_del_check_box(void)
+{
+    int i;
+    int list_index, list_index_start = (__this->file_cur_page - 1) * ONE_PAGE_MAX_NUM;
+
+    for (i = 0; i < __this->file_cur_page_num; i++) {
+        list_index = list_index_start + i;
+        if (find_file(__this->del_selected_files, list_index)) {
+            //模型ID对应
+            lvgl_module_msg_send_value(GUI_FILE_BROWSER_MSG_ID_SEL_CHECK_BOX0 + i, 1, 0);
+        } else {
+            //模型ID对应
+            lvgl_module_msg_send_value(GUI_FILE_BROWSER_MSG_ID_SEL_CHECK_BOX0 + i, 0, 0);
+        }
+    }
+
+    return 0;
+}
+
+void gui_bbm_add_del_file(int index)
+{
+    int list_index = (__this->file_cur_page - 1) * ONE_PAGE_MAX_NUM + index;
+    printf("add del file:%d ", list_index);
+
+    add_file(&__this->del_selected_files, list_index);
+}
+
+void gui_bbm_remove_del_file(int index)
+{
+    int i;
+    int list_index = (__this->file_cur_page - 1) * ONE_PAGE_MAX_NUM + index;
+    printf("remove del file:%d ", list_index);
+
+    delete_file(&__this->del_selected_files, list_index);
+}
+
+static void gui_bbm_file_confirm_delete(void)
+{
+    struct intent it;
+    init_intent(&it);
+    it.name	= "baby_monitor";
+    it.action = ACTION_BBM_DELETE_FILE;
+    it.data = __this->full_path;
+    it.exdata = __this->del_selected_files;
+    start_app(&it);
+
+    file_browser_screen_unload();
+    file_browser_screen_load();
+}
+
+static void gui_bbm_file_cancel_delete(void)
+{
+    file_brwser_exit_del();
+}
+
+//入口,click回调
+int gui_bbm_file_del(void)
+{
+    if (__this->deleting) {
+        char lab[128];
+        int cnt = HASH_COUNT(__this->del_selected_files);
+        if (cnt > 0) {
+            sprintf(lab, "Are you sure you want to delete these %d files?", cnt);
+        } else {
+            sprintf(lab, "Are you sure you want to delete \n All files? !!!!!!");
+        }
+        gui_set_sys_options_yes_cb(gui_bbm_file_confirm_delete);
+        gui_set_sys_options_no_cb(gui_bbm_file_cancel_delete);
+        post_home_msg_to_ui("show_sys_options", lab);
+    } else {
+        file_brwser_enter_del();
+    }
+
+    return 0;
+}
+
 static int file_browser_update_file_num(void)
 {
     char *ptr = lvgl_module_msg_get_ptr(GUI_FILE_BROWSER_MSG_ID_FILE_NUM, 24);
@@ -203,6 +352,10 @@ static void cal_cur_page_file_num(void)
 static void file_browser_update(void)
 {
     cal_cur_page_file_num();
+
+    if (__this->deleting) {
+        flush_del_check_box();
+    }
 
     file_browser_update_file_num();
     file_browser_update_file_cont();
@@ -380,6 +533,7 @@ static int file_browser_screen_unload(void)
     //缩略图信号量
     os_sem_del(&__this->thumb_data.sem, OS_DEL_ALWAYS);
 
+    file_brwser_exit_del();
 
     return 0;
 }
@@ -681,6 +835,58 @@ exit:
     }
     return err;
 }
+
+static void update_file_browser_clickable(int disable_clickable)
+{
+    lv_obj_t *objs[] = {
+        guider_ui.file_browser_file_cont1,
+        guider_ui.file_browser_file_cont2,
+        guider_ui.file_browser_file_cont3,
+        guider_ui.file_browser_file_cont4,
+        guider_ui.file_browser_file_cont5,
+        guider_ui.file_browser_file_cont6,
+    };
+
+    uint8_t cnt = sizeof(objs) / sizeof(objs[0]);
+
+    if (disable_clickable) {
+        /* 禁用点击：清除控件的点击标志，并将控件从组中移除 */
+        for (uint8_t i = 0; i < cnt; i++) {
+            if (objs[i] && lv_obj_is_valid(objs[i])) {
+                lv_obj_clear_flag(objs[i], LV_OBJ_FLAG_CLICKABLE);
+                lv_group_remove_obj(objs[i]);
+            }
+        }
+    } else {
+        /* 启用点击：添加控件的点击标志，并将控件加入默认组 */
+        lv_group_t *def_group = lv_group_get_default();
+        if (def_group == NULL) {
+            def_group = lv_group_create();
+        }
+        for (uint8_t i = 0; i < cnt; i++) {
+            if (objs[i] && lv_obj_is_valid(objs[i])) {
+                lv_obj_add_flag(objs[i], LV_OBJ_FLAG_CLICKABLE);
+                lv_group_add_obj(def_group, objs[i]);
+            }
+        }
+    }
+}
+
+int gui_file_browser_msg_check_box_del_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type)
+{
+
+    if (access == GUI_MSG_ACCESS_SET) {
+        update_file_browser_clickable(data->value_int);
+    } else if (access == GUI_MSG_ACCESS_GET) {
+        data->value_int = 0;
+    }
+
+    return 0;
+}
+
+REGISTER_UI_MODULE_EVENT_HANDLER(GUI_FILE_BROWSER_MSG_ID_CHECK_BOX_DEL)
+.onchange = gui_file_browser_msg_check_box_del_cb,
+};
 
 
 #endif

@@ -1,6 +1,7 @@
 #ifndef ASR_FN_ASR_H_
 #define ASR_FN_ASR_H_
 
+#include "fst_types.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -8,7 +9,7 @@ extern "C" {
 // Return value   : 0 - OK, -1 - Error
 int  Wanson_ASR_Init();
 
-void Wanson_ASR_Reset();
+void Wanson_ASR_Set_Fst(Fst *fst);
 
 /*****************************************
 * Input:

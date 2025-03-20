@@ -206,6 +206,7 @@ static bool __is_jldma2d_image_normal_map(lv_draw_image_dsc_t *dsc)
         && (lv_image_src_get_type(dsc->src) == LV_IMAGE_SRC_VARIABLE
             || lv_image_src_get_type(dsc->src) == LV_IMAGE_SRC_BIN)
         && (dsc->base.layer->color_format == LV_COLOR_FORMAT_ARGB8888
+            || dsc->base.layer->color_format == LV_COLOR_FORMAT_ARGB8565
             || dsc->base.layer->color_format == LV_COLOR_FORMAT_XRGB8888
             || dsc->base.layer->color_format == LV_COLOR_FORMAT_RGB888
             || dsc->base.layer->color_format == LV_COLOR_FORMAT_RGB565)) {
@@ -293,7 +294,18 @@ static int32_t evaluate_cb(lv_draw_unit_t *draw_unit, lv_draw_task_t *task)
         lv_draw_image_dsc_t *dsc = task->draw_dsc;
         if (lv_get_compress_type(dsc->src) != LV_COMPRESS_NONE) {
             //压缩
-            if (__is_jldma2d_image_normal_map(dsc)) {
+            if (__is_jldma2d_image_normal_map(dsc)
+                && dsc->recolor_opa <= LV_OPA_MIN
+                && (dsc->header.cf == LV_COLOR_FORMAT_ARGB8888
+                    || dsc->header.cf == LV_COLOR_FORMAT_ARGB8565
+                    || dsc->header.cf == LV_COLOR_FORMAT_XRGB8888
+                    || dsc->header.cf == LV_COLOR_FORMAT_RGB888
+                    || dsc->header.cf == LV_COLOR_FORMAT_RGB565
+                    || (dsc->header.cf >= LV_COLOR_FORMAT_I1 && dsc->header.cf <= LV_COLOR_FORMAT_I8))) {
+                task->preferred_draw_unit_id = DRAW_UNIT_ID_JLDMA2D;
+                task->preference_score = 0;
+            } else if (__is_jldma2d_image_normal_map(dsc)
+                       && dsc->header.cf >= LV_COLOR_FORMAT_A1 && dsc->header.cf <= LV_COLOR_FORMAT_A8) {
                 task->preferred_draw_unit_id = DRAW_UNIT_ID_JLDMA2D;
                 task->preference_score = 0;
             } else {
@@ -306,6 +318,7 @@ static int32_t evaluate_cb(lv_draw_unit_t *draw_unit, lv_draw_task_t *task)
         else  if (__is_jldma2d_image_normal_map(dsc)
                   && dsc->recolor_opa <= LV_OPA_MIN
                   && (dsc->header.cf == LV_COLOR_FORMAT_ARGB8888
+                      || dsc->header.cf == LV_COLOR_FORMAT_ARGB8565
                       || dsc->header.cf == LV_COLOR_FORMAT_XRGB8888
                       || dsc->header.cf == LV_COLOR_FORMAT_RGB888
                       || dsc->header.cf == LV_COLOR_FORMAT_RGB565

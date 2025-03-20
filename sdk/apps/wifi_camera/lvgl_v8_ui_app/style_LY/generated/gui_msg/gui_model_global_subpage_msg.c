@@ -407,8 +407,7 @@ void gui_model_global_subpage_msg_init_events()
     lv_subject_t *subject_state_funkey3 = gui_msg_get_subject(GUI_MODEL_GLOBAL_SUBPAGE_MSG_ID_STATE_FUNKEY3);
     lv_subject_t *subject_state_funkey4 = gui_msg_get_subject(GUI_MODEL_GLOBAL_SUBPAGE_MSG_ID_STATE_FUNKEY4);
     if (!guider_ui.sys_setting_del) {
-        gui_model_global_subpage_msg_roller_opt_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_STRING);
-        lv_subject_add_observer_obj(subject_roller_opt, gui_msg_set_roller_roller_name_by_string_cb, guider_ui.sys_setting_roller_mutifunc, &guider_msg_data);
+        gui_msg_setup_component(true, false, subject_roller_opt, guider_ui.sys_setting_roller_mutifunc, &guider_msg_data, gui_msg_set_roller_roller_name_by_string_cb, GUI_MODEL_GLOBAL_SUBPAGE_MSG_ID_ROLLER_OPT, GUI_MSG_ACCESS_GET, VALUE_STRING, NULL);
 
 
         for (int i = 0; i < 21; i++) {
@@ -418,8 +417,7 @@ void gui_model_global_subpage_msg_init_events()
         }
     }
     if (!guider_ui.video_rec_del) {
-        gui_model_global_subpage_msg_roller_opt_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_STRING);
-        lv_subject_add_observer_obj(subject_roller_opt, gui_msg_set_roller_roller_name_by_string_cb, guider_ui.video_rec_roller_mutifunc, &guider_msg_data);
+        gui_msg_setup_component(true, false, subject_roller_opt, guider_ui.video_rec_roller_mutifunc, &guider_msg_data, gui_msg_set_roller_roller_name_by_string_cb, GUI_MODEL_GLOBAL_SUBPAGE_MSG_ID_ROLLER_OPT, GUI_MSG_ACCESS_GET, VALUE_STRING, NULL);
 
 
         for (int i = 0; i < 21; i++) {
@@ -429,8 +427,7 @@ void gui_model_global_subpage_msg_init_events()
         }
     }
     if (!guider_ui.video_photo_del) {
-        gui_model_global_subpage_msg_roller_opt_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_STRING);
-        lv_subject_add_observer_obj(subject_roller_opt, gui_msg_set_roller_roller_name_by_string_cb, guider_ui.video_photo_roller_mutifunc, &guider_msg_data);
+        gui_msg_setup_component(true, false, subject_roller_opt, guider_ui.video_photo_roller_mutifunc, &guider_msg_data, gui_msg_set_roller_roller_name_by_string_cb, GUI_MODEL_GLOBAL_SUBPAGE_MSG_ID_ROLLER_OPT, GUI_MSG_ACCESS_GET, VALUE_STRING, NULL);
 
 
         for (int i = 0; i < 21; i++) {

@@ -37,7 +37,7 @@ extern int http_virfile_reg(const char *path, const char *contents, unsigned lon
 #define INFO_LEN 160
 #if (defined CONFIG_ENABLE_VLIST)
 /* #define MAX_NUM  640 */
-#define MAX_NUM  160
+#define MAX_NUM  1000
 #else
 #define MAX_NUM  2
 #endif

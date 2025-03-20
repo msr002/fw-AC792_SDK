@@ -27,6 +27,7 @@
 #define VFLIST_FILE_NAME "vf_list.txt"
 
 static struct ctp_arg info;
+static u8 is_phone;
 
 int send_ctp_string(int cmd_type, char *buf, const char *_req, void *priv)
 {
@@ -202,6 +203,7 @@ int cmd_put_app_access(void *priv, char *content)
     type_num = atoi(type);
     if (type_num == 99) {
         //BBM
+        is_phone = 0;
         if (FILE_IS_INIT_CHECK()) {
             FILE_GEN();
             snprintf(buf, sizeof(buf), "type:1,path:%s", CONFIG_REC_PATH_0"vf_list.txt");
@@ -209,6 +211,7 @@ int cmd_put_app_access(void *priv, char *content)
         }
     } else {
         //手机
+        is_phone = 1;
         //app_access命令完成后，随后发送所有get命令
         __all_get_cmd_run(priv, content);
     }
@@ -634,11 +637,25 @@ static int cmd_put_time_axis_play(void *priv, char *content)
     strcpy(req.playback.file_name, file_name);
     req.playback.msec = atoi(msec);
 
+    struct sockaddr_in *dst_addr = ctp_srv_get_cli_addr(priv);
+
+    req.remote_addr.sin_family = AF_INET;
+    req.remote_addr.sin_addr.s_addr = dst_addr->sin_addr.s_addr;
+    req.remote_addr.sin_port = htons(2223);
+
 #ifdef CONFIG_ENABLE_VLIST
-    if (video_playback_post_msg(&req)) {
-        CTP_CMD_COMBINED(priv, CTP_REQUEST, "TIME_AXIS_PLAY", "NOTIFY", CTP_REQUEST_MSG);
-        json_object_put(new_obj);
-        return 0;
+    if (is_phone) {
+        if (video_playback_post_msg(&req)) {
+            CTP_CMD_COMBINED(priv, CTP_REQUEST, "TIME_AXIS_PLAY", "NOTIFY", CTP_REQUEST_MSG);
+            json_object_put(new_obj);
+            return 0;
+        }
+    } else {
+        if (video_playback_post_msg_udp(&req)) {
+            CTP_CMD_COMBINED(priv, CTP_REQUEST, "TIME_AXIS_PLAY", "NOTIFY", CTP_REQUEST_MSG);
+            json_object_put(new_obj);
+            return 0;
+        }
     }
 #endif
     json_object_put(new_obj);
@@ -671,19 +688,31 @@ static int cmd_put_time_axis_play_ctrl(void *priv, char *content)
     switch (atoi(status)) {
     case FILE_PLAY_VIDEO_CONTINUE:
 #ifdef CONFIG_ENABLE_VLIST
-        ret = playback_cli_continue(dst_addr);
+        if (is_phone) {
+            ret = playback_cli_continue(dst_addr);
+        } else {
+            ret = playback_udp_cli_continue(dst_addr);
+        }
 #endif
         break;
 
     case FILE_PLAY_VIDEO_PAUSE:
 #ifdef CONFIG_ENABLE_VLIST
-        ret = playback_cli_pause(dst_addr);
+        if (is_phone) {
+            ret = playback_cli_pause(dst_addr);
+        } else {
+            ret = playback_udp_cli_pause(dst_addr);
+        }
 #endif
         break;
 
     case FILE_PLAY_VIDEO_STOP:
 #ifdef CONFIG_ENABLE_VLIST
-        ret = playback_disconnect_cli(dst_addr);
+        if (is_phone) {
+            ret = playback_disconnect_cli(dst_addr);
+        } else {
+            ret = playback_udp_disconnect_cli(dst_addr);
+        }
 #endif
         break;
 
@@ -1309,6 +1338,153 @@ int cmd_put_video_param(void *priv,  char *content)
 
 }
 
+static int cmd_put_files_delete(void *priv, char *content)
+{
+    json_object *new_obj = NULL;
+    json_object *parm = NULL;
+    json_object *tmp = NULL;
+    char buf[256 ] = {0};
+    u32 i = 0;
+    char filename[8];
+    u32 ret = 0;
+    new_obj = json_tokener_parse(content);
+    parm =  json_object_object_get(new_obj, "param");
+
+    while (1) {
+        sprintf(filename, "path_%d", i);
+        tmp =  json_object_object_get(parm, filename);
+
+        if (tmp == NULL) {
+            break;
+        }
+
+        const char *tmp_value = json_object_get_string(tmp);
+        printf("filename %s \n", tmp_value);
+
+        if (fdelete_by_name(tmp_value)) {
+            printf("fdelete by name\n");
+            ret = snprintf(buf, sizeof(buf), "status:%d,path:%s", 0, tmp_value);
+            CTP_CMD_COMBINED(priv, CTP_OPEN_FILE, "FILES_DELETE", "NOTIFY", buf);
+        } else {
+
+#if defined CONFIG_ENABLE_VLIST
+            FILE_DELETE(tmp_value, 1);
+#endif
+            snprintf(buf, sizeof(buf), "status:%d,path:%s", 1, tmp_value);
+            CTP_CMD_COMBINED(priv, CTP_NO_ERR, "FILES_DELETE", "NOTIFY", buf);
+
+        }
+
+        i++;
+    }
+
+    json_object_put(new_obj);
+    return 0;
+
+}
+
+static int cmd_put_files_delete_all(void *priv, char *content)
+{
+    json_object *new_obj = NULL;
+    json_object *parm = NULL;
+    json_object *tmp = NULL;
+    char buf[128] = {0};
+    char file_name[128];
+    u32 i = 0;
+    u32 ret = 0;
+    new_obj = json_tokener_parse(content);
+    parm =  json_object_object_get(new_obj, "param");
+    tmp =  json_object_object_get(parm, "status");
+
+    if (tmp && atoi(tmp)) {
+        printf("delete all files \n");
+        goto err;
+    }
+
+    struct vfscan *fs = fscan(CONFIG_REC_PATH_0, "-tMOVJPGAVI -sn", 3);
+    if (!fs) {
+        printf("delet files fscan err \n");
+        goto err;
+    }
+
+    void *fp = fselect(fs, FSEL_FIRST_FILE, 0);
+
+    while (fp) {
+
+#if defined CONFIG_ENABLE_VLIST
+        if (fget_name(fp, file_name, sizeof(file_name))) {
+            FILE_DELETE(file_name, 1);
+        }
+#endif
+        fdelete(fp);
+        fp = fselect(fs, FSEL_NEXT_FILE, 0);
+    }
+
+    fscan_release(fs);
+
+    snprintf(buf, sizeof(buf), "status:1");
+    CTP_CMD_COMBINED(priv, CTP_NO_ERR, "FILES_DELETE_ALL", "NOTIFY", buf);
+
+    json_object_put(new_obj);
+    return 0;
+
+err:
+    snprintf(buf, sizeof(buf), "status:0");
+    CTP_CMD_COMBINED(priv, CTP_OPEN_FILE, "FILES_DELETE_ALL", "NOTIFY", buf);
+    json_object_put(new_obj);
+    return -1;
+}
+
+
+int cmd_put_photo_ctrl(void *priv, char *content)
+{
+    char buf[128];
+    struct intent it;
+    int ret;
+
+    struct video_rec_config config = {0};
+
+    if (is_phone) {
+        config.id = 1;
+        config.sub_id = 0;
+    } else {
+        json_object *new_obj = NULL;
+        json_object *parm = NULL;
+        const char *id, *sub_id;
+        new_obj = json_tokener_parse(content);
+        parm =  json_object_object_get(new_obj, "param");
+        id = json_object_get_string(json_object_object_get(parm, "id"));
+        sub_id = json_object_get_string(json_object_object_get(parm, "sub_id"));
+
+        if (id && sub_id) {
+            config.id          = atoi(id);
+            config.sub_id      = atoi(sub_id);
+        }
+        json_object_put(new_obj);
+    }
+
+    if (storage_device_ready() == 0) {
+        CTP_CMD_COMBINED(priv, CTP_SD_OFFLINE, "PHOTO_CTRL", "NOTIFY", CTP_SD_OFFLINE_MSG);
+    } else {
+        init_intent(&it);
+        it.name = "video_rec";
+        it.action = ACTION_VIDEO_TAKE_PHOTO;
+        it.exdata = &config;
+        ret = start_app(&it);
+        if (ret) {
+            printf("cmd_put_photo_ctrl err \n");
+            CTP_CMD_COMBINED(NULL, CTP_REQUEST, "PHOTO_CTRL", "NOTIFY", CTP_REQUEST_MSG);
+            return -1;
+        }
+    }
+
+    //media_file_list会发;
+    /* snprintf(buf, sizeof(buf), "status:1"); */
+    /* CTP_CMD_COMBINED(priv, CTP_NO_ERR, "PHOTO_CTRL", "NOTIFY", buf); */
+
+    return 0;
+}
+
 const struct ctp_map_entry ctp_video_cmd_tab[] SEC_USED(.ctp_video_cmd) = {
     {NULL, "APP_ACCESS", NULL, cmd_put_app_access},
     {NULL, "OPEN_RT_STREAM", NULL, cmd_put_open_rt_stream},
@@ -1320,9 +1496,13 @@ const struct ctp_map_entry ctp_video_cmd_tab[] SEC_USED(.ctp_video_cmd) = {
     {NULL, "VIDEO_SIZE", cmd_get_video_size, cmd_put_video_size},
     {NULL, "VIDEO_PARAM", cmd_get_video_param, cmd_put_video_param},
     {NULL, "VIDEO_CTRL", cmd_get_video_ctrl, cmd_put_video_ctrl},
+    {NULL, "PHOTO_CTRL", NULL, cmd_put_photo_ctrl},
 
     {NULL, "CTP_CLI_DISCONNECT", NULL, cmd_put_ctp_cli_disconnect},
     {NULL, "CTP_CLI_CONNECTED", NULL, cmd_put_ctp_cli_connected},
+
+    {NULL, "FILES_DELETE", NULL, cmd_put_files_delete},
+    {NULL, "FILES_DELETE_ALL", NULL, cmd_put_files_delete_all},
 
     //TODO
     //以下命令移植行车工程ctp_cmd暂未做修改

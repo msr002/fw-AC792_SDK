@@ -12,6 +12,7 @@
 #include "baby_monitor.h"
 #include "fs/fs.h"
 #include "wifi/wifi_connect.h"
+#include "video_ioctl.h"
 
 #define DEVICE_ONLINE_TIMEOUT   2000            //设备在线超时时间
 
@@ -48,11 +49,17 @@ struct wifi_bbm_hdl {
     int cur_channel;                        //当前通讯通道
     int last_opened_ch;                     //上一次开启的通道
     u8 bbm_cur_mode;                        //当前模式,实时流/文件预览/视频文件播放
+    u8 is_pairing;
 
     struct bbm_client_hdl *bbm_client_hdl[MAX_PAIR_NUM + 1];        //设备client管理句柄
 };
 static struct wifi_bbm_hdl bbm_hdl;
 #define __this (&bbm_hdl)
+
+extern struct video_window disp_win_1[1];
+extern struct video_window disp_win_2[2];
+extern struct video_window disp_win_3[3];
+extern struct video_window disp_win_4[4];
 
 static int bbm_tx_sd_offline(void *priv)
 {
@@ -83,23 +90,30 @@ static int bbm_tx_sd_offline(void *priv)
 static int bbm_file_list_update(void *priv, char *fname)
 {
     struct bbm_client_hdl *bbm_client_hdl = priv;
+    char **new_file_name_list = NULL;
+    int new_file_total_num = bbm_client_hdl->file_total_num + 1;
+    int list_size = new_file_total_num * sizeof(char *);
 
-    bbm_client_hdl->file_total_num++;
-
-    int list_size = bbm_client_hdl->file_total_num * sizeof(char *);
-    bbm_client_hdl->file_name_list = realloc(bbm_client_hdl->file_name_list, list_size);
-    if (!bbm_client_hdl->file_name_list) {
-        printf("file_name_list realloc err \n");
+    new_file_name_list = malloc(list_size);
+    if (!new_file_name_list) {
+        printf("new_file_name_list malloc err \n");
         return -1;
     }
-    int list_index = bbm_client_hdl->file_total_num - 1;
-    bbm_client_hdl->file_name_list[list_index] = (char *)malloc(strlen(fname) + 1);
-    if (bbm_client_hdl->file_name_list[list_index] == NULL) {
-        printf("malloc failed for file_list[%d]\n", list_index);
+    new_file_name_list[0] = (char *)malloc(strlen(fname) + 1);
+    if (new_file_name_list[0]  == NULL) {
+        printf("malloc failed for new_file_list[%d]\n", 0);
+        free(new_file_name_list);
         return -1;
     }
-    strcpy(bbm_client_hdl->file_name_list[list_index], fname);
+    strcpy(new_file_name_list[0], fname);
 
+    memcpy(new_file_name_list + 1,
+           bbm_client_hdl->file_name_list,
+           bbm_client_hdl->file_total_num * sizeof(char *));
+    free(bbm_client_hdl->file_name_list);
+
+    bbm_client_hdl->file_name_list  = new_file_name_list;
+    bbm_client_hdl->file_total_num  = new_file_total_num;
     return 0;
 }
 
@@ -335,7 +349,7 @@ static int find_next_camera(int ch)
     int find_ch = ch;
     do {
         find_ch++;
-        if (find_ch > MAX_PAIR_CH) {
+        if (find_ch > MAX_PAIR_NUM) {
             find_ch = MIN_PAIR_CH;
         }
 
@@ -345,7 +359,7 @@ static int find_next_camera(int ch)
             return -1;
         }
 
-        if (__this->online_table[find_ch] == BBM_TX_ONLINE) {
+        if (__this->online_table[find_ch] == BBM_TX_ONLINE || find_ch == MAX_PAIR_NUM) {
             return find_ch;
         }
     } while (1);
@@ -377,14 +391,19 @@ static int bbm_reset_camera_pipe_by_ch(int ch, int disp_mode)
     return 0;
 }
 
-static int bbm_start_camera_by_ch(int ch, int disp_mode)
+static int bbm_start_camera_by_ch(int ch, struct video_window *win)
 {
-    printf("rt stream start:%d mode:%d \n", ch, disp_mode);
+    printf("rt stream start:%d \n", ch);
     int ret;
 
     //可根据分辨率、码率调整
-    bbm_ctp_send_modify_txrate(__this->bbm_client_hdl[ch]->ctp_cli_hdl, WIFI_TXRATE_5M);
-    ret = bbm_ctp_rt_start(__this->bbm_client_hdl[ch], disp_mode);
+    if (win != &disp_win_1[0]) {
+        bbm_ctp_send_modify_txrate(__this->bbm_client_hdl[ch]->ctp_cli_hdl, WIFI_TXRATE_11M);
+    } else {
+        bbm_ctp_send_modify_txrate(__this->bbm_client_hdl[ch]->ctp_cli_hdl, WIFI_TXRATE_5M);
+    }
+
+    ret = bbm_ctp_rt_start(__this->bbm_client_hdl[ch], win);
     if (ret) {
         printf("ch:%d rt stream start err\n", ch);
         return -1;
@@ -535,7 +554,7 @@ static int bbm_stop_camera_all(void)
 
     for (ch = 0; ch < MAX_PAIR_NUM; ch++) {
         if (__this->cur_channel & BIT(ch)) {
-            printf("rt stream stop:%d \n", ch);
+            printf("rt stream stop all:%d \n", ch);
             ret = bbm_ctp_rt_stop(__this->bbm_client_hdl[ch]);
             if (ret) {
                 printf("ch:%d rt stream stop err\n", ch);
@@ -550,86 +569,66 @@ static int bbm_stop_camera_all(void)
 
 static int bbm_switch_camera(void)
 {
-    int ret = -1;
-    int ch;
-    int i;
-    int stop_num = 0;
-    int start_ch[2] = {-1, -1};
-    int cmd[2] = {-1, -1};
-    int win_mode[2] = {0, 0};
+    int i, ch;
+    int start_ch;
 
-    for (ch = 0; ch < MAX_PAIR_NUM; ch++) {
-        if (__this->cur_channel & BIT(ch)) {
-            start_ch[stop_num] = ch;
-            stop_num++;
-        }
-    }
+    printf("switch camera \n");
 
-    printf("stop_num:%d \n", stop_num);
-    if (stop_num == 2) {
-
-        for (i = 0; i < ARRAY_SIZE(start_ch); i++) {
-            if (start_ch[i] == __this->last_opened_ch) {
-                cmd[i] = BBM_RT_RESET;
-                win_mode[i] = RT_DISP_WIN_MAIN;
-            } else {
-                cmd[i] = BBM_RT_STOP;
-            }
-        }
-
-    } else if (stop_num == 1) {
-        if (__this->online_dev_cnt < 2) {
-            cmd[0] = BBM_RT_RESET;
-            win_mode[0] = RT_DISP_WIN_MAIN;
-            __this->last_opened_ch = start_ch[0];
-            /*             cmd[0] = BBM_RT_STOP; */
-
-            /* start_ch[1] = find_any_online_camera(); */
-            /* cmd[1] = BBM_RT_START; */
-            /* win_mode[1] = RT_DISP_WIN_MAIN; */
-        } else {
-            start_ch[0] = __this->last_opened_ch;
-            cmd[0] = BBM_RT_RESET;
-            win_mode[0] = RT_DISP_WIN_LEFT;
-
-            start_ch[1] = find_next_camera(__this->last_opened_ch);
-            cmd[1] = BBM_RT_START;
-            win_mode[1] = RT_DISP_WIN_RIGHT;
-        }
-
+    if (__this->online_dev_cnt <= 0) {
+        printf("no online camera switch \n");
+        return 0;
     } else {
-        start_ch[0] = find_any_online_camera();
-        cmd[0] = BBM_RT_START;
-        win_mode[0] = RT_DISP_WIN_MAIN;
-    }
+        for (ch = 0; ch < MAX_PAIR_NUM; ch++) {
+            if (__this->cur_channel & BIT(ch)) {
+                bbm_stop_camera_by_ch(ch);
+            }
+        }
 
-    ret = 0;
-
-    for (i = 0; i < ARRAY_SIZE(start_ch); i++) {
-        if (start_ch[i] >= 0) {
-            if (cmd[i] == BBM_RT_START) {
-                ret = bbm_start_camera_by_ch(start_ch[i], win_mode[i]);
-                if (ret) {
-                    break;
-                }
-                __this->last_opened_ch = start_ch[i];
-            } else if (cmd[i] == BBM_RT_RESET) {
-                ret = bbm_reset_camera_pipe_by_ch(start_ch[i], win_mode[i]);
-                if (ret) {
-                    break;
-                }
-                /* __this->last_opened_ch = start_ch[i]; */
-            } else {
-                ret = bbm_stop_camera_by_ch(start_ch[i]);
-                if (ret) {
-                    break;
-                }
+        start_ch = find_next_camera(__this->last_opened_ch);
+        if (start_ch == -1) {
+            return 0;
+        } else if (start_ch == MAX_PAIR_NUM) {
+            //开启全部分屏显示
+            struct video_window *selected_win = NULL;
+            switch (__this->online_dev_cnt) {
+            case 1:
+                selected_win = disp_win_1;
+                break;
+            case 2:
+                selected_win = disp_win_2;
+                break;
+            case 3:
+                selected_win = disp_win_3;
+                break;
+            case 4:
+                selected_win = disp_win_4;
+                break;
+            default:
+                break;
+            }
+            if (!selected_win) {
+                printf("selected_win err \n");
+                return -1;
             }
 
+            int select = 0;
+            for (ch = 0; ch < MAX_PAIR_NUM; ch++) {
+                if (__this->online_table[ch] == BBM_TX_ONLINE) {
+                    bbm_start_camera_by_ch(ch, &selected_win[select++]);
+                }
+            }
+            if (__this->online_dev_cnt == 1) {
+                start_ch = ch;
+            }
+
+        } else {
+            bbm_start_camera_by_ch(start_ch, &disp_win_1[0]);
         }
+        __this->last_opened_ch = start_ch;
     }
 
-    return ret;
+
+    return 0;
 
 }
 
@@ -745,7 +744,9 @@ static int bbm_tx_offline(void *priv)
 
     //log
     struct arp_entry_t *arp_entry = get_arp_static_entry_by_id(ch);
-    printf("ch:%d ip:%s not online ! ", ch, inet_ntoa(arp_entry->ipaddr));
+    if (arp_entry) {
+        printf("ch:%d ip:%s not online ! ", ch, inet_ntoa(arp_entry->ipaddr));
+    }
 
     if (__this->online_timeout[ch]) {
         sys_timeout_del(__this->online_timeout[ch]);
@@ -813,9 +814,6 @@ static int bbm_tx_online(int ch, u32 ip_addr)
             post_stream_msg_to_ui("show switch btn");
         } else {
             ret = bbm_switch_camera();
-            if (ret) {
-                goto err;
-            }
         }
         break;
     case BBM_MODE_FILE_BROWSER:
@@ -850,7 +848,7 @@ static int bbm_online_event_hander(struct intent *it)
     for (ch = 0; ch < MAX_PAIR_NUM; ch++) {
         struct arp_entry_t *arp_entry = get_arp_static_entry_by_id(ch);
 
-        if (arp_entry && arp_entry->ipaddr.addr == ip_addr) {
+        if (!__this->is_pairing && arp_entry && arp_entry->ipaddr.addr == ip_addr) {
 
             //设备上线处理
             if (__this->online_table[ch] == BBM_TX_OFFLINE) {
@@ -948,10 +946,12 @@ static int state_machine(struct application *app, enum app_state state, struct i
         case ACTION_BBM_ENTER_PAIRING:
             log_d("\n>>>>>baby_monitor start pairing <<<<<\n");
             ch = it->exdata;
+            __this->is_pairing = 1;
             bbm_set_enter_pairing(ch);
             break;
         case ACTION_BBM_EXIT_PAIRING:
             log_d("\n>>>>>baby_monitor exit pairing <<<<<\n");
+            __this->is_pairing = 0;
             bbm_set_exit_pairing();
             break;
         case ACTION_BBM_UNPAIR:
@@ -1079,6 +1079,18 @@ static int state_machine(struct application *app, enum app_state state, struct i
             priv = it->data;
             ret = bbm_tx_start_rec_err(priv);
             break;
+        case ACTION_BBM_DELETE_FILE:
+            path = it->data;
+            if (strstr(path, "storage")) {
+                ch = RX_DEVICE_CH;
+            } else {
+                ch = bbm_path_to_ch(path);
+            }
+            ret = bbm_ctp_file_delete(__this->bbm_client_hdl[ch], it->exdata);
+            break;
+        case ACTION_BBM_CLEAN_PAIR:
+            arp_static_table_reset_to_flash();
+            break;
         }
         break;
     case APP_STA_PAUSE:
@@ -1132,6 +1144,8 @@ static int baby_monitor_key_event_handler(struct key_event *key)
             bbm_tx_start_rec_all();
             //开启全部RX录像
             bbm_rx_start_rec_all();
+            //RX设备拍照
+            //bbm_ctp_take_photo(__this->bbm_client_hdl[1]);
             break;
         case KEY_OK:
             printf("KEY5\n");

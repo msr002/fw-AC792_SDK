@@ -91,7 +91,7 @@ lv_obj_t *setup_scr_sys_prompt(lv_ui *ui)
 #if LV_USE_GUIBUILDER_SIMULATOR
     lv_img_set_src(ui->sys_prompt_img_1, "A:\\gitlab-m\\ac792\\ui_prj\\wifi_bbm_800x480\\import\\image\\warn.png");
 #else
-    lv_img_set_src(ui->sys_prompt_img_1, "mnt/sdfile/EXT_RESERVED/uipackres/ui/55000010.zip");
+    lv_img_set_src(ui->sys_prompt_img_1, "mnt/sdfile/EXT_RESERVED/uipackres/ui/55000011.zip");
 #endif
     lv_img_set_pivot(ui->sys_prompt_img_1, 0, 0);
     lv_img_set_angle(ui->sys_prompt_img_1, 0);

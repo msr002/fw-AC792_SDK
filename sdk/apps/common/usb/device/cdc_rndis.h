@@ -2,6 +2,7 @@
 #define __CDC_RNDIS_H__
 
 #include "usb/device/usb_stack.h"
+// #include "host/usbnet.h"
 
 #ifdef __cplusplus
 extern "C" {

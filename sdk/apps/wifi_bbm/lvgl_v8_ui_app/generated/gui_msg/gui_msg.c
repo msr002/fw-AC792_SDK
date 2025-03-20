@@ -53,6 +53,13 @@ gui_msg_status_t gui_msg_send(int32_t msg_id, void *value, int32_t len)
     gui_msg_status_t ret;
     switch (msg_id) {
     case GUI_FILE_BROWSER_MSG_ID_FILE_NUM:
+    case GUI_FILE_BROWSER_MSG_ID_CHECK_BOX_DEL:
+    case GUI_FILE_BROWSER_MSG_ID_SEL_CHECK_BOX0:
+    case GUI_FILE_BROWSER_MSG_ID_SEL_CHECK_BOX1:
+    case GUI_FILE_BROWSER_MSG_ID_SEL_CHECK_BOX2:
+    case GUI_FILE_BROWSER_MSG_ID_SEL_CHECK_BOX3:
+    case GUI_FILE_BROWSER_MSG_ID_SEL_CHECK_BOX4:
+    case GUI_FILE_BROWSER_MSG_ID_SEL_CHECK_BOX5:
         ret = gui_file_browser_msg_send(msg_id, value, len);
         gui_msg_send_status = GUI_MSG_SEND_DONE;
         return ret;
@@ -65,6 +72,7 @@ gui_msg_status_t gui_msg_send(int32_t msg_id, void *value, int32_t len)
     case GUI_PAIR_MSG_ID_PAIR_CH5:
     case GUI_PAIR_MSG_ID_PARING_LAB:
     case GUI_PAIR_MSG_ID_UNPAIR_LAB:
+    case GUI_PAIR_MSG_ID_WIFI_CH_SELECT:
         ret = gui_pair_msg_send(msg_id, value, len);
         gui_msg_send_status = GUI_MSG_SEND_DONE;
         return ret;
@@ -75,6 +83,7 @@ gui_msg_status_t gui_msg_send(int32_t msg_id, void *value, int32_t len)
         return ret;
 
     case GUI_SYS_PROMPT_MSG_ID_PROMPT_LAB:
+    case GUI_SYS_PROMPT_MSG_ID_PROMPT_OPT_LAB:
         ret = gui_sys_prompt_msg_send(msg_id, value, len);
         gui_msg_send_status = GUI_MSG_SEND_DONE;
         return ret;
@@ -108,6 +117,13 @@ gui_msg_data_t *gui_msg_get_guider(int32_t msg_id)
     switch (msg_id) {
     case GUI_FILE_BROWSER_MSG_ID:
     case GUI_FILE_BROWSER_MSG_ID_FILE_NUM:
+    case GUI_FILE_BROWSER_MSG_ID_CHECK_BOX_DEL:
+    case GUI_FILE_BROWSER_MSG_ID_SEL_CHECK_BOX0:
+    case GUI_FILE_BROWSER_MSG_ID_SEL_CHECK_BOX1:
+    case GUI_FILE_BROWSER_MSG_ID_SEL_CHECK_BOX2:
+    case GUI_FILE_BROWSER_MSG_ID_SEL_CHECK_BOX3:
+    case GUI_FILE_BROWSER_MSG_ID_SEL_CHECK_BOX4:
+    case GUI_FILE_BROWSER_MSG_ID_SEL_CHECK_BOX5:
         return gui_file_browser_msg_get(msg_id);
 
     case GUI_PAIR_MSG_ID:
@@ -119,6 +135,7 @@ gui_msg_data_t *gui_msg_get_guider(int32_t msg_id)
     case GUI_PAIR_MSG_ID_PAIR_CH5:
     case GUI_PAIR_MSG_ID_PARING_LAB:
     case GUI_PAIR_MSG_ID_UNPAIR_LAB:
+    case GUI_PAIR_MSG_ID_WIFI_CH_SELECT:
         return gui_pair_msg_get(msg_id);
 
     case GUI_RT_STREAM_MSG_ID:
@@ -127,6 +144,7 @@ gui_msg_data_t *gui_msg_get_guider(int32_t msg_id)
 
     case GUI_SYS_PROMPT_MSG_ID:
     case GUI_SYS_PROMPT_MSG_ID_PROMPT_LAB:
+    case GUI_SYS_PROMPT_MSG_ID_PROMPT_OPT_LAB:
         return gui_sys_prompt_msg_get(msg_id);
 
     case GUI_VIDEO_PLAY_MSG_ID:
@@ -150,6 +168,13 @@ void gui_msg_action_change_guider(int32_t msg_id, gui_msg_action_t access, gui_m
     switch (msg_id) {
     case GUI_FILE_BROWSER_MSG_ID:
     case GUI_FILE_BROWSER_MSG_ID_FILE_NUM:
+    case GUI_FILE_BROWSER_MSG_ID_CHECK_BOX_DEL:
+    case GUI_FILE_BROWSER_MSG_ID_SEL_CHECK_BOX0:
+    case GUI_FILE_BROWSER_MSG_ID_SEL_CHECK_BOX1:
+    case GUI_FILE_BROWSER_MSG_ID_SEL_CHECK_BOX2:
+    case GUI_FILE_BROWSER_MSG_ID_SEL_CHECK_BOX3:
+    case GUI_FILE_BROWSER_MSG_ID_SEL_CHECK_BOX4:
+    case GUI_FILE_BROWSER_MSG_ID_SEL_CHECK_BOX5:
         return gui_file_browser_msg_action_change(msg_id, access, data, type);
 
     case GUI_PAIR_MSG_ID:
@@ -161,6 +186,7 @@ void gui_msg_action_change_guider(int32_t msg_id, gui_msg_action_t access, gui_m
     case GUI_PAIR_MSG_ID_PAIR_CH5:
     case GUI_PAIR_MSG_ID_PARING_LAB:
     case GUI_PAIR_MSG_ID_UNPAIR_LAB:
+    case GUI_PAIR_MSG_ID_WIFI_CH_SELECT:
         return gui_pair_msg_action_change(msg_id, access, data, type);
 
     case GUI_RT_STREAM_MSG_ID:
@@ -169,6 +195,7 @@ void gui_msg_action_change_guider(int32_t msg_id, gui_msg_action_t access, gui_m
 
     case GUI_SYS_PROMPT_MSG_ID:
     case GUI_SYS_PROMPT_MSG_ID_PROMPT_LAB:
+    case GUI_SYS_PROMPT_MSG_ID_PROMPT_OPT_LAB:
         return gui_sys_prompt_msg_action_change(msg_id, access, data, type);
 
     case GUI_VIDEO_PLAY_MSG_ID:
@@ -232,6 +259,27 @@ void gui_msg_set_imglist_selected_index_by_int32_cb(lv_observer_t *observer, lv_
     gui_msg_data_t *data = (gui_msg_data_t *)observer->user_data;
     lv_imglist_set_act(obj, data->value_int);
 }
+void gui_msg_set_dropdown_selected_index_by_int32_cb(lv_observer_t *observer, lv_subject_t *subject)
+{
+    lv_obj_t *obj = lv_observer_get_target_obj(observer);
+    if (obj == NULL || lv_obj_is_valid(obj) == false) {
+        return;
+    }
+
+    gui_msg_data_t *data = (gui_msg_data_t *)observer->user_data;
+    lv_dropdown_set_selected(obj, data->value_int);
+}
+void gui_msg_change_dropdown_selected_index_cb(lv_event_t *e)
+{
+    lv_obj_t *obj = lv_event_get_target(e);
+    if (obj == NULL || lv_obj_is_valid(obj) == false) {
+        return;
+    }
+
+    int32_t msg_id = (int32_t)lv_event_get_user_data(e);
+    int32_t var = lv_dropdown_get_selected(obj);
+    gui_msg_send(msg_id, (void *)var, 1);
+}
 void gui_msg_set_visible_by_bool_cb(lv_observer_t *observer, lv_subject_t *subject)
 {
     lv_obj_t *obj = lv_observer_get_target_obj(observer);
@@ -255,6 +303,28 @@ void gui_msg_set_label_text_by_string_cb(lv_observer_t *observer, lv_subject_t *
 
     gui_msg_data_t *data = (gui_msg_data_t *)observer->user_data;
     lv_label_set_text(obj, data->value_string);
+}
+void gui_msg_set_checkbox_checked_by_bool_cb(lv_observer_t *observer, lv_subject_t *subject)
+{
+    lv_obj_t *obj = lv_observer_get_target_obj(observer);
+    if (obj == NULL || lv_obj_is_valid(obj) == false) {
+        return;
+    }
+
+    gui_msg_data_t *data = (gui_msg_data_t *)observer->user_data;
+    lv_obj_clear_state(obj, LV_STATE_ANY);
+    lv_obj_add_state(obj, data->value_bool ? LV_STATE_CHECKED : LV_STATE_DEFAULT);
+}
+void gui_msg_change_checkbox_checked_cb(lv_event_t *e)
+{
+    lv_obj_t *obj = lv_event_get_target(e);
+    if (obj == NULL || lv_obj_is_valid(obj) == false) {
+        return;
+    }
+
+    int32_t msg_id = (int32_t)lv_event_get_user_data(e);
+    int32_t var = lv_obj_has_state(obj, LV_STATE_CHECKED);
+    gui_msg_send(msg_id, (void *)var, 1);
 }
 void gui_msg_set_bar_bar_value_by_int32_cb(lv_observer_t *observer, lv_subject_t *subject)
 {

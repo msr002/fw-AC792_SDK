@@ -63,6 +63,7 @@ void init_scr_del_flag(lv_ui *ui)
     ui->sys_prompt_del = true;
     ui->dir_select_del = true;
     ui->device_select_del = true;
+    ui->sys_options_del = true;
 }
 
 void setup_ui(lv_ui *ui)

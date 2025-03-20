@@ -267,6 +267,7 @@ c_SRC_FILES := \
 	../../../../apps/common/config/log_config/lib_driver_config.c \
 	../../../../apps/common/config/log_config/lib_power_config.c \
 	../../../../apps/common/config/log_config/lib_system_config.c \
+	../../../../apps/common/config/log_config/lib_ui_config.c \
 	../../../../apps/common/config/log_config/lib_update_config.c \
 	../../../../apps/common/config/user_cfg.c \
 	../../../../apps/common/debug/debug.c \
@@ -576,6 +577,7 @@ c_SRC_FILES := \
 	../../../../apps/common/lvgl_v8/examples/widgets/textarea/lv_example_textarea_3.c \
 	../../../../apps/common/lvgl_v8/examples/widgets/tileview/lv_example_tileview_1.c \
 	../../../../apps/common/lvgl_v8/examples/widgets/win/lv_example_win_1.c \
+	../../../../apps/common/lvgl_v8/lvgl_main.c \
 	../../../../apps/common/lvgl_v8/src/core/lv_disp.c \
 	../../../../apps/common/lvgl_v8/src/core/lv_event.c \
 	../../../../apps/common/lvgl_v8/src/core/lv_group.c \
@@ -771,6 +773,7 @@ c_SRC_FILES := \
 	../../../../apps/common/system/device_mount.c \
 	../../../../apps/common/system/flash_write_protect.c \
 	../../../../apps/common/system/init.c \
+	../../../../apps/common/system/init_expand.c \
 	../../../../apps/common/system/mem_mmu.c \
 	../../../../apps/common/system/perf_counter/example/main.c \
 	../../../../apps/common/system/perf_counter/perf_counter.c \
@@ -874,6 +877,7 @@ c_SRC_FILES := \
 	../../../../apps/wifi_bbm/lvgl_v8_ui_app/generated/gui_scr/setup_scr_pair_status.c \
 	../../../../apps/wifi_bbm/lvgl_v8_ui_app/generated/gui_scr/setup_scr_pairing.c \
 	../../../../apps/wifi_bbm/lvgl_v8_ui_app/generated/gui_scr/setup_scr_rt_stream.c \
+	../../../../apps/wifi_bbm/lvgl_v8_ui_app/generated/gui_scr/setup_scr_sys_options.c \
 	../../../../apps/wifi_bbm/lvgl_v8_ui_app/generated/gui_scr/setup_scr_sys_prompt.c \
 	../../../../apps/wifi_bbm/lvgl_v8_ui_app/generated/gui_scr/setup_scr_unpair.c \
 	../../../../apps/wifi_bbm/lvgl_v8_ui_app/generated/gui_scr/setup_scr_video_play.c \
@@ -893,6 +897,7 @@ c_SRC_FILES := \
 	../../../../apps/wifi_bbm/wifi/stream/video_rt_udp.c \
 	../../../../apps/wifi_bbm/wifi/stream/video_rt_usr.c \
 	../../../../apps/wifi_bbm/wifi/video_playback.c \
+	../../../../apps/wifi_bbm/wifi/video_playback_udp.c \
 	../../../../apps/wifi_bbm/wifi/video_preview.c \
 	../../../../apps/wifi_bbm/wifi/wifi_app_task.c \
 	../../../../cpu/wl83/adc_api.c \
@@ -960,9 +965,6 @@ LFLAGS := \
 	--plugin-opt=-pi32v2-large-program=true \
 	--plugin-opt=-pi32v2-csync-before-rti=true \
 	--start-group \
-	../../../../include_lib/newlib/pi32v2-lib/libm.a \
-	../../../../include_lib/newlib/pi32v2-lib/libc.a \
-	../../../../include_lib/newlib/pi32v2-lib/libcompiler_rt.a \
 	--start-group  \
 	../../../../cpu/wl83/liba/system.a \
 	../../../../cpu/wl83/liba/fs.a \
@@ -1002,9 +1004,12 @@ LFLAGS := \
 	../../../../cpu/wl83/liba/libqrcode.a \
 	--end-group \
 	../../../../cpu/wl83/liba/lvgl_v8_extend.a \
+	../../../../include_lib/newlib/pi32v2-lib/libm.a \
+	../../../../include_lib/newlib/pi32v2-lib/libc.a \
+	../../../../include_lib/newlib/pi32v2-lib/libcompiler_rt.a \
+	--end-group  \
 	-T../../../../cpu/wl83/sdk.ld \
 	-M=../../../../cpu/wl83/tools/sdk.map \
-	--end-group  \
 	--plugin-opt=mcpu=r3 \
 	--plugin-opt=-mattr=+fprev1 \
 

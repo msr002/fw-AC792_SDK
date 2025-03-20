@@ -48,7 +48,9 @@ void arp_static_table_update_to_flash(void)
 
 void arp_static_table_reset_to_flash(void)
 {
+    int ip_cnt = g_arp_table.ip_cnt;
     memset(&g_arp_table, 0x00, sizeof(g_arp_table));
+    g_arp_table.ip_cnt = ip_cnt;
     char *ptr = (char *)&g_arp_table;
     int ret = syscfg_write(BBM_RX_ARP_INDEX, ptr, sizeof(g_arp_table));
     if (ret < 0) {

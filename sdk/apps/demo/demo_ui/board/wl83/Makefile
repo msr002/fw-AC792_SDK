@@ -112,10 +112,6 @@ DEFINES := \
 	-D__GCC_PI32V2__ \
 	-DCONFIG_NEW_ECC_ENABLE \
 	-DCONFIG_DEMO_UI_PROJECT_ENABLE \
-	-DEVENT_HANDLER_NUM_CONFIG=2 \
-	-DEVENT_POOL_SIZE_CONFIG=256 \
-	-DTIMER_POOL_NUM_CONFIG=15 \
-	-DVFS_FILE_POOL_NUM_CONFIG=8 \
 	-DVM_MAX_PAGE_ALIGN_SIZE_CONFIG=64*1024 \
 	-DVM_MAX_SECTOR_ALIGN_SIZE_CONFIG=64*1024 \
 	-DVM_ITEM_MAX_NUM=256 \
@@ -190,6 +186,7 @@ c_SRC_FILES := \
 	../../../../../apps/common/config/log_config/lib_driver_config.c \
 	../../../../../apps/common/config/log_config/lib_power_config.c \
 	../../../../../apps/common/config/log_config/lib_system_config.c \
+	../../../../../apps/common/config/log_config/lib_ui_config.c \
 	../../../../../apps/common/config/log_config/lib_update_config.c \
 	../../../../../apps/common/config/user_cfg.c \
 	../../../../../apps/common/debug/debug.c \
@@ -392,6 +389,7 @@ c_SRC_FILES := \
 	../../../../../apps/common/example/third_party/lvgl_v9/examples/libs/ffmpeg/lv_example_ffmpeg_1.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/examples/libs/ffmpeg/lv_example_ffmpeg_2.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/examples/libs/freetype/lv_example_freetype_1.c \
+	../../../../../apps/common/example/third_party/lvgl_v9/examples/libs/freetype/lv_example_freetype_2.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/examples/libs/gif/img_bulb_gif.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/examples/libs/gif/lv_example_gif_1.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/examples/libs/libjpeg_turbo/lv_example_libjpeg_turbo_1.c \
@@ -553,6 +551,7 @@ c_SRC_FILES := \
 	../../../../../apps/common/example/third_party/lvgl_v9/examples/widgets/textarea/lv_example_textarea_3.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/examples/widgets/tileview/lv_example_tileview_1.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/examples/widgets/win/lv_example_win_1.c \
+	../../../../../apps/common/example/third_party/lvgl_v9/lvgl_main.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/lvgl_v9_main_task_init.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/src/core/lv_group.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/src/core/lv_obj.c \
@@ -843,6 +842,7 @@ c_SRC_FILES := \
 	../../../../../apps/common/lzw/lzwtester.c \
 	../../../../../apps/common/system/device_mount.c \
 	../../../../../apps/common/system/init.c \
+	../../../../../apps/common/system/init_expand.c \
 	../../../../../apps/common/system/perf_counter/example/main.c \
 	../../../../../apps/common/system/perf_counter/perf_counter.c \
 	../../../../../apps/common/system/version.c \
@@ -942,9 +942,6 @@ LFLAGS := \
 	--plugin-opt=-pi32v2-large-program=true \
 	--plugin-opt=-pi32v2-csync-before-rti=true \
 	--start-group \
-	../../../../../include_lib/newlib/pi32v2-lib/libm.a \
-	../../../../../include_lib/newlib/pi32v2-lib/libc.a \
-	../../../../../include_lib/newlib/pi32v2-lib/libcompiler_rt.a \
 	--start-group  \
 	../../../../../cpu/wl83/liba/cpu.a \
 	../../../../../cpu/wl83/liba/event.a \
@@ -958,9 +955,12 @@ LFLAGS := \
 	../../../../../include_lib/c++/libstdc++/ucos/libc++.a \
 	../../../../../include_lib/c++/libstdc++/ucos/libc++abi.a \
 	../../../../../cpu/wl83/liba/lvgl_v9_extend.a \
+	../../../../../include_lib/newlib/pi32v2-lib/libm.a \
+	../../../../../include_lib/newlib/pi32v2-lib/libc.a \
+	../../../../../include_lib/newlib/pi32v2-lib/libcompiler_rt.a \
+	--end-group  \
 	-T../../../../../cpu/wl83/sdk.ld \
 	-M=../../../../../cpu/wl83/tools/sdk.map \
-	--end-group  \
 	--plugin-opt=mcpu=r3 \
 	--plugin-opt=-mattr=+fprev1 \
 

@@ -52,7 +52,7 @@ struct net_req {
     char dir[36];
     struct preview pre;
     struct _playback playback;
-
+    struct sockaddr_in remote_addr;
 };
 
 enum {

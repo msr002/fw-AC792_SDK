@@ -393,6 +393,32 @@ static void file_browser_imgbtn_3_event_handler(lv_event_t *e)
     }
 }
 
+static void file_browser_imgbtn_4_event_handler(lv_event_t *e)
+{
+    lv_event_code_t code = lv_event_get_code(e);
+    lv_ui *ui = (lv_ui *) lv_event_get_user_data(e);
+    lv_obj_t *src = lv_event_get_target(e);
+    switch (code) {
+    case LV_EVENT_CLICKED: {
+        //custom code
+        {
+            lv_obj_t *dest = src;
+#if !LV_USE_GUIBUILDER_SIMULATOR
+
+            extern int gui_bbm_file_del(void);
+            gui_bbm_file_del();
+
+#endif
+
+
+        }
+    }
+    break;
+    default:
+        break;
+    }
+}
+
 static void file_browser_file_cont1_event_handler(lv_event_t *e)
 {
     lv_event_code_t code = lv_event_get_code(e);
@@ -413,6 +439,38 @@ static void file_browser_file_cont1_event_handler(lv_event_t *e)
             screen = gui_scr_create(GUI_SCREEN_VIDEO_PLAY, "video_play", guider_ui.video_play, (gui_scr_setup_cb_t)setup_scr_video_play, (gui_scr_unload_cb_t)unload_scr_video_play);
         }
         ui_load_scr_anim(ui, screen, LV_SCR_LOAD_ANIM_NONE, 0, 0, true, true, false);
+    }
+    break;
+    default:
+        break;
+    }
+}
+
+static void file_browser_cb_1_event_handler(lv_event_t *e)
+{
+    lv_event_code_t code = lv_event_get_code(e);
+    lv_ui *ui = (lv_ui *) lv_event_get_user_data(e);
+    lv_obj_t *src = lv_event_get_target(e);
+    switch (code) {
+    case LV_EVENT_VALUE_CHANGED: {
+        //custom code
+        {
+            lv_obj_t *dest = src;
+            if (code == LV_EVENT_VALUE_CHANGED) {
+                // 判断复选框是否被选中
+                if (lv_obj_has_state(src, LV_STATE_CHECKED)) {
+#if !LV_USE_GUIBUILDER_SIMULATOR
+                    extern void gui_bbm_add_del_file(int index);
+                    gui_bbm_add_del_file(0);
+#endif
+                } else {
+#if !LV_USE_GUIBUILDER_SIMULATOR
+                    extern void gui_bbm_remove_del_file(int index);
+                    gui_bbm_remove_del_file(0);
+#endif
+                }
+            }
+        }
     }
     break;
     default:
@@ -447,6 +505,38 @@ static void file_browser_file_cont2_event_handler(lv_event_t *e)
     }
 }
 
+static void file_browser_cb_2_event_handler(lv_event_t *e)
+{
+    lv_event_code_t code = lv_event_get_code(e);
+    lv_ui *ui = (lv_ui *) lv_event_get_user_data(e);
+    lv_obj_t *src = lv_event_get_target(e);
+    switch (code) {
+    case LV_EVENT_VALUE_CHANGED: {
+        //custom code
+        {
+            lv_obj_t *dest = src;
+            if (code == LV_EVENT_VALUE_CHANGED) {
+                // 判断复选框是否被选中
+                if (lv_obj_has_state(src, LV_STATE_CHECKED)) {
+#if !LV_USE_GUIBUILDER_SIMULATOR
+                    extern void gui_bbm_add_del_file(int index);
+                    gui_bbm_add_del_file(1);
+#endif
+                } else {
+#if !LV_USE_GUIBUILDER_SIMULATOR
+                    extern void gui_bbm_remove_del_file(int index);
+                    gui_bbm_remove_del_file(1);
+#endif
+                }
+            }
+        }
+    }
+    break;
+    default:
+        break;
+    }
+}
+
 static void file_browser_file_cont3_event_handler(lv_event_t *e)
 {
     lv_event_code_t code = lv_event_get_code(e);
@@ -467,6 +557,38 @@ static void file_browser_file_cont3_event_handler(lv_event_t *e)
             screen = gui_scr_create(GUI_SCREEN_VIDEO_PLAY, "video_play", guider_ui.video_play, (gui_scr_setup_cb_t)setup_scr_video_play, (gui_scr_unload_cb_t)unload_scr_video_play);
         }
         ui_load_scr_anim(ui, screen, LV_SCR_LOAD_ANIM_NONE, 0, 0, true, true, false);
+    }
+    break;
+    default:
+        break;
+    }
+}
+
+static void file_browser_cb_3_event_handler(lv_event_t *e)
+{
+    lv_event_code_t code = lv_event_get_code(e);
+    lv_ui *ui = (lv_ui *) lv_event_get_user_data(e);
+    lv_obj_t *src = lv_event_get_target(e);
+    switch (code) {
+    case LV_EVENT_VALUE_CHANGED: {
+        //custom code
+        {
+            lv_obj_t *dest = src;
+            if (code == LV_EVENT_VALUE_CHANGED) {
+                // 判断复选框是否被选中
+                if (lv_obj_has_state(src, LV_STATE_CHECKED)) {
+#if !LV_USE_GUIBUILDER_SIMULATOR
+                    extern void gui_bbm_add_del_file(int index);
+                    gui_bbm_add_del_file(2);
+#endif
+                } else {
+#if !LV_USE_GUIBUILDER_SIMULATOR
+                    extern void gui_bbm_remove_del_file(int index);
+                    gui_bbm_remove_del_file(2);
+#endif
+                }
+            }
+        }
     }
     break;
     default:
@@ -501,6 +623,38 @@ static void file_browser_file_cont4_event_handler(lv_event_t *e)
     }
 }
 
+static void file_browser_cb_4_event_handler(lv_event_t *e)
+{
+    lv_event_code_t code = lv_event_get_code(e);
+    lv_ui *ui = (lv_ui *) lv_event_get_user_data(e);
+    lv_obj_t *src = lv_event_get_target(e);
+    switch (code) {
+    case LV_EVENT_VALUE_CHANGED: {
+        //custom code
+        {
+            lv_obj_t *dest = src;
+            if (code == LV_EVENT_VALUE_CHANGED) {
+                // 判断复选框是否被选中
+                if (lv_obj_has_state(src, LV_STATE_CHECKED)) {
+#if !LV_USE_GUIBUILDER_SIMULATOR
+                    extern void gui_bbm_add_del_file(int index);
+                    gui_bbm_add_del_file(3);
+#endif
+                } else {
+#if !LV_USE_GUIBUILDER_SIMULATOR
+                    extern void gui_bbm_remove_del_file(int index);
+                    gui_bbm_remove_del_file(3);
+#endif
+                }
+            }
+        }
+    }
+    break;
+    default:
+        break;
+    }
+}
+
 static void file_browser_file_cont5_event_handler(lv_event_t *e)
 {
     lv_event_code_t code = lv_event_get_code(e);
@@ -521,6 +675,38 @@ static void file_browser_file_cont5_event_handler(lv_event_t *e)
             screen = gui_scr_create(GUI_SCREEN_VIDEO_PLAY, "video_play", guider_ui.video_play, (gui_scr_setup_cb_t)setup_scr_video_play, (gui_scr_unload_cb_t)unload_scr_video_play);
         }
         ui_load_scr_anim(ui, screen, LV_SCR_LOAD_ANIM_NONE, 0, 0, true, true, false);
+    }
+    break;
+    default:
+        break;
+    }
+}
+
+static void file_browser_cb_5_event_handler(lv_event_t *e)
+{
+    lv_event_code_t code = lv_event_get_code(e);
+    lv_ui *ui = (lv_ui *) lv_event_get_user_data(e);
+    lv_obj_t *src = lv_event_get_target(e);
+    switch (code) {
+    case LV_EVENT_VALUE_CHANGED: {
+        //custom code
+        {
+            lv_obj_t *dest = src;
+            if (code == LV_EVENT_VALUE_CHANGED) {
+                // 判断复选框是否被选中
+                if (lv_obj_has_state(src, LV_STATE_CHECKED)) {
+#if !LV_USE_GUIBUILDER_SIMULATOR
+                    extern void gui_bbm_add_del_file(int index);
+                    gui_bbm_add_del_file(4);
+#endif
+                } else {
+#if !LV_USE_GUIBUILDER_SIMULATOR
+                    extern void gui_bbm_remove_del_file(int index);
+                    gui_bbm_remove_del_file(4);
+#endif
+                }
+            }
+        }
     }
     break;
     default:
@@ -554,6 +740,38 @@ static void file_browser_file_cont6_event_handler(lv_event_t *e)
         break;
     }
 }
+
+static void file_browser_cb_6_event_handler(lv_event_t *e)
+{
+    lv_event_code_t code = lv_event_get_code(e);
+    lv_ui *ui = (lv_ui *) lv_event_get_user_data(e);
+    lv_obj_t *src = lv_event_get_target(e);
+    switch (code) {
+    case LV_EVENT_VALUE_CHANGED: {
+        //custom code
+        {
+            lv_obj_t *dest = src;
+            if (code == LV_EVENT_VALUE_CHANGED) {
+                // 判断复选框是否被选中
+                if (lv_obj_has_state(src, LV_STATE_CHECKED)) {
+#if !LV_USE_GUIBUILDER_SIMULATOR
+                    extern void gui_bbm_add_del_file(int index);
+                    gui_bbm_add_del_file(5);
+#endif
+                } else {
+#if !LV_USE_GUIBUILDER_SIMULATOR
+                    extern void gui_bbm_remove_del_file(int index);
+                    gui_bbm_remove_del_file(5);
+#endif
+                }
+            }
+        }
+    }
+    break;
+    default:
+        break;
+    }
+}
 static void file_browser_screen_event_handler(lv_event_t *e)
 {
     lv_event_code_t code = lv_event_get_code(e);
@@ -574,12 +792,19 @@ void events_init_file_browser(lv_ui *ui)
     lv_obj_add_event_cb(ui->file_browser_imgbtn_1, file_browser_imgbtn_1_event_handler, LV_EVENT_ALL, ui);
     lv_obj_add_event_cb(ui->file_browser_imgbtn_2, file_browser_imgbtn_2_event_handler, LV_EVENT_ALL, ui);
     lv_obj_add_event_cb(ui->file_browser_imgbtn_3, file_browser_imgbtn_3_event_handler, LV_EVENT_ALL, ui);
+    lv_obj_add_event_cb(ui->file_browser_imgbtn_4, file_browser_imgbtn_4_event_handler, LV_EVENT_ALL, ui);
     lv_obj_add_event_cb(ui->file_browser_file_cont1, file_browser_file_cont1_event_handler, LV_EVENT_ALL, ui);
+    lv_obj_add_event_cb(ui->file_browser_cb_1, file_browser_cb_1_event_handler, LV_EVENT_ALL, ui);
     lv_obj_add_event_cb(ui->file_browser_file_cont2, file_browser_file_cont2_event_handler, LV_EVENT_ALL, ui);
+    lv_obj_add_event_cb(ui->file_browser_cb_2, file_browser_cb_2_event_handler, LV_EVENT_ALL, ui);
     lv_obj_add_event_cb(ui->file_browser_file_cont3, file_browser_file_cont3_event_handler, LV_EVENT_ALL, ui);
+    lv_obj_add_event_cb(ui->file_browser_cb_3, file_browser_cb_3_event_handler, LV_EVENT_ALL, ui);
     lv_obj_add_event_cb(ui->file_browser_file_cont4, file_browser_file_cont4_event_handler, LV_EVENT_ALL, ui);
+    lv_obj_add_event_cb(ui->file_browser_cb_4, file_browser_cb_4_event_handler, LV_EVENT_ALL, ui);
     lv_obj_add_event_cb(ui->file_browser_file_cont5, file_browser_file_cont5_event_handler, LV_EVENT_ALL, ui);
+    lv_obj_add_event_cb(ui->file_browser_cb_5, file_browser_cb_5_event_handler, LV_EVENT_ALL, ui);
     lv_obj_add_event_cb(ui->file_browser_file_cont6, file_browser_file_cont6_event_handler, LV_EVENT_ALL, ui);
+    lv_obj_add_event_cb(ui->file_browser_cb_6, file_browser_cb_6_event_handler, LV_EVENT_ALL, ui);
     lv_obj_add_event_cb(ui->file_browser, file_browser_screen_event_handler, LV_EVENT_ALL, ui);
 }
 
@@ -1187,4 +1412,60 @@ void events_init_device_select(lv_ui *ui)
     lv_obj_add_event_cb(ui->device_select_view_2, device_select_view_2_event_handler, LV_EVENT_ALL, ui);
     lv_obj_add_event_cb(ui->device_select_imgbtn_1, device_select_imgbtn_1_event_handler, LV_EVENT_ALL, ui);
     lv_obj_add_event_cb(ui->device_select, device_select_screen_event_handler, LV_EVENT_ALL, ui);
+}
+
+static void sys_options_btn_1_event_handler(lv_event_t *e)
+{
+    lv_event_code_t code = lv_event_get_code(e);
+    lv_ui *ui = (lv_ui *) lv_event_get_user_data(e);
+    lv_obj_t *src = lv_event_get_target(e);
+    switch (code) {
+    case LV_EVENT_CLICKED: {
+        //custom code sys_options
+        {
+            lv_obj_t *dest = ui->sys_options;
+#if !LV_USE_GUIBUILDER_SIMULATOR
+            extern void gui_sys_options_run_yes_cb(void);
+            gui_sys_options_run_yes_cb();
+#endif
+        }
+        if (guider_ui.sys_options_del == false && lv_obj_is_valid(guider_ui.sys_options)) {
+            lv_obj_add_flag(guider_ui.sys_options, LV_OBJ_FLAG_HIDDEN);
+        }
+    }
+    break;
+    default:
+        break;
+    }
+}
+
+static void sys_options_btn_2_event_handler(lv_event_t *e)
+{
+    lv_event_code_t code = lv_event_get_code(e);
+    lv_ui *ui = (lv_ui *) lv_event_get_user_data(e);
+    lv_obj_t *src = lv_event_get_target(e);
+    switch (code) {
+    case LV_EVENT_CLICKED: {
+        //custom code sys_options
+        {
+            lv_obj_t *dest = ui->sys_options;
+#if !LV_USE_GUIBUILDER_SIMULATOR
+            extern void gui_sys_options_run_no_cb(void);
+            gui_sys_options_run_no_cb();
+#endif
+        }
+        if (guider_ui.sys_options_del == false && lv_obj_is_valid(guider_ui.sys_options)) {
+            lv_obj_add_flag(guider_ui.sys_options, LV_OBJ_FLAG_HIDDEN);
+        }
+    }
+    break;
+    default:
+        break;
+    }
+}
+
+void events_init_sys_options(lv_ui *ui)
+{
+    lv_obj_add_event_cb(ui->sys_options_btn_1, sys_options_btn_1_event_handler, LV_EVENT_ALL, ui);
+    lv_obj_add_event_cb(ui->sys_options_btn_2, sys_options_btn_2_event_handler, LV_EVENT_ALL, ui);
 }

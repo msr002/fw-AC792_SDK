@@ -6,8 +6,9 @@
 #define PLUGIN_SOURCE_ISC_BASE  (0)
 #define PLUGIN_SOURCE_CSI_BASE  (2)
 #define PLUGIN_SOURCE_UVC_BASE  (3)
-#define PLUGIN_SOURCE_VIR_BASE  (5)
-#define PLUGIN_SOURCE_FILE_BASE (10)
+#define PLUGIN_SOURCE_MCV_BASE  (5)
+#define PLUGIN_SOURCE_VIR_BASE  (9)
+#define PLUGIN_SOURCE_FILE_BASE (15)
 
 
 
@@ -40,6 +41,16 @@ enum pipeline_plugin_error {
 };
 
 #define PLUGIN_ERR_LOG() do {log_error("PLUGIN UNKOWN ERR AT %s  %d",__func__,__LINE__);} while(0);
+
+
+
+
+
+
+#define PLUGIN_USE_DOUBLE_RAW  BIT(31)
+#define PLUGIN_USE_DOUBLE_RAW_DISP BIT(30)
+#define PLUGIN_USE_DOUBLE_RAW_CAPTURE BIT(29)
+
 
 
 
@@ -78,6 +89,8 @@ struct pipeline_plugin_ops {
 
 struct plugin_factory_entry {
     struct list_head entry;
+    int channel;
+    int extra;
     u8 used;
     void *plugin;
     struct pipeline_plugin_ops *ops;
@@ -98,7 +111,7 @@ extern const struct pipeline_plugin_ops plugin_end[];
 
 void port_source_channel_inc(pipe_plugin_t *prev_plugin, pipe_plugin_t *plugin, int source_channel);
 
-pipe_plugin_t *plugin_register(const char *name);
+pipe_plugin_t *plugin_register(const char *name, int channel);
 
 void plugin_unregister(pipe_plugin_t *plugin);
 
@@ -112,15 +125,27 @@ char *plugin_get_name(pipe_plugin_t *plugin);
 //查看plugin 使用情况
 int plugin_factory_plugin_status(void);
 
+char *plugin_factory_find_reverse(const char *find_name);
+
 char *plugin_factory_find(const char *find_name);
+
+void plugin_factory_set_extra(const char *find_name, int _extra);
+
+char *find_use_for_display_plugin(const char *_name);
 
 int plugin_source_to_channel(const char *source_name);
 
 pipe_plugin_t *plugin_factory_find_used(const char *find_name);
 
+char *plugin_factory_find_used_by_channel(const char *find_name, int channel);
+
+char *plugin_factory_find_used_by_extra(const char *find_name, int _extra);
+
+char *plugin_factory_find_used_by_all(const char *find_name, int channel, int _extra);
+
 bool port_check_connected(pipe_plugin_t *prev_plugin, pipe_plugin_t *plugin);
 
-void plugin_pre_unregister(pipe_plugin_t *plugin);
+void plugin_pre_unregister(pipe_plugin_t *plugin, int channel);
 
 #endif
 

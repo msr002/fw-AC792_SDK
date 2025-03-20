@@ -99,8 +99,12 @@ extern gui_msg_sub_t *gui_msg_create_sub(int32_t msg_id);
 extern gui_msg_data_t *gui_msg_get_data();
 
 extern void gui_msg_set_imglist_selected_index_by_int32_cb(lv_observer_t *observer, lv_subject_t *subject);
+extern void gui_msg_set_dropdown_selected_index_by_int32_cb(lv_observer_t *observer, lv_subject_t *subject);
+extern void gui_msg_change_dropdown_selected_index_cb(lv_event_t *e);
 extern void gui_msg_set_visible_by_bool_cb(lv_observer_t *observer, lv_subject_t *subject);
 extern void gui_msg_set_label_text_by_string_cb(lv_observer_t *observer, lv_subject_t *subject);
+extern void gui_msg_set_checkbox_checked_by_bool_cb(lv_observer_t *observer, lv_subject_t *subject);
+extern void gui_msg_change_checkbox_checked_cb(lv_event_t *e);
 extern void gui_msg_set_bar_bar_value_by_int32_cb(lv_observer_t *observer, lv_subject_t *subject);
 #if LV_USE_OBSERVER
 #include "./gui_file_browser_msg.h"
@@ -108,7 +112,7 @@ extern void gui_msg_set_bar_bar_value_by_int32_cb(lv_observer_t *observer, lv_su
 #include "./gui_rt_stream_msg.h"
 #include "./gui_sys_prompt_msg.h"
 #include "./gui_video_play_msg.h"
-#define GUI_MSG_MAX_ID 0x12
+#define GUI_MSG_MAX_ID 0x1b
 #endif
 
 extern gui_msg_data_t guider_msg_data;

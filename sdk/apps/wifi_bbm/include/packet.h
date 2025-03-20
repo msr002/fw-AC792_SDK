@@ -28,6 +28,8 @@ struct __packet_info {
     u8 fast_play_mask;
     u8 state;//0 preview , 1 playback
     struct __mov_unpkg_info info;
+    u8 *is_udp;
+    struct sockaddr_in remote_addr;
     char file_name[64];
 };
 #define IMAGE_SIZE	256*1024 //该长度必须大于一帧视频的数据长度

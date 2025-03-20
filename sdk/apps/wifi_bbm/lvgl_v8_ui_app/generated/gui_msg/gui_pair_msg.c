@@ -95,6 +95,15 @@ GUI_WEAK int gui_pair_msg_unpair_lab_cb(gui_msg_action_t access, gui_msg_data_t 
     data->value_string = unpair_lab_var;
     return 0;
 }
+GUI_WEAK int gui_pair_msg_wifi_ch_select_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type)
+{
+    static int32_t wifi_ch_select_var = 1;
+    if (access == GUI_MSG_ACCESS_SET) {
+        wifi_ch_select_var = data->value_int;
+    }
+    data->value_int = wifi_ch_select_var;
+    return 0;
+}
 
 void gui_pair_msg_init(lv_ui *ui)
 {
@@ -131,6 +140,10 @@ void gui_pair_msg_init(lv_ui *ui)
     if (sub != NULL) {
         lv_subject_init_pointer(sub->subject, &guider_msg_data);
     }
+    sub = gui_msg_create_sub(GUI_PAIR_MSG_ID_WIFI_CH_SELECT);
+    if (sub != NULL) {
+        lv_subject_init_pointer(sub->subject, &guider_msg_data);
+    }
     gui_pair_msg_init_ui();
     gui_pair_msg_init_events();
 }
@@ -142,7 +155,7 @@ void gui_pair_msg_init_ui()
 void gui_pair_msg_init_events()
 {
     void *res = NULL;
-    _gui_msg_status_t status[8] = {
+    _gui_msg_status_t status[9] = {
         {GUI_PAIR_MSG_ID_PAIR_CH0, 0, 0},
         {GUI_PAIR_MSG_ID_PAIR_CH1, 0, 0},
         {GUI_PAIR_MSG_ID_PAIR_CH2, 0, 0},
@@ -151,9 +164,10 @@ void gui_pair_msg_init_events()
         {GUI_PAIR_MSG_ID_PAIR_CH5, 0, 0},
         {GUI_PAIR_MSG_ID_PARING_LAB, 0, 0},
         {GUI_PAIR_MSG_ID_UNPAIR_LAB, 0, 0},
+        {GUI_PAIR_MSG_ID_WIFI_CH_SELECT, 0, 0},
     };
 
-    for (int i = 0; i < 8; i++) {
+    for (int i = 0; i < 9; i++) {
         lv_subject_t *subject = gui_msg_get_subject(status[i].msg_id);
         if (subject == NULL) {
             continue;
@@ -173,6 +187,7 @@ void gui_pair_msg_init_events()
     lv_subject_t *subject_pair_ch5 = gui_msg_get_subject(GUI_PAIR_MSG_ID_PAIR_CH5);
     lv_subject_t *subject_paring_lab = gui_msg_get_subject(GUI_PAIR_MSG_ID_PARING_LAB);
     lv_subject_t *subject_unpair_lab = gui_msg_get_subject(GUI_PAIR_MSG_ID_UNPAIR_LAB);
+    lv_subject_t *subject_wifi_ch_select = gui_msg_get_subject(GUI_PAIR_MSG_ID_WIFI_CH_SELECT);
     if (!guider_ui.pair_status_del) {
         gui_pair_msg_pair_ch5_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
         lv_subject_add_observer_obj(subject_pair_ch5, gui_msg_set_imglist_selected_index_by_int32_cb, guider_ui.pair_status_imglist_6, &guider_msg_data);
@@ -189,11 +204,16 @@ void gui_pair_msg_init_events()
         gui_pair_msg_pair_ch3_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
         lv_subject_add_observer_obj(subject_pair_ch3, gui_msg_set_imglist_selected_index_by_int32_cb, guider_ui.pair_status_imglist_4, &guider_msg_data);
 
+        gui_pair_msg_wifi_ch_select_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
+        lv_subject_add_observer_obj(subject_wifi_ch_select, gui_msg_set_dropdown_selected_index_by_int32_cb, guider_ui.pair_status_ddlist_1, &guider_msg_data);
+        lv_obj_remove_event_cb(guider_ui.pair_status_ddlist_1, gui_msg_change_dropdown_selected_index_cb);
+        lv_obj_add_event_cb(guider_ui.pair_status_ddlist_1, gui_msg_change_dropdown_selected_index_cb, LV_EVENT_VALUE_CHANGED, (void *)GUI_PAIR_MSG_ID_WIFI_CH_SELECT);
+
         gui_pair_msg_pair_ch0_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
         lv_subject_add_observer_obj(subject_pair_ch0, gui_msg_set_imglist_selected_index_by_int32_cb, guider_ui.pair_status_imglist_1, &guider_msg_data);
 
 
-        for (int i = 0; i < 8; i++) {
+        for (int i = 0; i < 9; i++) {
             if (status[i].msg_id == GUI_PAIR_MSG_ID_PAIR_CH5) {
                 status[i].is_subscribe = 1;
             }
@@ -212,6 +232,9 @@ void gui_pair_msg_init_events()
             if (status[i].msg_id == GUI_PAIR_MSG_ID_PAIR_CH2) {
                 status[i].is_subscribe = 1;
             }
+            if (status[i].msg_id == GUI_PAIR_MSG_ID_WIFI_CH_SELECT) {
+                status[i].is_subscribe = 1;
+            }
         }
     }
     if (!guider_ui.pairing_del) {
@@ -219,7 +242,7 @@ void gui_pair_msg_init_events()
         lv_subject_add_observer_obj(subject_paring_lab, gui_msg_set_label_text_by_string_cb, guider_ui.pairing_lbl_1, &guider_msg_data);
 
 
-        for (int i = 0; i < 8; i++) {
+        for (int i = 0; i < 9; i++) {
             if (status[i].msg_id == GUI_PAIR_MSG_ID_PARING_LAB) {
                 status[i].is_subscribe = 1;
             }
@@ -230,14 +253,14 @@ void gui_pair_msg_init_events()
         lv_subject_add_observer_obj(subject_unpair_lab, gui_msg_set_label_text_by_string_cb, guider_ui.unpair_lbl_1, &guider_msg_data);
 
 
-        for (int i = 0; i < 8; i++) {
+        for (int i = 0; i < 9; i++) {
             if (status[i].msg_id == GUI_PAIR_MSG_ID_UNPAIR_LAB) {
                 status[i].is_subscribe = 1;
             }
         }
     }
 
-    for (int i = 0; i < 8; i++) {
+    for (int i = 0; i < 9; i++) {
         if (status[i].is_subscribe == 0 && status[i].is_unsubscribe == 1) {
             gui_msg_subscribe_change(status[i].msg_id, GUI_MSG_UNSUBSCRIBE);
         } else if (status[i].is_subscribe == 1 && status[i].is_unsubscribe == 0) {
@@ -248,7 +271,7 @@ void gui_pair_msg_init_events()
 
 void gui_pair_msg_unsubscribe()
 {
-    _gui_msg_status_t status[8] = {
+    _gui_msg_status_t status[9] = {
         {GUI_PAIR_MSG_ID_PAIR_CH0, 0, 0},
         {GUI_PAIR_MSG_ID_PAIR_CH1, 0, 0},
         {GUI_PAIR_MSG_ID_PAIR_CH2, 0, 0},
@@ -257,8 +280,9 @@ void gui_pair_msg_unsubscribe()
         {GUI_PAIR_MSG_ID_PAIR_CH5, 0, 0},
         {GUI_PAIR_MSG_ID_PARING_LAB, 0, 0},
         {GUI_PAIR_MSG_ID_UNPAIR_LAB, 0, 0},
+        {GUI_PAIR_MSG_ID_WIFI_CH_SELECT, 0, 0},
     };
-    for (int i = 0; i < 8; i++) {
+    for (int i = 0; i < 9; i++) {
         lv_subject_t *subject = gui_msg_get_subject(status[i].msg_id);
         if (subject == NULL) {
             continue;
@@ -277,7 +301,7 @@ void gui_pair_msg_unsubscribe()
         }
     }
 
-    for (int i = 0; i < 8; i++) {
+    for (int i = 0; i < 9; i++) {
         if (status[i].is_unsubscribe == 1) {
             gui_msg_subscribe_change(status[i].msg_id, GUI_MSG_UNSUBSCRIBE);
         }
@@ -319,6 +343,10 @@ gui_msg_data_t *gui_pair_msg_get(int32_t msg_id)
         gui_pair_msg_unpair_lab_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_STRING);
         break;
     }
+    case GUI_PAIR_MSG_ID_WIFI_CH_SELECT: {
+        gui_pair_msg_wifi_ch_select_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
+        break;
+    }
     default:
         return NULL;
     }
@@ -358,6 +386,10 @@ void gui_pair_msg_action_change(int32_t msg_id, gui_msg_action_t access, gui_msg
     }
     case GUI_PAIR_MSG_ID_UNPAIR_LAB: {
         gui_pair_msg_unpair_lab_cb(access, data, type);
+        break;
+    }
+    case GUI_PAIR_MSG_ID_WIFI_CH_SELECT: {
+        gui_pair_msg_wifi_ch_select_cb(access, data, type);
         break;
     }
     default: {
@@ -416,6 +448,12 @@ gui_msg_status_t gui_pair_msg_send(int32_t msg_id, void *value, int32_t len)
         }
         case GUI_PAIR_MSG_ID_UNPAIR_LAB: {
             data_type = VALUE_STRING;
+            guider_msg_data.value_array.ptr = value;
+            guider_msg_data.value_array.len = len;
+            break;
+        }
+        case GUI_PAIR_MSG_ID_WIFI_CH_SELECT: {
+            data_type = VALUE_INT;
             guider_msg_data.value_array.ptr = value;
             guider_msg_data.value_array.len = len;
             break;

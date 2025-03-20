@@ -4827,10 +4827,12 @@ static const struct application_operation app_music_ops = {
     .event_handler 	= app_music_event_handler,
 };
 
+#if !TCFG_RF_FCC_TEST_ENABLE
 REGISTER_APPLICATION(app_music) = {
     .name 	= "app_music",
     .ops 	= &app_music_ops,
     .state  = APP_STA_DESTROY,
 };
+#endif
 
 #endif

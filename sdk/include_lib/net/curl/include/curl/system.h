@@ -1,5 +1,5 @@
-#ifndef __CURL_SYSTEM_H
-#define __CURL_SYSTEM_H
+#ifndef CURLINC_SYSTEM_H
+#define CURLINC_SYSTEM_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -7,11 +7,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -19,6 +19,8 @@
  *
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
+ *
+ * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
 
@@ -98,22 +100,6 @@
 #  define CURL_SUFFIX_CURL_OFF_TU    UL
 #  define CURL_TYPEOF_CURL_SOCKLEN_T int
 
-#elif defined(__WATCOMC__)
-#  if defined(__386__)
-#    define CURL_TYPEOF_CURL_OFF_T     __int64
-#    define CURL_FORMAT_CURL_OFF_T     "I64d"
-#    define CURL_FORMAT_CURL_OFF_TU    "I64u"
-#    define CURL_SUFFIX_CURL_OFF_T     i64
-#    define CURL_SUFFIX_CURL_OFF_TU    ui64
-#  else
-#    define CURL_TYPEOF_CURL_OFF_T     long
-#    define CURL_FORMAT_CURL_OFF_T     "ld"
-#    define CURL_FORMAT_CURL_OFF_TU    "lu"
-#    define CURL_SUFFIX_CURL_OFF_T     L
-#    define CURL_SUFFIX_CURL_OFF_TU    UL
-#  endif
-#  define CURL_TYPEOF_CURL_SOCKLEN_T int
-
 #elif defined(__POCC__)
 #  if (__POCC__ < 280)
 #    define CURL_TYPEOF_CURL_OFF_T     long
@@ -137,15 +123,26 @@
 #  define CURL_TYPEOF_CURL_SOCKLEN_T int
 
 #elif defined(__LCC__)
-#  define CURL_TYPEOF_CURL_OFF_T     long
-#  define CURL_FORMAT_CURL_OFF_T     "ld"
-#  define CURL_FORMAT_CURL_OFF_TU    "lu"
-#  define CURL_SUFFIX_CURL_OFF_T     L
-#  define CURL_SUFFIX_CURL_OFF_TU    UL
-#  define CURL_TYPEOF_CURL_SOCKLEN_T int
+#  if defined(__MCST__) /* MCST eLbrus Compiler Collection */
+#    define CURL_TYPEOF_CURL_OFF_T     long
+#    define CURL_FORMAT_CURL_OFF_T     "ld"
+#    define CURL_FORMAT_CURL_OFF_TU    "lu"
+#    define CURL_SUFFIX_CURL_OFF_T     L
+#    define CURL_SUFFIX_CURL_OFF_TU    UL
+#    define CURL_TYPEOF_CURL_SOCKLEN_T socklen_t
+#    define CURL_PULL_SYS_TYPES_H      1
+#    define CURL_PULL_SYS_SOCKET_H     1
+#  else                /* Local (or Little) C Compiler */
+#    define CURL_TYPEOF_CURL_OFF_T     long
+#    define CURL_FORMAT_CURL_OFF_T     "ld"
+#    define CURL_FORMAT_CURL_OFF_TU    "lu"
+#    define CURL_SUFFIX_CURL_OFF_T     L
+#    define CURL_SUFFIX_CURL_OFF_TU    UL
+#    define CURL_TYPEOF_CURL_SOCKLEN_T int
+#  endif
 
 #elif defined(__SYMBIAN32__)
-#  if defined(__EABI__)  /* Treat all ARM compilers equally */
+#  if defined(__EABI__) /* Treat all ARM compilers equally */
 #    define CURL_TYPEOF_CURL_OFF_T     long long
 #    define CURL_FORMAT_CURL_OFF_T     "lld"
 #    define CURL_FORMAT_CURL_OFF_TU    "llu"
@@ -167,13 +164,33 @@
 #  endif
 #  define CURL_TYPEOF_CURL_SOCKLEN_T unsigned int
 
-#elif defined(__MWERKS__)
+#elif defined(macintosh)
+#  include <ConditionalMacros.h>
+#  if TYPE_LONGLONG
+#    define CURL_TYPEOF_CURL_OFF_T     long long
+#    define CURL_FORMAT_CURL_OFF_T     "lld"
+#    define CURL_FORMAT_CURL_OFF_TU    "llu"
+#    define CURL_SUFFIX_CURL_OFF_T     LL
+#    define CURL_SUFFIX_CURL_OFF_TU    ULL
+#  else
+#    define CURL_TYPEOF_CURL_OFF_T     long
+#    define CURL_FORMAT_CURL_OFF_T     "ld"
+#    define CURL_FORMAT_CURL_OFF_TU    "lu"
+#    define CURL_SUFFIX_CURL_OFF_T     L
+#    define CURL_SUFFIX_CURL_OFF_TU    UL
+#  endif
+#  define CURL_TYPEOF_CURL_SOCKLEN_T unsigned int
+
+#elif defined(__TANDEM)
+# if ! defined(__LP64)
+   /* Required for 32-bit NonStop builds only. */
 #  define CURL_TYPEOF_CURL_OFF_T     long long
 #  define CURL_FORMAT_CURL_OFF_T     "lld"
 #  define CURL_FORMAT_CURL_OFF_TU    "llu"
 #  define CURL_SUFFIX_CURL_OFF_T     LL
 #  define CURL_SUFFIX_CURL_OFF_TU    ULL
 #  define CURL_TYPEOF_CURL_SOCKLEN_T int
+# endif
 
 #elif defined(_WIN32_WCE)
 #  define CURL_TYPEOF_CURL_OFF_T     __int64
@@ -210,45 +227,38 @@
 #  define CURL_TYPEOF_CURL_SOCKLEN_T unsigned int
 
 #elif defined(__OS400__)
-#  if defined(__ILEC400__)
+#  define CURL_TYPEOF_CURL_OFF_T     long long
+#  define CURL_FORMAT_CURL_OFF_T     "lld"
+#  define CURL_FORMAT_CURL_OFF_TU    "llu"
+#  define CURL_SUFFIX_CURL_OFF_T     LL
+#  define CURL_SUFFIX_CURL_OFF_TU    ULL
+#  define CURL_TYPEOF_CURL_SOCKLEN_T socklen_t
+#  define CURL_PULL_SYS_TYPES_H      1
+#  define CURL_PULL_SYS_SOCKET_H     1
+
+#elif defined(__MVS__)
+#  if defined(_LONG_LONG)
 #    define CURL_TYPEOF_CURL_OFF_T     long long
 #    define CURL_FORMAT_CURL_OFF_T     "lld"
 #    define CURL_FORMAT_CURL_OFF_TU    "llu"
 #    define CURL_SUFFIX_CURL_OFF_T     LL
 #    define CURL_SUFFIX_CURL_OFF_TU    ULL
-#    define CURL_TYPEOF_CURL_SOCKLEN_T socklen_t
-#    define CURL_PULL_SYS_TYPES_H      1
-#    define CURL_PULL_SYS_SOCKET_H     1
+#  elif defined(_LP64)
+#    define CURL_TYPEOF_CURL_OFF_T     long
+#    define CURL_FORMAT_CURL_OFF_T     "ld"
+#    define CURL_FORMAT_CURL_OFF_TU    "lu"
+#    define CURL_SUFFIX_CURL_OFF_T     L
+#    define CURL_SUFFIX_CURL_OFF_TU    UL
+#  else
+#    define CURL_TYPEOF_CURL_OFF_T     long
+#    define CURL_FORMAT_CURL_OFF_T     "ld"
+#    define CURL_FORMAT_CURL_OFF_TU    "lu"
+#    define CURL_SUFFIX_CURL_OFF_T     L
+#    define CURL_SUFFIX_CURL_OFF_TU    UL
 #  endif
-
-#elif defined(__MVS__)
-#  if defined(__IBMC__) || defined(__IBMCPP__)
-#    if defined(_ILP32)
-#    elif defined(_LP64)
-#    endif
-#    if defined(_LONG_LONG)
-#      define CURL_TYPEOF_CURL_OFF_T     long long
-#      define CURL_FORMAT_CURL_OFF_T     "lld"
-#      define CURL_FORMAT_CURL_OFF_TU    "llu"
-#      define CURL_SUFFIX_CURL_OFF_T     LL
-#      define CURL_SUFFIX_CURL_OFF_TU    ULL
-#    elif defined(_LP64)
-#      define CURL_TYPEOF_CURL_OFF_T     long
-#      define CURL_FORMAT_CURL_OFF_T     "ld"
-#      define CURL_FORMAT_CURL_OFF_TU    "lu"
-#      define CURL_SUFFIX_CURL_OFF_T     L
-#      define CURL_SUFFIX_CURL_OFF_TU    UL
-#    else
-#      define CURL_TYPEOF_CURL_OFF_T     long
-#      define CURL_FORMAT_CURL_OFF_T     "ld"
-#      define CURL_FORMAT_CURL_OFF_TU    "lu"
-#      define CURL_SUFFIX_CURL_OFF_T     L
-#      define CURL_SUFFIX_CURL_OFF_TU    UL
-#    endif
-#    define CURL_TYPEOF_CURL_SOCKLEN_T socklen_t
-#    define CURL_PULL_SYS_TYPES_H      1
-#    define CURL_PULL_SYS_SOCKET_H     1
-#  endif
+#  define CURL_TYPEOF_CURL_SOCKLEN_T socklen_t
+#  define CURL_PULL_SYS_TYPES_H      1
+#  define CURL_PULL_SYS_SOCKET_H     1
 
 #elif defined(__370__)
 #  if defined(__IBMC__) || defined(__IBMCPP__)
@@ -288,7 +298,6 @@
 #  define CURL_TYPEOF_CURL_SOCKLEN_T int
 
 #elif defined(__TINYC__) /* also known as tcc */
-
 #  define CURL_TYPEOF_CURL_OFF_T     long long
 #  define CURL_FORMAT_CURL_OFF_T     "lld"
 #  define CURL_FORMAT_CURL_OFF_TU    "llu"
@@ -298,7 +307,7 @@
 #  define CURL_PULL_SYS_TYPES_H      1
 #  define CURL_PULL_SYS_SOCKET_H     1
 
-#elif defined(__SUNPRO_C) /* Oracle Solaris Studio */
+#elif defined(__SUNPRO_C) || defined(__SUNPRO_CC) /* Oracle Solaris Studio */
 #  if !defined(__LP64) && (defined(__ILP32) ||                          \
                            defined(__i386) ||                           \
                            defined(__sparcv8) ||                        \
@@ -337,6 +346,66 @@
 #  define CURL_TYPEOF_CURL_SOCKLEN_T socklen_t
 #  define CURL_PULL_SYS_TYPES_H      1
 #  define CURL_PULL_SYS_SOCKET_H     1
+
+#elif defined(__hpux) /* HP aCC compiler */
+#  if !defined(_LP64)
+#    define CURL_TYPEOF_CURL_OFF_T     long long
+#    define CURL_FORMAT_CURL_OFF_T     "lld"
+#    define CURL_FORMAT_CURL_OFF_TU    "llu"
+#    define CURL_SUFFIX_CURL_OFF_T     LL
+#    define CURL_SUFFIX_CURL_OFF_TU    ULL
+#  else
+#    define CURL_TYPEOF_CURL_OFF_T     long
+#    define CURL_FORMAT_CURL_OFF_T     "ld"
+#    define CURL_FORMAT_CURL_OFF_TU    "lu"
+#    define CURL_SUFFIX_CURL_OFF_T     L
+#    define CURL_SUFFIX_CURL_OFF_TU    UL
+#  endif
+#  define CURL_TYPEOF_CURL_SOCKLEN_T socklen_t
+#  define CURL_PULL_SYS_TYPES_H      1
+#  define CURL_PULL_SYS_SOCKET_H     1
+
+#elif defined(FreeRTOS) /* Life on FreeRTOS */
+
+#if (defined(__SIZEOF_LONG__) && __SIZEOF_LONG__ == 4)  ||      \
+  (defined(__LONG_MAX__) && __LONG_MAX__ == 2147483647L)
+#    define CURL_TYPEOF_CURL_OFF_T     long long
+#    define CURL_FORMAT_CURL_OFF_T     "lld"
+#    define CURL_FORMAT_CURL_OFF_TU    "llu"
+#    define CURL_SUFFIX_CURL_OFF_T     LL
+#    define CURL_SUFFIX_CURL_OFF_TU    ULL
+#else
+#    define CURL_TYPEOF_CURL_OFF_T     long
+#    define CURL_FORMAT_CURL_OFF_T     "ld"
+#    define CURL_FORMAT_CURL_OFF_TU    "lu"
+#    define CURL_SUFFIX_CURL_OFF_T     L
+#    define CURL_SUFFIX_CURL_OFF_TU    UL
+#  endif
+#  define CURL_FREERTOS_SOCKETS_H 1
+#  define CURL_TYPEOF_CURL_SOCKLEN_T uint32_t
+#  define CURL_AVOID_SYS_TYPES_H 1
+#  define CURL_AVOID_SYS_SOCKET_H 1
+
+#elif defined(MICRIUM)
+
+#if (defined(__SIZEOF_LONG__) && __SIZEOF_LONG__ == 4)  ||      \
+  (defined(__LONG_MAX__) && __LONG_MAX__ == 2147483647L)
+#    define CURL_TYPEOF_CURL_OFF_T     long long
+#    define CURL_FORMAT_CURL_OFF_T     "lld"
+#    define CURL_FORMAT_CURL_OFF_TU    "llu"
+#    define CURL_SUFFIX_CURL_OFF_T     LL
+#    define CURL_SUFFIX_CURL_OFF_TU    ULL
+#else
+#    define CURL_TYPEOF_CURL_OFF_T     long
+#    define CURL_FORMAT_CURL_OFF_T     "ld"
+#    define CURL_FORMAT_CURL_OFF_TU    "lu"
+#    define CURL_SUFFIX_CURL_OFF_T     L
+#    define CURL_SUFFIX_CURL_OFF_TU    UL
+#  endif
+#  define CURL_TYPEOF_CURL_SOCKLEN_T CPU_INT32S
+#  define CURL_AVOID_SYS_TYPES_H 1
+#  define CURL_AVOID_SYS_SOCKET_H 1
+#  define CURL_AVOID_SYS_TIME_H 1
 
 /* ===================================== */
 /*    KEEP MSVC THE PENULTIMATE ENTRY    */
@@ -377,6 +446,7 @@
 #    define CURL_SUFFIX_CURL_OFF_TU    ULL
 #  elif defined(__LP64__) || \
         defined(__x86_64__) || defined(__ppc64__) || defined(__sparc64__) || \
+        defined(__e2k__) || \
         (defined(__SIZEOF_LONG__) && __SIZEOF_LONG__ == 8) || \
         (defined(__LONG_MAX__) && __LONG_MAX__ == 9223372036854775807L)
 #    define CURL_TYPEOF_CURL_OFF_T     long
@@ -416,18 +486,47 @@
 /* CURL_PULL_SYS_TYPES_H is defined above when inclusion of header file  */
 /* sys/types.h is required here to properly make type definitions below. */
 #ifdef CURL_PULL_SYS_TYPES_H
-//#  include <sys/types.h>
-#  include <typedef.h>
+#  include <sys/types.h>
 #endif
+
+#ifdef CURL_FREERTOS_SOCKETS_H
+#  include <FreeRTOS.h>
+#  include <FreeRTOS_Sockets.h>
+#include <stdint.h>
+#include <stddef.h>
+/* for the base type etc */
+#include "portmacro.h"
+#define curl_fd_set_typedefed
+typedef SocketSet_t curl_fd_set;
+#define curl_struct_sockaddr freertos_sockaddr
+#define curl_setsockopt(a,b,c,d,e) FreeRTOS_setsockopt(a,b,c,d,e)
+#define curl_connect(a,x,b,c) FreeRTOS_connect(a,b,c)
+#define curl_bind(a,b,c) FreeRTOS_bind(a,b,c)
+#define curl_recv(a,b,c,d) FreeRTOS_recv(a,b,c,d)
+#define curl_socket(a,b,c) FreeRTOS_socket(a,b,c)
+/* not quite socket-style API */
+#define CURL_FD_SET(a,b,c) FreeRTOS_FD_SET(a,b,c)
+/* struct sockaddr "fix" */
+#define sa_family sin_family
+/* use our private pollfd struct alternative */
+#define curl_pollfd curl_waitfd
+#elif defined(MICRIUM)
+#include <net/include/net_bsd.h>
+
+/* make use of the types from net_bsd.h */
+typedef _size_t size_t;
+typedef _time_t time_t;
+
+#define curl_fd_set_typedefed
+typedef struct fd_set curl_fd_set;
+
+#endif
+
 
 /* CURL_PULL_SYS_SOCKET_H is defined above when inclusion of header file  */
 /* sys/socket.h is required here to properly make type definitions below. */
 #ifdef CURL_PULL_SYS_SOCKET_H
-#ifndef USE_RTOS
 #  include <sys/socket.h>
-#else
-#include "lwip/sockets.h"
-#endif // USE_RTOS
 #endif
 
 /* CURL_PULL_SYS_POLL_H is defined above when inclusion of header file    */
@@ -438,13 +537,13 @@
 
 /* Data type definition of curl_socklen_t. */
 #ifdef CURL_TYPEOF_CURL_SOCKLEN_T
-typedef CURL_TYPEOF_CURL_SOCKLEN_T curl_socklen_t;
+  typedef CURL_TYPEOF_CURL_SOCKLEN_T curl_socklen_t;
 #endif
 
 /* Data type definition of curl_off_t. */
 
 #ifdef CURL_TYPEOF_CURL_OFF_T
-typedef CURL_TYPEOF_CURL_OFF_T curl_off_t;
+  typedef CURL_TYPEOF_CURL_OFF_T curl_off_t;
 #endif
 
 /*
@@ -466,11 +565,43 @@ typedef CURL_TYPEOF_CURL_OFF_T curl_off_t;
   defined(__HP_aCC) || defined(__BORLANDC__) || defined(__LCC__) || \
   defined(__POCC__) || defined(__SALFORDC__) || defined(__HIGHC__) || \
   defined(__ILEC400__)
-/* This compiler is believed to have an ISO compatible preprocessor */
+  /* This compiler is believed to have an ISO compatible preprocessor */
 #define CURL_ISOCPP
 #else
-/* This compiler is believed NOT to have an ISO compatible preprocessor */
+  /* This compiler is believed NOT to have an ISO compatible preprocessor */
 #undef CURL_ISOCPP
+#endif
+
+/*
+ * For the standard systems
+ */
+#ifndef curl_struct_sockaddr
+#define curl_struct_sockaddr sockaddr
+#endif
+#ifndef curl_fd_set_typedefed
+#define curl_fd_set_typedefed
+typedef fd_set curl_fd_set;
+#endif
+#ifndef curl_pollfd
+#define curl_pollfd pollfd
+#endif
+#ifndef curl_setsockopt
+#define curl_setsockopt(a,b,c,d,e) setsockopt(a,b,c,d,e)
+#endif
+#ifndef curl_bind
+#define curl_bind(a,b,c) bind(a,b,c)
+#endif
+#ifndef curl_connect
+#define curl_connect(a,x,b,c) connect(a,b,c)
+#endif
+#ifndef curl_recv
+#define curl_recv(a,b,c,d) recv(a,b,c,d)
+#endif
+#ifndef curl_socket
+#define curl_socket(a,b,c) socket(a,b,c)
+#endif
+#ifndef CURL_FD_SET
+#define CURL_FD_SET(a,b,c) FD_SET(a,b)
 #endif
 
 /*
@@ -478,21 +609,21 @@ typedef CURL_TYPEOF_CURL_OFF_T curl_off_t;
  */
 
 #if defined(__BORLANDC__) && (__BORLANDC__ == 0x0551)
-#  define __CURL_OFF_T_C_HLPR2(x) x
-#  define __CURL_OFF_T_C_HLPR1(x) __CURL_OFF_T_C_HLPR2(x)
-#  define CURL_OFF_T_C(Val)  __CURL_OFF_T_C_HLPR1(Val) ## \
-                             __CURL_OFF_T_C_HLPR1(CURL_SUFFIX_CURL_OFF_T)
-#  define CURL_OFF_TU_C(Val) __CURL_OFF_T_C_HLPR1(Val) ## \
-                             __CURL_OFF_T_C_HLPR1(CURL_SUFFIX_CURL_OFF_TU)
+#  define CURLINC_OFF_T_C_HLPR2(x) x
+#  define CURLINC_OFF_T_C_HLPR1(x) CURLINC_OFF_T_C_HLPR2(x)
+#  define CURL_OFF_T_C(Val)  CURLINC_OFF_T_C_HLPR1(Val) ## \
+                             CURLINC_OFF_T_C_HLPR1(CURL_SUFFIX_CURL_OFF_T)
+#  define CURL_OFF_TU_C(Val) CURLINC_OFF_T_C_HLPR1(Val) ## \
+                             CURLINC_OFF_T_C_HLPR1(CURL_SUFFIX_CURL_OFF_TU)
 #else
 #  ifdef CURL_ISOCPP
-#    define __CURL_OFF_T_C_HLPR2(Val,Suffix) Val ## Suffix
+#    define CURLINC_OFF_T_C_HLPR2(Val,Suffix) Val ## Suffix
 #  else
-#    define __CURL_OFF_T_C_HLPR2(Val,Suffix) Val/**/Suffix
+#    define CURLINC_OFF_T_C_HLPR2(Val,Suffix) Val/**/Suffix
 #  endif
-#  define __CURL_OFF_T_C_HLPR1(Val,Suffix) __CURL_OFF_T_C_HLPR2(Val,Suffix)
-#  define CURL_OFF_T_C(Val)  __CURL_OFF_T_C_HLPR1(Val,CURL_SUFFIX_CURL_OFF_T)
-#  define CURL_OFF_TU_C(Val) __CURL_OFF_T_C_HLPR1(Val,CURL_SUFFIX_CURL_OFF_TU)
+#  define CURLINC_OFF_T_C_HLPR1(Val,Suffix) CURLINC_OFF_T_C_HLPR2(Val,Suffix)
+#  define CURL_OFF_T_C(Val)  CURLINC_OFF_T_C_HLPR1(Val,CURL_SUFFIX_CURL_OFF_T)
+#  define CURL_OFF_TU_C(Val) CURLINC_OFF_T_C_HLPR1(Val,CURL_SUFFIX_CURL_OFF_TU)
 #endif
 
-#endif /* __CURL_SYSTEM_H */
+#endif /* CURLINC_SYSTEM_H */

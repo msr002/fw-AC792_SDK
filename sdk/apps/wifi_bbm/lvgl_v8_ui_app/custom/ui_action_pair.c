@@ -3,6 +3,8 @@
 #include "gui_guider.h"
 
 static uint8_t cur_pair_channel;
+static int is_cancel_option = 0;
+static int cancel_wifi_channel = 0;
 
 #if !LV_USE_GUIBUILDER_SIMULATOR
 #include "app_core.h"
@@ -83,6 +85,53 @@ int gui_set_bbm_unpair(uint8_t ch)
     start_app(&it);
 
     return 0;
+}
+
+static void gui_bbm_pair_confirm_wifi_ch(void)
+{
+    //清空配对表
+    struct intent it;
+    init_intent(&it);
+    it.name = "baby_monitor";
+    it.action = ACTION_BBM_CLEAN_PAIR;
+    start_app(&it);
+
+    int wifi_channel;
+    if (syscfg_read(BBM_WIFI_CH_INDEX, &wifi_channel, sizeof(wifi_channel))) {
+        wifi_set_channel(wifi_channel);
+    }
+
+    lvgl_module_msg_send_value(GUI_PAIR_MSG_ID_PAIR_CH0, 0, 0);
+    lvgl_module_msg_send_value(GUI_PAIR_MSG_ID_PAIR_CH1, 0, 0);
+    lvgl_module_msg_send_value(GUI_PAIR_MSG_ID_PAIR_CH2, 0, 0);
+    lvgl_module_msg_send_value(GUI_PAIR_MSG_ID_PAIR_CH3, 0, 0);
+    lvgl_module_msg_send_value(GUI_PAIR_MSG_ID_PAIR_CH4, 0, 0);
+    lvgl_module_msg_send_value(GUI_PAIR_MSG_ID_PAIR_CH5, 0, 0);
+}
+
+static void gui_bbm_pair_cancel_wifi_ch(void)
+{
+    int index;
+    is_cancel_option = 1;
+
+    if (cancel_wifi_channel == 1) {
+        index = 0;
+    } else if (cancel_wifi_channel == 6) {
+        index = 1;
+    } else if (cancel_wifi_channel == 13) {
+        index = 2;
+    }
+
+    lvgl_module_msg_send_value(GUI_PAIR_MSG_ID_WIFI_CH_SELECT, index, 1);
+}
+
+int gui_set_bbm_wifi_channel(void)
+{
+    char lab[128];
+    sprintf(lab, "This will disconnect all connections. \nAre you sure you want to do this?");
+    gui_set_sys_options_yes_cb(gui_bbm_pair_confirm_wifi_ch);
+    gui_set_sys_options_no_cb(gui_bbm_pair_cancel_wifi_ch);
+    post_home_msg_to_ui("show_sys_options", lab);
 }
 
 int gui_pair_msg_pair_ch0_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type)
@@ -185,6 +234,44 @@ int gui_pair_msg_unpair_lab_cb(gui_msg_action_t access, gui_msg_data_t *data, gu
     return 0;
 }
 
+int gui_pair_msg_wifi_ch_select_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type)
+{
+    int wifi_channel;
+    int ret = 0;
+    if (access == GUI_MSG_ACCESS_SET) {
+
+        syscfg_read(BBM_WIFI_CH_INDEX, &cancel_wifi_channel, sizeof(cancel_wifi_channel));
+
+        if (data->value_int == 0) {
+            wifi_channel = 1;
+        } else if (data->value_int == 1) {
+            wifi_channel = 6;
+        } else if (data->value_int == 2) {
+            wifi_channel = 13;
+        }
+
+        syscfg_write(BBM_WIFI_CH_INDEX, &wifi_channel, sizeof(wifi_channel));
+
+        if (!is_cancel_option) {
+            gui_set_bbm_wifi_channel();
+        }
+        is_cancel_option = 0;
+    }
+
+    if (access == GUI_MSG_ACCESS_GET) {
+        syscfg_read(BBM_WIFI_CH_INDEX, &wifi_channel, sizeof(wifi_channel));
+        if (wifi_channel == 1) {
+            data->value_int = 0;
+        } else if (wifi_channel == 6) {
+            data->value_int = 1;
+        } else if (wifi_channel == 13) {
+            data->value_int = 2;
+        }
+    }
+
+    return 0;
+}
+
 REGISTER_UI_MODULE_EVENT_HANDLER(GUI_PAIR_MSG_ID_PAIR_CH0)
 .onchange = gui_pair_msg_pair_ch0_cb,
 };
@@ -210,5 +297,9 @@ REGISTER_UI_MODULE_EVENT_HANDLER(GUI_PAIR_MSG_ID_PARING_LAB)
 };
 REGISTER_UI_MODULE_EVENT_HANDLER(GUI_PAIR_MSG_ID_UNPAIR_LAB)
 .onchange = gui_pair_msg_unpair_lab_cb,
+};
+
+REGISTER_UI_MODULE_EVENT_HANDLER(GUI_PAIR_MSG_ID_WIFI_CH_SELECT)
+.onchange = gui_pair_msg_wifi_ch_select_cb,
 };
 #endif

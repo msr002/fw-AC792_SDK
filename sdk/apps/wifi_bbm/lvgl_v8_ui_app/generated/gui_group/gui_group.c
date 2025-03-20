@@ -86,18 +86,26 @@ void set_default_group_cb()
         gui_group_add_obj(guider_ui.default_group, guider_ui.pair_status_imglist_5, true);
         gui_group_add_obj(guider_ui.default_group, guider_ui.pair_status_imglist_6, true);
         gui_group_add_obj(guider_ui.default_group, guider_ui.pair_status_imgbtn_1, true);
+        gui_group_add_obj(guider_ui.default_group, guider_ui.pair_status_ddlist_1, true);
     } else if (act_scr == guider_ui.rt_stream) {
         gui_group_add_obj(guider_ui.default_group, guider_ui.rt_stream_imgbtn_1, true);
     } else if (act_scr == guider_ui.file_browser) {
         gui_group_add_obj(guider_ui.default_group, guider_ui.file_browser_imgbtn_1, true);
         gui_group_add_obj(guider_ui.default_group, guider_ui.file_browser_imgbtn_2, true);
         gui_group_add_obj(guider_ui.default_group, guider_ui.file_browser_imgbtn_3, true);
+        gui_group_add_obj(guider_ui.default_group, guider_ui.file_browser_imgbtn_4, true);
         gui_group_add_obj(guider_ui.default_group, guider_ui.file_browser_file_cont1, true);
+        gui_group_add_obj(guider_ui.default_group, guider_ui.file_browser_cb_1, true);
         gui_group_add_obj(guider_ui.default_group, guider_ui.file_browser_file_cont2, true);
+        gui_group_add_obj(guider_ui.default_group, guider_ui.file_browser_cb_2, true);
         gui_group_add_obj(guider_ui.default_group, guider_ui.file_browser_file_cont3, true);
+        gui_group_add_obj(guider_ui.default_group, guider_ui.file_browser_cb_3, true);
         gui_group_add_obj(guider_ui.default_group, guider_ui.file_browser_file_cont4, true);
+        gui_group_add_obj(guider_ui.default_group, guider_ui.file_browser_cb_4, true);
         gui_group_add_obj(guider_ui.default_group, guider_ui.file_browser_file_cont5, true);
+        gui_group_add_obj(guider_ui.default_group, guider_ui.file_browser_cb_5, true);
         gui_group_add_obj(guider_ui.default_group, guider_ui.file_browser_file_cont6, true);
+        gui_group_add_obj(guider_ui.default_group, guider_ui.file_browser_cb_6, true);
     } else if (act_scr == guider_ui.pair_options) {
         gui_group_add_obj(guider_ui.default_group, guider_ui.pair_options_imgbtn_1, true);
         gui_group_add_obj(guider_ui.default_group, guider_ui.pair_options_imgbtn_2, true);

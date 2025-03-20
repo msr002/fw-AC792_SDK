@@ -3,6 +3,12 @@
 
 #include "system/includes.h"
 #include "app_config.h"
+#include "utils/uthash/uthash.h"
+
+typedef struct {
+    int file_no;             // 文件序号key
+    UT_hash_handle hh;       // 哈希表句柄
+} file_entry;
 
 struct net_ctp_thumb {
     int start_index;
@@ -35,6 +41,7 @@ struct bbm_client_hdl {
     void *ctp_cli_hdl;          //CTP句柄
     u32 ip_addr;                //CTP ip地址
     u32 ch;                     //设备通道号
+    u16 alive_timer;
 
     //实时流/录像
     struct video_rec_config rt_config;      //实时流配置
@@ -62,6 +69,7 @@ struct bbm_client_hdl {
     int ctp_file_play_task_pid;     //文件播放线程PID
     u8 ctp_file_play_task_exit;     //文件播放线程退出标记
     u8 video_play_state;            //播放状态
+    int play_index;
 };
 
 

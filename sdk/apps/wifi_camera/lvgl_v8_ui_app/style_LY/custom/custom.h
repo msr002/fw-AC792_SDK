@@ -12,7 +12,9 @@ extern "C" {
 #include "custom.h"
 #include <time.h>
 #include "../generated/gui_events/screen_handler.h"
+#include "../generated/gui_timelines/gui_timelines.h"
 #include "sim_database.h"//仿真专用数据库
+
 
 #if !LV_USE_GUIBUILDER_SIMULATOR
 #include "key_event.h"
@@ -20,6 +22,26 @@ extern "C" {
 #include "../generated/gui_res/res_common.h"
 #include "../generated/gui_msg/gui_msg.h"
 #endif
+enum {//语言
+    LANG_ZH_CN = 1,
+    LANG_ZH_HK,
+    LANG_ENGLISH,
+    LANG_RU,
+    LANG_AR,
+    LANG_TH,
+    LANG_DE,
+    LANG_FR,
+    LANG_KO,
+    LANG_JA,
+    LANG_ES,
+    LANG_PT,
+    LANG_CS,
+    LANG_PL,
+    LANG_IT,
+    LANG_NL,
+    LANG_SV,
+    LANG_DA
+};
 
 //子菜单页面枚举
 enum MENU_SUBPAGE {
@@ -79,10 +101,6 @@ enum {//子页面功能键
     SUBPAGE_FUNKEY7
 };
 
-enum {//语言
-    LANG_CHINESE_SIMP = 1,
-    LANG_ENGLISH
-};
 
 struct sysmenu_subpage_data {
     void *funkey1;//功能按键1文字内容（填空就是不显示）
@@ -143,7 +161,7 @@ extern struct photo_submenu_data photo_subpage_data;  //拍照设置菜单
 extern struct sysmenu_subpage_data my_sysmenu_subpage;  //系统设置菜单
 extern char user_roller_str[128];//记录roller被选项
 extern int subpage_cur_btn;//子页面当前被按下的按键 0无按下 1~n代表funkey1~n
-extern bool update_date;
+
 
 /*
 * 录像启停控制--控件触摸事件回调
@@ -204,9 +222,7 @@ void format_sdcard(void);
 void setting_reset(void);
 void custom_init(lv_ui *ui);
 void hide_label_timer_cb(lv_timer_t *timer);
-void set_rtc_time(void);
-void set_carnum(void);
-void carnum_utf8_to_gb2312(const uint8_t *utf_8, uint8_t *gb2312_data, int selected_index);
+
 
 #if !LV_USE_GUIBUILDER_SIMULATOR
 void set_menu_status(int data);

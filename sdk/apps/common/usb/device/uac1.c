@@ -2315,6 +2315,11 @@ u32 uac_audio_desc_config(const usb_dev usb_id, u8 *ptr, u32 *cur_itf_num)
     return i;
 }
 
+__attribute__((weak)) u8 get_uac_spk_def_vol(void)
+{
+    return 100;
+}
+
 static u32 uac_spk_register(const usb_dev usb_id)
 {
     if (spk_info[usb_id] == NULL) {
@@ -2329,7 +2334,7 @@ static u32 uac_spk_register(const usb_dev usb_id)
 #endif
         spk_info[usb_id]->spk_dma_buffer = usb_alloc_ep_dmabuffer(usb_id, SPK_ISO_EP_OUT, spk_get_max_frame_len() + ep_reserved_len);
     }
-    spk_info[usb_id]->spk_def_vol = vol_convert(100);
+    spk_info[usb_id]->spk_def_vol = vol_convert(get_uac_spk_def_vol());
     spk_info[usb_id]->spk_left_vol = spk_info[usb_id]->spk_def_vol;
     spk_info[usb_id]->spk_right_vol = spk_info[usb_id]->spk_def_vol;
     spk_info[usb_id]->spk_max_vol = vol_convert(100);

@@ -1,3 +1,4 @@
+
 #include "system/includes.h"
 #include "system/task.h"
 #include "app_config.h"
@@ -11,6 +12,10 @@
 #include "device/device.h"
 #include "asm/includes.h"
 #include "ota_impl.h"
+#if (defined THIRD_PARTY_PROTOCOLS_SEL && (THIRD_PARTY_PROTOCOLS_SEL & MIJIA_EN))
+#include "syscfg/syscfg_id.h"
+#include "user_cfg_id.h"
+#endif
 
 //=======================net_update==========================================================
 #define NET_UPDATE_STATE_NONE	0
@@ -38,7 +43,7 @@ struct net_update {
     FILE *fd;
 };
 
-#ifdef DATA_DOWNLOAD_VERIFY_ENABLE
+#if defined DATA_DOWNLOAD_VERIFY_ENABLE
 typedef struct stJL_FILE_HEAD {
     u16 u16Crc;
     u16 u16DataCrc;
@@ -55,18 +60,44 @@ extern u16 calc_crc16_with_init_val(u16 init_crc, u8 *ptr, u16 len);
 static int firstBlock = 1;
 static u16 calcCrc = 0;
 static JL_FILE_HEAD gUpdateHead;
+#elif (defined THIRD_PARTY_PROTOCOLS_SEL && (THIRD_PARTY_PROTOCOLS_SEL & MIJIA_EN))
+typedef struct stJL_FILE_HEAD {
+    u16 u16Crc;
+    u16 u16DataCrc;
+    u32 u32Address;
+    u32 u32Length;
+
+    u8 u8Attribute;
+    u8 u8Res;
+    u16 u16Index;
+    char szFileName[16];
+} JL_FILE_HEAD;
+
+static int firstBlock = 1;
+static JL_FILE_HEAD gUpdateHead;
+static u32 update_file_size = 0;
+u32 get_update_file_size(void)
+{
+    syscfg_read(CFG_OTA_PART_SIZE, &update_file_size, sizeof(u32));
+    return update_file_size;
+}
 #endif
 
 static struct net_update *net_update_info = NULL;
 int storage_device_ready(void);
 u32 get_target_udate_addr(void);
 
+
 void test_update_process_notify_callback(void *priv)
 {
     static u32 percent = 0;
     update_file_info *info = (update_file_info *)priv;
     u32 tmp = info->finish_len * 100 / info->file_size;
-
+#if (defined THIRD_PARTY_PROTOCOLS_SEL && (THIRD_PARTY_PROTOCOLS_SEL & MIJIA_EN))
+    if (update_file_size) {
+        info->file_size = update_file_size;
+    }
+#endif
     if (percent != tmp || tmp == 0) {
         printf("update[%s] >> %d%% \n", info->FileName, tmp);
         percent = tmp;
@@ -97,7 +128,7 @@ static int dual_bank_verify_hdl(int result)
 }
 #endif
 
-#ifdef DATA_DOWNLOAD_VERIFY_ENABLE
+#if defined DATA_DOWNLOAD_VERIFY_ENABLE
 static int net_update_check(JL_FILE_HEAD *head, const u8 *buf, const u32 len)
 {
     int ret;
@@ -119,6 +150,31 @@ static int net_update_check(JL_FILE_HEAD *head, const u8 *buf, const u32 len)
 
     printf("update file not match!\n");
     return -1;
+}
+#elif (defined THIRD_PARTY_PROTOCOLS_SEL && (THIRD_PARTY_PROTOCOLS_SEL & MIJIA_EN))
+static int net_update_check(JL_FILE_HEAD *head, const u8 *buf, const u32 len)
+{
+    int ret;
+    u32 size = 0;
+
+    if ((32 > len) || (NULL == head)) {
+        return -1;
+    }
+
+    memcpy((u8 *)head, buf, sizeof(JL_FILE_HEAD));
+
+    ret = jl_file_head_valid_check(head);
+    if (!ret) {
+        update_file_size = head->u32Length;
+        syscfg_write(CFG_OTA_PART_SIZE, &update_file_size, sizeof(u32));
+    } else {
+        syscfg_read(CFG_OTA_PART_SIZE, &size, sizeof(u32));
+        if (size > 0) {
+            update_file_size = size;
+        }
+    }
+    printf("%s=%d==size = %d", __func__, __LINE__, head->u32Length);
+    return 0;
 }
 #endif
 
@@ -337,6 +393,17 @@ int net_fwrite(void *fd, unsigned char *buf, int len, int end)
             calcCrc = calc_crc16_with_init_val(calcCrc, buf, len);
         }
     }
+#elif (defined THIRD_PARTY_PROTOCOLS_SEL && (THIRD_PARTY_PROTOCOLS_SEL & MIJIA_EN))
+    if (buf) {
+        if (firstBlock) {
+            err = net_update_check(&gUpdateHead, buf, len);
+            if (err) {
+                printf("net_update_check err!");
+                return -EINVAL;
+            }
+            firstBlock = 0;
+        }
+    }
 #endif
 
     if (net_update->write_to_flash) {
@@ -417,5 +484,6 @@ int net_fwrite(void *fd, unsigned char *buf, int len, int end)
     }
     return ret;
 }
+
 
 

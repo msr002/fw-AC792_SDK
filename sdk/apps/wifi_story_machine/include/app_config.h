@@ -158,11 +158,6 @@
 // #define CONFIG_SYS_VDD_CLOCK_ENABLE          //系统可使用动态电源、时钟配置
 // #define CONFIG_IPMASK_ENABLE                 //系统使用不可屏蔽中断
 
-//*********************************************************************************//
-//                                  FCC测试相关配置                                //
-//*********************************************************************************//
-//#define RF_FCC_TEST_ENABLE//使能RF_FCC测试，详细配置见"apps/common/rf_fcc_tool/include/rf_fcc_main.h"
-
 
 //*********************************************************************************//
 //                                  网络相关配置                                   //
@@ -220,7 +215,7 @@
 #endif
 
 #if TCFG_WIFI_ENABLE
-#define CONFIG_AIRKISS_NET_CFG                  //AIRKISS配网
+// #define CONFIG_AIRKISS_NET_CFG               //AIRKISS配网
 // #define CONFIG_WSC_NET_CFG                   //WSC配网
 #endif
 
@@ -442,22 +437,36 @@
 #define TCFG_USER_TWS_ENABLE                        0   //tws功能使能
 #define TCFG_USER_BLE_ENABLE                        1   //BLE功能使能
 #define TCFG_USER_EDR_ENABLE                        0   //EDR用户自定义协议功能
-#define TCFG_USER_EMITTER_ENABLE                    1   //蓝牙发射功能
+#define TCFG_USER_EMITTER_ENABLE                    0   //蓝牙发射功能
 #define TCFG_BT_DUAL_CONN_ENABLE                    0   //经典蓝牙支持同时连接2台设备
+#if TCFG_RF_FCC_TEST_ENABLE
+#define TCFG_BT_SNIFF_ENABLE                        0   //经典蓝牙低功耗sniff模式
+#define TCFG_BT_SUPPORT_AAC                         0   //蓝牙AAC格式支持
+#define TCFG_BT_SUPPORT_MUSIC_VOL_SYNC              0   //音量同步
+#define TCFG_BT_SUPPORT_DISPLAY_BAT                 0   //电池电量同步显示功能
+#else
 #define TCFG_BT_SNIFF_ENABLE                        1   //经典蓝牙低功耗sniff模式
 #define TCFG_BT_SUPPORT_AAC                         1   //蓝牙AAC格式支持
 #define TCFG_BT_SUPPORT_MUSIC_VOL_SYNC              1   //音量同步
 #define TCFG_BT_SUPPORT_DISPLAY_BAT                 1   //电池电量同步显示功能
+#endif
 #define TCFG_BT_SUPPORT_EMITTER_AUTO_A2DP_START     1   //发射器连上后自动打开A2DP流
 #define TCFG_BT_SUPPORT_RECEIVER_AUTO_A2DP_START    1   //接收器器连上后自动打开A2DP流
 #define TCFG_BT_SUPPORT_EMITTER_PAGE_SCAN           0   //发射器打开可发现性
 #define TCFG_BT_SUPPORT_WIFI_CFG_COEXISTENCE        0   //wifi配网时保持蓝牙连接
 
 //---------------------------用户选择蓝牙支持的协议--------------------------------//
+#if TCFG_RF_FCC_TEST_ENABLE
+#define TCFG_BT_SUPPORT_PROFILE_SPP                 0
+#define TCFG_BT_SUPPORT_PROFILE_HFP                 0
+#define TCFG_BT_SUPPORT_PROFILE_A2DP                0
+#define TCFG_BT_SUPPORT_PROFILE_AVCTP               0
+#else
 #define TCFG_BT_SUPPORT_PROFILE_SPP                 1
 #define TCFG_BT_SUPPORT_PROFILE_HFP                 1
 #define TCFG_BT_SUPPORT_PROFILE_A2DP                1
 #define TCFG_BT_SUPPORT_PROFILE_AVCTP               1
+#endif
 #define TCFG_BT_SUPPORT_PROFILE_HID                 0
 #define TCFG_BT_SUPPORT_PROFILE_PNP                 0
 #define TCFG_BT_SUPPORT_PROFILE_PBAP                0

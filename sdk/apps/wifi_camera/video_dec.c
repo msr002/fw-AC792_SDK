@@ -36,7 +36,6 @@ const char *dec_path[DEC_PATH_NUM][2] = {
 };
 #endif
 
-#define  CONFIG_FILE_PREVIEW_ENABLE
 extern int video_dec_change_status(struct video_dec_hdl *, struct intent *it);
 extern int video_dec_set_config(struct video_dec_hdl *, struct intent *it);
 extern int video_dec_get_config(struct intent *it);
@@ -45,6 +44,9 @@ struct video_dec_hdl dec_handler;
 
 #define __this 	(&dec_handler)
 
+//通过预打开fb显存,切换文件时不关闭
+//解决切换文件时屏幕会黑一下问题
+#define VIDEO_DEC_FB_PREV_OPEN  0
 
 /*
  * 发送一些状态给ui
@@ -62,6 +64,12 @@ u32 video_dec_get_file_toltime(void)
 {
     return __this->req.dec.info.total_time;
 }
+
+void *video_dec_get_file_fd(void)
+{
+    return __this->req.dec.file;
+}
+
 /*
  * 发送文件的信息给LVGL ui显示
  */
@@ -69,6 +77,7 @@ void video_dec_post_file_info_to_ui(int fname_len, int format)
 {
 #ifdef CONFIG_UI_ENABLE
     int attr;
+    int attr_ro = 0;
 
     /*
      *发送文件名信息，如果文件名长度超过12byte，则为utf16编码格式
@@ -87,11 +96,20 @@ void video_dec_post_file_info_to_ui(int fname_len, int format)
      */
     fget_attr(__this->req.dec.file, &attr);
     /*video_dec_post_msg("fattr:ro=%1", !!(attr & F_ATTR_RO));*/
+    attr_ro = attr & F_ATTR_RO;
 
     /*
      * 发送分辨率和影片时长信息
      */
+#ifdef CONFIG_FILE_PREVIEW_ENABLE
     video_dec_post_msg("fileInfo", 0);
+#else
+    video_dec_post_msg("fileInfo",
+                       __this->req.dec.info.total_time,
+                       __this->req.dec.info.width,
+                       __this->req.dec.info.height,
+                       __this->file_type, attr_ro);
+#endif
     /*video_dec_post_msg("res:w=%2 h=%2,filmLen:s=%4", __this->req.dec.info.width,*/
     /*__this->req.dec.info.height, __this->req.dec.info.total_time);*/
 
@@ -334,13 +352,8 @@ static int video_dec_start(void *p)
      */
     __this->req.dec.left 	= 0;
     __this->req.dec.top 	= 0;
-#ifdef DISP_IMAGE_AND_VIDEO
-    __this->req.dec.width 	= 640;
-    __this->req.dec.height 	= 480;
-#else
-    __this->req.dec.width 	= 480;
-    __this->req.dec.height 	= 320;
-#endif
+    __this->req.dec.width 	= LCD_W;
+    __this->req.dec.height 	= LCD_H;
 
     /*
      * jpeg图片优先解缩略图标志
@@ -354,8 +367,10 @@ static int video_dec_start(void *p)
 
     __this->req.dec.volume = __this->volume;
     __this->curr_dir = 0;
-#ifndef CONFIG_UI_ENABLE
     video_dec_scan_dir();
+
+#if VIDEO_DEC_FB_PREV_OPEN
+    video_dec_fb_prev_open();
 #endif
     return 0;
 }
@@ -573,6 +588,16 @@ static int video_dec_set_speed(float speed)
     return 0;
 }
 
+//TODO
+//SEEK到文件头部开始播放
+static int video_dec_set_seek(void)
+{
+    union video_dec_req req = {0};
+
+    server_request(__this->video_dec, VIDEO_REQ_DEC_SET_SEEK, &req);
+    return 0;
+}
+
 #ifdef CONFIG_FILE_PREVIEW_ENABLE
 int dec_open_file()
 {
@@ -674,6 +699,10 @@ int dec_open_file()
             video_dec_post_msg("play");
         }
     }
+
+#if VIDEO_DEC_FB_PREV_OPEN
+    video_dec_fb_prev_open();
+#endif
     return err;
 }
 #endif
@@ -712,6 +741,30 @@ int ui_video_dir(char *dir_path)
     fscan_release(fs);
     return 0;
 }
+
+static int video_dec_fb_prev_open(void)
+{
+    printf("server req fb prev open \n");
+    if (!__this->video_dec) {
+        printf("err !! video_dec server is NULL \n");
+        return -1;
+    }
+
+    return server_request(__this->video_dec, VIDEO_REQ_DEC_FB_PREV_OPEN, &__this->req);
+}
+
+static int video_dec_fb_prev_close(void)
+{
+    printf("server req fb prev close \n");
+    if (!__this->video_dec) {
+        printf("err !! video_dec server is NULL");
+        return -1;
+
+    }
+    return server_request(__this->video_dec, VIDEO_REQ_DEC_FB_PREV_CLOSE, &__this->req);
+}
+
+
 
 /*
  * 解码任务的状态机函数，由start_app负责调用
@@ -816,6 +869,9 @@ static int state_machine(struct application *app, enum app_state state, struct i
         case ACTION_VIDEO_DEC_CUR_PAGE:
             if (__this->req.dec.file) {
                 server_request(__this->video_dec, VIDEO_REQ_DEC_STOP, &__this->req);
+#if VIDEO_DEC_FB_PREV_OPEN
+                video_dec_fb_prev_close();
+#endif
                 server_close(__this->video_dec);
                 __this->video_dec = NULL;
 #ifdef CONFIG_EMR_DIR_ENABLE
@@ -918,6 +974,9 @@ static int state_machine(struct application *app, enum app_state state, struct i
         break;
     case APP_STA_DESTROY:
         if (__this->video_dec) {
+#if VIDEO_DEC_FB_PREV_OPEN
+            video_dec_fb_prev_close();
+#endif
             server_close(__this->video_dec);
             __this->video_dec = NULL;
         }
@@ -966,10 +1025,13 @@ static int video_dec_key_event_handler(struct key_event *key)
             } else
 #endif
             {
+                //todo
+#if 1
                 if (__this->status != VIDEO_DEC_FR) {
                     __this->ff_fr_times = 1;
                 }
                 video_dec_ff_fr(VIDEO_REQ_DEC_FR);
+#endif
             }
             break;
         case KEY_DOWN:
@@ -981,10 +1043,13 @@ static int video_dec_key_event_handler(struct key_event *key)
             } else
 #endif
             {
+                //todo
+#if 1
                 if (__this->status != VIDEO_DEC_FF) {
                     __this->ff_fr_times = 1;
                 }
                 video_dec_ff_fr(VIDEO_REQ_DEC_FF);
+#endif
 
             }
             break;
@@ -1047,6 +1112,9 @@ static int video_dec_device_event_handler(struct sys_event *sys_eve)
                 //进入了解码才关闭dec
                 if (__this->video_dec) {
                     server_request(__this->video_dec, VIDEO_REQ_DEC_STOP, &__this->req);
+#if VIDEO_DEC_FB_PREV_OPEN
+                    video_dec_fb_prev_close();
+#endif
                     server_close(__this->video_dec);
                     __this->video_dec = NULL;
 

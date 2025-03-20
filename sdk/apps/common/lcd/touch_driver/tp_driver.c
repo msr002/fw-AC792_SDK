@@ -18,12 +18,12 @@
 
 #define TP_RESOLUTION_SCALE_ENABLE   0         ///< TP与显示屏分辨率不一致时，可使能TP坐标缩放，有一定误差，仅调试用
 #if TP_RESOLUTION_SCALE_ENABLE
-#define TP_REAL_X                    4080      ///< TP驱动芯片返回的实际最大X坐标值
-#define TP_REAL_Y                    4080      ///< TP驱动芯片返回的实际最大Y坐标值
+#define TP_REAL_X                    4080      ///< TP驱动芯片返回的实际最大X坐标值，单位pixel
+#define TP_REAL_Y                    4080      ///< TP驱动芯片返回的实际最大Y坐标值，单位pixel
 #endif
 
-
-#define TP_REPOST_DATA_TO_UI_TIME    2         ///< UI接收不过来数据，TP重新发送数据给UI的时间间隔
+#define TP_EVENT_INTERVAL            100       ///< TP发送触摸事件到系统的最小间隔，单位ms
+#define TP_REPOST_DATA_TO_UI_TIME    2         ///< UI接收不过来数据，TP重新发送数据给UI的时间间隔，单位system ticks
 #define TP_FILTER_SAME_COORDINATE    0         ///< 过滤相同坐标。如果UI没有长按事件的需求，可打开减少消息发送消耗
 
 
@@ -219,10 +219,16 @@ static void tp_calc_interval_of_trig(void)
 //发送触摸事件到系统
 static int tp_event_notify_sys(u16 x, u16 y, touch_action_t act)
 {
+    static u32 tp_last_send_time;
+    u32 now_time = get_system_ms();
     struct touch_event event;
     event.x = x;
     event.y = y;
     event.action = act;
+
+    if ((now_time - tp_last_send_time) < TP_EVENT_INTERVAL) {
+        return 0; ///< 低于最低发送间隔，取消发送事件给系统
+    }
 
     log_debug("tp_event_notify_sys: %d\n", act);
     if (touch_event_notify(TOUCH_EVENT_FROM_TOUCH, &event)) {
@@ -233,6 +239,8 @@ static int tp_event_notify_sys(u16 x, u16 y, touch_action_t act)
     if (touch_event_check_consume()) {
         return -1;
     }
+
+    tp_last_send_time = now_time;
 
     return 0;
 }

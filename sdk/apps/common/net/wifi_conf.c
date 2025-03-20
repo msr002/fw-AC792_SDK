@@ -23,6 +23,16 @@ Debug information verbosity: lower values indicate higher urgency
 */
 const u8 RTDebugLevel = 2;
 
+#if TCFG_RF_FCC_TEST_ENABLE
+const u8 config_rf_test_enable = 1;
+#else
+#if TCFG_RF_PRODUCT_TEST_ENABLE
+u8 config_rf_test_enable = 0;
+#else
+const u8 config_rf_test_enable = 0;
+#endif
+#endif
+
 const char WL_TX_DEBUG = 0; //WIFI底层发送数据FIFO繁忙打印
 const char WL_RX_DEBUG = 0; //WIFI底层接收FIFO塞满导致丢包打印
 
@@ -38,7 +48,11 @@ const char WL_RX_PEND_DEBUG_SEC = 2; //统计WIFI底层连续多少秒都接收�
 
 const char WL_RX_OVERFLOW_DEBUG = 0; //统计WIFI底层接收FIFO塞满导致丢包打印,一般认为对端发送太猛/空中干扰太强/CPU太繁忙来接收线程来不及取数因素导致, 使能后如果出现丢包打印每秒丢多少个数据包
 
+#if TCFG_RF_FCC_TEST_ENABLE
+char WIFI_PA_ENABLE = 0; //wifi开启外挂硬件PA功率放大，需要根据实际原理图配置需要映射的IO
+#else
 const char WIFI_PA_ENABLE = 0; //wifi开启外挂硬件PA功率放大，需要根据实际原理图配置需要映射的IO
+#endif
 
 #if defined CONFIG_NO_SDRAM_ENABLE
 const u8 RxReorderEnable = 0; //底层包乱序整理，0为关闭(关闭时UDP重发包也会上传到上层, 但关闭可以减少内存消耗)，1为开启
@@ -52,7 +66,7 @@ const u16 MAX_CHANNEL_TIME_BSS_INFRA = 120;//扫描每个信道停留时间,单�
 
 const char WIFI_CHANNEL_QUALITY_INDICATION_BAD = 5; //STA模式下的信道通信质量差阈值,一旦低于这个值就断线重连,如果配置为-1则信号质量再差也不通知断线,但是太久不重连会被路由器认为死亡踢掉的风险
 
-#ifdef CONFIG_RF_TEST_ENABLE
+#if TCFG_RF_FCC_TEST_ENABLE
 const char wifi_temperature_drift_trim_on = 0; //WiFi温度漂移校准开关,0为关闭，1为打开
 #else
 const char wifi_temperature_drift_trim_on = 1; //WiFi温度漂移校准开关,0为关闭，1为打开
@@ -71,7 +85,7 @@ const u16 MAX_PACKETS_IN_MCAST_PS_QUEUE = 8;  //配置WiFi驱动最大发送MCAS
 const u16 MAX_PACKETS_IN_PS_QUEUE	= 16; //配置WiFi驱动最大发送power-save队列	//128	/*16 */
 #endif
 
-#ifdef CONFIG_RF_TEST_ENABLE
+#if TCFG_RF_FCC_TEST_ENABLE
 const u8 RFIinitUseTrimValue = 0;//记忆wifi rf 初始化使用vm记忆的trim的值,可大大降低wifi初始化时间
 #else
 const u8 RFIinitUseTrimValue = 1;//记忆wifi rf 初始化使用vm记忆的trim的值,可大大降低wifi初始化时间
@@ -115,7 +129,7 @@ const unsigned int CONFIG_WIFI_MAX_MEM_LIMIT = 200 * 1024; //允许wifi使用的
 const unsigned char CONFIG_AP_TXQ_PRI = 0;  //AP模式下tx和rx队列分配,tx占最大比重，用于改善发送为主的性能
 
 
-#ifdef RF_FCC_TEST_ENABLE
+#if TCFG_RF_FCC_TEST_ENABLE
 //WIFI Adaptivity
 /*n/8 dBm 干扰功率阈值, 设置值和真实值有-20dBm的差值, 即默认值为(-80*8)时，干扰功率为-60dBm时进行规避, 最低配置值为(-127*8)*/
 short CHL_PWR_THR = (-70 * 8); //75
@@ -127,6 +141,7 @@ short CHL_PWR_THR = (-80 * 8);
 short CHL_BUSY_CONFIG = (0xc & 0x0f); //0xe
 #endif
 
+const u8 CONFIG_WPA3_SUPPORT = 1;  //1：使能wpa3支持，0：关闭wpa3支持
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
 #ifdef CONFIG_NET_ENABLE
@@ -143,9 +158,9 @@ static void print_debug_ipv4(u32 daddr, u32 saddr)
 //用于根据LWIP接收队列溢出情况下快速丢包减轻CPU负担,预留空间接收重要数据包
 int lwip_low_level_inputput_filter(u8 *pkg, u32 len)
 {
-#ifdef CONFIG_RF_TEST_ENABLE
-    return 0;
-#endif
+    if (config_rf_test_enable) {
+        return 0;
+    }
 
     static const u8 bc_mac[6] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
 #define ipv4addr_ismulticast(addr) ((addr & PP_HTONL(0xf0000000UL)) == PP_HTONL(0xe0000000UL))
@@ -183,9 +198,9 @@ int lwip_low_level_inputput_filter(u8 *pkg, u32 len)
 //在WIFI底层发送队列不足的情况, 预留空间给重要数据包发送
 int lwip_low_level_output_filter(u8 *pkg, u32 len)
 {
-#ifdef CONFIG_RF_TEST_ENABLE
-    return 0;
-#endif
+    if (config_rf_test_enable) {
+        return 0;
+    }
 
     struct iphdr_e *iph = (struct iphdr_e *)(pkg + 10);
     u16 protoType = ntohs(iph->h_proto);

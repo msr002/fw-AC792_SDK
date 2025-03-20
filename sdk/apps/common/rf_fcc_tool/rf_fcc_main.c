@@ -1,20 +1,18 @@
-
 #include "rf_fcc_main.h"
 
-#ifdef RF_FCC_TEST_ENABLE
+#if TCFG_RF_FCC_TEST_ENABLE || TCFG_RF_PRODUCT_TEST_ENABLE
 
-#include "asm/gpio.h"
+#include "device/gpio.h"
 #include "device/uart.h"
 #include "btcontroller_modules.h"
 #include "utils/syscfg/syscfg_id.h"
-#include "asm/gpcnt.h"
-#include "asm/gpio.h"
+#include "asm/clock.h"
+#include "asm/crc16.h"
 #include "fs/fs.h"
 #include "json_c/json_tokener.h"
 #ifdef CONFIG_NET_ENABLE
 #include "lwip.h"
 #include "wifi/wifi_connect.h"
-#include "sock_api/sock_api.h"
 #endif
 
 #ifdef CONFIG_BT_ENABLE
@@ -30,7 +28,7 @@
 #define     log_err(...)
 #endif
 
-#define WIFI_SIGN_INDEX	      (250)
+#define WIFI_SIGN_INDEX	      (90)
 #define MAX_DGAIN   		  (128)
 #define MIN_DGAIN   		  (0)
 #define MAX_XOSC    		  (15)
@@ -44,14 +42,15 @@
 #define TX_INR_IN_ADJ   	  (500)
 #define TX_LEN_IN_ADJ   	  (512)
 
+#define LOOP_TEST_TRIM 0//循环测试校准时打开，重置读取txt文件配置进行循环测试
 
 struct fcc_info {
-    u8 res[8];
+    char res[8];
     u16 crc;
 };
 
 
-struct  rate_info {
+struct rate_info {
     const char string[6];
     u8 phy;
     u8 mcs;
@@ -71,26 +70,13 @@ struct ctl_params {
     OS_SEM cdc_sem;
     OS_MUTEX list_mutex;
     struct WIFI_SIGN_INFO g_sign_info;
-    struct  rate_info tx_rate_tab[20];
+    struct rate_info tx_rate_tab[20];
     u8 online_flag;
     u8 tx_stop_flag;
-    u8 sign_ssid[33], sign_pwd[65];
+    char sign_ssid[33], sign_pwd[65];
     u8 wifi_send_pkg[1564] __attribute__((aligned(4)));
     u8 uart_circlebuf[1024] __attribute__((aligned(4)));
-    u8 FCC_RSP_ARRAY[7];
-    u8 FCC_RSP_FAIL_ARRAY[7];
-    u8 FCC_READY_RSP_ARRAY[7];
-    u8 FCC_HEART_RSP_ARRAY[10];
-    u8 FCC_WIFI_ARRAY[10];
-    u8 FCC_BT_ARRAY[10];
-    u8 FCC_RESET_ARRAY[10];
-    u8 FCC_RES_SUCC_ARRAY[10];
-    u8 FCC_RES_FAIL_ARRAY[10];
-    u8 FCC_BT_DUT_ARRAY[10];
-    u8 FCC_BT_BQB_ARRAY[10];
-    u8 FCC_HEART_ARRAY[10];
-    u8 FCC_READY_ARRAY[10];
-    u8 fcc_str[3][8];
+    char fcc_str[3][8];
     s8 ana_pw;
     u8 test_mode;
     u8 signalling_mode;
@@ -99,6 +85,29 @@ struct ctl_params {
 static u8 g_cur_mode;
 static struct fcc_mode g_mode_info = {0};
 
+static const u8 FCC_RSP_ARRAY[7]       = {0x04, 0x0E, 0x01, 0x01, 0xA1, 0xA2, 0x00};
+static const u8 FCC_RSP_FAIL_ARRAY[7]  = {0x04, 0x0E, 0x01, 0x01, 0xA1, 0xA2, 0x01};
+static const u8 FCC_READY_RSP_ARRAY[7] = {0x04, 0x0E, 0x01, 0x01, 0xA1, 0xA2, 0x02};
+static u8 FCC_HEART_RSP_ARRAY[10] = {0x04, 0x0E, 0x04, 0x01, 0xA1, 0xA3, 0x00, 0x00, 0x00, 0x00};
+static const u8 FCC_WIFI_ARRAY[10]      = {0x01, 0xA1, 0xA2, 0x06, 0x01, 0x02, 0x03, 0x04, 0x05, 0x01};
+static const u8 FCC_BT_ARRAY[10]        = {0x01, 0xA1, 0xA2, 0x06, 0x01, 0x02, 0x03, 0x04, 0x05, 0x02};
+static const u8 FCC_RESET_ARRAY[10]     = {0x01, 0xA1, 0xA2, 0x06, 0x01, 0x02, 0x03, 0x04, 0x05, 0x03};
+static const u8 FCC_RES_SUCC_ARRAY[10]  = {0x01, 0xA1, 0xA2, 0x06, 0x01, 0x02, 0x03, 0x04, 0x05, 0x04};
+static const u8 FCC_RES_FAIL_ARRAY[10]  = {0x01, 0xA1, 0xA2, 0x06, 0x01, 0x02, 0x03, 0x04, 0x05, 0x05};
+static const u8 FCC_BT_DUT_ARRAY[10]    = {0x01, 0xA1, 0xA2, 0x06, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06};
+static const u8 FCC_BT_BQB_ARRAY[10]    = {0x01, 0xA1, 0xA2, 0x06, 0x01, 0x02, 0x03, 0x04, 0x05, 0x07};
+static const u8 FCC_HEART_ARRAY[10]     = {0x01, 0xA1, 0xA3, 0x06, 0x01, 0x02, 0x03, 0x04, 0x05, 0x00};
+static const u8 FCC_READY_ARRAY[10]     = {0x01, 0xA1, 0xA3, 0x06, 0x01, 0x02, 0x03, 0x04, 0x05, 0x01};
+
+static const u8 FCC_EXIT_ARRAY[10]     = {0x01, 0xA1, 0xA2, 0x06, 0x01, 0x02, 0x03, 0x04, 0x05, 0x08};
+
+static const u8 FCC_SET_BT_WIFI_MAC_ARRAY[10]     = {0x01, 0xA1, 0xA2, 0x06, 0x01, 0x02, 0x03, 0x04, 0x05, 0x09};
+static const u8 FCC_GET_BT_WIFI_MAC_ARRAY[10]     = {0x01, 0xA1, 0xA2, 0x06, 0x01, 0x02, 0x03, 0x04, 0x05, 0x0A};
+static u8 FCC_GET_BT_WIFI_MAC_RSP_ARRAY[13] = {0x04, 0x0E, 0x01, 0x01, 0xA1, 0xA2, 0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
+
+static const u8 FCC_SET_BLE_MAC_ARRAY[10]     = {0x01, 0xA1, 0xA2, 0x06, 0x01, 0x02, 0x03, 0x04, 0x05, 0x0B};
+static const u8 FCC_GET_BLE_MAC_ARRAY[10]     = {0x01, 0xA1, 0xA2, 0x06, 0x01, 0x02, 0x03, 0x04, 0x05, 0x0C};
+static u8 FCC_GET_BLE_MAC_RSP_ARRAY[13] = {0x04, 0x0E, 0x01, 0x01, 0xA1, 0xA2, 0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
 
 extern short CHL_BUSY_CONFIG;
 int wifi_get_mac(u8 *mac);
@@ -106,6 +115,7 @@ u32 sdio_mac_rreg(u32 reg);
 void wf_tx_sine_test(void);
 void wf_read_xosc(u8 *xosc);
 void wf_write_xosc(u8 *xosc);
+void wifi_get_mcs_dgain(u8 *mcs_dgain);
 void wl_anl_actl_init(char init_sel);
 static void rf_fcc_save_change_mode(void);
 void sdio_mac_wreg(u32 wr_addr, u32 dat);
@@ -123,6 +133,8 @@ u8 set_search_bd_name(char *name);
 void bt_set_local_name(char *name);
 void wf_tx_sine_test_reset(unsigned char reset);
 void bredr_set_dut_enble(u8 en, u8 phone);
+u8 rf_fcc_adj_res_read(char *str, void *data);
+u8 rf_fcc_adj_res_write(char *str, void *data);
 
 static u8 array_cmp(void *a_array, void *b_array, u32 size)
 {
@@ -230,6 +242,10 @@ u8 fcc_comm_cdc_post()
 
 void fcc_comm_dev_tx_data(int packet_type, const u8 *packet, int size)
 {
+    if (!config_rf_test_enable) {
+        return;
+    }
+
 #ifdef FCC_USB_COMM
     u8 data[64] = {0};
     data[0] = packet_type;
@@ -434,7 +450,7 @@ static void wifi_tx_data(u8 *pkg, int len, u32 rate, u8 bw, u8 short_gi)// 最�
 
 static void wifi_rx_frame_cb(void *rxwi, void *header, void *data, u32 len, void *reserve)
 {
-    PRXWI_STRUC pRxWI = (PRXWI_STRUC *)rxwi;
+    /* PRXWI_STRUC pRxWI = (PRXWI_STRUC *)rxwi; */
     u8 *src_mac = (u8 *)data + 34;
     /* u8 *src_mac = (u8 *)data + 28; */
 
@@ -534,6 +550,11 @@ static int wifi_event_callback(void *network_ctx, enum WIFI_EVENT event)
 
     case WIFI_EVENT_STA_NETWORK_STACK_DHCP_SUCC:
         os_sem_post(&__THIS->conn_sem);
+        break;
+
+    case WIFI_EVENT_STA_STOP:
+        void wifi_adaptivity_exit(void);
+        wifi_adaptivity_exit();
         break;
 
     default:
@@ -888,15 +909,69 @@ u8 fcc_freq_adj_read(s16 *data)
 }
 #endif
 
+#define FCC_MAC_SIZE (6)
+
+u8 fcc_rf_mac_wr(u8 *type, u8 *mac, u8 is_write)
+{
+    u8 exist[] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
+    u8 rscorr, idx, *str[] = {"EDR_WIFI", "BLE"}, temp[FCC_MAC_SIZE];
+
+    for (idx = 0; idx < ARRAY_SIZE(str); idx++) {
+        if (!strcmp(type, str[idx])) {
+            break;
+        }
+    }
+
+    switch (idx) {
+    case 0:
+    case 2:
+        if (is_write) {
+            if (syscfg_read(CFG_BT_MAC_ADDR, temp, FCC_MAC_SIZE) == FCC_MAC_SIZE) {
+                if (!memcmp(temp, mac, FCC_MAC_SIZE) && memcmp(exist, mac, FCC_MAC_SIZE)) {
+                    rscorr = 0;
+                    break;
+                }
+            }
+            rscorr = syscfg_write(CFG_BT_MAC_ADDR, mac, FCC_MAC_SIZE);
+        } else {
+            rscorr = syscfg_read(CFG_BT_MAC_ADDR, mac, FCC_MAC_SIZE);
+        }
+        break;
+
+    case 1:
+        if (is_write) {
+            if (syscfg_read(CFG_BLE_MAC_ADDR, temp, FCC_MAC_SIZE) == FCC_MAC_SIZE) {
+                if (!memcmp(temp, mac, FCC_MAC_SIZE) && memcmp(exist, mac, FCC_MAC_SIZE)) {
+                    rscorr = 0;
+                    break;
+                }
+            }
+            rscorr = syscfg_write(CFG_BLE_MAC_ADDR, mac, FCC_MAC_SIZE);
+        } else {
+            rscorr = syscfg_read(CFG_BLE_MAC_ADDR, mac, FCC_MAC_SIZE);
+        }
+        break;
+
+    default:
+        rscorr = 0;
+        break;
+    }
+
+    return rscorr;
+}
 
 u8 *fcc_common_data_deal(u8 packet_type, u8 *data, u32 len, u32 *rsp_len, u8 *reset)
 {
+    if (!config_rf_test_enable) {
+        return NULL;
+    }
 
+    u8 mac[FCC_MAC_SIZE];
     s32 ret;
     u8 buf[16] = {0};
     static u8 ready = 0;
 
-    if (len < sizeof(__THIS->FCC_BT_ARRAY) - 1) {
+    if (len < sizeof(FCC_BT_ARRAY) - 1) {
         *reset = 0;
         *rsp_len = 0;
         return NULL;
@@ -905,106 +980,140 @@ u8 *fcc_common_data_deal(u8 packet_type, u8 *data, u32 len, u32 *rsp_len, u8 *re
     buf[0] = packet_type;
     memcpy(&buf[1], data, sizeof(buf) - 1);
 
-    if (!array_cmp(buf, __THIS->FCC_WIFI_ARRAY, sizeof(__THIS->FCC_WIFI_ARRAY))) {
+    if (!array_cmp(buf, FCC_WIFI_ARRAY, sizeof(FCC_WIFI_ARRAY))) {
         log_info("COMMON OPCODE : change to FCC_WIFI_MODE");
 #ifdef CONFIG_NET_ENABLE
         g_mode_info.mode = FCC_WIFI_MODE;
         rf_fcc_save_change_mode();
         *reset = 1;
-        *rsp_len = sizeof(__THIS->FCC_RSP_ARRAY);
-        return __THIS->FCC_RSP_ARRAY;
+        *rsp_len = sizeof(FCC_RSP_ARRAY);
+        return FCC_RSP_ARRAY;
 #else
         log_err("no support WIFI Moudle\n");
         *reset = 0;
         return NULL;
 #endif
-    } else if (!array_cmp(buf, __THIS->FCC_BT_ARRAY, sizeof(__THIS->FCC_BT_ARRAY))) {
+    } else if (!array_cmp(buf, FCC_BT_ARRAY, sizeof(FCC_BT_ARRAY))) {
         log_info("COMMON OPCODE : change to FCC_BT_MODE");
 #ifdef CONFIG_BT_ENABLE
         g_mode_info.mode = FCC_BT_MODE;
         rf_fcc_save_change_mode();
         *reset = 1;
-        *rsp_len = sizeof(__THIS->FCC_RSP_ARRAY);
-        return __THIS->FCC_RSP_ARRAY;
+        *rsp_len = sizeof(FCC_RSP_ARRAY);
+        return FCC_RSP_ARRAY;
 #else
         log_err("no support BT Moudle\n");
         *reset = 0;
         return NULL;
 #endif
-    } else if (!array_cmp(buf, __THIS->FCC_BT_DUT_ARRAY, sizeof(__THIS->FCC_BT_DUT_ARRAY))) {
+    } else if (!array_cmp(buf, FCC_BT_DUT_ARRAY, sizeof(FCC_BT_DUT_ARRAY))) {
         log_info("COMMON OPCODE : change to FCC_BT_DUT_MODE");
 #ifdef CONFIG_BT_ENABLE
         g_mode_info.mode = FCC_BT_DUT_MODE;
         rf_fcc_save_change_mode();
         *reset = 1;
-        *rsp_len = sizeof(__THIS->FCC_RSP_ARRAY);
-        return __THIS->FCC_RSP_ARRAY;
+        *rsp_len = sizeof(FCC_RSP_ARRAY);
+        return FCC_RSP_ARRAY;
 #else
         log_err("no support BT DUT Moudle\n");
         *reset = 0;
         return NULL;
 #endif
-    } else if (!array_cmp(buf, __THIS->FCC_BT_BQB_ARRAY, sizeof(__THIS->FCC_BT_BQB_ARRAY))) {
+    } else if (!array_cmp(buf, FCC_BT_BQB_ARRAY, sizeof(FCC_BT_BQB_ARRAY))) {
         log_info("COMMON OPCODE : change to FCC_BT_BQB_MODE");
 #ifdef CONFIG_BT_ENABLE
         g_mode_info.mode = FCC_BT_BQB_MODE;
         rf_fcc_save_change_mode();
         *reset = 1;
-        *rsp_len = sizeof(__THIS->FCC_RSP_ARRAY);
-        return __THIS->FCC_RSP_ARRAY;
+        *rsp_len = sizeof(FCC_RSP_ARRAY);
+        return FCC_RSP_ARRAY;
 #else
         log_err("no support BT BQB Moudle\n");
         *reset = 0;
         return NULL;
 #endif
-    } else if (!array_cmp(buf, __THIS->FCC_RESET_ARRAY, sizeof(__THIS->FCC_RESET_ARRAY))) {
+    } else if (!array_cmp(buf, FCC_RESET_ARRAY, sizeof(FCC_RESET_ARRAY))) {
         log_info("COMMON OPCODE : RESET");
         g_mode_info.mode = g_cur_mode;
         rf_fcc_save_change_mode();
         *reset = 1;
-        *rsp_len = sizeof(__THIS->FCC_RSP_ARRAY);
-        return __THIS->FCC_RSP_ARRAY;
-    } else if (!array_cmp(buf, __THIS->FCC_HEART_ARRAY, sizeof(__THIS->FCC_HEART_ARRAY))) {
+        *rsp_len = sizeof(FCC_RSP_ARRAY);
+        return FCC_RSP_ARRAY;
+    } else if (!array_cmp(buf, FCC_EXIT_ARRAY, sizeof(FCC_EXIT_ARRAY))) {
+        log_info("COMMON OPCODE : EXIT FCC");
+        ///TODO
+        *rsp_len = sizeof(FCC_RSP_ARRAY);
+        return FCC_RSP_ARRAY;
+    } else if (!array_cmp(buf, FCC_HEART_ARRAY, sizeof(FCC_HEART_ARRAY))) {
         /* log_info("COMMON OPCODE : HEART"); */
         putchar('H');
         /* log_info("__THIS->rand_num = %d\n", __THIS->rand_num); */
-        memcpy(&__THIS->FCC_HEART_RSP_ARRAY[6], &__THIS->rand_num, sizeof(__THIS->rand_num));
+        memcpy(&FCC_HEART_RSP_ARRAY[6], &__THIS->rand_num, sizeof(__THIS->rand_num));
         *reset = 0;
-        *rsp_len = sizeof(__THIS->FCC_HEART_RSP_ARRAY);
-        return __THIS->FCC_HEART_RSP_ARRAY;
-    } else if (!array_cmp(buf, __THIS->FCC_RES_SUCC_ARRAY, sizeof(__THIS->FCC_RES_SUCC_ARRAY))) {
+        *rsp_len = sizeof(FCC_HEART_RSP_ARRAY);
+        return FCC_HEART_RSP_ARRAY;
+    } else if (!array_cmp(buf, FCC_RES_SUCC_ARRAY, sizeof(FCC_RES_SUCC_ARRAY))) {
         log_info("COMMON OPCODE : RES_SUCC");
         read_res();
         fcc_res_handler(true);
-        /* void clear_efuse(void); */
-        /* clear_efuse(); */
+#if LOOP_TEST_TRIM
+        void clear_efuse(void);
+        clear_efuse();
+#endif
         struct fcc_info info;
         strcpy(info.res, __THIS->fcc_str[0]);
         info.crc = CRC16(info.res, sizeof(info.res));
         ret = syscfg_write(WIFI_BT_FCC_RES_FLAG, &info, sizeof(struct fcc_info));
         *reset = 0;
-        *rsp_len = sizeof(__THIS->FCC_RSP_ARRAY);
+        *rsp_len = sizeof(FCC_RSP_ARRAY);
         ready = 1;
-        return ((ret == sizeof(struct fcc_info)) ? __THIS->FCC_RSP_ARRAY : __THIS->FCC_RSP_FAIL_ARRAY);
-    } else if (!array_cmp(buf, __THIS->FCC_RES_FAIL_ARRAY, sizeof(__THIS->FCC_RES_FAIL_ARRAY))) {
+        return ((ret == sizeof(struct fcc_info)) ? FCC_RSP_ARRAY : FCC_RSP_FAIL_ARRAY);
+    } else if (!array_cmp(buf, FCC_RES_FAIL_ARRAY, sizeof(FCC_RES_FAIL_ARRAY))) {
         log_info("COMMON OPCODE : RES_FAIL");
         read_res();
         fcc_res_handler(false);
-        /* void clear_efuse(void); */
-        /* clear_efuse(); */
+#if LOOP_TEST_TRIM
+        void clear_efuse(void);
+        clear_efuse();
+#endif
         struct fcc_info info;
         strcpy(info.res, __THIS->fcc_str[1]);
         info.crc = CRC16(info.res, sizeof(info.res));
         ret = syscfg_write(WIFI_BT_FCC_RES_FLAG, &info, sizeof(struct fcc_info));
         *reset = 0;
-        *rsp_len = sizeof(__THIS->FCC_RSP_ARRAY);
+        *rsp_len = sizeof(FCC_RSP_ARRAY);
         ready = 1;
-        return ((ret == sizeof(struct fcc_info)) ? __THIS->FCC_RSP_ARRAY : __THIS->FCC_RSP_FAIL_ARRAY);
-    } else if (!array_cmp(buf, __THIS->FCC_READY_ARRAY, sizeof(__THIS->FCC_READY_ARRAY))) {
+        return ((ret == sizeof(struct fcc_info)) ? FCC_RSP_ARRAY : FCC_RSP_FAIL_ARRAY);
+    } else if (!array_cmp(buf, FCC_READY_ARRAY, sizeof(FCC_READY_ARRAY))) {
         log_info("COMMON OPCODE : READY");
         *reset = 0;
-        *rsp_len = sizeof(__THIS->FCC_READY_RSP_ARRAY);
-        return (ready ? NULL : __THIS->FCC_READY_RSP_ARRAY);
+        *rsp_len = sizeof(FCC_READY_RSP_ARRAY);
+        return (ready ? NULL : FCC_READY_RSP_ARRAY);
+    } else if (!array_cmp(buf, FCC_GET_BT_WIFI_MAC_ARRAY, sizeof(FCC_GET_BT_WIFI_MAC_ARRAY))) {
+        log_info("COMMON OPCODE : GET_BT_WIFI_MAC");
+        fcc_rf_mac_wr("EDR_WIFI", mac, 0);
+        *rsp_len = sizeof(FCC_GET_BT_WIFI_MAC_RSP_ARRAY);
+        memcpy(FCC_GET_BT_WIFI_MAC_RSP_ARRAY + 7, mac, 6);
+        return FCC_GET_BT_WIFI_MAC_RSP_ARRAY;
+    } else if (!array_cmp(buf, FCC_SET_BT_WIFI_MAC_ARRAY, sizeof(FCC_SET_BT_WIFI_MAC_ARRAY))) {
+        log_info("COMMON OPCODE : SET_BT_WIFI_MAC");
+        memcpy(mac, buf + 10, 6);
+        fcc_rf_mac_wr("EDR_WIFI", mac, 1);
+        *rsp_len = sizeof(FCC_RSP_ARRAY);
+        return FCC_RSP_ARRAY;
+    } else if (!array_cmp(buf, FCC_GET_BLE_MAC_ARRAY, sizeof(FCC_GET_BLE_MAC_ARRAY))) {
+        log_info("COMMON OPCODE : GET_BLE_MAC");
+        fcc_rf_mac_wr("BLE", mac, 0);
+        *rsp_len = sizeof(FCC_GET_BLE_MAC_RSP_ARRAY);
+        memcpy(FCC_GET_BLE_MAC_RSP_ARRAY + 7, mac, 6);
+        return FCC_GET_BLE_MAC_RSP_ARRAY;
+    } else if (!array_cmp(buf, FCC_SET_BLE_MAC_ARRAY, sizeof(FCC_SET_BLE_MAC_ARRAY))) {
+        log_info("COMMON OPCODE : SET_BLE_MAC");
+        memcpy(mac, buf + 10, 6);
+        fcc_rf_mac_wr("BLE", mac, 1);
+        *rsp_len = sizeof(FCC_RSP_ARRAY);
+        return FCC_RSP_ARRAY;
+
     } else {
         *reset = 0;
         *rsp_len = 0;
@@ -1058,6 +1167,11 @@ static void fcc_data_deal_task(void *priv)
             fcc_data_show(fcc->opcode, fcc->params);
 #endif
 
+            if (!__THIS->signalling_mode && fcc->opcode == OP_FCC_ENTER_WIFI_SIGN) {
+                goto __get;
+            }
+
+
             wifi_get_mode_cur_info(&cur_info);
             if (fcc->opcode > OP_IN_WIFI && fcc->opcode < OP_OUT_WIFI && cur_info.mode != MP_TEST_MODE) {
                 wifi_enter_mp_test_mode();
@@ -1087,9 +1201,11 @@ static void fcc_data_deal_task(void *priv)
 
             memset(&__THIS->g_sign_info, 0, sizeof(struct WIFI_SIGN_INFO));
             syscfg_write(WIFI_SIGN_INDEX, &__THIS->g_sign_info, sizeof(struct WIFI_SIGN_INFO));
-            if (__THIS->signalling_mode) {
+            if (__THIS->signalling_mode && fcc->opcode != OP_FCC_ENTER_WIFI_SIGN) {
                 cpu_reset();
             }
+
+__get:
             if (lcw && (fcc->opcode != OP_FCC_START_TX)) {
                 lcw = FALSE;
                 wf_tx_sine_test_reset(1);
@@ -1374,9 +1490,15 @@ static void fcc_data_deal_task(void *priv)
 
             case OP_FCC_ENTER_WIFI_SIGN:
                 sign = (struct WIFI_SIGN *)fcc->params;
-                strcpy(&__THIS->g_sign_info.str, WIFI_SIGN_STR);
+                strcpy(__THIS->g_sign_info.str, WIFI_SIGN_STR);
                 memcpy(&__THIS->g_sign_info.data, sign, sizeof(struct WIFI_SIGN));
                 syscfg_write(WIFI_SIGN_INDEX, &__THIS->g_sign_info, sizeof(struct WIFI_SIGN_INFO));
+
+                if (!__THIS->signalling_mode) {
+                    status = ST_SUCC;
+                    report_data(OP_FCC_RPT_ST, &status, sizeof(status));
+                    cpu_reset();
+                }
 
                 strcpy(__THIS->sign_ssid, sign->ssid);
                 strcpy(__THIS->sign_pwd, sign->pwd);
@@ -1389,12 +1511,6 @@ static void fcc_data_deal_task(void *priv)
 
                 status = ST_SUCC;
                 report_data(OP_FCC_RPT_ST, &status, sizeof(status));
-
-                os_time_dly(10);
-
-                if (!__THIS->signalling_mode) {
-                    cpu_reset();
-                }
 
 #ifdef CONFIG_IPERF_ENABLE
                 extern void iperf_test(void);
@@ -1451,7 +1567,7 @@ static void fcc_data_deal_task(void *priv)
                 report_data(OP_FCC_RPT_ST, &resp_data, sizeof(resp_data));
 #else
                 sign = (struct WIFI_SIGN *)fcc->params;
-                strcpy(&__THIS->g_sign_info.str, WIFI_CONN_STR);
+                strcpy(__THIS->g_sign_info.str, WIFI_CONN_STR);
                 memcpy(&__THIS->g_sign_info.data, sign, sizeof(struct WIFI_SIGN));
 
                 strcpy(__THIS->sign_ssid, sign->ssid);
@@ -1512,22 +1628,134 @@ u8 get_fcc_info(void)
 }
 
 
-#ifdef CONFIG_NET_ENABLE
+#if LOOP_TEST_TRIM
 void clear_efuse(void)
 {
+    log_info("clear efuse");
+
+    s16 bt_freq;
+    FILE *fd = NULL;
+    char *buf;
+    u8 edr_power, ble_power;
+    json_object *new_obj = NULL;
     u8 xosc[2];
-    xosc[0] = wifi_calibration_param.xosc_l;
-    xosc[1] = wifi_calibration_param.xosc_r;
-    syscfg_write(VM_XOSC_INDEX, xosc, 2);
-    syscfg_write(VM_WIFI_PA_MCS_DGAIN, wifi_calibration_param.mcs_dgain, sizeof(wifi_calibration_param.mcs_dgain));
+
+    if (!(fd = fopen(SDFILE_RES_ROOT_PATH"cfg/FCC_PROFILE.txt", "r"))) {
+        log_info("clear efuse fopen fail, use defaul value to test");
+        //没有txt文件情况进行下列默认值进行重置进行循环测试
+#ifdef CONFIG_NET_ENABLE
+        u8 xosc[2];
+        xosc[0] = wifi_calibration_param.xosc_l;
+        xosc[1] = wifi_calibration_param.xosc_r;
+        syscfg_write(VM_XOSC_INDEX, xosc, 2);
+        wf_write_xosc(xosc);
+        syscfg_write(VM_WIFI_PA_MCS_DGAIN, (void *)wifi_calibration_param.mcs_dgain, sizeof(wifi_calibration_param.mcs_dgain));
+#endif
 
 #ifdef CONFIG_BT_ENABLE
-    s16 adj_freq = -30;
-    u8 ble_power = 6, bt_power = 8;
-    rf_fcc_adj_res_write("ble", &ble_power);
-    rf_fcc_adj_res_write("edr", &bt_power);
-    rf_fcc_adj_res_write("offset", &adj_freq);
+        s16 adj_freq;
+        u8 ble_power, bt_power;
+        ret = syscfg_read(CFG_BT_RF_POWER_ID, &bt_power, 1);
+        if (ret < 0) {
+            log_error("clear efuse read edr rf power err");
+            bt_power = 10;
+        }
+
+        ret = syscfg_read(CFG_BLE_RF_POWER_ID, &ble_power, 1);
+        if (ret < 0) {
+            log_error("clear efuse read ble rf power err");
+            ble_power = 10;
+        }
+
+        ret = syscfg_read(CFG_BT_FRE_OFFSET, &adj_freq, 1);
+        if (ret < 0) {
+            log_error("clear efuse read bt freq offset err");
+            adj_freq = -30;
+        }
+
+        rf_fcc_adj_res_write("ble", &ble_power);
+        rf_fcc_adj_res_write("edr", &bt_power);
+        rf_fcc_adj_res_write("offset", &adj_freq);
 #endif
+        goto _cefuse_exit;
+    }
+
+    if (!(buf = zalloc(1024))) {
+        log_info("clear efuse buf alloc fail");
+        goto _cefuse_exit;
+    }
+
+    if (fread(buf, 1024, 1, fd) <= 0) {
+        log_info("clear efuse fread fail");
+        goto _cefuse_exit;
+    }
+
+    printf(" clear efuse read buf = %s\n", buf);
+    if (!(new_obj = json_tokener_parse((const char *)buf))) {
+        log_info("clear efuse json parse fail");
+        goto _cefuse_exit;
+    }
+
+#ifdef CONFIG_BT_ENABLE
+    if (json_object_object_get(new_obj, "BT_FREQ")) {
+        bt_freq = json_object_get_int(json_object_object_get(new_obj, "BT_FREQ"));
+        rf_fcc_adj_res_write("offset", &bt_freq);
+    }
+
+    if (json_object_object_get(new_obj, "EDR_POWER")) {
+        edr_power = json_object_get_int(json_object_object_get(new_obj, "EDR_POWER"));
+        rf_fcc_adj_res_write("edr", &edr_power);
+        log_info("clear efuse set rf edr_power: %d", edr_power);
+    }
+
+    if (json_object_object_get(new_obj, "BLE_POWER")) {
+        ble_power = json_object_get_int(json_object_object_get(new_obj, "BLE_POWER"));
+        rf_fcc_adj_res_write("ble", &ble_power);
+        log_info("clear efuse set rf ble_power: %d", ble_power);
+    }
+
+    if (json_object_object_get(new_obj, "EDR_POWER") && json_object_object_get(new_obj, "EDR_POWER")) {
+        extern void bt_max_pwr_set(u8 pwr, u8 pg_pwr, u8 iq_pwr, u8 ble_pwr);
+        bt_max_pwr_set(edr_power, 6, 6, ble_power);
+    }
+#endif
+
+#ifdef CONFIG_NET_ENABLE
+    if (json_object_object_get(new_obj, "XOSC")) {
+        if (ARRAY_SIZE(xosc) == json_object_array_length(json_object_object_get(new_obj, "XOSC"))) {
+            for (u8 i = 0; i < json_object_array_length(json_object_object_get(new_obj, "XOSC")); i++) {
+                xosc[i] = json_object_get_int(json_object_array_get_idx(json_object_object_get(new_obj, "XOSC"), i));
+            }
+            syscfg_write(VM_XOSC_INDEX, xosc, 2);
+            wf_write_xosc(xosc);
+            log_info("clear efuse set osc: %d %d", xosc[0], xosc[1]);
+        }
+    }
+
+    u8 save_gain[20];
+    if (json_object_object_get(new_obj, "DGAIN")) {
+        if (ARRAY_SIZE(save_gain) == json_object_array_length(json_object_object_get(new_obj, "DGAIN"))) {
+            for (u8 i = 0; i < json_object_array_length(json_object_object_get(new_obj, "DGAIN")); i++) {
+                save_gain[i] = json_object_get_int(json_object_array_get_idx(json_object_object_get(new_obj, "DGAIN"), i));
+                log_info("clear efuse set dgain: %d", save_gain[i]);
+            }
+            syscfg_write(VM_WIFI_PA_MCS_DGAIN, save_gain, sizeof(save_gain));
+        }
+    }
+#endif
+
+_cefuse_exit:
+    if (new_obj) {
+        json_object_put(new_obj);
+    }
+
+    if (buf) {
+        free(buf);
+    }
+
+    if (fd) {
+        fclose(fd);
+    }
 }
 #endif
 
@@ -1564,8 +1792,8 @@ static void create_fcc_cmd_demo(void)
 {
     log_info("================OP_FCC_WIFI_CONN================\n");
     struct WIFI_CONN_INFO info = {0};
-    strcpy(info.ssid, "GJ1");
-    strcpy(info.pwd, "8888888899");
+    strcpy((char *)info.ssid, "GJ1");
+    strcpy((char *)info.pwd, "8888888899");
     create_cmd_data(OP_FCC_WIFI_CONN, &info, sizeof(struct WIFI_CONN_INFO));
 
     log_info("================OP_FCC_ENTER_WIFI_SIGN================\n");
@@ -1855,22 +2083,43 @@ struct fcc_mode *rf_fcc_bt_adj_info(void)
 #endif
 
 
+static int get_gpio(const char *p)
+{
+    u32 port;
+    if (p[0] == 'P') {
+        if (p[1] >= 'A' && p[1] <= 'E') {
+            port = p[1] - 'A';
+            port *= IO_GROUP_NUM;
+        } else if (p[1] == 'F') {
+            /* return IO_PORTF_00; */
+        } else {
+            return -EINVAL;
+        }
+        int mask = (p[2] - '0') * 10 + (p[3] - '0');
+        if (mask < 16) {
+            port += mask;
+            return port;
+        }
+    }
+    return -EINVAL;
+}
+
+
 static void fcc_cfg_parse(void)
 {
     s16 bt_freq;
+    u8 edr_power, ble_power;
     FILE *fd = NULL;
-    char *buf, *str;
+    char *buf;
+    const char *str;
     json_object *new_obj = NULL;
+    int gpio;
 
-#if 0 //fixme
-    extern struct uart_platform_data uart2_data;
-#endif
-
-    if (!(buf = malloc(256))) {
+    if (!(buf = zalloc(1024))) {
         goto _parse_exit_;
     }
 
-    if (!(fd = fopen("mnt/sdfile/res/cfg/FCC_PROFILE.txt", "r"))) {
+    if (!(fd = fopen(SDFILE_RES_ROOT_PATH"cfg/FCC_PROFILE.txt", "r"))) {
         goto _parse_exit_;
     }
 
@@ -1883,60 +2132,100 @@ static void fcc_cfg_parse(void)
         goto _parse_exit_;
     }
 
-#if 0 //fixme
+#ifdef CONFIG_DEBUG_ENABLE
     if (json_object_object_get(new_obj, "DEBUG_PORT")) {
-        if (str = json_object_get_string(json_object_object_get(new_obj, "DEBUG_PORT"))) {
-            if (str[0] == 'P'                    && \
-                str[1] >= 'A' && str[1] <= 'H'   && \
-                (str[2] == '0' || str[2] == '1') && \
-                str[3] >= '0' && str[3] <= '9') {
-                uart2_data.tx_pin = (str[1] - 'A') * 16 + (str[2] - '0') * 10 + (str[3] - '0');
+        str = json_object_get_string(json_object_object_get(new_obj, "DEBUG_PORT"));
+        if (str) {
+            gpio = get_gpio(str);
+            if (gpio >= 0) {
+                gpio_enable_function(gpio, GPIO_FUNC_UART0_TX, 1);
             }
         }
     }
-
-    if (json_object_object_get(new_obj, "DEBUG_BAUD")) {
-        uart2_data.baudrate = json_object_get_int(json_object_object_get(new_obj, "DEBUG_BAUD"));
-    }
-
-    uart_init(&uart2_data);
 #endif
 
 #ifdef CONFIG_BT_ENABLE
-    if (json_object_object_get(new_obj, "BT_FREQ")) {
+    if (!rf_fcc_adj_res_read("offset", &bt_freq) && json_object_object_get(new_obj, "BT_FREQ")) {
         bt_freq = json_object_get_int(json_object_object_get(new_obj, "BT_FREQ"));
         rf_fcc_adj_res_write("offset", &bt_freq);
+    }
+
+    if (!rf_fcc_adj_res_read("edr", &edr_power) && json_object_object_get(new_obj, "EDR_POWER")) {
+        edr_power = json_object_get_int(json_object_object_get(new_obj, "EDR_POWER"));
+        rf_fcc_adj_res_write("edr", &edr_power);
+        if (!rf_fcc_adj_res_read("ble", &ble_power) && json_object_object_get(new_obj, "BLE_POWER")) {
+            ble_power = json_object_get_int(json_object_object_get(new_obj, "BLE_POWER"));
+            rf_fcc_adj_res_write("ble", &ble_power);
+            extern void bt_max_pwr_set(u8 pwr, u8 pg_pwr, u8 iq_pwr, u8 ble_pwr);
+            bt_max_pwr_set(edr_power, 6, 6, ble_power);
+            log_info("set rf edr_power: %d, ble_power: %d", edr_power, ble_power);
+        }
     }
 #endif
 
     if (json_object_object_get(new_obj, "ANALOG")) {
         __THIS->ana_pw = json_object_get_int(json_object_object_get(new_obj, "ANALOG"));
+        log_info("set analog power: %d", __THIS->ana_pw);
     }
 
-#ifdef CONFIG_NET_ENABLE
+    u8 save_gain[20];
+    if (syscfg_read(VM_WIFI_PA_MCS_DGAIN, save_gain, sizeof(save_gain)) != sizeof(save_gain) && json_object_object_get(new_obj, "DGAIN")) {
+        if (ARRAY_SIZE(save_gain) == json_object_array_length(json_object_object_get(new_obj, "DGAIN"))) {
+            for (u8 i = 0; i < json_object_array_length(json_object_object_get(new_obj, "DGAIN")); i++) {
+                save_gain[i] = json_object_get_int(json_object_array_get_idx(json_object_object_get(new_obj, "DGAIN"), i));
+                log_info("set dgain: %d", save_gain[i]);
+            }
+            syscfg_write(VM_WIFI_PA_MCS_DGAIN, save_gain, sizeof(save_gain));
+        }
+    }
+
     u8 xosc[2], pa[7];
-    if (json_object_object_get(new_obj, "XOSC")) {
+    if (syscfg_read(VM_XOSC_INDEX, xosc, sizeof(xosc)) != sizeof(xosc) && json_object_object_get(new_obj, "XOSC")) {
         if (ARRAY_SIZE(xosc) == json_object_array_length(json_object_object_get(new_obj, "XOSC"))) {
             for (u8 i = 0; i < json_object_array_length(json_object_object_get(new_obj, "XOSC")); i++) {
                 xosc[i] = json_object_get_int(json_object_array_get_idx(json_object_object_get(new_obj, "XOSC"), i));
             }
             syscfg_write(VM_XOSC_INDEX, xosc, 2);
             wf_write_xosc(xosc);
-            put_buf(xosc, 2);
+            log_info("set osc: %d %d", xosc[0], xosc[1]);
         }
     }
 
-    if (json_object_object_get(new_obj, "PA")) {
+    if (syscfg_read(VM_WIFI_PA_DATA, pa, sizeof(pa)) != sizeof(pa) && json_object_object_get(new_obj, "PA")) {
         if (ARRAY_SIZE(pa) == json_object_array_length(json_object_object_get(new_obj, "PA"))) {
             for (u8 i = 0; i < ARRAY_SIZE(pa); i++) {
                 pa[i] = json_object_get_int(json_object_array_get_idx(json_object_object_get(new_obj, "PA"), i));
             }
             syscfg_write(VM_WIFI_PA_DATA, pa, sizeof(pa));
             set_pa_config_data(pa);
-            put_buf(pa, 6);
+            log_info("set pa: %d %d %d %d %d %d %d", pa[0], pa[1], pa[2], pa[3], pa[4], pa[5], pa[6]);
         }
     }
-#endif
+
+    if (json_object_object_get(new_obj, "PAEN")) {
+        str = json_object_get_string(json_object_object_get(new_obj, "PAEN"));
+        if (str) {
+            gpio = get_gpio(str);
+            if (gpio >= 0) {
+                gpio_set_mode(gpio, GPIO_OUTPUT_LOW);
+                gpio_och_sel_output_signal(gpio, OUTPUT_CH_SIGNAL_WL_AMPE);
+            }
+        }
+
+        extern char WIFI_PA_ENABLE;
+        WIFI_PA_ENABLE = 1;
+    }
+
+    if (json_object_object_get(new_obj, "LANEN")) {
+        str = json_object_get_string(json_object_object_get(new_obj, "LANEN"));
+        if (str) {
+            gpio = get_gpio(str);
+            if (gpio >= 0) {
+                gpio_set_mode(gpio, GPIO_OUTPUT_LOW);
+                gpio_och_sel_output_signal(gpio, OUTPUT_CH_SIGNAL_WL_LNAE);
+            }
+        }
+    }
 
 _parse_exit_:
     if (new_obj) {
@@ -1959,6 +2248,10 @@ u8 rf_fcc_test_init(void)
     struct FCC_HIS his = {0};
     struct host_data *host;
     struct fcc_data *fcc;
+
+    if (!config_rf_test_enable) {
+        return 0;
+    }
 
     u8 fcc_str[3][8] = {
         {"SUCC"},
@@ -2009,20 +2302,6 @@ u8 rf_fcc_test_init(void)
     };
 #endif
 
-    u8 FCC_RSP_ARRAY[]       = {0x04, 0x0E, 0x01, 0x01, 0xA1, 0xA2, 0x00};
-    u8 FCC_RSP_FAIL_ARRAY[]  = {0x04, 0x0E, 0x01, 0x01, 0xA1, 0xA2, 0x01};
-    u8 FCC_READY_RSP_ARRAY[] = {0x04, 0x0E, 0x01, 0x01, 0xA1, 0xA2, 0x02};
-    u8 FCC_HEART_RSP_ARRAY[] = {0x04, 0x0E, 0x04, 0x01, 0xA1, 0xA3, 0x00, 0x00, 0x00, 0x00};
-    u8 FCC_WIFI_ARRAY[]      = {0x01, 0xA1, 0xA2, 0x06, 0x01, 0x02, 0x03, 0x04, 0x05, 0x01};
-    u8 FCC_BT_ARRAY[]        = {0x01, 0xA1, 0xA2, 0x06, 0x01, 0x02, 0x03, 0x04, 0x05, 0x02};
-    u8 FCC_RESET_ARRAY[]     = {0x01, 0xA1, 0xA2, 0x06, 0x01, 0x02, 0x03, 0x04, 0x05, 0x03};
-    u8 FCC_RES_SUCC_ARRAY[]  = {0x01, 0xA1, 0xA2, 0x06, 0x01, 0x02, 0x03, 0x04, 0x05, 0x04};
-    u8 FCC_RES_FAIL_ARRAY[]  = {0x01, 0xA1, 0xA2, 0x06, 0x01, 0x02, 0x03, 0x04, 0x05, 0x05};
-    u8 FCC_BT_DUT_ARRAY[]    = {0x01, 0xA1, 0xA2, 0x06, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06};
-    u8 FCC_BT_BQB_ARRAY[]    = {0x01, 0xA1, 0xA2, 0x06, 0x01, 0x02, 0x03, 0x04, 0x05, 0x07};
-    u8 FCC_HEART_ARRAY[]     = {0x01, 0xA1, 0xA3, 0x06, 0x01, 0x02, 0x03, 0x04, 0x05, 0x00};
-    u8 FCC_READY_ARRAY[]     = {0x01, 0xA1, 0xA3, 0x06, 0x01, 0x02, 0x03, 0x04, 0x05, 0x01};
-
     if (!(mode = rf_fcc_get_change_mode())) {
 #if (CONFIG_RF_FCC_TRIGGER_MODE == IO_TRIGGER_MODE)
         if (!fcc_enter_io_trigger()) {
@@ -2045,19 +2324,6 @@ u8 rf_fcc_test_init(void)
     __THIS = (struct ctl_params *)zalloc(sizeof(struct ctl_params));
     ASSERT(__THIS);
     memcpy(__THIS->wifi_send_pkg, wifi_head, sizeof(wifi_head));
-    memcpy(__THIS->FCC_RSP_ARRAY, FCC_RSP_ARRAY, sizeof(FCC_RSP_ARRAY));
-    memcpy(__THIS->FCC_RSP_FAIL_ARRAY, FCC_RSP_FAIL_ARRAY, sizeof(FCC_RSP_FAIL_ARRAY));
-    memcpy(__THIS->FCC_READY_RSP_ARRAY, FCC_READY_RSP_ARRAY, sizeof(FCC_READY_RSP_ARRAY));
-    memcpy(__THIS->FCC_HEART_RSP_ARRAY, FCC_HEART_RSP_ARRAY, sizeof(FCC_HEART_RSP_ARRAY));
-    memcpy(__THIS->FCC_WIFI_ARRAY, FCC_WIFI_ARRAY, sizeof(FCC_WIFI_ARRAY));
-    memcpy(__THIS->FCC_BT_ARRAY, FCC_BT_ARRAY, sizeof(FCC_BT_ARRAY));
-    memcpy(__THIS->FCC_RESET_ARRAY, FCC_RESET_ARRAY, sizeof(FCC_RESET_ARRAY));
-    memcpy(__THIS->FCC_RES_SUCC_ARRAY, FCC_RES_SUCC_ARRAY, sizeof(FCC_RES_SUCC_ARRAY));
-    memcpy(__THIS->FCC_RES_FAIL_ARRAY, FCC_RES_FAIL_ARRAY, sizeof(FCC_RES_FAIL_ARRAY));
-    memcpy(__THIS->FCC_BT_DUT_ARRAY, FCC_BT_DUT_ARRAY, sizeof(FCC_BT_DUT_ARRAY));
-    memcpy(__THIS->FCC_BT_BQB_ARRAY, FCC_BT_BQB_ARRAY, sizeof(FCC_BT_BQB_ARRAY));
-    memcpy(__THIS->FCC_HEART_ARRAY, FCC_HEART_ARRAY, sizeof(FCC_HEART_ARRAY));
-    memcpy(__THIS->FCC_READY_ARRAY, FCC_READY_ARRAY, sizeof(FCC_READY_ARRAY));
     memcpy(__THIS->fcc_str, fcc_str, sizeof(fcc_str));
     memcpy(__THIS->tx_rate_tab, tx_rate_tab, sizeof(tx_rate_tab));
 
@@ -2066,7 +2332,7 @@ u8 rf_fcc_test_init(void)
 
 #ifdef CONFIG_NET_ENABLE
     if (syscfg_read(WIFI_SIGN_INDEX, &__THIS->g_sign_info, sizeof(struct WIFI_SIGN_INFO)) == sizeof(struct WIFI_SIGN_INFO)) {
-        if (!strcmp(__THIS->g_sign_info.str, WIFI_SIGN_STR)) {
+        if (!strcmp(__THIS->g_sign_info.str, WIFI_SIGN_STR) && (!mode || mode == FCC_WIFI_MODE)) {
             log_info("%s, %s\n", __FUNCTION__, __THIS->g_sign_info.str);
             mode = FCC_WIFI_MODE;
             g_cur_mode = FCC_WIFI_MODE;
@@ -2082,7 +2348,7 @@ u8 rf_fcc_test_init(void)
     get_fcc_info();
     /* create_fcc_cmd_demo(); */
     __THIS->rand_num = random32(0) & 2147483647;
-    log_info("__THIS->rand_num = %ld\n", __THIS->rand_num);
+    log_info("__THIS->rand_num = %u\n", __THIS->rand_num);
 
     INIT_LIST_HEAD(&__THIS->head);
 
@@ -2189,6 +2455,10 @@ u8 rf_fcc_test_init(void)
 #ifdef CONFIG_NET_ENABLE
         if (!__THIS->signalling_mode) {
             __THIS->test_mode = 1;
+        } else {
+            __THIS->test_mode = 0xff;
+            clk_set("hsb", 96000000);
+            clk_set("sys", 192000000);
         }
         //wifi_set_sta_connect_timeout(10000);
         wifi_set_event_callback(wifi_event_callback);
@@ -2276,6 +2546,8 @@ static void read_res(void)
 
 
 #ifdef CONFIG_NET_ENABLE
+#include "sock_api/sock_api.h"
+
 static void udp_recv_handler(void *socket_fd)
 {
     static u32 sock_rcv_cnt;
@@ -2355,6 +2627,10 @@ __attribute__((weak))void fcc_res_handler(u8 res)
 #ifdef CONFIG_NET_ENABLE
 u8 fcc_wifi_sign_dgain_set(u8 phy, u8 mcs)
 {
+    if (!config_rf_test_enable) {
+        return 0;
+    }
+
     u8 idx;
     if (!strcmp(__THIS->g_sign_info.str, WIFI_SIGN_STR)) {
         for (idx = 0; idx < ARRAY_SIZE(__THIS->tx_rate_tab); idx++) {
@@ -2379,9 +2655,16 @@ u8 fcc_wifi_sign_dgain_set(u8 phy, u8 mcs)
 sec(.volatile_ram_code)
 u8 is_fcc_auth(void)
 {
+#if TCFG_RF_PRODUCT_TEST_ENABLE
+    return 0;
+#endif
     return __THIS->test_mode;
 }
 
-#endif
+u8 wifi_trim_is_always_enable(void)
+{
+    return config_rf_test_enable;
+}
 
+#endif
 

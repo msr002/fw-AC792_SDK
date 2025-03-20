@@ -5,6 +5,15 @@
 
 #include <stdint.h>
 
+#define MULTI_ROLE_MASTER            1
+#define MULTI_ROLE_SLAVE             0
+
+#define MULTI_ROLE_CLIENT            MULTI_ROLE_MASTER
+#define MULTI_ROLE_SERVER            MULTI_ROLE_SLAVE
+
+#define MULTI_INVAIL_INDEX            ((s8)-1)
+
+
 //搜索匹配连接方式
 typedef enum {
     CLI_CREAT_BY_ADDRESS = 0,//指定地址创建连接
@@ -19,6 +28,7 @@ typedef enum {
     CLI_EVENT_DISCONNECT,//设备连接断开
     CLI_EVENT_MATCH_UUID,//搜索到匹配的UUID
     CLI_EVENT_SEARCH_PROFILE_COMPLETE, //搜索profile服务结束
+    CLI_EVENT_CONNECTION_UPDATE,//设备连接参数更新成功
 } le_client_event_e;
 
 

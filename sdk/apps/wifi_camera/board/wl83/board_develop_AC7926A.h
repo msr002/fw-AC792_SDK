@@ -122,8 +122,8 @@
 #define TCFG_SD0_DET_MODE                   SD_CLK_DECT    //检测模式:命令检测，时钟检测，IO检测
 #define TCFG_SD0_DET_IO                     IO_PORTD_01    //SD_DET_MODE为SD_IO_DECT时有效
 #define TCFG_SD0_DET_IO_LEVEL               0              //IO检卡上线的电平(0/1),SD_DET_MODE为SD_IO_DECT时有效
-#define TCFG_SD0_CLK                        48000000       //SDIO时钟
-#define TCFG_SD0_HD_LEVEL                   2              //强驱等级
+#define TCFG_SD0_CLK                        40000000       //SDIO时钟
+#define TCFG_SD0_HD_LEVEL                   3              //强驱等级
 #define TCFG_SD0_POWER_ENABLE               0
 #define TCFG_SD0_PORTS_GROUP                'A'            //'A''B''C''D'表示使用固定组IO
 #define TCFG_SD0_PORTS                      {\
@@ -141,8 +141,8 @@
 #define TCFG_SD1_DET_MODE                   SD_CMD_DECT    //检测模式:命令检测，时钟检测，IO检测
 #define TCFG_SD1_DET_IO                     -1             //SD_DET_MODE为SD_IO_DECT时有效
 #define TCFG_SD1_DET_IO_LEVEL               0              //IO检卡上线的电平(0/1),SD_DET_MODE为SD_IO_DECT时有效
-#define TCFG_SD1_CLK                        24000000       //SDIO时钟
-#define TCFG_SD1_HD_LEVEL                   0              //强驱等级
+#define TCFG_SD1_CLK                        40000000       //SDIO时钟
+#define TCFG_SD1_HD_LEVEL                   3              //强驱等级
 #define TCFG_SD1_POWER_ENABLE               0
 #define TCFG_SD1_PORTS_GROUP                'A'            //'A''B'表示使用固定组IO
 #define TCFG_SD1_PORTS                      {\
@@ -852,7 +852,7 @@
 #ifdef CONFIG_VIDEO_ENABLE
 
 #define CONFIG_VIDEO0_ENABLE
-#define CONFIG_VIDEO1_ENABLE
+// #define CONFIG_VIDEO1_ENABLE
 #define CONFIG_VIDEO2_ENABLE
 // #define CONFIG_VIDEO3_ENABLE
 //#define CONFIG_VIDEO4_ENABLE

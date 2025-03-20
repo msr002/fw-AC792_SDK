@@ -1,5 +1,5 @@
-#ifndef SOUNDBOX_H
-#define SOUNDBOX_H
+#ifndef HCI_EVENT_H
+#define HCI_EVENT_H
 
 #include "app_config.h"
 #include "btctrler/btcontroller_mode.h"
@@ -60,117 +60,6 @@
 #define CUSTOM_BB_AUTO_CANCEL_PAGE                            0xFD  //// app cancle page
 ///杰理自定义，库里面有些功能需要停止page的时候会有。比如page的时候来了电话
 #define BB_CANCEL_PAGE                                        0xFE  //// bb cancle page
-
-
-#if ((TCFG_USER_BLE_ENABLE)&&(TCFG_BT_MODE == BT_NORMAL))
-
-#if RCSP_MODE
-
-int rcsp_bt_state_init();
-int rcsp_bt_state_set_page_scan_enable();
-int rcsp_bt_state_get_connect_mac_addr();
-int rcsp_bt_state_cancel_page_scan();
-int rcsp_bt_state_enter_soft_poweroff();
-int rcsp_bt_state_tws_init(int paired);
-int rcsp_bt_state_tws_connected(int first_pair, u8 *comm_addr);
-int sys_event_handler_specific(struct sys_event *event);
-
-#define BT_STATE_INIT()                   rcsp_bt_state_init()
-#define BT_STATE_SET_PAGE_SCAN_ENABLE()   rcsp_bt_state_set_page_scan_enable()
-#define BT_STATE_GET_CONNECT_MAC_ADDR()   rcsp_bt_state_get_connect_mac_addr()
-#define BT_STATE_CANCEL_PAGE_SCAN()       rcsp_bt_state_cancel_page_scan()
-#define BT_STATE_ENTER_SOFT_POWEROFF()    rcsp_bt_state_enter_soft_poweroff()
-#define BT_STATE_TWS_INIT(a)              rcsp_bt_state_tws_init(a)
-#define BT_STATE_TWS_CONNECTED(a, b)      rcsp_bt_state_tws_connected(a,b)
-#define BT_BREDR_HANDLE_REG()
-#define SYS_EVENT_HANDLER_SPECIFIC(a)     sys_event_handler_specific(a)
-
-#elif TRANS_DATA_EN
-
-int trans_data_bt_state_init();
-int trans_data_bt_state_set_page_scan_enable();
-int trans_data_bt_state_get_connect_mac_addr();
-int trans_data_bt_state_cancel_page_scan();
-int trans_data_bt_state_enter_soft_poweroff();
-int trans_data_bt_state_tws_init(int paired);
-int trans_data_bt_state_tws_connected(int first_pair, u8 *comm_addr);
-void trans_data_bt_bredr_handle_reg(void);
-int trans_data_sys_event_handler_specific(struct sys_event *event);
-
-#define BT_STATE_INIT()                   trans_data_bt_state_init()
-#define BT_STATE_SET_PAGE_SCAN_ENABLE()   trans_data_bt_state_set_page_scan_enable()
-#define BT_STATE_GET_CONNECT_MAC_ADDR()   trans_data_bt_state_get_connect_mac_addr()
-#define BT_STATE_CANCEL_PAGE_SCAN()       trans_data_bt_state_cancel_page_scan()
-#define BT_STATE_ENTER_SOFT_POWEROFF()    trans_data_bt_state_enter_soft_poweroff()
-#define BT_STATE_TWS_INIT(a)              trans_data_bt_state_tws_init(a)
-#define BT_STATE_TWS_CONNECTED(a, b)      trans_data_bt_state_tws_connected(a,b)
-#define BT_BREDR_HANDLE_REG()			  do { } while(0)
-#define SYS_EVENT_HANDLER_SPECIFIC(a)     trans_data_sys_event_handler_specific(a)
-
-#elif ANCS_CLIENT_EN
-
-int ancs_data_bt_state_init();
-int ancs_data_bt_state_set_page_scan_enable();
-int ancs_data_bt_state_get_connect_mac_addr();
-int ancs_data_bt_state_cancel_page_scan();
-int ancs_data_bt_state_enter_soft_poweroff();
-int ancs_data_bt_state_tws_init(int paired);
-int ancs_data_bt_state_tws_connected(int first_pair, u8 *comm_addr);
-int ancs_data_sys_event_handler_specific(struct sys_event *event);
-
-#define BT_STATE_INIT()                   ancs_data_bt_state_init()
-#define BT_STATE_SET_PAGE_SCAN_ENABLE()   ancs_data_bt_state_set_page_scan_enable()
-#define BT_STATE_GET_CONNECT_MAC_ADDR()   ancs_data_bt_state_get_connect_mac_addr()
-#define BT_STATE_CANCEL_PAGE_SCAN()       ancs_data_bt_state_cancel_page_scan()
-#define BT_STATE_ENTER_SOFT_POWEROFF()    ancs_data_bt_state_enter_soft_poweroff()
-#define BT_STATE_TWS_INIT(a)              ancs_data_bt_state_tws_init(a)
-#define BT_STATE_TWS_CONNECTED(a, b)      ancs_data_bt_state_tws_connected(a,b)
-#define BT_BREDR_HANDLE_REG()
-#define SYS_EVENT_HANDLER_SPECIFIC(a)     ancs_data_sys_event_handler_specific(a)
-
-#elif BLE_CLIENT_EN
-
-#define BT_STATE_INIT()
-#define BT_STATE_SET_PAGE_SCAN_ENABLE()
-#define BT_STATE_GET_CONNECT_MAC_ADDR()
-#define BT_STATE_CANCEL_PAGE_SCAN()
-#define BT_STATE_ENTER_SOFT_POWEROFF()
-#define BT_STATE_TWS_INIT(a)
-#define BT_STATE_TWS_CONNECTED(a, b)
-#define BT_BREDR_HANDLE_REG()
-#define SYS_EVENT_HANDLER_SPECIFIC(a)
-
-#else
-
-#define BT_STATE_INIT()                   do { } while(0)
-#define BT_STATE_SET_PAGE_SCAN_ENABLE()   do { } while(0)
-#define BT_STATE_GET_CONNECT_MAC_ADDR()   do { } while(0)
-#define BT_STATE_CANCEL_PAGE_SCAN()       do { } while(0)
-#define BT_STATE_ENTER_SOFT_POWEROFF()    do { } while(0)
-#define BT_STATE_TWS_INIT(a)              do { } while(0)
-#define BT_STATE_TWS_CONNECTED(a, b)      do { } while(0)
-#define BT_BREDR_HANDLE_REG()			  do { } while(0)
-#define SYS_EVENT_HANDLER_SPECIFIC(a)     do { } while(0)
-
-#endif
-
-#else
-
-#define BT_STATE_INIT()                   do { } while(0)
-#define BT_STATE_SET_PAGE_SCAN_ENABLE()   do { } while(0)
-#define BT_STATE_GET_CONNECT_MAC_ADDR()   do { } while(0)
-#define BT_STATE_CANCEL_PAGE_SCAN()       do { } while(0)
-#define BT_STATE_ENTER_SOFT_POWEROFF()    do { } while(0)
-#define BT_STATE_TWS_INIT(a)              do { } while(0)
-#define BT_STATE_TWS_CONNECTED(a, b)      do { } while(0)
-#define BT_BREDR_HANDLE_REG()			  do { } while(0)
-#define SYS_EVENT_HANDLER_SPECIFIC(a)     do { } while(0)
-
-#endif
-
-
-
-
 
 #endif
 

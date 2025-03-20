@@ -17,7 +17,39 @@
 |1byte 类型 |  1byte 保留 | 2byte  payload长度 | 4byte 序号 |  4byte  帧大小 |  4byte 偏移  | 4byte 时间戳  |  payload  |
 */
 #define UDP_SEND_BUF_SIZE  (4*1460)
-//#define CONFIG_UDP_STREAM_DROP_ENABLE
+/* #define CONFIG_UDP_STREAM_DROP1_ENABLE */
+#define CONFIG_UDP_STREAM_DROP2_ENABLE
+
+#ifdef CONFIG_UDP_STREAM_DROP2_ENABLE
+static u32 drop_counter_lcm = 0;
+static u32 original_fps = 25; // 原始帧率
+static u32 target_fps = 18;   // 目标帧率
+static u32 lcm_threshold = 0;//lcm(original_fps, target_fps);
+static u32 lcm_drop_step = 0;//lcm_threshold - (u32)((double)target_fps / original_fps * lcm_threshold);
+
+
+// 辅助函数：计算最大公约数 (GCD) - 辗转相除法
+u32 gcd(u32 a, u32 b)
+{
+    while (b != 0) {
+        u32 temp = b;
+        b = a % b;
+        a = temp;
+    }
+    return a;
+}
+
+// 计算最小公倍数 (LCM)
+u32 lcm(u32 a, u32 b)
+{
+    if (a == 0 || b == 0) {
+        return 0;
+    }
+    return (a * b) / gcd(a, b);
+}
+
+
+#endif
 
 
 #define MAX_PAYLOAD (1460-sizeof(struct frm_head))//最后4字节属于h264流的
@@ -135,7 +167,10 @@ struct rt_stream_info *net_rt_vpkg_open(const char *path, const char *mode)
         free(info);
         return NULL;
     }
-
+#ifdef CONFIG_UDP_STREAM_DROP2_ENABLE
+    lcm_threshold = lcm(original_fps, target_fps);
+    lcm_drop_step = lcm_threshold - (u32)((double)target_fps / original_fps * lcm_threshold);
+#endif
 
     rt_info = info;
     return info;
@@ -216,11 +251,27 @@ int net_rt_send_frame(struct rt_stream_info *info, char *buffer, size_t len, u8 
         return len;
     }
 
-#ifdef CONFIG_UDP_STREAM_DROP_ENABLE
-    static u32 drop_cnt = 0;
+#ifdef CONFIG_UDP_STREAM_DROP1_ENABLE
+    static u32 drop_counter = 0; // 静态变量，记录计数器状态
+    static const u32 drop_threshold = 25; // 阈值，代表原始帧率 (近似)
+    static const u32 drop_step = 7;      // 步进值，每 25 帧丢弃 7 帧 (25-18=7)
 
-    if (drop_cnt++ % 4 == 0) {
-        putchar('D');
+    drop_counter += drop_step; // 计数器累加步进值
+    if (drop_counter >= drop_threshold) {
+        // 计数器超过阈值，需要丢帧
+        drop_counter -= drop_threshold; // 计数器减去阈值，保持在合理范围内
+        putchar('D'); // 可以保留 'D' 输出作为丢帧标记 (调试用)
+        os_mutex_post(&info->mutex); // 释放互斥锁
+        return len; // 直接返回，相当于丢弃当前帧，不再进行后续的发送处理
+    }
+    // 如果 drop_counter < drop_threshold，则不丢帧，继续正常发送流程
+#endif
+
+#ifdef CONFIG_UDP_STREAM_DROP2_ENABLE
+    drop_counter_lcm += lcm_drop_step;
+    if (drop_counter_lcm >= lcm_threshold) {
+        drop_counter_lcm -= lcm_threshold;
+        putchar('L');
         os_mutex_post(&info->mutex);
         return len;
     }

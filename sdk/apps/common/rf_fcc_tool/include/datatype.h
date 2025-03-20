@@ -174,8 +174,8 @@ struct PWR_ADJ {
 
 #pragma pack (1)
 struct WIFI_SIGN {
-    u8 ssid[33];
-    u8 pwd[65];
+    char ssid[33];
+    char pwd[65];
     u8 xosc[2];
     u8 pa[7];
     u8 gain[20];
@@ -187,7 +187,7 @@ struct WIFI_SIGN {
 #define	WIFI_SIGN_STR	"abcdefg"
 #pragma pack (1)
 struct WIFI_SIGN_INFO {
-    u8 str[16];
+    char str[16];
     struct WIFI_SIGN data;
 };
 #pragma pack ()
@@ -308,7 +308,7 @@ struct FCC_BLE_RX {
 };
 #pragma pack ()
 
-
+struct urb;
 typedef unsigned int UINT32;
 typedef void (*usb_complete_t)(struct urb *);
 

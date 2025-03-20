@@ -64,6 +64,8 @@ typedef struct {
     lv_obj_t *pair_status_lbl_4;
     lv_obj_t *pair_status_lbl_5;
     lv_obj_t *pair_status_lbl_6;
+    lv_obj_t *pair_status_ddlist_1;
+    lv_obj_t *pair_status_lbl_7;
 
     // Screen rt_stream
     lv_obj_t *rt_stream;
@@ -82,25 +84,33 @@ typedef struct {
     lv_obj_t *file_browser_imgbtn_3;
     lv_obj_t *file_browser_imgbtn_3_label;
     lv_obj_t *file_browser_lbl_1;
+    lv_obj_t *file_browser_imgbtn_4;
+    lv_obj_t *file_browser_imgbtn_4_label;
     lv_obj_t *file_browser_browser_cont;
     lv_obj_t *file_browser_file_cont1;
     lv_obj_t *file_browser_img_1;
     lv_obj_t *file_browser_lbl_2;
+    lv_obj_t *file_browser_cb_1;
     lv_obj_t *file_browser_file_cont2;
     lv_obj_t *file_browser_img_2;
     lv_obj_t *file_browser_lbl_3;
+    lv_obj_t *file_browser_cb_2;
     lv_obj_t *file_browser_file_cont3;
     lv_obj_t *file_browser_img_3;
     lv_obj_t *file_browser_lbl_4;
+    lv_obj_t *file_browser_cb_3;
     lv_obj_t *file_browser_file_cont4;
     lv_obj_t *file_browser_img_4;
     lv_obj_t *file_browser_lbl_5;
+    lv_obj_t *file_browser_cb_4;
     lv_obj_t *file_browser_file_cont5;
     lv_obj_t *file_browser_img_5;
     lv_obj_t *file_browser_lbl_6;
+    lv_obj_t *file_browser_cb_5;
     lv_obj_t *file_browser_file_cont6;
     lv_obj_t *file_browser_img_6;
     lv_obj_t *file_browser_lbl_7;
+    lv_obj_t *file_browser_cb_6;
 
     // Screen pair_options
     lv_obj_t *pair_options;
@@ -182,6 +192,16 @@ typedef struct {
     lv_obj_t *device_select_imgbtn_1;
     lv_obj_t *device_select_imgbtn_1_label;
 
+    // Screen sys_options
+    lv_obj_t *sys_options;
+    bool      sys_options_del;
+    lv_obj_t *sys_options_view_1;
+    lv_obj_t *sys_options_lbl_1;
+    lv_obj_t *sys_options_btn_1;
+    lv_obj_t *sys_options_btn_1_label;
+    lv_obj_t *sys_options_btn_2;
+    lv_obj_t *sys_options_btn_2_label;
+
     lv_group_t *default_group;
 } lv_ui;
 
@@ -235,6 +255,9 @@ void unload_scr_dir_select(lv_ui *ui);
 // Screen device_select
 lv_obj_t *setup_scr_device_select(lv_ui *ui);
 void unload_scr_device_select(lv_ui *ui);
+// Screen sys_options
+lv_obj_t *setup_scr_sys_options(lv_ui *ui);
+void unload_scr_sys_options(lv_ui *ui);
 #ifdef __cplusplus
 }
 #endif

@@ -23,6 +23,7 @@ const struct task_info task_info_table[] = {
     {"sys_event",           29,      512,   0     },
     {"systimer",            14,      256,   0     },
     {"sys_timer",            9,      512,   64    },
+    {"btencry",             14,      512,   128   },
     {"btctrler",            19,      512,   384   },
     {"btstack",             18,      768,   384   },
     {0, 0},

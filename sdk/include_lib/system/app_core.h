@@ -20,6 +20,7 @@ enum app_state {
     APP_STA_RESUME,
     APP_STA_STOP,
     APP_STA_DESTROY,
+    APP_STA_COMPLETE,
 };
 
 struct application;

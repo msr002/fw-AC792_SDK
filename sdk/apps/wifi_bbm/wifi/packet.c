@@ -5,6 +5,18 @@
 
 #ifdef CONFIG_ENABLE_VLIST
 
+static int send_packet(void *sock, u8 *buf, int len, int flag, struct __packet_info *pinfo)
+{
+    int ret;
+    if (pinfo->is_udp) {
+        ret = sock_sendto(sock, buf, len, flag,
+                          &pinfo->remote_addr, sizeof(struct sockaddr_in));
+    } else {
+        ret = sock_send(sock, buf, len, flag);
+    }
+    return ret;
+}
+
 int send_date_packet(struct __packet_info *pinfo, u32 msec);
 
 int get_video_media_info(struct __packet_info *pinfo)
@@ -502,7 +514,8 @@ int send_video_packet(struct __packet_info  *pinfo, u32 i)
         //	   处理P帧
         memcpy(buffer, &start_code, 4);
     }
-    ret = sock_send(pinfo->sock, (char *)pinfo->data, ret + sizeof(struct frm_head), 0);
+
+    ret = send_packet(pinfo->sock, (char *)pinfo->data, ret + sizeof(struct frm_head), 0, pinfo);
     return ret;
 #endif
 
@@ -519,7 +532,7 @@ int send_video_packet(struct __packet_info  *pinfo, u32 i)
         return flen;
     }
     frame_head->frm_sz = flen;
-    ret = sock_send(pinfo->sock, (char *)pinfo->data, sizeof(struct frm_head), 0);
+    ret = send_packet(pinfo->sock, (char *)pinfo->data, sizeof(struct frm_head), 0, pinfo);
     if (ret <= 0) {
         return ret;
     }
@@ -530,7 +543,7 @@ int send_video_packet(struct __packet_info  *pinfo, u32 i)
             return ret;
         }
         flen -= ret;
-        ret = sock_send(pinfo->sock, (char *)pinfo->data, ret, 0);
+        ret = send_packet(pinfo->sock, (char *)pinfo->data, ret, 0, pinfo);
         if (ret <= 0) {
             return ret;
         }
@@ -548,7 +561,7 @@ int send_video_packet(struct __packet_info  *pinfo, u32 i)
         printf("get video frame ok...\n");
     }
     frame_head->frm_sz = flen;
-    ret = sock_send(pinfo->sock, (char *)pinfo->data, flen + sizeof(struct frm_head), 0);
+    ret = send_packet(pinfo->sock, (char *)pinfo->data, flen + sizeof(struct frm_head), 0, pinfo);
     return ret;
 #endif
 #endif
@@ -579,7 +592,7 @@ int send_audio_packet(struct __packet_info *pinfo, u32 j)
     if (ret <= 0) {
         return ret;
     }
-    ret = sock_send(pinfo->sock, (char *)pinfo->data, ret + sizeof(struct frm_head), 0);
+    ret = send_packet(pinfo->sock, (char *)pinfo->data, ret + sizeof(struct frm_head), 0, pinfo);
     tmp2++;
     if (tmp2 == pinfo->info.audio_chunk_num) {
         tmp = 0;
@@ -595,7 +608,7 @@ int send_audio_packet(struct __packet_info *pinfo, u32 j)
     pinfo->info.audio_block_size = ret;
     frame_head->type = PCM_TYPE_AUDIO;
     frame_head->frm_sz = pinfo->info.audio_block_size;
-    ret = sock_send(pinfo->sock, (char *)pinfo->data, ret + sizeof(struct frm_head), 0);
+    ret = send_packet(pinfo->sock, (char *)pinfo->data, ret + sizeof(struct frm_head), 0, pinfo);
 #endif
     return ret;
 }
@@ -688,7 +701,7 @@ int send_media_packet(struct __packet_info *pinfo)
     size_t len = sizeof(struct frm_head) + sizeof(struct media_info)  + strlen(pinfo->file_name);
     frame_head->frm_sz = len - sizeof(struct frm_head);
 
-    ret = sock_send(pinfo->sock, (char *)pinfo->data, len, 0);
+    ret = send_packet(pinfo->sock, (char *)pinfo->data, len, 0, pinfo);
     if (ret <= 0) {
         return ret;
     }
@@ -729,7 +742,7 @@ int send_date_packet(struct __packet_info *pinfo, u32 msec)
 
     memcpy(pinfo->data + sizeof(struct frm_head), &date, frame_head->frm_sz);
 
-    ret = sock_send(pinfo->sock, (char *)pinfo->data, sizeof(struct frm_head) + 4, 0);
+    ret = send_packet(pinfo->sock, (char *)pinfo->data, sizeof(struct frm_head) + 4, 0, pinfo);
 #endif
     return ret;
 }
@@ -750,7 +763,7 @@ int send_end_packet(struct __packet_info *pinfo)
         frame_head->type = PLAY_OVER_TYPE;
     }
 
-    ret = sock_send(pinfo->sock, (char *)pinfo->data, sizeof(struct frm_head), 0);
+    ret = send_packet(pinfo->sock, (char *)pinfo->data, sizeof(struct frm_head), 0, pinfo);
 #endif
     return ret;
 
@@ -853,7 +866,7 @@ static int send_no_gps_media(struct __packet_info *pinfo)
     memcpy(pinfo->data + sizeof(struct frm_head), buf, len);
     printf("%s\n", buf);
 
-    ret = sock_send(pinfo->sock, pinfo->data, sizeof(struct frm_head) + len, 0);
+    ret = send_packet(pinfo->sock, pinfo->data, sizeof(struct frm_head) + len, 0, pinfo);
     if (ret != sizeof(struct frm_head) + len) {
         printf("gps media send err!!!\n\n");
         return ret;
@@ -875,7 +888,7 @@ static int send_gps_media(struct __packet_info *pinfo, int data_len)
         frame_head->frm_sz = len;
         frame_head->seq = 0;
         memcpy(pinfo->data + sizeof(struct frm_head), buf, len);
-        ret = sock_send(pinfo->sock, pinfo->data, sizeof(struct frm_head) + len, 0);
+        ret = send_packet(pinfo->sock, pinfo->data, sizeof(struct frm_head) + len, 0, pinfo);
         if (ret != sizeof(struct frm_head) + len) {
             printf("gps media send err!!!\n\n");
             return ret;
@@ -884,7 +897,7 @@ static int send_gps_media(struct __packet_info *pinfo, int data_len)
         frame_head->type = GPS_INFO_TYPE;
         frame_head->frm_sz = 0;
         frame_head->seq = 0;
-        ret = sock_send(pinfo->sock, pinfo->data, sizeof(struct frm_head), 0);
+        ret = send_packet(pinfo->sock, pinfo->data, sizeof(struct frm_head), 0, pinfo);
         if (ret != sizeof(struct frm_head)) {
             printf("gps media send err!!!\n\n");
             return ret;
@@ -990,7 +1003,7 @@ int send_gps_data_packet(struct __packet_info *pinfo)
         frame_head->seq = gps_packet_seq;
 
         memcpy(pinfo->data + sizeof(struct frm_head), send_buf, len);
-        ret = sock_send(pinfo->sock, pinfo->data, sizeof(struct frm_head) + len, 0);
+        ret = send_packet(pinfo->sock, pinfo->data, sizeof(struct frm_head) + len, 0, pinfo);
         if (ret != (sizeof(struct frm_head) + len)) {
             printf("gps data send err !!!\n\n");
             return ret;

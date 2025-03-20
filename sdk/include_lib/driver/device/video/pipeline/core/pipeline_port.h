@@ -10,7 +10,7 @@
 
 typedef struct pipeline_endpoint {
     struct list_head entry;
-    int channel;
+    long long channel;
     char name[10];
     buffer_t *data_buffer;
     void *priv_data;

@@ -69,6 +69,7 @@ struct wifi_scan_ssid_info {
 
 enum wifi_sta_connect_state {
     WIFI_STA_DISCONNECT,
+    WIFI_STA_CONNECTING,
     WIFI_STA_CONNECT_SUCC,
     WIFI_STA_CONNECT_TIMEOUT_NOT_FOUND_SSID,
     WIFI_STA_CONNECT_ASSOCIAT_FAIL,

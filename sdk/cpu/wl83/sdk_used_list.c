@@ -109,7 +109,8 @@ jla_v2_enc_plug
 #elif (TCFG_LE_AUDIO_CODEC_TYPE == AUDIO_CODING_JLA)
 jla_dec_plug
 jla_encoder_plug
-#else
+#endif
+#if defined TCFG_LE_AUDIO_APP_CONFIG && (TCFG_LE_AUDIO_APP_CONFIG & (LE_AUDIO_AURACAST_SOURCE_EN | LE_AUDIO_AURACAST_SINK_EN))
 lc3_dec_plug
 lc3_encoder_plug
 #endif
@@ -467,6 +468,27 @@ split_gain_node_adapter
 #if TCFG_VIRTUAL_BASS_CLASSIC_NODE_ENABLE
 virtual_bass_classic_node_adapter
 #endif
+#if TCFG_PHASER_NODE_ENABLE
+phaser_node_adapter
+#endif
+#if TCFG_FLANGER_NODE_ENABLE
+flanger_node_adapter
+#endif
+#if TCFG_CHORUS_ADVANCE_NODE_ENABLE
+chorus_advance_node_adapter
+#endif
+#if TCFG_PINGPONG_ECHO_NODE_ENABLE
+pingpong_echo_node_adapter
+#endif
+#if TCFG_STEREO_SPATIAL_WIDER_NODE_ENABLE
+stereo_spatial_wider_node_adapter
+#endif
+#if TCFG_DISTORTION_CLIPPING_NODE_ENABLE
+distortion_clipping_node_adapter
+#endif
+#if TCFG_FREQUENCY_COMPRESSOR_NODE_ENABLE
+frequency_compressor_node_adapter
+#endif
 
 #endif
 
@@ -489,6 +511,8 @@ jpeg_enc1
 jpeg_enc2
 jpeg_dec0
 jpeg_dec1
+jpeg_dec2
+jpeg_dec3
 file0
 uvc0
 uvc1
@@ -509,15 +533,12 @@ videosink1
 videosink2
 imagesink0
 gp0
-video0
-video1
-video2
-video3
 virtual0
 virtual1
-video_dec
-soft_imc0
-soft_imc1
+virtual2
+virtual3
+sft0
+sft1
 gpu0
 gpu1
 gpu2
@@ -528,6 +549,11 @@ yuv2
 yuv3
 composite0
 composite1
+video0
+video1
+video2
+video3
+video_dec
 #endif
 
 #if defined CONFIG_VIDEO_ENABLE || defined CONFIG_UI_ENABLE

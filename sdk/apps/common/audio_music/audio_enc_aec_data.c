@@ -141,6 +141,10 @@ static void audio_aec_enc_data_to_sd()
         os_time_dly(1);
     }
 
+    if (__this->cache_buf) {
+        return ;
+    }
+
     __this->stop_flag = 0;
     __this->fd = fopen("storage/sd0/C/aec.pcm", "w+");
     __this->fd1 = fopen("storage/sd0/C/dac.pcm", "w+");

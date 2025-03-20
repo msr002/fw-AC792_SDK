@@ -23,11 +23,102 @@ GUI_WEAK int gui_file_browser_msg_file_num_cb(gui_msg_action_t access, gui_msg_d
     data->value_string = file_num_var;
     return 0;
 }
+GUI_WEAK int gui_file_browser_msg_check_box_del_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type)
+{
+    static bool check_box_del_var = false;
+    if (access == GUI_MSG_ACCESS_SET) {
+        check_box_del_var = data->value_int;
+    }
+    data->value_int = check_box_del_var;
+    return 0;
+}
+GUI_WEAK int gui_file_browser_msg_sel_check_box0_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type)
+{
+    static bool sel_check_box0_var = false;
+    if (access == GUI_MSG_ACCESS_SET) {
+        sel_check_box0_var = data->value_int;
+    }
+    data->value_int = sel_check_box0_var;
+    return 0;
+}
+GUI_WEAK int gui_file_browser_msg_sel_check_box1_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type)
+{
+    static bool sel_check_box1_var = false;
+    if (access == GUI_MSG_ACCESS_SET) {
+        sel_check_box1_var = data->value_int;
+    }
+    data->value_int = sel_check_box1_var;
+    return 0;
+}
+GUI_WEAK int gui_file_browser_msg_sel_check_box2_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type)
+{
+    static bool sel_check_box2_var = false;
+    if (access == GUI_MSG_ACCESS_SET) {
+        sel_check_box2_var = data->value_int;
+    }
+    data->value_int = sel_check_box2_var;
+    return 0;
+}
+GUI_WEAK int gui_file_browser_msg_sel_check_box3_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type)
+{
+    static bool sel_check_box3_var = false;
+    if (access == GUI_MSG_ACCESS_SET) {
+        sel_check_box3_var = data->value_int;
+    }
+    data->value_int = sel_check_box3_var;
+    return 0;
+}
+GUI_WEAK int gui_file_browser_msg_sel_check_box4_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type)
+{
+    static bool sel_check_box4_var = false;
+    if (access == GUI_MSG_ACCESS_SET) {
+        sel_check_box4_var = data->value_int;
+    }
+    data->value_int = sel_check_box4_var;
+    return 0;
+}
+GUI_WEAK int gui_file_browser_msg_sel_check_box5_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type)
+{
+    static bool sel_check_box5_var = false;
+    if (access == GUI_MSG_ACCESS_SET) {
+        sel_check_box5_var = data->value_int;
+    }
+    data->value_int = sel_check_box5_var;
+    return 0;
+}
 
 void gui_file_browser_msg_init(lv_ui *ui)
 {
     gui_msg_sub_t *sub;
     sub = gui_msg_create_sub(GUI_FILE_BROWSER_MSG_ID_FILE_NUM);
+    if (sub != NULL) {
+        lv_subject_init_pointer(sub->subject, &guider_msg_data);
+    }
+    sub = gui_msg_create_sub(GUI_FILE_BROWSER_MSG_ID_CHECK_BOX_DEL);
+    if (sub != NULL) {
+        lv_subject_init_pointer(sub->subject, &guider_msg_data);
+    }
+    sub = gui_msg_create_sub(GUI_FILE_BROWSER_MSG_ID_SEL_CHECK_BOX0);
+    if (sub != NULL) {
+        lv_subject_init_pointer(sub->subject, &guider_msg_data);
+    }
+    sub = gui_msg_create_sub(GUI_FILE_BROWSER_MSG_ID_SEL_CHECK_BOX1);
+    if (sub != NULL) {
+        lv_subject_init_pointer(sub->subject, &guider_msg_data);
+    }
+    sub = gui_msg_create_sub(GUI_FILE_BROWSER_MSG_ID_SEL_CHECK_BOX2);
+    if (sub != NULL) {
+        lv_subject_init_pointer(sub->subject, &guider_msg_data);
+    }
+    sub = gui_msg_create_sub(GUI_FILE_BROWSER_MSG_ID_SEL_CHECK_BOX3);
+    if (sub != NULL) {
+        lv_subject_init_pointer(sub->subject, &guider_msg_data);
+    }
+    sub = gui_msg_create_sub(GUI_FILE_BROWSER_MSG_ID_SEL_CHECK_BOX4);
+    if (sub != NULL) {
+        lv_subject_init_pointer(sub->subject, &guider_msg_data);
+    }
+    sub = gui_msg_create_sub(GUI_FILE_BROWSER_MSG_ID_SEL_CHECK_BOX5);
     if (sub != NULL) {
         lv_subject_init_pointer(sub->subject, &guider_msg_data);
     }
@@ -42,11 +133,18 @@ void gui_file_browser_msg_init_ui()
 void gui_file_browser_msg_init_events()
 {
     void *res = NULL;
-    _gui_msg_status_t status[1] = {
+    _gui_msg_status_t status[8] = {
         {GUI_FILE_BROWSER_MSG_ID_FILE_NUM, 0, 0},
+        {GUI_FILE_BROWSER_MSG_ID_CHECK_BOX_DEL, 0, 0},
+        {GUI_FILE_BROWSER_MSG_ID_SEL_CHECK_BOX0, 0, 0},
+        {GUI_FILE_BROWSER_MSG_ID_SEL_CHECK_BOX1, 0, 0},
+        {GUI_FILE_BROWSER_MSG_ID_SEL_CHECK_BOX2, 0, 0},
+        {GUI_FILE_BROWSER_MSG_ID_SEL_CHECK_BOX3, 0, 0},
+        {GUI_FILE_BROWSER_MSG_ID_SEL_CHECK_BOX4, 0, 0},
+        {GUI_FILE_BROWSER_MSG_ID_SEL_CHECK_BOX5, 0, 0},
     };
 
-    for (int i = 0; i < 1; i++) {
+    for (int i = 0; i < 8; i++) {
         lv_subject_t *subject = gui_msg_get_subject(status[i].msg_id);
         if (subject == NULL) {
             continue;
@@ -59,19 +157,89 @@ void gui_file_browser_msg_init_events()
     }
 
     lv_subject_t *subject_file_num = gui_msg_get_subject(GUI_FILE_BROWSER_MSG_ID_FILE_NUM);
+    lv_subject_t *subject_check_box_del = gui_msg_get_subject(GUI_FILE_BROWSER_MSG_ID_CHECK_BOX_DEL);
+    lv_subject_t *subject_sel_check_box0 = gui_msg_get_subject(GUI_FILE_BROWSER_MSG_ID_SEL_CHECK_BOX0);
+    lv_subject_t *subject_sel_check_box1 = gui_msg_get_subject(GUI_FILE_BROWSER_MSG_ID_SEL_CHECK_BOX1);
+    lv_subject_t *subject_sel_check_box2 = gui_msg_get_subject(GUI_FILE_BROWSER_MSG_ID_SEL_CHECK_BOX2);
+    lv_subject_t *subject_sel_check_box3 = gui_msg_get_subject(GUI_FILE_BROWSER_MSG_ID_SEL_CHECK_BOX3);
+    lv_subject_t *subject_sel_check_box4 = gui_msg_get_subject(GUI_FILE_BROWSER_MSG_ID_SEL_CHECK_BOX4);
+    lv_subject_t *subject_sel_check_box5 = gui_msg_get_subject(GUI_FILE_BROWSER_MSG_ID_SEL_CHECK_BOX5);
     if (!guider_ui.file_browser_del) {
+        gui_file_browser_msg_check_box_del_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_BOOL);
+        lv_subject_add_observer_obj(subject_check_box_del, gui_msg_set_visible_by_bool_cb, guider_ui.file_browser_cb_6, &guider_msg_data);
+        gui_file_browser_msg_sel_check_box5_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_BOOL);
+        lv_subject_add_observer_obj(subject_sel_check_box5, gui_msg_set_checkbox_checked_by_bool_cb, guider_ui.file_browser_cb_6, &guider_msg_data);
+        lv_obj_remove_event_cb(guider_ui.file_browser_cb_6, gui_msg_change_checkbox_checked_cb);
+        lv_obj_add_event_cb(guider_ui.file_browser_cb_6, gui_msg_change_checkbox_checked_cb, LV_EVENT_VALUE_CHANGED, (void *)GUI_FILE_BROWSER_MSG_ID_SEL_CHECK_BOX5);
+
         gui_file_browser_msg_file_num_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_STRING);
         lv_subject_add_observer_obj(subject_file_num, gui_msg_set_label_text_by_string_cb, guider_ui.file_browser_lbl_1, &guider_msg_data);
 
+        gui_file_browser_msg_check_box_del_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_BOOL);
+        lv_subject_add_observer_obj(subject_check_box_del, gui_msg_set_visible_by_bool_cb, guider_ui.file_browser_cb_1, &guider_msg_data);
+        gui_file_browser_msg_sel_check_box0_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_BOOL);
+        lv_subject_add_observer_obj(subject_sel_check_box0, gui_msg_set_checkbox_checked_by_bool_cb, guider_ui.file_browser_cb_1, &guider_msg_data);
+        lv_obj_remove_event_cb(guider_ui.file_browser_cb_1, gui_msg_change_checkbox_checked_cb);
+        lv_obj_add_event_cb(guider_ui.file_browser_cb_1, gui_msg_change_checkbox_checked_cb, LV_EVENT_VALUE_CHANGED, (void *)GUI_FILE_BROWSER_MSG_ID_SEL_CHECK_BOX0);
 
-        for (int i = 0; i < 1; i++) {
+        gui_file_browser_msg_check_box_del_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_BOOL);
+        lv_subject_add_observer_obj(subject_check_box_del, gui_msg_set_visible_by_bool_cb, guider_ui.file_browser_cb_4, &guider_msg_data);
+        gui_file_browser_msg_sel_check_box3_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_BOOL);
+        lv_subject_add_observer_obj(subject_sel_check_box3, gui_msg_set_checkbox_checked_by_bool_cb, guider_ui.file_browser_cb_4, &guider_msg_data);
+        lv_obj_remove_event_cb(guider_ui.file_browser_cb_4, gui_msg_change_checkbox_checked_cb);
+        lv_obj_add_event_cb(guider_ui.file_browser_cb_4, gui_msg_change_checkbox_checked_cb, LV_EVENT_VALUE_CHANGED, (void *)GUI_FILE_BROWSER_MSG_ID_SEL_CHECK_BOX3);
+
+        gui_file_browser_msg_check_box_del_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_BOOL);
+        lv_subject_add_observer_obj(subject_check_box_del, gui_msg_set_visible_by_bool_cb, guider_ui.file_browser_cb_5, &guider_msg_data);
+        gui_file_browser_msg_sel_check_box4_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_BOOL);
+        lv_subject_add_observer_obj(subject_sel_check_box4, gui_msg_set_checkbox_checked_by_bool_cb, guider_ui.file_browser_cb_5, &guider_msg_data);
+        lv_obj_remove_event_cb(guider_ui.file_browser_cb_5, gui_msg_change_checkbox_checked_cb);
+        lv_obj_add_event_cb(guider_ui.file_browser_cb_5, gui_msg_change_checkbox_checked_cb, LV_EVENT_VALUE_CHANGED, (void *)GUI_FILE_BROWSER_MSG_ID_SEL_CHECK_BOX4);
+
+        gui_file_browser_msg_check_box_del_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_BOOL);
+        lv_subject_add_observer_obj(subject_check_box_del, gui_msg_set_visible_by_bool_cb, guider_ui.file_browser_cb_2, &guider_msg_data);
+        gui_file_browser_msg_sel_check_box1_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_BOOL);
+        lv_subject_add_observer_obj(subject_sel_check_box1, gui_msg_set_checkbox_checked_by_bool_cb, guider_ui.file_browser_cb_2, &guider_msg_data);
+        lv_obj_remove_event_cb(guider_ui.file_browser_cb_2, gui_msg_change_checkbox_checked_cb);
+        lv_obj_add_event_cb(guider_ui.file_browser_cb_2, gui_msg_change_checkbox_checked_cb, LV_EVENT_VALUE_CHANGED, (void *)GUI_FILE_BROWSER_MSG_ID_SEL_CHECK_BOX1);
+
+        gui_file_browser_msg_check_box_del_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_BOOL);
+        lv_subject_add_observer_obj(subject_check_box_del, gui_msg_set_visible_by_bool_cb, guider_ui.file_browser_cb_3, &guider_msg_data);
+        gui_file_browser_msg_sel_check_box2_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_BOOL);
+        lv_subject_add_observer_obj(subject_sel_check_box2, gui_msg_set_checkbox_checked_by_bool_cb, guider_ui.file_browser_cb_3, &guider_msg_data);
+        lv_obj_remove_event_cb(guider_ui.file_browser_cb_3, gui_msg_change_checkbox_checked_cb);
+        lv_obj_add_event_cb(guider_ui.file_browser_cb_3, gui_msg_change_checkbox_checked_cb, LV_EVENT_VALUE_CHANGED, (void *)GUI_FILE_BROWSER_MSG_ID_SEL_CHECK_BOX2);
+
+
+        for (int i = 0; i < 8; i++) {
+            if (status[i].msg_id == GUI_FILE_BROWSER_MSG_ID_SEL_CHECK_BOX3) {
+                status[i].is_subscribe = 1;
+            }
+            if (status[i].msg_id == GUI_FILE_BROWSER_MSG_ID_SEL_CHECK_BOX4) {
+                status[i].is_subscribe = 1;
+            }
+            if (status[i].msg_id == GUI_FILE_BROWSER_MSG_ID_SEL_CHECK_BOX5) {
+                status[i].is_subscribe = 1;
+            }
+            if (status[i].msg_id == GUI_FILE_BROWSER_MSG_ID_SEL_CHECK_BOX0) {
+                status[i].is_subscribe = 1;
+            }
+            if (status[i].msg_id == GUI_FILE_BROWSER_MSG_ID_SEL_CHECK_BOX1) {
+                status[i].is_subscribe = 1;
+            }
+            if (status[i].msg_id == GUI_FILE_BROWSER_MSG_ID_SEL_CHECK_BOX2) {
+                status[i].is_subscribe = 1;
+            }
             if (status[i].msg_id == GUI_FILE_BROWSER_MSG_ID_FILE_NUM) {
+                status[i].is_subscribe = 1;
+            }
+            if (status[i].msg_id == GUI_FILE_BROWSER_MSG_ID_CHECK_BOX_DEL) {
                 status[i].is_subscribe = 1;
             }
         }
     }
 
-    for (int i = 0; i < 1; i++) {
+    for (int i = 0; i < 8; i++) {
         if (status[i].is_subscribe == 0 && status[i].is_unsubscribe == 1) {
             gui_msg_subscribe_change(status[i].msg_id, GUI_MSG_UNSUBSCRIBE);
         } else if (status[i].is_subscribe == 1 && status[i].is_unsubscribe == 0) {
@@ -82,10 +250,17 @@ void gui_file_browser_msg_init_events()
 
 void gui_file_browser_msg_unsubscribe()
 {
-    _gui_msg_status_t status[1] = {
+    _gui_msg_status_t status[8] = {
         {GUI_FILE_BROWSER_MSG_ID_FILE_NUM, 0, 0},
+        {GUI_FILE_BROWSER_MSG_ID_CHECK_BOX_DEL, 0, 0},
+        {GUI_FILE_BROWSER_MSG_ID_SEL_CHECK_BOX0, 0, 0},
+        {GUI_FILE_BROWSER_MSG_ID_SEL_CHECK_BOX1, 0, 0},
+        {GUI_FILE_BROWSER_MSG_ID_SEL_CHECK_BOX2, 0, 0},
+        {GUI_FILE_BROWSER_MSG_ID_SEL_CHECK_BOX3, 0, 0},
+        {GUI_FILE_BROWSER_MSG_ID_SEL_CHECK_BOX4, 0, 0},
+        {GUI_FILE_BROWSER_MSG_ID_SEL_CHECK_BOX5, 0, 0},
     };
-    for (int i = 0; i < 1; i++) {
+    for (int i = 0; i < 8; i++) {
         lv_subject_t *subject = gui_msg_get_subject(status[i].msg_id);
         if (subject == NULL) {
             continue;
@@ -104,7 +279,7 @@ void gui_file_browser_msg_unsubscribe()
         }
     }
 
-    for (int i = 0; i < 1; i++) {
+    for (int i = 0; i < 8; i++) {
         if (status[i].is_unsubscribe == 1) {
             gui_msg_subscribe_change(status[i].msg_id, GUI_MSG_UNSUBSCRIBE);
         }
@@ -118,6 +293,34 @@ gui_msg_data_t *gui_file_browser_msg_get(int32_t msg_id)
         gui_file_browser_msg_file_num_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_STRING);
         break;
     }
+    case GUI_FILE_BROWSER_MSG_ID_CHECK_BOX_DEL: {
+        gui_file_browser_msg_check_box_del_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_BOOL);
+        break;
+    }
+    case GUI_FILE_BROWSER_MSG_ID_SEL_CHECK_BOX0: {
+        gui_file_browser_msg_sel_check_box0_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_BOOL);
+        break;
+    }
+    case GUI_FILE_BROWSER_MSG_ID_SEL_CHECK_BOX1: {
+        gui_file_browser_msg_sel_check_box1_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_BOOL);
+        break;
+    }
+    case GUI_FILE_BROWSER_MSG_ID_SEL_CHECK_BOX2: {
+        gui_file_browser_msg_sel_check_box2_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_BOOL);
+        break;
+    }
+    case GUI_FILE_BROWSER_MSG_ID_SEL_CHECK_BOX3: {
+        gui_file_browser_msg_sel_check_box3_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_BOOL);
+        break;
+    }
+    case GUI_FILE_BROWSER_MSG_ID_SEL_CHECK_BOX4: {
+        gui_file_browser_msg_sel_check_box4_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_BOOL);
+        break;
+    }
+    case GUI_FILE_BROWSER_MSG_ID_SEL_CHECK_BOX5: {
+        gui_file_browser_msg_sel_check_box5_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_BOOL);
+        break;
+    }
     default:
         return NULL;
     }
@@ -129,6 +332,34 @@ void gui_file_browser_msg_action_change(int32_t msg_id, gui_msg_action_t access,
     switch (msg_id) {
     case GUI_FILE_BROWSER_MSG_ID_FILE_NUM: {
         gui_file_browser_msg_file_num_cb(access, data, type);
+        break;
+    }
+    case GUI_FILE_BROWSER_MSG_ID_CHECK_BOX_DEL: {
+        gui_file_browser_msg_check_box_del_cb(access, data, type);
+        break;
+    }
+    case GUI_FILE_BROWSER_MSG_ID_SEL_CHECK_BOX0: {
+        gui_file_browser_msg_sel_check_box0_cb(access, data, type);
+        break;
+    }
+    case GUI_FILE_BROWSER_MSG_ID_SEL_CHECK_BOX1: {
+        gui_file_browser_msg_sel_check_box1_cb(access, data, type);
+        break;
+    }
+    case GUI_FILE_BROWSER_MSG_ID_SEL_CHECK_BOX2: {
+        gui_file_browser_msg_sel_check_box2_cb(access, data, type);
+        break;
+    }
+    case GUI_FILE_BROWSER_MSG_ID_SEL_CHECK_BOX3: {
+        gui_file_browser_msg_sel_check_box3_cb(access, data, type);
+        break;
+    }
+    case GUI_FILE_BROWSER_MSG_ID_SEL_CHECK_BOX4: {
+        gui_file_browser_msg_sel_check_box4_cb(access, data, type);
+        break;
+    }
+    case GUI_FILE_BROWSER_MSG_ID_SEL_CHECK_BOX5: {
+        gui_file_browser_msg_sel_check_box5_cb(access, data, type);
         break;
     }
     default: {
@@ -145,6 +376,48 @@ gui_msg_status_t gui_file_browser_msg_send(int32_t msg_id, void *value, int32_t 
         switch (msg_id) {
         case GUI_FILE_BROWSER_MSG_ID_FILE_NUM: {
             data_type = VALUE_STRING;
+            guider_msg_data.value_array.ptr = value;
+            guider_msg_data.value_array.len = len;
+            break;
+        }
+        case GUI_FILE_BROWSER_MSG_ID_CHECK_BOX_DEL: {
+            data_type = VALUE_BOOL;
+            guider_msg_data.value_array.ptr = value;
+            guider_msg_data.value_array.len = len;
+            break;
+        }
+        case GUI_FILE_BROWSER_MSG_ID_SEL_CHECK_BOX0: {
+            data_type = VALUE_BOOL;
+            guider_msg_data.value_array.ptr = value;
+            guider_msg_data.value_array.len = len;
+            break;
+        }
+        case GUI_FILE_BROWSER_MSG_ID_SEL_CHECK_BOX1: {
+            data_type = VALUE_BOOL;
+            guider_msg_data.value_array.ptr = value;
+            guider_msg_data.value_array.len = len;
+            break;
+        }
+        case GUI_FILE_BROWSER_MSG_ID_SEL_CHECK_BOX2: {
+            data_type = VALUE_BOOL;
+            guider_msg_data.value_array.ptr = value;
+            guider_msg_data.value_array.len = len;
+            break;
+        }
+        case GUI_FILE_BROWSER_MSG_ID_SEL_CHECK_BOX3: {
+            data_type = VALUE_BOOL;
+            guider_msg_data.value_array.ptr = value;
+            guider_msg_data.value_array.len = len;
+            break;
+        }
+        case GUI_FILE_BROWSER_MSG_ID_SEL_CHECK_BOX4: {
+            data_type = VALUE_BOOL;
+            guider_msg_data.value_array.ptr = value;
+            guider_msg_data.value_array.len = len;
+            break;
+        }
+        case GUI_FILE_BROWSER_MSG_ID_SEL_CHECK_BOX5: {
+            data_type = VALUE_BOOL;
             guider_msg_data.value_array.ptr = value;
             guider_msg_data.value_array.len = len;
             break;

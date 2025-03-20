@@ -195,7 +195,7 @@ static int change_capture_acu(int acu)
     struct server *server;
     union video_req req = {0};
 
-    if (__this->camera_id == 2) {
+    if (__this->camera_id == 2 || __this->camera_id == 4 || __this->camera_id == 5) {
         return 0;
     }
     if ((acu < PHOTO_ACU_LO) || (acu > PHOTO_ACU_HI)) {
@@ -229,7 +229,7 @@ static int change_capture_wbl(int wbl)
     struct server *server;
     union video_req req = {0};
 
-    if (__this->camera_id == 2) {
+    if (__this->camera_id == 2 || __this->camera_id == 4 || __this->camera_id == 5) {
         return 0;
     }
 
@@ -265,7 +265,7 @@ static int change_capture_pexp(int pexp)
     struct server *server;
     union video_req req = {0};
 
-    if (__this->camera_id == 2) {
+    if (__this->camera_id == 2 || __this->camera_id == 4 || __this->camera_id == 5) {
         return 0;
     }
 
@@ -326,7 +326,7 @@ static int change_capture_zoom(int zoom_factor)
 //修改图片色彩
 static int change_capture_col(int col)
 {
-    if (__this->camera_id == 2) {
+    if (__this->camera_id == 2 || __this->camera_id == 4 || __this->camera_id == 5) {
         return 0;
     }
 
@@ -661,6 +661,10 @@ static int camera_take_photo(void)
         req.icap.path = CAMERA0_CAP_PATH"img_****.jpg";
     } else if (__this->camera_id == 1) {
         req.icap.path = CAMERA1_CAP_PATH"img_****.jpg";
+    } else if (__this->camera_id == 4) {
+        req.icap.path = CAMERA4_CAP_PATH"img_****.jpg";
+    } else if (__this->camera_id == 5) {
+        req.icap.path = CAMERA5_CAP_PATH"img_****.jpg";
     } else {
 #if THREE_WAY_ENABLE
         req.icap.path = CAMERA2_CAP_PATH"img_****.jpg";
@@ -869,8 +873,14 @@ static int camera_display_start(void)
     int uvc_host_online(void);
     if (__this->camera_id == 2 && uvc_host_online() != __this->camera_subid) {
         log_w(" uvc sub id:%d not online", __this->camera_subid);
+#ifdef CONFIG_VIDEO0_ENABLE
         //uvc不在线 切换回video0
         __this->camera_id = 0;
+#elif (defined CONFIG_VIDEO4_ENABLE)
+        __this->camera_id = 4;
+#elif (defined CONFIG_VIDEO5_ENABLE)
+        __this->camera_id = 5;
+#endif
         __this->camera_subid = 0;
     }
 #endif
@@ -970,7 +980,11 @@ static void switch_camera(void)
         __this->camera_id = 0;
     }
 #else
+#ifdef CONFIG_VIDEO0_ENABLE
     __this->camera_id = __this->camera_id ? 0 : 2;
+#elif (defined CONFIG_VIDEO4_ENABLE && defined CONFIG_VIDEO5_ENABLE)
+    __this->camera_id = __this->camera_id == 4 ? 5 : 4;
+#endif
 #endif
 
 #if TCFG_HOST_UVC_ENABLE
@@ -997,7 +1011,7 @@ static void check_usb_gpio_state(void)
 static void photo_mode_init(void)
 {
     memset(__this, 0, sizeof(__this));
-#if defined(CONFIG_VIDEO0_ENABLE) && defined(CONFIG_VIDEO1_ENABLE)
+#if (defined(CONFIG_VIDEO0_ENABLE) && defined(CONFIG_VIDEO1_ENABLE)) || (defined(CONFIG_VIDEO4_ENABLE) && defined(CONFIG_VIDEO5_ENABLE))
     video_photo_post_msg("swWinicon", 1);
 #endif
 
@@ -1040,7 +1054,15 @@ static int state_machine(struct application *app, enum app_state state, struct i
 #endif
 
             printf("uvc->id:%d", uvc_id);
-            photo_mode_start(0, uvc_id >= 0 ? uvc_id : 0);
+            u8 id = 0;
+#ifdef CONFIG_VIDEO0_ENABLE
+            id = 0;
+#elif (defined CONFIG_VIDEO4_ENABLE)
+            id = 4;
+#elif (defined CONFIG_VIDEO5_ENABLE)
+            id = 5;
+#endif
+            photo_mode_start(id, uvc_id >= 0 ? uvc_id : 0);
             //发送UI MSG 更新可拍照数量
             img_num = get_take_photo_num();
             video_photo_post_msg("remainPhoto", img_num);
@@ -1146,9 +1168,9 @@ static int video_photo_device_event_handler(struct sys_event *e)
             break;
         case DEVICE_EVENT_OUT:
 #ifndef CONFIG_UI_STYLE_LY_ENABLE
-#if defined(CONFIG_VIDEO0_ENABLE) && defined(CONFIG_VIDEO1_ENABLE)
+#if (defined(CONFIG_VIDEO0_ENABLE) && defined(CONFIG_VIDEO1_ENABLE)) || (defined(CONFIG_VIDEO4_ENABLE) && defined(CONFIG_VIDEO5_ENABLE))
             video_photo_post_msg("swWinicon", 1);
-#else if defined(CONFIG_VIDEO0_ENABLE) || defined(CONFIG_VIDEO1_ENABLE)
+#elif defined(CONFIG_VIDEO0_ENABLE) || defined(CONFIG_VIDEO1_ENABLE) || defined(CONFIG_VIDEO4_ENABLE) || defined(CONFIG_VIDEO5_ENABLE)
             video_photo_post_msg("swWinicon", 0);
 #endif
 #endif

@@ -85,6 +85,7 @@ typedef struct {
     u8 avdd28_lev;          //avdd28_enable
     u8 avdd18_enable;       //avdd18_enable
     u8 avdd28_enable;       //avdd28_enable
+    u8 soff_keep_last_cfg;  //软关机时维持最后设置的电压档位配置
 
     //*****************************************************
     /* soff

@@ -104,10 +104,6 @@ DEFINES := \
 	-DCONFIG_THREAD_ENABLE \
 	-D__GCC_PI32V2__ \
 	-DCONFIG_NEW_ECC_ENABLE \
-	-DEVENT_HANDLER_NUM_CONFIG=2 \
-	-DEVENT_POOL_SIZE_CONFIG=256 \
-	-DTIMER_POOL_NUM_CONFIG=15 \
-	-DVFS_FILE_POOL_NUM_CONFIG=8 \
 	-DVM_MAX_PAGE_ALIGN_SIZE_CONFIG=64*1024 \
 	-DVM_MAX_SECTOR_ALIGN_SIZE_CONFIG=64*1024 \
 	-DVM_ITEM_MAX_NUM=256 \
@@ -172,6 +168,7 @@ c_SRC_FILES := \
 	../../../../../apps/common/rf_fcc_tool/rf_fcc_main.c \
 	../../../../../apps/common/rf_fcc_tool/wifi_adaptivity.c \
 	../../../../../apps/common/system/init.c \
+	../../../../../apps/common/system/init_expand.c \
 	../../../../../apps/common/system/perf_counter/example/main.c \
 	../../../../../apps/common/system/perf_counter/perf_counter.c \
 	../../../../../apps/common/system/version.c \
@@ -241,9 +238,6 @@ LFLAGS := \
 	--plugin-opt=-pi32v2-large-program=true \
 	--plugin-opt=-pi32v2-csync-before-rti=true \
 	--start-group \
-	../../../../../include_lib/newlib/pi32v2-lib/libm.a \
-	../../../../../include_lib/newlib/pi32v2-lib/libc.a \
-	../../../../../include_lib/newlib/pi32v2-lib/libcompiler_rt.a \
 	--start-group  \
 	../../../../../cpu/wl83/liba/cpu.a \
 	../../../../../cpu/wl83/liba/fs.a \
@@ -264,9 +258,12 @@ LFLAGS := \
 	../../../../../cpu/wl83/liba/lwip_2_2_0.a \
 	../../../../../cpu/wl83/liba/wl_wifi.a \
 	--end-group \
+	../../../../../include_lib/newlib/pi32v2-lib/libm.a \
+	../../../../../include_lib/newlib/pi32v2-lib/libc.a \
+	../../../../../include_lib/newlib/pi32v2-lib/libcompiler_rt.a \
+	--end-group  \
 	-T../../../../../cpu/wl83/sdk.ld \
 	-M=../../../../../cpu/wl83/tools/sdk.map \
-	--end-group  \
 	--plugin-opt=mcpu=r3 \
 	--plugin-opt=-mattr=+fprev1 \
 

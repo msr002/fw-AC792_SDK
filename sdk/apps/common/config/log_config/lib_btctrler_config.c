@@ -1,5 +1,5 @@
-#include "btcontroller_config.h"
 #include "app_config.h"
+#include "btcontroller_config.h"
 
 #ifdef CONFIG_BT_ENABLE
 
@@ -16,20 +16,25 @@ const int config_btctler_modules                    = (BT_MODULE_LE);
 const int config_btctler_modules                    = 0;
 #endif
 
-#ifdef CONFIG_RF_TEST_ENABLE
-int config_btctler_mode                             = BT_FCC;
-int config_btctler_hci_standard                     = 1;
-#else
+#if TCFG_RF_FCC_TEST_ENABLE || TCFG_RF_PRODUCT_TEST_ENABLE
 int config_btctler_mode                             = TCFG_BT_MODE;
-#if (TCFG_BT_MODE != BT_NORMAL)
+#if TCFG_RF_FCC_TEST_ENABLE
 int config_btctler_hci_standard                     = 1;
 #else
 int config_btctler_hci_standard                     = 0;
+#endif
+#else
+const int config_btctler_mode                       = TCFG_BT_MODE;
+#if (TCFG_BT_MODE != BT_NORMAL)
+const int config_btctler_hci_standard               = 1;
+#else
+const int config_btctler_hci_standard               = 0;
 #endif
 #endif
 
 const int CONFIG_BT_FUNCTION                        = 0;
 const int CONFIG_DONGLE_SPEAK_ENABLE                = 0;
+const int CONFIG_BTCTLER_JL_DONGLE_SOURCE_ENABLE    = 0;
 const int CONFIG_WIFI_DETECT_ENABLE                 = 0;
 const int CONFIG_ESCO_FORWARD_ENABLE                = 0;
 const int CONFIG_UPDATE_BT_LMP_EN                   = 0;
@@ -49,6 +54,7 @@ const int CONFIG_LMP_PASSKEY_ENABLE                 = 0;
 const int CONFIG_LMP_OOB_ENABLE                     = 0;
 const int CONFIG_LMP_MASTER_ESCO_ENABLE             = 0;
 const int CONFIG_BTCTLER_QOS_ENABLE                 = 1;
+const int CONFIG_MASTER_QOS_POLL                    = 0;
 const int CONFIG_BTCTLER_FAST_CONNECT_ENABLE        = 0;
 #ifdef CONFIG_NO_SDRAM_ENABLE
 const int CONFIG_BTCTLER_RAM_MALLOC_ENABLE          = 0;
@@ -189,7 +195,7 @@ const int config_btctler_le_hw_nums                 = 6;
 #elif (TCFG_LEA_CIG_CENTRAL_EN || TCFG_LEA_CIG_PERIPHERAL_EN)
 const int config_btctler_le_hw_nums                 = 5;
 #elif (TCFG_LE_AUDIO_APP_CONFIG & (LE_AUDIO_AURACAST_SOURCE_EN | LE_AUDIO_AURACAST_SINK_EN))
-const int config_btctler_le_hw_nums                 = 6;
+const int config_btctler_le_hw_nums                 = 7;
 #elif TCFG_TRANS_MULTI_BLE_EN
 const int config_btctler_le_hw_nums                 = TCFG_TRANS_MULTI_BLE_SLAVE_NUMS + TCFG_TRANS_MULTI_BLE_MASTER_NUMS;
 #elif TCFG_BLE_MESH_ENABLE
@@ -197,7 +203,7 @@ const int config_btctler_le_hw_nums                 = 3;
 #elif TCFG_BLE_MASTER_CENTRAL_EN || TCFG_NONCONN_24G_EN
 const int config_btctler_le_hw_nums                 = 2;
 #else
-const int config_btctler_le_hw_nums                 = 1;
+const int config_btctler_le_hw_nums                 = 2;
 #endif
 
 /* const uint64_t config_btctler_le_features = (LE_ENCRYPTION | LE_FEATURES_ISO | LE_EXTENDED_ADVERTISING | LE_PERIODIC_ADVERTISING | LL_FEAT_ISO_SYNC | LL_FEAT_ISO_BROADCASTER | LL_FEAT_CIS_MASTER_ROLE | LL_FEAT_CIS_SLAVE_ROLE | LL_FEAT_LE_2M_PHY | LL_FEAT_LE_CODED_PHY); */
@@ -253,7 +259,7 @@ const int config_bb_optimized_ctrl                  = BIT(13) | BIT(14) | BIT(20
 #elif (TCFG_LE_AUDIO_APP_CONFIG & (LE_AUDIO_AURACAST_SOURCE_EN | LE_AUDIO_AURACAST_SINK_EN))
 
 const int config_btctler_le_roles                   = (LE_MASTER | LE_SLAVE | LE_ADV | LE_SCAN);
-const uint64_t config_btctler_le_features           = LL_FEAT_ISO_BROADCASTER | LL_FEAT_ISO_SYNC | LL_FEAT_ISO_HOST_SUPPORT | LE_2M_PHY | CHANNEL_SELECTION_ALGORITHM_2 | LE_EXTENDED_ADVERTISING | LE_PERIODIC_ADVERTISING;
+const uint64_t config_btctler_le_features           = LL_FEAT_ISO_BROADCASTER | LE_DATA_PACKET_LENGTH_EXTENSION | LL_FEAT_ISO_SYNC | LL_FEAT_ISO_HOST_SUPPORT | LE_2M_PHY | CHANNEL_SELECTION_ALGORITHM_2 | LE_EXTENDED_ADVERTISING | LE_PERIODIC_ADVERTISING;
 const int config_btctler_le_rx_nums                 = 20;
 const int config_btctler_le_acl_packet_length       = 255;
 const int config_btctler_le_acl_total_nums          = 15;

@@ -222,6 +222,7 @@ static int dec_card_in_handler(const char *type, u32 arg)
 *	模式post消息给UI，执行UI动作
 *
 */
+#ifdef CONFIG_FILE_PREVIEW_ENABLE
 void video_dec_post_msg(const char *msg, ...)
 {
 #ifdef USE_LVGL_V8_UI_DEMO
@@ -247,9 +248,6 @@ void video_dec_post_msg(const char *msg, ...)
         dec_play_time_handler(msg, va_arg(argptr, int));
     } else if (strstr(msg, "fname")) {
         dec_file_name_handler(msg, va_arg(argptr, int));
-    } else if (strstr(msg, "fileInfo")) {
-        post_msg2_dec(msg, va_arg(argptr, int));
-
     } else {
         printf("[chili] %s your msg [%s] no callback! \n", __func__, msg, __LINE__);
     }
@@ -259,6 +257,7 @@ void video_dec_post_msg(const char *msg, ...)
 #endif
 
 }
+#endif /* CONFIG_FILE_PREVIEW_ENABLE */
 static void video_dir_view_9_event_handler(lv_event_t *e)  //文件夹回调
 {
     lv_event_code_t code = lv_event_get_code(e);
