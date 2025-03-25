@@ -503,8 +503,8 @@ video3
 virtual0
 virtual1
 video_dec
-soft_imc0
-soft_imc1
+sft0
+sft1
 gpu0
 gpu1
 gpu2

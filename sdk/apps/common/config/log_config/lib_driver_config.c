@@ -615,11 +615,11 @@ const char log_tag_const_w_VIRTUAL_ADAPTER AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB
 const char log_tag_const_e_VIRTUAL_ADAPTER AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(TRUE);
 
 
-const char log_tag_const_v_SOFT_IMC_ADAPTER AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(TRUE);
-const char log_tag_const_d_SOFT_IMC_ADAPTER AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(TRUE);
-const char log_tag_const_i_SOFT_IMC_ADAPTER AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(TRUE);
-const char log_tag_const_w_SOFT_IMC_ADAPTER AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(FALSE);
-const char log_tag_const_e_SOFT_IMC_ADAPTER AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(TRUE);
+const char log_tag_const_v_SFT_ADAPTER AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(TRUE);
+const char log_tag_const_d_SFT_ADAPTER AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(TRUE);
+const char log_tag_const_i_SFT_ADAPTER AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(TRUE);
+const char log_tag_const_w_SFT_ADAPTER AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(FALSE);
+const char log_tag_const_e_SFT_ADAPTER AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(TRUE);
 
 
 const char log_tag_const_v_GPU_ADAPTER AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(TRUE);

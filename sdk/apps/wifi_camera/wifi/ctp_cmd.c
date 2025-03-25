@@ -3806,7 +3806,7 @@ static int cmd_exit_backstage(void *priv, char *content)
     key_event_enable();
     touch_event_enable();
 
-    user_ctp_cli_disconnect();
+    /* user_ctp_cli_disconnect(); */
 
 
 }

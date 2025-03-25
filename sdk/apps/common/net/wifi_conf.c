@@ -113,7 +113,19 @@ u8 wifi_lowpower_mode = 0;
 const u8 CONFIG_WIFI_USE_TLSF_MEM = 0; //配置wifi使用独立的内存管理，与系统内存管理分割开
 const unsigned int CONFIG_WIFI_MAX_MEM_LIMIT = 200 * 1024; //允许wifi使用的内存大小
 const unsigned char CONFIG_AP_TXQ_PRI = 0;  //AP模式下tx和rx队列分配,tx占最大比重，用于改善发送为主的性能
+#if TCFG_RF_FCC_TEST_ENABLE
+//WIFI Adaptivity
+/*n/8 dBm 干扰功率阈值, 设置值和真实值有-20dBm的差值, 即默认值为(-80*8)时，干扰功率为-60dBm时进行规避, 最低配置值为(-127*8)*/
+short CHL_PWR_THR = (-70 * 8); //75
+short CHL_BUSY_CONFIG = (0xe & 0x0f); //0xe
+#else
+//WIFI Adaptivity
+/*n/8 dBm 干扰功率阈值, 设置值和真实值有-20dBm的差值, 即默认值为(-80*8)时，干扰功率为-60dBm时进行规避, 最低配置值为(-127*8)*/
+short CHL_PWR_THR = (-80 * 8);
+short CHL_BUSY_CONFIG = (0xc & 0x0f); //0xe
+#endif
 
+const u8 CONFIG_WPA3_SUPPORT = 1;  //1：使能wpa3支持，0：关闭wpa3支持
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
 #ifdef CONFIG_NET_ENABLE
@@ -353,7 +365,7 @@ BssidNum=1\n\
 MaxStaNum=2\n\
 IdleTimeout=300\n\
 SSID=####SSID_LENTH_MUST_LESS_THAN_32\n\
-WirelessMode=9\n\
+WirelessMode=0\n\
 TxRate=0\n\
 Channel=12#\n\
 BasicRate=15\n\
@@ -851,6 +863,47 @@ __attribute__((weak)) u8 *lte_module_get_mac_addr(void)
 {
     return NULL;
 }
+
+#define TX_ERR_ADJUST_THRESHOLD 45
+#define TX_ERR_ADJUST_COUNTERS 4
+static int tx_adjust_counters = 0;
+
+void wifi_edca_adjust(u8 ac_type, u8 txop_limit, u8 cwmin, u8 cwmax, u8 aifsn)
+{
+    u8 txop_limit_t, cwmin_t, cwmax_t, aifsn_t;
+    wifi_edca_parm_get(ac_type, &txop_limit_t, &cwmin_t, &cwmax_t, &aifsn_t);
+    //printf("txop_limit: %d, cwmin: %d, cwmax: %d, aifsn: %d\n", txop_limit, cwmin, cwmax, aifsn);
+    if (txop_limit_t != txop_limit || cwmin_t != cwmin || cwmax_t != cwmax || aifsn_t != aifsn) {
+        wifi_edca_parm_set(ac_type, txop_limit, cwmin, cwmax, aifsn);
+    }
+}
+
+void wifi_tx_states_count_callback(unsigned long total_count, unsigned long retransmit_count,
+                                   unsigned long fail_count, unsigned long err_ratio)
+{
+#if 1 //根据错包率调整edca参数
+    if (err_ratio <= TX_ERR_ADJUST_THRESHOLD) {
+        if (tx_adjust_counters) {
+            tx_adjust_counters--;
+        }
+    } else {
+        tx_adjust_counters++;
+    }
+    //printf("err_ratio: %d, total_count: %d, tx_adjust_counters: %d\n", err_ratio,  total_count, tx_adjust_counters);
+
+    if (tx_adjust_counters < TX_ERR_ADJUST_COUNTERS) {
+        wifi_edca_adjust(0, 255, 1, 1, 1);
+    } else {
+        wifi_edca_adjust(0, 0, 4, 10, 3);
+    }
+
+    if (tx_adjust_counters > TX_ERR_ADJUST_COUNTERS + 3) {
+        tx_adjust_counters = TX_ERR_ADJUST_COUNTERS + 3;
+    }
+#endif
+}
+
+
 
 /**
  * @brief Log (Verbose/Info/Debug/Warn/Error)

@@ -97,6 +97,8 @@ int plugin_factory_plugin_status(void);
 
 char *plugin_factory_find(const char *find_name);
 
+char *find_use_for_display_plugin(const char *_name);
+
 pipe_plugin_t *plugin_factory_find_used(const char *find_name);
 
 bool port_check_connected(pipe_plugin_t *prev_plugin, pipe_plugin_t *plugin);

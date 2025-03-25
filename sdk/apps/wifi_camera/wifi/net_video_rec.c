@@ -1008,7 +1008,7 @@ static int net_video_rec0_start()
         return VREC_ERR_V0_REQ_START;
     }
 
-    net_video_rec_set_bitrate(net_video_rec_get_abr(req.rec.width));
+    /* net_video_rec_set_bitrate(net_video_rec_get_abr(req.rec.width)); */
 
     return 0;
 }
@@ -1029,7 +1029,7 @@ static int net_video_rec0_stop(u8 close)
             printf("\nstop rec err 0x%x\n", err);
             return VREC_ERR_V0_REQ_STOP;
         }
-        net_video_rec_set_bitrate(video_rec_get_abr(__this_net->net_videoreq[0].rec.width));
+        /* net_video_rec_set_bitrate(video_rec_get_abr(__this_net->net_videoreq[0].rec.width)); */
         if (close) {
             server_close(__this_net->net_video_rec);
             __this_net->net_video_rec = NULL;
@@ -1252,7 +1252,7 @@ static int net_video_rec1_stop(u8 close)
             return VREC_ERR_V1_REQ_STOP;
         }
 
-        net_video_rec_set_bitrate(video_rec_get_abr(__this_net->net_videoreq[1].rec.width));
+        /* net_video_rec_set_bitrate(video_rec_get_abr(__this_net->net_videoreq[1].rec.width)); */
 
         if (close) {
             server_close(__this_net->net_video_rec1);

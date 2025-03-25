@@ -1136,8 +1136,18 @@ tcp_connect(struct tcp_pcb *pcb, const ip_addr_t *ipaddr, u16_t port,
                         (cpcb->remote_port == port) &&
                         ip_addr_eq(&cpcb->local_ip, &pcb->local_ip) &&
                         ip_addr_eq(&cpcb->remote_ip, ipaddr)) {
-                        /* linux returns EISCONN here, but ERR_USE should be OK for us */
-                        return ERR_USE;
+#if JL_LWIP
+                        //socket绑定bind ip和port
+                        //已经主动发送了FIN， 对方没有回复ACK或FIN, 客户端调用close socket后又立即(需要等2MSL)创建socket导致connect失败
+                        if (cpcb->state == FIN_WAIT_1) {
+                            tcp_pcb_remove(tcp_pcb_lists[i], cpcb);
+                            tcp_free(cpcb);
+                        } else
+#endif
+                        {
+                            /* linux returns EISCONN here, but ERR_USE should be OK for us */
+                            return ERR_USE;
+                        }
                     }
                 }
             }
@@ -1758,7 +1768,11 @@ tcp_kill_state(enum tcp_state state)
     struct tcp_pcb *pcb, *inactive;
     u32_t inactivity;
 
+#if JL_LWIP
+    LWIP_ASSERT("invalid state", (state == CLOSING) || (state == LAST_ACK) || (state == FIN_WAIT_1) || (state == FIN_WAIT_2));
+#else
     LWIP_ASSERT("invalid state", (state == CLOSING) || (state == LAST_ACK));
+#endif
 
     inactivity = 0;
     inactive = NULL;
@@ -1863,17 +1877,44 @@ tcp_alloc(u8_t prio)
                 tcp_kill_state(CLOSING);
                 /* Try to allocate a tcp_pcb again. */
                 pcb = (struct tcp_pcb *)memp_malloc(MEMP_TCP_PCB);
+
+#if JL_LWIP
                 if (pcb == NULL) {
-                    /* Try killing oldest active connection with lower priority than the new one. */
-                    LWIP_DEBUGF(TCP_DEBUG, ("tcp_alloc: killing oldest connection with prio lower than %d\n", prio));
-                    tcp_kill_prio(prio);
-                    /* Try to allocate a tcp_pcb again. */
+                    /* Try killing oldest connection in FIN_WAIT_2. */
+                    LWIP_DEBUGF(TCP_DEBUG, ("tcp_alloc: killing off oldest FIN_WAIT_2 connection\n"));
+                    tcp_kill_state(FIN_WAIT_2);
                     pcb = (struct tcp_pcb *)memp_malloc(MEMP_TCP_PCB);
+                    if (pcb == NULL) {
+                        /* Try killing oldest connection in FIN_WAIT_1. */
+                        LWIP_DEBUGF(TCP_DEBUG, ("tcp_alloc: killing off oldest FIN_WAIT_1 connection\n"));
+                        tcp_kill_state(FIN_WAIT_1);
+                        pcb = (struct tcp_pcb *)memp_malloc(MEMP_TCP_PCB);
+#endif
+                        if (pcb == NULL) {
+                            /* Try killing oldest active connection with lower priority than the new one. */
+                            LWIP_DEBUGF(TCP_DEBUG, ("tcp_alloc: killing oldest connection with prio lower than %d\n", prio));
+                            tcp_kill_prio(prio);
+                            /* Try to allocate a tcp_pcb again. */
+                            pcb = (struct tcp_pcb *)memp_malloc(MEMP_TCP_PCB);
+                            if (pcb != NULL) {
+                                /* adjust err stats: memp_malloc failed multiple times before */
+                                MEMP_STATS_DEC(err, MEMP_TCP_PCB);
+                            }
+                        }
+
+#if JL_LWIP
+                        if (pcb != NULL) {
+                            /* adjust err stats: memp_malloc failed multiple times before */
+                            MEMP_STATS_DEC(err, MEMP_TCP_PCB);
+                        }
+                    }
+
                     if (pcb != NULL) {
                         /* adjust err stats: memp_malloc failed multiple times before */
                         MEMP_STATS_DEC(err, MEMP_TCP_PCB);
                     }
                 }
+#endif
                 if (pcb != NULL) {
                     /* adjust err stats: memp_malloc failed multiple times before */
                     MEMP_STATS_DEC(err, MEMP_TCP_PCB);

@@ -1680,7 +1680,7 @@ static int video_rec_del_old_file()
     if (!__this->new_file[0]) {
         fsize[0] =  video_rec_get_fsize(cyc_time, rec_pix_w[db_select("res")], VIDEO0_REC_FORMAT);
         if (gap_time) {
-            fsize[0] = fsize[0] / (30 * gap_time / 1000);
+            fsize[0] = fsize[0] / (20 * gap_time / 1000);
         }
         need_space += fsize[0];
     }
@@ -1691,7 +1691,7 @@ static int video_rec_del_old_file()
         if (__this->video_online[1] && !__this->new_file[1]) {
             fsize[1] =  video_rec_get_fsize(cyc_time, rec_pix_w[db_select("res")], VIDEO1_REC_FORMAT);
             if (gap_time) {
-                fsize[1] = fsize[1] / (30 * gap_time / 1000);
+                fsize[1] = fsize[1] / (20 * gap_time / 1000);
             }
             need_space += fsize[1];
         }
@@ -1711,7 +1711,7 @@ static int video_rec_del_old_file()
         if (__this->video_online[3] && !__this->new_file[3]) {
             fsize[3] =  video_rec_get_fsize(cyc_time, rec_pix_w[db_select("res")], VIDEO3_REC_FORMAT);
             if (gap_time) {
-                fsize[3] = fsize[3] / (30 * gap_time / 1000);
+                fsize[3] = fsize[3] / (20 * gap_time / 1000);
             }
             need_space += fsize[3];
         }
