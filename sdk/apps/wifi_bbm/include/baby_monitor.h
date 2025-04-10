@@ -5,6 +5,10 @@
 #include "app_config.h"
 #include "utils/uthash/uthash.h"
 
+#define AUDIO_RX_ENC_SAMPLE_RATE   8000
+#define AUDIO_RX_ENC_FRAME_SIZE    640*2       //每个音频包的大小，越大会导致延迟高
+#define AUDIO_RX_ENC_BUF_MAX_LEN   AUDIO_RX_ENC_FRAME_SIZE * 64    //编码音频缓存
+
 typedef struct {
     int file_no;             // 文件序号key
     UT_hash_handle hh;       // 哈希表句柄

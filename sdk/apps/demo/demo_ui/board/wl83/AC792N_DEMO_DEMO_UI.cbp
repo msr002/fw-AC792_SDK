@@ -1076,6 +1076,7 @@
 <Unit filename="../../../../../apps/common/example/third_party/lvgl_v9/src/libs/gif/lv_gif.h" />
 <Unit filename="../../../../../apps/common/example/third_party/lvgl_v9/src/libs/gif/lv_gif_private.h" />
 <Unit filename="../../../../../apps/common/example/third_party/lvgl_v9/src/libs/jl_bin/lv_jl_bin.h" />
+<Unit filename="../../../../../apps/common/example/third_party/lvgl_v9/src/libs/jljpeg/lv_jljpeg.h" />
 <Unit filename="../../../../../apps/common/example/third_party/lvgl_v9/src/libs/libjpeg_turbo/lv_libjpeg_turbo.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../../apps/common/example/third_party/lvgl_v9/src/libs/libjpeg_turbo/lv_libjpeg_turbo.h" />
 <Unit filename="../../../../../apps/common/example/third_party/lvgl_v9/src/libs/libpng/lv_libpng.c"><Option compilerVer="CC"/></Unit>

@@ -11,7 +11,7 @@
 
 #if !LV_USE_GUIBUILDER_SIMULATOR
 
-void post_stream_msg_to_ui(const char *msg)
+void post_stream_msg_to_ui(const char *msg, int arg)
 {
     static u8 switch_prev_state = 0;
 
@@ -27,6 +27,11 @@ void post_stream_msg_to_ui(const char *msg)
             lvgl_module_msg_send_value(GUI_RT_STREAM_MSG_ID_CAMERA_SWITCH, 0, 0);
         }
         switch_prev_state = 0;
+    } else if (!strcmp(msg, "show stream info")) {
+        char *text = (char *)arg;
+        char *lab = lvgl_module_msg_get_ptr(GUI_RT_STREAM_MSG_ID_STREAM_INFO, strlen(text) + 1);
+        strcpy(lab, text);
+        lvgl_module_msg_send_ptr(lab, 0);
     } else {
         printf("Unknow Msg\n");
     }
@@ -88,9 +93,9 @@ static int gui_src_action_wifi_bbm(int action)
     switch (action) {
     case GUI_SCREEN_ACTION_LOAD:
 #if LV_DISP_UI_FB_NUM
-        lv_obj_set_style_bg_opa(guider_ui.rt_stream, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+        lv_obj_set_style_bg_opa(guider_ui.rt_stream->rt_stream, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
 #else
-        lv_obj_set_style_bg_opa(guider_ui.rt_stream, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+        lv_obj_set_style_bg_opa(guider_ui.rt_stream->rt_stream, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
 #endif
         gui_bbm_start_stream();
         break;
@@ -100,6 +105,34 @@ static int gui_src_action_wifi_bbm(int action)
 }
 REGISTER_UI_SCREEN_ACTION_HANDLER(GUI_SCREEN_RT_STREAM)
 .onchange = gui_src_action_wifi_bbm,
+};
+
+//开发板的KEY4 / KEY5 不映射LVGL. 按键事件发给app_core.
+static int bbm_rt_stream_key_handler(struct key_event *key)
+{
+    switch (key->action) {
+    case KEY_EVENT_CLICK:
+        switch (key->value) {
+        case KEY_DOWN:
+            //key4
+            return 1;
+            break;
+        case KEY_OK:
+            //key5
+            return 1;
+            break;
+        default:
+            break;
+        }
+        break;
+    default:
+        break;
+    }
+
+    return 0;
+}
+REGISTER_UI_KEY_EVENT_HANDLER(GUI_SCREEN_RT_STREAM)
+.key_onchange = bbm_rt_stream_key_handler,
 };
 #endif
 

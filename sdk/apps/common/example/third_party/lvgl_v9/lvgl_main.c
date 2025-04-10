@@ -344,6 +344,29 @@ void _lvgl_ui_task_suspend_resume(uint8_t state, void *cb)
     os_sem_del(&sem_wait, OS_DEL_ALWAYS);
 }
 
+static void _lv_ui_suspend_resume_cb(uint8_t state)
+{
+    if (state == 0) {
+        printf("lvgl ui pause!\n");
+    } else {
+        printf("lvgl ui resume!\n");
+        //设置全屏脏矩形
+        int err;
+        int msg[2];
+        lv_disp_t *disp = lv_disp_get_default();
+        lv_area_t a;
+        lv_area_set(&a, 0, 0, lv_disp_get_hor_res(disp) - 1, lv_disp_get_ver_res(disp) - 1);
+        _lv_inv_area(disp, &a);
+    }
+}
+void lvgl_ui_suspend(void)
+{
+    _lvgl_ui_task_suspend_resume(0, _lv_ui_suspend_resume_cb);
+}
+void lvgl_ui_resume(void)
+{
+    _lvgl_ui_task_suspend_resume(1, _lv_ui_suspend_resume_cb);
+}
 u8 lvgl_ui_is_suspended(void)
 {
     return lvgl_suspend_flag;

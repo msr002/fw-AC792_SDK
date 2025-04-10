@@ -1237,6 +1237,10 @@
 <Unit filename="../../../../apps/wifi_bbm/lvgl_v8_ui_app/generated/gui_scr/setup_scr_sys_prompt.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/wifi_bbm/lvgl_v8_ui_app/generated/gui_scr/setup_scr_unpair.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/wifi_bbm/lvgl_v8_ui_app/generated/gui_scr/setup_scr_video_play.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="../../../../apps/wifi_bbm/lvgl_v8_ui_app/generated/gui_scr/ui_scr_manager.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="../../../../apps/wifi_bbm/lvgl_v8_ui_app/generated/gui_scr/ui_scr_manager.h" />
+<Unit filename="../../../../apps/wifi_bbm/lvgl_v8_ui_app/generated/gui_scr/ui_style.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="../../../../apps/wifi_bbm/lvgl_v8_ui_app/generated/gui_scr/ui_style.h" />
 <Unit filename="../../../../apps/wifi_bbm/lvgl_v8_ui_app/generated/gui_timelines/gui_timelines.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/wifi_bbm/lvgl_v8_ui_app/generated/gui_timelines/gui_timelines.h" />
 <Unit filename="../../../../apps/wifi_bbm/lvgl_v8_ui_app/generated/i18n/lv_i18n.c"><Option compilerVer="CC"/></Unit>

@@ -27,9 +27,9 @@ static void time_rtc_test_task(void *arg)
 {
     static struct sys_time time;
 
-    // adc_init()和rtc_early_init()一般在板级board_init()里初始化，在此处调用是为了方便演示
-    adc_init();             ///< rtc_early_init()里调用adc相关接口，因此需要先初始化ADC。
-    rtc_early_init();       ///< 使用RTC前需要先初始化。
+    // adc_init()和rtc_early_init()一般在板级board_init()里初始化。
+    // adc_init();             ///< rtc_early_init()里调用adc相关接口，因此需要先初始化ADC。
+    // rtc_early_init();       ///< 使用RTC前需要先初始化。
 
     // 打开RTC设备
     rtc_hdl = dev_open("rtc", NULL);

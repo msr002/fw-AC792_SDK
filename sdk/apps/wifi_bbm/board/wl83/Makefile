@@ -881,6 +881,8 @@ c_SRC_FILES := \
 	../../../../apps/wifi_bbm/lvgl_v8_ui_app/generated/gui_scr/setup_scr_sys_prompt.c \
 	../../../../apps/wifi_bbm/lvgl_v8_ui_app/generated/gui_scr/setup_scr_unpair.c \
 	../../../../apps/wifi_bbm/lvgl_v8_ui_app/generated/gui_scr/setup_scr_video_play.c \
+	../../../../apps/wifi_bbm/lvgl_v8_ui_app/generated/gui_scr/ui_scr_manager.c \
+	../../../../apps/wifi_bbm/lvgl_v8_ui_app/generated/gui_scr/ui_style.c \
 	../../../../apps/wifi_bbm/lvgl_v8_ui_app/generated/gui_timelines/gui_timelines.c \
 	../../../../apps/wifi_bbm/lvgl_v8_ui_app/generated/i18n/lv_i18n.c \
 	../../../../apps/wifi_bbm/protocols/arp_static_table.c \

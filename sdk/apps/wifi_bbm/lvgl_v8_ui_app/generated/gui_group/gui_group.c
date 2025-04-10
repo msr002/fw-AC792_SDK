@@ -72,61 +72,69 @@ void set_default_group_cb()
     }
 
     lv_group_remove_all_objs(guider_ui.default_group);
-    lv_obj_t *act_scr = lv_scr_act();
+    int32_t act_scr_id = gui_scr_get_id(gui_scr_get_act());
 
-    if (act_scr == guider_ui.home) {
-        gui_group_add_obj(guider_ui.default_group, guider_ui.home_imgbtn_2, true);
-        gui_group_add_obj(guider_ui.default_group, guider_ui.home_imgbtn_1, true);
-        gui_group_add_obj(guider_ui.default_group, guider_ui.home_imgbtn_3, true);
-    } else if (act_scr == guider_ui.pair_status) {
-        gui_group_add_obj(guider_ui.default_group, guider_ui.pair_status_imglist_1, true);
-        gui_group_add_obj(guider_ui.default_group, guider_ui.pair_status_imglist_2, true);
-        gui_group_add_obj(guider_ui.default_group, guider_ui.pair_status_imglist_3, true);
-        gui_group_add_obj(guider_ui.default_group, guider_ui.pair_status_imglist_4, true);
-        gui_group_add_obj(guider_ui.default_group, guider_ui.pair_status_imglist_5, true);
-        gui_group_add_obj(guider_ui.default_group, guider_ui.pair_status_imglist_6, true);
-        gui_group_add_obj(guider_ui.default_group, guider_ui.pair_status_imgbtn_1, true);
-        gui_group_add_obj(guider_ui.default_group, guider_ui.pair_status_ddlist_1, true);
-    } else if (act_scr == guider_ui.rt_stream) {
-        gui_group_add_obj(guider_ui.default_group, guider_ui.rt_stream_imgbtn_1, true);
-    } else if (act_scr == guider_ui.file_browser) {
-        gui_group_add_obj(guider_ui.default_group, guider_ui.file_browser_imgbtn_1, true);
-        gui_group_add_obj(guider_ui.default_group, guider_ui.file_browser_imgbtn_2, true);
-        gui_group_add_obj(guider_ui.default_group, guider_ui.file_browser_imgbtn_3, true);
-        gui_group_add_obj(guider_ui.default_group, guider_ui.file_browser_imgbtn_4, true);
-        gui_group_add_obj(guider_ui.default_group, guider_ui.file_browser_file_cont1, true);
-        gui_group_add_obj(guider_ui.default_group, guider_ui.file_browser_cb_1, true);
-        gui_group_add_obj(guider_ui.default_group, guider_ui.file_browser_file_cont2, true);
-        gui_group_add_obj(guider_ui.default_group, guider_ui.file_browser_cb_2, true);
-        gui_group_add_obj(guider_ui.default_group, guider_ui.file_browser_file_cont3, true);
-        gui_group_add_obj(guider_ui.default_group, guider_ui.file_browser_cb_3, true);
-        gui_group_add_obj(guider_ui.default_group, guider_ui.file_browser_file_cont4, true);
-        gui_group_add_obj(guider_ui.default_group, guider_ui.file_browser_cb_4, true);
-        gui_group_add_obj(guider_ui.default_group, guider_ui.file_browser_file_cont5, true);
-        gui_group_add_obj(guider_ui.default_group, guider_ui.file_browser_cb_5, true);
-        gui_group_add_obj(guider_ui.default_group, guider_ui.file_browser_file_cont6, true);
-        gui_group_add_obj(guider_ui.default_group, guider_ui.file_browser_cb_6, true);
-    } else if (act_scr == guider_ui.pair_options) {
-        gui_group_add_obj(guider_ui.default_group, guider_ui.pair_options_imgbtn_1, true);
-        gui_group_add_obj(guider_ui.default_group, guider_ui.pair_options_imgbtn_2, true);
-        gui_group_add_obj(guider_ui.default_group, guider_ui.pair_options_imgbtn_4, true);
-    } else if (act_scr == guider_ui.video_play) {
-        gui_group_add_obj(guider_ui.default_group, guider_ui.video_play_imgbtn_1, true);
-        gui_group_add_obj(guider_ui.default_group, guider_ui.video_play_imglist_1, true);
-        gui_group_add_obj(guider_ui.default_group, guider_ui.video_play_imgbtn_3, true);
-        gui_group_add_obj(guider_ui.default_group, guider_ui.video_play_imgbtn_2, true);
-    } else if (act_scr == guider_ui.dir_select) {
-        gui_group_add_obj(guider_ui.default_group, guider_ui.dir_select_view_1, true);
-        gui_group_add_obj(guider_ui.default_group, guider_ui.dir_select_view_2, true);
-        gui_group_add_obj(guider_ui.default_group, guider_ui.dir_select_view_3, true);
-        gui_group_add_obj(guider_ui.default_group, guider_ui.dir_select_view_4, true);
-        gui_group_add_obj(guider_ui.default_group, guider_ui.dir_select_view_5, true);
-        gui_group_add_obj(guider_ui.default_group, guider_ui.dir_select_view_6, true);
-        gui_group_add_obj(guider_ui.default_group, guider_ui.dir_select_imgbtn_1, true);
-    } else if (act_scr == guider_ui.device_select) {
-        gui_group_add_obj(guider_ui.default_group, guider_ui.device_select_view_1, true);
-        gui_group_add_obj(guider_ui.default_group, guider_ui.device_select_view_2, true);
-        gui_group_add_obj(guider_ui.default_group, guider_ui.device_select_imgbtn_1, true);
+    if (act_scr_id == GUI_SCREEN_HOME) {
+        lv_ui_home *ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_HOME);
+        gui_group_add_obj(guider_ui.default_group, ui_scr->home_imgbtn_2, true);
+        gui_group_add_obj(guider_ui.default_group, ui_scr->home_imgbtn_1, true);
+        gui_group_add_obj(guider_ui.default_group, ui_scr->home_imgbtn_3, true);
+    } else if (act_scr_id == GUI_SCREEN_PAIR_STATUS) {
+        lv_ui_pair_status *ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_PAIR_STATUS);
+        gui_group_add_obj(guider_ui.default_group, ui_scr->pair_status_imglist_1, true);
+        gui_group_add_obj(guider_ui.default_group, ui_scr->pair_status_imglist_2, true);
+        gui_group_add_obj(guider_ui.default_group, ui_scr->pair_status_imglist_3, true);
+        gui_group_add_obj(guider_ui.default_group, ui_scr->pair_status_imglist_4, true);
+        gui_group_add_obj(guider_ui.default_group, ui_scr->pair_status_imglist_5, true);
+        gui_group_add_obj(guider_ui.default_group, ui_scr->pair_status_imglist_6, true);
+        gui_group_add_obj(guider_ui.default_group, ui_scr->pair_status_imgbtn_1, true);
+        gui_group_add_obj(guider_ui.default_group, ui_scr->pair_status_ddlist_1, true);
+    } else if (act_scr_id == GUI_SCREEN_RT_STREAM) {
+        lv_ui_rt_stream *ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_RT_STREAM);
+        gui_group_add_obj(guider_ui.default_group, ui_scr->rt_stream_imgbtn_1, true);
+    } else if (act_scr_id == GUI_SCREEN_FILE_BROWSER) {
+        lv_ui_file_browser *ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_FILE_BROWSER);
+        gui_group_add_obj(guider_ui.default_group, ui_scr->file_browser_imgbtn_1, true);
+        gui_group_add_obj(guider_ui.default_group, ui_scr->file_browser_imgbtn_2, true);
+        gui_group_add_obj(guider_ui.default_group, ui_scr->file_browser_imgbtn_3, true);
+        gui_group_add_obj(guider_ui.default_group, ui_scr->file_browser_imgbtn_4, true);
+        gui_group_add_obj(guider_ui.default_group, ui_scr->file_browser_file_cont1, true);
+        gui_group_add_obj(guider_ui.default_group, ui_scr->file_browser_cb_1, true);
+        gui_group_add_obj(guider_ui.default_group, ui_scr->file_browser_file_cont2, true);
+        gui_group_add_obj(guider_ui.default_group, ui_scr->file_browser_cb_2, true);
+        gui_group_add_obj(guider_ui.default_group, ui_scr->file_browser_file_cont3, true);
+        gui_group_add_obj(guider_ui.default_group, ui_scr->file_browser_cb_3, true);
+        gui_group_add_obj(guider_ui.default_group, ui_scr->file_browser_file_cont4, true);
+        gui_group_add_obj(guider_ui.default_group, ui_scr->file_browser_cb_4, true);
+        gui_group_add_obj(guider_ui.default_group, ui_scr->file_browser_file_cont5, true);
+        gui_group_add_obj(guider_ui.default_group, ui_scr->file_browser_cb_5, true);
+        gui_group_add_obj(guider_ui.default_group, ui_scr->file_browser_file_cont6, true);
+        gui_group_add_obj(guider_ui.default_group, ui_scr->file_browser_cb_6, true);
+    } else if (act_scr_id == GUI_SCREEN_PAIR_OPTIONS) {
+        lv_ui_pair_options *ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_PAIR_OPTIONS);
+        gui_group_add_obj(guider_ui.default_group, ui_scr->pair_options_imgbtn_1, true);
+        gui_group_add_obj(guider_ui.default_group, ui_scr->pair_options_imgbtn_2, true);
+        gui_group_add_obj(guider_ui.default_group, ui_scr->pair_options_imgbtn_4, true);
+    } else if (act_scr_id == GUI_SCREEN_VIDEO_PLAY) {
+        lv_ui_video_play *ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_VIDEO_PLAY);
+        gui_group_add_obj(guider_ui.default_group, ui_scr->video_play_imgbtn_1, true);
+        gui_group_add_obj(guider_ui.default_group, ui_scr->video_play_imglist_1, true);
+        gui_group_add_obj(guider_ui.default_group, ui_scr->video_play_imgbtn_3, true);
+        gui_group_add_obj(guider_ui.default_group, ui_scr->video_play_imgbtn_2, true);
+    } else if (act_scr_id == GUI_SCREEN_DIR_SELECT) {
+        lv_ui_dir_select *ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_DIR_SELECT);
+        gui_group_add_obj(guider_ui.default_group, ui_scr->dir_select_view_1, true);
+        gui_group_add_obj(guider_ui.default_group, ui_scr->dir_select_view_2, true);
+        gui_group_add_obj(guider_ui.default_group, ui_scr->dir_select_view_3, true);
+        gui_group_add_obj(guider_ui.default_group, ui_scr->dir_select_view_4, true);
+        gui_group_add_obj(guider_ui.default_group, ui_scr->dir_select_view_5, true);
+        gui_group_add_obj(guider_ui.default_group, ui_scr->dir_select_view_6, true);
+        gui_group_add_obj(guider_ui.default_group, ui_scr->dir_select_imgbtn_1, true);
+    } else if (act_scr_id == GUI_SCREEN_DEVICE_SELECT) {
+        lv_ui_device_select *ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_DEVICE_SELECT);
+        gui_group_add_obj(guider_ui.default_group, ui_scr->device_select_view_1, true);
+        gui_group_add_obj(guider_ui.default_group, ui_scr->device_select_view_2, true);
+        gui_group_add_obj(guider_ui.default_group, ui_scr->device_select_imgbtn_1, true);
     }
     lv_group_set_default(guider_ui.default_group);
 

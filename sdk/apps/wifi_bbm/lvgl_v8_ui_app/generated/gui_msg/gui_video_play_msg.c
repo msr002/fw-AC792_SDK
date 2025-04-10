@@ -65,12 +65,11 @@ void gui_video_play_msg_init_events()
 
     lv_subject_t *subject_progress_bar = gui_msg_get_subject(GUI_VIDEO_PLAY_MSG_ID_PROGRESS_BAR);
     lv_subject_t *subject_play_control = gui_msg_get_subject(GUI_VIDEO_PLAY_MSG_ID_PLAY_CONTROL);
-    if (!guider_ui.video_play_del) {
-        gui_video_play_msg_play_control_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
-        lv_subject_add_observer_obj(subject_play_control, gui_msg_set_imglist_selected_index_by_int32_cb, guider_ui.video_play_imglist_1, &guider_msg_data);
+    if (guider_ui.video_play) {
+        lv_ui_video_play *ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_VIDEO_PLAY);
+        gui_msg_setup_component(true, false, subject_play_control, ui_scr->video_play_imglist_1, &guider_msg_data, gui_msg_set_imglist_selected_index_by_int32_cb, GUI_VIDEO_PLAY_MSG_ID_PLAY_CONTROL, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
 
-        gui_video_play_msg_progress_bar_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
-        lv_subject_add_observer_obj(subject_progress_bar, gui_msg_set_bar_bar_value_by_int32_cb, guider_ui.video_play_bar_1, &guider_msg_data);
+        gui_msg_setup_component(true, false, subject_progress_bar, ui_scr->video_play_bar_1, &guider_msg_data, gui_msg_set_bar_bar_value_by_int32_cb, GUI_VIDEO_PLAY_MSG_ID_PROGRESS_BAR, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
 
 
         for (int i = 0; i < 2; i++) {

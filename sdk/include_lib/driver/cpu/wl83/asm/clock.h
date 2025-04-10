@@ -108,7 +108,11 @@ int clk_early_init(void);
 
 void video_clock_early_init(u32 clk);
 
+void video_clock_early_uninit(void);
+
 void jlgpu_clock_early_init(u32 clk);
+
+void jlgpu_clock_early_uninit(void);
 
 void audio_clock_early_init(void);
 

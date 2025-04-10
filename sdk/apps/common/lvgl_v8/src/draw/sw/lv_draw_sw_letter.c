@@ -82,6 +82,156 @@ const uint8_t _lv_bpp8_opa_table[256] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 1
  *   GLOBAL FUNCTIONS
  **********************/
 
+#if LV_USE_FONT_SCALE
+
+lv_font_t *scale_base_font = NULL;
+
+void lv_set_scale_base_font(const lv_font_t *font_p)
+{
+    scale_base_font = font_p;
+}
+
+lv_font_t *lv_get_scale_base_font(void)
+{
+    return scale_base_font;
+}
+
+static uint8_t *allocate_bitmap_memory(int w, int h, int bpp)
+{
+    if (w <= 0 || h <= 0) {
+        return NULL;
+    }
+    if (bpp != 1 && bpp != 2 && bpp != 4 && bpp != 8) {
+        return NULL;
+    }
+
+    const uint16_t u_w = (uint16_t)w;
+    const uint16_t u_h = (uint16_t)h;
+    const uint16_t u_bpp = (uint16_t)bpp;
+
+    const uint16_t wh = u_w * u_h;
+    const uint16_t total_bits = wh * u_bpp;
+
+    const uint16_t total_bytes = (total_bits + 7) / 8;
+    return lv_mem_alloc(total_bytes);
+}
+
+static uint8_t get_pixel_1bpp(const uint8_t *src, int src_width, int src_x, int src_y)
+{
+    int index = src_y * src_width + src_x;
+    int byte_index = index / 8;
+    int bit_index = 7 - (index % 8);
+    return (src[byte_index] >> bit_index) & 1;
+}
+
+static void set_pixel_1bpp(uint8_t *dst, int dst_width, int x, int y, uint8_t value)
+{
+    int index = y * dst_width + x;
+    int byte_index = index / 8;
+    int bit_index = 7 - (index % 8);
+    if (value) {
+        dst[byte_index] |= (1 << bit_index);
+    } else {
+        dst[byte_index] &= ~(1 << bit_index);
+    }
+}
+
+static uint8_t get_pixel_2bpp(const uint8_t *src, int src_width, int src_x, int src_y)
+{
+    int index = src_y * src_width + src_x;
+    int byte_index = index / 4;
+    int shift = 6 - (index % 4) * 2;
+    return (src[byte_index] >> shift) & 0x03;
+}
+
+static void set_pixel_2bpp(uint8_t *dst, int dst_width, int x, int y, uint8_t value)
+{
+    int index = y * dst_width + x;
+    int byte_index = index / 4;
+    int shift = 6 - (index % 4) * 2;
+    dst[byte_index] &= ~(0x03 << shift);
+    dst[byte_index] |= (value & 0x03) << shift;
+}
+
+static uint8_t get_pixel_4bpp(const uint8_t *src, int src_width, int src_x, int src_y)
+{
+    int index = src_y * src_width + src_x;
+    int byte_index = index / 2;
+    int shift = (index % 2) ? 0 : 4;
+    return (src[byte_index] >> shift) & 0x0F;
+}
+
+static void set_pixel_4bpp(uint8_t *dst, int dst_width, int x, int y, uint8_t value)
+{
+    int index = y * dst_width + x;
+    int byte_index = index / 2;
+    int shift = (index % 2) ? 0 : 4;
+    dst[byte_index] &= ~(0x0F << shift);
+    dst[byte_index] |= (value & 0x0F) << shift;
+}
+
+static uint8_t get_pixel_8bpp(const uint8_t *src, int src_width, int src_x, int src_y)
+{
+    return src[src_y * src_width + src_x];
+}
+
+static void set_pixel_8bpp(uint8_t *dst, int dst_width, int x, int y, uint8_t value)
+{
+    dst[y * dst_width + x] = value;
+}
+
+static void scale_nearest(const uint8_t *src, int src_width, int src_height,
+                          uint8_t *dst, int dst_width, int dst_height, int bpp)
+{
+
+    float scale_y = src_height * 1.0 / dst_height;
+    float scale_x = src_width * 1.0  / dst_width;
+
+    uint8_t pixel;
+    for (int y = 0; y < dst_height; y++) {
+        int src_y = y * scale_y + 0.5;
+        if (src_y >= src_height) {
+            src_y = src_height - 1;
+        }
+
+        for (int x = 0; x < dst_width; x++) {
+            int src_x = x * scale_x + 0.5;
+            if (src_x >= src_width) {
+                src_x = src_width - 1;
+            }
+
+            switch (bpp) {
+            case 1: {
+                pixel = get_pixel_1bpp(src, src_width, src_x, src_y);
+                set_pixel_1bpp(dst, dst_width, x, y, pixel);
+                break;
+            }
+            case 2: {
+                pixel = get_pixel_2bpp(src, src_width, src_x, src_y);
+                set_pixel_2bpp(dst, dst_width, x, y, pixel);
+                break;
+            }
+            case 4: {
+                pixel = get_pixel_4bpp(src, src_width, src_x, src_y);
+                set_pixel_4bpp(dst, dst_width, x, y, pixel);
+                break;
+            }
+            case 8: {
+                pixel = get_pixel_8bpp(src, src_width, src_x, src_y);
+                set_pixel_8bpp(dst, dst_width, x, y, pixel);
+                break;
+            }
+            default:
+                // not support
+                break;
+            }
+        }
+    }
+}
+
+#endif
+
+
 /**
  * Draw a letter in the Virtual Display Buffer
  * @param pos_p left-top coordinate of the latter
@@ -96,6 +246,16 @@ void lv_draw_sw_letter(lv_draw_ctx_t *draw_ctx, const lv_draw_label_dsc_t *dsc, 
 {
     lv_font_glyph_dsc_t g;
     bool g_ret = lv_font_get_glyph_dsc(dsc->font, &g, letter, '\0');
+
+#if LV_USE_FONT_SCALE
+    lv_font_glyph_dsc_t g_base;
+    if (scale_base_font) {
+        g_ret = lv_font_get_glyph_dsc(scale_base_font, &g_base, letter, '\0');
+    } else {
+        g_ret = lv_font_get_glyph_dsc(dsc->font, &g_base, letter, '\0');
+    }
+#endif
+
     if (g_ret == false) {
         /*Add warning if the dsc is not found
          *but do not print warning for non printable ASCII chars (e.g. '\n')*/
@@ -154,7 +314,15 @@ void lv_draw_sw_letter(lv_draw_ctx_t *draw_ctx, const lv_draw_label_dsc_t *dsc, 
         LV_LOG_WARN("Can't draw sub-pixel rendered letter because LV_USE_FONT_SUBPX == 0 in lv_conf.h");
 #endif
     } else {
+#if LV_USE_FONT_SCALE
+        uint8_t *zoom_buf = allocate_bitmap_memory(g.box_w, g.box_h, g.bpp);
+        //软件缩放
+        scale_nearest(map_p, g_base.box_w, g_base.box_h, zoom_buf, g.box_w, g.box_h, g.bpp);
+        draw_letter_normal(draw_ctx, dsc, &gpos, &g, zoom_buf);
+        lv_mem_free(zoom_buf);
+#else
         draw_letter_normal(draw_ctx, dsc, &gpos, &g, map_p);
+#endif
     }
 }
 

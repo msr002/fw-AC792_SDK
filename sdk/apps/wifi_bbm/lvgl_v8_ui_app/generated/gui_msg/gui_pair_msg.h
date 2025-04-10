@@ -17,7 +17,8 @@ typedef enum {
     GUI_PAIR_MSG_ID_PAIR_CH5 = 0x0007,
     GUI_PAIR_MSG_ID_PARING_LAB = 0x0008,
     GUI_PAIR_MSG_ID_UNPAIR_LAB = 0x0009,
-    GUI_PAIR_MSG_ID_WIFI_CH_SELECT = 0x001B,
+    GUI_PAIR_MSG_ID_DDLIST_LAB = 0x001B,
+    GUI_PAIR_MSG_ID_WIFI_CH_SELECT = 0x001C,
 } gui_pair_msg_id_t;
 
 extern int gui_pair_msg_pair_ch0_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type);
@@ -28,6 +29,7 @@ extern int gui_pair_msg_pair_ch4_cb(gui_msg_action_t access, gui_msg_data_t *dat
 extern int gui_pair_msg_pair_ch5_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type);
 extern int gui_pair_msg_paring_lab_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type);
 extern int gui_pair_msg_unpair_lab_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type);
+extern int gui_pair_msg_ddlist_lab_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type);
 extern int gui_pair_msg_wifi_ch_select_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type);
 
 extern void gui_pair_msg_init(lv_ui *ui);

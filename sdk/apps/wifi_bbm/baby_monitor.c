@@ -400,7 +400,7 @@ static int bbm_start_camera_by_ch(int ch, struct video_window *win)
     if (win != &disp_win_1[0]) {
         bbm_ctp_send_modify_txrate(__this->bbm_client_hdl[ch]->ctp_cli_hdl, WIFI_TXRATE_11M);
     } else {
-        bbm_ctp_send_modify_txrate(__this->bbm_client_hdl[ch]->ctp_cli_hdl, WIFI_TXRATE_5M);
+        bbm_ctp_send_modify_txrate(__this->bbm_client_hdl[ch]->ctp_cli_hdl, WIFI_TXRATE_11M);
     }
 
     ret = bbm_ctp_rt_start(__this->bbm_client_hdl[ch], win);
@@ -677,9 +677,9 @@ static int bbm_enter_mode(u8 mode, int ch, int arg)
         bbm_rt_stream_init();
         ret = bbm_switch_camera();
         if (__this->online_dev_cnt > 1) {
-            post_stream_msg_to_ui("show switch btn");
+            post_stream_msg_to_ui("show switch btn", 0);
         } else {
-            post_stream_msg_to_ui("hide switch btn");
+            post_stream_msg_to_ui("hide switch btn", 0);
         }
         break;
     case BBM_MODE_FILE_BROWSER:
@@ -756,7 +756,7 @@ static int bbm_tx_offline(void *priv)
     switch (__this->bbm_cur_mode) {
     case BBM_MODE_STREAM:
         if (__this->online_dev_cnt < 2) {
-            post_stream_msg_to_ui("hide switch btn");
+            post_stream_msg_to_ui("hide switch btn", 0);
         }
         if (__this->cur_channel & BIT(ch)) {
             bbm_stop_camera_by_ch(ch);
@@ -811,7 +811,7 @@ static int bbm_tx_online(int ch, u32 ip_addr)
     case BBM_MODE_STREAM:
         if (__this->online_dev_cnt > 1 && __this->cur_channel) {
             //两个设备以上,显示切摄像头图标
-            post_stream_msg_to_ui("show switch btn");
+            post_stream_msg_to_ui("show switch btn", 0);
         } else {
             ret = bbm_switch_camera();
         }

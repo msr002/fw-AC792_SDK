@@ -1134,36 +1134,41 @@ LTE_MODULE_DATA_BEGIN(lte_module_data)
 LTE_MODULE_DATA_END()
 #endif
 
+
+//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+//如果改了这里的参数
+//要把tools目录下的isd_config.ini文件中的VM_OPT值设置成0,擦除VM
+//否者WIFI初始化时会读取VM里已经保存的值进行设置.导致这里值设置不进去.
 #if defined CONFIG_BT_ENABLE || TCFG_WIFI_ENABLE
 #include "wifi/wifi_connect.h"
 #if !BBM_WIFI_PA_ENABLE
 const struct wifi_calibration_param wifi_calibration_param = {
-    .xosc_l     = 0x7,// 调节左晶振电容
-    .xosc_r     = 0x7,// 调节右晶振电容
+    .xosc_l     = 0xb,// 调节左晶振电容
+    .xosc_r     = 0xb,// 调节右晶振电容
     .pa_trim_data = {1, 7, 4, 7, 11, 1, 7},// 根据MP测试生成PA TRIM值
 	.mcs_dgain    = {
-        50,//11B_1M
-        50,//11B_2.2M
-        50,//11B_5.5M
-        50,//11B_11M
+        43,//11B_1M
+        42,//11B_2.2M
+        42,//11B_5.5M
+        41,//11B_11M
 
-        72,//11G_6M
-        72,//11G_9M
-        85,//11G_12M
-        80,//11G_18M
-        64,//11G_24M
-        64,//11G_36M
-        62,//11G_48M
-        52,//11G_54M
+        51,//11G_6M
+        50,//11G_9M
+        60,//11G_12M
+        51,//11G_18M
+        44,//11G_24M
+        44,//11G_36M
+        43,//11G_48M
+        38,//11G_54M
 
-        72,//11N_MCS0
-        90,//11N_MCS1
-        80,//11N_MCS2
-        64,//11N_MCS3
-        64,//11N_MCS4
-        64,//11N_MCS5
-        50,//11N_MCS6
-        43,//11N_MCS7
+        50,//11N_MCS0
+        71,//11N_MCS1
+        52,//11N_MCS2
+        44,//11N_MCS3
+        44,//11N_MCS4
+        43,//11N_MCS5
+        38,//11N_MCS6
+        33,//11N_MCS7
     }
 };
 #else

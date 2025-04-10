@@ -464,13 +464,15 @@ static void lcd_te_interrupt(void *arg, u32 parm)
 
 static int lcd_send_init_code(struct lcd_dev_drive *lcd, struct lcd_board_cfg *bd_cfg)
 {
+    int ret;
     if (!lcd) {
         log_error("lcd is null");
         return -EFAULT;
     }
 
     if (lcd->type == LCD_MIPI) {
-        dsi_send_init_code(&lcd->dev->mipi);
+        ret = dsi_send_init_code(&lcd->dev->mipi);
+        ASSERT(ret == 0, "dsi send init code fail!!!\n");
     } else {
         if (lcd->send_init_code) {
             lcd->send_init_code(bd_cfg);
@@ -852,7 +854,7 @@ static int lcd_dev_close(struct device *device)
         __this->start_disp_flag = 0;
         break;
     case LCD_MIPI:
-        dsi_video_stop();
+        dsi_dev_deinit();
         dmm_deinit();
         __this->start_disp_flag = 0;
         break;

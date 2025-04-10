@@ -596,10 +596,12 @@ static int camera_take_photo(void)
     union video_req req;
     union video_req img_req = {0};
     char video_name[16];
+    char file_name[32];
     u32 preview_timeout_val;
     int reso_index;
     int img_width, img_height;
     struct jpg_thumbnail thumbnails = {0};
+    struct image_sticker sticker = {0};
     struct video_source_crop crop;
     float zoom_val;
     u32 img_buf_size;
@@ -673,10 +675,19 @@ static int camera_take_photo(void)
 #endif
     }
 
+    req.icap.file_name = file_name;
+
+    //拍照贴纸配置
+    sticker.x = 10;
+    sticker.y = 10;
+    sticker.addr = "mnt/sdfile/EXT_RESERVED/uipackres/ui/4b000056.zip";
+    /* req.icap.sticker = &sticker; */
+    req.icap.sticker = NULL;
+
     //日期标签
     req.icap.text_label = get_camera_setting_value("pdat") ? &__this->label : NULL;
-    req.icap.src_w = CAMERA_W;
-    req.icap.src_h = CAMERA_H;
+    req.icap.src_w = 1280;//CAMERA_W;
+    req.icap.src_h = 720;//CAMERA_H;
     set_label_config(req.icap.width, req.icap.height, 0xe20095, req.icap.text_label);
 
     //变焦, VM值除以10,暂时不用
@@ -723,6 +734,7 @@ static int camera_take_photo(void)
             goto __err;
         }
 
+        log_i("take photo ok :%s \n", req.icap.file_name);
 
         //获取照片
         err = server_request(__this->capture, VIDEO_REQ_GET_IMAGE, &img_req);

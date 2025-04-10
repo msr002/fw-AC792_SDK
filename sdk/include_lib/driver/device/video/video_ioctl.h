@@ -132,6 +132,7 @@ enum video_buf_type {
     VIDEO_BUF_TYPE_UVC_CAPTURE,
     VIDEO_BUF_TYPE_ISP_TRAIN,
     VIDEO_BUF_TYPE_QUICK_IMAGE,
+    VIDEO_BUF_TYPE_STICKER_IMAGE,
     VIDEO_PIPE_PRE_CREATE,
 };
 
@@ -192,6 +193,7 @@ struct video_format {
     struct video_window win;
     void *private_data;
     u8 double_raw;
+    void *sticker;
 };
 
 struct jpg_thumbnail {
@@ -206,7 +208,8 @@ struct jpg_thumbnail {
 struct image_sticker {
     u8 enable;
     u8 format;//YUV420/YUV422
-    u8 threshold;//y分量阈值，小于该阈值为贴纸透明
+    u16 x;
+    u16 y;
     u16 width;
     u16 height;
     u8 *addr;

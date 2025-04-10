@@ -4,7 +4,7 @@
 #include "asm/dsi.h"
 #include "asm/dsi_packet.h"
 
-void dsi_send_init_code(struct mipi_dev *dev);
+int dsi_send_init_code(struct mipi_dev *dev);
 void dsi_dev_init(struct mipi_dev *dev);
 void dsi_dev_deinit(void);
 extern void dsi_video_kick_start();

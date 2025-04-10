@@ -31,7 +31,7 @@ static u32 cfg_desc_len[USB_MAX_HW_NUM];
 
 void usb_reset_host_type(const usb_dev usb_id)
 {
-    host_type[usb_id] = HOST_TYPE_ERR;
+    host_type[usb_id] = HOST_TYPE_UNKNOW;
     dev_desc_len[usb_id] = 0;
     cfg_desc_len[usb_id] = 0;
 }

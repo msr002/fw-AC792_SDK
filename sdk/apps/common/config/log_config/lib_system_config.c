@@ -25,6 +25,8 @@ const int config_asser         = 1;
 const int config_asser         = 1;
 #endif
 
+const int config_system_pdown  = 1; // 开启系统自动调度进低功耗
+
 //为减少频繁写入VM导致的长时间关中断问题，提供VM写入缓存机制，调用vm_in_ram_update()才主动刷新到flash
 const int config_vm_save_in_ram_enable = 0;
 
@@ -73,7 +75,7 @@ const int device_bulk_read_async_enable = 0;
 const char log_tag_const_v_SYS_TMR AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(FALSE);
 const char log_tag_const_d_SYS_TMR AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(FALSE);
 const char log_tag_const_i_SYS_TMR AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(FALSE);
-const char log_tag_const_w_SYS_TMR AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(TRUE);
+const char log_tag_const_w_SYS_TMR AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(FALSE);
 const char log_tag_const_e_SYS_TMR AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(TRUE);
 
 const char log_tag_const_v_WAIT_COMPLETION AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(FALSE);

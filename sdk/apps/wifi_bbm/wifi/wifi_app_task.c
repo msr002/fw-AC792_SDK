@@ -611,6 +611,7 @@ static void bbm_tx_online_task(void)
         memcpy(&old_pkg, &recv_pkg, sizeof(recv_pkg));
 
 #if BBM_WIFI_PA_ENABLE
+        //带PA时需要调整防止近距离卡顿
         //根据rssi调整wifi模拟增益
         //TODO粗略值
         if (recv_pkg.rssi >= RSSI_HIGH_THRESHOLD) {
@@ -675,6 +676,7 @@ static void bbm_rx_online_task(void)
         memcpy(&old_pkg, &recv_pkg, sizeof(recv_pkg));
 
 #if BBM_WIFI_PA_ENABLE
+        //带PA时需要调整防止近距离卡顿
         //根据rssi调整wifi模拟增益
         //TODO粗略值
         if (recv_pkg.rssi >= RSSI_HIGH_THRESHOLD) {
@@ -856,8 +858,12 @@ void wifi_raw_init(void)
     wf_asic_set_mac(src_mac);
 
     //模拟增益
+#if BBM_WIFI_PA_ENABLE
     cur_pwr = WIFI_PWR_MIN;
     wifi_set_pwr(cur_pwr);
+#else
+    //不带PA时不需要调整该值,默认最大
+#endif
 
     //TX创建CTP_SERVER
     //RX初始化CTP_CLIENT
@@ -1090,8 +1096,12 @@ static int wifi_event_callback(void *network_ctx, enum WIFI_EVENT event)
             wifi_set_tx_rate_control_tab(tx_rate_control_tab);
 
         }
+#if BBM_WIFI_PA_ENABLE
         cur_pwr = WIFI_PWR_MAX;
         wifi_set_pwr(cur_pwr);
+#else
+        //不带PA时不需要调整该值,默认最大
+#endif
         break;
     case WIFI_EVENT_MODULE_STOP:
         puts("|network_user_callback->WIFI_EVENT_MODULE_STOP\n");

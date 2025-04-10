@@ -112,9 +112,9 @@ static int gui_src_action_play(int action)
     switch (action) {
     case GUI_SCREEN_ACTION_LOAD:
 #if LV_DISP_UI_FB_NUM
-        lv_obj_set_style_bg_opa(guider_ui.video_play, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+        lv_obj_set_style_bg_opa(guider_ui.video_play->video_play, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
 #else
-        lv_obj_set_style_bg_opa(guider_ui.video_play, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+        lv_obj_set_style_bg_opa(guider_ui.video_play->video_play, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
 #endif
         gui_bbm_play_file_start();
         break;

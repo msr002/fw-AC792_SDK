@@ -1,6 +1,7 @@
 #include "app_config.h"
 #include "system/includes.h"
 #include "os/os_api.h"
+#include "lvgl.h"
 
 /*中断列表 */
 const struct irq_info irq_info_table[] = {
@@ -24,6 +25,23 @@ const struct task_info task_info_table[] = {
     {0, 0, 0, 0, 0},
 };
 
+
+#ifdef CONFIG_UI_ENABLE
+_WEAK_ int jpeg_codec_init(void)
+{
+    LV_LOG_ERROR("jpeg_codec_init error !!! Please add JPEG dependency");
+}
+_WEAK_ int jpeg_decode_image_info(struct jpeg_image_info *info)
+{
+    LV_LOG_ERROR("jpeg_decode_image_info error !!! Please add JPEG dependency");
+    assert(0);
+}
+_WEAK_ int jpeg_decode_one_image(struct jpeg_decode_req *req, u8 id)
+{
+    LV_LOG_ERROR("jpeg_decode_one_image error !!! Please add JPEG dependency");
+    assert(0);
+}
+#endif
 
 #ifdef USE_LVGL_V8_UI_DEMO
 #include "lvgl.h"

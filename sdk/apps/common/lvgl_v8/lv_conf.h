@@ -418,6 +418,12 @@
 /*Always set a default font*/
 #define LV_FONT_DEFAULT &lv_font_montserrat_18
 
+/*使用 lv_set_scale_base_font(const lv_font_t *font_p)设置缩放基准字号字体;
+ *基准字体需要生成完整信息;
+ *其他字体可不生成bitmap;
+ *其他字体由基准字号字体缩放显示;*/
+#define LV_USE_FONT_SCALE  0
+
 /*Enable handling large font and/or fonts with a lot of characters.
  *The limit depends on the font size, font face and bpp.
  *Compiler error will be triggered if a font needs it.*/

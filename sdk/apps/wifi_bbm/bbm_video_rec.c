@@ -23,7 +23,7 @@
 #define AUDIO_REC_INTERVAL_SIZE     8192            //录像音频包大小
 
 #define AUDIO_RT_RECV_PORT               9981            //接收数据端口
-#define AUDIO_DEC_BUF_MAX_LEN            2*1024
+#define AUDIO_DEC_BUF_MAX_LEN            AUDIO_RX_ENC_BUF_MAX_LEN
 #define AUDIO_RT_RECV_BUF_MAX_LEN        200*1024
 
 enum {
@@ -611,6 +611,23 @@ static int video_start(struct video_rec_config *config)
     req.rec.audio.buf = dev_hdl->audio_buf;
     req.rec.audio.buf_len = AUDIO_BUF_SIZE;
 
+    //回声消除,默认使用软件的
+    //如要改动其他采样率或硬件回声消除请查看开源文档
+    req.rec.audio.aec_enable = 1;
+    struct aec_s_attr aec_param = {0};
+    req.rec.audio.aec_attr = &aec_param;
+
+    extern void get_cfg_file_aec_config(struct aec_s_attr * aec_param);
+    get_cfg_file_aec_config(&aec_param);
+
+    if (aec_param.EnableBit == 0) {
+        req.rec.audio.aec_enable = 0;
+        req.rec.audio.aec_attr = NULL;
+    }
+    aec_param.wideband = 0;
+    aec_param.hw_delay_offset = 75;
+
+
     //实时流
     if (config->net_path) {
         strcpy(req.rec.net_par.netpath, config->net_path);
@@ -880,7 +897,7 @@ static int video_take_photo(struct video_rec_config *config)
             fclose(fp);
             sprintf(buf, "%s%s", CAMERA0_CAP_PATH, fname);
             req.rec.rec_save_path = buf;
-
+            req.rec.channel = sub_id;
             ret = server_request(dev_hdl->video_server, VIDEO_REQ_SAVE_FRAME, &req);
             if (ret) {
                 printf("video save frame err:%d \n", ret);

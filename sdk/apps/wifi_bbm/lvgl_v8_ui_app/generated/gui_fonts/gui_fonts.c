@@ -3,6 +3,7 @@
 #include <stdio.h>
 #endif
 #include "./gui_fonts.h"
+#include "../common.h"
 
 
 

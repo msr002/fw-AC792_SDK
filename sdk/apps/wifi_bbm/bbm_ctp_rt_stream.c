@@ -16,8 +16,6 @@
 #define RT_LBUF_SIZE                200 * 1024  //LBUF
 #define CTP_RT_RECV_TIMEOUT         300         //实时流socket接收超时时间设置,单位ms
 
-#define SEND_BUF_MAX_LEN             2 * 1024   //UDP发送缓存,用于BBM_RX发送音频包
-
 #define OPEN_RT_TOPIC "OPEN_RT_STREAM"
 #define OPEN_RT_CONTENT \
     "{\"op\":\"PUT\",\"param\":{" \
@@ -371,7 +369,7 @@ static void ctp_rt_send_task(void)
     int data_size;
     u8 *data_buf  = NULL;
 
-    data_buf = malloc(SEND_BUF_MAX_LEN);
+    data_buf = malloc(AUDIO_RX_ENC_FRAME_SIZE);
     if (!data_buf) {
         printf("ctp send malloc data buf err \n");
         goto exit;
@@ -432,6 +430,7 @@ static void rt_stream_dev_task(void *priv)
     int fps = 0;
     int abr = 0;
     int total = 0;
+    char text[128];
 
     parse_info.data_buf = malloc(CTP_RT_PARSE_BUF_SIZE);
     if (!parse_info.data_buf) {
@@ -454,11 +453,15 @@ static void rt_stream_dev_task(void *priv)
 
                 if ((timer_get_ms() - time) >= 1000) {
                     //调试信息
-                    printf("total:%d abr:%d  fps:%d \n", total / 1024, abr / 1024, fps);
+                    sprintf(text, "total:%d abr:%d  fps:%d", total / 1024, abr / 1024, fps);
                     time = timer_get_ms();
                     fps = 0;
                     abr = 0;
                     total = 0;
+
+                    printf("%s \n", text);
+                    //debug
+                    /* post_stream_msg_to_ui("show stream info", text); */
                 }
                 total += lbuf_data->len;
 

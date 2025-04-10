@@ -30,6 +30,9 @@
 //开发板使用PA时不使用MIPI摄像头(video0)
 #define BBM_WIFI_PA_ENABLE          1
 
+//使用额外的信道,避开干扰
+// #define USE_ADDITIONAL_CHANNELS
+
 //*********************************************************************************//
 //                                 资源分配相关配置                                //
 //*********************************************************************************//
@@ -308,7 +311,7 @@
 // #define CONFIG_ADPCM_ENC_ENABLE
 // #define CONFIG_OPUS_DEC_ENABLE
 // #define CONFIG_AMR_ENC_ENABLE
-// #define CONFIG_AEC_ENC_ENABLE
+#define CONFIG_AEC_ENC_ENABLE
 #define CONFIG_DNS_ENC_ENABLE
 // #define CONFIG_OGG_VORBIS_DEC_ENABLE
 

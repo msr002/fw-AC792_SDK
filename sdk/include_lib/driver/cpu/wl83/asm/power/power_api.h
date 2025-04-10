@@ -86,6 +86,7 @@ typedef struct {
     u8 avdd18_enable;       //avdd18_enable
     u8 avdd28_enable;       //avdd28_enable
     u8 soff_keep_last_cfg;  //软关机时维持最后设置的电压档位配置
+    u8 ana_keep0_config;    //power down keep config
 
     //*****************************************************
     /* soff
@@ -95,6 +96,8 @@ typedef struct {
     u8 lptmr_flow;			//低功耗参数由用户配置
     u32 btosc_hz;			//蓝牙晶振频率(默认使用24M)
     u32 osc_delay_us;		//低功耗晶振起振延时，为预留配置。
+
+    u32 pdown_sdr_dly_us;   //pdown流程，sdram退出self refresh低功耗后的延时
 
     u32 t1;
     u32 t2;
@@ -131,6 +134,12 @@ u32 power_control(power_control_cmd_t cmd, u32 arg);
 //
 //******************************************************************
 void low_power_sys_request(void *priv);
+
+void low_power_enable(void);
+
+void low_power_disbale(void);
+
+void low_power_request_customize(u32 sleep_time_ms);
 
 s32 low_power_trace_drift(u32 usec);
 

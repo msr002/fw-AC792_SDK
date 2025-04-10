@@ -21,23 +21,13 @@
 #ifdef CONFIG_BBM_RX
 
 //Baby Monitor RX端LVGL按键映射
-//开发板的KEY1 / KEY2 / KEY3 按键映射对应LVGL的PREV / NEXT / ENTER键.按键事件不发送给app_core.
-//开发板的KEY4 / KEY5 不映射LVGL. 按键事件发给app_core.
 
 //返回1时，则将按键信息交给app core处理
+//这里不做处理，统一交给页面注册key_handler处理
 int ui_scr_key_event_handler_ext(struct key_event *event)
 {
-    switch (event->value) {
-    case KEY_DOWN:
-        //KEY4
-        return 1;
-    case KEY_OK:
-        //KEY5
-        return 1;
-    default:
-        //KEY1/2/3...........
-        return 0;
-    }
+    //KEY1/2/3/4/5...........
+    return 0;
 }
 
 //LVGL按键映射
@@ -55,6 +45,14 @@ void lvgl_key_value_remap(u8 key_value, uint32_t *key_remap)
     case KEY_UP:
         //KEY3
         *key_remap = LV_KEY_ENTER;
+        break;
+    case KEY_DOWN:
+        //KEY4
+        *key_remap = LV_KEY_UP;
+        break;
+    case KEY_OK:
+        //KEY5
+        *key_remap = LV_KEY_DOWN;
         break;
     }
     //隐藏顶层提示框

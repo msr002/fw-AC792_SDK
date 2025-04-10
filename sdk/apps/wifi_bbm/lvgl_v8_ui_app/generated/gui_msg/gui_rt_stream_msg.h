@@ -10,9 +10,11 @@ extern "C" {
 
 typedef enum {
     GUI_RT_STREAM_MSG_ID_CAMERA_SWITCH = 0x000B,
+    GUI_RT_STREAM_MSG_ID_STREAM_INFO = 0x001D,
 } gui_rt_stream_msg_id_t;
 
 extern int gui_rt_stream_msg_camera_switch_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type);
+extern int gui_rt_stream_msg_stream_info_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type);
 
 extern void gui_rt_stream_msg_init(lv_ui *ui);
 extern void gui_rt_stream_msg_init_ui();

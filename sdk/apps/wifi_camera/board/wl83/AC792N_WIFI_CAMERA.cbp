@@ -318,6 +318,7 @@
 <Unit filename="../../../../apps/common/debug/debug.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/common/debug/debug_user.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/common/dma2d_gpu/dma2d_common_api.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="../../../../apps/common/dma2d_gpu/filter/dma2d_adapter.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/common/dma2d_gpu/filter/gpu_adapter.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/common/dma2d_gpu/filter/gpu_adapter.h" />
 <Unit filename="../../../../apps/common/example/peripheral/lcd/lcd_driver_test.c"><Option compilerVer="CC"/></Unit>

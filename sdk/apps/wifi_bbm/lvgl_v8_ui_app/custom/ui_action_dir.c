@@ -72,12 +72,18 @@ static void dir_select_screen_load(void)
         return;
     }
 
+    lv_ui_dir_select *_ui_dir_select = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_DIR_SELECT);
+    if (!_ui_dir_select) {
+        printf("ui get scr  NULL !\n");
+        return;
+    }
+
     //最多六个设备
     for (i = 0; i < 6; i++) {
         //这里对应这UI工具生成代码的顺序
         //保证这些控件是第0-5生成的
         //如果改了控件顺序,这里要对应修改
-        lv_obj_t *cont = lv_obj_get_child(guider_ui.dir_select, i);
+        lv_obj_t *cont = lv_obj_get_child(_ui_dir_select->dir_select, i);
         if (i < num) {
             lv_obj_clear_flag(cont, LV_OBJ_FLAG_HIDDEN);
             lv_obj_t *lab = lv_obj_get_child(cont, 1);

@@ -181,6 +181,10 @@ static inline lv_coord_t lv_font_get_line_height(const lv_font_t *font_p)
     return font_p->line_height;
 }
 
+#if LV_USE_FONT_SCALE
+void lv_set_scale_base_font(const lv_font_t *font_p);
+#endif
+
 /**********************
  *      MACROS
  **********************/

@@ -271,6 +271,7 @@ c_SRC_FILES := \
 	../../../../apps/common/debug/debug.c \
 	../../../../apps/common/debug/debug_user.c \
 	../../../../apps/common/dma2d_gpu/dma2d_common_api.c \
+	../../../../apps/common/dma2d_gpu/filter/dma2d_adapter.c \
 	../../../../apps/common/dma2d_gpu/filter/gpu_adapter.c \
 	../../../../apps/common/example/peripheral/lcd/lcd_driver_test.c \
 	../../../../apps/common/gsensor/da380.c \

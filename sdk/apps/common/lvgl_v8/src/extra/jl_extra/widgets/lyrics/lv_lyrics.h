@@ -82,6 +82,8 @@ typedef struct {
     jlvg_point2_t tc_point;     // 变换中心: 这是一个比例范围点: 0.0f ~ 1.0f; 例如 (0.0f, 0.0f) 表示左上角, (1.0f, 1.0f) 表示右下角, 也可以在范围外
     jlvg_matrix_t tf_matrix_sw; // 用于软件计算的变换矩阵
     jlvg_matrix_t tf_matrix_hw; // 配置给 GPU 硬件的变换矩阵: 这个矩阵其实就是 tf_matrix_sw 的逆矩阵
+
+    jlvg_color_t fill_color; //设置字形填充颜色
 } lv_lyrics_info;
 
 /**********************
@@ -188,6 +190,14 @@ void lv_lyrics_set_zoom(lv_obj_t *obj, uint16_t x_zoom, uint16_t y_zoom);
 /* ------------------------------------------------------------------------------------*/
 void lv_lyrics_set_rotation(lv_obj_t *obj, int16_t x_angle, int16_t y_angle, int16_t z_angle);
 
+/* ------------------------------------------------------------------------------------*/
+/**
+ * @brief lv_lyrics_set_color
+ *
+ * @Params color
+ */
+/* ------------------------------------------------------------------------------------*/
+void lv_lyrics_set_color(lv_obj_t *obj, jlvg_color_t color);
 /**********************
  *      MACROS
  **********************/

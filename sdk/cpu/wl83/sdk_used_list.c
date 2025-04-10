@@ -543,6 +543,8 @@ gpu0
 gpu1
 gpu2
 gpu3
+dma2d0
+dma2d1
 yuv0
 yuv1
 yuv2

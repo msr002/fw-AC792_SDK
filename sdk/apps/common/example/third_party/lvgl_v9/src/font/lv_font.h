@@ -256,6 +256,9 @@ int32_t lv_font_get_line_height(const lv_font_t *font);
  */
 void lv_font_set_kerning(lv_font_t *font, lv_font_kerning_t kerning);
 
+#if LV_USE_FONT_SCALE
+void lv_set_scale_base_font(const lv_font_t *font_p);
+#endif
 /**********************
  *      MACROS
  **********************/

@@ -136,7 +136,10 @@ err1:
 int net_rt_vpkg_write(struct rt_stream_info *info, char *buffer, size_t len, struct sockaddr *addr, int addrlen)
 {
     /* struct sockaddr_in * addr2 = (struct sockaddr_in *)addr; */
-    return sock_sendto(info->fd, buffer, len, 0, addr, addrlen);
+    int ret;
+    ret = sock_sendto(info->fd, buffer, len, 0, addr, addrlen);
+
+    return ret;
 }
 
 int net_rt_vpkg_close(struct rt_stream_info *info)

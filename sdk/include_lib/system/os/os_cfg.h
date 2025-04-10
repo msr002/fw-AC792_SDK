@@ -136,6 +136,6 @@ date : 2014-07-03 09:09
 #define configSYSTICK_CLOCK_HZ      clk_get("sys")
 #endif
 
-#define configEXPECTED_IDLE_TIME_BEFORE_SLEEP       5
+#define configEXPECTED_IDLE_TIME_BEFORE_SLEEP       4
 
 #endif

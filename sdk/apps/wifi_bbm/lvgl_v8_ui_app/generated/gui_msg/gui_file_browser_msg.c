@@ -164,51 +164,27 @@ void gui_file_browser_msg_init_events()
     lv_subject_t *subject_sel_check_box3 = gui_msg_get_subject(GUI_FILE_BROWSER_MSG_ID_SEL_CHECK_BOX3);
     lv_subject_t *subject_sel_check_box4 = gui_msg_get_subject(GUI_FILE_BROWSER_MSG_ID_SEL_CHECK_BOX4);
     lv_subject_t *subject_sel_check_box5 = gui_msg_get_subject(GUI_FILE_BROWSER_MSG_ID_SEL_CHECK_BOX5);
-    if (!guider_ui.file_browser_del) {
-        gui_file_browser_msg_check_box_del_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_BOOL);
-        lv_subject_add_observer_obj(subject_check_box_del, gui_msg_set_visible_by_bool_cb, guider_ui.file_browser_cb_6, &guider_msg_data);
-        gui_file_browser_msg_sel_check_box5_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_BOOL);
-        lv_subject_add_observer_obj(subject_sel_check_box5, gui_msg_set_checkbox_checked_by_bool_cb, guider_ui.file_browser_cb_6, &guider_msg_data);
-        lv_obj_remove_event_cb(guider_ui.file_browser_cb_6, gui_msg_change_checkbox_checked_cb);
-        lv_obj_add_event_cb(guider_ui.file_browser_cb_6, gui_msg_change_checkbox_checked_cb, LV_EVENT_VALUE_CHANGED, (void *)GUI_FILE_BROWSER_MSG_ID_SEL_CHECK_BOX5);
+    if (guider_ui.file_browser) {
+        lv_ui_file_browser *ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_FILE_BROWSER);
+        gui_msg_setup_component(true, true, subject_sel_check_box5, ui_scr->file_browser_cb_6, &guider_msg_data, gui_msg_set_checkbox_checked_by_bool_cb, GUI_FILE_BROWSER_MSG_ID_SEL_CHECK_BOX5, GUI_MSG_ACCESS_GET, VALUE_BOOL, gui_msg_change_checkbox_checked_cb);
+        gui_msg_setup_component(true, false, subject_check_box_del, ui_scr->file_browser_cb_6, &guider_msg_data, gui_msg_set_visible_by_bool_cb, GUI_FILE_BROWSER_MSG_ID_CHECK_BOX_DEL, GUI_MSG_ACCESS_GET, VALUE_BOOL, NULL);
 
-        gui_file_browser_msg_file_num_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_STRING);
-        lv_subject_add_observer_obj(subject_file_num, gui_msg_set_label_text_by_string_cb, guider_ui.file_browser_lbl_1, &guider_msg_data);
+        gui_msg_setup_component(true, false, subject_file_num, ui_scr->file_browser_lbl_1, &guider_msg_data, gui_msg_set_label_text_by_string_cb, GUI_FILE_BROWSER_MSG_ID_FILE_NUM, GUI_MSG_ACCESS_GET, VALUE_STRING, NULL);
 
-        gui_file_browser_msg_check_box_del_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_BOOL);
-        lv_subject_add_observer_obj(subject_check_box_del, gui_msg_set_visible_by_bool_cb, guider_ui.file_browser_cb_1, &guider_msg_data);
-        gui_file_browser_msg_sel_check_box0_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_BOOL);
-        lv_subject_add_observer_obj(subject_sel_check_box0, gui_msg_set_checkbox_checked_by_bool_cb, guider_ui.file_browser_cb_1, &guider_msg_data);
-        lv_obj_remove_event_cb(guider_ui.file_browser_cb_1, gui_msg_change_checkbox_checked_cb);
-        lv_obj_add_event_cb(guider_ui.file_browser_cb_1, gui_msg_change_checkbox_checked_cb, LV_EVENT_VALUE_CHANGED, (void *)GUI_FILE_BROWSER_MSG_ID_SEL_CHECK_BOX0);
+        gui_msg_setup_component(true, true, subject_sel_check_box0, ui_scr->file_browser_cb_1, &guider_msg_data, gui_msg_set_checkbox_checked_by_bool_cb, GUI_FILE_BROWSER_MSG_ID_SEL_CHECK_BOX0, GUI_MSG_ACCESS_GET, VALUE_BOOL, gui_msg_change_checkbox_checked_cb);
+        gui_msg_setup_component(true, false, subject_check_box_del, ui_scr->file_browser_cb_1, &guider_msg_data, gui_msg_set_visible_by_bool_cb, GUI_FILE_BROWSER_MSG_ID_CHECK_BOX_DEL, GUI_MSG_ACCESS_GET, VALUE_BOOL, NULL);
 
-        gui_file_browser_msg_check_box_del_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_BOOL);
-        lv_subject_add_observer_obj(subject_check_box_del, gui_msg_set_visible_by_bool_cb, guider_ui.file_browser_cb_4, &guider_msg_data);
-        gui_file_browser_msg_sel_check_box3_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_BOOL);
-        lv_subject_add_observer_obj(subject_sel_check_box3, gui_msg_set_checkbox_checked_by_bool_cb, guider_ui.file_browser_cb_4, &guider_msg_data);
-        lv_obj_remove_event_cb(guider_ui.file_browser_cb_4, gui_msg_change_checkbox_checked_cb);
-        lv_obj_add_event_cb(guider_ui.file_browser_cb_4, gui_msg_change_checkbox_checked_cb, LV_EVENT_VALUE_CHANGED, (void *)GUI_FILE_BROWSER_MSG_ID_SEL_CHECK_BOX3);
+        gui_msg_setup_component(true, true, subject_sel_check_box3, ui_scr->file_browser_cb_4, &guider_msg_data, gui_msg_set_checkbox_checked_by_bool_cb, GUI_FILE_BROWSER_MSG_ID_SEL_CHECK_BOX3, GUI_MSG_ACCESS_GET, VALUE_BOOL, gui_msg_change_checkbox_checked_cb);
+        gui_msg_setup_component(true, false, subject_check_box_del, ui_scr->file_browser_cb_4, &guider_msg_data, gui_msg_set_visible_by_bool_cb, GUI_FILE_BROWSER_MSG_ID_CHECK_BOX_DEL, GUI_MSG_ACCESS_GET, VALUE_BOOL, NULL);
 
-        gui_file_browser_msg_check_box_del_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_BOOL);
-        lv_subject_add_observer_obj(subject_check_box_del, gui_msg_set_visible_by_bool_cb, guider_ui.file_browser_cb_5, &guider_msg_data);
-        gui_file_browser_msg_sel_check_box4_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_BOOL);
-        lv_subject_add_observer_obj(subject_sel_check_box4, gui_msg_set_checkbox_checked_by_bool_cb, guider_ui.file_browser_cb_5, &guider_msg_data);
-        lv_obj_remove_event_cb(guider_ui.file_browser_cb_5, gui_msg_change_checkbox_checked_cb);
-        lv_obj_add_event_cb(guider_ui.file_browser_cb_5, gui_msg_change_checkbox_checked_cb, LV_EVENT_VALUE_CHANGED, (void *)GUI_FILE_BROWSER_MSG_ID_SEL_CHECK_BOX4);
+        gui_msg_setup_component(true, true, subject_sel_check_box4, ui_scr->file_browser_cb_5, &guider_msg_data, gui_msg_set_checkbox_checked_by_bool_cb, GUI_FILE_BROWSER_MSG_ID_SEL_CHECK_BOX4, GUI_MSG_ACCESS_GET, VALUE_BOOL, gui_msg_change_checkbox_checked_cb);
+        gui_msg_setup_component(true, false, subject_check_box_del, ui_scr->file_browser_cb_5, &guider_msg_data, gui_msg_set_visible_by_bool_cb, GUI_FILE_BROWSER_MSG_ID_CHECK_BOX_DEL, GUI_MSG_ACCESS_GET, VALUE_BOOL, NULL);
 
-        gui_file_browser_msg_check_box_del_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_BOOL);
-        lv_subject_add_observer_obj(subject_check_box_del, gui_msg_set_visible_by_bool_cb, guider_ui.file_browser_cb_2, &guider_msg_data);
-        gui_file_browser_msg_sel_check_box1_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_BOOL);
-        lv_subject_add_observer_obj(subject_sel_check_box1, gui_msg_set_checkbox_checked_by_bool_cb, guider_ui.file_browser_cb_2, &guider_msg_data);
-        lv_obj_remove_event_cb(guider_ui.file_browser_cb_2, gui_msg_change_checkbox_checked_cb);
-        lv_obj_add_event_cb(guider_ui.file_browser_cb_2, gui_msg_change_checkbox_checked_cb, LV_EVENT_VALUE_CHANGED, (void *)GUI_FILE_BROWSER_MSG_ID_SEL_CHECK_BOX1);
+        gui_msg_setup_component(true, true, subject_sel_check_box1, ui_scr->file_browser_cb_2, &guider_msg_data, gui_msg_set_checkbox_checked_by_bool_cb, GUI_FILE_BROWSER_MSG_ID_SEL_CHECK_BOX1, GUI_MSG_ACCESS_GET, VALUE_BOOL, gui_msg_change_checkbox_checked_cb);
+        gui_msg_setup_component(true, false, subject_check_box_del, ui_scr->file_browser_cb_2, &guider_msg_data, gui_msg_set_visible_by_bool_cb, GUI_FILE_BROWSER_MSG_ID_CHECK_BOX_DEL, GUI_MSG_ACCESS_GET, VALUE_BOOL, NULL);
 
-        gui_file_browser_msg_check_box_del_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_BOOL);
-        lv_subject_add_observer_obj(subject_check_box_del, gui_msg_set_visible_by_bool_cb, guider_ui.file_browser_cb_3, &guider_msg_data);
-        gui_file_browser_msg_sel_check_box2_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_BOOL);
-        lv_subject_add_observer_obj(subject_sel_check_box2, gui_msg_set_checkbox_checked_by_bool_cb, guider_ui.file_browser_cb_3, &guider_msg_data);
-        lv_obj_remove_event_cb(guider_ui.file_browser_cb_3, gui_msg_change_checkbox_checked_cb);
-        lv_obj_add_event_cb(guider_ui.file_browser_cb_3, gui_msg_change_checkbox_checked_cb, LV_EVENT_VALUE_CHANGED, (void *)GUI_FILE_BROWSER_MSG_ID_SEL_CHECK_BOX2);
+        gui_msg_setup_component(true, true, subject_sel_check_box2, ui_scr->file_browser_cb_3, &guider_msg_data, gui_msg_set_checkbox_checked_by_bool_cb, GUI_FILE_BROWSER_MSG_ID_SEL_CHECK_BOX2, GUI_MSG_ACCESS_GET, VALUE_BOOL, gui_msg_change_checkbox_checked_cb);
+        gui_msg_setup_component(true, false, subject_check_box_del, ui_scr->file_browser_cb_3, &guider_msg_data, gui_msg_set_visible_by_bool_cb, GUI_FILE_BROWSER_MSG_ID_CHECK_BOX_DEL, GUI_MSG_ACCESS_GET, VALUE_BOOL, NULL);
 
 
         for (int i = 0; i < 8; i++) {

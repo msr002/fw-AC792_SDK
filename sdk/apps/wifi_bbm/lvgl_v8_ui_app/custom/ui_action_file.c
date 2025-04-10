@@ -310,8 +310,15 @@ static int file_browser_update_file_cont(void)
     os_taskq_del_type(THUMB_DEC_TASK_NAME, Q_MSG);
     os_taskq_post_type(THUMB_DEC_TASK_NAME, Q_MSG, 1, msg);
 
+    lv_ui_file_browser *_ui_file_browser = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_FILE_BROWSER);
+    if (!_ui_file_browser) {
+        printf("ui get scr NULL !\n");
+        return -1;
+    }
+
     for (i = 0; i < __this->file_cur_page_num; i++) {
-        lv_obj_t *contain = lv_obj_get_child(guider_ui.file_browser_browser_cont, i);
+
+        lv_obj_t *contain = lv_obj_get_child(_ui_file_browser->file_browser_browser_cont, i);
         lv_obj_clear_flag(contain, LV_OBJ_FLAG_HIDDEN);
 
         //图片控件
@@ -332,7 +339,7 @@ static int file_browser_update_file_cont(void)
     }
 
     for (i = __this->file_cur_page_num; i < ONE_PAGE_MAX_NUM; i++) {
-        lv_obj_t *contain = lv_obj_get_child(guider_ui.file_browser_browser_cont, i);
+        lv_obj_t *contain = lv_obj_get_child(_ui_file_browser->file_browser_browser_cont, i);
         lv_obj_add_flag(contain, LV_OBJ_FLAG_HIDDEN);
     }
 
@@ -567,22 +574,25 @@ static void clean_thumb_buf(void)
 
 static void post_func_flush_img(void)
 {
-    if (lv_obj_is_valid(guider_ui.file_browser_browser_cont)) {
-        lv_obj_invalidate(guider_ui.file_browser_browser_cont);
+    lv_ui_file_browser *_ui_file_browser = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_FILE_BROWSER);
+
+    if (_ui_file_browser && lv_obj_is_valid(_ui_file_browser->file_browser_browser_cont)) {
+        lv_obj_invalidate(_ui_file_browser->file_browser_browser_cont);
     }
 }
 
 static void post_func_flush_lab(void)
 {
     int i;
-    if (lv_obj_is_valid(guider_ui.file_browser_browser_cont)) {
+    lv_ui_file_browser *_ui_file_browser = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_FILE_BROWSER);
+    if (_ui_file_browser && lv_obj_is_valid(_ui_file_browser->file_browser_browser_cont)) {
         for (i = 0; i < __this->file_cur_page_num; i++) {
-            lv_obj_t *contain = lv_obj_get_child(guider_ui.file_browser_browser_cont, i);
+            lv_obj_t *contain = lv_obj_get_child(_ui_file_browser->file_browser_browser_cont, i);
             //文件名控件
             lv_obj_t *lab = lv_obj_get_child(contain, 1);
             lv_label_set_text(lab, __this->thumb_data.file_name_buf[i]);
         }
-        lv_obj_invalidate(guider_ui.file_browser_browser_cont);
+        lv_obj_invalidate(_ui_file_browser->file_browser_browser_cont);
     }
 }
 
@@ -838,13 +848,18 @@ exit:
 
 static void update_file_browser_clickable(int disable_clickable)
 {
+    lv_ui_file_browser *_ui_file_browser = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_FILE_BROWSER);
+    if (!_ui_file_browser) {
+        return;
+    }
+
     lv_obj_t *objs[] = {
-        guider_ui.file_browser_file_cont1,
-        guider_ui.file_browser_file_cont2,
-        guider_ui.file_browser_file_cont3,
-        guider_ui.file_browser_file_cont4,
-        guider_ui.file_browser_file_cont5,
-        guider_ui.file_browser_file_cont6,
+        _ui_file_browser->file_browser_file_cont1,
+        _ui_file_browser->file_browser_file_cont2,
+        _ui_file_browser->file_browser_file_cont3,
+        _ui_file_browser->file_browser_file_cont4,
+        _ui_file_browser->file_browser_file_cont5,
+        _ui_file_browser->file_browser_file_cont6,
     };
 
     uint8_t cnt = sizeof(objs) / sizeof(objs[0]);

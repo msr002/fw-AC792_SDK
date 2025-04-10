@@ -646,6 +646,13 @@ const char log_tag_const_i_GPU_ADAPTER AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(TRU
 const char log_tag_const_w_GPU_ADAPTER AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(FALSE);
 const char log_tag_const_e_GPU_ADAPTER AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(TRUE);
 
+const char log_tag_const_v_DMA2D_ADAPTER AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(TRUE);
+const char log_tag_const_d_DMA2D_ADAPTER AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(TRUE);
+const char log_tag_const_i_DMA2D_ADAPTER AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(TRUE);
+const char log_tag_const_w_DMA2D_ADAPTER AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(FALSE);
+const char log_tag_const_e_DMA2D_ADAPTER AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(TRUE);
+
+
 const char log_tag_const_v_COMPOSITE_ADAPTER AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(TRUE);
 const char log_tag_const_d_COMPOSITE_ADAPTER AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(TRUE);
 const char log_tag_const_i_COMPOSITE_ADAPTER AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(TRUE);

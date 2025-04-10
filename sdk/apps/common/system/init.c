@@ -340,11 +340,13 @@ void local_irq_disable(void)
     if (bt_lock_cnt[current_cpu_id()]++ == 0) {
         arch_spin_lock(&bt_lock);
     }
+    __asm_csync();
 }
 
 __attribute__((always_inline))
 void local_irq_enable(void)
 {
+    __asm_csync();
     if (--bt_lock_cnt[current_cpu_id()] == 0) {
         arch_spin_unlock(&bt_lock);
     }
@@ -377,12 +379,13 @@ void __rt_local_irq_disable(void)
     if (rt_lock_cnt[current_cpu_id()]++ == 0) {
         arch_spin_lock(&rt_lock);
     }
-
+    __asm_csync();
 }
 
 __attribute__((used))
 void __rt_local_irq_enable(void)
 {
+    __asm_csync();
     if (--rt_lock_cnt[current_cpu_id()] == 0) {
         arch_spin_unlock(&rt_lock);
     }
@@ -402,11 +405,13 @@ void media_irq_disable(void)
     if (media_lock_cnt[current_cpu_id()]++ == 0) {
         arch_spin_lock(&media_lock);
     }
+    __asm_csync();
 }
 
 __attribute__((always_inline))
 void media_irq_enable(void)
 {
+    __asm_csync();
     if (--media_lock_cnt[current_cpu_id()] == 0) {
         arch_spin_unlock(&media_lock);
     }

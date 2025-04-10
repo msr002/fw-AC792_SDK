@@ -83,9 +83,9 @@ void gui_sys_prompt_msg_init_events()
 
     lv_subject_t *subject_prompt_lab = gui_msg_get_subject(GUI_SYS_PROMPT_MSG_ID_PROMPT_LAB);
     lv_subject_t *subject_prompt_opt_lab = gui_msg_get_subject(GUI_SYS_PROMPT_MSG_ID_PROMPT_OPT_LAB);
-    if (!guider_ui.sys_prompt_del) {
-        gui_sys_prompt_msg_prompt_lab_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_STRING);
-        lv_subject_add_observer_obj(subject_prompt_lab, gui_msg_set_label_text_by_string_cb, guider_ui.sys_prompt_lbl_1, &guider_msg_data);
+    if (guider_ui.sys_prompt) {
+        lv_ui_sys_prompt *ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_SYS_PROMPT);
+        gui_msg_setup_component(true, false, subject_prompt_lab, ui_scr->sys_prompt_lbl_1, &guider_msg_data, gui_msg_set_label_text_by_string_cb, GUI_SYS_PROMPT_MSG_ID_PROMPT_LAB, GUI_MSG_ACCESS_GET, VALUE_STRING, NULL);
 
 
         for (int i = 0; i < 2; i++) {
@@ -94,9 +94,9 @@ void gui_sys_prompt_msg_init_events()
             }
         }
     }
-    if (!guider_ui.sys_options_del) {
-        gui_sys_prompt_msg_prompt_opt_lab_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_STRING);
-        lv_subject_add_observer_obj(subject_prompt_opt_lab, gui_msg_set_label_text_by_string_cb, guider_ui.sys_options_lbl_1, &guider_msg_data);
+    if (guider_ui.sys_options) {
+        lv_ui_sys_options *ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_SYS_OPTIONS);
+        gui_msg_setup_component(true, false, subject_prompt_opt_lab, ui_scr->sys_options_lbl_1, &guider_msg_data, gui_msg_set_label_text_by_string_cb, GUI_SYS_PROMPT_MSG_ID_PROMPT_OPT_LAB, GUI_MSG_ACCESS_GET, VALUE_STRING, NULL);
 
 
         for (int i = 0; i < 2; i++) {

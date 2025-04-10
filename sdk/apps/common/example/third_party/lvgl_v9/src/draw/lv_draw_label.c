@@ -54,6 +54,95 @@ static void draw_letter(lv_draw_unit_t *draw_unit, lv_draw_glyph_dsc_t *dsc,  co
 /**********************
  *   GLOBAL FUNCTIONS
  **********************/
+#if LV_USE_FONT_SCALE
+
+lv_font_t *scale_base_font = NULL;
+
+void lv_set_scale_base_font(const lv_font_t *font_p)
+{
+    scale_base_font = font_p;
+}
+
+lv_font_t *lv_get_scale_base_font(void)
+{
+    return scale_base_font;
+}
+
+static uint8_t *allocate_bitmap_memory(int w, int h, int bpp)
+{
+    if (w <= 0 || h <= 0) {
+        return NULL;
+    }
+    if (bpp != 1 && bpp != 2 && bpp != 4 && bpp != 8) {
+        return NULL;
+    }
+
+    const uint16_t u_w = (uint16_t)w;
+    const uint16_t u_h = (uint16_t)h;
+    const uint16_t u_bpp = (uint16_t)bpp;
+
+    const uint16_t wh = u_w * u_h;
+    const uint16_t total_bits = wh * u_bpp;
+
+    const uint16_t total_bytes = (total_bits + 7) / 8;
+    return lv_malloc_zeroed(total_bytes);
+}
+
+static uint8_t get_pixel_8bpp(const uint8_t *src, int src_width, int src_x, int src_y)
+{
+    return src[src_y * src_width + src_x];
+}
+
+static void set_pixel_8bpp(uint8_t *dst, int dst_width, int x, int y, uint8_t value)
+{
+    dst[y * dst_width + x] = value;
+}
+
+static void scale_nearest(const uint8_t *src, int src_width, int src_height,
+                          uint8_t *dst, int dst_width, int dst_height, int bpp)
+{
+
+    float scale_y = src_height * 1.0 / dst_height;
+    float scale_x = src_width * 1.0  / dst_width;
+
+    uint8_t pixel;
+    for (int y = 0; y < dst_height; y++) {
+        int src_y = y * scale_y + 0.5;
+        if (src_y >= src_height) {
+            src_y = src_height - 1;
+        }
+
+        for (int x = 0; x < dst_width; x++) {
+            int src_x = x * scale_x + 0.5;
+            if (src_x >= src_width) {
+                src_x = src_width - 1;
+            }
+
+            switch (bpp) {
+            case 8: {
+                pixel = get_pixel_8bpp(src, src_width, src_x, src_y);
+                set_pixel_8bpp(dst, dst_width, x, y, pixel);
+                break;
+            }
+            default:
+                // not support
+                LV_LOG_ERROR("not support");
+                break;
+            }
+        }
+    }
+}
+static void lv_draw_buf_scale_ex(lv_draw_buf_t *draw_buf, uint32_t w, uint32_t h)
+{
+    uint32_t stride = lv_draw_buf_width_to_stride(w, LV_COLOR_FORMAT_A8);
+    uint32_t size = w * h;
+    draw_buf->header.w = w;
+    draw_buf->header.h = h;
+    draw_buf->header.stride = stride;
+    draw_buf->data_size = size;
+}
+#endif
+
 
 void lv_draw_label_dsc_init(lv_draw_label_dsc_t *dsc)
 {
@@ -643,6 +732,17 @@ static void draw_letter(lv_draw_unit_t *draw_unit, lv_draw_glyph_dsc_t *dsc,  co
 
     LV_PROFILER_BEGIN;
     bool g_ret = lv_font_get_glyph_dsc(font, &g, letter, '\0');
+
+#if LV_USE_FONT_SCALE
+    lv_font_glyph_dsc_t g_base;
+    if (scale_base_font) {
+        g_ret = lv_font_get_glyph_dsc(scale_base_font, &g_base, letter, '\0');
+    } else {
+        LV_LOG_ERROR("scale_base_font not set,set it use lv_set_scale_base_font()");
+        g_ret = lv_font_get_glyph_dsc(font, &g_base, letter, '\0');
+    }
+#endif
+
     if (g_ret == false) {
         /*Add warning if the dsc is not found*/
         LV_LOG_WARN("lv_draw_letter: glyph dsc. not found for U+%" LV_PRIX32, letter);
@@ -670,6 +770,25 @@ static void draw_letter(lv_draw_unit_t *draw_unit, lv_draw_glyph_dsc_t *dsc,  co
     if (g.resolved_font) {
         lv_draw_buf_t *draw_buf = NULL;
         if (LV_FONT_GLYPH_FORMAT_NONE < g.format && g.format < LV_FONT_GLYPH_FORMAT_IMAGE) {
+
+#if LV_USE_FONT_SCALE
+            /*Only check draw buf for bitmap glyph*/
+            draw_buf = lv_draw_buf_reshape(dsc->_draw_buf, 0, g_base.box_w, g_base.box_h, LV_STRIDE_AUTO);
+            if (draw_buf == NULL) {
+                if (dsc->_draw_buf) {
+                    lv_draw_buf_destroy(dsc->_draw_buf);
+                }
+
+                uint32_t h = g_base.box_h;
+                if (h * g_base.box_w < 64) {
+                    h *= 2;    /*Alloc a slightly larger buffer*/
+                }
+                draw_buf = lv_draw_buf_create_ex(font_draw_buf_handlers, g_base.box_w, h, LV_COLOR_FORMAT_A8, LV_STRIDE_AUTO);
+                LV_ASSERT_MALLOC(draw_buf);
+                draw_buf->header.h = g_base.box_h;
+                dsc->_draw_buf = draw_buf;
+            }
+#else
             /*Only check draw buf for bitmap glyph*/
             draw_buf = lv_draw_buf_reshape(dsc->_draw_buf, 0, g.box_w, g.box_h, LV_STRIDE_AUTO);
             if (draw_buf == NULL) {
@@ -686,13 +805,33 @@ static void draw_letter(lv_draw_unit_t *draw_unit, lv_draw_glyph_dsc_t *dsc,  co
                 draw_buf->header.h = g.box_h;
                 dsc->_draw_buf = draw_buf;
             }
+#endif
         }
 
 #if ((LV_USE_DRAW_JLVG == 1) && (LV_USE_DRAW_JLVG_LABEL_ENABLE == 1))
         g.label_info = dsc->label_info;
         g.pos = pos;
 #endif
+
+#if LV_USE_FONT_SCALE
+        uint8_t *zoom_buf = allocate_bitmap_memory(g_base.box_w, g_base.box_h, 8);
+
+        dsc->glyph_data = (void *) lv_font_get_glyph_bitmap(&g_base, draw_buf);
+
+        uint8_t *bitmap_out = draw_buf->data;
+
+        lv_memcpy(zoom_buf, bitmap_out, g_base.box_w * g_base.box_h);
+
+        //软件缩放
+        scale_nearest(zoom_buf, g_base.box_w, g_base.box_h, bitmap_out, g.box_w, g.box_h, 8);
+
+        lv_free(zoom_buf);
+
+        //还原draw_buf句柄
+        lv_draw_buf_scale_ex(draw_buf, g.box_w, g.box_h);
+#else
         dsc->glyph_data = (void *) lv_font_get_glyph_bitmap(&g, draw_buf);
+#endif
         dsc->format = dsc->glyph_data ? g.format : LV_FONT_GLYPH_FORMAT_NONE;
     } else {
         dsc->format = LV_FONT_GLYPH_FORMAT_NONE;

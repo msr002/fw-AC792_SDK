@@ -333,7 +333,7 @@ static void ctp_file_play_task(void *priv)
                 break;
             case JPEG_TYPE_VIDEO:
                 video_dec_one_frame(frame_data, frame_head->frm_sz);
-                video_frame_cnt++;
+                video_frame_cnt = frame_head->seq;
 
                 //计算进度条百分比(0-100),1s计算一次
                 if (!(video_frame_cnt % video_fps)) {
@@ -349,6 +349,7 @@ static void ctp_file_play_task(void *priv)
                 printf("recv end type %d \n", frame_head->type);
                 //更改UI图标,停止
                 post_video_play_msg_to_ui("play_control", 0);
+                post_video_play_msg_to_ui("play_time", 100);
                 goto exit;
             default:
                 printf("default frame type :%d  \n", frame_head->type);

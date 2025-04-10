@@ -174,7 +174,7 @@
 /* Set the number of draw unit.
  * > 1 requires an operating system enabled in `LV_USE_OS`
  * > 1 means multiple threads will render the screen in parallel */
-#define LV_DRAW_SW_DRAW_UNIT_CNT    2
+#define LV_DRAW_SW_DRAW_UNIT_CNT    1
 
 /* Use Arm-2D to accelerate the sw render */
 #define LV_USE_DRAW_ARM2D_SYNC      0
@@ -547,6 +547,12 @@
 /*Always set a default font*/
 #define LV_FONT_DEFAULT &lv_font_montserrat_14
 
+/*使用 lv_set_scale_base_font(const lv_font_t *font_p)设置缩放基准字号字体;
+ *基准字体需要生成完整信息;
+ *其他字体可不生成bitmap;
+ *其他字体由基准字号字体缩放显示;*/
+#define LV_USE_FONT_SCALE  0
+
 /*Enable handling large font and/or fonts with a lot of characters.
  *The limit depends on the font size, font face and bpp.
  *Compiler error will be triggered if a font needs it.*/
@@ -808,6 +814,9 @@
 /* JPG + split JPG decoder library.
  * Split JPG is a custom format optimized for embedded systems. */
 #define LV_USE_TJPGD 0
+
+/*JL JPG decoder library*/
+#define LV_USE_JLJPEG 1
 
 /* libjpeg-turbo decoder library.
  * Supports complete JPEG specifications and high-performance JPEG decoding. */

@@ -115,16 +115,6 @@
             "group": "build"
         }
         ,{
-            "label": "ac792n_wifi_story_machine",
-            "type": "shell",
-            "windows": {
-                "command": ".vscode/winmk.bat ac792n_wifi_story_machine"
-            },
-            "command": "make ac792n_wifi_story_machine -j`nproc`",
-            "problemMatcher": [],
-            "group": "build"
-        }
-        ,{
             "label": "ac792n_wifi_ipc",
             "type": "shell",
             "windows": {
@@ -221,16 +211,6 @@
                 "command": ".vscode/winmk.bat clean_ac792n_wifi_camera"
             },
             "command": "make clean_ac792n_wifi_camera -j`nproc`",
-            "problemMatcher": [],
-            "group": "build"
-        }
-        ,{
-            "label": "clean_ac792n_wifi_story_machine",
-            "type": "shell",
-            "windows": {
-                "command": ".vscode/winmk.bat clean_ac792n_wifi_story_machine"
-            },
-            "command": "make clean_ac792n_wifi_story_machine -j`nproc`",
             "problemMatcher": [],
             "group": "build"
         }

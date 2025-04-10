@@ -23,6 +23,8 @@ extern "C" {
  *      TYPEDEFS
  **********************/
 extern const uint8_t lv_jlffmpeg_debug_time;
+extern const uint8_t lv_jlffmpeg_use_frame_ctl;
+extern const uint8_t frame_control_sens;
 
 struct ffmpeg_context_s;
 
@@ -32,16 +34,37 @@ struct ffmpeg_context_s {
     bool has_alpha;
     uint32_t width;
     uint32_t height;
+    uint32_t dst_width;
+    uint32_t dst_heitht;
     uint32_t total_time;
     uint32_t total_frame;
     uint32_t idx;
+    uint32_t audio_idx;
+    uint32_t audio_chunk_num;
+    uint32_t audio_to_video_idx;
+    uint32_t audio_sample_rate;
+    uint8_t audio_pause;
+    uint8_t audio_task_exit;
+    void *audio_pause_sem;
+    void *read_mutex;
     lv_fs_file_t *lv_file;
-    uint32_t size;
+    uint32_t audio_frame_timer;
+    uint32_t audio_read_len;
+    uint32_t audio_frame_len;
+    uint32_t video_frame_duration;
+    int size;
     uint8_t *jpg_data;
     uint8_t *buf_act;
     uint8_t *buf1_data;
+    uint8_t *buf1_ori;
     uint8_t *buf2_data;
+    uint8_t *buf2_ori;
     uint8_t *buf3_data;
+    uint8_t *audio_cbuf;
+    uint8_t *audio_data_buf;
+    void *audio_dec_save_cbuf;
+    void *audio_dec_server;
+    void *pipeline_core;
     bool auto_cycle;
     lv_obj_t *parent_obj;
 };
@@ -60,6 +83,8 @@ typedef enum {
     LV_FFMPEG_PLAYER_CMD_STOP,
     LV_FFMPEG_PLAYER_CMD_PAUSE,
     LV_FFMPEG_PLAYER_CMD_RESUME,
+    LV_FFMPEG_PLAYER_CMD_AUDIO_PAUSE,
+    LV_FFMPEG_PLAYER_CMD_AUDIO_RESUME,
     _LV_FFMPEG_PLAYER_CMD_LAST
 } lv_ffmpeg_player_cmd_t;
 
