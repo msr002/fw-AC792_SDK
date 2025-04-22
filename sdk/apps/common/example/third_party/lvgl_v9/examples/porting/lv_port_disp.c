@@ -49,6 +49,9 @@ static void disp_flush(lv_display_t *disp, const lv_area_t *area, uint8_t *px_ma
 static u32 debug_draw_time_ms; //用于观察从开始渲染一帧开始到渲染完成一帧(推屏之前)需要的时间
 static u64 debug_lcd_latency_us;//用于观察每帧推屏引起的延迟,如果有开TE,等TE时间也会计算进入,如果单纯评估测试DMA造成的时延,请关闭TE测试
 static u32 debug_draw_max_time_ms;//用于观察记录从绘制完第一帧的第一片后开始推屏到绘制完最后一片消耗的历史最长时间
+static uint8_t first_render = 1;
+static uint32_t lcd_rotate_task_pid = 0;
+
 /**********************
  *      MACROS
  **********************/
@@ -276,8 +279,6 @@ static void lcd_rotate_task(void *p)
 }
 static void lv_lcd_swap_fb(lv_display_t *disp_drv, const lv_area_t *area, LV_PIXEL_COLOR_T *px_map)
 {
-    static uint8_t first_render = 1;
-
 #ifdef THREE_FB_ACCELERATION
 
     if (lcd_dev == NULL) { //LVGL首次启动渲染
@@ -331,7 +332,7 @@ static void lv_lcd_swap_fb(lv_display_t *disp_drv, const lv_area_t *area, LV_PIX
     if (first_render == 1) { //LVGL首次启动渲染
         first_render = 0;
         if (lcd_rotate != 0) {
-            thread_fork("lcd_rotate_task", 20, 1024, 256, 0, lcd_rotate_task, px_map);
+            thread_fork("lcd_rotate_task", 20, 1024, 256, &lcd_rotate_task_pid, lcd_rotate_task, px_map);
         } else {
             dev_ioctl(lcd_dev, IOCTL_LCD_RGB_SET_ISR_CB, (u32)lv_lcd_frame_end_hook_func);
             dev_ioctl(lcd_dev, IOCTL_LCD_RGB_START_DISPLAY, (u32)LV_GLOBAL_DEFAULT()->disp_refresh->buf_act->data);
@@ -350,7 +351,7 @@ static void lv_lcd_swap_fb(lv_display_t *disp_drv, const lv_area_t *area, LV_PIX
 #endif
 }
 /*Initialize your display and the required peripherals.*/
-static void disp_init(void)
+void disp_init(void)
 {
     struct lcd_dev_drive *lcd = NULL;
     //yuv422,rgb565,rgb888,argb888
@@ -375,6 +376,22 @@ static void disp_init(void)
             }
         }
     }
+}
+void disp_uninit(void)
+{
+    if (lcd_dev) {
+        dev_close(lcd_dev);
+        lcd_dev = NULL;
+    }
+    if (lcd_disp_buffer) {
+        free(lcd_disp_buffer);
+        lcd_disp_buffer = NULL;
+    }
+    if (lcd_rotate_task_pid) {
+        thread_kill(&lcd_rotate_task_pid, KILL_WAIT);
+        lcd_rotate_task_pid = 0;
+    }
+    first_render = 1;
 }
 
 /*Flush the content of the internal buffer the specific area on the display.

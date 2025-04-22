@@ -464,8 +464,11 @@ int tp_deinit(void)
 {
     log_info(">>>>deinit");
 
-    if (__this->deinit) {
+    if (__this && __this->deinit) {
         __this->deinit(tp_pd_data);
+    } else {
+        log_warn("This model of tp driver no support deinit function!");
+        return -ESRCH;
     }
 
 #if TP_USE_TASK

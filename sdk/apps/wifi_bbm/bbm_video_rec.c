@@ -44,12 +44,12 @@ struct audio_recv_hdl {
     void *recv_sockfd;
     int recv_task_pid;
     u8 task_exit;
-    OS_SEM  dec_data_sem;
 
     u8 *audio_dec_buf;
     cbuffer_t audio_dec_save_cbuf;
     struct server *audio_dec_server;
 };
+static u8 *tmp_buf = NULL;
 
 //id用于区别摄像头设备(板级对应)比如id0(video0)->MIPI摄像头
 //sub_id,在此工程中用于区别同一摄像头设备的实时流/录像
@@ -73,10 +73,6 @@ static int vfs_audio_dec_fread(void *file, void *data, u32 len)
     struct audio_recv_hdl *hdl = file;
 
     do {
-        ret = os_sem_pend(&hdl->dec_data_sem, 100);
-        if (ret) {
-            return -1;
-        }
 
         rlen = cbuf_read(&hdl->audio_dec_save_cbuf, data, len);
         if (rlen == len) {
@@ -110,6 +106,14 @@ static int audio_dec_init(struct audio_recv_hdl *hdl)
     union audio_req req = {0};
     int err;
 
+    if (!tmp_buf) {
+        tmp_buf = (u8 *)malloc(AUDIO_DEC_BUF_MAX_LEN);
+        if (tmp_buf == NULL) {
+            printf("tmp_buf malloc fail");
+            goto __err;
+        }
+    }
+
     hdl->audio_dec_server = server_open("audio_server", "dec");
     if (!hdl->audio_dec_server) {
         printf("open audio_dec_server fail");
@@ -124,13 +128,13 @@ static int audio_dec_init(struct audio_recv_hdl *hdl)
     }
     cbuf_init(&hdl->audio_dec_save_cbuf, hdl->audio_dec_buf, AUDIO_DEC_BUF_MAX_LEN);
 
-    os_sem_create(&hdl->dec_data_sem, 0);
 
     req.dec.cmd             = AUDIO_DEC_OPEN;
     req.dec.volume          = 100;
     req.dec.output_buf      = NULL;
     req.dec.output_buf_len  = 4096;
-    req.dec.channel         = 1;
+    //使用双通道,避免叠音卡顿
+    req.dec.channel         = 2;
     req.dec.sample_rate     = 8000;
     req.dec.priority        = 1;
     req.dec.vfs_ops         = &vfs_audio_dec_ops;
@@ -162,6 +166,10 @@ __err:
         free(hdl->audio_dec_buf);
         hdl->audio_dec_buf = NULL;
     }
+    if (tmp_buf) {
+        free(tmp_buf);
+        tmp_buf = NULL;
+    }
     return -1;
 }
 
@@ -170,7 +178,6 @@ static int audio_dec_exit(struct audio_recv_hdl *hdl)
     int ret;
     union audio_req req = {0};
 
-    os_sem_del(&hdl->dec_data_sem, OS_DEL_ALWAYS);
 
     if (hdl->audio_dec_server) {
         req.dec.cmd = AUDIO_DEC_STOP;
@@ -186,6 +193,10 @@ static int audio_dec_exit(struct audio_recv_hdl *hdl)
         free(hdl->audio_dec_buf);
         hdl->audio_dec_buf = NULL;
     }
+    if (tmp_buf) {
+        free(tmp_buf);
+        tmp_buf = NULL;
+    }
 
     return 0;
 }
@@ -195,11 +206,19 @@ static int audio_dec_write_cbuf(cbuffer_t *cbuf, u8 *buf, u32 size)
     u32 cur_size;
     cur_size =  cbuf_get_data_size(cbuf);
 
-    if (cur_size + size >= AUDIO_DEC_BUF_MAX_LEN) {
+    if (cur_size + (size * 2) >= AUDIO_DEC_BUF_MAX_LEN) {
         cbuf_clear(cbuf);
     }
 
-    cbuf_write(cbuf, buf, size);
+    u16 *data_in = (u16 *)buf;          // 原始单通道数据
+    u16 *data_out = (u16 *)tmp_buf;     // 扩展后的双通道数据
+
+    for (u32 i = 0; i < size / 2; i++) {
+        data_out[2 * i] = data_in[i];
+        data_out[2 * i + 1] = data_in[i];
+    }
+
+    cbuf_write(cbuf, data_out, size * 2);
 
     return 0;
 }
@@ -226,7 +245,6 @@ static void rt_audio_recv_task(void *priv)
         }
 
         audio_dec_write_cbuf(&hdl->audio_dec_save_cbuf, hdl->recv_buf, recv_len);
-        os_sem_post(&hdl->dec_data_sem);
     }
 
 }

@@ -278,6 +278,11 @@ extern void wifi_set_tx_rate_control_tab(u32 tab);
 extern u32 wifi_get_channel(void);
 
 /**
+ * @brief wifi_set_get_best_channel，用于混杂模式设置并获取WIFI最佳信道
+ */
+extern u32 wifi_set_get_best_channel(void);
+
+/**
  * @brief wifi_get_bssid，用于获取WIFI当前bssid
  */
 extern void wifi_get_bssid(u8 bssid[6]);
@@ -511,6 +516,8 @@ extern int wifi_get_cfg_net_result(struct smp_cfg_result *smp_cfg);
  * @brief wifi_set_channel，用于设置WIFI当前信道
  *
  * @param ch 要设置的WIFI信道
+ * 1-13常规信道,  23-26特殊信道
+ * 特殊信道: 23->2360MHz， 24->2370MHz， 25->2380MHz，26->2390MHz
  */
 extern void wifi_set_channel(u8 ch);
 

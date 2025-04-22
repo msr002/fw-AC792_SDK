@@ -137,7 +137,7 @@ void low_power_sys_request(void *priv);
 
 void low_power_enable(void);
 
-void low_power_disbale(void);
+void low_power_disable(void);
 
 void low_power_request_customize(u32 sleep_time_ms);
 

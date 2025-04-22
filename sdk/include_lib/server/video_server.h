@@ -43,6 +43,7 @@ enum video_state {
     VIDEO_STATE_SET_DIS_CROP,
     VIDEO_STATE_SET_AUDIO_CALLBACK,
     VIDEO_STATE_SET_DIS_PAUSE,
+    VIDEO_STATE_SET_AUDIO_VOLUME,
 };
 
 enum video_rec_format {
@@ -222,6 +223,7 @@ struct vs_video_rec {
     u32 sbuf_size;
     u8 bfmode;//ppbuf mode
     u8 double_raw;
+    u8 enc_volume;
 
     /*net_video*/
     const char *fpath;

@@ -46,7 +46,7 @@ static int audio_dec_write_cbuf(u8 *buf, u32 size)
     u32 cur_size;
     cur_size =  cbuf_get_data_size(&audio_dec_save_cbuf);
 
-    if (cur_size + size >= AUDIO_DEC_BUF_MAX_LEN) {
+    if (cur_size + (size * 2) >= AUDIO_DEC_BUF_MAX_LEN) {
         cbuf_clear(&audio_dec_save_cbuf);
     }
 

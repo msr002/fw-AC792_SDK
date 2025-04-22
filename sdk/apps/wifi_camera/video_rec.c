@@ -2412,7 +2412,12 @@ static int video1_rec_start()
 
     u32 res = db_select("res");
 
+
+#if THREE_WAY_DOUBLE_RAW
     req.rec.online  = 1;
+#else
+    req.rec.online  = 0;
+#endif
     req.rec.enable_dri  = 0;
     req.rec.channel = 0;
     req.rec.camera_type = VIDEO_CAMERA_NORMAL;

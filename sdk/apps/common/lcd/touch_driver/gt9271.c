@@ -307,6 +307,7 @@ static int gt9271_deinit(const tp_platform_data_t *pd_data)
 
     if (!iic) {
         dev_close(iic);
+        iic = NULL;
     }
 
     return 0;

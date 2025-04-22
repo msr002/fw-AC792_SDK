@@ -75,6 +75,8 @@ const char wifi_temperature_drift_trim_degree = 22; //触发trim动作的温差�
 
 const char wifi_ap_scan_support = 0; //ap扫描开关，0为关闭，1为开启
 
+const char wifi_ap_miss_owndevice_channel = 0; //自己设备信道错开功能，0为关闭，1为开启
+
 #if defined CONFIG_NO_SDRAM_ENABLE
 const u16 MAX_PACKETS_IN_QUEUE = 16; //配置WiFi驱动最大发送数据包队列
 const u16 MAX_PACKETS_IN_MCAST_PS_QUEUE	= 4;	//配置WiFi驱动最大发送数据包队列 //8	16 modify by lyx 32

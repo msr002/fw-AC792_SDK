@@ -308,6 +308,7 @@ static struct cli_info *get_tcp_net_info()
         count++;
     }
     printf("count = %d\n\n", count);
+#if 0
     if (count > 1) {
         old_cli = list_first_entry(&server_info.cli_head, struct cli_info, entry);
         list_del(&old_cli->entry);
@@ -316,6 +317,7 @@ static struct cli_info *get_tcp_net_info()
         old_cli->fd = NULL;
         free(old_cli);
     }
+#endif
 
     return cli;
 
@@ -329,6 +331,8 @@ static void __do_sock_accpet(void *arg)
 {
 
     socklen_t len = sizeof(server_info.local_addr);
+    struct list_head *pos = NULL;
+    struct cli_info *cli = NULL;
     while (1) {
 
         struct cli_info *__cli = calloc(1, sizeof(sizeof(struct cli_info)));
@@ -345,6 +349,19 @@ static void __do_sock_accpet(void *arg)
             printf("some error in here\n\n");
             continue;
         }
+
+        if (!list_empty(&server_info.cli_head)) {
+            list_for_each(pos, &server_info.cli_head) {
+                printf("ip:%s   port:%d\n\n", inet_ntoa(cli->addr.sin_addr.s_addr), htons(cli->addr.sin_port));
+                cli = list_entry(pos, struct cli_info, entry);
+                list_del(&cli->entry);
+                sock_set_quit(cli->fd);
+                sock_unreg(cli->fd);
+                free(cli);
+            }
+        }
+
+
         printf("__do_sock_accpet add client list\n\n");
         list_add_tail(&__cli->entry, &server_info.cli_head);
         sock_set_send_timeout(__cli->fd, 4000);

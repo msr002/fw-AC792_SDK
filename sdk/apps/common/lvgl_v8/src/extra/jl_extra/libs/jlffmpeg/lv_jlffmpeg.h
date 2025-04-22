@@ -30,6 +30,12 @@ struct ffmpeg_context_s;
 
 extern const lv_obj_class_t lv_ffmpeg_player_class;
 
+typedef struct ffmpeg_clock {
+    int pts;
+    int pts_drift;
+    // int last_updated;
+} ffmpeg_clock;
+
 struct ffmpeg_context_s {
     bool has_alpha;
     uint32_t width;
@@ -44,10 +50,13 @@ struct ffmpeg_context_s {
     uint32_t audio_to_video_idx;
     uint32_t audio_sample_rate;
     uint8_t audio_pause;
+    uint8_t play_sync;
     uint8_t audio_task_exit;
     void *audio_pause_sem;
     void *read_mutex;
     lv_fs_file_t *lv_file;
+    ffmpeg_clock audio_clk;
+    ffmpeg_clock video_clk;
     uint32_t audio_frame_timer;
     uint32_t audio_read_len;
     uint32_t audio_frame_len;
@@ -65,6 +74,8 @@ struct ffmpeg_context_s {
     void *audio_dec_save_cbuf;
     void *audio_dec_server;
     void *pipeline_core;
+    void *audio_chunk_buf;
+    u32 audio_chunk_len;
     bool auto_cycle;
     lv_obj_t *parent_obj;
 };
@@ -76,6 +87,8 @@ typedef struct {
     bool auto_restart;
     struct ffmpeg_context_s *ffmpeg_ctx;
     void (*autostop_cb)(lv_obj_t *);
+    void (*frame_begin_cb)(lv_obj_t *);
+    void (*frame_end_cb)(lv_obj_t *);
 } lv_ffmpeg_player_t;
 
 typedef enum {
@@ -142,11 +155,26 @@ void lv_ffmpeg_player_set_zoom(lv_obj_t *obj, uint16_t zoom);
  * Other functions
  *====================*/
 /**
- * 注册播完自动暂停回调函数
+ * 注册播完自动暂停回调
  * @param obj pointer to a ffmpeg_player object
  * @param autostop_cb: cb: void cb(lv_obj_t *obj);
  */
 void lv_jlffmpeg_set_autostop_cb(lv_obj_t *obj, void (*autostop_cb)(lv_obj_t *));
+
+/**
+ * 注册解码开始回调
+ * @param obj pointer to a ffmpeg_player object
+ * @param frame_begin_cb: cb: void cb(lv_obj_t *obj);
+ */
+void lv_jlffmpeg_set_frame_begin_cb(lv_obj_t *obj, void (*frame_begin_cb)(lv_obj_t *));
+
+/**
+ * 注册解码结束回调
+ * @param obj pointer to a ffmpeg_player object
+ * @param frame_end_cb: cb: void cb(lv_obj_t *obj);
+ */
+void lv_jlffmpeg_set_frame_end_cb(lv_obj_t *obj, void (*frame_end_cb)(lv_obj_t *));
+
 /**
  * 获取当前解码器状态
  */

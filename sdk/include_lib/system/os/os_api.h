@@ -49,6 +49,20 @@ extern "C"
 #define OS_TASK_FATHER  (const char *)0x2
 /* \} name */
 
+/**
+ * \name 用户TCB信息
+ * \{
+ */
+typedef struct {
+    char tcb_name[configMAX_TASK_NAME_LEN];
+    u16  dly_ticks;
+    u8   slice_cnt;
+    u8   status;
+    u8   priority;
+} os_user_tcb_info_t;
+/* \} name */
+
+
 /* ----------------------------------------------------------------------------*/
 /**
  * @brief 初始化操作系统
@@ -770,6 +784,13 @@ int os_eventgroup_wait_bits(OS_EVENT_GRP *event, int bits, int isClearOnExit, in
  */
 /* ----------------------------------------------------------------------------*/
 int os_tasks_num_query(void);
+
+/* ----------------------------------------------------------------------------*/
+/**
+ * @brief 打印当前操作系统的任务的用户TCB信息
+ */
+/* ----------------------------------------------------------------------------*/
+void os_dump_user_tcb_info(void);
 
 /* ----------------------------------------------------------------------------*/
 /**

@@ -2101,10 +2101,12 @@ static int usb_stor_close(struct device *device)
     if (disk->udisk_ep.epin_buf) {
         usb_h_free_ep_buffer(host_device2id(host_dev), disk->udisk_ep.epin_buf);
         disk->udisk_ep.epin_buf = NULL;
+        usb_free_ep_num(usb_id, USB_DIR_IN | disk->udisk_ep.host_epin);
     }
     if (disk->udisk_ep.epout_buf) {
         usb_h_free_ep_buffer(host_device2id(host_dev), disk->udisk_ep.epout_buf);
         disk->udisk_ep.epout_buf = NULL;
+        usb_free_ep_num(usb_id, disk->udisk_ep.host_epout);
     }
 
     if (ret != OS_ERR_NONE) {

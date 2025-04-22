@@ -135,6 +135,11 @@ static inline u32 reverse_u16(u16 data16)
 		asm volatile("csync;"); \
     } while (0)
 
+#define __asm_ssync() \
+    do { \
+		asm volatile("ssync;"); \
+    } while (0)
+
 #include "asm/irq.h"
 #include "generic/printf.h"
 #include "system/generic/log.h"

@@ -147,6 +147,8 @@ typedef struct S_PICTURE_SIZE {
 	(sfr = (sfr & ~((~(0xffffffff << (len))) << (start))) | \
 	 (((dat) & (~(0xffffffff << (len)))) << (start)))
 
+#define SFR_READ(sfr, start, len) \
+    (((sfr >> (start)) & ((1 << (len)) - 1)))
 
 #include "generic/errno-base.h"
 #include "string.h"

@@ -70,6 +70,7 @@ enum {
 #define AUDIO_DEC_AB_REPEAT_CLOSE      13 /*!< 关闭AB点复读播放 */
 #define AUDIO_DEC_GET_EFFECT_HANDLE    14 /*!< 获取对应音效算法的句柄 */
 #define AUDIO_DEC_REPEAT_SET           15 /*!< 设置循环播放 */
+#define AUDIO_DEC_CLEAR_CBUF           16 /*!< 清空解码缓存 */
 
 #define AUDIO_ENC_OPEN                 4  /*!< 打开编码 */
 #define AUDIO_ENC_START                5  /*!< 开始编码 */

@@ -14,7 +14,7 @@ static int cancel_wifi_channel = 0;
 #endif
 
 #ifdef USE_ADDITIONAL_CHANNELS
-//23->2340， 24->2370， 25->2510，26->2540
+//23->2360， 24->2370， 25->2380，26->2390
 const int wifi_channel_table[4] = {23, 24, 25, 26};
 #else
 //1-13

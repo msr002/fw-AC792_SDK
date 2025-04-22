@@ -4,4 +4,4 @@
 
 include_lib_system_version:
 
-.asciz "INCLUDE_SYSTEM-$d7b0b4c"
+.asciz "INCLUDE_SYSTEM-$6683c19"
