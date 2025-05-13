@@ -302,9 +302,8 @@ static void lv_lcd_swap_fb(lv_display_t *disp_drv, const lv_area_t *area, LV_PIX
     } else {
         //第三轮渲染以后都要等待LCD Vsync SWAP FB完成
         /*while (next_disp.fb != NULL) {};*/
-        dev_ioctl(lcd_dev, IOCTL_LCD_RGB_WAIT_FB_SWAP_FINISH, 0);
-        /* 等到s_next_fb空闲同步已完成 */
-        ASSERT(next_disp.fb == NULL);
+        lv_draw_buf_t *cur_fb = next_disp.fb;
+        dev_ioctl(lcd_dev, IOCTL_LCD_RGB_WAIT_FB_SWAP_FINISH, (u32)cur_fb->data);
     }
 
     if (LV_GLOBAL_DEFAULT()->disp_refresh->render_mode != LV_DISPLAY_RENDER_MODE_FULL) {
@@ -347,7 +346,8 @@ static void lv_lcd_swap_fb(lv_display_t *disp_drv, const lv_area_t *area, LV_PIX
         return;
     }
     next_disp.fb = LV_GLOBAL_DEFAULT()->disp_refresh->buf_act;
-    dev_ioctl(lcd_dev, IOCTL_LCD_RGB_WAIT_FB_SWAP_FINISH, 0);
+    lv_draw_buf_t *cur_fb = next_disp.fb;
+    dev_ioctl(lcd_dev, IOCTL_LCD_RGB_WAIT_FB_SWAP_FINISH, (u32)cur_fb->data);
 #endif
 }
 /*Initialize your display and the required peripherals.*/

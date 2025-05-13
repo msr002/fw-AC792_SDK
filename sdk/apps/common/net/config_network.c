@@ -32,13 +32,14 @@
 
 
 #if TCFG_BT_NET_CFG_EN || TCFG_BT_NET_CFG_DUI_EN || TCFG_BT_NET_CFG_DUEROS_EN || TCFG_BT_NET_CFG_TURING_EN || TCFG_BT_NET_CFG_TENCENT_EN
-#define TCFG_OLD_NET_CFG_EN	1
 #define TCFG_BLE_NET_CFG_EN	1
 #endif
 
-#if defined THIRD_PARTY_PROTOCOLS_SEL && (THIRD_PARTY_PROTOCOLS_SEL & MIJIA_EN)
-#define TCFG_OLD_NET_CFG_EN	0
+#if defined THIRD_PARTY_PROTOCOLS_SEL && ((THIRD_PARTY_PROTOCOLS_SEL & MIJIA_EN) || (THIRD_PARTY_PROTOCOLS_SEL & NET_CFG_EN))
 #define TCFG_BLE_NET_CFG_EN	1
+
+extern void le_net_cfg_all_init(void);
+extern void le_net_cfg_all_exit(void);
 #endif
 
 static u8 config_network_flag;
@@ -149,16 +150,8 @@ void config_network_start(void)
 #if TCFG_USER_BLE_ENABLE && TCFG_BLE_NET_CFG_EN
     memset(&bt_net_result, 0, sizeof(bt_net_result));
     ble_config_complete_flag = 0;
-#if !TCFG_POWER_ON_ENABLE_BLE
-#if TCFG_BLE_MASTER_CENTRAL_EN
-    void bt_master_ble_exit(void);
-    bt_master_ble_exit();
-    os_time_dly(200);
-#endif
-#if TCFG_OLD_NET_CFG_EN
-    extern void bt_ble_init(void);
-    bt_ble_init();
-#endif
+#if defined THIRD_PARTY_PROTOCOLS_SEL && (THIRD_PARTY_PROTOCOLS_SEL & NET_CFG_EN)
+    le_net_cfg_all_init();
 #endif
 #endif
 
@@ -182,10 +175,9 @@ void config_network_stop(void)
     /* wifi_on(); */
 #endif
 #if TCFG_USER_BLE_ENABLE && TCFG_BLE_NET_CFG_EN && !TCFG_POWER_ON_ENABLE_BLE
-#if TCFG_OLD_NET_CFG_EN
-    void bt_ble_exit(void);
+#if defined THIRD_PARTY_PROTOCOLS_SEL && (THIRD_PARTY_PROTOCOLS_SEL & NET_CFG_EN)
     if (!ble_config_complete_flag) {
-        bt_ble_exit();
+        le_net_cfg_all_exit();
     }
 #endif
 #endif

@@ -1010,8 +1010,8 @@ int fb_combine_task(void *priv)
                     out.height = fb_lcd_get_interpolation() ? fb_lcd_get_buf_height() : fb_lcd_get_height();
                 }
             } else {
-                out.width  = fb_lcd_get_buf_width();
-                out.height = fb_lcd_get_buf_height();
+                out.width  = fb_lcd_get_interpolation() ? fb_lcd_get_buf_width() : fb_lcd_get_width();
+                out.height = fb_lcd_get_interpolation() ? fb_lcd_get_buf_height() : fb_lcd_get_height();
             }
             if (priv) {
                 out.addr = (uint8_t *)priv;

@@ -68,6 +68,17 @@ const int device_bulk_read_async_enable = 1;
 const int device_bulk_read_async_enable = 0;
 #endif
 
+//================================================//
+// 默认由宏来控制,请勿修改
+// 0:表示使能压缩ram0_data、data功能
+// 1:表示关闭压缩ram0_data、data功能
+//================================================//
+#ifdef CONFIG_LZ4_DATA_CODE_ENABLE
+const int LZ4_DATA_CODE_ENABLE = 1;
+#else
+const int LZ4_DATA_CODE_ENABLE = 0;
+#endif
+
 /**
  * @brief Log (Verbose/Info/Debug/Warn/Error)
  */

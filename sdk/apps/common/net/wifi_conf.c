@@ -886,6 +886,9 @@ __attribute__((weak)) u8 *lte_module_get_mac_addr(void)
 #define TX_ERR_ADJUST_COUNTERS 4
 static int tx_adjust_counters = 0;
 
+void wifi_edca_parm_get(u8 ac_type, u8 *txop_limit, u8 *cwmin, u8 *cwmax, u8 *aifsn);
+void wifi_edca_parm_set(u8 ac_type, u8 txop_limit, u8 cwmin, u8 cwmax, u8 aifsn);
+
 void wifi_edca_adjust(u8 ac_type, u8 txop_limit, u8 cwmin, u8 cwmax, u8 aifsn)
 {
     u8 txop_limit_t, cwmin_t, cwmax_t, aifsn_t;

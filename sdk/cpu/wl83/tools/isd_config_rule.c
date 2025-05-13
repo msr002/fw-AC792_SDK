@@ -95,6 +95,7 @@ EX_FLASH_IO=2_PA09_PA10_PA05_PA06_PA08;
 #endif
 #endif
 SPI_IO_HD=1_1_1_0_0_1;[主控SPI口IO驱动档位,0-3档可配,clk_d0_d1_d2_d3_cs]
+FLASH_QE_POS=0;[QE的位置:0-SR2的BIT1, 1-SR1的BIT6]
 
 //###时钟配置====================================================================
 #if defined TCFG_OSC_FREQUENCY

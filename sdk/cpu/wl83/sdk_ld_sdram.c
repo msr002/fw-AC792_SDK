@@ -31,6 +31,7 @@ VIDEO_RAM_SIZE = 128K;
 #endif
 RAM0_SIZE = 0x11fe00 - 0x100000 - TLB_SIZE - BOOT_INFO_SIZE - 128;
 UPDATA_BEG = 0x11fe00 - 128;
+CODE_BEG = 0x8000120;
 
 FREE_DCACHE_WAY = 0; //max is 7
 FREE_ICACHE0_WAY = 0; //max is 7
@@ -42,7 +43,7 @@ ICACHE1_RAM_SIZE = FREE_ICACHE1_WAY*4K;
 
 MEMORY
 {
-    rom(rx)             : ORIGIN =  0x8000120, LENGTH = __FLASH_SIZE__
+    rom(rx)             : ORIGIN =  CODE_BEG, LENGTH = __FLASH_SIZE__
     sdram(rwx)          : ORIGIN =  SDRAM_ORIGIN, LENGTH = SDRAM_SIZE
     ram0(rwx)           : ORIGIN =  0x100000 + TLB_SIZE, LENGTH = RAM0_SIZE
     boot_info(rwx)      : ORIGIN =  0x100000 + TLB_SIZE + RAM0_SIZE, LENGTH = BOOT_INFO_SIZE
@@ -329,37 +330,66 @@ SECTIONS
     bss_size  = SIZEOF(.bss);
     PROVIDE(bss_size = SIZEOF(.bss));
 
-    data_vma = ADDR(.data);
-    data_lma = text_begin + SIZEOF(.text);
-    data_size = SIZEOF(.data);
-    PROVIDE(data_size = SIZEOF(.data));
-
     _ram0_bss_vma = ADDR(.ram0_bss);
     _ram0_bss_size = SIZEOF(.ram0_bss);
     PROVIDE(ram0_bss_size = SIZEOF(.ram0_bss));
-
-    _ram0_data_vma = ADDR(.ram0_data);
-    _ram0_data_lma = text_begin + SIZEOF(.text) + SIZEOF(.data);
-    _ram0_data_size = SIZEOF(.ram0_data);
-    PROVIDE(ram0_data_size = SIZEOF(.ram0_data));
 
     _dcache_ram_bss_vma = ADDR(.dcache_ram_bss);
     _dcache_ram_bss_size = SIZEOF(.dcache_ram_bss);
     PROVIDE(dcache_ram_bss_size = SIZEOF(.dcache_ram_bss));
 
-    _dcache_ram_data_vma = ADDR(.dcache_ram_data);
-    _dcache_ram_data_lma = text_begin + SIZEOF(.text) + SIZEOF(.data) + SIZEOF(.ram0_data);
-    _dcache_ram_data_size = SIZEOF(.dcache_ram_data);
-    PROVIDE(dcache_ram_data_size = SIZEOF(.dcache_ram_data));
-
     _video_ram_bss_vma = ADDR(.video_ram_bss);
     _video_ram_bss_size = SIZEOF(.video_ram_bss);
     PROVIDE(video_ram_bss_size = SIZEOF(.video_ram_bss));
 
+#ifdef CONFIG_LZ4_DATA_CODE_ENABLE
+
+    _dcache_ram_data_vma = ADDR(.dcache_ram_data);
+    _dcache_ram_data_lma = text_begin + SIZEOF(.text);
+    _dcache_ram_data_size = SIZEOF(.dcache_ram_data);
+    PROVIDE(dcache_ram_data_size = SIZEOF(.dcache_ram_data));
+
     _video_ram_data_vma = ADDR(.video_ram_data);
-    _video_ram_data_lma = text_begin + SIZEOF(.text) + SIZEOF(.data) + SIZEOF(.ram0_data) + SIZEOF(.dcache_ram_data);
+    _video_ram_data_lma = text_begin + SIZEOF(.text) + SIZEOF(.dcache_ram_data);
     _video_ram_data_size = SIZEOF(.video_ram_data);
     PROVIDE(video_ram_data_size = SIZEOF(.video_ram_data));
+
+    _ram0_data_vma = ADDR(.ram0_data);
+    _ram0_data_lma = text_begin + SIZEOF(.text) + SIZEOF(.dcache_ram_data) + SIZEOF(.video_ram_data);
+    _ram0_data_size = SIZEOF(.ram0_data);
+    PROVIDE(ram0_data_size = SIZEOF(.ram0_data));
+
+    data_vma = ADDR(.data);
+    data_lma = text_begin + SIZEOF(.text) + SIZEOF(.dcache_ram_data) + SIZEOF(.video_ram_data) + SIZEOF(.ram0_data);
+    data_size = SIZEOF(.data);
+    PROVIDE(data_size = SIZEOF(.data));
+
+#else
+
+    data_vma = ADDR(.data);
+    data_lma = text_begin + SIZEOF(.text);
+    data_size = SIZEOF(.data);
+    PROVIDE(data_size = SIZEOF(.data));
+
+    _dcache_ram_data_vma = ADDR(.dcache_ram_data);
+    _dcache_ram_data_lma = text_begin + SIZEOF(.text) + SIZEOF(.data);
+    _dcache_ram_data_size = SIZEOF(.dcache_ram_data);
+    PROVIDE(dcache_ram_data_size = SIZEOF(.dcache_ram_data));
+
+    _video_ram_data_vma = ADDR(.video_ram_data);
+    _video_ram_data_lma = text_begin + SIZEOF(.text) + SIZEOF(.data) + SIZEOF(.dcache_ram_data);
+    _video_ram_data_size = SIZEOF(.video_ram_data);
+    PROVIDE(video_ram_data_size = SIZEOF(.video_ram_data));
+
+    _ram0_data_vma = ADDR(.ram0_data);
+    _ram0_data_lma = text_begin + SIZEOF(.text) + SIZEOF(.data) + SIZEOF(.dcache_ram_data) + SIZEOF(.video_ram_data);
+    _ram0_data_size = SIZEOF(.ram0_data);
+    PROVIDE(ram0_data_size = SIZEOF(.ram0_data));
+
+#endif
+
+    bank_code_load_addr = _ram0_data_lma;
+    common_code_run_addr = _ram0_data_vma;
 
 // *INDENT-ON*
 

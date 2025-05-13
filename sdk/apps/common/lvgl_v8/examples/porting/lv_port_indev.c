@@ -81,6 +81,16 @@ static struct lv_scroll_throw lv_throw = {0};
  *   GLOBAL FUNCTIONS
  **********************/
 
+bool lv_indev_set_touch_timer_check(void)
+{
+
+    if (indev_touchpad->driver->read_timer) {
+        return true;
+    } else {
+        return false;
+    }
+
+}
 
 void lv_port_indev_init(void)
 {
@@ -212,12 +222,15 @@ void lv_indev_set_touch_timer_en(int en)
             indev_touchpad->driver->read_timer = lv_timer_create(lv_indev_read_timer_cb, LV_INDEV_DEF_READ_PERIOD, indev_touchpad);
         }
     } else {
-        void lv_set_touch_timer_status(u8 status);
-        lv_set_touch_timer_status(0);
+
         if (indev_touchpad->driver->read_timer) {
             lv_timer_del(indev_touchpad->driver->read_timer);
             indev_touchpad->driver->read_timer = NULL;
         }
+
+        void lv_set_touch_timer_status(u8 status);
+        lv_set_touch_timer_status(0);
+
     }
 }
 

@@ -29,8 +29,8 @@
 #include "spinlock.h"
 
 //static spinlock_t perfc_lock;
-#define PERF_COUNTER_LOCK()  //   spin_lock(&perfc_lock)
-#define PERF_COUNTER_UNLOCK()  // spin_unlock(&perfc_lock)
+#define PERF_COUNTER_LOCK()     //spin_lock(&perfc_lock)
+#define PERF_COUNTER_UNLOCK()   //spin_unlock(&perfc_lock)
 
 
 #define __IMPLEMENT_PERF_COUNTER
@@ -142,7 +142,7 @@ __initcall(perf_counter_init);
 /*============================ GLOBAL VARIABLES ==============================*/
 
 /*============================ LOCAL VARIABLES ===============================*/
-int64_t g_lLastTimeStamp;
+static int64_t g_lLastTimeStamp;
 static uint32_t s_lOldTimeCnt, s_lOldOverFlowCnt;
 static int32_t s_nUSUnit;
 static int32_t s_nMSUnit = 0x7fffffff;
@@ -357,12 +357,13 @@ int64_t clock(void)
 
 uint32_t get_system_ms(void)
 {
-    return (check_systick()) / s_nMSUnit;
+    /* return (check_systick()) / s_nMSUnit; */
+    return jiffies_msec();
 }
 
 uint32_t timer_get_ms(void)
 {
-    return (check_systick()) / s_nMSUnit;
+    return get_system_ms();
 }
 
 uint32_t timer_get_sec(void)
@@ -372,7 +373,8 @@ uint32_t timer_get_sec(void)
 
 uint32_t get_system_us(void)
 {
-    return (check_systick()) / s_nUSUnit;
+    /* return (check_systick()) / s_nUSUnit; */
+    return jiffies_usec();
 }
 
 int64_t perfc_convert_ticks_to_ms(int64_t lTick)
@@ -397,7 +399,6 @@ int64_t perfc_convert_us_to_ticks(uint32_t wMS)
     return lResult ? lResult : 1;
 }
 
-
 bool __perfc_is_time_out(int64_t lPeriod, int64_t *plTimestamp, bool bAutoReload)
 {
     if (NULL == plTimestamp) {
@@ -405,7 +406,6 @@ bool __perfc_is_time_out(int64_t lPeriod, int64_t *plTimestamp, bool bAutoReload
     }
 
     int64_t lTimestamp = get_system_ticks();
-
 
     if (0 == *plTimestamp) {
         *plTimestamp = lPeriod;
@@ -443,7 +443,6 @@ unsigned int time_lapse(unsigned int *handle, unsigned int time_out)//2^32/1000/
 
     return 0;
 }
-
 
 __attribute__((always_inline))
 void delay(unsigned int ncycle)

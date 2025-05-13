@@ -25,16 +25,17 @@ extern "C" {
 extern const uint8_t lv_jlffmpeg_debug_time;
 extern const uint8_t lv_jlffmpeg_use_frame_ctl;
 extern const uint8_t frame_control_sens;
+extern const uint8_t jlffmpeg_use_media_interface;
 
 struct ffmpeg_context_s;
-
-extern const lv_obj_class_t lv_ffmpeg_player_class;
 
 typedef struct ffmpeg_clock {
     int pts;
     int pts_drift;
     // int last_updated;
 } ffmpeg_clock;
+
+extern const lv_obj_class_t lv_ffmpeg_player_class;
 
 struct ffmpeg_context_s {
     bool has_alpha;
@@ -55,12 +56,12 @@ struct ffmpeg_context_s {
     void *audio_pause_sem;
     void *read_mutex;
     lv_fs_file_t *lv_file;
-    ffmpeg_clock audio_clk;
-    ffmpeg_clock video_clk;
     uint32_t audio_frame_timer;
     uint32_t audio_read_len;
     uint32_t audio_frame_len;
     uint32_t video_frame_duration;
+    ffmpeg_clock audio_clk;
+    ffmpeg_clock video_clk;
     int size;
     uint8_t *jpg_data;
     uint8_t *buf_act;

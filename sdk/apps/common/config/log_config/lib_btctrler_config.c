@@ -40,6 +40,7 @@ const int CONFIG_ESCO_FORWARD_ENABLE                = 0;
 const int CONFIG_UPDATE_BT_LMP_EN                   = 0;
 const int CONFIG_AES_CCM_FOR_EDR_ENABLE             = 0;
 const int CONFIG_MPR_CLOSE_WHEN_ESCO                = 0;
+const int CONFIG_DISTURB_SCAN_ENABLE                = 0;
 #if TCFG_BT_DUAL_CONN_ENABLE
 const int CONFIG_LMP_SUPPORT_MULTI_CONN             = 1;
 const int CONFIG_LMP_CONNECTION_NUM                 = 2;
@@ -184,11 +185,7 @@ const int config_btctler_le_afh_en                  = 0;
 const int config_btctler_le_tws                     = 0;
 
 // Master multi-link
-#if TCFG_TRANS_MULTI_BLE_EN
-const int config_btctler_le_master_multilink        = 1;
-#else
 const int config_btctler_le_master_multilink        = 0;
-#endif
 
 #if (TCFG_LEA_BIG_CTRLER_TX_EN || TCFG_LEA_BIG_CTRLER_RX_EN)
 const int config_btctler_le_hw_nums                 = 6;
@@ -258,8 +255,8 @@ const int config_bb_optimized_ctrl                  = BIT(13) | BIT(14) | BIT(20
 
 #elif (TCFG_LE_AUDIO_APP_CONFIG & (LE_AUDIO_AURACAST_SOURCE_EN | LE_AUDIO_AURACAST_SINK_EN))
 
-const int config_btctler_le_roles                   = (LE_MASTER | LE_SLAVE | LE_ADV | LE_SCAN);
-const uint64_t config_btctler_le_features           = LL_FEAT_ISO_BROADCASTER | LE_DATA_PACKET_LENGTH_EXTENSION | LL_FEAT_ISO_SYNC | LL_FEAT_ISO_HOST_SUPPORT | LE_2M_PHY | CHANNEL_SELECTION_ALGORITHM_2 | LE_EXTENDED_ADVERTISING | LE_PERIODIC_ADVERTISING;
+const int config_btctler_le_roles                   = (LE_MASTER | LE_SLAVE | LE_ADV | LE_SCAN | LE_INIT);
+const uint64_t config_btctler_le_features           = LL_FEAT_ISO_BROADCASTER | LE_DATA_PACKET_LENGTH_EXTENSION | LL_FEAT_ISO_SYNC | LL_FEAT_ISO_HOST_SUPPORT | LE_2M_PHY | CHANNEL_SELECTION_ALGORITHM_2 | LE_EXTENDED_ADVERTISING | LE_PERIODIC_ADVERTISING | LE_ENCRYPTION;
 const int config_btctler_le_rx_nums                 = 20;
 const int config_btctler_le_acl_packet_length       = 255;
 const int config_btctler_le_acl_total_nums          = 15;
@@ -278,12 +275,6 @@ const int config_bb_optimized_ctrl                  = VENDOR_BB_ISO_DIRECT_PUSH;
 
 
 //le 配置,可以优化代码和RAM
-#if TCFG_TRANS_MULTI_BLE_EN
-const int config_le_hci_connection_num              = TCFG_TRANS_MULTI_BLE_SLAVE_NUMS + TCFG_TRANS_MULTI_BLE_MASTER_NUMS; //支持同时连接个数
-const int config_le_sm_support_enable               = 1; //是否支持加密配对
-const int config_le_gatt_server_num                 = TCFG_TRANS_MULTI_BLE_SLAVE_NUMS; //支持server角色个数
-const int config_le_gatt_client_num                 = TCFG_TRANS_MULTI_BLE_MASTER_NUMS; //支持client角色个数
-#else
 #if TCFG_BLE_MESH_ENABLE
 const int config_le_sm_support_enable               = 0; //是否支持加密配对
 #else
@@ -292,7 +283,6 @@ const int config_le_sm_support_enable               = 1; //是否支持加密配
 const int config_le_hci_connection_num              = 1; //支持同时连接个数
 const int config_le_gatt_server_num                 = 1; //支持server角色个数
 const int config_le_gatt_client_num                 = 1; //支持client角色个数
-#endif
 
 #endif
 

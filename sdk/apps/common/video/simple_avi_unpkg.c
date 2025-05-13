@@ -30,9 +30,6 @@
 #define IDX_01WB   ntohl(0x30317762)
 #define IDX_00WB   ntohl(0x30307762)
 
-#define REC_CYC_FILE_TIME 	10	 //分钟
-#define AVI_AUDIO_NUM_TABLE		(REC_CYC_FILE_TIME * 60 * 2 + 128)
-
 struct avi_head_str {
     UNPKG_JL_AVI_HEAD file_head;
     FILE *fd;
@@ -56,7 +53,7 @@ struct avi_head_str {
     u32 per_adframe_time;//每帧音频时间
     float video_num_coefficient;
     float audio_num_coefficient;
-    u8 audio_num_buff[AVI_AUDIO_NUM_TABLE];//存储音频每帧偏移量，1s2帧，3分钟360帧
+    u8 *audio_num_buff;
     u8 *video_num_buff;
 };
 static u8 avi_open_file_num = 0;
@@ -138,6 +135,10 @@ int avi_net_unpkg_exit(FILE *fd, u8 state)
         if (avi_info->video_num_buff) {
             free(avi_info->video_num_buff);
             avi_info->video_num_buff = NULL;
+        }
+        if (avi_info->audio_num_buff) {
+            free(avi_info->audio_num_buff);
+            avi_info->audio_num_buff = NULL;
         }
         /*memset(avi_info,0,sizeof(struct avi_head_str));*/
         return 0;
@@ -715,7 +716,24 @@ static int avi_get_video_audio_chunk_num(FILE *fd, u8 state) //获取整个视�
     if (!avi_info->video_num_buff) {
         avi_info->video_num_buff = zalloc(avi_info->file_head.avih.dwTotalFrames);//回放模式
     }
-    if (!avi_info->video_num_buff) {
+
+    //总长*声道数/chunk大小 约等于总音频包数量
+    //只适用于PCM
+    u32 assume_audio_chunks = 0;
+    if (avi_info->file_head.aud_strh.dwSuggestedBufferSize) {
+        assume_audio_chunks = (avi_info->file_head.aud_strh.dwLength * avi_info->file_head.aud_strh.dwSampleSize)
+                              / avi_info->file_head.aud_strh.dwSuggestedBufferSize;
+    } else {
+        assume_audio_chunks = avi_info->file_head.avih.dwTotalFrames;
+    }
+
+    assume_audio_chunks *= 2; //容错
+    if (!avi_info->audio_num_buff) {
+        printf("assume_audio_chunks:%d\n", assume_audio_chunks);
+        avi_info->audio_num_buff = zalloc(assume_audio_chunks);
+    }
+
+    if ((!avi_info->video_num_buff) || (!avi_info->audio_num_buff)) {
         printf("%s no mem err !!!!!\n", __func__);
         UNPKG_S_ERR();
     }
@@ -735,7 +753,7 @@ static int avi_get_video_audio_chunk_num(FILE *fd, u8 state) //获取整个视�
 
         if (index_info.dwChunkId == IDX_01WB || index_info.dwChunkId == IDX_00WB) {
             start = cnt + num;
-            if (num < sizeof(avi_info->audio_num_buff)) {
+            if (num < assume_audio_chunks) {
                 avi_info->audio_num_buff[num] =  start - end;
             }
             end = start;

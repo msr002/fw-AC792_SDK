@@ -4,4 +4,4 @@
 
 lib_net_version:
 
-.asciz "NET-$8a80bc44"
+.asciz "NET-$421d3dc5"

@@ -2,7 +2,8 @@
 #include "app_config.h"
 
 #ifdef CONFIG_UI_ENABLE
-
+//临时用法，写1时 使用可视化音频接口播放AVI音频
+const uint8_t jlffmpeg_use_media_interface = 1;
 const uint8_t lv_jlffmpeg_debug_time = 0;    //读卡时间debug
 const uint8_t lv_jlffmpeg_use_frame_ctl = 1; //使用avi实际帧率
 const uint8_t frame_control_sens = 0;        //灵敏度设置:单位ms,作用是减小帧率波动极值

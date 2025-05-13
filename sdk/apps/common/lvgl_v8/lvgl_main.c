@@ -227,9 +227,9 @@ int lcd_touch_interrupt_event(const char *tp_task_name, u16 x, u16 y, u8 status)
     }
 
     if (status) {
+        int msg[6];
         //检测到触摸,创建定时器启用轮询
         if (!lvgl_touch_timer_status) {//这个标志是用来防止多次发消息
-            int msg[6];
             msg[0] = UI_MSG_TOUCH;
             msg[1] = (int)x;
             msg[2] = (int)y;
@@ -241,6 +241,19 @@ int lcd_touch_interrupt_event(const char *tp_task_name, u16 x, u16 y, u8 status)
                 return err;
             }
             lvgl_touch_timer_status = 1;
+        } else {
+            //确保定时器创建成功
+            if (lv_indev_set_touch_timer_check() == false) {
+                msg[0] = UI_MSG_TOUCH;
+                msg[1] = (int)x;
+                msg[2] = (int)y;
+                msg[3] = (int)status;
+                err = os_taskq_post_type(LVGL_TASK_NAME, Q_USER, ARRAY_SIZE(msg), msg);
+                if (err) {
+                    printf("lvgl touch msg drop3 err = %d\n", err);
+                    return err;
+                }
+            }
         }
 
         return 0;

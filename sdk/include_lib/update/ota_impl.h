@@ -47,6 +47,18 @@ void set_update_process_notify_cb(update_process_notify callback);
  */
 update_err_t dual_bank_passive_update_init(u32 fw_crc, u32 fw_size, u16 max_pkt_len, void *priv);
 
+typedef struct BootInfo {
+    u32 codeLength;  //code总长度
+    u32 baseAddress; //code基地址
+    u16 version;     //当前版本
+};
+
+/* @brief:get current startup information
+ * @param info: get information
+   @returns: if 0, succeed, other value means to fail.
+ */
+int get_current_boot_info(struct BootInfo *info);
+
 
 u32 get_dual_bank_passive_update_max_buf(void);
 update_err_t dual_bank_passive_update_init(u32 fw_crc, u32 fw_size, u16 max_pkt_len, void *priv);

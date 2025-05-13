@@ -48,3 +48,15 @@ const char log_tag_const_d_UPDATE AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(FALSE);
 const char log_tag_const_w_UPDATE AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(TRUE);
 const char log_tag_const_e_UPDATE AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(TRUE);
 
+const char log_tag_const_i_DECOM AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(TRUE);
+const char log_tag_const_d_DECOM AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(TRUE);
+const char log_tag_const_e_DECOM AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(TRUE);
+
+const char log_tag_const_i_UPDIFF_UPDATE AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(TRUE);
+const char log_tag_const_d_UPDIFF_UPDATE AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(TRUE);
+const char log_tag_const_e_UPDIFF_UPDATE AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(TRUE);
+
+const char log_tag_const_i_UPDIFF AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(TRUE);
+const char log_tag_const_d_UPDIFF AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(TRUE);
+const char log_tag_const_e_UPDIFF AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(TRUE);
+

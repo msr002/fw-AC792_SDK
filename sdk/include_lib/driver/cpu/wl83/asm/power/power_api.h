@@ -81,12 +81,16 @@ typedef struct {
     u8 vddiow_lev;          //vddiow，系统低功耗时使用vddiow ldo(使用enum VDDIOW_VOL配置)
     u8 vdc14_lev;           //vdc14 dcvdd
     u8 sysvdd_lev;          //sysvdd
-    u8 avdd18_lev;          //avdd18_enable
-    u8 avdd28_lev;          //avdd28_enable
+    u8 avdd18_lev;          //avdd18电压档位 0-1.8V、1-1.5V、2-1.6V、3-1.7V、4-1.8V、
+    //                                               5-1.9V、6-2.0V、7-2.1V、8-2.2V
+    u8 avdd28_lev;          //avdd28电压档位 0-2.8V、1-2.5V、2-2.6V、3-2.7V、4-2.8V、
+    //                                               5-2.9V、6-3.0V、7-3.1V、8-3.2V
     u8 avdd18_enable;       //avdd18_enable
     u8 avdd28_enable;       //avdd28_enable
     u8 soff_keep_last_cfg;  //软关机时维持最后设置的电压档位配置
     u8 ana_keep0_config;    //power down keep config
+    u8 pdown_keep_osc;      //power down keep osc
+    u8 pdown_keep_sfpg;     //power down keep SFPG
 
     //*****************************************************
     /* soff

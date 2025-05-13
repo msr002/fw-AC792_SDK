@@ -22,6 +22,7 @@ echo "echo 加一下中文注释,防止服务器导出不了报错,加一下中�
 echo "set OBJDUMP=C:\JL\pi32\bin\llvm-objdump.exe" >> ${PROJ_BUILD}
 echo "set OBJCOPY=C:\JL\pi32\bin\llvm-objcopy.exe" >> ${PROJ_BUILD}
 echo "set ELFFILE=sdk.elf" >> ${PROJ_BUILD}
+echo "set LZ4_PACKET=.\lz4_packet.exe" >> ${PROJ_BUILD}
 echo "%OBJCOPY% -O binary -j .text %ELFFILE% text.bin" >> ${PROJ_BUILD}
 echo "%OBJCOPY% -O binary -j .data %ELFFILE% data.bin" >> ${PROJ_BUILD}
 echo "%OBJCOPY% -O binary -j .ram0_data  %ELFFILE% ram0_data.bin" >> ${PROJ_BUILD}
@@ -29,7 +30,12 @@ echo "%OBJCOPY% -O binary -j .dcache_ram_data  %ELFFILE% dcache_ram_data.bin" >>
 echo "%OBJCOPY% -O binary -j .video_ram_data  %ELFFILE% video_ram_data.bin" >> ${PROJ_BUILD}
 echo "%OBJDUMP% -section-headers %ELFFILE%" >> ${PROJ_BUILD}
 echo "%OBJDUMP% -t %ELFFILE% > symbol_tbl.txt" >> ${PROJ_BUILD}
-echo "copy /b text.bin+data.bin+ram0_data.bin+dcache_ram_data.bin+video_ram_data.bin app.bin" >> ${PROJ_BUILD}
+#ifdef CONFIG_LZ4_DATA_CODE_ENABLE
+echo "%LZ4_PACKET% -dict text.bin -input ram0_data.bin 0 data.bin 0 -o compress.bin" >> ${PROJ_BUILD}
+echo "copy /b text.bin+dcache_ram_data.bin+video_ram_data.bin+compress.bin app.bin" >> ${PROJ_BUILD}
+#else
+echo "copy /b text.bin+data.bin+dcache_ram_data.bin+video_ram_data.bin+ram0_data.bin app.bin" >> ${PROJ_BUILD}
+#endif
 
 #if defined CONFIG_WIFI_IPC_PROJECT_ENABLE
 echo "set UI_RES_PREFIX=ipc_" >> ${PROJ_BUILD}
@@ -144,6 +150,9 @@ echo "del video_ram_data.bin" >> ${PROJ_BUILD}
 echo "del dcache_ram_data.bin" >> ${PROJ_BUILD}
 echo "del data.bin" >> ${PROJ_BUILD}
 echo "del ram0_data.bin" >> ${PROJ_BUILD}
+#ifdef CONFIG_LZ4_DATA_CODE_ENABLE
+echo "del compress.bin" >> ${PROJ_BUILD}
+#endif
 echo "del text.bin" >> ${PROJ_BUILD}
 #if defined CONFIG_SDFILE_EXT_ENABLE
 echo "del jl_hfs.bin" >> ${PROJ_BUILD}
@@ -184,6 +193,7 @@ echo %*
 set OBJDUMP=C:\JL\pi32\bin\llvm-objdump.exe
 set OBJCOPY=C:\JL\pi32\bin\llvm-objcopy.exe
 set ELFFILE=sdk.elf
+set LZ4_PACKET=lz4_packet.exe
 
 REM %OBJDUMP% -D -address-mask=0x1ffffff -print-dbg %ELFFILE% > sdk.lst
 %OBJCOPY% -O binary -j .text %ELFFILE% text.bin
@@ -195,7 +205,12 @@ REM %OBJDUMP% -D -address-mask=0x1ffffff -print-dbg %ELFFILE% > sdk.lst
 %OBJDUMP% -section-headers -address-mask=0x1ffffff %ELFFILE%
 %OBJDUMP% -t %ELFFILE% > symbol_tbl.txt
 
-copy /b text.bin+data.bin+ram0_data.bin+dcache_ram_data.bin+video_ram_data.bin app.bin
+#ifdef CONFIG_LZ4_DATA_CODE_ENABLE
+%LZ4_PACKET% -dict text.bin -input ram0_data.bin 0 data.bin 0 -o compress.bin
+copy /b text.bin+dcache_ram_data.bin+video_ram_data.bin+compress.bin app.bin
+#else
+copy /b text.bin+data.bin+dcache_ram_data.bin+video_ram_data.bin+ram0_data.bin app.bin
+#endif
 
 #if defined CONFIG_WIFI_IPC_PROJECT_ENABLE
 set UI_RES_PREFIX=ipc_
@@ -338,6 +353,9 @@ del dcache_ram_data.bin
 del data.bin
 del ram0_data.bin
 del text.bin
+#ifdef CONFIG_LZ4_DATA_CODE_ENABLE
+del compress.bin
+#endif
 
 #if defined CONFIG_SDFILE_EXT_ENABLE
 del jl_hfs.bin
