@@ -1,0 +1,21 @@
+# Hi-Res Audio FAQ
+
+## Hi-Res使能后距离短容易卡顿
+相较于SBC和AAC格式，LDAC/LHDC的码率较高，最高可到900kbps以上，对蓝牙的带宽要求很高。所以它不能做到跟AAC和SBC一样的距离。最高码率情况下，有些场景（干扰较强）可能距离只有1到2米。当出现距离较短的时候，可以从以下方面进行调整优化：
+- **优化蓝牙性能**<br>
+优化蓝牙收发性能，可以提高数据传输成功率，减少重发，从而减少数据出现欠载的情况
+- **调整音频延时**<br> 
+适当加大LDAC或者LHDC格式的延时，在蓝牙传输出现阻塞的时候 ，可以优化卡顿的情况。 
+- **调整音效流程**<br> 
+由于LDAC/LHDC是96kHz甚至192kHz，采样率高，音效模块需要处理更多的采样点。可能会跑不过来，或者运行时间过长。调整音效模块流程，加大系统时钟，可以缩短运行时间，或者根据系统资源情况，将代码高频运行代码指定到RAM运行
+
+## LDAC频响曲线没有到40kHz
+**LDAC不同的质量，会影响频响**，官方文档将LDAC质量划为以下3档：<br>
+**HQ** : Encode setting for High Quality.<br>
+**SQ** : Encode setting for Standard Quality.<br>
+**MQ** : Encode setting for Mobile use Quality.<br>
+![LDAC Frequency Response](./assets/LDAC_FR.png)<br>
+所以，测试LDAC频响的时候，需要确认以下两点：<br>
+- <1>输出采样率设置到96kHz或以上<br>
+- <2>LDAC质量选择，如果要达到40kHz以上，需要配置到高质量(如下图华为Nova10手机所示的`首选音质`)<br>
+![Nova10 LDAC](./assets/LDAC_bps.png)

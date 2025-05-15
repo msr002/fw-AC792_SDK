@@ -1,0 +1,14 @@
+# Limiter
+## 功能介绍
+
+将输入信号的幅度限定在一定范围内，即当输入信号的幅度超出所设置的阈值，则输出的幅度将被限制在阈值。
+
+### 参数介绍：
+Attack Time:  限幅器启动时间
+Release Time: 限幅器释放时间
+Threshold:    限幅器阈值
+Limiter Type: 限幅器模式
+Detect Time:  限幅器输入信号检测时间
+Input Gain:   限幅器输入增益
+Output Gain： 限幅器输出增益
+precision:    限幅器精度

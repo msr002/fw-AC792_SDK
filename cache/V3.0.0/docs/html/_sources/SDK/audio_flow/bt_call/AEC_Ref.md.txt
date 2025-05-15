@@ -1,0 +1,13 @@
+# AEC回采方式
+
+## 软件回采
+默认SDK流程采样软件回采的方式做算法处理
+
+## 硬件回采
+
+ 1、在通话算法节点里面配置使用硬回采，选择硬回采的MIC
+ ![CVP节点配置](./assets/bt_call_flow/ref_0.jpg)
+
+
+ 2、在ADC节点里面使能硬回采使用的MIC通道，并配置相关通道的参数
+ ![ADC节点配置](./assets/bt_call_flow/ref_1.jpg)

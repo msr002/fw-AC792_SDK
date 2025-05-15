@@ -1,0 +1,45 @@
+# Hi-Res Audio通用
+
+## Hi-Res支持列表
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>如果特殊说明，LHDC支持V3，V4和V5，如有系列因为资源受限，不支持其中某个版本，会在以下列表备注中说明</p>
+</div>
+
+|系列|LDAC|LHDC|USB Audio|Linein|备注|
+|---|---|---|---|---|---|
+|JL701N|√|√|    |   |   |
+|JL703N|√|√|    |   |   |
+|JL708N|√|√|    |   |   |
+
+
+## Hi-Res介绍
+Hi-Res Audio的定义，具体见JAS官网：[Definition of Hi-Res Audio](https://www.jas-audio.or.jp/english/hi-res-logo-en)。基本要求就是24bit/96kHz，摘取官网部分内容如下：
+![Hi-Res Audio Definition](./assets/hi_res_audio_definition.png)
+
+## Hi-Res配置
+
+- **（1）使能配置**<br>
+目前支持Hi-Res认证的codec格式有LHDC和LDAC，使能配置如下
+![hi-res enable](./assets/LHDC_LDAC_enable.png)<br>
+应用方案根据实际需求，使能对应的codec格式<br>
+<br>
+**备注**：有些SDK版本LHDC配置没有区分版本，即对应**LHDC V3/V4**使能控制，如下配置示例：
+![hi-res enable](./assets/LHDC_LDAC_enable_old.png)
+
+<br>
+
+- **（2）采样率配置**<br>
+Hi-Res采样率配置以下二选一<br>
+`全局采样率 = Disable`：采样率自适应，播放LHDC或者LDAC的时候，自行适配到对应的采样率<br>
+`全局采样率 = 96000Hz`：固定全局采样率，即所有音源统一重采样到96kHz回放<br>
+![Hi-Res SampleRate](./assets/hi-res_sr.png)
+
+<br>
+
+- **（3）位宽配置**<br>
+Hi-Res位宽配置24bit<br>
+![Hi-Res SampleRate](./assets/hi-res_bitwidth.png)
+
+<br>
+
