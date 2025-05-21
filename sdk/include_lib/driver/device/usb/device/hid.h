@@ -154,6 +154,8 @@ u32 hid_tx_data(const usb_dev usb_id, const u8 *buffer, u32 len);
   */
 void hid_key_handler(const usb_dev usb_id, u32 hid_key);
 
+void hid_key_handler_send_one_packet(const usb_dev usb_id, u32 hid_key);
+
 /**@brief   hid发送数据
   * @param[in]  *p 数据指针，指向存放数据的地址
   * @param[in]  len 发送的数据长度

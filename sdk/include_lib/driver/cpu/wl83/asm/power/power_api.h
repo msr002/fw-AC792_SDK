@@ -88,9 +88,10 @@ typedef struct {
     u8 avdd18_enable;       //avdd18_enable
     u8 avdd28_enable;       //avdd28_enable
     u8 soff_keep_last_cfg;  //软关机时维持最后设置的电压档位配置
-    u8 ana_keep0_config;    //power down keep config
-    u8 pdown_keep_osc;      //power down keep osc
-    u8 pdown_keep_sfpg;     //power down keep SFPG
+    u8 ana_keep0_config;    //pdown keep config
+    u8 pdown_keep_osc;      //pdown keep osc
+    u8 pdown_keep_fspg;     //pdown keep FSPG
+    u8 pdown_dcv_mode;      //pdown(keep osc时)使用的DCVDD电源类型
 
     //*****************************************************
     /* soff

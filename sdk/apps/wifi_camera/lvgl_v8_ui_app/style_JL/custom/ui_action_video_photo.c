@@ -1,7 +1,5 @@
 #include "app_config.h"
-#include "app_msg.h"
 #ifdef CONFIG_UI_STYLE_JL_ENABLE
-
 #include "lvgl.h"
 #include "custom.h"
 #if !LV_USE_GUIBUILDER_SIMULATOR
@@ -101,24 +99,34 @@ void video_photo_post_msg(const char *msg, ...)
 //注册页面加载卸载回调
 int gui_src_action_video_photo(int action)
 {
+    struct intent it;
     struct application *app;
+
+    init_intent(&it);
     app = get_current_app();
 
     printf("[chili] %s %d   \n", __func__, __LINE__);
-
+    lv_ui_video_photo *ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_VIDEO_PHOTO);
+    if (!ui_scr) {
+        return -1;
+    }
 #if LV_DISP_UI_FB_NUM
-    lv_obj_set_style_bg_opa(guider_ui.video_photo, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(ui_scr->video_photo, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
 #else
-    lv_obj_set_style_bg_opa(guider_ui.video_photo, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(ui_scr->video_photo, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
 #endif
 
     switch (action) {
     case GUI_SCREEN_ACTION_LOAD:
         if (app) {
-            app_mode_go_back();
+            printf("[chili] %s %d   \n", app->name, __LINE__);
+            it.name = app->name;
+            it.action = ACTION_BACK;
+            start_app(&it);
         }
-        app_mode_change_replace(APP_MODE_PHOTO);
-        app_send_message(APP_MSG_PHOTO_TAKE_MAIN, 0);
+        it.name = "video_photo";
+        it.action = ACTION_PHOTO_TAKE_MAIN;
+        start_app(&it);
         break;
     case GUI_SCREEN_ACTION_UNLOAD:
 
@@ -133,7 +141,10 @@ REGISTER_UI_SCREEN_ACTION_HANDLER(GUI_SCREEN_VIDEO_PHOTO)
 int gui_take_photo(void)
 {
 #if !LV_USE_GUIBUILDER_SIMULATOR
-    return app_send_message(APP_MSG_PHOTO_TAKE_CONTROL, 0);
+    struct intent it;
+    it.name = "video_photo";
+    it.action = ACTION_PHOTO_TAKE_CONTROL;
+    return  start_app(&it);
 #else
     return 0;
 #endif
@@ -143,7 +154,10 @@ int gui_take_photo(void)
 int gui_switch_camera(void)
 {
 #if !LV_USE_GUIBUILDER_SIMULATOR
-    return app_send_message(APP_MSG_PHOTO_TAKE_SWITCH_WIN, 0);
+    struct intent it;
+    it.name = "video_photo";
+    it.action = ACTION_PHOTO_TAKE_SWITCH_WIN;
+    return  start_app(&it);
 #else
     return 0;
 #endif
@@ -153,13 +167,12 @@ int gui_switch_camera(void)
 int gui_set_camera_config(char *label, uint32_t value)
 {
 #if !LV_USE_GUIBUILDER_SIMULATOR
-
-    struct intent *it = NULL;
-    it = malloc(sizeof(struct intent));
-    init_intent(it);
-    it->data = label;
-    it->exdata = value;
-    return app_send_message(APP_MSG_PHOTO_TAKE_SET_CONFIG, 1, it);
+    struct intent it;
+    it.name = "video_photo";
+    it.action = ACTION_PHOTO_TAKE_SET_CONFIG;
+    it.data = label;
+    it.exdata = value;
+    return  start_app(&it);
 #else
     return 0;
 #endif
@@ -169,13 +182,12 @@ int gui_set_camera_config(char *label, uint32_t value)
 int gui_get_camera_config(char *label)
 {
 #if !LV_USE_GUIBUILDER_SIMULATOR
-    struct intent *it = NULL;
-    it = malloc(sizeof(struct intent));
-    init_intent(it);
-    it->data = label;
-    app_send_message(APP_MSG_PHOTO_TAKE_GET_CONFIG, 1, it);
-    mdelay(40);
-    return it->exdata;
+    struct intent it;
+    it.name = "video_photo";
+    it.action = ACTION_PHOTO_TAKE_GET_CONFIG;
+    it.data = label;
+    start_app(&it);
+    return it.exdata;
 #else
     return 0;
 #endif
@@ -481,22 +493,27 @@ int gui_model_video_photo_msg_show_handshake_cb(gui_msg_action_t access, gui_msg
 int gui_model_video_photo_msg_capture_time_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type)
 {
     char *str = data->value_string;
-
+    lv_ui_video_photo *ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_VIDEO_PHOTO);
+    if (!ui_scr) {
+        return -1;
+    }
     if (access == GUI_MSG_ACCESS_SET) {
         int time = atoi(str);
         if (time) {
-            lv_obj_clear_flag(guider_ui.video_photo_show_capture_time, LV_OBJ_FLAG_HIDDEN);
+            lv_obj_clear_flag(ui_scr->video_photo_show_capture_time, LV_OBJ_FLAG_HIDDEN);
         } else {
-            lv_obj_add_flag(guider_ui.video_photo_show_capture_time, LV_OBJ_FLAG_HIDDEN);
+            lv_obj_add_flag(ui_scr->video_photo_show_capture_time, LV_OBJ_FLAG_HIDDEN);
         }
     }
     if (access == GUI_MSG_ACCESS_GET) {
         data->value_string = "0";
-        lv_obj_add_flag(guider_ui.video_photo_show_capture_time, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_add_flag(ui_scr->video_photo_show_capture_time, LV_OBJ_FLAG_HIDDEN);
     }
 
     return 0;
 }
+
+
 
 
 #endif

@@ -18,7 +18,7 @@
 #include "audio_event_manager.h"
 #include "syscfg/syscfg_id.h"
 #include "user_cfg_id.h"
-/* #include "power/power_manage.h" */
+#include "asm/power/power_manage.h"
 
 u32 lower_power_rf_group_query(void);
 

@@ -164,8 +164,6 @@ void gui_model_video_dec_msg_init(lv_ui *ui)
     if (sub != NULL) {
         lv_subject_init_pointer(sub->subject, &guider_msg_data);
     }
-    gui_model_video_dec_msg_init_ui();
-    gui_model_video_dec_msg_init_events();
 }
 
 void gui_model_video_dec_msg_init_ui()
@@ -208,57 +206,59 @@ void gui_model_video_dec_msg_init_events()
     lv_subject_t *subject_video_cont_show = gui_msg_get_subject(GUI_MODEL_VIDEO_DEC_MSG_ID_VIDEO_CONT_SHOW);
     lv_subject_t *subject_file_lock_show = gui_msg_get_subject(GUI_MODEL_VIDEO_DEC_MSG_ID_FILE_LOCK_SHOW);
     lv_subject_t *subject_video_dec_options_lab = gui_msg_get_subject(GUI_MODEL_VIDEO_DEC_MSG_ID_VIDEO_DEC_OPTIONS_LAB);
-    if (!guider_ui.video_dec_options_del) {
-        gui_msg_setup_component(true, false, subject_video_dec_options_lab, guider_ui.video_dec_options_lbl_1, &guider_msg_data, gui_msg_set_label_text_by_string_cb, GUI_MODEL_VIDEO_DEC_MSG_ID_VIDEO_DEC_OPTIONS_LAB, GUI_MSG_ACCESS_GET, VALUE_STRING, NULL);
+    if (guider_ui.video_dec) {
+        lv_ui_video_dec *ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_VIDEO_DEC);
+        gui_msg_setup_component(true, false, subject_file_type_img, ui_scr->video_dec_imglist_1, &guider_msg_data, gui_msg_set_imglist_selected_index_by_int32_cb, GUI_MODEL_VIDEO_DEC_MSG_ID_FILE_TYPE_IMG, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
+
+        gui_msg_setup_component(true, true, subject_file_name_lab, ui_scr->video_dec_edit_2, &guider_msg_data, gui_msg_set_textarea_text_by_string_cb, GUI_MODEL_VIDEO_DEC_MSG_ID_FILE_NAME_LAB, GUI_MSG_ACCESS_GET, VALUE_STRING, gui_msg_change_textarea_text_cb);
+
+        gui_msg_setup_component(true, true, subject_media_info_lab, ui_scr->video_dec_edit_3, &guider_msg_data, gui_msg_set_textarea_text_by_string_cb, GUI_MODEL_VIDEO_DEC_MSG_ID_MEDIA_INFO_LAB, GUI_MSG_ACCESS_GET, VALUE_STRING, gui_msg_change_textarea_text_cb);
+
+        gui_msg_setup_component(true, false, subject_sd_status_img, ui_scr->video_dec_imglist_2, &guider_msg_data, gui_msg_set_imglist_selected_index_by_int32_cb, GUI_MODEL_VIDEO_DEC_MSG_ID_SD_STATUS_IMG, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
+
+        gui_msg_setup_component(true, false, subject_play_status_img, ui_scr->video_dec_imglist_3, &guider_msg_data, gui_msg_set_imglist_selected_index_by_int32_cb, GUI_MODEL_VIDEO_DEC_MSG_ID_PLAY_STATUS_IMG, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
+
+        gui_msg_setup_component(true, true, subject_video_time_lab, ui_scr->video_dec_edit_1, &guider_msg_data, gui_msg_set_textarea_text_by_string_cb, GUI_MODEL_VIDEO_DEC_MSG_ID_VIDEO_TIME_LAB, GUI_MSG_ACCESS_GET, VALUE_STRING, gui_msg_change_textarea_text_cb);
+
+        gui_msg_setup_component(true, false, subject_video_cont_show, ui_scr->video_dec_view_1, &guider_msg_data, gui_msg_set_visible_by_bool_cb, GUI_MODEL_VIDEO_DEC_MSG_ID_VIDEO_CONT_SHOW, GUI_MSG_ACCESS_GET, VALUE_BOOL, NULL);
+
+        gui_msg_setup_component(true, false, subject_file_lock_show, ui_scr->video_dec_img_1, &guider_msg_data, gui_msg_set_visible_by_bool_cb, GUI_MODEL_VIDEO_DEC_MSG_ID_FILE_LOCK_SHOW, GUI_MSG_ACCESS_GET, VALUE_BOOL, NULL);
 
 
         for (int i = 0; i < 9; i++) {
-            if (status[i].msg_id == GUI_MODEL_VIDEO_DEC_MSG_ID_VIDEO_DEC_OPTIONS_LAB) {
+            if (status[i].msg_id == GUI_MODEL_VIDEO_DEC_MSG_ID_FILE_TYPE_IMG) {
                 status[i].is_subscribe = 1;
             }
-        }
-    }
-    if (!guider_ui.video_dec_del) {
-        gui_msg_setup_component(true, false, subject_video_cont_show, guider_ui.video_dec_view_1, &guider_msg_data, gui_msg_set_visible_by_bool_cb, GUI_MODEL_VIDEO_DEC_MSG_ID_VIDEO_CONT_SHOW, GUI_MSG_ACCESS_GET, VALUE_BOOL, NULL);
-
-        gui_msg_setup_component(true, false, subject_file_type_img, guider_ui.video_dec_imglist_1, &guider_msg_data, gui_msg_set_imglist_selected_index_by_int32_cb, GUI_MODEL_VIDEO_DEC_MSG_ID_FILE_TYPE_IMG, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
-
-        gui_msg_setup_component(true, false, subject_file_lock_show, guider_ui.video_dec_img_1, &guider_msg_data, gui_msg_set_visible_by_bool_cb, GUI_MODEL_VIDEO_DEC_MSG_ID_FILE_LOCK_SHOW, GUI_MSG_ACCESS_GET, VALUE_BOOL, NULL);
-
-        gui_msg_setup_component(true, false, subject_sd_status_img, guider_ui.video_dec_imglist_2, &guider_msg_data, gui_msg_set_imglist_selected_index_by_int32_cb, GUI_MODEL_VIDEO_DEC_MSG_ID_SD_STATUS_IMG, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
-
-        gui_msg_setup_component(true, true, subject_video_time_lab, guider_ui.video_dec_edit_1, &guider_msg_data, gui_msg_set_textarea_text_by_string_cb, GUI_MODEL_VIDEO_DEC_MSG_ID_VIDEO_TIME_LAB, GUI_MSG_ACCESS_GET, VALUE_STRING, gui_msg_change_textarea_text_cb);
-
-        gui_msg_setup_component(true, true, subject_file_name_lab, guider_ui.video_dec_edit_2, &guider_msg_data, gui_msg_set_textarea_text_by_string_cb, GUI_MODEL_VIDEO_DEC_MSG_ID_FILE_NAME_LAB, GUI_MSG_ACCESS_GET, VALUE_STRING, gui_msg_change_textarea_text_cb);
-
-        gui_msg_setup_component(true, true, subject_media_info_lab, guider_ui.video_dec_edit_3, &guider_msg_data, gui_msg_set_textarea_text_by_string_cb, GUI_MODEL_VIDEO_DEC_MSG_ID_MEDIA_INFO_LAB, GUI_MSG_ACCESS_GET, VALUE_STRING, gui_msg_change_textarea_text_cb);
-
-        gui_msg_setup_component(true, false, subject_play_status_img, guider_ui.video_dec_imglist_3, &guider_msg_data, gui_msg_set_imglist_selected_index_by_int32_cb, GUI_MODEL_VIDEO_DEC_MSG_ID_PLAY_STATUS_IMG, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
-
-
-        for (int i = 0; i < 9; i++) {
             if (status[i].msg_id == GUI_MODEL_VIDEO_DEC_MSG_ID_FILE_NAME_LAB) {
-                status[i].is_subscribe = 1;
-            }
-            if (status[i].msg_id == GUI_MODEL_VIDEO_DEC_MSG_ID_FILE_LOCK_SHOW) {
-                status[i].is_subscribe = 1;
-            }
-            if (status[i].msg_id == GUI_MODEL_VIDEO_DEC_MSG_ID_SD_STATUS_IMG) {
-                status[i].is_subscribe = 1;
-            }
-            if (status[i].msg_id == GUI_MODEL_VIDEO_DEC_MSG_ID_VIDEO_CONT_SHOW) {
                 status[i].is_subscribe = 1;
             }
             if (status[i].msg_id == GUI_MODEL_VIDEO_DEC_MSG_ID_MEDIA_INFO_LAB) {
                 status[i].is_subscribe = 1;
             }
-            if (status[i].msg_id == GUI_MODEL_VIDEO_DEC_MSG_ID_FILE_TYPE_IMG) {
+            if (status[i].msg_id == GUI_MODEL_VIDEO_DEC_MSG_ID_SD_STATUS_IMG) {
                 status[i].is_subscribe = 1;
             }
             if (status[i].msg_id == GUI_MODEL_VIDEO_DEC_MSG_ID_PLAY_STATUS_IMG) {
                 status[i].is_subscribe = 1;
             }
             if (status[i].msg_id == GUI_MODEL_VIDEO_DEC_MSG_ID_VIDEO_TIME_LAB) {
+                status[i].is_subscribe = 1;
+            }
+            if (status[i].msg_id == GUI_MODEL_VIDEO_DEC_MSG_ID_VIDEO_CONT_SHOW) {
+                status[i].is_subscribe = 1;
+            }
+            if (status[i].msg_id == GUI_MODEL_VIDEO_DEC_MSG_ID_FILE_LOCK_SHOW) {
+                status[i].is_subscribe = 1;
+            }
+        }
+    }
+    if (guider_ui.video_dec_options) {
+        lv_ui_video_dec_options *ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_VIDEO_DEC_OPTIONS);
+        gui_msg_setup_component(true, false, subject_video_dec_options_lab, ui_scr->video_dec_options_lbl_1, &guider_msg_data, gui_msg_set_label_text_by_string_cb, GUI_MODEL_VIDEO_DEC_MSG_ID_VIDEO_DEC_OPTIONS_LAB, GUI_MSG_ACCESS_GET, VALUE_STRING, NULL);
+
+
+        for (int i = 0; i < 9; i++) {
+            if (status[i].msg_id == GUI_MODEL_VIDEO_DEC_MSG_ID_VIDEO_DEC_OPTIONS_LAB) {
                 status[i].is_subscribe = 1;
             }
         }

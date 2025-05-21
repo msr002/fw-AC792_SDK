@@ -198,7 +198,7 @@
 
 // ------------公共配置.json------------
 
-#define TCFG_LE_AUDIO_STREAM_ENABLE 1 // 公共配置
+#define TCFG_LE_AUDIO_STREAM_ENABLE 0 // 公共配置
 #if TCFG_LE_AUDIO_STREAM_ENABLE
 #define TCFG_LE_AUDIO_APP_CONFIG (LE_AUDIO_AURACAST_SOURCE_EN | LE_AUDIO_AURACAST_SINK_EN) // le_audio 应用选择
 #define TCFG_LE_AUDIO_CODEC_TYPE 4194304 // 编解码格式

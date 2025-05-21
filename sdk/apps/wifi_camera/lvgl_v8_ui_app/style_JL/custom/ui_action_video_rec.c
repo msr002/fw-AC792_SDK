@@ -1,7 +1,5 @@
 #include "app_config.h"
-#include "app_msg.h"
 #ifdef CONFIG_UI_STYLE_JL_ENABLE
-
 unsigned char rec_running = 0;
 char video_rec_car_num[64];
 #if !LV_USE_GUIBUILDER_SIMULATOR
@@ -149,19 +147,22 @@ int set_car_num_part_b(uint32_t parm)
 */
 void rec_get_remain_time_ontouch(void)
 {
-    printf("\n -[function] %s -[line] %d\n", __FUNCTION__, __LINE__);
-    app_send_message(APP_MSG_REC_GET_REMAIN_TIME, 0);
+    struct intent it;
+    init_intent(&it);
+    it.name = "video_rec";
+    it.action = ACTION_VIDEO_REC_GET_REMAIN_TIME;
+    start_app(&it);
 }
 
 void rec_set_config(char *cfg, int val)
 {
-    printf("\n -[function] %s -[line] %d\n", __FUNCTION__, __LINE__);
-    struct intent *it = NULL;
-    it = malloc(sizeof(struct intent));
-    init_intent(it);
-    it->data = cfg;
-    it->exdata = val;
-    app_send_message(APP_MSG_REC_SET_CONFIG, 1, it);
+    struct intent it;
+    init_intent(&it);
+    it.name = "video_rec";
+    it.action = ACTION_VIDEO_REC_SET_CONFIG;
+    it.data = cfg;
+    it.exdata = val;
+    start_app(&it);
 }
 
 static void key_touch_enable_cb(void)
@@ -175,14 +176,18 @@ static void key_touch_enable_cb(void)
 */
 void rec_control_ontouch(void)
 {
+    struct intent it;
+    init_intent(&it);
+
+    it.name = "video_rec";
+    it.action = ACTION_VIDEO_REC_CONTROL;
+
     //异步模式下,暂时关闭触摸和按键
     key_event_disable();
     touch_event_disable();
 
-    printf("\n -[function] %s -[line] %d\n", __FUNCTION__, __LINE__);
-    app_send_message(APP_MSG_REC_CONTROL, 0);
-    mdelay(5);
-    key_touch_enable_cb();
+    start_app_async(&it, key_touch_enable_cb, NULL);
+    /* start_app(&it); */
 }
 
 /*
@@ -190,8 +195,13 @@ void rec_control_ontouch(void)
 */
 void rec_switch_win_ontouch(void)
 {
-    printf("\n -[function] %s -[line] %d\n", __FUNCTION__, __LINE__);
-    app_send_message(APP_MSG_REC_SWITCH_WIN, 0);
+    struct intent it;
+    init_intent(&it);
+
+    it.name = "video_rec";
+    it.action = ACTION_VIDEO_REC_SWITCH_WIN;
+    start_app(&it);
+
 }
 
 /*
@@ -200,13 +210,13 @@ void rec_switch_win_ontouch(void)
 void rec_tell_app_exit_menu(void)
 {
 
-    printf("\n -[function] %s -[line] %d\n", __FUNCTION__, __LINE__);
     int err;
-    struct intent *it = NULL;
-    it = malloc(sizeof(struct intent));
-    init_intent(it);
-    it->data = "exitMENU";
-    err = app_send_message(APP_MSG_REC_CHANGE_STATUS, 1, it);
+    struct intent it;
+    init_intent(&it);
+    it.name = "video_rec";
+    it.action = ACTION_VIDEO_REC_CHANGE_STATUS;
+    it.data = "exitMENU";
+    err = start_app(&it);
     if (err) {
         printf("res exit menu err! %d\n", err);
         /* ASSERT(err == 0, ":rec exitMENU\n"); */
@@ -217,19 +227,21 @@ int rec_ask_app_open_menu(void)
 {
 
     int err;
-    struct intent *it = NULL;
-    it = malloc(sizeof(struct intent));
-    init_intent(it);
-    it->data = "opMENU:";
-    err = app_send_message(APP_MSG_REC_CHANGE_STATUS, 1, it);
+    struct intent it;
+
+    init_intent(&it);
+    it.name = "video_rec";
+    it.action = ACTION_VIDEO_REC_CHANGE_STATUS;
+    it.data = "opMENU:";
+    err = start_app(&it);
     if (err) {
         printf("res ask menu err! %d\n", err);
         return -1;
         /* ASSERT(err == 0, ":rec opMENU fail! %d\n", err); */
     }
-    if (!strcmp(it->data, "opMENU:dis")) {
+    if (!strcmp(it.data, "opMENU:dis")) {
         return -1;
-    } else if (!strcmp(it->data, "opMENU:en")) {
+    } else if (!strcmp(it.data, "opMENU:en")) {
     } else {
         ASSERT(0, "opMENU err\n");
     }
@@ -245,24 +257,24 @@ int rec_ask_app_open_menu(void)
 
 void rec_set_lock_ontouch(void)
 {
-    struct intent *it = NULL;
-    it = malloc(sizeof(struct intent));
-    init_intent(it);
-    printf("it:%p", it);
-    printf("\n -[function] %s -[line] %d\n", __FUNCTION__, __LINE__);
-    it->data = "get_lock_statu";
-    app_send_message(APP_MSG_REC_LOCK_FILE, 1, it);
+    struct intent it;
+    init_intent(&it);
 
-    printf("it:%p", it);
-    mdelay(30);
-    it->data = "set_lock_statu";
-    if (it->exdata) {//已经上锁
-        it->exdata = 0x0;//解锁
+    it.name = "video_rec";
+    it.action = ACTION_VIDEO_REC_LOCK_FILE;
+    it.data = "get_lock_statu";
+    start_app(&it);
+
+    it.name = "video_rec";
+    it.action = ACTION_VIDEO_REC_LOCK_FILE;
+    it.data = "set_lock_statu";
+    if (it.exdata) {//已经上锁
+        it.exdata = 0x0;//解锁
     } else {
-        it->exdata = 0xff;//上锁
+        it.exdata = 0xff;//上锁
     }
-    printf("it:%p", it);
-    app_send_message(APP_MSG_REC_LOCK_FILE, 1, it);
+    start_app(&it);
+
 }
 
 void rec_set_lock_crash(void)
@@ -282,8 +294,12 @@ void rec_set_lock_crash(void)
 //录像走时
 int video_rec_record_time()
 {
+    lv_ui_video_rec *ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_VIDEO_REC);
+    if (!ui_scr) {
+        return -1;
+    }
     if (rec_running) {
-        if (!lv_obj_is_valid(guider_ui.video_rec_digitclock_record_time)) {
+        if (!lv_obj_is_valid(ui_scr->video_rec_digitclock_record_time)) {
             printf("obj no valid \n");
             return 0;
         }
@@ -291,7 +307,7 @@ int video_rec_record_time()
         if (!count) {
             memset(&rec_running_time, 0, sizeof(rec_running_time));
             count = 1;
-            lv_label_set_text_fmt(guider_ui.video_rec_digitclock_record_time, "%02d:%02d:%02d", rec_running_time.tm_hour, rec_running_time.tm_min, rec_running_time.tm_sec);
+            lv_label_set_text_fmt(ui_scr->video_rec_digitclock_record_time, "%02d:%02d:%02d", rec_running_time.tm_hour, rec_running_time.tm_min, rec_running_time.tm_sec);
             return 0;
         }
         if (++rec_running_time.tm_sec > 59) {
@@ -307,7 +323,7 @@ int video_rec_record_time()
                 rec_running_time.tm_hour = 0;
             }
         }
-        lv_label_set_text_fmt(guider_ui.video_rec_digitclock_record_time, "%02d:%02d:%02d", rec_running_time.tm_hour, rec_running_time.tm_min, rec_running_time.tm_sec);
+        lv_label_set_text_fmt(ui_scr->video_rec_digitclock_record_time, "%02d:%02d:%02d", rec_running_time.tm_hour, rec_running_time.tm_min, rec_running_time.tm_sec);
         return 0;
     }
 }
@@ -340,14 +356,18 @@ int video_rec_record_time()
  */
 static int rec_on_handler(const char *type, u32 arg)
 {
+    lv_ui_video_rec *ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_VIDEO_REC);
+    if (!ui_scr) {
+        return -1;
+    }
     rec_remain_handler(0, 0);
     count = 0;
     lvgl_module_msg_send_value(GUI_MODEL_VIDEO_REC_MSG_ID_REC_BTN, LV_STATE_CHECKED, 0);
     rec_running = 1;
     lvgl_module_msg_send_global_ptr(GUI_MODEL_VIDEO_REC_MSG_ID_HIDE_REMAIN_TIME, (void *)LV_OBJ_FLAG_HIDDEN, 1, 0);
     lvgl_module_msg_send_global_ptr(GUI_MODEL_VIDEO_REC_MSG_ID_SHOW_RECORD_TIME, (void *)LV_OBJ_FLAG_HIDDEN, 1, 0);
-    if (guider_ui.video_rec_timer_1 != NULL) {
-        lv_timer_resume(guider_ui.video_rec_timer_1);
+    if (ui_scr->video_rec_timer_1 != NULL) {
+        lv_timer_resume(ui_scr->video_rec_timer_1);
     }
     lvgl_module_msg_send_global_ptr(GUI_MODEL_VIDEO_REC_MSG_ID_REC_TIME_STATE, (void *)LV_STATE_DISABLED, 1, 0);
 
@@ -356,15 +376,19 @@ static int rec_on_handler(const char *type, u32 arg)
 
 static int rec_off_handler(const char *type, u32 arg)
 {
+    lv_ui_video_rec *ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_VIDEO_REC);
+    if (!ui_scr) {
+        return -1;
+    }
     rec_running = 0;
-    if (guider_ui.video_rec_timer_1 != NULL) {
-        lv_timer_pause(guider_ui.video_rec_timer_1);
+    if (ui_scr->video_rec_timer_1 != NULL) {
+        lv_timer_pause(ui_scr->video_rec_timer_1);
     }
     lvgl_module_msg_send_global_ptr(GUI_MODEL_VIDEO_REC_MSG_ID_SHOW_REMAIN_TIME, (void *)LV_OBJ_FLAG_HIDDEN, 1, 0);
     lvgl_module_msg_send_global_ptr(GUI_MODEL_VIDEO_REC_MSG_ID_HIDE_RECORD_TIME, (void *)LV_OBJ_FLAG_HIDDEN, 1, 0);
     memset(&rec_running_time, 0, sizeof(rec_running_time));
-    if (lv_obj_is_valid(guider_ui.video_rec_digitclock_record_time)) {
-        lv_label_set_text_fmt(guider_ui.video_rec_digitclock_record_time, "%02d:%02d:%02d", rec_running_time.tm_hour, rec_running_time.tm_min, rec_running_time.tm_sec);
+    if (lv_obj_is_valid(ui_scr->video_rec_digitclock_record_time)) {
+        lv_label_set_text_fmt(ui_scr->video_rec_digitclock_record_time, "%02d:%02d:%02d", rec_running_time.tm_hour, rec_running_time.tm_min, rec_running_time.tm_sec);
     }
     lvgl_module_msg_send_value(GUI_MODEL_VIDEO_REC_MSG_ID_REC_BTN, LV_STATE_DEFAULT, 0);
     lvgl_module_msg_send_global_ptr(GUI_MODEL_VIDEO_REC_MSG_ID_REC_TIME_STATE, (void *)LV_STATE_DEFAULT, 1, 0);
@@ -565,60 +589,59 @@ void video_rec_post_msg(const char *msg, ...)
 //注册页面加载卸载回调
 int gui_src_action_video_rec(int action)
 {
-    /* struct intent it; */
+    struct intent it;
     struct application *app;
-
-    /* init_intent(&it); */
-
-    /* struct intent *it = NULL; */
-    /* it = malloc(sizeof(struct intent)); */
-    /* init_intent(it); */
+    lv_ui_video_rec *ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_VIDEO_REC);
+    if (!ui_scr) {
+        return -1;
+    }
+    init_intent(&it);
 
     printf("[chili] %s %d   \n", __func__, __LINE__);
 
 #if LV_DISP_UI_FB_NUM
-    lv_obj_set_style_bg_opa(guider_ui.video_rec, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(ui_scr->video_rec, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
 #else
-    lv_obj_set_style_bg_opa(guider_ui.video_rec, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(ui_scr->video_rec, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
 #endif
 
     switch (action) {
     case GUI_SCREEN_ACTION_LOAD:
         usb_flag = false;
         if (db_select("num")) {
-            lv_obj_clear_flag(guider_ui.video_rec_lbl_4, LV_OBJ_FLAG_HIDDEN);  //开启车牌号码功能，取消隐藏
+            lv_obj_clear_flag(ui_scr->video_rec_lbl_4, LV_OBJ_FLAG_HIDDEN);  //开启车牌号码功能，取消隐藏
         } else {
-            lv_obj_add_flag(guider_ui.video_rec_lbl_4, LV_OBJ_FLAG_HIDDEN);    //未开启车牌号码功能，添加隐藏
+            lv_obj_add_flag(ui_scr->video_rec_lbl_4, LV_OBJ_FLAG_HIDDEN);    //未开启车牌号码功能，添加隐藏
         }
         if (db_select("dat")) {
-            lv_obj_clear_flag(guider_ui.video_rec_digitclock_2, LV_OBJ_FLAG_HIDDEN);
+            lv_obj_clear_flag(ui_scr->video_rec_digitclock_2, LV_OBJ_FLAG_HIDDEN);
         } else {
-            lv_obj_add_flag(guider_ui.video_rec_digitclock_2, LV_OBJ_FLAG_HIDDEN);
+            lv_obj_add_flag(ui_scr->video_rec_digitclock_2, LV_OBJ_FLAG_HIDDEN);
         }
         if (db_select("lag") == LANG_ENGLISH) {
             lv_i18n_set_locale("en");
             i18n_refresh_all_texts(); //语言即可生效
         }
-        printf("\n -[function] %s -[line] %d\n", __FUNCTION__, __LINE__);
         app = get_current_app();
         if (app) {
-            printf("\n -[function] %s -[line] %d\n", __FUNCTION__, __LINE__);
-            /* app_send_message(APP_MSG_REC_PARKING_STATUS, 1, it); */
-            /* if (it->action == ACTION_VIDEO_REC_PARKING) { */
-            /* printf("\n -[function] %s -[line] %d\n", __FUNCTION__, __LINE__); */
-            /* return 0; */
-            /* } else { */
-            printf("\n -[function] %s -[line] %d\n", __FUNCTION__, __LINE__);
-            app_mode_go_back();
-            /* } */
+            printf("[chili] %s %d   \n", app->name, __LINE__);
+            it.name = app->name;//APP状态机在：video_rec.c
+            it.action = ACTION_VIDEO_GET_PARKING_STATUS;
+            start_app(&it);
+
+            if (it.action == ACTION_VIDEO_REC_PARKING) {
+                return 0;
+            } else {
+                it.action = ACTION_BACK;
+                start_app(&it);
+
+            }
         }
-        printf("\n -[function] %s -[line] %d\n", __FUNCTION__, __LINE__);
-        app_mode_change_replace(APP_MODE_REC);
-        printf("\n -[function] %s -[line] %d\n", __FUNCTION__, __LINE__);
-        app_send_message(APP_MSG_REC_MAIN, 0);
+        it.name = "video_rec";//APP状态机在：video_rec.c
+        it.action = ACTION_VIDEO_REC_MAIN;
+        start_app(&it);
         break;
     case GUI_SCREEN_ACTION_UNLOAD:
-        printf("\n -[function] %s -[line] %d\n", __FUNCTION__, __LINE__);
 
         break;
     }
@@ -1075,5 +1098,6 @@ int gui_model_video_rec_msg_flash_headlight_cb(gui_msg_action_t access, gui_msg_
 
 
 #endif
+
 
 #endif

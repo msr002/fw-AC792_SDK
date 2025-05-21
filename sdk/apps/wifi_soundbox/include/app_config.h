@@ -580,6 +580,7 @@
 #define CUSTOM_DEMO_EN                          (1 << 19)   // 第三方协议的demo，用于示例客户开发自定义协议
 #define MULTI_BOX_ADV_EN                        (1 << 20)
 #define MIJIA_EN                                (1 << 21)
+#define DUEROS_EN                               (1 << 28)
 #define NET_CFG_EN                              (1 << 29)
 #define LE_HOGP_EN                              (1 << 30)
 #define ALIPAY_EN                               (1 << 31)
@@ -590,16 +591,15 @@
 #else
 #define ALIPAY_SEL                              0
 #endif
-
+#if TCFG_AI_SERVER == TCFG_DUER_ENABLE
+#define THIRD_PARTY_PROTOCOLS_SEL               ((TCFG_THIRD_PARTY_PROTOCOLS_SEL & ~NET_CFG_EN) | DUEROS_EN)
+#else
 #define THIRD_PARTY_PROTOCOLS_SEL               (TCFG_THIRD_PARTY_PROTOCOLS_SEL|ALIPAY_SEL)
+#endif
 #endif
 
 #ifndef THIRD_PARTY_PROTOCOLS_SEL
 #define THIRD_PARTY_PROTOCOLS_SEL               0
-#endif
-
-#if THIRD_PARTY_PROTOCOLS_SEL && (TCFG_TRANS_MULTI_BLE_EN + TCFG_BT_NET_CFG_TURING_EN + TCFG_BT_NET_CFG_DUEROS_EN + TCFG_BT_NET_CFG_DUI_EN + TCFG_BT_NET_CFG_EN + TCFG_BLE_HID_EN + TCFG_TRANS_DATA_EN + TCFG_APP_BT_ENABLE + TCFG_NONCONN_24G_EN > 0)
-#error "they can not enable at the same time, just select one!!!"
 #endif
 
 

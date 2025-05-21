@@ -1,7 +1,5 @@
 #include "app_config.h"
 #ifdef CONFIG_UI_STYLE_JL_ENABLE
-
-
 #ifndef __MULTI_LANGUAGE_H_
 #define __MULTI_LANGUAGE_H_
 

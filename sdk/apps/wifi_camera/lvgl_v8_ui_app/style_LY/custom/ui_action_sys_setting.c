@@ -52,10 +52,14 @@ int gui_src_action_setting(int action)
 {
     switch (action) {
     case GUI_SCREEN_ACTION_LOAD:
+        lv_ui_sys_setting *ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_SYS_SETTING);
+        if (!ui_scr) {
+            return -1;
+        }
 #if LV_DISP_UI_FB_NUM
-        lv_obj_set_style_bg_opa(guider_ui.sys_setting, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+        lv_obj_set_style_bg_opa(ui_scr->sys_setting, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
 #else
-        lv_obj_set_style_bg_opa(guider_ui.sys_setting, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+        lv_obj_set_style_bg_opa(ui_scr->sys_setting, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
 #endif
         break;
     case GUI_SCREEN_ACTION_UNLOAD:
@@ -162,6 +166,7 @@ void format_sdcard(void)
 
 #endif
 }
+
 
 
 

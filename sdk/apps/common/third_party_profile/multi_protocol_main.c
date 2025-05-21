@@ -14,7 +14,7 @@
 #include "swift_pair_api.h"
 #endif
 #if (THIRD_PARTY_PROTOCOLS_SEL & MULTI_BOX_ADV_EN)
-#include "multi_box_adv.h"
+#include "multi_box_adv/multi_box_adv.h"
 #endif
 
 #if THIRD_PARTY_PROTOCOLS_SEL || (TCFG_LE_AUDIO_APP_CONFIG & (LE_AUDIO_UNICAST_SINK_EN | LE_AUDIO_JL_UNICAST_SINK_EN | LE_AUDIO_AURACAST_SINK_EN | LE_AUDIO_JL_AURACAST_SINK_EN | LE_AUDIO_AURACAST_SOURCE_EN | LE_AUDIO_JL_AURACAST_SOURCE_EN))
@@ -448,6 +448,11 @@ void multi_protocol_bt_init(void)
 #if (THIRD_PARTY_PROTOCOLS_SEL & MULTI_BOX_ADV_EN)
 #ifndef MULTI_BOX_ADV_FILTER_ENABLE
     multi_box_scan_all_init();
+#if (THIRD_PARTY_PROTOCOLS_SEL & ~MULTI_BOX_ADV_EN)
+    extern const int config_le_gatt_client_num;
+    extern const int config_le_hci_connection_num;
+    ASSERT(config_le_gatt_client_num >= 2 && config_le_hci_connection_num >= 2);
+#endif
 #endif
 #endif
 }

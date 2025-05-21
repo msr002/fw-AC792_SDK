@@ -15,8 +15,9 @@ extern "C" {
 #define GUI_WEAK __attribute__((weak))
 #endif
 
+#define CONV_RES_ID(id) (((id) >> 24) | ((id) & 0x00FFFFFF) << 8)
 typedef enum {
-    GUI_RES_JL_AVI = 0x31000000,   //F:\WL83_NEW\wifi_video_master\ui_prj\wifi_soundbox_480x800\import\video\jl.avi
+    GUI_RES_JL_480X800_AVI = 0x3E800000,   //E:\1111\ac792\ui_prj\wifi_soundbox_480x800\import\video\jl_480X800.avi
 } GUI_RES_ID;
 
 extern char *gui_get_res_path(int32_t id);

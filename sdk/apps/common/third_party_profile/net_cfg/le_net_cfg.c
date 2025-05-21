@@ -622,7 +622,7 @@ void le_net_cfg_all_exit(void)
     le_net_cfg_ble_hdl = NULL;
 }
 
-void le_hogp_modify_ble_name(const char *name)
+void le_net_cfg_modify_ble_name(const char *name)
 {
     if (strlen(name) <= BT_NAME_LEN_MAX) {
         memset(gap_device_name, 0x0, BT_NAME_LEN_MAX);

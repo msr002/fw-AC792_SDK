@@ -193,8 +193,6 @@ void gui_model_msg_init(lv_ui *ui)
     if (sub != NULL) {
         lv_subject_init_pointer(sub->subject, &guider_msg_data);
     }
-    gui_model_msg_init_ui();
-    gui_model_msg_init_events();
 }
 
 void gui_model_msg_init_ui()
@@ -237,48 +235,28 @@ void gui_model_msg_init_events()
     lv_subject_t *subject_total_time = gui_msg_get_subject(GUI_MODEL_MSG_ID_TOTAL_TIME);
     lv_subject_t *subject_file_path = gui_msg_get_subject(GUI_MODEL_MSG_ID_FILE_PATH);
     lv_subject_t *subject_file_num = gui_msg_get_subject(GUI_MODEL_MSG_ID_FILE_NUM);
-    if (!guider_ui.video_dir_del) {
-        gui_model_msg_file_path_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_STRING);
-        lv_subject_add_observer_obj(subject_file_path, gui_msg_set_label_text_by_string_cb, guider_ui.video_dir_lbl_path, &guider_msg_data);
+    if (guider_ui.video_play) {
+        lv_ui_video_play *ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_VIDEO_PLAY);
+        gui_msg_setup_component(true, false, subject_cur_time, ui_scr->video_play_lbl_cur_time, &guider_msg_data, gui_msg_set_label_text_by_string_cb, GUI_MODEL_MSG_ID_CUR_TIME, GUI_MSG_ACCESS_GET, VALUE_STRING, NULL);
+
+        gui_msg_setup_component(true, false, subject_video_pause, ui_scr->video_play_imgbtn_pause, &guider_msg_data, gui_msg_set_control_state_by_int32_cb, GUI_MODEL_MSG_ID_VIDEO_PAUSE, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
+
+        gui_msg_setup_component(true, false, subject_total_time, ui_scr->video_play_lbl_total_time, &guider_msg_data, gui_msg_set_label_text_by_string_cb, GUI_MODEL_MSG_ID_TOTAL_TIME, GUI_MSG_ACCESS_GET, VALUE_STRING, NULL);
+
+        gui_msg_setup_component(true, false, subject_cur_time_process, ui_scr->video_play_bar_process, &guider_msg_data, gui_msg_set_bar_bar_value_by_int32_cb, GUI_MODEL_MSG_ID_CUR_TIME_PROCESS, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
+
+        gui_msg_setup_component(true, false, subject_file_name, ui_scr->video_play_lbl_msg, &guider_msg_data, gui_msg_set_label_text_by_string_cb, GUI_MODEL_MSG_ID_FILE_NAME, GUI_MSG_ACCESS_GET, VALUE_STRING, NULL);
+
+        gui_msg_setup_component(true, false, subject_prev_file, ui_scr->video_play_img_prev_file, &guider_msg_data, gui_model_msg_video_play_img_prev_file_set_img_path_cb, GUI_MODEL_MSG_ID_PREV_FILE, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
+
+        gui_msg_setup_component(true, false, subject_next_file, ui_scr->video_play_img_next_file, &guider_msg_data, gui_model_msg_video_play_img_next_file_set_img_path_cb, GUI_MODEL_MSG_ID_NEXT_FILE, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
 
 
         for (int i = 0; i < 9; i++) {
-            if (status[i].msg_id == GUI_MODEL_MSG_ID_FILE_PATH) {
-                status[i].is_subscribe = 1;
-            }
-        }
-    }
-    if (!guider_ui.video_play_del) {
-        gui_model_msg_total_time_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_STRING);
-        lv_subject_add_observer_obj(subject_total_time, gui_msg_set_label_text_by_string_cb, guider_ui.video_play_lbl_total_time, &guider_msg_data);
-
-        gui_model_msg_cur_time_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_STRING);
-        lv_subject_add_observer_obj(subject_cur_time, gui_msg_set_label_text_by_string_cb, guider_ui.video_play_lbl_cur_time, &guider_msg_data);
-
-        gui_model_msg_next_file_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
-        lv_subject_add_observer_obj(subject_next_file, gui_model_msg_video_play_img_next_file_set_img_path_cb, guider_ui.video_play_img_next_file, &guider_msg_data);
-
-        gui_model_msg_cur_time_process_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
-        lv_subject_add_observer_obj(subject_cur_time_process, gui_msg_set_bar_bar_value_by_int32_cb, guider_ui.video_play_bar_process, &guider_msg_data);
-
-        gui_model_msg_file_name_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_STRING);
-        lv_subject_add_observer_obj(subject_file_name, gui_msg_set_label_text_by_string_cb, guider_ui.video_play_lbl_msg, &guider_msg_data);
-
-        gui_model_msg_video_pause_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
-        lv_subject_add_observer_obj(subject_video_pause, gui_msg_set_control_state_by_int32_cb, guider_ui.video_play_imgbtn_pause, &guider_msg_data);
-
-        gui_model_msg_prev_file_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
-        lv_subject_add_observer_obj(subject_prev_file, gui_model_msg_video_play_img_prev_file_set_img_path_cb, guider_ui.video_play_img_prev_file, &guider_msg_data);
-
-
-        for (int i = 0; i < 9; i++) {
-            if (status[i].msg_id == GUI_MODEL_MSG_ID_VIDEO_PAUSE) {
-                status[i].is_subscribe = 1;
-            }
-            if (status[i].msg_id == GUI_MODEL_MSG_ID_NEXT_FILE) {
-                status[i].is_subscribe = 1;
-            }
             if (status[i].msg_id == GUI_MODEL_MSG_ID_CUR_TIME) {
+                status[i].is_subscribe = 1;
+            }
+            if (status[i].msg_id == GUI_MODEL_MSG_ID_VIDEO_PAUSE) {
                 status[i].is_subscribe = 1;
             }
             if (status[i].msg_id == GUI_MODEL_MSG_ID_TOTAL_TIME) {
@@ -293,20 +271,33 @@ void gui_model_msg_init_events()
             if (status[i].msg_id == GUI_MODEL_MSG_ID_PREV_FILE) {
                 status[i].is_subscribe = 1;
             }
+            if (status[i].msg_id == GUI_MODEL_MSG_ID_NEXT_FILE) {
+                status[i].is_subscribe = 1;
+            }
         }
     }
-    if (!guider_ui.video_file_del) {
-        gui_model_msg_file_num_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_STRING);
-        lv_subject_add_observer_obj(subject_file_num, gui_msg_set_label_text_by_string_cb, guider_ui.video_file_lbl_1, &guider_msg_data);
+    if (guider_ui.video_file) {
+        lv_ui_video_file *ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_VIDEO_FILE);
+        gui_msg_setup_component(true, false, subject_file_path, ui_scr->video_file_lbl_path, &guider_msg_data, gui_msg_set_label_text_by_string_cb, GUI_MODEL_MSG_ID_FILE_PATH, GUI_MSG_ACCESS_GET, VALUE_STRING, NULL);
 
-        gui_model_msg_file_path_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_STRING);
-        lv_subject_add_observer_obj(subject_file_path, gui_msg_set_label_text_by_string_cb, guider_ui.video_file_lbl_path, &guider_msg_data);
+        gui_msg_setup_component(true, false, subject_file_num, ui_scr->video_file_lbl_1, &guider_msg_data, gui_msg_set_label_text_by_string_cb, GUI_MODEL_MSG_ID_FILE_NUM, GUI_MSG_ACCESS_GET, VALUE_STRING, NULL);
 
 
         for (int i = 0; i < 9; i++) {
+            if (status[i].msg_id == GUI_MODEL_MSG_ID_FILE_PATH) {
+                status[i].is_subscribe = 1;
+            }
             if (status[i].msg_id == GUI_MODEL_MSG_ID_FILE_NUM) {
                 status[i].is_subscribe = 1;
             }
+        }
+    }
+    if (guider_ui.video_dir) {
+        lv_ui_video_dir *ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_VIDEO_DIR);
+        gui_msg_setup_component(true, false, subject_file_path, ui_scr->video_dir_lbl_path, &guider_msg_data, gui_msg_set_label_text_by_string_cb, GUI_MODEL_MSG_ID_FILE_PATH, GUI_MSG_ACCESS_GET, VALUE_STRING, NULL);
+
+
+        for (int i = 0; i < 9; i++) {
             if (status[i].msg_id == GUI_MODEL_MSG_ID_FILE_PATH) {
                 status[i].is_subscribe = 1;
             }

@@ -14,6 +14,10 @@ extern "C" {
 extern lv_style_t gui_digitclock_main_default_style;
 extern lv_style_t gui_digitclock_main_disabled_style;
 
+// digital_clock
+extern lv_style_t gui_digitclock_main_default_style;
+extern lv_style_t gui_digitclock_main_disabled_style;
+
 // img
 extern lv_style_t gui_img_main_default_style;
 extern lv_style_t gui_img_main_focus_key_style;
@@ -32,6 +36,13 @@ extern lv_style_t gui_imgbtn_main_checked_style;
 extern lv_style_t gui_imgbtn_main_focus_key_style;
 
 // ddlist
+extern lv_style_t gui_ddlist_main_default_style;
+extern lv_style_t gui_ddlist_main_focus_key_style;
+extern lv_style_t gui_ddlist_selected_checked_style;
+extern lv_style_t gui_ddlist_dropdown_list_default_style;
+extern lv_style_t gui_ddlist_scrollbar_default_style;
+
+// dropdown
 extern lv_style_t gui_ddlist_main_default_style;
 extern lv_style_t gui_ddlist_main_focus_key_style;
 extern lv_style_t gui_ddlist_selected_checked_style;
@@ -63,8 +74,28 @@ extern lv_style_t gui_imglist_main_default_style;
 extern lv_style_t gui_ta_main_default_style;
 extern lv_style_t gui_ta_scrollbar_default_style;
 
+// textarea
+extern lv_style_t gui_ta_main_default_style;
+extern lv_style_t gui_ta_scrollbar_default_style;
+
+enum {
+    GUI_CTRL_DIGITALCLOCK,
+    GUI_CTRL_IMG,
+    GUI_CTRL_BAR,
+    GUI_CTRL_SCR,
+    GUI_CTRL_IMGBTN,
+    GUI_CTRL_DROPDOWN,
+    GUI_CTRL_LABEL,
+    GUI_CTRL_CONT,
+    GUI_CTRL_BUTTON,
+    GUI_CTRL_ROLLER,
+    GUI_CTRL_IMGLIST,
+    GUI_CTRL_TEXTAREA,
+};
+typedef uint8_t gui_ctrl_type_t;
 
 extern void ui_style_init(void);
+extern void ui_style_set(lv_obj_t *obj, gui_ctrl_type_t type);
 
 #ifdef __cplusplus
 }

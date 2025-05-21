@@ -23,6 +23,7 @@ void events_init_line_drift(lv_ui *ui);
 void events_init_sys_popwin(lv_ui *ui);
 void events_init_video_dec(lv_ui *ui);
 void events_init_video_dec_options(lv_ui *ui);
+void events_init_car_parking(lv_ui *ui);
 
 #ifdef __cplusplus
 }

@@ -255,7 +255,7 @@ int music_file_player_pp(struct file_player *music_player)
 
         if (music_player->status == FILE_PLAYER_START) {
             if (music_player->stream->coding_type == AUDIO_CODING_PCM) {
-                jlstream_node_ioctl(music_player->stream, NODE_UUID_DECODER, NODE_IOC_GET_PARAM, &music_player->pcm_addr);
+                jlstream_node_ioctl(music_player->stream, NODE_UUID_DECODER, NODE_IOC_GET_PARAM, (int)&music_player->pcm_addr);
             }
         }
 

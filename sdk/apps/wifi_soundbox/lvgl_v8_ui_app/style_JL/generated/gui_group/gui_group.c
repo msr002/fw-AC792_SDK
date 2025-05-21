@@ -72,7 +72,7 @@ void set_default_group_cb()
     }
 
     lv_group_remove_all_objs(guider_ui.default_group);
-    lv_obj_t *act_scr = lv_scr_act();
+    int32_t act_scr_id = gui_scr_get_id(gui_scr_get_act());
 
     lv_group_set_default(guider_ui.default_group);
 

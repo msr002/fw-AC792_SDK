@@ -947,12 +947,13 @@ c_SRC_FILES := \
 	../../../../apps/wifi_soundbox/lvgl_v8_ui_app/style_JL/generated/gui_events/events_init.c \
 	../../../../apps/wifi_soundbox/lvgl_v8_ui_app/style_JL/generated/gui_events/i18n_handler.c \
 	../../../../apps/wifi_soundbox/lvgl_v8_ui_app/style_JL/generated/gui_fonts/gui_fonts.c \
-	../../../../apps/wifi_soundbox/lvgl_v8_ui_app/style_JL/generated/gui_fonts/lv_font_montserratMedium_30.c \
 	../../../../apps/wifi_soundbox/lvgl_v8_ui_app/style_JL/generated/gui_group/gui_group.c \
 	../../../../apps/wifi_soundbox/lvgl_v8_ui_app/style_JL/generated/gui_guider.c \
 	../../../../apps/wifi_soundbox/lvgl_v8_ui_app/style_JL/generated/gui_msg/gui_msg.c \
 	../../../../apps/wifi_soundbox/lvgl_v8_ui_app/style_JL/generated/gui_res/res_common.c \
 	../../../../apps/wifi_soundbox/lvgl_v8_ui_app/style_JL/generated/gui_scr/setup_scr_home.c \
+	../../../../apps/wifi_soundbox/lvgl_v8_ui_app/style_JL/generated/gui_scr/ui_scr_manager.c \
+	../../../../apps/wifi_soundbox/lvgl_v8_ui_app/style_JL/generated/gui_scr/ui_style.c \
 	../../../../apps/wifi_soundbox/lvgl_v8_ui_app/style_JL/generated/gui_timelines/gui_timelines.c \
 	../../../../apps/wifi_soundbox/lvgl_v8_ui_app/style_JL/generated/i18n/lv_i18n.c \
 	../../../../apps/wifi_soundbox/mode/bt/bt.c \

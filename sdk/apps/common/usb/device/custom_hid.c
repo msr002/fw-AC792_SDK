@@ -22,7 +22,7 @@ struct custom_hid_hdl {
     void *priv_hdl;
     hid_rx_handle_t hid_rx_hook;
 };
-static struct custom_hid_hdl *custom_hid_info;
+static struct custom_hid_hdl *custom_hid_info[USB_MAX_HW_NUM];
 #if USB_MALLOC_ENABLE
 #else
 static struct custom_hid_hdl _custom_hid_info;
@@ -93,6 +93,7 @@ static u32 get_hid_report_desc_len(u32 index)
     len = sizeof(sHIDReportDesc);
     return len;
 }
+
 static void *get_hid_report_desc(u32 index)
 {
     u8 *ptr  = NULL;
@@ -105,7 +106,7 @@ u32 custom_hid_tx_data(const usb_dev usb_id, const u8 *buffer, u32 len)
     if (len > MAXP_SIZE_CUSTOM_HIDIN) {
         len = MAXP_SIZE_CUSTOM_HIDIN;
     }
-    if (custom_hid_info == NULL || custom_hid_info->cfg_done == 0) {
+    if (custom_hid_info[usb_id] == NULL || custom_hid_info[usb_id]->cfg_done == 0) {
         return 0;
     }
     return usb_g_intr_write(usb_id, CUSTOM_HID_EP_IN, buffer, len);
@@ -114,41 +115,38 @@ u32 custom_hid_tx_data(const usb_dev usb_id, const u8 *buffer, u32 len)
 static void custom_hid_rx_data(struct usb_device_t *usb_device, u32 ep)
 {
     const usb_dev usb_id = usb_device2id(usb_device);
-    u8 rx_buffer[64] = {0};
-    u32 rx_len = usb_g_intr_read(usb_id, CUSTOM_HID_EP_OUT, rx_buffer, 64, 0);
-    if (custom_hid_info && custom_hid_info->hid_rx_hook) {
-        custom_hid_info->hid_rx_hook(custom_hid_info->priv_hdl, rx_buffer, rx_len);
+    u8 rx_buffer[MAXP_SIZE_CUSTOM_HIDOUT] = {0};
+    u32 rx_len = usb_g_intr_read(usb_id, ep, rx_buffer, MAXP_SIZE_CUSTOM_HIDOUT, 0);
+    if (custom_hid_info[usb_id] && custom_hid_info[usb_id]->hid_rx_hook) {
+        custom_hid_info[usb_id]->hid_rx_hook(custom_hid_info[usb_id]->priv_hdl, rx_buffer, rx_len);
     }
 }
 
 int custom_hid_get_ready(const usb_dev usb_id)
 {
-    if (custom_hid_info && custom_hid_info->cfg_done) {
+    if (custom_hid_info[usb_id] && custom_hid_info[usb_id]->cfg_done) {
         return 1;
     }
     return 0;
 }
 
-void custom_hid_set_rx_hook(void *priv, void (*rx_hook)(void *priv, u8 *buf, u32 len))
+void custom_hid_set_rx_hook(const usb_dev usb_id, void *priv, void (*rx_hook)(void *priv, u8 *buf, u32 len))
 {
-    if (custom_hid_info) {
-        custom_hid_info->priv_hdl = priv;
-        custom_hid_info->hid_rx_hook = rx_hook;
+    if (custom_hid_info[usb_id]) {
+        custom_hid_info[usb_id]->priv_hdl = priv;
+        custom_hid_info[usb_id]->hid_rx_hook = rx_hook;
     }
 }
 
-static u8 *custom_hid_ep_in_dma;
-static u8 *custom_hid_ep_out_dma;
+static u8 *custom_hid_ep_in_dma[USB_MAX_HW_NUM];
+static u8 *custom_hid_ep_out_dma[USB_MAX_HW_NUM];
 
 static void custom_hid_endpoint_init(struct usb_device_t *usb_device, u32 itf)
 {
     const usb_dev usb_id = usb_device2id(usb_device);
-    //u8 *ep_buffer = usb_alloc_ep_dmabuffer(usb_id, CUSTOM_HID_EP_IN | USB_DIR_IN, MAXP_SIZE_CUSTOM_HIDIN);
-    usb_g_ep_config(usb_id, CUSTOM_HID_EP_IN | USB_DIR_IN, USB_ENDPOINT_XFER_INT, 0, custom_hid_ep_in_dma, MAXP_SIZE_CUSTOM_HIDIN);
-
-    //ep_buffer = usb_alloc_ep_dmabuffer(usb_id, CUSTOM_HID_EP_OUT, MAXP_SIZE_CUSTOM_HIDOUT);
+    usb_g_ep_config(usb_id, CUSTOM_HID_EP_IN | USB_DIR_IN, USB_ENDPOINT_XFER_INT, 0, custom_hid_ep_in_dma[usb_id], MAXP_SIZE_CUSTOM_HIDIN);
+    usb_g_ep_config(usb_id, CUSTOM_HID_EP_OUT, USB_ENDPOINT_XFER_INT, 1, custom_hid_ep_out_dma[usb_id], MAXP_SIZE_CUSTOM_HIDOUT);
     usb_g_set_intr_hander(usb_id, CUSTOM_HID_EP_OUT, custom_hid_rx_data);
-    usb_g_ep_config(usb_id, CUSTOM_HID_EP_OUT, USB_ENDPOINT_XFER_INT, 1, custom_hid_ep_out_dma, MAXP_SIZE_CUSTOM_HIDOUT);
     usb_enable_ep(usb_id, CUSTOM_HID_EP_OUT);
 }
 
@@ -235,7 +233,7 @@ static u32 custom_hid_itf_hander(struct usb_device_t *usb_device, struct usb_ctr
         case USB_REQ_SET_IDLE:
             custom_hid_endpoint_init(usb_device, LOBYTE(req->wIndex));
             usb_set_setup_phase(usb_device, USB_EP0_STAGE_SETUP);
-            custom_hid_info->cfg_done = 1;
+            custom_hid_info[usb_id]->cfg_done = 1;
             break;
         case USB_REQ_GET_IDLE:
             tx_len = 1;
@@ -267,8 +265,8 @@ u32 custom_hid_desc_config(const usb_dev usb_id, u8 *ptr, u32 *cur_itf_num)
     ptr[USB_DT_INTERFACE_SIZE + 8] = HIBYTE(get_hid_report_desc_len(0));
 
     if (usb_device->bSpeed == USB_SPEED_HIGH) {
-        ptr[9 + 9 + 6] = HID_INTERVAL_HS;
-        ptr[9 + 9 + 7 + 6] = HID_INTERVAL_HS;
+        ptr[9 + 9 + 6] = HID_INTR_INTERVAL_HS;
+        ptr[9 + 9 + 7 + 6] = HID_INTR_INTERVAL_HS;
     }
 
     if (usb_set_interface_hander(usb_id, *cur_itf_num, custom_hid_itf_hander) != *cur_itf_num) {
@@ -284,44 +282,44 @@ u32 custom_hid_desc_config(const usb_dev usb_id, u8 *ptr, u32 *cur_itf_num)
 
 u32 custom_hid_register(usb_dev usb_id)
 {
-    if (custom_hid_info) {
+    if (custom_hid_info[usb_id]) {
         return 0;
     }
 #if USB_MALLOC_ENABLE
-    custom_hid_info = malloc(sizeof(struct custom_hid_hdl));
-    if (!custom_hid_info) {
+    custom_hid_info[usb_id] = malloc(sizeof(struct custom_hid_hdl));
+    if (!custom_hid_info[usb_id]) {
         log_error("custom hid allocates memory fail 1\n");
         return -1;
     }
 #else
-    custom_hid_info = &_custom_hid_info;
+    custom_hid_info[usb_id] = &_custom_hid_info;
 #endif
-    memset(custom_hid_info, 0, sizeof(struct custom_hid_hdl));
-    custom_hid_ep_in_dma = usb_alloc_ep_dmabuffer(usb_id, CUSTOM_HID_EP_IN | USB_DIR_IN, MAXP_SIZE_CUSTOM_HIDIN);
-    custom_hid_ep_out_dma = usb_alloc_ep_dmabuffer(usb_id, CUSTOM_HID_EP_OUT, MAXP_SIZE_CUSTOM_HIDOUT);
+    memset(custom_hid_info[usb_id], 0, sizeof(struct custom_hid_hdl));
+    custom_hid_ep_in_dma[usb_id] = usb_alloc_ep_dmabuffer(usb_id, CUSTOM_HID_EP_IN | USB_DIR_IN, MAXP_SIZE_CUSTOM_HIDIN);
+    custom_hid_ep_out_dma[usb_id] = usb_alloc_ep_dmabuffer(usb_id, CUSTOM_HID_EP_OUT, MAXP_SIZE_CUSTOM_HIDOUT);
     return 0;
 }
 
 void custom_hid_release(const usb_dev usb_id)
 {
-    if (custom_hid_info == NULL) {
+    if (custom_hid_info[usb_id] == NULL) {
         return;
     }
 #if USB_MALLOC_ENABLE
-    if (custom_hid_ep_in_dma) {
-        usb_free_ep_dmabuffer(usb_id, custom_hid_ep_in_dma);
-        custom_hid_ep_in_dma = NULL;
+    if (custom_hid_ep_in_dma[usb_id]) {
+        usb_free_ep_dmabuffer(usb_id, custom_hid_ep_in_dma[usb_id]);
+        custom_hid_ep_in_dma[usb_id] = NULL;
     }
-    if (custom_hid_ep_out_dma) {
-        usb_free_ep_dmabuffer(usb_id, custom_hid_ep_out_dma);
-        custom_hid_ep_out_dma = NULL;
+    if (custom_hid_ep_out_dma[usb_id]) {
+        usb_free_ep_dmabuffer(usb_id, custom_hid_ep_out_dma[usb_id]);
+        custom_hid_ep_out_dma[usb_id] = NULL;
     }
-    free(custom_hid_info);
-    custom_hid_info = NULL;
+    free(custom_hid_info[usb_id]);
+    custom_hid_info[usb_id] = NULL;
 #else
-    memset(custom_hid_info, 0, sizeof(struct custom_hid_hdl));
+    memset(custom_hid_info[usb_id], 0, sizeof(struct custom_hid_hdl));
 #endif
-    custom_hid_info = NULL;
+    custom_hid_info[usb_id] = NULL;
 }
 
 #endif

@@ -1,6 +1,5 @@
 #include "app_config.h"
 #ifdef CONFIG_UI_STYLE_JL_ENABLE
-
 /*********************
  *      INCLUDES
  *********************/
@@ -29,15 +28,15 @@ bool get_usb_app_flag(void)
 }
 int gui_src_action_usb(int action)
 {
-    /* struct intent it; */
+    struct intent it;
 
-    /* init_intent(&it); */
+    init_intent(&it);
     printf("[chili] %s %d   \n", __func__, __LINE__);
     switch (action) {
     case GUI_SCREEN_ACTION_LOAD:
-        /* it.action = ACTION_BACK; */
-        /* start_app(&it); */
-        app_mode_go_back();
+        it.action = ACTION_BACK;
+        start_app(&it);
+
         //usb_start();
         break;
     case GUI_SCREEN_ACTION_UNLOAD:
@@ -96,5 +95,6 @@ void usb_page_hide(int arg)
     }
 }
 #endif
+
 
 #endif

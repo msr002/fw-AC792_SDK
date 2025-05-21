@@ -10,7 +10,7 @@ extern "C" {
 #include "src/font/lv_font.h"
 #endif
 
-LV_FONT_DECLARE(lv_font_montserratMedium_30);
+
 
 void init_gui_fonts();
 

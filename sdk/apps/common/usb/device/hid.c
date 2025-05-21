@@ -225,7 +225,7 @@ u32 hid_tx_data(const usb_dev usb_id, const u8 *buffer, u32 len)
     }
     cfg_done = hid_info[usb_id]->cfg_done;
     hid_info[usb_id]->cfg_done = 0;
-    if (cfg_done != 0) {
+    if (cfg_done != 0 || usb_get_host_type(usb_id) == HOST_TYPE_IOS) {
         len = usb_g_intr_write(usb_id, HID_EP_IN, buffer, len);
     }
     hid_info[usb_id]->cfg_done = cfg_done;
@@ -259,16 +259,11 @@ static void hid_reset(struct usb_device_t *usb_device, u32 itf)
 static u32 hid_recv_output_report(struct usb_device_t *usb_device, struct usb_ctrlrequest *setup)
 {
     const usb_dev usb_id = usb_device2id(usb_device);
-    u32 ret = 0;
     u8 read_ep[MAXP_SIZE_HIDOUT];
-    u8 mute;
-    u16 volume = 0;
     usb_read_ep0(usb_id, read_ep, MIN(sizeof(read_ep), setup->wLength));
     put_buf(read_ep, 8);
     hid_output_handle(usb_id, read_ep, MIN(sizeof(read_ep), setup->wLength));
-
-    ret = USB_EP0_STAGE_SETUP;
-    return ret;
+    return USB_EP0_STAGE_SETUP;
 }
 
 static u32 hid_itf_hander(struct usb_device_t *usb_device, struct usb_ctrlrequest *req)
@@ -290,7 +285,7 @@ static u32 hid_itf_hander(struct usb_device_t *usb_device, struct usb_ctrlreques
                 tx_payload[8] = HIBYTE(get_hid_report_desc_len(usb_id, req->wIndex));
                 break;
             case USB_HID_DT_REPORT:
-                /* hid_endpoint_init(usb_device, req->wIndex); */
+                hid_endpoint_init(usb_device, req->wIndex);
                 tx_len = get_hid_report_desc_len(usb_id, req->wIndex);
                 tx_payload = get_hid_report_desc(usb_id, req->wIndex);
                 usb_set_data_payload(usb_device, req, tx_payload, tx_len);
@@ -643,9 +638,8 @@ void hid_key_handler(const usb_dev usb_id, u32 hid_key)
     }
 }
 
-void hid_key_handler_send_one_packet(struct usb_device_t *usb_device, u32 hid_key)
+void hid_key_handler_send_one_packet(const usb_dev usb_id, u32 hid_key)
 {
-    const usb_dev usb_id = usb_device2id(usb_device);
     u8 key_buf[4] = {0};
 
     if (usb_get_ep_status(usb_id, HID_EP_IN)) {

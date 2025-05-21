@@ -1,6 +1,8 @@
 /*Generate Code, Do NOT Edit!*/
 #include "lvgl.h"
+#if LV_USE_GUIBUILDER_SIMULATOR
 #include <stdio.h>
+#endif
 #include <stdlib.h>
 #include "../gui_guider.h"
 #include "../gui_events/events_init.h"
@@ -11,55 +13,36 @@
 
 lv_obj_t *setup_scr_home(lv_ui *ui)
 {
-    //Write codes home
-    ui->home = lv_obj_create(NULL);
-    lv_group_t *def_group = lv_group_get_default();
+    lv_ui_home *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_HOME);
+    if (ui_scr == NULL) {
+        ui_scr = lv_mem_alloc(sizeof(lv_ui_home));
+        memset(ui_scr, 0, sizeof(lv_ui_home));
+        ui->home = ui_scr;
+    }
 
-    //Set style for home. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
-    lv_obj_set_style_bg_color(ui->home, lv_color_make(0xFF, 0xFF, 0xFF), LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_opa(ui->home, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_border_width(ui->home, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_scrollbar_mode(ui->home, LV_SCROLLBAR_MODE_OFF);
+    //Write codes home
+    ui_scr->home = lv_obj_create(NULL);
+    lv_group_t *def_group = lv_group_get_default();
+    lv_obj_set_scrollbar_mode(ui_scr->home, LV_SCROLLBAR_MODE_OFF);
+    lv_obj_clear_flag(ui_scr->home, LV_OBJ_FLAG_SCROLLABLE);
+    ui_style_set(ui_scr->home, GUI_CTRL_SCR);
 
     //Write codes home_video_1
-    ui->home_video_1 = lv_ffmpeg_player_create(ui->home);
-#if LV_USE_GUIBUILDER_SIMULATOR
-    lv_ffmpeg_player_set_src(ui->home_video_1, "F:\\WL83_NEW\\wifi_video_master\\ui_prj\\wifi_soundbox_480x800\\import\\video\\jl.avi");
-#else
-    lv_ffmpeg_player_set_src(ui->home_video_1, "storage/sd0/C/bin/31000000.avi");
-#endif
-    lv_ffmpeg_player_set_auto_restart(ui->home_video_1, true);
-    lv_ffmpeg_player_set_cmd(ui->home_video_1, LV_FFMPEG_PLAYER_CMD_START);
-    lv_obj_set_pos(ui->home_video_1, 0, 0);
-    lv_obj_set_size(ui->home_video_1, 480, 480);
-    //Write codes home_lbl_1
-    ui->home_lbl_1 = lv_label_create(ui->home);
-    lv_label_set_text(ui->home_lbl_1, "Please insert SD card");
-    lv_label_set_long_mode(ui->home_lbl_1, LV_LABEL_LONG_WRAP);
+    ui_scr->home_video_1 = lv_ffmpeg_player_create(ui_scr->home);
+    lv_ffmpeg_player_set_src(ui_scr->home_video_1, gui_get_res_path(GUI_RES_JL_480X800_AVI));
+    lv_ffmpeg_player_set_auto_restart(ui_scr->home_video_1, true);
+    lv_ffmpeg_player_set_cmd(ui_scr->home_video_1, LV_FFMPEG_PLAYER_CMD_START);
+    lv_obj_set_pos(ui_scr->home_video_1, 0, 0);
+    lv_obj_set_size(ui_scr->home_video_1, 480, 800);
 
-    //Set style for home_lbl_1. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
-    lv_obj_set_style_radius(ui->home_lbl_1, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_color(ui->home_lbl_1, lv_color_make(0x21, 0x95, 0xF6), LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_opa(ui->home_lbl_1, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_shadow_width(ui->home_lbl_1, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_border_width(ui->home_lbl_1, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_text_color(ui->home_lbl_1, lv_color_make(0x00, 0x00, 0x00), LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_text_font(ui->home_lbl_1, &lv_font_montserratMedium_30, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_text_letter_space(ui->home_lbl_1, 2, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_text_line_space(ui->home_lbl_1, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_text_align(ui->home_lbl_1, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_pad_left(ui->home_lbl_1, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_pad_right(ui->home_lbl_1, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_pad_top(ui->home_lbl_1, 8, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_pad_bottom(ui->home_lbl_1, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_pos(ui->home_lbl_1, 0, 150);
-    lv_obj_set_size(ui->home_lbl_1, 480, 50);
-    lv_obj_set_scrollbar_mode(ui->home_lbl_1, LV_SCROLLBAR_MODE_OFF);
-    lv_obj_update_layout(ui->home);
-    ui->home_del = false;
-    return ui->home;
+    lv_obj_update_layout(ui_scr->home);
+    ui_scr->home_del = false;
+
+    //Init events for screen
+    events_init_home(ui);
+    return ui_scr->home;
 }
 void unload_scr_home(lv_ui *ui)
 {
-    ui->home_del = true;
+    ui_free_scr_ptr(ui, GUI_SCREEN_HOME);
 }

@@ -53,7 +53,7 @@ extern const struct le_audio_mode_ops le_audio_pc_ops;
   Local Global Variables
 **************************************************************************************************/
 static char lea_product_test_name[28];
-static char le_audio_pair_name[28];
+static char le_audio_pair_name[28] = "JL_AC792N_AURACAST";
 static struct le_audio_mode_ops *broadcast_audio_switch_ops = NULL; /*!< le audio和local audio切换回调接口指针 */
 static struct le_audio_mode_ops *connected_audio_switch_ops = NULL; /*!< le audio和local audio切换回调接口指针 */
 

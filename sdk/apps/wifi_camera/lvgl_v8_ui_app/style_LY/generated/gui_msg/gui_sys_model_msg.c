@@ -64,8 +64,6 @@ void gui_sys_model_msg_init(lv_ui *ui)
         lv_subject_init_pointer(sub->subject, &guider_msg_data);
     }
     _lv_ll_init(&timer_ll, sizeof(timer_dsc_t));
-    gui_sys_model_msg_init_ui();
-    gui_sys_model_msg_init_events();
 }
 
 void gui_sys_model_msg_init_ui()

@@ -302,7 +302,7 @@ void usb_start(const usb_dev usbfd, u32 class)
 
     if (class & CUSTOM_HID_CLASS) {
 #if TCFG_USB_CUSTOM_HID_ENABLE
-        custom_hid_set_rx_hook(NULL, custom_hid_rx_handler);
+        custom_hid_set_rx_hook(usbfd, NULL, custom_hid_rx_handler);
         log_info("custom_hid rx_hook");
 #endif
     }

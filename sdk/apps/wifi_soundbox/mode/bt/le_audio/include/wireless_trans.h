@@ -42,8 +42,11 @@ extern "C" {
 #define list_for_each_wireless_data_trans(p) \
     for (p = wireless_custom_data_trans_stub_begin; p < wireless_custom_data_trans_stub_end; p++)
 
-#define WIRELESS_SYNC_CALL_TX                1
-#define WIRELESS_SYNC_CALL_RX                2
+#define WIRELESS_SYNC_CALL_TX               1
+#define WIRELESS_SYNC_CALL_RX               2
+
+#define LEA_ROLE_AS_TX                      1
+#define LEA_ROLE_AS_RX                      2
 
 /**************************************************************************************************
   Data Types

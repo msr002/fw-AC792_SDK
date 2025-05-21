@@ -404,20 +404,18 @@ void cfg_file_parse(void)
     }
 
     u8 bt_power = 8;
-    u8 ble_power = 6;
+    u8 ble_power = 8;
 
     //-----------------------------CFG_BT_RF_POWER_ID----------------------------//
     ret = syscfg_read(CFG_BT_RF_POWER_ID, &bt_power, 1);
     if (ret < 0) {
         log_error("read edr rf power err");
-        bt_power = 8;
     }
 
     //-----------------------------CFG_BLE_RF_POWER_ID----------------------------//
     ret = syscfg_read(CFG_BLE_RF_POWER_ID, &ble_power, 1);
     if (ret < 0) {
         log_error("read ble rf power err");
-        ble_power = 6;
     }
 
     //-------------若存在BT/BLE功率校准值(RF_FCC校准所得)，则使用校准值-----------//
@@ -437,11 +435,7 @@ void cfg_file_parse(void)
 #endif
 
     extern void bt_max_pwr_set(u8 pwr, u8 pg_pwr, u8 iq_pwr, u8 ble_pwr);
-#if TCFG_RF_FCC_TEST_ENABLE
-    bt_max_pwr_set(8, 6, 6, 8);	//0-10 设置蓝牙发射功率
-#else
     bt_max_pwr_set(bt_power, 6, 6, ble_power);	//0-10 设置蓝牙发射功率
-#endif
     log_info("rf bt_power:%d, ble_power:%d", bt_power, ble_power);
 
     //-----------------------------CFG_TWS_PAIR_CODE_ID----------------------------//

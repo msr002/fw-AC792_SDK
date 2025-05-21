@@ -99,7 +99,7 @@ unsigned char scane_type[] = {SCENE_NIGHT, SCENE_INDOOR, SCENE_OUTCLUDY, SCENE_O
 #define ISP0_CFG_CAMERA_CHANNEL 0xff
 #define ISP1_CFG_CAMERA_CHANNEL 0xff
 
-#define USE_FILE_SCENES_CHANGE  0
+#define USE_FILE_SCENES_CHANGE  1
 
 static struct user_isp_cfg  isp0_cfg = {
     .channel = ISP0_CFG_CAMERA_CHANNEL,

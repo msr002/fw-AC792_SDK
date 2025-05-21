@@ -30,15 +30,14 @@
 #include "debug.h"
 
 
-#if TCFG_BT_NET_CFG_EN || TCFG_BT_NET_CFG_DUI_EN || TCFG_BT_NET_CFG_DUEROS_EN || TCFG_BT_NET_CFG_TURING_EN || TCFG_BT_NET_CFG_TENCENT_EN
-#define TCFG_BLE_NET_CFG_EN	1
-#endif
-
-#if defined THIRD_PARTY_PROTOCOLS_SEL && ((THIRD_PARTY_PROTOCOLS_SEL & MIJIA_EN) || (THIRD_PARTY_PROTOCOLS_SEL & NET_CFG_EN))
+#if defined THIRD_PARTY_PROTOCOLS_SEL && \
+        ((THIRD_PARTY_PROTOCOLS_SEL & MIJIA_EN) || (THIRD_PARTY_PROTOCOLS_SEL & NET_CFG_EN) || (THIRD_PARTY_PROTOCOLS_SEL & DUEROS_EN))
 #define TCFG_BLE_NET_CFG_EN	1
 
 extern void le_net_cfg_all_init(void);
 extern void le_net_cfg_all_exit(void);
+extern void le_net_cfg_dueros_all_init(void);
+extern void le_net_cfg_dueros_all_exit(void);
 #endif
 
 static u8 config_network_flag;
@@ -109,10 +108,6 @@ void config_network_start(void)
 {
     config_network_flag = 1;
 
-#ifdef CONFIG_LOW_POWER_ENABLE
-    low_power_hw_unsleep_lock();
-#endif
-
 #ifdef CONFIG_AIRKISS_NET_CFG
     memset(&airkiss_result, 0, sizeof(airkiss_result));
     wifi_set_smp_cfg_timeout(100);
@@ -152,6 +147,9 @@ void config_network_start(void)
 #if defined THIRD_PARTY_PROTOCOLS_SEL && (THIRD_PARTY_PROTOCOLS_SEL & NET_CFG_EN)
     le_net_cfg_all_init();
 #endif
+#if defined THIRD_PARTY_PROTOCOLS_SEL && (THIRD_PARTY_PROTOCOLS_SEL & DUEROS_EN)
+    le_net_cfg_dueros_all_init();
+#endif
 #endif
 
 #ifdef CONFIG_ACOUSTIC_COMMUNICATION_ENABLE
@@ -174,15 +172,14 @@ void config_network_stop(void)
     /* wifi_on(); */
 #endif
 #if TCFG_USER_BLE_ENABLE && TCFG_BLE_NET_CFG_EN && !TCFG_POWER_ON_ENABLE_BLE
-#if defined THIRD_PARTY_PROTOCOLS_SEL && (THIRD_PARTY_PROTOCOLS_SEL & NET_CFG_EN)
     if (!ble_config_complete_flag) {
+#if defined THIRD_PARTY_PROTOCOLS_SEL && (THIRD_PARTY_PROTOCOLS_SEL & NET_CFG_EN)
         le_net_cfg_all_exit();
+#endif
+#if defined THIRD_PARTY_PROTOCOLS_SEL && (THIRD_PARTY_PROTOCOLS_SEL & DUEROS_EN)
+        le_net_cfg_dueros_all_exit();
+#endif
     }
-#endif
-#endif
-
-#ifdef CONFIG_LOW_POWER_ENABLE
-    low_power_hw_unsleep_unlock();
 #endif
 }
 
@@ -234,7 +231,7 @@ int bt_net_config_info_set(const char *ssid, const char *pwd)
     net.event = NET_EVENT_SMP_CFG_FINISH;
     net_event_notify(NET_EVENT_FROM_USER, &net);
 
-#if TCFG_BT_NET_CFG_DUEROS_EN
+#if defined THIRD_PARTY_PROTOCOLS_SEL && (THIRD_PARTY_PROTOCOLS_SEL & DUEROS_EN)
     ble_config_complete_flag = 1;
 #endif
 

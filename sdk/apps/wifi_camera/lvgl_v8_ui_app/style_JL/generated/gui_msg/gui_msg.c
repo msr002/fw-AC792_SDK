@@ -591,6 +591,38 @@ gui_msg_data_t *gui_msg_get_data()
 {
     return &guider_msg_data;
 }
+bool gui_msg_has_observer(lv_subject_t *subject, lv_observer_cb_t cb, lv_obj_t *obj, void *user_data)
+{
+    if (subject == NULL || subject->type == LV_SUBJECT_TYPE_INVALID) {
+        return false;
+    }
+    lv_observer_t *observer = _lv_ll_get_head(&(subject->subs_ll));
+    while (observer != NULL) {
+        if (observer->cb == cb && observer->target == obj && observer->user_data == user_data) {
+            return true;
+        }
+        observer = _lv_ll_get_next(&(subject->subs_ll), observer);
+    }
+    return false;
+}
+void gui_msg_setup_component(bool subscribe_enabled, bool event_enabled, lv_subject_t *subject, lv_obj_t *target_obj, gui_msg_data_t *msg_data, lv_observer_cb_t observer_cb, int32_t msg_id, gui_msg_action_t msg_action, gui_msg_data_type_t data_type, lv_event_cb_t event_cb)
+{
+    if (subject == NULL || subject->type == LV_SUBJECT_TYPE_INVALID) {
+        return;
+    }
+
+    if (subscribe_enabled) {
+        if (!gui_msg_has_observer(subject, observer_cb, target_obj, msg_data)) {
+            gui_msg_action_change(msg_id, msg_action, msg_data, data_type);
+            lv_subject_add_observer_obj(subject, observer_cb, target_obj, msg_data);
+        }
+    }
+
+    if (event_enabled) {
+        lv_obj_remove_event_cb(target_obj, event_cb);
+        lv_obj_add_event_cb(target_obj, event_cb, LV_EVENT_VALUE_CHANGED, (void *)msg_id);
+    }
+}
 
 void gui_msg_set_control_state_by_int32_cb(lv_observer_t *observer, lv_subject_t *subject)
 {
@@ -603,16 +635,6 @@ void gui_msg_set_control_state_by_int32_cb(lv_observer_t *observer, lv_subject_t
     lv_obj_clear_state(obj, LV_STATE_ANY);
     lv_obj_add_state(obj, data->value_int);
 }
-void gui_msg_set_flag_by_int32_cb(lv_observer_t *observer, lv_subject_t *subject)
-{
-    lv_obj_t *obj = lv_observer_get_target_obj(observer);
-    if (obj == NULL || lv_obj_is_valid(obj) == false) {
-        return;
-    }
-
-    gui_msg_data_t *data = (gui_msg_data_t *)observer->user_data;
-    lv_obj_add_flag(obj, data->value_int);
-}
 void gui_msg_set_clear_flag_by_int32_cb(lv_observer_t *observer, lv_subject_t *subject)
 {
     lv_obj_t *obj = lv_observer_get_target_obj(observer);
@@ -622,6 +644,16 @@ void gui_msg_set_clear_flag_by_int32_cb(lv_observer_t *observer, lv_subject_t *s
 
     gui_msg_data_t *data = (gui_msg_data_t *)observer->user_data;
     lv_obj_clear_flag(obj, data->value_int);
+}
+void gui_msg_set_flag_by_int32_cb(lv_observer_t *observer, lv_subject_t *subject)
+{
+    lv_obj_t *obj = lv_observer_get_target_obj(observer);
+    if (obj == NULL || lv_obj_is_valid(obj) == false) {
+        return;
+    }
+
+    gui_msg_data_t *data = (gui_msg_data_t *)observer->user_data;
+    lv_obj_add_flag(obj, data->value_int);
 }
 void gui_msg_set_label_text_by_string_cb(lv_observer_t *observer, lv_subject_t *subject)
 {

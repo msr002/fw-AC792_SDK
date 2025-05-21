@@ -146,14 +146,14 @@ static const target_uuid_t jl_search_uuid_table[] = {
     // CHARACTERISTIC,  ae3c, NOTIFY,
 
     {
-        .services_uuid16 = 0xae3a,
-        .characteristic_uuid16 = 0xae3b,
+        .services_uuid16 = 0xae00,
+        .characteristic_uuid16 = 0xae01,
         .opt_type = ATT_PROPERTY_WRITE_WITHOUT_RESPONSE,
     },
 
     {
-        .services_uuid16 = 0xae3a,
-        .characteristic_uuid16 = 0xae3c,
+        .services_uuid16 = 0xae00,
+        .characteristic_uuid16 = 0xae02,
         .opt_type = ATT_PROPERTY_NOTIFY,
     },
 };
@@ -177,7 +177,7 @@ static s8 mul_get_dev_index(u16 handle)
 
 static void ble_report_data_deal(att_data_report_t *report_data, const target_uuid_t *search_uuid)
 {
-    log_info("conn_handle:%04x,report_data:%02x,%02x,%d,len(%d)", report_data->conn_handle, report_data->packet_type,
+    log_info("conn_handle:%04x,report_data:0x%02x,0x%02x,%d,len(%d)", report_data->conn_handle, report_data->packet_type,
              report_data->value_handle, report_data->value_offset, report_data->blob_length);
 
     log_info_hexdump(report_data->blob, report_data->blob_length);
@@ -188,6 +188,9 @@ static void ble_report_data_deal(att_data_report_t *report_data, const target_uu
     /* } */
 
     switch (report_data->packet_type) {
+    case GATT_EVENT_QUERY_COMPLETE:
+        break;
+
     case GATT_EVENT_NOTIFICATION:  //notify
         log_info("GATT_EVENT_NOTIFICATION");
         break;
@@ -1392,8 +1395,7 @@ static void cbk_packet_handler(void *ble_hdl, uint8_t packet_type, uint16_t chan
                 log_info("conn_interval = %d", hci_subevent_le_enhanced_connection_complete_get_conn_interval(packet));
                 log_info("conn_latency = %d", hci_subevent_le_enhanced_connection_complete_get_conn_latency(packet));
                 log_info("conn_timeout = %d", hci_subevent_le_enhanced_connection_complete_get_supervision_timeout(packet));
-                att_server_set_exchange_mtu(client_con_handle[cur_dev_cid]); //主动请求交换MTU
-                /* client_profile_start(client_con_handle[cur_dev_cid]); */
+                client_profile_start(client_con_handle[cur_dev_cid]);
             }
             break;
 
@@ -1413,7 +1415,7 @@ static void cbk_packet_handler(void *ble_hdl, uint8_t packet_type, uint16_t chan
                 }
 
                 u16 tmp_handle = hci_subevent_le_connection_complete_get_connection_handle(packet);
-                log_info("HCI_SUBEVENT_LE_CONNECTION_COMPLETE: %0x", tmp_handle);
+                log_info("HCI_SUBEVENT_LE_CONNECTION_COMPLETE: 0x%0x", tmp_handle);
                 s8 tmp_dev_cid = mul_get_idle_dev_index();
 
                 if (tmp_dev_cid == MULTI_INVAIL_INDEX) {
@@ -1428,8 +1430,7 @@ static void cbk_packet_handler(void *ble_hdl, uint8_t packet_type, uint16_t chan
                 ble_op_multi_att_send_conn_handle(client_con_handle[cur_dev_cid], cur_dev_cid, MULTI_ROLE_CLIENT);
 
                 connection_update_complete_success(tmp_handle, packet + 8, 1);
-                att_server_set_exchange_mtu(client_con_handle[cur_dev_cid]); //主动请求交换MTU
-                /* client_profile_start(client_con_handle[cur_dev_cid]); */
+                client_profile_start(client_con_handle[cur_dev_cid]);
                 client_event_report(CLI_EVENT_CONNECTED, packet, size);
 
                 conn_pair_info.match_dev_id = match_dev_id;
@@ -1479,7 +1480,7 @@ static void cbk_packet_handler(void *ble_hdl, uint8_t packet_type, uint16_t chan
             break;
 
         case HCI_EVENT_DISCONNECTION_COMPLETE: {
-            log_info("HCI_EVENT_DISCONNECTION_COMPLETE_CLIENT: %0x", packet[5]);
+            log_info("HCI_EVENT_DISCONNECTION_COMPLETE_CLIENT: 0x%0x", packet[5]);
 
             u16 tmp_handle = little_endian_read_16(packet, 3);
             s8 tmp_index = mul_get_dev_index(tmp_handle);
@@ -1526,9 +1527,6 @@ static void cbk_packet_handler(void *ble_hdl, uint8_t packet_type, uint16_t chan
                 mtu = att_event_mtu_exchange_complete_get_MTU(packet) - 3;
                 log_info("ATT MTU = %u", mtu);
                 ble_op_multi_att_set_send_mtu(tmp_handle, mtu);
-                if (get_ble_work_state(cur_dev_cid) == BLE_ST_CREATE_CONN) {
-                    client_profile_start(tmp_handle);
-                }
                 /* set_connection_data_length(251, 2120); */
             }
         }
@@ -1543,7 +1541,7 @@ static void cbk_packet_handler(void *ble_hdl, uint8_t packet_type, uint16_t chan
             s8  tmp_cid = mul_get_dev_index(tmp_handle);
             if (tmp_cid != MULTI_INVAIL_INDEX) {
                 tmp = little_endian_read_16(packet, 4);
-                log_info("-update_rsp:%04x, %02x", tmp_handle, tmp);
+                log_info("-update_rsp:0x%04x, 0x%02x", tmp_handle, tmp);
             }
         }
         break;
@@ -1553,7 +1551,7 @@ static void cbk_packet_handler(void *ble_hdl, uint8_t packet_type, uint16_t chan
             if (BLE_ST_SCAN == get_ble_work_state(cur_dev_cid)) {
                 client_report_adv_data((void *)&packet[2], packet[1]);
             } else {
-                log_info("drop adv_report!!!%02x", get_ble_work_state(cur_dev_cid));
+                log_info("drop adv_report!!!0x%02x", get_ble_work_state(cur_dev_cid));
             }
             break;
 
@@ -1939,7 +1937,9 @@ static void ble_client_module_enable(u8 en)
 static void client_profile_init(void)
 {
     //setup GATT client
-    /* gatt_client_init(); */
+#ifndef MULTI_BOX_ADV_FILTER_ENABLE
+    gatt_client_init();
+#endif
     gatt_client_register_packet_handler(client_cbk_packet_handler);
     memset(&conn_pair_info, 0, sizeof(struct pair_info_t));
     memset(conn_pair_info_table, 0, sizeof(conn_pair_info_table));
