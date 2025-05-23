@@ -6,6 +6,7 @@
 #include "ui.h"
 #include "custom.h"
 #include "app_config.h"
+#include "app_msg.h"
 #include "sys_time.h"
 #include "system/includes.h"
 #include "asm/includes.h"

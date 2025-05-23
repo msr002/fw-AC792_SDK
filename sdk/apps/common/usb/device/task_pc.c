@@ -199,13 +199,13 @@ static void usb_cdc_wakeup(struct usb_device_t *usb_device)
 
 #if TCFG_USB_CUSTOM_HID_ENABLE
 #define TCFG_USB_CUSTOM_HID_TEST_EN //hid读写测试(搭配上位机)
-static void custom_hid_rx_handler(void *priv, u8 *buf, u32 len)
+static void custom_hid_rx_handler(const usb_dev usb_id, void *priv, u8 *buf, u32 len)
 {
     /* printf("%s,%d,\n", __func__, __LINE__); */
 #ifdef TCFG_USB_CUSTOM_HID_TEST_EN
     /* 将custom hid收到的数据发送回去 */
     /* put_buf(buf, len); */
-    custom_hid_tx_data(0, buf, len);
+    custom_hid_tx_data(usb_id, buf, len);
 #endif
 }
 #endif /* #if TCFG_USB_CUSTOM_HID_ENABLE */

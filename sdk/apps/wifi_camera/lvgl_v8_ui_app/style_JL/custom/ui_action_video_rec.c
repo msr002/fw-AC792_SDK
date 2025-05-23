@@ -10,6 +10,7 @@ char video_rec_car_num[64];
 #include "system/includes.h"
 #include "asm/includes.h"
 #include "app_database.h"
+#include "app_msg.h"
 #include "action.h"
 
 static struct tm rec_running_time = { 0 };
@@ -147,22 +148,19 @@ int set_car_num_part_b(uint32_t parm)
 */
 void rec_get_remain_time_ontouch(void)
 {
-    struct intent it;
-    init_intent(&it);
-    it.name = "video_rec";
-    it.action = ACTION_VIDEO_REC_GET_REMAIN_TIME;
-    start_app(&it);
+    printf("\n -[function] %s -[line] %d\n", __FUNCTION__, __LINE__);
+    app_send_message(APP_MSG_REC_GET_REMAIN_TIME, 0);
 }
 
 void rec_set_config(char *cfg, int val)
 {
-    struct intent it;
-    init_intent(&it);
-    it.name = "video_rec";
-    it.action = ACTION_VIDEO_REC_SET_CONFIG;
-    it.data = cfg;
-    it.exdata = val;
-    start_app(&it);
+    printf("\n -[function] %s -[line] %d\n", __FUNCTION__, __LINE__);
+    struct intent *it = NULL;
+    it = malloc(sizeof(struct intent));
+    init_intent(it);
+    it->data = cfg;
+    it->exdata = val;
+    app_send_message(APP_MSG_REC_SET_CONFIG, 1, it);
 }
 
 static void key_touch_enable_cb(void)
@@ -176,18 +174,14 @@ static void key_touch_enable_cb(void)
 */
 void rec_control_ontouch(void)
 {
-    struct intent it;
-    init_intent(&it);
-
-    it.name = "video_rec";
-    it.action = ACTION_VIDEO_REC_CONTROL;
-
     //异步模式下,暂时关闭触摸和按键
     key_event_disable();
     touch_event_disable();
 
-    start_app_async(&it, key_touch_enable_cb, NULL);
-    /* start_app(&it); */
+    printf("\n -[function] %s -[line] %d\n", __FUNCTION__, __LINE__);
+    app_send_message(APP_MSG_REC_CONTROL, 0);
+    mdelay(5);
+    key_touch_enable_cb();
 }
 
 /*
@@ -195,12 +189,8 @@ void rec_control_ontouch(void)
 */
 void rec_switch_win_ontouch(void)
 {
-    struct intent it;
-    init_intent(&it);
-
-    it.name = "video_rec";
-    it.action = ACTION_VIDEO_REC_SWITCH_WIN;
-    start_app(&it);
+    printf("\n -[function] %s -[line] %d\n", __FUNCTION__, __LINE__);
+    app_send_message(APP_MSG_REC_SWITCH_WIN, 0);
 
 }
 
@@ -210,13 +200,13 @@ void rec_switch_win_ontouch(void)
 void rec_tell_app_exit_menu(void)
 {
 
+    printf("\n -[function] %s -[line] %d\n", __FUNCTION__, __LINE__);
     int err;
-    struct intent it;
-    init_intent(&it);
-    it.name = "video_rec";
-    it.action = ACTION_VIDEO_REC_CHANGE_STATUS;
-    it.data = "exitMENU";
-    err = start_app(&it);
+    struct intent *it = NULL;
+    it = malloc(sizeof(struct intent));
+    init_intent(it);
+    it->data = "exitMENU";
+    err = app_send_message(APP_MSG_REC_CHANGE_STATUS, 1, it);
     if (err) {
         printf("res exit menu err! %d\n", err);
         /* ASSERT(err == 0, ":rec exitMENU\n"); */
@@ -227,21 +217,20 @@ int rec_ask_app_open_menu(void)
 {
 
     int err;
-    struct intent it;
+    struct intent *it = NULL;
+    it = malloc(sizeof(struct intent));
+    init_intent(it);
 
-    init_intent(&it);
-    it.name = "video_rec";
-    it.action = ACTION_VIDEO_REC_CHANGE_STATUS;
-    it.data = "opMENU:";
-    err = start_app(&it);
+    it->data = "opMENU:";
+    err = app_send_message(APP_MSG_REC_CHANGE_STATUS, 1, it);
     if (err) {
         printf("res ask menu err! %d\n", err);
         return -1;
         /* ASSERT(err == 0, ":rec opMENU fail! %d\n", err); */
     }
-    if (!strcmp(it.data, "opMENU:dis")) {
+    if (!strcmp(it->data, "opMENU:dis")) {
         return -1;
-    } else if (!strcmp(it.data, "opMENU:en")) {
+    } else if (!strcmp(it->data, "opMENU:en")) {
     } else {
         ASSERT(0, "opMENU err\n");
     }
@@ -257,23 +246,23 @@ int rec_ask_app_open_menu(void)
 
 void rec_set_lock_ontouch(void)
 {
-    struct intent it;
-    init_intent(&it);
+    struct intent *it = NULL;
+    it = malloc(sizeof(struct intent));
+    init_intent(it);
+    printf("it:%p", it);
+    printf("\n -[function] %s -[line] %d\n", __FUNCTION__, __LINE__);
+    it->data = "set_lock_statu";
+    app_send_message(APP_MSG_REC_LOCK_FILE, 1, it);
+    printf("it:%p", it);
+    mdelay(30);
 
-    it.name = "video_rec";
-    it.action = ACTION_VIDEO_REC_LOCK_FILE;
-    it.data = "get_lock_statu";
-    start_app(&it);
-
-    it.name = "video_rec";
-    it.action = ACTION_VIDEO_REC_LOCK_FILE;
-    it.data = "set_lock_statu";
-    if (it.exdata) {//已经上锁
-        it.exdata = 0x0;//解锁
+    if (it->exdata) {//已经上锁
+        it->exdata = 0x0;//解锁
     } else {
-        it.exdata = 0xff;//上锁
+        it->exdata = 0xff;//上锁
     }
-    start_app(&it);
+    printf("it:%p", it);
+    app_send_message(APP_MSG_REC_LOCK_FILE, 1, it);
 
 }
 
@@ -589,13 +578,11 @@ void video_rec_post_msg(const char *msg, ...)
 //注册页面加载卸载回调
 int gui_src_action_video_rec(int action)
 {
-    struct intent it;
     struct application *app;
     lv_ui_video_rec *ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_VIDEO_REC);
     if (!ui_scr) {
         return -1;
     }
-    init_intent(&it);
 
     printf("[chili] %s %d   \n", __func__, __LINE__);
 
@@ -622,24 +609,17 @@ int gui_src_action_video_rec(int action)
             lv_i18n_set_locale("en");
             i18n_refresh_all_texts(); //语言即可生效
         }
+        printf("\n -[function] %s -[line] %d\n", __FUNCTION__, __LINE__);
         app = get_current_app();
         if (app) {
             printf("[chili] %s %d   \n", app->name, __LINE__);
-            it.name = app->name;//APP状态机在：video_rec.c
-            it.action = ACTION_VIDEO_GET_PARKING_STATUS;
-            start_app(&it);
-
-            if (it.action == ACTION_VIDEO_REC_PARKING) {
-                return 0;
-            } else {
-                it.action = ACTION_BACK;
-                start_app(&it);
-
-            }
+            printf("\n -[function] %s -[line] %d\n", __FUNCTION__, __LINE__);
+            app_mode_go_back();
         }
-        it.name = "video_rec";//APP状态机在：video_rec.c
-        it.action = ACTION_VIDEO_REC_MAIN;
-        start_app(&it);
+        printf("\n -[function] %s -[line] %d\n", __FUNCTION__, __LINE__);
+        app_mode_change_replace(APP_MODE_REC);
+        app_send_message(APP_MSG_REC_MAIN, 0);
+
         break;
     case GUI_SCREEN_ACTION_UNLOAD:
 

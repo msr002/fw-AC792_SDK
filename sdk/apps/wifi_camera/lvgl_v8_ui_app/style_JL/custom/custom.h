@@ -18,6 +18,7 @@ extern "C" {
 #include "key_event.h"
 #include "sys_time.h"
 #include "ui.h"
+#include "app_msg.h"
 #endif
 
 enum UI_GROUP_ID {

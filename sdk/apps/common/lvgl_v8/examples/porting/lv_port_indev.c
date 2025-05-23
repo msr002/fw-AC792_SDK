@@ -167,25 +167,27 @@ void lv_port_indev_init(void)
      *and assign this input device to group to navigate in it:
      *`lv_indev_set_group(indev_keypad, group);`*/
 
-#if 0
     /*------------------
      * Encoder
      * -----------------*/
 
+    static lv_indev_drv_t indev_drv_encoder;
     /*Initialize your encoder if you have*/
     encoder_init();
 
     /*Register a encoder input device*/
-    lv_indev_drv_init(&indev_drv);
-    indev_drv.type = LV_INDEV_TYPE_ENCODER;
-    indev_drv.read_cb = encoder_read;
-    indev_encoder = lv_indev_drv_register(&indev_drv);
-
+    lv_indev_drv_init(&indev_drv_encoder);
+    indev_drv_encoder.type = LV_INDEV_TYPE_ENCODER;
+    indev_drv_encoder.read_cb = encoder_read;
+    indev_encoder = lv_indev_drv_register(&indev_drv_encoder);
+    lv_timer_del(indev_encoder->driver->read_timer);
+    indev_encoder->driver->read_timer = NULL;
     /*Later you should create group(s) with `lv_group_t * group = lv_group_create()`,
      *add objects to the group with `lv_group_add_obj(group, obj)`
      *and assign this input device to group to navigate in it:
      *`lv_indev_set_group(indev_encoder, group);`*/
 
+#if 0
     /*------------------
      * Button
      * -----------------*/
@@ -569,6 +571,13 @@ static void keypad_read(lv_indev_drv_t *indev_drv, lv_indev_data_t *data)
 /*------------------
  * Encoder
  * -----------------*/
+void lv_indev_timer_read_encoder(void *user_data)
+{
+    lv_timer_t timer;
+    timer.user_data = indev_encoder;
+    indev_encoder->driver->user_data = user_data;
+    lv_indev_read_timer_cb(&timer);
+}
 
 /*Initialize your encoder*/
 static void encoder_init(void)
@@ -579,9 +588,25 @@ static void encoder_init(void)
 /*Will be called by the library to read the encoder*/
 static void encoder_read(lv_indev_drv_t *indev_drv, lv_indev_data_t *data)
 {
+    struct key_event *key_e = (struct key_event *)indev_drv->user_data;
+    if (ui_scr_key_event_handler(key_e)) {
+        //判断事件是否要发给UI
+        //返回1,按键事件发给app_core处理,不发给UI
+        return;
+    }
+
+    if (key_e->action == KEY_EVENT_RDEC_UP) {
+        encoder_diff++;
+    } else if (key_e->action == KEY_EVENT_RDEC_DOWN) {
+        encoder_diff--;
+    } else {
+        LV_LOG_WARN("encoder_read:key_e->value illegality!");
+    }
 
     data->enc_diff = encoder_diff;
-    data->state = encoder_state;
+    data->state = encoder_state;//keypad_read()中判断
+
+    encoder_diff = 0;
 }
 
 /*Call this function in an interrupt to process encoder events (turn, press)*/

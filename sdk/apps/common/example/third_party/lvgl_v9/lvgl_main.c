@@ -16,6 +16,7 @@ static u16 lvgl_timeout_id = 0;
 
 enum {
     UI_MSG_TOUCH = 1,
+    UI_MSG_ENCODER,
     UI_MSG_KEY,
     UI_MSG_TIMER_TIMEOUT,
     UI_MSG_SUSPEND,
@@ -120,6 +121,23 @@ int lvgl_key_event_handler_2(struct sys_event *event)
     if (key->key_intercept) {
         return 0;
     }
+
+    int msg[2 + sizeof(struct key_event) / 4];
+    //编码器旋钮
+    if (key->action == KEY_EVENT_RDEC_UP || KEY_EVENT_RDEC_DOWN) {
+        msg[0] = UI_MSG_ENCODER;
+        memcpy(&msg[1], key, sizeof(struct key_event));
+        if (os_taskq_post_type(LVGL_TASK_NAME, Q_USER, ARRAY_SIZE(msg), msg)) {
+            puts("lvgl_key_event_handler_2 post failed 5");
+            goto  _retry;
+        } else {
+            s_last_key_value = key->value;
+            ++lvgl_key_msg_remain_cnt;
+        }
+        return -EINVAL;
+    }
+
+
     if ((key->action == KEY_EVENT_UP) && (key->value != s_last_key_value)) {
         puts("lvgl_key_event_handler_2 post failed 1");
         return -EINVAL;
@@ -141,7 +159,6 @@ int lvgl_key_event_handler_2(struct sys_event *event)
         goto  _retry;
     }
 
-    int msg[2 + sizeof(struct key_event) / 4];
     if (key->action == KEY_EVENT_UP) {
         u8 event_split = 2;
         if (s_last_key_action == KEY_EVENT_HOLD || s_last_key_action == KEY_EVENT_LONG) {
@@ -476,6 +493,10 @@ void lvgl_main_task(void *priv)
             /*printf("lvgl_key_msg_remain_cnt = %d\r\n", lvgl_key_msg_remain_cnt);*/
             struct key_event *e = (struct key_event *)&msg[2];
             lv_indev_timer_read_key(e);
+        } else if (msg[1] == UI_MSG_ENCODER) {
+            --lvgl_key_msg_remain_cnt;
+            struct key_event *e = (struct key_event *)&msg[2];
+            lv_indev_timer_read_encoder(e);
         } else if (msg[1] == UI_MSG_TIMER_TIMEOUT) {
             lvgl_timerout_msg_remain_flag = 2; //标记LVGL定时器超时消息已经消耗掉
         } else if (msg[1] == UI_MSG_SUSPEND) {

@@ -117,7 +117,7 @@ static int bt_ble_scan_enable(void *priv, u32 en);
 static int client_write_send(void *priv, u8 *data, u16 len);
 static int client_operation_send(u16 handle, u8 *data, u16 len, u8 att_op_type);
 static int ble_enable_new_dev_scan(void);
-static void ble_client_module_enable(u8 en);
+
 //---------------------------------------------------------------------------
 static const client_conn_cfg_t *client_config = NULL;
 
@@ -875,7 +875,7 @@ static bool resolve_adv_report(u8 *adv_address, u8 data_length, u8 *data, s8 rss
             if (check_device_is_match(CLI_CREAT_BY_NAME, adv_data_pt, lenght - 1)) {
                 find_remoter = 1;
                 log_info("catch name ok");
-                /* ble_client_module_enable(0);	//如果配对成功后像继续扫描，屏蔽该行 */
+                /* multi_box_scan_module_enable(0);	//如果配对成功后像继续扫描，屏蔽该行 */
             }
             break;
 
@@ -1918,7 +1918,7 @@ REGISTER_LP_TARGET(multi_client_target) = {
 };
 #endif
 
-static void ble_client_module_enable(u8 en)
+void multi_box_scan_module_enable(u8 en)
 {
     log_info("mode_en:%d", en);
 
@@ -1938,7 +1938,11 @@ static void client_profile_init(void)
 {
     //setup GATT client
 #ifndef MULTI_BOX_ADV_FILTER_ENABLE
-    gatt_client_init();
+    static u8 gatt_client_init_flag = 0;
+    if (!gatt_client_init_flag) {
+        gatt_client_init_flag = 1;
+        gatt_client_init();
+    }
 #endif
     gatt_client_register_packet_handler(client_cbk_packet_handler);
     memset(&conn_pair_info, 0, sizeof(struct pair_info_t));
@@ -1990,12 +1994,12 @@ void multi_box_scan_all_init(void)
     client_profile_init();
     __bt_multi_client_init();
     le_multi_client_hdl_init(cur_dev_cid);
-    ble_client_module_enable(1);
+    multi_box_scan_module_enable(1);
 }
 
 void multi_box_scan_all_exit(void)
 {
-    ble_client_module_enable(0);
+    multi_box_scan_module_enable(0);
 
     for (int i = 0; i < SUPPORT_MAX_CLIENT; i++) {
         app_ble_hdl_free(le_multi_client_hdl[i]);

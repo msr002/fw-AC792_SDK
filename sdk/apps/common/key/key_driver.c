@@ -26,6 +26,10 @@
 
 static volatile u8 is_key_active = 0;
 
+#if TCFG_RDEC_KEY_ENABLE
+static u8 key_value0; 	//键值1
+static u8 key_value1; 	//键值2
+#endif
 //=======================================================//
 // 按键值重新映射函数:
 // 用户可以实现该函数把一些按键值重新映射, 可用于组合键的键值重新映射
@@ -49,6 +53,26 @@ static void key_driver_scan(void *key)
     struct key_event e = {0};
 
     cur_key_value = key_handler->get_value();
+
+
+#if TCFG_RDEC_KEY_ENABLE
+    if (scan_para->key_type == KEY_DRIVER_TYPE_RDEC) {
+        if (cur_key_value != 0 && cur_key_value != 255) {
+            if (cur_key_value == key_value0) {
+                key_event = KEY_EVENT_RDEC_UP;
+            } else if (cur_key_value == key_value1) {
+                key_event = KEY_EVENT_RDEC_DOWN;
+            } else {
+                return;
+            }
+            key_value = cur_key_value;
+            goto __notify;
+        } else {
+            return;
+        }
+    }
+#endif
+
 
     if (cur_key_value != NO_KEY) {
         is_key_active = 35;      //35*10Ms
@@ -203,6 +227,14 @@ int key_driver_init(void)
             sys_s_hi_timer_add((void *)key, key_driver_scan, key->param->scan_time); //注册按键扫描定时器
         }
     }
+
+#if TCFG_RDEC_KEY_ENABLE
+    struct rdec_platform_data *platform_data = get_rdec_key_platform_data();
+    if (platform_data) {
+        key_value0 = platform_data->rdec[0].key_value0;
+        key_value1 = platform_data->rdec[0].key_value1;
+    }
+#endif
 
     return 0;
 }

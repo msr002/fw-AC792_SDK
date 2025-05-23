@@ -70,6 +70,7 @@ enum {
     AURACAST_SINK_ISO_RX_CALLBACK_EVENT,
     AURACAST_SINK_BIG_SYNC_FAIL_EVENT,
     AURACAST_SINK_EXT_SCAN_COMPLETE_EVENT,
+    AURACAST_SINK_PADV_REPORT_EVENT,
 };
 
 typedef void (*auracast_sink_event_callback_t)(uint16_t event, uint8_t *packet, uint16_t length);

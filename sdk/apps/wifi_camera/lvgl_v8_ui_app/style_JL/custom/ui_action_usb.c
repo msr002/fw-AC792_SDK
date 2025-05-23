@@ -28,14 +28,10 @@ bool get_usb_app_flag(void)
 }
 int gui_src_action_usb(int action)
 {
-    struct intent it;
-
-    init_intent(&it);
     printf("[chili] %s %d   \n", __func__, __LINE__);
     switch (action) {
     case GUI_SCREEN_ACTION_LOAD:
-        it.action = ACTION_BACK;
-        start_app(&it);
+        app_mode_go_back();
 
         //usb_start();
         break;

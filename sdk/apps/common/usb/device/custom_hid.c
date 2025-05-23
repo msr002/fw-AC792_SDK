@@ -16,7 +16,7 @@
 #define LOG_CLI_ENABLE
 #include "debug.h"
 
-typedef void (*hid_rx_handle_t)(void *hdl, u8 *buffer, u32 len);
+typedef void (*hid_rx_handle_t)(const usb_dev usb_id, void *hdl, u8 *buffer, u32 len);
 struct custom_hid_hdl {
     u8 cfg_done;
     void *priv_hdl;
@@ -118,7 +118,7 @@ static void custom_hid_rx_data(struct usb_device_t *usb_device, u32 ep)
     u8 rx_buffer[MAXP_SIZE_CUSTOM_HIDOUT] = {0};
     u32 rx_len = usb_g_intr_read(usb_id, ep, rx_buffer, MAXP_SIZE_CUSTOM_HIDOUT, 0);
     if (custom_hid_info[usb_id] && custom_hid_info[usb_id]->hid_rx_hook) {
-        custom_hid_info[usb_id]->hid_rx_hook(custom_hid_info[usb_id]->priv_hdl, rx_buffer, rx_len);
+        custom_hid_info[usb_id]->hid_rx_hook(usb_id, custom_hid_info[usb_id]->priv_hdl, rx_buffer, rx_len);
     }
 }
 
@@ -130,7 +130,7 @@ int custom_hid_get_ready(const usb_dev usb_id)
     return 0;
 }
 
-void custom_hid_set_rx_hook(const usb_dev usb_id, void *priv, void (*rx_hook)(void *priv, u8 *buf, u32 len))
+void custom_hid_set_rx_hook(const usb_dev usb_id, void *priv, void (*rx_hook)(const usb_dev usb_id, void *priv, u8 *buf, u32 len))
 {
     if (custom_hid_info[usb_id]) {
         custom_hid_info[usb_id]->priv_hdl = priv;

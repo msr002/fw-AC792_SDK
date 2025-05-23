@@ -226,7 +226,7 @@ int video_rec_key_handler(struct key_event *key)
             printf("key event long swith video photo\n");
             gui_scr_t *screen = gui_scr_get(GUI_SCREEN_VIDEO_PHOTO);
             if (screen == NULL) {
-                screen = gui_scr_create(GUI_SCREEN_VIDEO_PHOTO, "video_photo", ui_scr->video_photo, (gui_scr_setup_cb_t)setup_scr_video_photo, (gui_scr_unload_cb_t)unload_scr_video_photo);
+                screen = gui_scr_create(GUI_SCREEN_VIDEO_PHOTO, "video_photo", guider_ui.video_photo, (gui_scr_setup_cb_t)setup_scr_video_photo, (gui_scr_unload_cb_t)unload_scr_video_photo);
             }
             ui_load_scr_anim(&guider_ui, screen, LV_SCR_LOAD_ANIM_NONE, 0, 0, true, true, false);
 #endif

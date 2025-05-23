@@ -120,17 +120,9 @@ int gui_model_main_msg_sys_prompt_cb(gui_msg_action_t access, gui_msg_data_t *da
 //注册页面加载卸载回调
 int gui_src_action_home(int action)
 {
-    struct intent it;
-    init_intent(&it);
-
     switch (action) {
     case GUI_SCREEN_ACTION_LOAD:
-        struct application *app;
-        app = get_current_app();
-        if (app) {
-            it.action = ACTION_BACK;
-            start_app(&it);
-        }
+        app_mode_go_back();
         struct sys_time usr_time;
         get_sys_time(&usr_time);
         u8 weekday = caculate_weekday_by_time(&usr_time);

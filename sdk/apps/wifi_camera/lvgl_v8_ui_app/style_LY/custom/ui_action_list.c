@@ -174,14 +174,10 @@ static void send_msg2file_num(void)
 static void dec_no_card_return(int dir)
 {
 #if 1
-    lv_ui_video_dir *ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_VIDEO_DIR);
-    if (!ui_scr) {
-        return;
-    }
     gui_scr_t *screen = gui_scr_get(GUI_SCREEN_VIDEO_DIR);
     if (screen == NULL) {
         printf("----->%s()-------: %d\n", __func__, __LINE__);
-        screen = gui_scr_create(GUI_SCREEN_VIDEO_DIR, "video_dir", ui_scr->video_dir, (gui_scr_setup_cb_t)setup_scr_video_dir, (gui_scr_unload_cb_t)unload_scr_video_dir);
+        screen = gui_scr_create(GUI_SCREEN_VIDEO_DIR, "video_dir", guider_ui.video_dir, (gui_scr_setup_cb_t)setup_scr_video_dir, (gui_scr_unload_cb_t)unload_scr_video_dir);
     } else {
         printf("----->%s()-------: %d\n", __func__, __LINE__);
         if (lv_obj_is_valid(ui_scr->video_dir_view_1)) {
