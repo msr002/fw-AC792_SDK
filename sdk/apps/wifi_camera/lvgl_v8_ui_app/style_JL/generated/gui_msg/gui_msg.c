@@ -635,16 +635,6 @@ void gui_msg_set_control_state_by_int32_cb(lv_observer_t *observer, lv_subject_t
     lv_obj_clear_state(obj, LV_STATE_ANY);
     lv_obj_add_state(obj, data->value_int);
 }
-void gui_msg_set_flag_by_int32_cb(lv_observer_t *observer, lv_subject_t *subject)
-{
-    lv_obj_t *obj = lv_observer_get_target_obj(observer);
-    if (obj == NULL || lv_obj_is_valid(obj) == false) {
-        return;
-    }
-
-    gui_msg_data_t *data = (gui_msg_data_t *)observer->user_data;
-    lv_obj_add_flag(obj, data->value_int);
-}
 void gui_msg_set_clear_flag_by_int32_cb(lv_observer_t *observer, lv_subject_t *subject)
 {
     lv_obj_t *obj = lv_observer_get_target_obj(observer);
@@ -654,6 +644,16 @@ void gui_msg_set_clear_flag_by_int32_cb(lv_observer_t *observer, lv_subject_t *s
 
     gui_msg_data_t *data = (gui_msg_data_t *)observer->user_data;
     lv_obj_clear_flag(obj, data->value_int);
+}
+void gui_msg_set_flag_by_int32_cb(lv_observer_t *observer, lv_subject_t *subject)
+{
+    lv_obj_t *obj = lv_observer_get_target_obj(observer);
+    if (obj == NULL || lv_obj_is_valid(obj) == false) {
+        return;
+    }
+
+    gui_msg_data_t *data = (gui_msg_data_t *)observer->user_data;
+    lv_obj_add_flag(obj, data->value_int);
 }
 void gui_msg_set_label_text_by_string_cb(lv_observer_t *observer, lv_subject_t *subject)
 {

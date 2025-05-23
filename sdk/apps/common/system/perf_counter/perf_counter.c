@@ -355,6 +355,11 @@ int64_t clock(void)
     return get_system_ticks();
 }
 
+uint32_t get_system_ms_in_irq(void)
+{
+    return (check_systick()) / s_nMSUnit;
+}
+
 uint32_t get_system_ms(void)
 {
     /* return (check_systick()) / s_nMSUnit; */

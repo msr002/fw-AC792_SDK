@@ -1,6 +1,5 @@
 #include "app_config.h"
 #ifdef CONFIG_UI_STYLE_JL_ENABLE
-
 #ifndef __CUSTOM_H_
 #define __CUSTOM_H_
 #ifdef __cplusplus

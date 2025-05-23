@@ -975,8 +975,9 @@ c_SRC_FILES := \
 	../../../../apps/wifi_ipc/lvgl_v8_ui_app/generated/gui_events/events_init.c \
 	../../../../apps/wifi_ipc/lvgl_v8_ui_app/generated/gui_events/i18n_handler.c \
 	../../../../apps/wifi_ipc/lvgl_v8_ui_app/generated/gui_fonts/gui_fonts.c \
+	../../../../apps/wifi_ipc/lvgl_v8_ui_app/generated/gui_group/gui_group.c \
 	../../../../apps/wifi_ipc/lvgl_v8_ui_app/generated/gui_guider.c \
-	../../../../apps/wifi_ipc/lvgl_v8_ui_app/generated/gui_images/_img_logo_alpha_332x82.c \
+	../../../../apps/wifi_ipc/lvgl_v8_ui_app/generated/gui_images/_img_logo_alpha332x82.c \
 	../../../../apps/wifi_ipc/lvgl_v8_ui_app/generated/gui_msg/gui_model_msg.c \
 	../../../../apps/wifi_ipc/lvgl_v8_ui_app/generated/gui_msg/gui_msg.c \
 	../../../../apps/wifi_ipc/lvgl_v8_ui_app/generated/gui_res/res_common.c \
@@ -987,6 +988,8 @@ c_SRC_FILES := \
 	../../../../apps/wifi_ipc/lvgl_v8_ui_app/generated/gui_scr/setup_scr_start.c \
 	../../../../apps/wifi_ipc/lvgl_v8_ui_app/generated/gui_scr/setup_scr_syscfg.c \
 	../../../../apps/wifi_ipc/lvgl_v8_ui_app/generated/gui_scr/setup_scr_sysinfo.c \
+	../../../../apps/wifi_ipc/lvgl_v8_ui_app/generated/gui_scr/ui_scr_manager.c \
+	../../../../apps/wifi_ipc/lvgl_v8_ui_app/generated/gui_scr/ui_style.c \
 	../../../../apps/wifi_ipc/lvgl_v8_ui_app/generated/gui_timelines/gui_timelines.c \
 	../../../../apps/wifi_ipc/lvgl_v8_ui_app/generated/i18n/lv_i18n.c \
 	../../../../apps/wifi_ipc/lvgl_v8_ui_app/ui_demo.c \

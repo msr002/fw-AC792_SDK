@@ -1,6 +1,5 @@
 #include "app_config.h"
 #ifdef CONFIG_UI_STYLE_LY_ENABLE
-
 #ifndef __CUSTOM_H_
 #define __CUSTOM_H_
 #ifdef __cplusplus
@@ -15,33 +14,12 @@ extern "C" {
 #include "../generated/gui_timelines/gui_timelines.h"
 #include "sim_database.h"//仿真专用数据库
 
-
 #if !LV_USE_GUIBUILDER_SIMULATOR
 #include "key_event.h"
 #include "ui.h"
 #include "../generated/gui_res/res_common.h"
 #include "../generated/gui_msg/gui_msg.h"
 #endif
-enum {//语言
-    LANG_ZH_CN = 1,
-    LANG_ZH_HK,
-    LANG_ENGLISH,
-    LANG_RU,
-    LANG_AR,
-    LANG_TH,
-    LANG_DE,
-    LANG_FR,
-    LANG_KO,
-    LANG_JA,
-    LANG_ES,
-    LANG_PT,
-    LANG_CS,
-    LANG_PL,
-    LANG_IT,
-    LANG_NL,
-    LANG_SV,
-    LANG_DA
-};
 
 //子菜单页面枚举
 enum MENU_SUBPAGE {
@@ -101,6 +79,10 @@ enum {//子页面功能键
     SUBPAGE_FUNKEY7
 };
 
+enum {//语言
+    LANG_CHINESE_SIMP = 1,
+    LANG_ENGLISH
+};
 
 struct sysmenu_subpage_data {
     void *funkey1;//功能按键1文字内容（填空就是不显示）

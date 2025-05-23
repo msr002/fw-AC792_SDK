@@ -13,8 +13,11 @@ extern "C" {
 #include "./gui_scr/ui_style.h"
 
 #ifdef JL_GUI_KERNEL_VERSION_MAJOR
-#if GUI_CORE_VERSION_MAJOR != JL_GUI_KERNEL_VERSION_MAJOR
-#error "Current Kernel Version is not compatible, please replace or upgrade the kernel!"
+#if GUI_CORE_VERSION_MAJOR > JL_GUI_KERNEL_VERSION_MAJOR
+#error "Current SDK Version is older than the kernel version. Please update the SDK version!"
+#endif
+#if GUI_CORE_VERSION_MAJOR < JL_GUI_KERNEL_VERSION_MAJOR
+#error "Current SDK Version is newer than the kernel version. Please update the kernel version!"
 #endif
 #if GUI_CORE_VERSION_MINOR > JL_GUI_KERNEL_VERSION_MINOR
 #warning "Current Kernel Version is too low, some features may not be available, please update the kernel version!"
@@ -251,8 +254,10 @@ void ui_scr_stack_pop_anim(lv_ui *ui, lv_scr_load_anim_t anim_type, uint32_t tim
 
 gui_scr_t *ui_get_scr(int32_t scr_id);
 gui_scr_t *ui_get_setup_scr(int32_t scr_id);
+lv_obj_t *ui_get_setup_scr_obj(int32_t scr_id);
 void *ui_get_scr_ptr(lv_ui *ui, int32_t scr_id);
 void ui_free_scr_ptr(lv_ui *ui, int32_t scr_id);
+bool ui_is_act_scr(int32_t scr_id);
 void ui_init_style(lv_style_t *style);
 void setup_ui(lv_ui *ui);
 #include "./gui_msg/gui_msg.h"

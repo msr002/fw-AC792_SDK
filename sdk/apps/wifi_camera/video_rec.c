@@ -4781,9 +4781,9 @@ static int video_rec_change_source_reso(int dev_id, u16 width, u16 height)
                 disp_state == DISP_HALF_WIN ||
                 disp_state == DISP_BACK_WIN ||
                 disp_state == DISP_PARK_WIN) {
-                if (__this->second_disp_dev == 2) {
-                    video_disp_stop(2);
-                }
+                /* if (__this->second_disp_dev == 2) { */
+                video_disp_stop(2);
+                /* } */
             }
             //video2.* record and display must be closed before source reso change
             if (rec_state == VIDREC_STA_START) {
@@ -4793,9 +4793,9 @@ static int video_rec_change_source_reso(int dev_id, u16 width, u16 height)
                 disp_state == DISP_HALF_WIN ||
                 disp_state == DISP_BACK_WIN ||
                 disp_state == DISP_PARK_WIN) {
-                if (__this->second_disp_dev == 2) {
-                    video_disp_start(2, &disp_window[disp_state][1]);
-                }
+                /* if (__this->second_disp_dev == 2) { */
+                video_disp_start(2, &disp_window[disp_state][1]);
+                /* } */
             }
         }
     } else

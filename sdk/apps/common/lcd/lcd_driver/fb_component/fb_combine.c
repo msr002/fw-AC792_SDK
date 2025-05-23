@@ -747,10 +747,10 @@ static int fb_check_gpu_plugin_is_busy(void)
         pipe_plugin_t *gpu_plugin = plugin_factory_find_used(gpu_source[i]);
         if (gpu_plugin) {
             u8 gpu_task_busy = *(u8 *)(((u32 *)gpu_plugin->private_data));
-            u32 time = get_system_ms() + 1 * 1000;
+            u32 time = get_system_ms_in_irq() + 1 * 1000;
             while (gpu_task_busy) { /* 如果繁忙则等待 */
                 gpu_task_busy = *(u8 *)(((u32 *)gpu_plugin->private_data));
-                if (time_after(get_system_ms(), time)) {
+                if (time_after(get_system_ms_in_irq(), time)) {
                     log_error("gpu_plugin task busy timeout!");
                     break;
                 }

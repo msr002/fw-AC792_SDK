@@ -11,41 +11,47 @@
 // Generate video_rec_timer_1 CallBack Handler
 void video_rec_timer_1_timer_cb(lv_timer_t *src)
 {
+    lv_ui_video_rec *ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_VIDEO_REC);
     extern int video_rec_record_time();
     lvgl_rpc_post_func(video_rec_record_time, 0);
 
     if (src->repeat_count == 0) {
-        guider_ui.video_rec_timer_1 = NULL;
+        ui_scr->video_rec_timer_1 = NULL;
     }
+
 }
 // Generate video_play_hide_bar CallBack Handler
 void video_play_hide_bar_timer_cb(lv_timer_t *src)
 {
-    if (lv_obj_is_valid(guider_ui.video_play_view_1)) {
-        lv_obj_add_flag(guider_ui.video_play_view_1, LV_OBJ_FLAG_HIDDEN);
+    lv_ui_video_play *ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_VIDEO_PLAY);
+    if (lv_obj_is_valid(ui_scr->video_play_view_1)) {
+        lv_obj_add_flag(ui_scr->video_play_view_1, LV_OBJ_FLAG_HIDDEN);
     }
-    if (guider_ui.video_play_hide_bar) {
-        lv_timer_del(guider_ui.video_play_hide_bar);
-        guider_ui.video_play_hide_bar = NULL;
+    if (ui_scr->video_play_hide_bar) {
+        lv_timer_del(ui_scr->video_play_hide_bar);
+        ui_scr->video_play_hide_bar = NULL;
     }
 
 
     if (src->repeat_count == 0) {
-        guider_ui.video_play_hide_bar = NULL;
+        ui_scr->video_play_hide_bar = NULL;
     }
+
 }
 // Generate video_play_hide_label CallBack Handler
 void video_play_hide_label_timer_cb(lv_timer_t *src)
 {
-    if (guider_ui.video_play_hide_label) {
-        lv_timer_del(guider_ui.video_play_hide_label);
-        guider_ui.video_play_hide_label = NULL;
+    lv_ui_video_play *ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_VIDEO_PLAY);
+    if (ui_scr->video_play_hide_label) {
+        lv_timer_del(ui_scr->video_play_hide_label);
+        ui_scr->video_play_hide_label = NULL;
     }
 
 
     if (src->repeat_count == 0) {
-        guider_ui.video_play_hide_label = NULL;
+        ui_scr->video_play_hide_label = NULL;
     }
+
 }
 
 #endif

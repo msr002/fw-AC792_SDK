@@ -27,8 +27,12 @@ static void dec_play_pause(void);
 
 void gui_show_video_dec_options(void)
 {
-    if (guider_ui.video_dec_options_del == false && lv_obj_is_valid(guider_ui.video_dec_options)) {
-        lv_obj_clear_flag(guider_ui.video_dec_options, LV_OBJ_FLAG_HIDDEN);
+    lv_ui_video_dec_options *ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_VIDEO_DEC_OPTIONS);
+    if (!ui_scr) {
+        return;
+    }
+    if (ui_scr->video_dec_options_del == false && lv_obj_is_valid(ui_scr->video_dec_options)) {
+        lv_obj_clear_flag(ui_scr->video_dec_options, LV_OBJ_FLAG_HIDDEN);
     } else {
         setup_scr_video_dec_options(&guider_ui);
         gui_msg_init_ui();
@@ -39,8 +43,8 @@ void gui_show_video_dec_options(void)
     //按键导航
     top_level_group = lv_group_create();
     if (top_level_group) {
-        lv_group_add_obj(top_level_group, guider_ui.video_dec_options_btn_1);
-        lv_group_add_obj(top_level_group, guider_ui.video_dec_options_btn_2);
+        lv_group_add_obj(top_level_group, ui_scr->video_dec_options_btn_1);
+        lv_group_add_obj(top_level_group, ui_scr->video_dec_options_btn_2);
         lv_indev_t *indev = lv_indev_get_next(NULL);
         if (indev != NULL) {
             lv_indev_set_group(indev, top_level_group);
@@ -50,8 +54,12 @@ void gui_show_video_dec_options(void)
 
 void gui_hide_video_dec_options(void)
 {
-    if (guider_ui.video_dec_options_del == false && lv_obj_is_valid(guider_ui.video_dec_options)) {
-        lv_obj_add_flag(guider_ui.video_dec_options, LV_OBJ_FLAG_HIDDEN);
+    lv_ui_video_dec_options *ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_VIDEO_DEC_OPTIONS);
+    if (!ui_scr) {
+        return;
+    }
+    if (ui_scr->video_dec_options_del == false && lv_obj_is_valid(ui_scr->video_dec_options)) {
+        lv_obj_add_flag(ui_scr->video_dec_options, LV_OBJ_FLAG_HIDDEN);
     }
 
 
@@ -95,12 +103,15 @@ void gui_video_dec_set_menu_hide(void)
 static void gui_video_dec_hide_menu(void)
 {
     gui_hide_video_dec_options();
-
-    if (lv_obj_is_valid(guider_ui.video_dec_view_5)) {
-        lv_obj_add_flag(guider_ui.video_dec_view_5, LV_OBJ_FLAG_HIDDEN);
-        if (lv_obj_is_valid(guider_ui.video_dec_view_scan)) {
-            lv_obj_clear_flag(guider_ui.video_dec_view_scan, LV_OBJ_FLAG_HIDDEN);
-            lv_group_focus_obj(guider_ui.video_dec_view_scan);
+    lv_ui_video_dec *ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_VIDEO_DEC);
+    if (!ui_scr) {
+        return;
+    }
+    if (lv_obj_is_valid(ui_scr->video_dec_view_5)) {
+        lv_obj_add_flag(ui_scr->video_dec_view_5, LV_OBJ_FLAG_HIDDEN);
+        if (lv_obj_is_valid(ui_scr->video_dec_view_scan)) {
+            lv_obj_clear_flag(ui_scr->video_dec_view_scan, LV_OBJ_FLAG_HIDDEN);
+            lv_group_focus_obj(ui_scr->video_dec_view_scan);
         }
     }
 
@@ -171,7 +182,6 @@ void gui_video_dec_prot_file(void)
 
 void gui_switch_video_dec_page(void)
 {
-
 #ifdef CONFIG_FILE_PREVIEW_ENABLE
     printf("load video dir page \n");
     gui_scr_t *screen = gui_scr_get(GUI_SCREEN_VIDEO_DIR);
@@ -385,13 +395,16 @@ int gui_src_action_video_dec(int action)
     struct intent it;
     struct application *app;
     init_intent(&it);
-
+    lv_ui_video_dec *ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_VIDEO_DEC);
+    if (!ui_scr) {
+        return -1;
+    }
     switch (action) {
     case GUI_SCREEN_ACTION_LOAD: {
 #if LV_DISP_UI_FB_NUM
-        lv_obj_set_style_bg_opa(guider_ui.video_dec, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+        lv_obj_set_style_bg_opa(ui_scr->video_dec, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
 #else
-        lv_obj_set_style_bg_opa(guider_ui.video_dec, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+        lv_obj_set_style_bg_opa(ui_scr->video_dec, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
 #endif
         app = get_current_app();
         if (app && strcmp(app->name, "video_dec")) {
@@ -486,6 +499,7 @@ REGISTER_UI_MODULE_EVENT_HANDLER(GUI_MODEL_VIDEO_DEC_MSG_ID_SD_STATUS_IMG)
 
 
 #endif /* LV_USE_GUIBUILDER_SIMULATOR */
+
 
 
 #endif

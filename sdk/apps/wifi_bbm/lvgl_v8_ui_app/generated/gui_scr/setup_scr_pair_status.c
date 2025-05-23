@@ -12,8 +12,8 @@
 
 static const char *pair_status_imglist_1_imgs[2] = {
 #if LV_USE_GUIBUILDER_SIMULATOR
-    "A:\\gitlab-m\\ac792\\ui_prj\\wifi_bbm_800x480\\import\\image\\unpair.png",
-    "A:\\gitlab-m\\ac792\\ui_prj\\wifi_bbm_800x480\\import\\image\\paired.png"
+    "A:\\1111\\ac792\\ui_prj\\wifi_bbm_800x480\\import\\image\\unpair.png",
+    "A:\\1111\\ac792\\ui_prj\\wifi_bbm_800x480\\import\\image\\paired.png"
 #else
     "mnt/sdfile/EXT_RESERVED/uipackres/ui/4b000003.zip",
     "mnt/sdfile/EXT_RESERVED/uipackres/ui/4b000004.zip"
@@ -21,8 +21,8 @@ static const char *pair_status_imglist_1_imgs[2] = {
 };
 static const char *pair_status_imglist_2_imgs[2] = {
 #if LV_USE_GUIBUILDER_SIMULATOR
-    "A:\\gitlab-m\\ac792\\ui_prj\\wifi_bbm_800x480\\import\\image\\unpair.png",
-    "A:\\gitlab-m\\ac792\\ui_prj\\wifi_bbm_800x480\\import\\image\\paired.png"
+    "A:\\1111\\ac792\\ui_prj\\wifi_bbm_800x480\\import\\image\\unpair.png",
+    "A:\\1111\\ac792\\ui_prj\\wifi_bbm_800x480\\import\\image\\paired.png"
 #else
     "mnt/sdfile/EXT_RESERVED/uipackres/ui/4b000003.zip",
     "mnt/sdfile/EXT_RESERVED/uipackres/ui/4b000004.zip"
@@ -30,8 +30,8 @@ static const char *pair_status_imglist_2_imgs[2] = {
 };
 static const char *pair_status_imglist_3_imgs[2] = {
 #if LV_USE_GUIBUILDER_SIMULATOR
-    "A:\\gitlab-m\\ac792\\ui_prj\\wifi_bbm_800x480\\import\\image\\unpair.png",
-    "A:\\gitlab-m\\ac792\\ui_prj\\wifi_bbm_800x480\\import\\image\\paired.png"
+    "A:\\1111\\ac792\\ui_prj\\wifi_bbm_800x480\\import\\image\\unpair.png",
+    "A:\\1111\\ac792\\ui_prj\\wifi_bbm_800x480\\import\\image\\paired.png"
 #else
     "mnt/sdfile/EXT_RESERVED/uipackres/ui/4b000003.zip",
     "mnt/sdfile/EXT_RESERVED/uipackres/ui/4b000004.zip"
@@ -39,8 +39,8 @@ static const char *pair_status_imglist_3_imgs[2] = {
 };
 static const char *pair_status_imglist_4_imgs[2] = {
 #if LV_USE_GUIBUILDER_SIMULATOR
-    "A:\\gitlab-m\\ac792\\ui_prj\\wifi_bbm_800x480\\import\\image\\unpair.png",
-    "A:\\gitlab-m\\ac792\\ui_prj\\wifi_bbm_800x480\\import\\image\\paired.png"
+    "A:\\1111\\ac792\\ui_prj\\wifi_bbm_800x480\\import\\image\\unpair.png",
+    "A:\\1111\\ac792\\ui_prj\\wifi_bbm_800x480\\import\\image\\paired.png"
 #else
     "mnt/sdfile/EXT_RESERVED/uipackres/ui/4b000003.zip",
     "mnt/sdfile/EXT_RESERVED/uipackres/ui/4b000004.zip"
@@ -48,8 +48,8 @@ static const char *pair_status_imglist_4_imgs[2] = {
 };
 static const char *pair_status_imglist_5_imgs[2] = {
 #if LV_USE_GUIBUILDER_SIMULATOR
-    "A:\\gitlab-m\\ac792\\ui_prj\\wifi_bbm_800x480\\import\\image\\unpair.png",
-    "A:\\gitlab-m\\ac792\\ui_prj\\wifi_bbm_800x480\\import\\image\\paired.png"
+    "A:\\1111\\ac792\\ui_prj\\wifi_bbm_800x480\\import\\image\\unpair.png",
+    "A:\\1111\\ac792\\ui_prj\\wifi_bbm_800x480\\import\\image\\paired.png"
 #else
     "mnt/sdfile/EXT_RESERVED/uipackres/ui/4b000003.zip",
     "mnt/sdfile/EXT_RESERVED/uipackres/ui/4b000004.zip"
@@ -57,8 +57,8 @@ static const char *pair_status_imglist_5_imgs[2] = {
 };
 static const char *pair_status_imglist_6_imgs[2] = {
 #if LV_USE_GUIBUILDER_SIMULATOR
-    "A:\\gitlab-m\\ac792\\ui_prj\\wifi_bbm_800x480\\import\\image\\unpair.png",
-    "A:\\gitlab-m\\ac792\\ui_prj\\wifi_bbm_800x480\\import\\image\\paired.png"
+    "A:\\1111\\ac792\\ui_prj\\wifi_bbm_800x480\\import\\image\\unpair.png",
+    "A:\\1111\\ac792\\ui_prj\\wifi_bbm_800x480\\import\\image\\paired.png"
 #else
     "mnt/sdfile/EXT_RESERVED/uipackres/ui/4b000003.zip",
     "mnt/sdfile/EXT_RESERVED/uipackres/ui/4b000004.zip"
@@ -98,6 +98,7 @@ lv_obj_t *setup_scr_pair_status(lv_ui *ui)
         memset(ui_scr, 0, sizeof(lv_ui_pair_status));
         ui->pair_status = ui_scr;
     }
+
     //Write codes pair_status
     ui_scr->pair_status = lv_obj_create(NULL);
 
@@ -109,121 +110,89 @@ lv_obj_t *setup_scr_pair_status(lv_ui *ui)
     lv_obj_set_size(ui_scr->g_kb_pair_status, LV_PCT(70), LV_PCT(40));
     lv_keyboard_set_mode(ui_scr->g_kb_pair_status, LV_KEYBOARD_MODE_TEXT_LOWER);
     lv_group_t *def_group = lv_group_get_default();
+    lv_obj_set_scrollbar_mode(ui_scr->pair_status, LV_SCROLLBAR_MODE_OFF);
+    ui_style_set(ui_scr->pair_status, GUI_CTRL_SCR);
 
     //Set style for pair_status. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
-    lv_obj_add_style(ui_scr->pair_status, &gui_scr_main_default_style, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_border_opa(ui_scr->pair_status, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_scrollbar_mode(ui_scr->pair_status, LV_SCROLLBAR_MODE_OFF);
+
     //Write codes pair_status_imglist_1
     ui_scr->pair_status_imglist_1 = lv_imglist_create(ui_scr->pair_status);
-
-    //Set style for pair_status_imglist_1. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
-    lv_obj_add_style(ui_scr->pair_status_imglist_1, &gui_imglist_main_default_style, LV_PART_MAIN | LV_STATE_DEFAULT);
-
-    //Set style for pair_status_imglist_1. Part: LV_PART_MAIN, State: LV_STATE_FOCUS_KEY
-    lv_obj_add_style(ui_scr->pair_status_imglist_1, &gui_imglist_main_focus_key_style, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
     lv_obj_set_pos(ui_scr->pair_status_imglist_1, 86, 111);
     lv_obj_set_size(ui_scr->pair_status_imglist_1, 128, 128);
     lv_obj_set_scrollbar_mode(ui_scr->pair_status_imglist_1, LV_SCROLLBAR_MODE_OFF);
     lv_obj_add_flag(ui_scr->pair_status_imglist_1, LV_OBJ_FLAG_CLICKABLE);
     lv_group_add_obj(def_group, ui_scr->pair_status_imglist_1);
+    ui_style_set(ui_scr->pair_status_imglist_1, GUI_CTRL_IMGLIST);
     lv_imglist_set_src(ui_scr->pair_status_imglist_1, (const void **) pair_status_imglist_1_imgs, 2);
     lv_imglist_set_act(ui_scr->pair_status_imglist_1, 0);
+
     //Write codes pair_status_imglist_2
     ui_scr->pair_status_imglist_2 = lv_imglist_create(ui_scr->pair_status);
-
-    //Set style for pair_status_imglist_2. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
-    lv_obj_add_style(ui_scr->pair_status_imglist_2, &gui_imglist_main_default_style, LV_PART_MAIN | LV_STATE_DEFAULT);
-
-    //Set style for pair_status_imglist_2. Part: LV_PART_MAIN, State: LV_STATE_FOCUS_KEY
-    lv_obj_add_style(ui_scr->pair_status_imglist_2, &gui_imglist_main_focus_key_style, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
     lv_obj_set_pos(ui_scr->pair_status_imglist_2, 337, 111);
     lv_obj_set_size(ui_scr->pair_status_imglist_2, 128, 128);
     lv_obj_set_scrollbar_mode(ui_scr->pair_status_imglist_2, LV_SCROLLBAR_MODE_OFF);
     lv_obj_add_flag(ui_scr->pair_status_imglist_2, LV_OBJ_FLAG_CLICKABLE);
     lv_group_add_obj(def_group, ui_scr->pair_status_imglist_2);
+    ui_style_set(ui_scr->pair_status_imglist_2, GUI_CTRL_IMGLIST);
     lv_imglist_set_src(ui_scr->pair_status_imglist_2, (const void **) pair_status_imglist_2_imgs, 2);
     lv_imglist_set_act(ui_scr->pair_status_imglist_2, 0);
+
     //Write codes pair_status_imglist_3
     ui_scr->pair_status_imglist_3 = lv_imglist_create(ui_scr->pair_status);
-
-    //Set style for pair_status_imglist_3. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
-    lv_obj_add_style(ui_scr->pair_status_imglist_3, &gui_imglist_main_default_style, LV_PART_MAIN | LV_STATE_DEFAULT);
-
-    //Set style for pair_status_imglist_3. Part: LV_PART_MAIN, State: LV_STATE_FOCUS_KEY
-    lv_obj_add_style(ui_scr->pair_status_imglist_3, &gui_imglist_main_focus_key_style, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
     lv_obj_set_pos(ui_scr->pair_status_imglist_3, 590, 111);
     lv_obj_set_size(ui_scr->pair_status_imglist_3, 128, 128);
     lv_obj_set_scrollbar_mode(ui_scr->pair_status_imglist_3, LV_SCROLLBAR_MODE_OFF);
     lv_obj_add_flag(ui_scr->pair_status_imglist_3, LV_OBJ_FLAG_CLICKABLE);
     lv_group_add_obj(def_group, ui_scr->pair_status_imglist_3);
+    ui_style_set(ui_scr->pair_status_imglist_3, GUI_CTRL_IMGLIST);
     lv_imglist_set_src(ui_scr->pair_status_imglist_3, (const void **) pair_status_imglist_3_imgs, 2);
     lv_imglist_set_act(ui_scr->pair_status_imglist_3, 0);
+
     //Write codes pair_status_imglist_4
     ui_scr->pair_status_imglist_4 = lv_imglist_create(ui_scr->pair_status);
-
-    //Set style for pair_status_imglist_4. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
-    lv_obj_add_style(ui_scr->pair_status_imglist_4, &gui_imglist_main_default_style, LV_PART_MAIN | LV_STATE_DEFAULT);
-
-    //Set style for pair_status_imglist_4. Part: LV_PART_MAIN, State: LV_STATE_FOCUS_KEY
-    lv_obj_add_style(ui_scr->pair_status_imglist_4, &gui_imglist_main_focus_key_style, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
     lv_obj_set_pos(ui_scr->pair_status_imglist_4, 82, 296);
     lv_obj_set_size(ui_scr->pair_status_imglist_4, 128, 128);
     lv_obj_set_scrollbar_mode(ui_scr->pair_status_imglist_4, LV_SCROLLBAR_MODE_OFF);
     lv_obj_add_flag(ui_scr->pair_status_imglist_4, LV_OBJ_FLAG_CLICKABLE);
     lv_group_add_obj(def_group, ui_scr->pair_status_imglist_4);
+    ui_style_set(ui_scr->pair_status_imglist_4, GUI_CTRL_IMGLIST);
     lv_imglist_set_src(ui_scr->pair_status_imglist_4, (const void **) pair_status_imglist_4_imgs, 2);
     lv_imglist_set_act(ui_scr->pair_status_imglist_4, 0);
+
     //Write codes pair_status_imglist_5
     ui_scr->pair_status_imglist_5 = lv_imglist_create(ui_scr->pair_status);
-
-    //Set style for pair_status_imglist_5. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
-    lv_obj_add_style(ui_scr->pair_status_imglist_5, &gui_imglist_main_default_style, LV_PART_MAIN | LV_STATE_DEFAULT);
-
-    //Set style for pair_status_imglist_5. Part: LV_PART_MAIN, State: LV_STATE_FOCUS_KEY
-    lv_obj_add_style(ui_scr->pair_status_imglist_5, &gui_imglist_main_focus_key_style, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
     lv_obj_set_pos(ui_scr->pair_status_imglist_5, 337, 291);
     lv_obj_set_size(ui_scr->pair_status_imglist_5, 128, 128);
     lv_obj_set_scrollbar_mode(ui_scr->pair_status_imglist_5, LV_SCROLLBAR_MODE_OFF);
     lv_obj_add_flag(ui_scr->pair_status_imglist_5, LV_OBJ_FLAG_CLICKABLE);
     lv_group_add_obj(def_group, ui_scr->pair_status_imglist_5);
+    ui_style_set(ui_scr->pair_status_imglist_5, GUI_CTRL_IMGLIST);
     lv_imglist_set_src(ui_scr->pair_status_imglist_5, (const void **) pair_status_imglist_5_imgs, 2);
     lv_imglist_set_act(ui_scr->pair_status_imglist_5, 0);
+
     //Write codes pair_status_imglist_6
     ui_scr->pair_status_imglist_6 = lv_imglist_create(ui_scr->pair_status);
-
-    //Set style for pair_status_imglist_6. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
-    lv_obj_add_style(ui_scr->pair_status_imglist_6, &gui_imglist_main_default_style, LV_PART_MAIN | LV_STATE_DEFAULT);
-
-    //Set style for pair_status_imglist_6. Part: LV_PART_MAIN, State: LV_STATE_FOCUS_KEY
-    lv_obj_add_style(ui_scr->pair_status_imglist_6, &gui_imglist_main_focus_key_style, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
     lv_obj_set_pos(ui_scr->pair_status_imglist_6, 590, 295);
     lv_obj_set_size(ui_scr->pair_status_imglist_6, 128, 128);
     lv_obj_set_scrollbar_mode(ui_scr->pair_status_imglist_6, LV_SCROLLBAR_MODE_OFF);
     lv_obj_add_flag(ui_scr->pair_status_imglist_6, LV_OBJ_FLAG_CLICKABLE);
     lv_group_add_obj(def_group, ui_scr->pair_status_imglist_6);
+    ui_style_set(ui_scr->pair_status_imglist_6, GUI_CTRL_IMGLIST);
     lv_imglist_set_src(ui_scr->pair_status_imglist_6, (const void **) pair_status_imglist_6_imgs, 2);
     lv_imglist_set_act(ui_scr->pair_status_imglist_6, 0);
+
     //Write codes pair_status_imgbtn_1
     ui_scr->pair_status_imgbtn_1 = lv_imgbtn_create(ui_scr->pair_status);
-
-    //Set style for pair_status_imgbtn_1. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
-    lv_obj_add_style(ui_scr->pair_status_imgbtn_1, &gui_imgbtn_main_default_style, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_shadow_opa(ui_scr->pair_status_imgbtn_1, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_outline_opa(ui_scr->pair_status_imgbtn_1, 128, LV_PART_MAIN | LV_STATE_DEFAULT);
-
-    //Set style for pair_status_imgbtn_1. Part: LV_PART_MAIN, State: LV_STATE_FOCUS_KEY
-    lv_obj_add_style(ui_scr->pair_status_imgbtn_1, &gui_imgbtn_main_focus_key_style, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
-
-    //Set style for pair_status_imgbtn_1. Part: LV_PART_MAIN, State: LV_STATE_PRESSED
-    lv_obj_add_style(ui_scr->pair_status_imgbtn_1, &gui_imgbtn_main_pressed_style, LV_PART_MAIN | LV_STATE_PRESSED);
-
-    //Set style for pair_status_imgbtn_1. Part: LV_PART_MAIN, State: LV_STATE_CHECKED
-    lv_obj_add_style(ui_scr->pair_status_imgbtn_1, &gui_imgbtn_main_checked_style, LV_PART_MAIN | LV_STATE_CHECKED);
     lv_obj_set_pos(ui_scr->pair_status_imgbtn_1, 19, 14);
     lv_obj_set_size(ui_scr->pair_status_imgbtn_1, 64, 64);
     lv_obj_set_scrollbar_mode(ui_scr->pair_status_imgbtn_1, LV_SCROLLBAR_MODE_OFF);
     lv_group_add_obj(def_group, ui_scr->pair_status_imgbtn_1);
+    ui_style_set(ui_scr->pair_status_imgbtn_1, GUI_CTRL_IMGBTN);
+
+    //Set style for pair_status_imgbtn_1. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
+    lv_obj_set_style_shadow_opa(ui_scr->pair_status_imgbtn_1, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_outline_opa(ui_scr->pair_status_imgbtn_1, 128, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_imgbtn_set_src(ui_scr->pair_status_imgbtn_1, LV_IMGBTN_STATE_RELEASED, NULL, gui_get_res_path(GUI_RES_BACK_PNG), NULL);
     lv_imgbtn_set_src(ui_scr->pair_status_imgbtn_1, LV_IMGBTN_STATE_PRESSED, NULL, gui_get_res_path(GUI_RES_BACK_PNG), NULL);
     lv_imgbtn_set_src(ui_scr->pair_status_imgbtn_1, LV_IMGBTN_STATE_CHECKED_RELEASED, NULL, gui_get_res_path(GUI_RES_BACK_PNG), NULL);
@@ -233,78 +202,71 @@ lv_obj_t *setup_scr_pair_status(lv_ui *ui)
     lv_label_set_text(ui_scr->pair_status_imgbtn_1_label, "");
     lv_obj_set_style_pad_all(ui_scr->pair_status_imgbtn_1, 0, LV_STATE_DEFAULT);
     lv_obj_align(ui_scr->pair_status_imgbtn_1_label, LV_ALIGN_CENTER, 0, 0);
+
     //Write codes pair_status_lbl_1
     ui_scr->pair_status_lbl_1 = lv_label_create(ui_scr->pair_status);
     lv_label_set_text(ui_scr->pair_status_lbl_1, "Device 0");
     lv_label_set_long_mode(ui_scr->pair_status_lbl_1, LV_LABEL_LONG_WRAP);
-
-    //Set style for pair_status_lbl_1. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
-    lv_obj_add_style(ui_scr->pair_status_lbl_1, &gui_label_main_default_style, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_pos(ui_scr->pair_status_lbl_1, 85, 240);
     lv_obj_set_size(ui_scr->pair_status_lbl_1, 100, 35);
     lv_obj_set_scrollbar_mode(ui_scr->pair_status_lbl_1, LV_SCROLLBAR_MODE_OFF);
+    ui_style_set(ui_scr->pair_status_lbl_1, GUI_CTRL_LABEL);
+
     //Write codes pair_status_lbl_2
     ui_scr->pair_status_lbl_2 = lv_label_create(ui_scr->pair_status);
     lv_label_set_text(ui_scr->pair_status_lbl_2, "Device 1");
     lv_label_set_long_mode(ui_scr->pair_status_lbl_2, LV_LABEL_LONG_WRAP);
-
-    //Set style for pair_status_lbl_2. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
-    lv_obj_add_style(ui_scr->pair_status_lbl_2, &gui_label_main_default_style, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_pos(ui_scr->pair_status_lbl_2, 335, 240);
     lv_obj_set_size(ui_scr->pair_status_lbl_2, 100, 35);
     lv_obj_set_scrollbar_mode(ui_scr->pair_status_lbl_2, LV_SCROLLBAR_MODE_OFF);
+    ui_style_set(ui_scr->pair_status_lbl_2, GUI_CTRL_LABEL);
+
     //Write codes pair_status_lbl_3
     ui_scr->pair_status_lbl_3 = lv_label_create(ui_scr->pair_status);
     lv_label_set_text(ui_scr->pair_status_lbl_3, "Device 2");
     lv_label_set_long_mode(ui_scr->pair_status_lbl_3, LV_LABEL_LONG_WRAP);
-
-    //Set style for pair_status_lbl_3. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
-    lv_obj_add_style(ui_scr->pair_status_lbl_3, &gui_label_main_default_style, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_pos(ui_scr->pair_status_lbl_3, 585, 240);
     lv_obj_set_size(ui_scr->pair_status_lbl_3, 100, 35);
     lv_obj_set_scrollbar_mode(ui_scr->pair_status_lbl_3, LV_SCROLLBAR_MODE_OFF);
+    ui_style_set(ui_scr->pair_status_lbl_3, GUI_CTRL_LABEL);
+
     //Write codes pair_status_lbl_4
     ui_scr->pair_status_lbl_4 = lv_label_create(ui_scr->pair_status);
     lv_label_set_text(ui_scr->pair_status_lbl_4, "Device 3");
     lv_label_set_long_mode(ui_scr->pair_status_lbl_4, LV_LABEL_LONG_WRAP);
-
-    //Set style for pair_status_lbl_4. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
-    lv_obj_add_style(ui_scr->pair_status_lbl_4, &gui_label_main_default_style, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_pos(ui_scr->pair_status_lbl_4, 85, 425);
     lv_obj_set_size(ui_scr->pair_status_lbl_4, 100, 35);
     lv_obj_set_scrollbar_mode(ui_scr->pair_status_lbl_4, LV_SCROLLBAR_MODE_OFF);
+    ui_style_set(ui_scr->pair_status_lbl_4, GUI_CTRL_LABEL);
+
     //Write codes pair_status_lbl_5
     ui_scr->pair_status_lbl_5 = lv_label_create(ui_scr->pair_status);
     lv_label_set_text(ui_scr->pair_status_lbl_5, "Device 4");
     lv_label_set_long_mode(ui_scr->pair_status_lbl_5, LV_LABEL_LONG_WRAP);
-
-    //Set style for pair_status_lbl_5. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
-    lv_obj_add_style(ui_scr->pair_status_lbl_5, &gui_label_main_default_style, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_pos(ui_scr->pair_status_lbl_5, 335, 425);
     lv_obj_set_size(ui_scr->pair_status_lbl_5, 100, 35);
     lv_obj_set_scrollbar_mode(ui_scr->pair_status_lbl_5, LV_SCROLLBAR_MODE_OFF);
+    ui_style_set(ui_scr->pair_status_lbl_5, GUI_CTRL_LABEL);
+
     //Write codes pair_status_lbl_6
     ui_scr->pair_status_lbl_6 = lv_label_create(ui_scr->pair_status);
     lv_label_set_text(ui_scr->pair_status_lbl_6, "Device 5");
     lv_label_set_long_mode(ui_scr->pair_status_lbl_6, LV_LABEL_LONG_WRAP);
-
-    //Set style for pair_status_lbl_6. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
-    lv_obj_add_style(ui_scr->pair_status_lbl_6, &gui_label_main_default_style, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_pos(ui_scr->pair_status_lbl_6, 585, 425);
     lv_obj_set_size(ui_scr->pair_status_lbl_6, 100, 35);
     lv_obj_set_scrollbar_mode(ui_scr->pair_status_lbl_6, LV_SCROLLBAR_MODE_OFF);
+    ui_style_set(ui_scr->pair_status_lbl_6, GUI_CTRL_LABEL);
+
     //Write codes pair_status_ddlist_1
     ui_scr->pair_status_ddlist_1 = lv_dropdown_create(ui_scr->pair_status);
     lv_dropdown_set_options(ui_scr->pair_status_ddlist_1, "Channel-1\nChannel-6\nChannel-11\nChannel-13");
     lv_dropdown_set_dir(ui_scr->pair_status_ddlist_1, LV_DIR_BOTTOM);
     lv_dropdown_set_symbol(ui_scr->pair_status_ddlist_1, LV_SYMBOL_DOWN);
     lv_dropdown_set_selected(ui_scr->pair_status_ddlist_1, 0);
-
-    //Set style for pair_status_ddlist_1. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
-    lv_obj_add_style(ui_scr->pair_status_ddlist_1, &gui_ddlist_main_default_style, LV_PART_MAIN | LV_STATE_DEFAULT);
-
-    //Set style for pair_status_ddlist_1. Part: LV_PART_MAIN, State: LV_STATE_FOCUS_KEY
-    lv_obj_add_style(ui_scr->pair_status_ddlist_1, &gui_ddlist_main_focus_key_style, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+    lv_obj_set_pos(ui_scr->pair_status_ddlist_1, 590, 49);
+    lv_obj_set_size(ui_scr->pair_status_ddlist_1, 150, 45);
+    lv_obj_set_scrollbar_mode(ui_scr->pair_status_ddlist_1, LV_SCROLLBAR_MODE_OFF);
+    ui_style_set(ui_scr->pair_status_ddlist_1, GUI_CTRL_DROPDOWN);
 
     //Set style state: LV_STATE_CHECKED for style_pair_status_ddlist_1_extra_list_selected_checked
     static lv_style_t style_pair_status_ddlist_1_extra_list_selected_checked;
@@ -323,24 +285,28 @@ lv_obj_t *setup_scr_pair_status(lv_ui *ui)
     ui_init_style(&style_pair_status_ddlist_1_extra_list_scrollbar_default);
     lv_obj_add_style(lv_dropdown_get_list(ui_scr->pair_status_ddlist_1), &gui_ddlist_scrollbar_default_style, LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
     lv_obj_add_style(lv_dropdown_get_list(ui_scr->pair_status_ddlist_1), &style_pair_status_ddlist_1_extra_list_scrollbar_default, LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
-    lv_obj_set_pos(ui_scr->pair_status_ddlist_1, 590, 49);
-    lv_obj_set_size(ui_scr->pair_status_ddlist_1, 150, 45);
-    lv_obj_set_scrollbar_mode(ui_scr->pair_status_ddlist_1, LV_SCROLLBAR_MODE_OFF);
+
+    //Delete extra default style for pair_status_ddlist_1
+    lv_obj_remove_style(ui_scr->pair_status_ddlist_1, &gui_ddlist_selected_checked_style, LV_PART_SELECTED | LV_STATE_CHECKED);
+    lv_obj_remove_style(ui_scr->pair_status_ddlist_1, &gui_ddlist_dropdown_list_default_style, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_remove_style(ui_scr->pair_status_ddlist_1, &gui_ddlist_scrollbar_default_style, LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
+
     //Write codes pair_status_lbl_7
     ui_scr->pair_status_lbl_7 = lv_label_create(ui_scr->pair_status);
     lv_label_set_text(ui_scr->pair_status_lbl_7, "WiFi-Channel");
     lv_label_set_long_mode(ui_scr->pair_status_lbl_7, LV_LABEL_LONG_WRAP);
+    lv_obj_set_pos(ui_scr->pair_status_lbl_7, 520, 0);
+    lv_obj_set_size(ui_scr->pair_status_lbl_7, 233, 38);
+    lv_obj_set_scrollbar_mode(ui_scr->pair_status_lbl_7, LV_SCROLLBAR_MODE_OFF);
+    ui_style_set(ui_scr->pair_status_lbl_7, GUI_CTRL_LABEL);
 
     //Set style for pair_status_lbl_7. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
-    lv_obj_add_style(ui_scr->pair_status_lbl_7, &gui_label_main_default_style, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_shadow_opa(ui_scr->pair_status_lbl_7, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_border_opa(ui_scr->pair_status_lbl_7, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_outline_opa(ui_scr->pair_status_lbl_7, 128, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_color(ui_scr->pair_status_lbl_7, lv_color_make(0x2A, 0x09, 0x23), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_font(ui_scr->pair_status_lbl_7, &lv_font_montserratMedium_24, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_pos(ui_scr->pair_status_lbl_7, 520, 0);
-    lv_obj_set_size(ui_scr->pair_status_lbl_7, 233, 38);
-    lv_obj_set_scrollbar_mode(ui_scr->pair_status_lbl_7, LV_SCROLLBAR_MODE_OFF);
+
     lv_obj_update_layout(ui_scr->pair_status);
     ui_scr->pair_status_del = false;
 

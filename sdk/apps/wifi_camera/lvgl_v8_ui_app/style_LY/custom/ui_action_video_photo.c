@@ -1,6 +1,5 @@
 #include "app_config.h"
 #ifdef CONFIG_UI_STYLE_LY_ENABLE
-
 #include "custom.h"
 #if !LV_USE_GUIBUILDER_SIMULATOR
 #include "ui.h"
@@ -28,10 +27,14 @@ int gui_src_action_video_photo(int action)
 
     switch (action) {
     case GUI_SCREEN_ACTION_LOAD: {
+        lv_ui_video_photo *ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_VIDEO_PHOTO);
+        if (!ui_scr) {
+            return -1;
+        }
 #if LV_DISP_UI_FB_NUM
-        lv_obj_set_style_bg_opa(guider_ui.video_photo, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+        lv_obj_set_style_bg_opa(ui_scr->video_photo, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
 #else
-        lv_obj_set_style_bg_opa(guider_ui.video_photo, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+        lv_obj_set_style_bg_opa(ui_scr->video_photo, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
 #endif
         // printf("--->%s()----->%d\n", __func__, __LINE__);
         app = get_current_app();
@@ -72,7 +75,11 @@ int video_photo_key_handler(struct key_event *key)
         case KEY_OK:
         case KEY_DOWN:
         case KEY_UP:
-            if (!lv_obj_has_flag(guider_ui.video_photo_view_menu_b, LV_OBJ_FLAG_HIDDEN)) {  //进入设置菜单时, 按键消息不传到792 app_core
+            lv_ui_video_photo *ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_VIDEO_PHOTO);
+            if (!ui_scr) {
+                return -1;
+            }
+            if (!lv_obj_has_flag(ui_scr->video_photo_view_menu_b, LV_OBJ_FLAG_HIDDEN)) {  //进入设置菜单时, 按键消息不传到792 app_core
                 return 0;
             } else {
                 return 1;
@@ -149,16 +156,24 @@ int gui_get_camera_config(char *label)
 #endif
 }
 
-static take_photo_in(int arg)
+static void take_photo_in(int arg)
 {
-    lv_obj_add_flag(guider_ui.video_photo_img_photo_icon, LV_OBJ_FLAG_HIDDEN);
-    lv_obj_clear_flag(guider_ui.video_photo_img_taking_photo, LV_OBJ_FLAG_HIDDEN);
+    lv_ui_video_photo *ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_VIDEO_PHOTO);
+    if (!ui_scr) {
+        return;
+    }
+    lv_obj_add_flag(ui_scr->video_photo_img_photo_icon, LV_OBJ_FLAG_HIDDEN);
+    lv_obj_clear_flag(ui_scr->video_photo_img_taking_photo, LV_OBJ_FLAG_HIDDEN);
 }
 
-static take_photo_out(int arg)
+static void take_photo_out(int arg)
 {
-    lv_obj_add_flag(guider_ui.video_photo_img_taking_photo, LV_OBJ_FLAG_HIDDEN);
-    lv_obj_clear_flag(guider_ui.video_photo_img_photo_icon, LV_OBJ_FLAG_HIDDEN);
+    lv_ui_video_photo *ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_VIDEO_PHOTO);
+    if (!ui_scr) {
+        return;
+    }
+    lv_obj_add_flag(ui_scr->video_photo_img_taking_photo, LV_OBJ_FLAG_HIDDEN);
+    lv_obj_clear_flag(ui_scr->video_photo_img_photo_icon, LV_OBJ_FLAG_HIDDEN);
 }
 
 static int tph_take_photo_in_handler(void)

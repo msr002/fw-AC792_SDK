@@ -230,10 +230,11 @@ int net_video_rec_uvc_online(void)
 }
 int net_pkg_get_video_size(int *width, int *height)
 {
+    u8 id = 0;
 #ifdef CONFIG_VIDEO0_ENABLE
-    u8 id = __this_net->video_id ? 1 : 0;
+    id = __this_net->video_id ? 1 : 0;
 #elif (defined CONFIG_VIDEO4_ENABLE)
-    u8 id = __this_net->video_id == 4 ? 5 : 4;
+    id = __this_net->video_id == 4 ? 5 : 4;
 #endif
     *width = __this_net->net_videoreq[id].rec.width;
     *height = __this_net->net_videoreq[id].rec.height;

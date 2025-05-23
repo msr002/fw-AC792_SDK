@@ -4267,16 +4267,22 @@ const struct ctp_map_entry ctp_video_cmd_tab[] SEC_USED(.ctp_video_cmd) = {
     {NULL, "OPEN_PULL_AUDIO_RT_STREAM", NULL, cmd_put_open_pull_audio_rt_stream},
     {NULL, "CLOSE_PULL_AUDIO_RT_STREAM", cmd_get_close_pull_audio_rt_stream, cmd_put_close_pull_audio_rt_stream},
 
+#endif
+
+#ifdef CONFIG_VIDEO1_ENABLE
     {NULL, "OPEN_THIRD_RT_STREAM", NULL, cmd_put_open_third_rt_stream},
     {NULL, "CLOSE_THIRD_RT_STREAM", cmd_get_close_third_rt_stream, cmd_put_close_third_rt_stream},
 
+    {NULL, "THIRD_VIDEO_STATUS", cmd_get_third_video_status, NULL},
+
+    {NULL, "THIRD_VIDEO_PARAM", cmd_get_third_video_param, cmd_put_third_video_param},
+    {NULL, "THIRD_MEDIA_FILES_LIST", NULL, cmd_put_make_third_files_list},
 #endif
+
     {NULL, "VIDEO_BUMPING", cmd_get_video_bumping, cmd_put_video_bumping},
 
     {NULL, "PULL_VIDEO_STATUS", cmd_get_pull_video_status, NULL},
-    {NULL, "THIRD_VIDEO_STATUS", cmd_get_third_video_status, NULL},
     {NULL, "PULL_VIDEO_PARAM", cmd_get_pull_video_param, cmd_put_pull_video_param},
-    {NULL, "THIRD_VIDEO_PARAM", cmd_get_third_video_param, cmd_put_third_video_param},
     {NULL, "VIDEO_CYC_SAVEFILE", NULL, cmd_put_video_cyc_savefile},
 #ifdef CONFIG_NET_SCR
     {NULL, "NET_SCR", cmd_get_net_scr, cmd_put_net_scr},
@@ -4308,7 +4314,6 @@ const struct ctp_map_entry ctp_system_cmd_tab[] SEC_USED(.ctp_system_cmd) = {
 #if defined CONFIG_ENABLE_VLIST
     {NULL, "FORWARD_MEDIA_FILES_LIST", NULL, cmd_put_make_forward_files_list},
     {NULL, "BEHIND_MEDIA_FILES_LIST", NULL, cmd_put_make_behind_files_list},
-    {NULL, "THIRD_MEDIA_FILES_LIST", NULL, cmd_put_make_third_files_list},
 #endif
     {NULL, "FILES_DELETE", NULL, cmd_put_files_delete},
     {NULL, "MULTI_COVER_FIGURE", NULL, cmd_put_multi_cover_figure},

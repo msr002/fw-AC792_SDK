@@ -214,6 +214,8 @@ struct rt_stream_dev {
     //video pipeline
     void *pipe_core;
     struct video_window win;
+    int src_width;
+    int src_height;
 
     //lbuf
     struct lbuff_head *lbuf_handle;
@@ -416,6 +418,40 @@ exit:
     bbm_audio_enc_exit();
 }
 
+static int jpeg_get_size(u8 *stream, int len, int *width, int *height)
+{
+    u8 marker;
+    int chunk_len;
+
+    if ((stream[0] != 0xFF) || (stream[1] != 0xD8)) {
+        printf("not jpg picture.");
+        return -1;
+    }
+
+    stream += 2;
+
+    while (1) {
+        if (*stream++ != 0xFF) {
+            return -2;
+        }
+
+        while (*stream == 0xFF) {
+            stream++;
+        }
+
+        marker = *stream++;
+        chunk_len = (u16)(stream[0] << 8) | stream[1];
+
+        if (marker == 0xC0) {
+            *height = (u16)((stream[3] << 8) | stream[4]);
+            *width  = (u16)((stream[5] << 8) | stream[6]);
+            break;
+        }
+        stream += chunk_len;
+    }
+    return 0;
+}
+
 
 static void rt_stream_dev_task(void *priv)
 {
@@ -486,7 +522,28 @@ static void rt_stream_dev_task(void *priv)
                 if (parse_info.packet_type == VIDEO_TYPE_PACKET) {
                     //8字节头部
                     u8 *jpeg_buf = parse_info.data_buf + 8;
-                    u32 jpeg_len = parse_info.data_len - 8;
+                    int jpeg_len = parse_info.data_len - 8;
+
+                    while (jpeg_len > 32) {
+                        if (jpeg_buf[jpeg_len - 2] == 0xFF && jpeg_buf[jpeg_len - 1] == 0XD9) {
+                            break;
+                        }
+                        jpeg_len--;
+                    }
+                    if (jpeg_len < 32 || jpeg_buf[0] != 0xFF || jpeg_buf[1] != 0xD8 ||
+                        jpeg_buf[jpeg_len - 2] != 0xFF || jpeg_buf[jpeg_len - 1] != 0XD9) {
+                        printf("err jpeg !!! \n");
+                        continue;
+                    }
+
+                    int jpeg_width = 0, jpeg_height = 0;
+                    ret = jpeg_get_size(jpeg_buf, jpeg_len, &jpeg_width, &jpeg_height);
+                    if (ret || jpeg_width != rt_dev->src_width || jpeg_height != rt_dev->src_height) {
+                        printf("jpeg fmt not match err:%d w:%d h:%d", ret, jpeg_width, jpeg_height);
+                        continue;
+                    }
+
+
                     fps++;
                     abr += jpeg_len;
                     bbm_pipe_disp_one_frame(rt_dev->pipe_core, jpeg_buf, jpeg_len);
@@ -632,6 +689,8 @@ static int bbm_rt_dev_init(u32 ip_addr, struct video_window *win, int src_w, int
     if (ret) {
         goto err;
     }
+    rt_dev->src_width = src_w;
+    rt_dev->src_height = src_h;
 
     //lbuf
     rt_dev->lbuf_ptr = malloc(RT_LBUF_SIZE);
@@ -772,7 +831,7 @@ int bbm_ctp_rt_start(void *priv, struct video_window *win)
         bbm_hdl->rt_config.height = win->height;
         /* bbm_hdl->rt_config.width = 192; */
         /* bbm_hdl->rt_config.height = 160; */
-        bbm_hdl->rt_config.abr_kbps = 1;
+        bbm_hdl->rt_config.abr_kbps = 1000;
     }
 
     snprintf(topic_3, sizeof(topic_3), OPEN_RT_TOPIC);

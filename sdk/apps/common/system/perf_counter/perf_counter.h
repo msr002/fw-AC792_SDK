@@ -915,6 +915,8 @@ extern void perf_counter_init(void);
 
 extern uint32_t time_lapse(uint32_t *handle, uint32_t time_out);//2^32/1000/60/60/24 后超时
 
+extern uint32_t get_system_ms_in_irq(void);
+
 #ifdef __cplusplus
 }
 #endif

@@ -1185,7 +1185,6 @@
 <Unit filename="../../../../apps/wifi_camera/lvgl_v8_ui_app/style_JL/custom/multi_language.h" />
 <Unit filename="../../../../apps/wifi_camera/lvgl_v8_ui_app/style_JL/custom/sim_database.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/wifi_camera/lvgl_v8_ui_app/style_JL/custom/sim_database.h" />
-<Unit filename="../../../../apps/wifi_camera/lvgl_v8_ui_app/style_JL/custom/ui_action_animation.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/wifi_camera/lvgl_v8_ui_app/style_JL/custom/ui_action_linedrift.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/wifi_camera/lvgl_v8_ui_app/style_JL/custom/ui_action_list.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/wifi_camera/lvgl_v8_ui_app/style_JL/custom/ui_action_main.c"><Option compilerVer="CC"/></Unit>

@@ -50,8 +50,6 @@ void gui_model_video_play_msg_init(lv_ui *ui)
     if (sub != NULL) {
         lv_subject_init_pointer(sub->subject, &guider_msg_data);
     }
-    gui_model_video_play_msg_init_ui();
-    gui_model_video_play_msg_init_events();
 }
 
 void gui_model_video_play_msg_init_ui()
@@ -82,11 +80,12 @@ void gui_model_video_play_msg_init_events()
     lv_subject_t *subject_disp_progress_bar = gui_msg_get_subject(GUI_MODEL_VIDEO_PLAY_MSG_ID_DISP_PROGRESS_BAR);
     lv_subject_t *subject_add_click_flag = gui_msg_get_subject(GUI_MODEL_VIDEO_PLAY_MSG_ID_ADD_CLICK_FLAG);
     lv_subject_t *subject_clear_click_flag = gui_msg_get_subject(GUI_MODEL_VIDEO_PLAY_MSG_ID_CLEAR_CLICK_FLAG);
-    if (!guider_ui.video_play_del) {
-        gui_msg_setup_component(true, false, subject_disp_progress_bar, guider_ui.video_play_view_1, &guider_msg_data, gui_msg_set_visible_by_bool_cb, GUI_MODEL_VIDEO_PLAY_MSG_ID_DISP_PROGRESS_BAR, GUI_MSG_ACCESS_GET, VALUE_BOOL, NULL);
+    if (guider_ui.video_play) {
+        lv_ui_video_play *ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_VIDEO_PLAY);
+        gui_msg_setup_component(true, false, subject_disp_progress_bar, ui_scr->video_play_view_1, &guider_msg_data, gui_msg_set_visible_by_bool_cb, GUI_MODEL_VIDEO_PLAY_MSG_ID_DISP_PROGRESS_BAR, GUI_MSG_ACCESS_GET, VALUE_BOOL, NULL);
 
-        gui_msg_setup_component(true, false, subject_add_click_flag, guider_ui.video_play, &guider_msg_data, gui_msg_set_flag_by_int32_cb, GUI_MODEL_VIDEO_PLAY_MSG_ID_ADD_CLICK_FLAG, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
-        gui_msg_setup_component(true, false, subject_clear_click_flag, guider_ui.video_play, &guider_msg_data, gui_msg_set_clear_flag_by_int32_cb, GUI_MODEL_VIDEO_PLAY_MSG_ID_CLEAR_CLICK_FLAG, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
+        gui_msg_setup_component(true, false, subject_clear_click_flag, ui_scr->video_play, &guider_msg_data, gui_msg_set_clear_flag_by_int32_cb, GUI_MODEL_VIDEO_PLAY_MSG_ID_CLEAR_CLICK_FLAG, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
+        gui_msg_setup_component(true, false, subject_add_click_flag, ui_scr->video_play, &guider_msg_data, gui_msg_set_flag_by_int32_cb, GUI_MODEL_VIDEO_PLAY_MSG_ID_ADD_CLICK_FLAG, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
 
 
         for (int i = 0; i < 3; i++) {

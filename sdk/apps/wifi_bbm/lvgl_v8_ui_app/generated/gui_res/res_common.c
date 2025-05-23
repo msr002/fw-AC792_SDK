@@ -18,43 +18,43 @@ char *gui_get_res_path(int32_t id)
 #if LV_USE_GUIBUILDER_SIMULATOR
     switch (id) {
     case GUI_RES_CAMERA_PNG:
-        return "A:\\gitlab-m\\ac792\\ui_prj\\wifi_bbm_800x480\\import\\image\\camera.png";
+        return "A:\\1111\\ac792\\ui_prj\\wifi_bbm_800x480\\import\\image\\camera.png";
     case GUI_RES_LINK_PNG:
-        return "A:\\gitlab-m\\ac792\\ui_prj\\wifi_bbm_800x480\\import\\image\\link.png";
+        return "A:\\1111\\ac792\\ui_prj\\wifi_bbm_800x480\\import\\image\\link.png";
     case GUI_RES_DIR_PNG:
-        return "A:\\gitlab-m\\ac792\\ui_prj\\wifi_bbm_800x480\\import\\image\\dir.png";
+        return "A:\\1111\\ac792\\ui_prj\\wifi_bbm_800x480\\import\\image\\dir.png";
     case GUI_RES_UNPAIR_PNG:
-        return "A:\\gitlab-m\\ac792\\ui_prj\\wifi_bbm_800x480\\import\\image\\unpair.png";
+        return "A:\\1111\\ac792\\ui_prj\\wifi_bbm_800x480\\import\\image\\unpair.png";
     case GUI_RES_PAIRED_PNG:
-        return "A:\\gitlab-m\\ac792\\ui_prj\\wifi_bbm_800x480\\import\\image\\paired.png";
+        return "A:\\1111\\ac792\\ui_prj\\wifi_bbm_800x480\\import\\image\\paired.png";
     case GUI_RES_BACK_PNG:
-        return "A:\\gitlab-m\\ac792\\ui_prj\\wifi_bbm_800x480\\import\\image\\back.png";
+        return "A:\\1111\\ac792\\ui_prj\\wifi_bbm_800x480\\import\\image\\back.png";
     case GUI_RES_SWITCH_PNG:
-        return "A:\\gitlab-m\\ac792\\ui_prj\\wifi_bbm_800x480\\import\\image\\switch.png";
+        return "A:\\1111\\ac792\\ui_prj\\wifi_bbm_800x480\\import\\image\\switch.png";
     case GUI_RES_UP_PNG:
-        return "A:\\gitlab-m\\ac792\\ui_prj\\wifi_bbm_800x480\\import\\image\\up.png";
+        return "A:\\1111\\ac792\\ui_prj\\wifi_bbm_800x480\\import\\image\\up.png";
     case GUI_RES_DOWN_PNG:
-        return "A:\\gitlab-m\\ac792\\ui_prj\\wifi_bbm_800x480\\import\\image\\down.png";
+        return "A:\\1111\\ac792\\ui_prj\\wifi_bbm_800x480\\import\\image\\down.png";
     case GUI_RES_DELETE_PNG:
-        return "A:\\gitlab-m\\ac792\\ui_prj\\wifi_bbm_800x480\\import\\image\\delete.png";
+        return "A:\\1111\\ac792\\ui_prj\\wifi_bbm_800x480\\import\\image\\delete.png";
     case GUI_RES_PAIR_OPT_PAIR_PNG:
-        return "A:\\gitlab-m\\ac792\\ui_prj\\wifi_bbm_800x480\\import\\image\\pair_opt_pair.png";
+        return "A:\\1111\\ac792\\ui_prj\\wifi_bbm_800x480\\import\\image\\pair_opt_pair.png";
     case GUI_RES_PAIR_OPT_UNPAIR_PNG:
-        return "A:\\gitlab-m\\ac792\\ui_prj\\wifi_bbm_800x480\\import\\image\\pair_opt_unpair.png";
+        return "A:\\1111\\ac792\\ui_prj\\wifi_bbm_800x480\\import\\image\\pair_opt_unpair.png";
     case GUI_RES_BACK_WHITE_PNG:
-        return "A:\\gitlab-m\\ac792\\ui_prj\\wifi_bbm_800x480\\import\\image\\back_white.png";
+        return "A:\\1111\\ac792\\ui_prj\\wifi_bbm_800x480\\import\\image\\back_white.png";
     case GUI_RES_VIDEO_PLAY_PNG:
-        return "A:\\gitlab-m\\ac792\\ui_prj\\wifi_bbm_800x480\\import\\image\\video_play.png";
+        return "A:\\1111\\ac792\\ui_prj\\wifi_bbm_800x480\\import\\image\\video_play.png";
     case GUI_RES_VIDEO_PAUSE_PNG:
-        return "A:\\gitlab-m\\ac792\\ui_prj\\wifi_bbm_800x480\\import\\image\\video_pause.png";
+        return "A:\\1111\\ac792\\ui_prj\\wifi_bbm_800x480\\import\\image\\video_pause.png";
     case GUI_RES_SKIP_NEXT_PNG:
-        return "A:\\gitlab-m\\ac792\\ui_prj\\wifi_bbm_800x480\\import\\image\\skip_next.png";
+        return "A:\\1111\\ac792\\ui_prj\\wifi_bbm_800x480\\import\\image\\skip_next.png";
     case GUI_RES_SKIP_PREVIOUS_PNG:
-        return "A:\\gitlab-m\\ac792\\ui_prj\\wifi_bbm_800x480\\import\\image\\skip_previous.png";
+        return "A:\\1111\\ac792\\ui_prj\\wifi_bbm_800x480\\import\\image\\skip_previous.png";
     case GUI_RES_WARN_PNG:
-        return "A:\\gitlab-m\\ac792\\ui_prj\\wifi_bbm_800x480\\import\\image\\warn.png";
+        return "A:\\1111\\ac792\\ui_prj\\wifi_bbm_800x480\\import\\image\\warn.png";
     case GUI_RES_REMOTE_PNG:
-        return "A:\\gitlab-m\\ac792\\ui_prj\\wifi_bbm_800x480\\import\\image\\remote.png";
+        return "A:\\1111\\ac792\\ui_prj\\wifi_bbm_800x480\\import\\image\\remote.png";
     default:
         return NULL;
     }
@@ -125,13 +125,9 @@ char *gui_get_res_path(int32_t id)
     } else if (id >= 0x42800000 && id < 0x43000000) {
         snprintf(path_buf, sizeof(path_buf), "%s%x.%s", sd_dir, id, "gif");
     } else if (id >= 0x43000000 && id < 0x43800000) {
-        snprintf(path_buf, sizeof(path_buf), "%s%x.%s", flash_dir, id, "bin");
+        snprintf(path_buf, sizeof(path_buf), "%s%x.%s", flash_dir, id, "zip");
     } else if (id >= 0x43800000 && id < 0x44000000) {
-        snprintf(path_buf, sizeof(path_buf), "%s%x.%s", sd_dir, id, "bin");
-    } else if (id >= 0x44000000 && id < 0x44800000) {
-        snprintf(path_buf, sizeof(path_buf), "%s%x.%s", flash_dir, id, "rle");
-    } else if (id >= 0x44800000 && id < 0x45000000) {
-        snprintf(path_buf, sizeof(path_buf), "%s%x.%s", sd_dir, id, "rle");
+        snprintf(path_buf, sizeof(path_buf), "%s%x.%s", sd_dir, id, "zip");
     } else if (id >= 0x46000000 && id < 0x46800000) {
         snprintf(path_buf, sizeof(path_buf), "%s%x.%s", flash_dir, id, "png");
     } else if (id >= 0x46800000 && id < 0x47000000) {

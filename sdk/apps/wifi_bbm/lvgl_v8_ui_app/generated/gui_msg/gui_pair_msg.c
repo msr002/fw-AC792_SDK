@@ -166,8 +166,6 @@ void gui_pair_msg_init(lv_ui *ui)
     if (sub != NULL) {
         lv_subject_init_pointer(sub->subject, &guider_msg_data);
     }
-    gui_pair_msg_init_ui();
-    gui_pair_msg_init_events();
 }
 
 void gui_pair_msg_init_ui()
@@ -214,30 +212,30 @@ void gui_pair_msg_init_events()
     lv_subject_t *subject_wifi_ch_select = gui_msg_get_subject(GUI_PAIR_MSG_ID_WIFI_CH_SELECT);
     if (guider_ui.pair_status) {
         lv_ui_pair_status *ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_PAIR_STATUS);
-        gui_msg_setup_component(true, false, subject_pair_ch5, ui_scr->pair_status_imglist_6, &guider_msg_data, gui_msg_set_imglist_selected_index_by_int32_cb, GUI_PAIR_MSG_ID_PAIR_CH5, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
-
-        gui_msg_setup_component(true, false, subject_pair_ch2, ui_scr->pair_status_imglist_3, &guider_msg_data, gui_msg_set_imglist_selected_index_by_int32_cb, GUI_PAIR_MSG_ID_PAIR_CH2, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
+        gui_msg_setup_component(true, false, subject_pair_ch0, ui_scr->pair_status_imglist_1, &guider_msg_data, gui_msg_set_imglist_selected_index_by_int32_cb, GUI_PAIR_MSG_ID_PAIR_CH0, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
 
         gui_msg_setup_component(true, false, subject_pair_ch1, ui_scr->pair_status_imglist_2, &guider_msg_data, gui_msg_set_imglist_selected_index_by_int32_cb, GUI_PAIR_MSG_ID_PAIR_CH1, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
 
-        gui_msg_setup_component(true, false, subject_pair_ch4, ui_scr->pair_status_imglist_5, &guider_msg_data, gui_msg_set_imglist_selected_index_by_int32_cb, GUI_PAIR_MSG_ID_PAIR_CH4, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
+        gui_msg_setup_component(true, false, subject_pair_ch2, ui_scr->pair_status_imglist_3, &guider_msg_data, gui_msg_set_imglist_selected_index_by_int32_cb, GUI_PAIR_MSG_ID_PAIR_CH2, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
 
         gui_msg_setup_component(true, false, subject_pair_ch3, ui_scr->pair_status_imglist_4, &guider_msg_data, gui_msg_set_imglist_selected_index_by_int32_cb, GUI_PAIR_MSG_ID_PAIR_CH3, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
+
+        gui_msg_setup_component(true, false, subject_pair_ch4, ui_scr->pair_status_imglist_5, &guider_msg_data, gui_msg_set_imglist_selected_index_by_int32_cb, GUI_PAIR_MSG_ID_PAIR_CH4, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
+
+        gui_msg_setup_component(true, false, subject_pair_ch5, ui_scr->pair_status_imglist_6, &guider_msg_data, gui_msg_set_imglist_selected_index_by_int32_cb, GUI_PAIR_MSG_ID_PAIR_CH5, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
 
         gui_msg_setup_component(true, false, subject_ddlist_lab, ui_scr->pair_status_ddlist_1, &guider_msg_data, gui_msg_set_dropdown_list_by_string_cb, GUI_PAIR_MSG_ID_DDLIST_LAB, GUI_MSG_ACCESS_GET, VALUE_STRING, NULL);
         gui_msg_setup_component(true, true, subject_wifi_ch_select, ui_scr->pair_status_ddlist_1, &guider_msg_data, gui_msg_set_dropdown_selected_index_by_int32_cb, GUI_PAIR_MSG_ID_WIFI_CH_SELECT, GUI_MSG_ACCESS_GET, VALUE_INT, gui_msg_change_dropdown_selected_index_cb);
 
-        gui_msg_setup_component(true, false, subject_pair_ch0, ui_scr->pair_status_imglist_1, &guider_msg_data, gui_msg_set_imglist_selected_index_by_int32_cb, GUI_PAIR_MSG_ID_PAIR_CH0, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
-
 
         for (int i = 0; i < 10; i++) {
-            if (status[i].msg_id == GUI_PAIR_MSG_ID_PAIR_CH5) {
-                status[i].is_subscribe = 1;
-            }
             if (status[i].msg_id == GUI_PAIR_MSG_ID_PAIR_CH0) {
                 status[i].is_subscribe = 1;
             }
-            if (status[i].msg_id == GUI_PAIR_MSG_ID_DDLIST_LAB) {
+            if (status[i].msg_id == GUI_PAIR_MSG_ID_PAIR_CH1) {
+                status[i].is_subscribe = 1;
+            }
+            if (status[i].msg_id == GUI_PAIR_MSG_ID_PAIR_CH2) {
                 status[i].is_subscribe = 1;
             }
             if (status[i].msg_id == GUI_PAIR_MSG_ID_PAIR_CH3) {
@@ -246,10 +244,10 @@ void gui_pair_msg_init_events()
             if (status[i].msg_id == GUI_PAIR_MSG_ID_PAIR_CH4) {
                 status[i].is_subscribe = 1;
             }
-            if (status[i].msg_id == GUI_PAIR_MSG_ID_PAIR_CH1) {
+            if (status[i].msg_id == GUI_PAIR_MSG_ID_PAIR_CH5) {
                 status[i].is_subscribe = 1;
             }
-            if (status[i].msg_id == GUI_PAIR_MSG_ID_PAIR_CH2) {
+            if (status[i].msg_id == GUI_PAIR_MSG_ID_DDLIST_LAB) {
                 status[i].is_subscribe = 1;
             }
             if (status[i].msg_id == GUI_PAIR_MSG_ID_WIFI_CH_SELECT) {

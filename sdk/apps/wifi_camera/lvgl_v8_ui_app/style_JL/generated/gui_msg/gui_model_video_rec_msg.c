@@ -448,8 +448,6 @@ void gui_model_video_rec_msg_init(lv_ui *ui)
     if (sub != NULL) {
         lv_subject_init_pointer(sub->subject, &guider_msg_data);
     }
-    gui_model_video_rec_msg_init_ui();
-    gui_model_video_rec_msg_init_events();
 }
 
 void gui_model_video_rec_msg_init_ui()
@@ -528,132 +526,133 @@ void gui_model_video_rec_msg_init_events()
     lv_subject_t *subject_hide_record_time = gui_msg_get_subject(GUI_MODEL_VIDEO_REC_MSG_ID_HIDE_RECORD_TIME);
     lv_subject_t *subject_show_record_time = gui_msg_get_subject(GUI_MODEL_VIDEO_REC_MSG_ID_SHOW_RECORD_TIME);
     lv_subject_t *subject_app_connected = gui_msg_get_subject(GUI_MODEL_VIDEO_REC_MSG_ID_APP_CONNECTED);
-    if (!guider_ui.video_rec_del) {
-        gui_msg_setup_component(true, false, subject_hide_car_crashlock, guider_ui.video_rec_img_lock_icon, &guider_msg_data, gui_msg_set_flag_by_int32_cb, GUI_MODEL_VIDEO_REC_MSG_ID_HIDE_CAR_CRASHLOCK, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
-        gui_msg_setup_component(true, false, subject_show_car_crashlock, guider_ui.video_rec_img_lock_icon, &guider_msg_data, gui_msg_set_clear_flag_by_int32_cb, GUI_MODEL_VIDEO_REC_MSG_ID_SHOW_CAR_CRASHLOCK, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
+    if (guider_ui.video_rec) {
+        lv_ui_video_rec *ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_VIDEO_REC);
+        gui_msg_setup_component(true, false, subject_rec_btn, ui_scr->video_rec_imgbtn_1, &guider_msg_data, gui_msg_set_control_state_by_int32_cb, GUI_MODEL_VIDEO_REC_MSG_ID_REC_BTN, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
 
-        gui_msg_setup_component(true, false, subject_app_connected, guider_ui.video_rec_img_app, &guider_msg_data, gui_model_video_rec_msg_video_rec_img_app_set_img_path_cb, GUI_MODEL_VIDEO_REC_MSG_ID_APP_CONNECTED, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
+        gui_msg_setup_component(true, false, subject_cycrec_icon, ui_scr->video_rec_img_4, &guider_msg_data, gui_model_video_rec_msg_video_rec_img_4_set_img_path_cb, GUI_MODEL_VIDEO_REC_MSG_ID_CYCREC_ICON, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
 
-        gui_msg_setup_component(true, false, subject_flash_headlight, guider_ui.video_rec_headlight, &guider_msg_data, gui_msg_set_visible_by_bool_cb, GUI_MODEL_VIDEO_REC_MSG_ID_FLASH_HEADLIGHT, GUI_MSG_ACCESS_GET, VALUE_BOOL, NULL);
+        gui_msg_setup_component(true, false, subject_show_gsensor_icon, ui_scr->video_rec_img_5, &guider_msg_data, gui_msg_set_clear_flag_by_int32_cb, GUI_MODEL_VIDEO_REC_MSG_ID_SHOW_GSENSOR_ICON, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
+        gui_msg_setup_component(true, false, subject_gsensor_icon, ui_scr->video_rec_img_5, &guider_msg_data, gui_model_video_rec_msg_video_rec_img_5_set_img_path_cb, GUI_MODEL_VIDEO_REC_MSG_ID_GSENSOR_ICON, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
+        gui_msg_setup_component(true, false, subject_hide_gsensor_icon, ui_scr->video_rec_img_5, &guider_msg_data, gui_msg_set_flag_by_int32_cb, GUI_MODEL_VIDEO_REC_MSG_ID_HIDE_GSENSOR_ICON, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
 
-        gui_msg_setup_component(true, false, subject_delayrec_icon, guider_ui.video_rec_img_11, &guider_msg_data, gui_model_video_rec_msg_video_rec_img_11_set_img_path_cb, GUI_MODEL_VIDEO_REC_MSG_ID_DELAYREC_ICON, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
+        gui_msg_setup_component(true, false, subject_mic_icon, ui_scr->video_rec_img_6, &guider_msg_data, gui_model_video_rec_msg_video_rec_img_6_set_img_path_cb, GUI_MODEL_VIDEO_REC_MSG_ID_MIC_ICON, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
 
-        gui_msg_setup_component(true, false, subject_car_nunber, guider_ui.video_rec_lbl_4, &guider_msg_data, gui_msg_set_label_text_by_string_cb, GUI_MODEL_VIDEO_REC_MSG_ID_CAR_NUNBER, GUI_MSG_ACCESS_GET, VALUE_STRING, NULL);
-        gui_msg_setup_component(true, false, subject_hide_car_num, guider_ui.video_rec_lbl_4, &guider_msg_data, gui_msg_set_flag_by_int32_cb, GUI_MODEL_VIDEO_REC_MSG_ID_HIDE_CAR_NUM, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
-        gui_msg_setup_component(true, false, subject_show_car_num, guider_ui.video_rec_lbl_4, &guider_msg_data, gui_msg_set_clear_flag_by_int32_cb, GUI_MODEL_VIDEO_REC_MSG_ID_SHOW_CAR_NUM, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
+        gui_msg_setup_component(true, false, subject_show_guard_icon, ui_scr->video_rec_img_7, &guider_msg_data, gui_msg_set_clear_flag_by_int32_cb, GUI_MODEL_VIDEO_REC_MSG_ID_SHOW_GUARD_ICON, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
+        gui_msg_setup_component(true, false, subject_hide_guard_icon, ui_scr->video_rec_img_7, &guider_msg_data, gui_msg_set_flag_by_int32_cb, GUI_MODEL_VIDEO_REC_MSG_ID_HIDE_GUARD_ICON, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
 
-        gui_msg_setup_component(true, false, subject_hide_hdr_icon, guider_ui.video_rec_lbl_3, &guider_msg_data, gui_msg_set_flag_by_int32_cb, GUI_MODEL_VIDEO_REC_MSG_ID_HIDE_HDR_ICON, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
-        gui_msg_setup_component(true, false, subject_show_hdr_icon, guider_ui.video_rec_lbl_3, &guider_msg_data, gui_msg_set_clear_flag_by_int32_cb, GUI_MODEL_VIDEO_REC_MSG_ID_SHOW_HDR_ICON, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
+        gui_msg_setup_component(true, false, subject_show_motion_icon, ui_scr->video_rec_img_8, &guider_msg_data, gui_msg_set_clear_flag_by_int32_cb, GUI_MODEL_VIDEO_REC_MSG_ID_SHOW_MOTION_ICON, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
+        gui_msg_setup_component(true, false, subject_hide_motion_icon, ui_scr->video_rec_img_8, &guider_msg_data, gui_msg_set_flag_by_int32_cb, GUI_MODEL_VIDEO_REC_MSG_ID_HIDE_MOTION_ICON, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
 
-        gui_msg_setup_component(true, false, subject_rec_reso, guider_ui.video_rec_lbl_2, &guider_msg_data, gui_msg_set_label_text_by_string_cb, GUI_MODEL_VIDEO_REC_MSG_ID_REC_RESO, GUI_MSG_ACCESS_GET, VALUE_STRING, NULL);
+        gui_msg_setup_component(true, false, subject_show_car_crashlock, ui_scr->video_rec_img_lock_icon, &guider_msg_data, gui_msg_set_clear_flag_by_int32_cb, GUI_MODEL_VIDEO_REC_MSG_ID_SHOW_CAR_CRASHLOCK, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
+        gui_msg_setup_component(true, false, subject_hide_car_crashlock, ui_scr->video_rec_img_lock_icon, &guider_msg_data, gui_msg_set_flag_by_int32_cb, GUI_MODEL_VIDEO_REC_MSG_ID_HIDE_CAR_CRASHLOCK, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
 
-        gui_msg_setup_component(true, false, subject_rec_remain_time, guider_ui.video_rec_digitclock_remain_time, &guider_msg_data, gui_model_video_rec_msg_video_rec_digitclock_remain_time_set_digit_clock_time_cb, GUI_MODEL_VIDEO_REC_MSG_ID_REC_REMAIN_TIME, GUI_MSG_ACCESS_GET, VALUE_TIME, NULL);
-        gui_msg_setup_component(true, false, subject_hide_remain_time, guider_ui.video_rec_digitclock_remain_time, &guider_msg_data, gui_msg_set_flag_by_int32_cb, GUI_MODEL_VIDEO_REC_MSG_ID_HIDE_REMAIN_TIME, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
-        gui_msg_setup_component(true, false, subject_show_remain_time, guider_ui.video_rec_digitclock_remain_time, &guider_msg_data, gui_msg_set_clear_flag_by_int32_cb, GUI_MODEL_VIDEO_REC_MSG_ID_SHOW_REMAIN_TIME, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
+        gui_msg_setup_component(true, false, subject_delayrec_icon, ui_scr->video_rec_img_11, &guider_msg_data, gui_model_video_rec_msg_video_rec_img_11_set_img_path_cb, GUI_MODEL_VIDEO_REC_MSG_ID_DELAYREC_ICON, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
 
-        gui_msg_setup_component(true, false, subject_hide_guard_icon, guider_ui.video_rec_img_7, &guider_msg_data, gui_msg_set_flag_by_int32_cb, GUI_MODEL_VIDEO_REC_MSG_ID_HIDE_GUARD_ICON, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
-        gui_msg_setup_component(true, false, subject_show_guard_icon, guider_ui.video_rec_img_7, &guider_msg_data, gui_msg_set_clear_flag_by_int32_cb, GUI_MODEL_VIDEO_REC_MSG_ID_SHOW_GUARD_ICON, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
+        gui_msg_setup_component(true, false, subject_app_connected, ui_scr->video_rec_img_app, &guider_msg_data, gui_model_video_rec_msg_video_rec_img_app_set_img_path_cb, GUI_MODEL_VIDEO_REC_MSG_ID_APP_CONNECTED, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
 
-        gui_msg_setup_component(true, false, subject_hide_motion_icon, guider_ui.video_rec_img_8, &guider_msg_data, gui_msg_set_flag_by_int32_cb, GUI_MODEL_VIDEO_REC_MSG_ID_HIDE_MOTION_ICON, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
-        gui_msg_setup_component(true, false, subject_show_motion_icon, guider_ui.video_rec_img_8, &guider_msg_data, gui_msg_set_clear_flag_by_int32_cb, GUI_MODEL_VIDEO_REC_MSG_ID_SHOW_MOTION_ICON, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
+        gui_msg_setup_component(true, false, subject_rec_reso, ui_scr->video_rec_lbl_2, &guider_msg_data, gui_msg_set_label_text_by_string_cb, GUI_MODEL_VIDEO_REC_MSG_ID_REC_RESO, GUI_MSG_ACCESS_GET, VALUE_STRING, NULL);
 
-        gui_msg_setup_component(true, false, subject_rec_btn, guider_ui.video_rec, &guider_msg_data, gui_msg_set_control_state_by_int32_cb, GUI_MODEL_VIDEO_REC_MSG_ID_REC_BTN, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
+        gui_msg_setup_component(true, false, subject_show_hdr_icon, ui_scr->video_rec_lbl_3, &guider_msg_data, gui_msg_set_clear_flag_by_int32_cb, GUI_MODEL_VIDEO_REC_MSG_ID_SHOW_HDR_ICON, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
+        gui_msg_setup_component(true, false, subject_hide_hdr_icon, ui_scr->video_rec_lbl_3, &guider_msg_data, gui_msg_set_flag_by_int32_cb, GUI_MODEL_VIDEO_REC_MSG_ID_HIDE_HDR_ICON, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
 
-        gui_msg_setup_component(true, false, subject_rec_time_state, guider_ui.video_rec_digitclock_record_time, &guider_msg_data, gui_msg_set_control_state_by_int32_cb, GUI_MODEL_VIDEO_REC_MSG_ID_REC_TIME_STATE, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
-        gui_msg_setup_component(true, false, subject_hide_record_time, guider_ui.video_rec_digitclock_record_time, &guider_msg_data, gui_msg_set_flag_by_int32_cb, GUI_MODEL_VIDEO_REC_MSG_ID_HIDE_RECORD_TIME, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
-        gui_msg_setup_component(true, false, subject_show_record_time, guider_ui.video_rec_digitclock_record_time, &guider_msg_data, gui_msg_set_clear_flag_by_int32_cb, GUI_MODEL_VIDEO_REC_MSG_ID_SHOW_RECORD_TIME, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
+        gui_msg_setup_component(true, false, subject_car_nunber, ui_scr->video_rec_lbl_4, &guider_msg_data, gui_msg_set_label_text_by_string_cb, GUI_MODEL_VIDEO_REC_MSG_ID_CAR_NUNBER, GUI_MSG_ACCESS_GET, VALUE_STRING, NULL);
+        gui_msg_setup_component(true, false, subject_show_car_num, ui_scr->video_rec_lbl_4, &guider_msg_data, gui_msg_set_clear_flag_by_int32_cb, GUI_MODEL_VIDEO_REC_MSG_ID_SHOW_CAR_NUM, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
+        gui_msg_setup_component(true, false, subject_hide_car_num, ui_scr->video_rec_lbl_4, &guider_msg_data, gui_msg_set_flag_by_int32_cb, GUI_MODEL_VIDEO_REC_MSG_ID_HIDE_CAR_NUM, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
 
-        gui_msg_setup_component(true, false, subject_rec_btn, guider_ui.video_rec_imgbtn_1, &guider_msg_data, gui_msg_set_control_state_by_int32_cb, GUI_MODEL_VIDEO_REC_MSG_ID_REC_BTN, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
+        gui_msg_setup_component(true, false, subject_rec_remain_time, ui_scr->video_rec_digitclock_remain_time, &guider_msg_data, gui_model_video_rec_msg_video_rec_digitclock_remain_time_set_digit_clock_time_cb, GUI_MODEL_VIDEO_REC_MSG_ID_REC_REMAIN_TIME, GUI_MSG_ACCESS_GET, VALUE_TIME, NULL);
+        gui_msg_setup_component(true, false, subject_show_remain_time, ui_scr->video_rec_digitclock_remain_time, &guider_msg_data, gui_msg_set_clear_flag_by_int32_cb, GUI_MODEL_VIDEO_REC_MSG_ID_SHOW_REMAIN_TIME, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
+        gui_msg_setup_component(true, false, subject_hide_remain_time, ui_scr->video_rec_digitclock_remain_time, &guider_msg_data, gui_msg_set_flag_by_int32_cb, GUI_MODEL_VIDEO_REC_MSG_ID_HIDE_REMAIN_TIME, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
 
-        gui_msg_setup_component(true, false, subject_gsensor_icon, guider_ui.video_rec_img_5, &guider_msg_data, gui_model_video_rec_msg_video_rec_img_5_set_img_path_cb, GUI_MODEL_VIDEO_REC_MSG_ID_GSENSOR_ICON, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
-        gui_msg_setup_component(true, false, subject_hide_gsensor_icon, guider_ui.video_rec_img_5, &guider_msg_data, gui_msg_set_flag_by_int32_cb, GUI_MODEL_VIDEO_REC_MSG_ID_HIDE_GSENSOR_ICON, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
-        gui_msg_setup_component(true, false, subject_show_gsensor_icon, guider_ui.video_rec_img_5, &guider_msg_data, gui_msg_set_clear_flag_by_int32_cb, GUI_MODEL_VIDEO_REC_MSG_ID_SHOW_GSENSOR_ICON, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
+        gui_msg_setup_component(true, false, subject_rec_time_state, ui_scr->video_rec_digitclock_record_time, &guider_msg_data, gui_msg_set_control_state_by_int32_cb, GUI_MODEL_VIDEO_REC_MSG_ID_REC_TIME_STATE, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
+        gui_msg_setup_component(true, false, subject_show_record_time, ui_scr->video_rec_digitclock_record_time, &guider_msg_data, gui_msg_set_clear_flag_by_int32_cb, GUI_MODEL_VIDEO_REC_MSG_ID_SHOW_RECORD_TIME, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
+        gui_msg_setup_component(true, false, subject_hide_record_time, ui_scr->video_rec_digitclock_record_time, &guider_msg_data, gui_msg_set_flag_by_int32_cb, GUI_MODEL_VIDEO_REC_MSG_ID_HIDE_RECORD_TIME, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
 
-        gui_msg_setup_component(true, false, subject_mic_icon, guider_ui.video_rec_img_6, &guider_msg_data, gui_model_video_rec_msg_video_rec_img_6_set_img_path_cb, GUI_MODEL_VIDEO_REC_MSG_ID_MIC_ICON, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
+        gui_msg_setup_component(true, false, subject_flash_headlight, ui_scr->video_rec_headlight, &guider_msg_data, gui_msg_set_visible_by_bool_cb, GUI_MODEL_VIDEO_REC_MSG_ID_FLASH_HEADLIGHT, GUI_MSG_ACCESS_GET, VALUE_BOOL, NULL);
 
-        gui_msg_setup_component(true, false, subject_cycrec_icon, guider_ui.video_rec_img_4, &guider_msg_data, gui_model_video_rec_msg_video_rec_img_4_set_img_path_cb, GUI_MODEL_VIDEO_REC_MSG_ID_CYCREC_ICON, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
+        gui_msg_setup_component(true, false, subject_rec_btn, ui_scr->video_rec, &guider_msg_data, gui_msg_set_control_state_by_int32_cb, GUI_MODEL_VIDEO_REC_MSG_ID_REC_BTN, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
 
 
         for (int i = 0; i < 27; i++) {
-            if (status[i].msg_id == GUI_MODEL_VIDEO_REC_MSG_ID_REC_RESO) {
-                status[i].is_subscribe = 1;
-            }
-            if (status[i].msg_id == GUI_MODEL_VIDEO_REC_MSG_ID_HIDE_GUARD_ICON) {
-                status[i].is_subscribe = 1;
-            }
-            if (status[i].msg_id == GUI_MODEL_VIDEO_REC_MSG_ID_SHOW_HDR_ICON) {
-                status[i].is_subscribe = 1;
-            }
-            if (status[i].msg_id == GUI_MODEL_VIDEO_REC_MSG_ID_HIDE_REMAIN_TIME) {
-                status[i].is_subscribe = 1;
-            }
-            if (status[i].msg_id == GUI_MODEL_VIDEO_REC_MSG_ID_HIDE_HDR_ICON) {
-                status[i].is_subscribe = 1;
-            }
-            if (status[i].msg_id == GUI_MODEL_VIDEO_REC_MSG_ID_SHOW_MOTION_ICON) {
-                status[i].is_subscribe = 1;
-            }
-            if (status[i].msg_id == GUI_MODEL_VIDEO_REC_MSG_ID_APP_CONNECTED) {
-                status[i].is_subscribe = 1;
-            }
-            if (status[i].msg_id == GUI_MODEL_VIDEO_REC_MSG_ID_HIDE_GSENSOR_ICON) {
-                status[i].is_subscribe = 1;
-            }
-            if (status[i].msg_id == GUI_MODEL_VIDEO_REC_MSG_ID_HIDE_CAR_CRASHLOCK) {
-                status[i].is_subscribe = 1;
-            }
-            if (status[i].msg_id == GUI_MODEL_VIDEO_REC_MSG_ID_HIDE_RECORD_TIME) {
-                status[i].is_subscribe = 1;
-            }
-            if (status[i].msg_id == GUI_MODEL_VIDEO_REC_MSG_ID_REC_TIME_STATE) {
-                status[i].is_subscribe = 1;
-            }
-            if (status[i].msg_id == GUI_MODEL_VIDEO_REC_MSG_ID_CAR_NUNBER) {
+            if (status[i].msg_id == GUI_MODEL_VIDEO_REC_MSG_ID_REC_BTN) {
                 status[i].is_subscribe = 1;
             }
             if (status[i].msg_id == GUI_MODEL_VIDEO_REC_MSG_ID_CYCREC_ICON) {
                 status[i].is_subscribe = 1;
             }
-            if (status[i].msg_id == GUI_MODEL_VIDEO_REC_MSG_ID_HIDE_CAR_NUM) {
-                status[i].is_subscribe = 1;
-            }
-            if (status[i].msg_id == GUI_MODEL_VIDEO_REC_MSG_ID_SHOW_REMAIN_TIME) {
-                status[i].is_subscribe = 1;
-            }
             if (status[i].msg_id == GUI_MODEL_VIDEO_REC_MSG_ID_SHOW_GSENSOR_ICON) {
-                status[i].is_subscribe = 1;
-            }
-            if (status[i].msg_id == GUI_MODEL_VIDEO_REC_MSG_ID_REC_REMAIN_TIME) {
-                status[i].is_subscribe = 1;
-            }
-            if (status[i].msg_id == GUI_MODEL_VIDEO_REC_MSG_ID_SHOW_CAR_CRASHLOCK) {
-                status[i].is_subscribe = 1;
-            }
-            if (status[i].msg_id == GUI_MODEL_VIDEO_REC_MSG_ID_FLASH_HEADLIGHT) {
-                status[i].is_subscribe = 1;
-            }
-            if (status[i].msg_id == GUI_MODEL_VIDEO_REC_MSG_ID_DELAYREC_ICON) {
-                status[i].is_subscribe = 1;
-            }
-            if (status[i].msg_id == GUI_MODEL_VIDEO_REC_MSG_ID_REC_BTN) {
-                status[i].is_subscribe = 1;
-            }
-            if (status[i].msg_id == GUI_MODEL_VIDEO_REC_MSG_ID_SHOW_CAR_NUM) {
                 status[i].is_subscribe = 1;
             }
             if (status[i].msg_id == GUI_MODEL_VIDEO_REC_MSG_ID_GSENSOR_ICON) {
                 status[i].is_subscribe = 1;
             }
-            if (status[i].msg_id == GUI_MODEL_VIDEO_REC_MSG_ID_MIC_ICON) {
+            if (status[i].msg_id == GUI_MODEL_VIDEO_REC_MSG_ID_HIDE_GSENSOR_ICON) {
                 status[i].is_subscribe = 1;
             }
-            if (status[i].msg_id == GUI_MODEL_VIDEO_REC_MSG_ID_HIDE_MOTION_ICON) {
+            if (status[i].msg_id == GUI_MODEL_VIDEO_REC_MSG_ID_MIC_ICON) {
                 status[i].is_subscribe = 1;
             }
             if (status[i].msg_id == GUI_MODEL_VIDEO_REC_MSG_ID_SHOW_GUARD_ICON) {
                 status[i].is_subscribe = 1;
             }
+            if (status[i].msg_id == GUI_MODEL_VIDEO_REC_MSG_ID_HIDE_GUARD_ICON) {
+                status[i].is_subscribe = 1;
+            }
+            if (status[i].msg_id == GUI_MODEL_VIDEO_REC_MSG_ID_SHOW_MOTION_ICON) {
+                status[i].is_subscribe = 1;
+            }
+            if (status[i].msg_id == GUI_MODEL_VIDEO_REC_MSG_ID_HIDE_MOTION_ICON) {
+                status[i].is_subscribe = 1;
+            }
+            if (status[i].msg_id == GUI_MODEL_VIDEO_REC_MSG_ID_SHOW_CAR_CRASHLOCK) {
+                status[i].is_subscribe = 1;
+            }
+            if (status[i].msg_id == GUI_MODEL_VIDEO_REC_MSG_ID_HIDE_CAR_CRASHLOCK) {
+                status[i].is_subscribe = 1;
+            }
+            if (status[i].msg_id == GUI_MODEL_VIDEO_REC_MSG_ID_DELAYREC_ICON) {
+                status[i].is_subscribe = 1;
+            }
+            if (status[i].msg_id == GUI_MODEL_VIDEO_REC_MSG_ID_APP_CONNECTED) {
+                status[i].is_subscribe = 1;
+            }
+            if (status[i].msg_id == GUI_MODEL_VIDEO_REC_MSG_ID_REC_RESO) {
+                status[i].is_subscribe = 1;
+            }
+            if (status[i].msg_id == GUI_MODEL_VIDEO_REC_MSG_ID_SHOW_HDR_ICON) {
+                status[i].is_subscribe = 1;
+            }
+            if (status[i].msg_id == GUI_MODEL_VIDEO_REC_MSG_ID_HIDE_HDR_ICON) {
+                status[i].is_subscribe = 1;
+            }
+            if (status[i].msg_id == GUI_MODEL_VIDEO_REC_MSG_ID_CAR_NUNBER) {
+                status[i].is_subscribe = 1;
+            }
+            if (status[i].msg_id == GUI_MODEL_VIDEO_REC_MSG_ID_SHOW_CAR_NUM) {
+                status[i].is_subscribe = 1;
+            }
+            if (status[i].msg_id == GUI_MODEL_VIDEO_REC_MSG_ID_HIDE_CAR_NUM) {
+                status[i].is_subscribe = 1;
+            }
+            if (status[i].msg_id == GUI_MODEL_VIDEO_REC_MSG_ID_REC_REMAIN_TIME) {
+                status[i].is_subscribe = 1;
+            }
+            if (status[i].msg_id == GUI_MODEL_VIDEO_REC_MSG_ID_SHOW_REMAIN_TIME) {
+                status[i].is_subscribe = 1;
+            }
+            if (status[i].msg_id == GUI_MODEL_VIDEO_REC_MSG_ID_HIDE_REMAIN_TIME) {
+                status[i].is_subscribe = 1;
+            }
+            if (status[i].msg_id == GUI_MODEL_VIDEO_REC_MSG_ID_REC_TIME_STATE) {
+                status[i].is_subscribe = 1;
+            }
             if (status[i].msg_id == GUI_MODEL_VIDEO_REC_MSG_ID_SHOW_RECORD_TIME) {
+                status[i].is_subscribe = 1;
+            }
+            if (status[i].msg_id == GUI_MODEL_VIDEO_REC_MSG_ID_HIDE_RECORD_TIME) {
+                status[i].is_subscribe = 1;
+            }
+            if (status[i].msg_id == GUI_MODEL_VIDEO_REC_MSG_ID_FLASH_HEADLIGHT) {
                 status[i].is_subscribe = 1;
             }
         }

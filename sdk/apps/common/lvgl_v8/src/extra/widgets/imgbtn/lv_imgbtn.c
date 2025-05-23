@@ -78,19 +78,21 @@ static void lv_imgbtn_destructor(const lv_obj_class_t *class_p, lv_obj_t *obj)
     LV_UNUSED(class_p);
     lv_imgbtn_t *imgbtn = (lv_imgbtn_t *)obj;
     for (int state = 0; state < _LV_IMGBTN_STATE_NUM; state++) {
-        if (imgbtn->img_src_left[state]) {
+        if (imgbtn->img_src_left[state] &&
+            lv_img_src_get_type(imgbtn->img_src_left[state]) != LV_IMG_SRC_VARIABLE) {
             lv_mem_free((void *)imgbtn->img_src_left[state]);
             imgbtn->img_src_left[state] = NULL;
         }
-        if (imgbtn->img_src_mid[state]) {
+        if (imgbtn->img_src_mid[state] &&
+            lv_img_src_get_type(imgbtn->img_src_mid[state]) != LV_IMG_SRC_VARIABLE) {
             lv_mem_free((void *)imgbtn->img_src_mid[state]);
             imgbtn->img_src_mid[state] = NULL;
         }
-        if (imgbtn->img_src_right[state]) {
+        if (imgbtn->img_src_right[state] &&
+            lv_img_src_get_type(imgbtn->img_src_right[state]) != LV_IMG_SRC_VARIABLE) {
             lv_mem_free((void *)imgbtn->img_src_right[state]);
             imgbtn->img_src_right[state] = NULL;
         }
-
     }
 }
 #endif
@@ -119,24 +121,35 @@ void lv_imgbtn_set_src(lv_obj_t *obj, lv_imgbtn_state_t state, const void *src_l
     char *src_right_str = NULL;
 
     if (src_left) {
-        src_left_str = lv_mem_alloc(strlen(src_left) + 1);
-        LV_ASSERT_MALLOC(src_left_str);
-        strcpy(src_left_str, src_left);
+        if (lv_img_src_get_type(src_left) != LV_IMG_SRC_VARIABLE) {
+            src_left_str = lv_mem_alloc(strlen(src_left) + 1);
+            LV_ASSERT_MALLOC(src_left_str);
+            strcpy(src_left_str, src_left);
+            imgbtn->img_src_left[state] = src_left_str;
+        } else {
+            imgbtn->img_src_left[state] = src_left;
+        }
     }
     if (src_mid) {
-        src_mid_str = lv_mem_alloc(strlen(src_mid) + 1);
-        LV_ASSERT_MALLOC(src_mid_str);
-        strcpy(src_mid_str, src_mid);
+        if (lv_img_src_get_type(src_mid) != LV_IMG_SRC_VARIABLE) {
+            src_mid_str = lv_mem_alloc(strlen(src_mid) + 1);
+            LV_ASSERT_MALLOC(src_mid_str);
+            strcpy(src_mid_str, src_mid);
+            imgbtn->img_src_mid[state] = src_mid_str;
+        } else {
+            imgbtn->img_src_mid[state] = src_mid;
+        }
     }
     if (src_right) {
-        src_right_str = lv_mem_alloc(strlen(src_right) + 1);
-        LV_ASSERT_MALLOC(src_right_str);
-        strcpy(src_right_str, src_right);
+        if (lv_img_src_get_type(src_right) != LV_IMG_SRC_VARIABLE) {
+            src_right_str = lv_mem_alloc(strlen(src_right) + 1);
+            LV_ASSERT_MALLOC(src_right_str);
+            strcpy(src_right_str, src_right);
+            imgbtn->img_src_right[state] = src_right_str;
+        } else {
+            imgbtn->img_src_right[state] = src_right;
+        }
     }
-
-    imgbtn->img_src_left[state] = src_left_str;
-    imgbtn->img_src_mid[state] = src_mid_str;
-    imgbtn->img_src_right[state] = src_right_str;
 #else
 
     imgbtn->img_src_left[state] = src_left;
@@ -466,4 +479,5 @@ lv_imgbtn_state_t get_state(const lv_obj_t *imgbtn)
 }
 
 #endif
+
 

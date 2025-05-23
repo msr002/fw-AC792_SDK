@@ -53,8 +53,6 @@ void gui_sys_prompt_msg_init(lv_ui *ui)
     if (sub != NULL) {
         lv_subject_init_pointer(sub->subject, &guider_msg_data);
     }
-    gui_sys_prompt_msg_init_ui();
-    gui_sys_prompt_msg_init_events();
 }
 
 void gui_sys_prompt_msg_init_ui()

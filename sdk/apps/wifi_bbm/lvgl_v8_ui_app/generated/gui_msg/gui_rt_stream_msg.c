@@ -44,8 +44,6 @@ void gui_rt_stream_msg_init(lv_ui *ui)
     if (sub != NULL) {
         lv_subject_init_pointer(sub->subject, &guider_msg_data);
     }
-    gui_rt_stream_msg_init_ui();
-    gui_rt_stream_msg_init_events();
 }
 
 void gui_rt_stream_msg_init_ui()
@@ -76,16 +74,16 @@ void gui_rt_stream_msg_init_events()
     lv_subject_t *subject_stream_info = gui_msg_get_subject(GUI_RT_STREAM_MSG_ID_STREAM_INFO);
     if (guider_ui.rt_stream) {
         lv_ui_rt_stream *ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_RT_STREAM);
-        gui_msg_setup_component(true, false, subject_stream_info, ui_scr->rt_stream_lbl_1, &guider_msg_data, gui_msg_set_label_text_by_string_cb, GUI_RT_STREAM_MSG_ID_STREAM_INFO, GUI_MSG_ACCESS_GET, VALUE_STRING, NULL);
-
         gui_msg_setup_component(true, false, subject_camera_switch, ui_scr->rt_stream_imgbtn_1, &guider_msg_data, gui_msg_set_visible_by_bool_cb, GUI_RT_STREAM_MSG_ID_CAMERA_SWITCH, GUI_MSG_ACCESS_GET, VALUE_BOOL, NULL);
+
+        gui_msg_setup_component(true, false, subject_stream_info, ui_scr->rt_stream_lbl_1, &guider_msg_data, gui_msg_set_label_text_by_string_cb, GUI_RT_STREAM_MSG_ID_STREAM_INFO, GUI_MSG_ACCESS_GET, VALUE_STRING, NULL);
 
 
         for (int i = 0; i < 2; i++) {
-            if (status[i].msg_id == GUI_RT_STREAM_MSG_ID_STREAM_INFO) {
+            if (status[i].msg_id == GUI_RT_STREAM_MSG_ID_CAMERA_SWITCH) {
                 status[i].is_subscribe = 1;
             }
-            if (status[i].msg_id == GUI_RT_STREAM_MSG_ID_CAMERA_SWITCH) {
+            if (status[i].msg_id == GUI_RT_STREAM_MSG_ID_STREAM_INFO) {
                 status[i].is_subscribe = 1;
             }
         }

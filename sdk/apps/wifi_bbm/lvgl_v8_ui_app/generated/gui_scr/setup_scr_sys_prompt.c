@@ -22,12 +22,15 @@ lv_obj_t *setup_scr_sys_prompt(lv_ui *ui)
     if (lv_obj_is_valid(ui_scr->sys_prompt)) {
         lv_obj_del(ui_scr->sys_prompt);
     }
+
     //Write codes sys_prompt
     ui_scr->sys_prompt = lv_obj_create(lv_layer_top());
     lv_group_t *def_group = lv_group_get_default();
+    lv_obj_set_size(ui_scr->sys_prompt, 800, 480);
+    lv_obj_set_scrollbar_mode(ui_scr->sys_prompt, LV_SCROLLBAR_MODE_OFF);
+    ui_style_set(ui_scr->sys_prompt, GUI_CTRL_SCR);
 
     //Set style for sys_prompt. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
-    lv_obj_add_style(ui_scr->sys_prompt, &gui_scr_main_default_style, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_color(ui_scr->sys_prompt, lv_color_make(0xff, 0xff, 0xff), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_opa(ui_scr->sys_prompt, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_border_width(ui_scr->sys_prompt, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -37,49 +40,52 @@ lv_obj_t *setup_scr_sys_prompt(lv_ui *ui)
     lv_obj_set_style_pad_bottom(ui_scr->sys_prompt, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_pad_row(ui_scr->sys_prompt, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_pad_column(ui_scr->sys_prompt, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_size(ui_scr->sys_prompt, 800, 480);
-    lv_obj_set_scrollbar_mode(ui_scr->sys_prompt, LV_SCROLLBAR_MODE_OFF);
+
     //Write codes sys_prompt_view_1
     ui_scr->sys_prompt_view_1 = lv_obj_create(ui_scr->sys_prompt);
+    lv_obj_set_pos(ui_scr->sys_prompt_view_1, 238, 137);
+    lv_obj_set_size(ui_scr->sys_prompt_view_1, 345, 194);
+    lv_obj_set_scrollbar_mode(ui_scr->sys_prompt_view_1, LV_SCROLLBAR_MODE_OFF);
+    lv_obj_add_flag(ui_scr->sys_prompt_view_1, LV_OBJ_FLAG_EVENT_BUBBLE);
+    ui_style_set(ui_scr->sys_prompt_view_1, GUI_CTRL_CONT);
 
     //Set style for sys_prompt_view_1. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
-    lv_obj_add_style(ui_scr->sys_prompt_view_1, &gui_cont_main_default_style, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_color(ui_scr->sys_prompt_view_1, lv_color_make(0x33, 0x30, 0x30), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_opa(ui_scr->sys_prompt_view_1, 217, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_shadow_opa(ui_scr->sys_prompt_view_1, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_outline_color(ui_scr->sys_prompt_view_1, lv_color_make(0x02, 0x6C, 0xC0), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_outline_width(ui_scr->sys_prompt_view_1, 2, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_outline_opa(ui_scr->sys_prompt_view_1, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_pos(ui_scr->sys_prompt_view_1, 238, 137);
-    lv_obj_set_size(ui_scr->sys_prompt_view_1, 345, 194);
-    lv_obj_set_scrollbar_mode(ui_scr->sys_prompt_view_1, LV_SCROLLBAR_MODE_OFF);
-    lv_obj_add_flag(ui_scr->sys_prompt_view_1, LV_OBJ_FLAG_EVENT_BUBBLE);
+
+    //Delete extra default style for sys_prompt_view_1
+    lv_obj_remove_style(ui_scr->sys_prompt_view_1, &gui_cont_main_focus_key_style, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+
     //Write codes sys_prompt_lbl_1
     ui_scr->sys_prompt_lbl_1 = lv_label_create(ui_scr->sys_prompt_view_1);
     lv_label_set_text(ui_scr->sys_prompt_lbl_1, "Connect Error !");
     lv_label_set_long_mode(ui_scr->sys_prompt_lbl_1, LV_LABEL_LONG_WRAP);
-
-    //Set style for sys_prompt_lbl_1. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
-    lv_obj_add_style(ui_scr->sys_prompt_lbl_1, &gui_label_main_default_style, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_text_color(ui_scr->sys_prompt_lbl_1, lv_color_make(0xff, 0xff, 0xff), LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_text_font(ui_scr->sys_prompt_lbl_1, &lv_font_montserratMedium_24, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_pos(ui_scr->sys_prompt_lbl_1, 159, 51);
     lv_obj_set_size(ui_scr->sys_prompt_lbl_1, 187, 125);
     lv_obj_set_scrollbar_mode(ui_scr->sys_prompt_lbl_1, LV_SCROLLBAR_MODE_OFF);
     lv_obj_add_flag(ui_scr->sys_prompt_lbl_1, LV_OBJ_FLAG_EVENT_BUBBLE);
+    ui_style_set(ui_scr->sys_prompt_lbl_1, GUI_CTRL_LABEL);
+
+    //Set style for sys_prompt_lbl_1. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
+    lv_obj_set_style_text_color(ui_scr->sys_prompt_lbl_1, lv_color_make(0xff, 0xff, 0xff), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui_scr->sys_prompt_lbl_1, &lv_font_montserratMedium_24, LV_PART_MAIN | LV_STATE_DEFAULT);
+
     //Write codes sys_prompt_img_1
     ui_scr->sys_prompt_img_1 = lv_img_create(ui_scr->sys_prompt_view_1);
     lv_img_set_src(ui_scr->sys_prompt_img_1, gui_get_res_path(GUI_RES_WARN_PNG));
     lv_img_set_pivot(ui_scr->sys_prompt_img_1, 0, 0);
     lv_img_set_angle(ui_scr->sys_prompt_img_1, 0);
     lv_img_set_zoom(ui_scr->sys_prompt_img_1, 256);
-
-    //Set style for sys_prompt_img_1. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
-    lv_obj_add_style(ui_scr->sys_prompt_img_1, &gui_img_main_default_style, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_pos(ui_scr->sys_prompt_img_1, 16, 26);
     lv_obj_set_size(ui_scr->sys_prompt_img_1, 128, 128);
     lv_obj_add_flag(ui_scr->sys_prompt_img_1, LV_OBJ_FLAG_EVENT_BUBBLE);
     lv_obj_add_flag(ui_scr->sys_prompt_img_1, LV_OBJ_FLAG_CLICKABLE);
+    ui_style_set(ui_scr->sys_prompt_img_1, GUI_CTRL_IMG);
+
     lv_obj_update_layout(ui_scr->sys_prompt);
     ui_scr->sys_prompt_del = false;
 

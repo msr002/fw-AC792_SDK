@@ -8,6 +8,15 @@
 #include "./gui_group/gui_group.h"
 #include "./gui_events/events_init.h"
 
+void scr_push_stack_loaded_handler(lv_event_t *e)
+{
+    int32_t scr_id = (int32_t)lv_event_get_user_data(e);
+    lv_obj_t *src = lv_event_get_target(e);
+    gui_scr_t *scr = ui_get_scr(scr_id);
+    if (scr != NULL) {
+        gui_scr_stack_push(scr);
+    }
+}
 void ui_load_scr_anim(lv_ui *ui, gui_scr_t *screen, lv_scr_load_anim_t anim_type,	uint32_t time,
                       uint32_t delay, bool is_clean, bool auto_del, bool is_push_satck)
 {
@@ -23,12 +32,12 @@ void ui_load_scr_anim(lv_ui *ui, gui_scr_t *screen, lv_scr_load_anim_t anim_type
     gui_timelines_delete();
     gui_scr_set_act_anim(screen, ui, anim_type, time, delay, is_clean, auto_del);
 
-    if (act_screen != NULL && gui_scr_get_act() == screen) {
-        gui_msg_init_ui();
-        gui_msg_init_events();
-
-        if (is_push_satck) {
+    if (is_push_satck) {
+        if (screen == gui_scr_get_act()) {
             gui_scr_stack_push(act_screen);
+        } else {
+            lv_obj_remove_event_cb(screen->scr, scr_push_stack_loaded_handler);
+            lv_obj_add_event_cb(screen->scr, scr_push_stack_loaded_handler, LV_EVENT_SCREEN_LOADED, (void *)act_screen->id);
         }
     }
 }
@@ -108,6 +117,16 @@ gui_scr_t *ui_get_setup_scr(int32_t scr_id)
         }
     }
     return screen;
+}
+
+lv_obj_t *ui_get_setup_scr_obj(int32_t scr_id)
+{
+    gui_scr_t *screen = ui_get_setup_scr(scr_id);
+    if (screen == NULL) {
+        return NULL;
+    }
+
+    return screen->scr;
 }
 
 
@@ -234,6 +253,15 @@ void ui_free_scr_ptr(lv_ui *ui, int32_t scr_id)
         }
         ui->sys_options = NULL;
     }
+    gui_scr_t *scr = gui_scr_get(scr_id);
+    if (scr != NULL) {
+        scr->scr = NULL;
+    }
+}
+
+bool ui_is_act_scr(int32_t scr_id)
+{
+    return gui_scr_is_act(ui_get_scr(scr_id));
 }
 
 void ui_init_style(lv_style_t *style)
@@ -250,13 +278,13 @@ void setup_ui(lv_ui *ui)
 {
     init_gui_fonts();
     ui_style_init();
-    gui_scr_t *scr = ui_get_scr(GUI_SCREEN_RT_STREAM);
-    ui_load_scr_anim(ui, scr, LV_SCR_LOAD_ANIM_NONE, 0, 0, false, false, false);
-    events_init(ui);
-    gui_group_init();
-    ui_scr_manager_init();
 #if LV_USE_MSG
     gui_msg_init(ui);
 #endif
+    gui_group_init();
+    ui_scr_manager_init();
+    gui_scr_t *scr = ui_get_scr(GUI_SCREEN_RT_STREAM);
+    ui_load_scr_anim(ui, scr, LV_SCR_LOAD_ANIM_NONE, 0, 0, false, false, false);
+    events_init(ui);
     gui_timelines_init(ui);
 }

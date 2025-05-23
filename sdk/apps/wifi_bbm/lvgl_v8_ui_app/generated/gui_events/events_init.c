@@ -9,6 +9,13 @@
 #include "../gui_group/gui_group.h"
 
 
+void scr_loaded_handler(lv_event_t *e)
+{
+    lv_obj_t *src = lv_event_get_target(e);
+    gui_msg_init_ui();
+    gui_msg_init_events();
+}
+
 void events_init(lv_ui *ui)
 {
 }
@@ -87,6 +94,7 @@ static void home_screen_event_handler(lv_event_t *e)
 void events_init_home(lv_ui *ui)
 {
     lv_ui_home *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_HOME);
+    lv_obj_add_event_cb(ui_scr->home, scr_loaded_handler, LV_EVENT_SCREEN_LOADED, ui);
     lv_obj_add_event_cb(ui_scr->home_imgbtn_2, home_imgbtn_2_event_handler, LV_EVENT_ALL, ui);
     lv_obj_add_event_cb(ui_scr->home_imgbtn_1, home_imgbtn_1_event_handler, LV_EVENT_ALL, ui);
     lv_obj_add_event_cb(ui_scr->home_imgbtn_3, home_imgbtn_3_event_handler, LV_EVENT_ALL, ui);
@@ -265,6 +273,7 @@ static void pair_status_imgbtn_1_event_handler(lv_event_t *e)
 void events_init_pair_status(lv_ui *ui)
 {
     lv_ui_pair_status *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_PAIR_STATUS);
+    lv_obj_add_event_cb(ui_scr->pair_status, scr_loaded_handler, LV_EVENT_SCREEN_LOADED, ui);
     lv_obj_add_event_cb(ui_scr->pair_status_imglist_1, pair_status_imglist_1_event_handler, LV_EVENT_ALL, ui);
     lv_obj_add_event_cb(ui_scr->pair_status_imglist_2, pair_status_imglist_2_event_handler, LV_EVENT_ALL, ui);
     lv_obj_add_event_cb(ui_scr->pair_status_imglist_3, pair_status_imglist_3_event_handler, LV_EVENT_ALL, ui);
@@ -331,6 +340,7 @@ static void rt_stream_screen_event_handler(lv_event_t *e)
 void events_init_rt_stream(lv_ui *ui)
 {
     lv_ui_rt_stream *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_RT_STREAM);
+    lv_obj_add_event_cb(ui_scr->rt_stream, scr_loaded_handler, LV_EVENT_SCREEN_LOADED, ui);
     lv_obj_add_event_cb(ui_scr->rt_stream, rt_stream_event_handler, LV_EVENT_ALL, ui);
     lv_obj_add_event_cb(ui_scr->rt_stream_imgbtn_1, rt_stream_imgbtn_1_event_handler, LV_EVENT_ALL, ui);
     lv_obj_add_event_cb(ui_scr->rt_stream, rt_stream_screen_event_handler, LV_EVENT_ALL, ui);
@@ -805,6 +815,7 @@ static void file_browser_screen_event_handler(lv_event_t *e)
 void events_init_file_browser(lv_ui *ui)
 {
     lv_ui_file_browser *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_FILE_BROWSER);
+    lv_obj_add_event_cb(ui_scr->file_browser, scr_loaded_handler, LV_EVENT_SCREEN_LOADED, ui);
     lv_obj_add_event_cb(ui_scr->file_browser_imgbtn_1, file_browser_imgbtn_1_event_handler, LV_EVENT_ALL, ui);
     lv_obj_add_event_cb(ui_scr->file_browser_imgbtn_2, file_browser_imgbtn_2_event_handler, LV_EVENT_ALL, ui);
     lv_obj_add_event_cb(ui_scr->file_browser_imgbtn_3, file_browser_imgbtn_3_event_handler, LV_EVENT_ALL, ui);
@@ -884,6 +895,7 @@ static void pair_options_imgbtn_4_event_handler(lv_event_t *e)
 void events_init_pair_options(lv_ui *ui)
 {
     lv_ui_pair_options *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_PAIR_OPTIONS);
+    lv_obj_add_event_cb(ui_scr->pair_options, scr_loaded_handler, LV_EVENT_SCREEN_LOADED, ui);
     lv_obj_add_event_cb(ui_scr->pair_options_imgbtn_1, pair_options_imgbtn_1_event_handler, LV_EVENT_ALL, ui);
     lv_obj_add_event_cb(ui_scr->pair_options_imgbtn_2, pair_options_imgbtn_2_event_handler, LV_EVENT_ALL, ui);
     lv_obj_add_event_cb(ui_scr->pair_options_imgbtn_4, pair_options_imgbtn_4_event_handler, LV_EVENT_ALL, ui);
@@ -919,6 +931,7 @@ static void pairing_event_handler(lv_event_t *e)
 void events_init_pairing(lv_ui *ui)
 {
     lv_ui_pairing *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_PAIRING);
+    lv_obj_add_event_cb(ui_scr->pairing, scr_loaded_handler, LV_EVENT_SCREEN_LOADED, ui);
     lv_obj_add_event_cb(ui_scr->pairing, pairing_event_handler, LV_EVENT_ALL, ui);
 }
 
@@ -944,6 +957,7 @@ static void unpair_event_handler(lv_event_t *e)
 void events_init_unpair(lv_ui *ui)
 {
     lv_ui_unpair *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_UNPAIR);
+    lv_obj_add_event_cb(ui_scr->unpair, scr_loaded_handler, LV_EVENT_SCREEN_LOADED, ui);
     lv_obj_add_event_cb(ui_scr->unpair, unpair_event_handler, LV_EVENT_ALL, ui);
 }
 
@@ -1052,6 +1066,7 @@ static void video_play_screen_event_handler(lv_event_t *e)
 void events_init_video_play(lv_ui *ui)
 {
     lv_ui_video_play *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_PLAY);
+    lv_obj_add_event_cb(ui_scr->video_play, scr_loaded_handler, LV_EVENT_SCREEN_LOADED, ui);
     lv_obj_add_event_cb(ui_scr->video_play_imgbtn_1, video_play_imgbtn_1_event_handler, LV_EVENT_ALL, ui);
     lv_obj_add_event_cb(ui_scr->video_play_imglist_1, video_play_imglist_1_event_handler, LV_EVENT_ALL, ui);
     lv_obj_add_event_cb(ui_scr->video_play_imgbtn_3, video_play_imgbtn_3_event_handler, LV_EVENT_ALL, ui);
@@ -1081,6 +1096,7 @@ static void sys_prompt_event_handler(lv_event_t *e)
 void events_init_sys_prompt(lv_ui *ui)
 {
     lv_ui_sys_prompt *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_SYS_PROMPT);
+    lv_obj_add_event_cb(ui_scr->sys_prompt, scr_loaded_handler, LV_EVENT_SCREEN_LOADED, ui);
     lv_obj_add_event_cb(ui_scr->sys_prompt, sys_prompt_event_handler, LV_EVENT_ALL, ui);
 }
 
@@ -1330,6 +1346,7 @@ static void dir_select_screen_event_handler(lv_event_t *e)
 void events_init_dir_select(lv_ui *ui)
 {
     lv_ui_dir_select *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_DIR_SELECT);
+    lv_obj_add_event_cb(ui_scr->dir_select, scr_loaded_handler, LV_EVENT_SCREEN_LOADED, ui);
     lv_obj_add_event_cb(ui_scr->dir_select_view_1, dir_select_view_1_event_handler, LV_EVENT_ALL, ui);
     lv_obj_add_event_cb(ui_scr->dir_select_view_2, dir_select_view_2_event_handler, LV_EVENT_ALL, ui);
     lv_obj_add_event_cb(ui_scr->dir_select_view_3, dir_select_view_3_event_handler, LV_EVENT_ALL, ui);
@@ -1430,6 +1447,7 @@ static void device_select_screen_event_handler(lv_event_t *e)
 void events_init_device_select(lv_ui *ui)
 {
     lv_ui_device_select *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_DEVICE_SELECT);
+    lv_obj_add_event_cb(ui_scr->device_select, scr_loaded_handler, LV_EVENT_SCREEN_LOADED, ui);
     lv_obj_add_event_cb(ui_scr->device_select_view_1, device_select_view_1_event_handler, LV_EVENT_ALL, ui);
     lv_obj_add_event_cb(ui_scr->device_select_view_2, device_select_view_2_event_handler, LV_EVENT_ALL, ui);
     lv_obj_add_event_cb(ui_scr->device_select_imgbtn_1, device_select_imgbtn_1_event_handler, LV_EVENT_ALL, ui);
@@ -1495,6 +1513,7 @@ static void sys_options_btn_2_event_handler(lv_event_t *e)
 void events_init_sys_options(lv_ui *ui)
 {
     lv_ui_sys_options *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_SYS_OPTIONS);
+    lv_obj_add_event_cb(ui_scr->sys_options, scr_loaded_handler, LV_EVENT_SCREEN_LOADED, ui);
     lv_obj_add_event_cb(ui_scr->sys_options_btn_1, sys_options_btn_1_event_handler, LV_EVENT_ALL, ui);
     lv_obj_add_event_cb(ui_scr->sys_options_btn_2, sys_options_btn_2_event_handler, LV_EVENT_ALL, ui);
 }

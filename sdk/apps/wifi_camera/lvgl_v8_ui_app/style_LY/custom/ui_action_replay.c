@@ -1,6 +1,5 @@
 #include "app_config.h"
 #ifdef CONFIG_UI_STYLE_LY_ENABLE
-
 #include "custom.h"
 uint8_t no_select = 1;
 uint8_t lock_all_flag = 1;
@@ -150,8 +149,13 @@ void video_dir_cb_event_handler(lv_event_t *e)  //录像文件控件右上角复
     case LV_EVENT_VALUE_CHANGED: {
         //custom code video_dir_view_dir
         {
+
             lv_obj_t *child_contain = lv_obj_get_parent(src);  //拿到对应录像文件的控件
-            lv_obj_t *contain = lv_obj_get_child(guider_ui.video_file, 3);
+            lv_ui_video_file *ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_VIDEO_FILE);
+            if (!ui_scr) {
+                return;
+            }
+            lv_obj_t *contain = lv_obj_get_child(ui_scr->video_file, 3);
             int32_t child_index = lv_obj_get_index(child_contain);
             printf("Child is the %dth in the parent container\n", child_index);
             if (__this->edit_sel[child_index] == 0) {
@@ -181,11 +185,15 @@ int gui_scr_action_video_dir_cb(int action)
     init_intent(&it);
     switch (action) {
     case GUI_SCREEN_ACTION_LOAD:
+        lv_ui_video_dir *ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_VIDEO_DIR);
+        if (!ui_scr) {
+            return -1;
+        }
         printf("--->%s()----->%d\n", __func__, __LINE__);
 #if LV_DISP_UI_FB_NUM
-        lv_obj_set_style_bg_opa(guider_ui.video_dir, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+        lv_obj_set_style_bg_opa(ui_scr->video_dir, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
 #else
-        lv_obj_set_style_bg_opa(guider_ui.video_dir, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+        lv_obj_set_style_bg_opa(ui_scr->video_dir, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
 #endif
         key_event_disable();
         struct application *app;
@@ -209,10 +217,14 @@ int gui_scr_action_video_file_cb(int action)
     init_intent(&it);
     switch (action) {
     case GUI_SCREEN_ACTION_LOAD:
+        lv_ui_video_file *ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_VIDEO_FILE);
+        if (!ui_scr) {
+            return -1;
+        }
 #if LV_DISP_UI_FB_NUM
-        lv_obj_set_style_bg_opa(guider_ui.video_file, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+        lv_obj_set_style_bg_opa(ui_scr->video_file, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
 #else
-        lv_obj_set_style_bg_opa(guider_ui.video_file, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+        lv_obj_set_style_bg_opa(ui_scr->video_file, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
 #endif
         if ((__this->file_fd != NULL) && (__this->err_file == 0) && (__this->type == 1)) {
             __this->file_fd = NULL;
@@ -239,14 +251,18 @@ int gui_scr_action_video_play_cb(int action)
 
     switch (action) {
     case GUI_SCREEN_ACTION_LOAD:
+        lv_ui_video_play *ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_VIDEO_PLAY);
+        if (!ui_scr) {
+            return -1;
+        }
 #if LV_DISP_UI_FB_NUM
-        lv_obj_set_style_bg_opa(guider_ui.video_play, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+        lv_obj_set_style_bg_opa(ui_scr->video_play, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
 #else
-        lv_obj_set_style_bg_opa(guider_ui.video_play, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+        lv_obj_set_style_bg_opa(ui_scr->video_play, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
 #endif
         if (__this->type == 0) {
             //jpg时隐藏进度条
-            lv_obj_add_flag(guider_ui.video_play_view_1, LV_OBJ_FLAG_HIDDEN);
+            lv_obj_add_flag(ui_scr->video_play_view_1, LV_OBJ_FLAG_HIDDEN);
         }
         break;
     }
@@ -260,9 +276,13 @@ void get_focused_file_idx(lv_obj_t *focused_obj)
 
 void focus_video_file(void)
 {
+    lv_ui_video_file *ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_VIDEO_FILE);
+    if (!ui_scr) {
+        return;
+    }
     printf("---->%s(), file idx: %d\n", __func__, __this->file_index);
     //聚焦到指定文件
-    lv_obj_t *focuse_file_obj = lv_obj_get_child(guider_ui.video_file_view_3, __this->file_index);
+    lv_obj_t *focuse_file_obj = lv_obj_get_child(ui_scr->video_file_view_3, __this->file_index);
     if (focuse_file_obj) {
         printf("----%d---%s\n", __LINE__, __func__);
         lv_group_focus_obj(focuse_file_obj);
@@ -493,17 +513,21 @@ void video_dec_edit_files(u8 mode)
     char file_name[50];
     struct vfscan *fs = NULL;
     __this->refresh_flag = 0; //每次进来要清空下重刷屏幕的标志位
-    const char *text_dir = lv_label_get_text(guider_ui.video_file_lbl_path); //路径
+    lv_ui_video_file *ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_VIDEO_FILE);
+    if (!ui_scr) {
+        return;
+    }
+    const char *text_dir = lv_label_get_text(ui_scr->video_file_lbl_path); //路径
     fs = fscan(text_dir, "-tMOVJPGAVI -sn", 3);
     strncpy(&__this->cur_path, text_dir, sizeof(__this->cur_path) - 1);
     __this->cur_path[sizeof(__this->cur_path) - 1] = '\0';
-    uint32_t child_cnt = lv_obj_get_child_cnt(guider_ui.video_file_view_3);
+    uint32_t child_cnt = lv_obj_get_child_cnt(ui_scr->video_file_view_3);
 
     for (int i = 0; i < child_cnt; i++) {
         if (__this->edit_sel[i]) {  //文件选中，edit_sel标记选中的文件序号
             __this->file_index = i;
             __this->edit_sel[i] = 0;
-            lv_obj_t *child_contain = lv_obj_get_child(guider_ui.video_file_view_3, i);  //拿到录像文件控件
+            lv_obj_t *child_contain = lv_obj_get_child(ui_scr->video_file_view_3, i);  //拿到录像文件控件
             lv_obj_t *checkbox = lv_obj_get_child(child_contain, 0);  //拿到复选框控件
             lv_obj_clear_state(checkbox, LV_STATE_CHECKED);
             FILE *fp = fselect(fs, FSEL_BY_NUMBER, __this->file_num - i);
@@ -525,7 +549,7 @@ void video_dec_edit_files(u8 mode)
             switch (mode) {
             case 0:  //加锁
                 cfun_dec_lock();
-                lv_obj_t *child_contain = lv_obj_get_child(guider_ui.video_file_view_3, __this->file_index);  //录像文件控件
+                lv_obj_t *child_contain = lv_obj_get_child(ui_scr->video_file_view_3, __this->file_index);  //录像文件控件
                 lv_obj_t *lock_flag = lv_obj_get_child(child_contain, 4);
                 if (lv_obj_is_valid(lock_flag)) {
                     if (lv_obj_has_flag(lock_flag, LV_OBJ_FLAG_HIDDEN)) {
@@ -548,7 +572,7 @@ void video_dec_edit_files(u8 mode)
             u8 flag = lock_all_flag;
             cfun_dec_lock_all(lock_all_flag);
             for (int i = 0; i < child_cnt; i++) {
-                lv_obj_t *child_contain = lv_obj_get_child(guider_ui.video_file_view_3, i);
+                lv_obj_t *child_contain = lv_obj_get_child(ui_scr->video_file_view_3, i);
                 lv_obj_t *lock_flag = lv_obj_get_child(child_contain, 4);
                 if (lv_obj_is_valid(lock_flag)) {
                     if (flag) {
@@ -597,8 +621,11 @@ int get_focused_file(void)
         printf("------>%s(), focused_video_file_obj is NULL\n", __func__);
         return -1;
     }
-
-    const char *text_dir = lv_label_get_text(guider_ui.video_file_lbl_path); //路径
+    lv_ui_video_file *ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_VIDEO_FILE);
+    if (!ui_scr) {
+        return -1;
+    }
+    const char *text_dir = lv_label_get_text(ui_scr->video_file_lbl_path); //路径
     fs = fscan(text_dir, "-tMOVJPGAVI -sn", 3);
     strncpy(&__this->cur_path, text_dir, sizeof(__this->cur_path) - 1);
     __this->cur_path[sizeof(__this->cur_path) - 1] = '\0';
@@ -662,11 +689,14 @@ void lock_flie(uint8_t file_num, uint8_t lock)
     init_intent(&it);
     it.name = "video_dec";
     it.action = ACTION_VIDEO_DEC_SET_CONFIG;
-
+    lv_ui_video_file *ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_VIDEO_FILE);
+    if (!ui_scr) {
+        return;
+    }
     printf(">>>file_num: %d, lock: %d\n", file_num, lock);
 
     if (file_num) {
-        video_file_num = lv_obj_get_child_cnt(guider_ui.video_file_view_3);
+        video_file_num = lv_obj_get_child_cnt(ui_scr->video_file_view_3);
         if (lock) {
             it.data = "lock:all";
         } else {
@@ -689,9 +719,9 @@ void lock_flie(uint8_t file_num, uint8_t lock)
     for (int i = 0; i < video_file_num; i++) {
         printf("file cnt: %d\n", i);
         if (file_num) {
-            video_file_obj = lv_obj_get_child(guider_ui.video_file_view_3, i);
+            video_file_obj = lv_obj_get_child(ui_scr->video_file_view_3, i);
         } else {
-            video_file_obj = lv_obj_get_child(guider_ui.video_file_view_3, __this->file_index);
+            video_file_obj = lv_obj_get_child(ui_scr->video_file_view_3, __this->file_index);
         }
 
         lock_icon_obj = lv_obj_get_child(video_file_obj, 4);
@@ -831,4 +861,5 @@ REGISTER_UI_SCREEN_ACTION_HANDLER(GUI_SCREEN_VIDEO_PLAY)
 .onchange = gui_scr_action_video_play_cb,
 };
 #endif
+
 #endif

@@ -785,6 +785,10 @@ static void funkey8_timer_cb(lv_timer_t *timer)
 */
 void sysmenu_subpage_show(struct sysmenu_subpage_data *my_subpage)
 {
+    lv_ui_sys_setting *ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_SYS_SETTING);
+    if (!ui_scr) {
+        return;
+    }
     lv_obj_t *focused_obj = lv_group_get_focused(lv_group_get_default());
 #ifdef USE_LVGL_V8_UI_DEMO
     if (!my_subpage->carnum_view && !my_subpage->warning && !my_subpage->date_view && my_subpage->now_subpage) {
@@ -867,19 +871,19 @@ void sysmenu_subpage_show(struct sysmenu_subpage_data *my_subpage)
     lvgl_module_msg_group_add_value(sys_group, GUI_MODEL_SYS_SETTING_MSG_ID_STATE_FUNKEY7, (void *)LV_STATE_DEFAULT);
     switch (my_subpage->list_focus_id) {
     case 1:
-        lv_group_focus_obj(guider_ui.sys_setting_lbl_funkey5);
+        lv_group_focus_obj(ui_scr->sys_setting_lbl_funkey5);
         lvgl_module_msg_group_add_value(sys_group, GUI_MODEL_SYS_SETTING_MSG_ID_STATE_FUNKEY5, (void *)LV_STATE_FOCUS_KEY);
         break;
     case 2:
-        lv_group_focus_obj(guider_ui.sys_setting_lbl_funkey6);
+        lv_group_focus_obj(ui_scr->sys_setting_lbl_funkey6);
         lvgl_module_msg_group_add_value(sys_group, GUI_MODEL_SYS_SETTING_MSG_ID_STATE_FUNKEY6, (void *)LV_STATE_FOCUS_KEY);
         break;
     case 3:
-        lv_group_focus_obj(guider_ui.sys_setting_lbl_funkey7);
+        lv_group_focus_obj(ui_scr->sys_setting_lbl_funkey7);
         lvgl_module_msg_group_add_value(sys_group, GUI_MODEL_SYS_SETTING_MSG_ID_STATE_FUNKEY7, (void *)LV_STATE_FOCUS_KEY);
         break;
     default:
-        lv_group_focus_obj(guider_ui.sys_setting_lbl_funkey4);
+        lv_group_focus_obj(ui_scr->sys_setting_lbl_funkey4);
         lvgl_module_msg_group_add_value(sys_group, GUI_MODEL_SYS_SETTING_MSG_ID_STATE_FUNKEY4, (void *)LV_STATE_FOCUS_KEY);
         break;
     }
@@ -913,6 +917,10 @@ void sysmenu_subpage_btnlist_keyevent_cb(lv_ui *ui)
     }
 
     printf("[chili] %s %d   \n", __func__, __LINE__);
+    lv_ui_sys_setting *ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_SYS_SETTING);
+    if (!ui_scr) {
+        return;
+    }
 #ifdef USE_LVGL_V8_UI_DEMO
     lv_group_set_default(def_group);
     lv_indev_set_group(indev_keypad, def_group);
@@ -936,7 +944,7 @@ void sysmenu_subpage_btnlist_keyevent_cb(lv_ui *ui)
             break;
         }
         ui_lcd_light_time_set(db_select("pro"));
-        lv_group_focus_obj(guider_ui.sys_setting_img_saver);
+        lv_group_focus_obj(ui_scr->sys_setting_img_saver);
         break;
 
     case  SUBPAGE_POWEROFF:
@@ -956,7 +964,7 @@ void sysmenu_subpage_btnlist_keyevent_cb(lv_ui *ui)
         }
 
         aff_set_function(db_select("aff"));
-        lv_group_focus_obj(guider_ui.sys_setting_img_2);
+        lv_group_focus_obj(ui_scr->sys_setting_img_2);
 
         break;
 
@@ -969,7 +977,7 @@ void sysmenu_subpage_btnlist_keyevent_cb(lv_ui *ui)
             db_update("fre", 50);
             break;
         }
-        lv_group_focus_obj(guider_ui.sys_setting_img_3);
+        lv_group_focus_obj(ui_scr->sys_setting_img_3);
         break;
 
     case  SUBPAGE_VOLUME:
@@ -981,7 +989,7 @@ void sysmenu_subpage_btnlist_keyevent_cb(lv_ui *ui)
             db_update("kvo", 0);
             break;
         }
-        lv_group_focus_obj(guider_ui.sys_setting_img_4);
+        lv_group_focus_obj(ui_scr->sys_setting_img_4);
 
         break;
 
@@ -1000,10 +1008,10 @@ void sysmenu_subpage_btnlist_keyevent_cb(lv_ui *ui)
     case  SUBPAGE_DATA:
         switch (subpage_cur_btn) {
         case SUBPAGE_FUNKEY2:
-            lv_roller_get_selected_str(ui->sys_setting_roller_hour, hour, 4);
-            lv_roller_get_selected_str(ui->sys_setting_roller_min, min, 4);
+            lv_roller_get_selected_str(ui_scr->sys_setting_roller_hour, hour, 4);
+            lv_roller_get_selected_str(ui_scr->sys_setting_roller_min, min, 4);
             //datetime:2024/05/20  23: 1
-            char *date = strdup(lv_label_get_text(ui->sys_setting_datetext_subpage));
+            char *date = strdup(lv_label_get_text(ui_scr->sys_setting_datetext_subpage));
             str_p = strtok(date, "/");
             if (str_p) {
                 db_update("datey", atoi(str_p));
@@ -1024,23 +1032,23 @@ void sysmenu_subpage_btnlist_keyevent_cb(lv_ui *ui)
         default:
             break;
         }
-        lv_group_focus_obj(guider_ui.sys_setting_img_12);
+        lv_group_focus_obj(ui_scr->sys_setting_img_12);
         break;
 
     case  SUBPAGE_CARNUM:
         switch (subpage_cur_btn) {
         case SUBPAGE_FUNKEY2:
             carnumber_cn =  lvgl_module_msg_get_ptr(GUI_MODEL_VIDEO_REC_MSG_ID_CAR_NUNBER, 16);
-            lv_dropdown_get_selected_str(ui->sys_setting_ddlist_1, carnumber_cn, 4);
-            lv_dropdown_get_selected_str(ui->sys_setting_ddlist_2, &carnumber_cn[3], 2);
-            lv_dropdown_get_selected_str(ui->sys_setting_ddlist_3, &carnumber_cn[4], 2);
-            lv_dropdown_get_selected_str(ui->sys_setting_ddlist_4, &carnumber_cn[5], 2);
-            lv_dropdown_get_selected_str(ui->sys_setting_ddlist_5, &carnumber_cn[6], 2);
-            lv_dropdown_get_selected_str(ui->sys_setting_ddlist_6, &carnumber_cn[7], 2);
-            lv_dropdown_get_selected_str(ui->sys_setting_ddlist_7, &carnumber_cn[8], 2);
+            lv_dropdown_get_selected_str(ui_scr->sys_setting_ddlist_1, carnumber_cn, 4);
+            lv_dropdown_get_selected_str(ui_scr->sys_setting_ddlist_2, &carnumber_cn[3], 2);
+            lv_dropdown_get_selected_str(ui_scr->sys_setting_ddlist_3, &carnumber_cn[4], 2);
+            lv_dropdown_get_selected_str(ui_scr->sys_setting_ddlist_4, &carnumber_cn[5], 2);
+            lv_dropdown_get_selected_str(ui_scr->sys_setting_ddlist_5, &carnumber_cn[6], 2);
+            lv_dropdown_get_selected_str(ui_scr->sys_setting_ddlist_6, &carnumber_cn[7], 2);
+            lv_dropdown_get_selected_str(ui_scr->sys_setting_ddlist_7, &carnumber_cn[8], 2);
             printf("[chili] %s carnumber_cn:%s   \n", __func__, carnumber_cn);
             lvgl_module_msg_send_ptr(carnumber_cn, 0);
-            int  selected_idx = lv_dropdown_get_selected(ui->sys_setting_ddlist_1);
+            int  selected_idx = lv_dropdown_get_selected(ui_scr->sys_setting_ddlist_1);
             db_update("proc", selected_idx);
             unsigned char gb2312Data[16] = {0};
             carnum_utf8_to_gb2312((uint8_t *)carnumber_cn, (uint8_t *)gb2312Data, selected_idx);
@@ -1051,7 +1059,7 @@ void sysmenu_subpage_btnlist_keyevent_cb(lv_ui *ui)
         default:
             break;
         }
-        lv_group_focus_obj(guider_ui.sys_setting_img_9);
+        lv_group_focus_obj(ui_scr->sys_setting_img_9);
         break;
 
     case  SUBPAGE_LINEDRIFT:
@@ -1063,7 +1071,7 @@ void sysmenu_subpage_btnlist_keyevent_cb(lv_ui *ui)
             db_update("lan", 0);
             break;
         }
-        lv_group_focus_obj(guider_ui.sys_setting_img_8);
+        lv_group_focus_obj(ui_scr->sys_setting_img_8);
 
         break;
 
@@ -1077,7 +1085,7 @@ void sysmenu_subpage_btnlist_keyevent_cb(lv_ui *ui)
             break;
         }
 
-        lv_group_focus_obj(guider_ui.sys_setting_img_6);
+        lv_group_focus_obj(ui_scr->sys_setting_img_6);
         break;
 
     case  SUBPAGE_FORMATTING:
@@ -1086,11 +1094,15 @@ void sysmenu_subpage_btnlist_keyevent_cb(lv_ui *ui)
             sys_prompt_show_ctl(3000, (void *)_("nosd"));
             return;
         }
+        lv_ui_sys_prompt *sys_prompt_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_SYS_PROMPT);
+        if (!sys_prompt_scr) {
+            return;
+        }
         sys_prompt_show_ctl(30000, (void *)_("being_formatted"));
-        lv_obj_clear_flag(guider_ui.sys_prompt_img_warn, LV_OBJ_FLAG_CLICKABLE);
+        lv_obj_clear_flag(sys_prompt_scr->sys_prompt_img_warn, LV_OBJ_FLAG_CLICKABLE);
         extern void video_system_format(void);
         video_system_format();
-        lv_group_focus_obj(guider_ui.sys_setting_img_10);
+        lv_group_focus_obj(ui_scr->sys_setting_img_10);
         break;
 
     case  SUBPAGE_RESET:
@@ -1118,11 +1130,11 @@ void sysmenu_subpage_btnlist_keyevent_cb(lv_ui *ui)
         lv_group_set_default(def_group);
         lv_indev_set_group(indev_keypad, def_group);
 #endif
-        lv_group_focus_obj(guider_ui.sys_setting_img_11);
+        lv_group_focus_obj(ui_scr->sys_setting_img_11);
         break;
 
     case  SUBPAGE_VERSION:
-        lv_group_focus_obj(guider_ui.sys_setting_img_7);
+        lv_group_focus_obj(ui_scr->sys_setting_img_7);
         break;
 
     default:
@@ -1203,11 +1215,14 @@ void subpage_show(struct subpage_data *my_subpage)
 void hide_label_timer_cb(lv_timer_t *timer)
 {
     lv_obj_t *obj = timer->user_data;
-
-    if (timer == guider_ui.video_play_hide_bar) {
-        guider_ui.video_play_hide_bar = NULL;
-    } else if (timer == guider_ui.video_play_hide_label) {
-        guider_ui.video_play_hide_label = NULL;
+    lv_ui_video_play *ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_VIDEO_PLAY);
+    if (!ui_scr) {
+        return;
+    }
+    if (timer == ui_scr->video_play_hide_bar) {
+        ui_scr->video_play_hide_bar = NULL;
+    } else if (timer == ui_scr->video_play_hide_label) {
+        ui_scr->video_play_hide_label = NULL;
     }
     lv_timer_del(timer);
 
@@ -1218,6 +1233,10 @@ void hide_label_timer_cb(lv_timer_t *timer)
 
 void reinit_sys_setting_model(void)
 {
+    lv_ui_sys_setting *ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_SYS_SETTING);
+    if (!ui_scr) {
+        return;
+    }
     gui_msg_send(GUI_MODEL_GLOBAL_SUBPAGE_MSG_ID_SUBPAGE_ICON, (void *)RES_LCD_OFF, sizeof(RES_LCD_OFF));
     gui_msg_send(GUI_MODEL_GLOBAL_SUBPAGE_MSG_ID_TITLE, (void *)_("lcdprotect"), strlen(_("lcdprotect")));
     gui_msg_send(GUI_MODEL_GLOBAL_SUBPAGE_MSG_ID_HIDE_FUNCKEY1, (void *)LV_OBJ_FLAG_HIDDEN, 4);
@@ -1245,16 +1264,16 @@ void reinit_sys_setting_model(void)
     gui_msg_send(GUI_MODEL_SYS_SETTING_MSG_ID_STATE_FUNKEY7, (void *)LV_STATE_DEFAULT, 4);
     switch (db_select("pro")) { //处理高亮样式
     case 30:
-        lv_group_focus_obj(guider_ui.sys_setting_lbl_funkey5);
+        lv_group_focus_obj(ui_scr->sys_setting_lbl_funkey5);
         break;
     case 60:
-        lv_group_focus_obj(guider_ui.sys_setting_lbl_funkey6);
+        lv_group_focus_obj(ui_scr->sys_setting_lbl_funkey6);
         break;
     case 120:
-        lv_group_focus_obj(guider_ui.sys_setting_lbl_funkey7);
+        lv_group_focus_obj(ui_scr->sys_setting_lbl_funkey7);
         break;
     default:
-        lv_group_focus_obj(guider_ui.sys_setting_lbl_funkey4);
+        lv_group_focus_obj(ui_scr->sys_setting_lbl_funkey4);
         break;
     }
 

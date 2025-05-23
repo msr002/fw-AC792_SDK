@@ -30,10 +30,14 @@ int gui_src_action_setting(int action)
     case GUI_SCREEN_ACTION_LOAD:
         def_group = lv_group_get_default();
         group_list = lv_group_create();
-        lv_group_add_obj(group_list, guider_ui.sys_setting_lbl_funkey4);
-        lv_group_add_obj(group_list, guider_ui.sys_setting_lbl_funkey5);
-        lv_group_add_obj(group_list, guider_ui.sys_setting_lbl_funkey6);
-        lv_group_add_obj(group_list, guider_ui.sys_setting_lbl_funkey7);
+        lv_ui_sys_setting *ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_SYS_SETTING);
+        if (!ui_scr) {
+            return -1;
+        }
+        lv_group_add_obj(group_list, ui_scr->sys_setting_lbl_funkey4);
+        lv_group_add_obj(group_list, ui_scr->sys_setting_lbl_funkey5);
+        lv_group_add_obj(group_list, ui_scr->sys_setting_lbl_funkey6);
+        lv_group_add_obj(group_list, ui_scr->sys_setting_lbl_funkey7);
         if (app) {
             printf("[chili] %s %d   \n", app->name, __LINE__);
             it.name = app->name;
@@ -56,7 +60,11 @@ REGISTER_UI_SCREEN_ACTION_HANDLER(GUI_SCREEN_SYS_SETTING)
 extern void sys_prompt_show_ctl(int32_t show_time, void *tips);
 void format_callback(void *p, int err)
 {
-    lv_obj_add_flag(guider_ui.sys_prompt_img_warn, LV_OBJ_FLAG_CLICKABLE);
+    lv_ui_sys_prompt *ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_SYS_PROMPT);
+    if (!ui_scr) {
+        return;
+    }
+    lv_obj_add_flag(ui_scr->sys_prompt_img_warn, LV_OBJ_FLAG_CLICKABLE);
     if (err == 0) {
         lvgl_rpc_post_func(sys_prompt_show_ctl, 2, 3000, (void *)_("format_succ"));
     } else {
@@ -73,5 +81,6 @@ void video_system_format(void)
     start_app_async(&it, format_callback, NULL);
 }
 #endif
+
 
 #endif
