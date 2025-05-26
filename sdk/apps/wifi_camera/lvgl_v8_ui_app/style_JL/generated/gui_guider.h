@@ -37,7 +37,6 @@ extern "C" {
 #endif
 #endif
 
-// generate lv_ui gui_guider
 typedef struct {
     // Screen usb_slave
     lv_obj_t *usb_slave;
@@ -51,7 +50,9 @@ typedef struct {
     lv_obj_t *usb_slave_imgbtn_masstorage_label;
     lv_obj_t *usb_slave_imgbtn_pccam;
     lv_obj_t *usb_slave_imgbtn_pccam_label;
+} lv_ui_usb_slave;
 
+typedef struct {
     // Screen video_rec
     lv_obj_t *video_rec;
     bool      video_rec_del;
@@ -120,7 +121,9 @@ typedef struct {
     lv_obj_t *video_rec_roller_mutifunc;
     lv_obj_t *video_rec_headlight;
     lv_timer_t *video_rec_timer_1;
+} lv_ui_video_rec;
 
+typedef struct {
     // Screen home_page
     lv_obj_t *home_page;
     bool      home_page_del;
@@ -134,7 +137,9 @@ typedef struct {
     lv_obj_t *home_page_digitclock_1;
     lv_obj_t *home_page_lbl_3;
     lv_obj_t *home_page_lbl_1;
+} lv_ui_home_page;
 
+typedef struct {
     // Screen sys_prompt
     lv_obj_t *sys_prompt;
     bool      sys_prompt_del;
@@ -143,7 +148,9 @@ typedef struct {
     lv_obj_t *sys_prompt_img_2;
     lv_obj_t *sys_prompt_img_1;
     lv_obj_t *sys_prompt_lbl_1;
+} lv_ui_sys_prompt;
 
+typedef struct {
     // Screen sys_setting
     lv_obj_t *sys_setting;
     bool      sys_setting_del;
@@ -203,7 +210,9 @@ typedef struct {
     lv_obj_t *sys_setting_lbl_funkey2_label;
     lv_obj_t *sys_setting_lbl_funkey3;
     lv_obj_t *sys_setting_lbl_funkey3_label;
+} lv_ui_sys_setting;
 
+typedef struct {
     // Screen video_photo
     lv_obj_t *video_photo;
     bool      video_photo_del;
@@ -264,7 +273,9 @@ typedef struct {
     lv_obj_t *video_photo_lbl_funkey4;
     lv_obj_t *video_photo_lbl_funkey4_label;
     lv_obj_t *video_photo_show_capture_time;
+} lv_ui_video_photo;
 
+typedef struct {
     // Screen video_play
     lv_obj_t *video_play;
     bool      video_play_del;
@@ -286,7 +297,9 @@ typedef struct {
     lv_obj_t *video_play_img_prev_file;
     lv_obj_t *video_play_img_next_file;
     lv_timer_t *video_play_hide_label;
+} lv_ui_video_play;
 
+typedef struct {
     // Screen video_file
     lv_obj_t *video_file;
     bool      video_file_del;
@@ -307,7 +320,9 @@ typedef struct {
     lv_obj_t *video_file_lbl_path;
     lv_obj_t *video_file_view_3;
     lv_obj_t *video_file_lbl_1;
+} lv_ui_video_file;
 
+typedef struct {
     // Screen video_dir
     lv_obj_t *video_dir;
     bool      video_dir_del;
@@ -325,12 +340,16 @@ typedef struct {
     lv_obj_t *video_dir_imgbtn_5_label;
     lv_obj_t *video_dir_imgbtn_2;
     lv_obj_t *video_dir_imgbtn_2_label;
+} lv_ui_video_dir;
 
+typedef struct {
     // Screen car_parking
     lv_obj_t *car_parking;
     bool      car_parking_del;
     lv_obj_t *car_parking_img_1;
+} lv_ui_car_parking;
 
+typedef struct {
     // Screen line_drift
     lv_obj_t *line_drift;
     bool      line_drift_del;
@@ -342,7 +361,9 @@ typedef struct {
     lv_obj_t *line_drift_btn_carhead_label;
     lv_obj_t *line_drift_lbl_7;
     lv_obj_t *line_drift_lbl_6;
+} lv_ui_line_drift;
 
+typedef struct {
     // Screen sys_popwin
     lv_obj_t *sys_popwin;
     bool      sys_popwin_del;
@@ -352,6 +373,22 @@ typedef struct {
     lv_obj_t *sys_popwin_btn_1_label;
     lv_obj_t *sys_popwin_btn_2;
     lv_obj_t *sys_popwin_btn_2_label;
+} lv_ui_sys_popwin;
+
+// generate lv_ui gui_guider
+typedef struct {
+    lv_ui_usb_slave *usb_slave;
+    lv_ui_video_rec *video_rec;
+    lv_ui_home_page *home_page;
+    lv_ui_sys_prompt *sys_prompt;
+    lv_ui_sys_setting *sys_setting;
+    lv_ui_video_photo *video_photo;
+    lv_ui_video_play *video_play;
+    lv_ui_video_file *video_file;
+    lv_ui_video_dir *video_dir;
+    lv_ui_car_parking *car_parking;
+    lv_ui_line_drift *line_drift;
+    lv_ui_sys_popwin *sys_popwin;
 
     lv_group_t *default_group;
 } lv_ui;
@@ -364,8 +401,11 @@ void ui_scr_stack_pop_anim(lv_ui *ui, lv_scr_load_anim_t anim_type, uint32_t tim
 
 gui_scr_t *ui_get_scr(int32_t scr_id);
 gui_scr_t *ui_get_setup_scr(int32_t scr_id);
+lv_obj_t *ui_get_setup_scr_obj(int32_t scr_id);
+void *ui_get_scr_ptr(lv_ui *ui, int32_t scr_id);
+void ui_free_scr_ptr(lv_ui *ui, int32_t scr_id);
+bool ui_is_act_scr(int32_t scr_id);
 void ui_init_style(lv_style_t *style);
-void init_scr_del_flag(lv_ui *ui);
 void setup_ui(lv_ui *ui);
 #include "./gui_msg/gui_msg.h"
 extern lv_ui guider_ui;// Screen usb_slave

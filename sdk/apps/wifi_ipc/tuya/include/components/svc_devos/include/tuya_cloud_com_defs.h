@@ -736,7 +736,7 @@ typedef BYTE_T GW_STATUS_E;
 #define GW_ACTIVED          1 // gw actived
 #define GW_FIRST_START      2 // start tuya-sdk in the first time.
 #define GW_NORMAL           3 // tuya-sdk is actived and started
-#define GW_BLE_ACTIVED      4 // gw ble actived
+#define GW_BLE_ACTIVED          4 // gw ble actived
 /**
  * @brief Handler to process gateway state change
  *

@@ -134,26 +134,28 @@ void bat_reflesh_timer_cb_t(struct _lv_timer_t *p)
         } else {
             lvgl_module_msg_send_global_ptr(GUI_MODEL_MSG_ID_TIPS, _("resetinfo"), strlen(_("resetinfo")), 0);
         }
-//            lv_obj_clear_flag(guider_ui.home_lbl_note, LV_OBJ_FLAG_HIDDEN);
     } else {
         lvgl_module_msg_send_global_ptr(GUI_MODEL_MSG_ID_TIPS, " ", strlen(" "), 0);
     }
-
+    lv_ui_home *ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_HOME);
+    if (!ui_scr) {
+        return;
+    }
     //电量更新
     int vbt = get_vbat_level() * 10 / 42;
     if (vbt <= 15) {
-        lv_imglist_set_act(guider_ui.home_imglist_bat, 0);
+        lv_imglist_set_act(ui_scr->home_imglist_bat, 0);
     } else if (vbt > 15 && vbt <= 25) {
-        lv_imglist_set_act(guider_ui.home_imglist_bat, 1);
+        lv_imglist_set_act(ui_scr->home_imglist_bat, 1);
     } else if (vbt > 25 && vbt <= 50) {
-        lv_imglist_set_act(guider_ui.home_imglist_bat, 2);
+        lv_imglist_set_act(ui_scr->home_imglist_bat, 2);
     } else if (vbt > 50 && vbt <= 75) {
-        lv_imglist_set_act(guider_ui.home_imglist_bat, 3);
+        lv_imglist_set_act(ui_scr->home_imglist_bat, 3);
     } else if (vbt > 75 && vbt <= 100) {
-        lv_imglist_set_act(guider_ui.home_imglist_bat, 4);
+        lv_imglist_set_act(ui_scr->home_imglist_bat, 4);
     }
     if (sys_power_is_charging()) {
-        lv_imglist_set_act(guider_ui.home_imglist_bat, 5);
+        lv_imglist_set_act(ui_scr->home_imglist_bat, 5);
     }
 
     //wifi信号图标更新
@@ -161,15 +163,15 @@ void bat_reflesh_timer_cb_t(struct _lv_timer_t *p)
         int rssi = wifi_get_rssi();
 
         if (rssi > -60 && rssi <= -40) { //强
-            lv_imglist_set_act(guider_ui.home_imglist_wifi, 4);
+            lv_imglist_set_act(ui_scr->home_imglist_wifi, 4);
         } else if (rssi > -70 && rssi <= -60) { //良好
-            lv_imglist_set_act(guider_ui.home_imglist_wifi, 3);
+            lv_imglist_set_act(ui_scr->home_imglist_wifi, 3);
         } else if (rssi > -85 && rssi <= -70) { //中等
-            lv_imglist_set_act(guider_ui.home_imglist_wifi, 2);
+            lv_imglist_set_act(ui_scr->home_imglist_wifi, 2);
         } else if (rssi < -85) { //弱
-            lv_imglist_set_act(guider_ui.home_imglist_wifi, 1);
+            lv_imglist_set_act(ui_scr->home_imglist_wifi, 1);
         } else {
-            lv_imglist_set_act(guider_ui.home_imglist_wifi, 0);
+            lv_imglist_set_act(ui_scr->home_imglist_wifi, 0);
         }
 #if 1
         //测试模型消息发送--天气更新

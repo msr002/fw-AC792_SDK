@@ -1,6 +1,5 @@
 #include "app_config.h"
 #ifdef CONFIG_UI_STYLE_JL_ENABLE
-
 /*********************
  *      INCLUDES
  *********************/
@@ -96,5 +95,6 @@ void usb_page_hide(int arg)
     }
 }
 #endif
+
 
 #endif

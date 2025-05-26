@@ -215,7 +215,6 @@ INCLUDES := \
 	-I../../../../apps/wifi_ipc/camx_xciot/include/osal/core \
 	-I../../../../apps/wifi_ipc/camx_xciot/src/camx \
 	-I../../../../apps/wifi_ipc/board/wl83 \
-	-I../../../../apps/wifi_ipc/tuya/demo_quickstart/include \
 	-I../../../../apps/wifi_ipc/tuya/tuyaos_adapter/include \
 	-I../../../../apps/wifi_ipc/tuya/include/components/tal_system/include \
 	-I../../../../apps/wifi_ipc/tuya/tuyaos_adapter/include/utilities/include \
@@ -239,6 +238,7 @@ INCLUDES := \
 	-I../../../../apps/wifi_ipc/tuya/tuyaos_adapter/include/timer \
 	-I../../../../apps/wifi_ipc/tuya/tuyaos_adapter/include/wifi \
 	-I../../../../apps/wifi_ipc/tuya/tuyaos_adapter/include/watchdog \
+	-I../../../../apps/wifi_ipc/tuya/tuya_demo_vedio_lock_ty/include \
 	-I../../../../apps/wifi_ipc/tuya/include/components/lib_cJSON/include \
 	-I../../../../apps/wifi_ipc/tuya/include/components/svc_wifi/include \
 	-I../../../../apps/wifi_ipc/tuya/include/components/svc_api_iot/include \
@@ -255,12 +255,20 @@ INCLUDES := \
 	-I../../../../apps/wifi_ipc/tuya/include/components/svc_mf_test/include \
 	-I../../../../apps/wifi_ipc/tuya/include/components/svc_tuya_cloud/include/mqtt \
 	-I../../../../apps/wifi_ipc/tuya/include/components/ty_gfw_lock_streamer/include \
-	-I../../../../apps/wifi_ipc/tuya/common_video_lock_demo/include \
 	-I../../../../apps/wifi_ipc/tuya/include/components/lib_http/include \
 	-I../../../../apps/wifi_ipc/tuya/include/components/base_uf/include \
 	-I../../../../apps/wifi_ipc/tuya/include/components/tal_security/include \
 	-I../../../../apps/wifi_ipc/tuya/include/tal_compatible/include \
 	-I../../../../apps/wifi_ipc/tuya/include/components/tal_driver/include \
+	-I../../../../apps/wifi_ipc/tuya/include/components/tfm_gpio_test/include \
+	-I../../../../apps/wifi_ipc/tuya/include/components/tdl_frame_send_recv/include \
+	-I../../../../apps/wifi_ipc/tuya/include/components/tbl_lock_app_proc/include \
+	-I../../../../apps/wifi_ipc/tuya/include/components/tbl_lock_dp_report/include \
+	-I../../../../apps/wifi_ipc/tuya/include/components/tbl_lock_kiwi_password/include \
+	-I../../../../apps/wifi_ipc/tuya/include/components/tfm_dp_cloud_cache/include \
+	-I../../../../apps/wifi_ipc/tuya/include/components/tfm_protocol_data_proc/include \
+	-I../../../../apps/wifi_ipc/tuya/include/components/tdd_uart/include \
+	-I../../../../apps/wifi_ipc/tuya/include/components/app_tuya_driver/include \
 	-I../../../../apps/common/net \
 	-I../../../../include_lib/net \
 	-I../../../../include_lib/net/tutk \
@@ -294,7 +302,6 @@ c_SRC_FILES := \
 	../../../../apps/common/audio_music/http_recorder.c \
 	../../../../apps/common/audio_music/music_decrypt.c \
 	../../../../apps/common/audio_music/pcm_play_api.c \
-	../../../../apps/common/audio_music/usb_audio_api.c \
 	../../../../apps/common/audio_music/wifi_upload_pcm.c \
 	../../../../apps/common/ble/le_24g_deal.c \
 	../../../../apps/common/ble/le_hogp.c \
@@ -962,8 +969,9 @@ c_SRC_FILES := \
 	../../../../apps/wifi_ipc/lvgl_v8_ui_app/generated/gui_events/events_init.c \
 	../../../../apps/wifi_ipc/lvgl_v8_ui_app/generated/gui_events/i18n_handler.c \
 	../../../../apps/wifi_ipc/lvgl_v8_ui_app/generated/gui_fonts/gui_fonts.c \
+	../../../../apps/wifi_ipc/lvgl_v8_ui_app/generated/gui_group/gui_group.c \
 	../../../../apps/wifi_ipc/lvgl_v8_ui_app/generated/gui_guider.c \
-	../../../../apps/wifi_ipc/lvgl_v8_ui_app/generated/gui_images/_img_logo_alpha_332x82.c \
+	../../../../apps/wifi_ipc/lvgl_v8_ui_app/generated/gui_images/_img_logo_alpha332x82.c \
 	../../../../apps/wifi_ipc/lvgl_v8_ui_app/generated/gui_msg/gui_model_msg.c \
 	../../../../apps/wifi_ipc/lvgl_v8_ui_app/generated/gui_msg/gui_msg.c \
 	../../../../apps/wifi_ipc/lvgl_v8_ui_app/generated/gui_res/res_common.c \
@@ -974,31 +982,23 @@ c_SRC_FILES := \
 	../../../../apps/wifi_ipc/lvgl_v8_ui_app/generated/gui_scr/setup_scr_start.c \
 	../../../../apps/wifi_ipc/lvgl_v8_ui_app/generated/gui_scr/setup_scr_syscfg.c \
 	../../../../apps/wifi_ipc/lvgl_v8_ui_app/generated/gui_scr/setup_scr_sysinfo.c \
+	../../../../apps/wifi_ipc/lvgl_v8_ui_app/generated/gui_scr/ui_scr_manager.c \
+	../../../../apps/wifi_ipc/lvgl_v8_ui_app/generated/gui_scr/ui_style.c \
 	../../../../apps/wifi_ipc/lvgl_v8_ui_app/generated/gui_timelines/gui_timelines.c \
 	../../../../apps/wifi_ipc/lvgl_v8_ui_app/generated/i18n/lv_i18n.c \
 	../../../../apps/wifi_ipc/lvgl_v8_ui_app/ui_demo.c \
 	../../../../apps/wifi_ipc/main/app_database.c \
 	../../../../apps/wifi_ipc/main/app_main.c \
 	../../../../apps/wifi_ipc/profile.c \
+	../../../../apps/wifi_ipc/record/usb_audio_rec.c \
 	../../../../apps/wifi_ipc/record/video_rec.c \
 	../../../../apps/wifi_ipc/record/video_rec_file.c \
-	../../../../apps/wifi_ipc/tuya/common_video_lock_demo/src/tuya_audio.c \
-	../../../../apps/wifi_ipc/tuya/common_video_lock_demo/src/tuya_photo_and_stream.c \
-	../../../../apps/wifi_ipc/tuya/common_video_lock_demo/src/tuya_video.c \
-	../../../../apps/wifi_ipc/tuya/demo_quickstart/src/app_key.c \
-	../../../../apps/wifi_ipc/tuya/demo_quickstart/src/app_led.c \
-	../../../../apps/wifi_ipc/tuya/demo_quickstart/src/dp_process.c \
-	../../../../apps/wifi_ipc/tuya/demo_quickstart/src/libqrencode/bitstream.c \
-	../../../../apps/wifi_ipc/tuya/demo_quickstart/src/libqrencode/mask.c \
-	../../../../apps/wifi_ipc/tuya/demo_quickstart/src/libqrencode/mmask.c \
-	../../../../apps/wifi_ipc/tuya/demo_quickstart/src/libqrencode/mqrspec.c \
-	../../../../apps/wifi_ipc/tuya/demo_quickstart/src/libqrencode/qrenc.c \
-	../../../../apps/wifi_ipc/tuya/demo_quickstart/src/libqrencode/qrencode.c \
-	../../../../apps/wifi_ipc/tuya/demo_quickstart/src/libqrencode/qrinput.c \
-	../../../../apps/wifi_ipc/tuya/demo_quickstart/src/libqrencode/qrspec.c \
-	../../../../apps/wifi_ipc/tuya/demo_quickstart/src/libqrencode/rsecc.c \
-	../../../../apps/wifi_ipc/tuya/demo_quickstart/src/tal_uart.c \
-	../../../../apps/wifi_ipc/tuya/demo_quickstart/src/tuya_app_main.c \
+	../../../../apps/wifi_ipc/tuya/tuya_demo_vedio_lock_ty/src/tuya_audio.c \
+	../../../../apps/wifi_ipc/tuya/tuya_demo_vedio_lock_ty/src/tuya_device.c \
+	../../../../apps/wifi_ipc/tuya/tuya_demo_vedio_lock_ty/src/tuya_main.c \
+	../../../../apps/wifi_ipc/tuya/tuya_demo_vedio_lock_ty/src/tuya_prod_test.c \
+	../../../../apps/wifi_ipc/tuya/tuya_demo_vedio_lock_ty/src/tuya_stream.c \
+	../../../../apps/wifi_ipc/tuya/tuya_demo_vedio_lock_ty/src/tuya_video.c \
 	../../../../apps/wifi_ipc/tuya/tuyaos_adapter/include/init/src/tkl_init_common.c \
 	../../../../apps/wifi_ipc/tuya/tuyaos_adapter/include/init/src/tkl_init_network.c \
 	../../../../apps/wifi_ipc/tuya/tuyaos_adapter/include/init/src/tkl_init_system.c \
@@ -1143,20 +1143,17 @@ LFLAGS := \
 	../../../../include_lib/newlib/pi32v2-lib/libm.a \
 	../../../../include_lib/newlib/pi32v2-lib/libc.a \
 	../../../../include_lib/newlib/pi32v2-lib/libcompiler_rt.a \
-	--start-group  \
+	../../../../cpu/wl83/liba/iperf.a \
 	../../../../cpu/wl83/liba/system.a \
 	../../../../cpu/wl83/liba/fs.a \
 	../../../../cpu/wl83/liba/cfg_tool.a \
-	../../../../cpu/wl83/liba/event.a \
-	../../../../cpu/wl83/liba/cpu.a \
 	../../../../cpu/wl83/liba/update.a \
 	../../../../cpu/wl83/liba/video_rec_server.a \
 	../../../../cpu/wl83/liba/wl_rf_common.a \
-	../../../../cpu/wl83/liba/common_lib.a \
 	../../../../cpu/wl83/liba/video_engine.a \
-	../../../../cpu/wl83/liba/libcrypto_mbedtls.a \
 	../../../../cpu/wl83/liba/net_server.a \
 	../../../../cpu/wl83/liba/audio_server.a \
+	../../../../cpu/wl83/liba/media_app.a \
 	../../../../cpu/wl83/liba/lib_m4a_dec_seek.a \
 	../../../../cpu/wl83/liba/lib_mp3_dec.a \
 	../../../../cpu/wl83/liba/lib_mp3_enc.a \
@@ -1165,29 +1162,30 @@ LFLAGS := \
 	../../../../cpu/wl83/liba/libaec.a \
 	../../../../cpu/wl83/liba/libdns.a \
 	../../../../cpu/wl83/liba/libjlsp.a \
-	../../../../cpu/wl83/liba/btctrler.a \
 	../../../../cpu/wl83/liba/btstack.a \
+	../../../../cpu/wl83/liba/btctrler.a \
 	../../../../cpu/wl83/liba/lib_ccm_aes.a \
 	../../../../cpu/wl83/liba/crypto_toolbox_Osize.a \
 	../../../../cpu/wl83/liba/libtuyaos.a \
 	../../../../cpu/wl83/liba/wl_wifi.a \
+	--start-group  \
 	../../../../cpu/wl83/liba/wpasupplicant.a \
+	../../../../cpu/wl83/liba/libcrypto_mbedtls.a \
+	--end-group \
 	../../../../cpu/wl83/liba/lwip_2_2_0.a \
 	../../../../cpu/wl83/liba/stream_media_server.a \
-	../../../../cpu/wl83/liba/libmbedtls_3_4_0.a \
-	../../../../cpu/wl83/liba/iperf.a \
-	../../../../cpu/wl83/liba/hsm.a \
-	../../../../cpu/wl83/liba/http_cli.a \
 	../../../../cpu/wl83/liba/http_server.a \
-	../../../../cpu/wl83/liba/https_cli.a \
 	../../../../cpu/wl83/liba/json.a \
 	../../../../cpu/wl83/liba/ftpserver.a \
 	../../../../cpu/wl83/liba/libqrcode.a \
-	--end-group \
+	../../../../cpu/wl83/liba/http_cli.a \
+	../../../../cpu/wl83/liba/https_cli.a \
+	../../../../cpu/wl83/liba/common_lib.a \
+	../../../../cpu/wl83/liba/libmbedtls_3_4_0.a \
+	../../../../cpu/wl83/liba/event.a \
+	../../../../cpu/wl83/liba/hsm.a \
+	../../../../cpu/wl83/liba/cpu.a \
 	../../../../cpu/wl83/liba/lvgl_v8_extend.a \
-	../../../../include_lib/c++/libstdc++/ucos/libemutls.a \
-	../../../../include_lib/c++/libstdc++/ucos/libc++.a \
-	../../../../include_lib/c++/libstdc++/ucos/libc++abi.a \
 	-T../../../../cpu/wl83/sdk.ld \
 	-M=../../../../cpu/wl83/tools/sdk.map \
 	--end-group  \

@@ -5,9 +5,9 @@
 extern "C" {
 #endif
 #include <stdlib.h>
-#include "gui_guider.h"
+#include "../gui_guider.h"
 #include "lvgl.h"
-#include "custom.h"
+#include "../../custom/custom.h"
 #include "time.h"
 
 typedef enum {
@@ -42,6 +42,11 @@ typedef enum {
     GUI_MSG_STATUS_NO_FOUND_ID = -3,
 } gui_msg_status_t;
 
+typedef enum {
+    GUI_MSG_SEND_DONE = 0,
+    GUI_MSG_SENDING,
+} gui_msg_send_status_t;
+
 typedef union {
     int32_t value_int;
     lv_coord_t value_coord;
@@ -58,38 +63,43 @@ typedef union {
 } gui_msg_data_t;
 
 typedef enum {
-    GUI_MODEL_MSG_ID = 0,
+    GUI_MODEL_MSG_ID = 0x0001,
 } gui_msg_id_t;
 
 typedef struct {
-    void *data;
+    lv_subject_t *subject;
     int32_t msg_id;
 } gui_msg_sub_t;
 
-#if LV_USE_MSG
 typedef struct {
-    uint32_t msg_id;
-    lv_msg_subscribe_cb_t callback;
-    void *user_data;
-    void *_priv_data;       /*Internal: used only store 'obj' in lv_obj_subscribe*/
-} gui_msg_sub_dsc_t;
-#endif
+    int32_t msg_id;
+    char is_subscribe;
+    char is_unsubscribe;
+} _gui_msg_status_t;
 
 extern void gui_msg_init(lv_ui *ui);
 extern void gui_msg_init_ui();
 extern void gui_msg_init_events();
 extern void gui_msg_unsubscribe();
 extern gui_msg_status_t gui_msg_send(int32_t msg_id, void *value, int32_t len);
+extern gui_msg_send_status_t gui_msg_get_send_status();
+extern GUI_WEAKREF gui_msg_data_t *gui_msg_get(int32_t msg_id);
+extern gui_msg_data_t *gui_msg_get_guider(int32_t msg_id);
 extern GUI_WEAKREF void gui_msg_action_change(int32_t msg_id, gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type);
 extern void gui_msg_action_change_guider(int32_t msg_id, gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type);
 extern GUI_WEAKREF void gui_msg_subscribe_change(int32_t msg_id, gui_msg_subscribe_t sub_type);
 extern void gui_msg_subscribe_change_guider(int32_t msg_id, gui_msg_subscribe_t sub_type);
-extern void *gui_msg_insert_list(lv_ll_t *ll_p, void *data);
-extern bool gui_msg_id_is_in_list(lv_ll_t *ll_p, int32_t msg_id);
+extern lv_subject_t *gui_msg_get_subject(int32_t msg_id);
+extern gui_msg_sub_t *gui_msg_get_sub(int32_t msg_id);
+extern gui_msg_sub_t *gui_msg_create_sub(int32_t msg_id);
 extern gui_msg_data_t *gui_msg_get_data();
+extern bool gui_msg_has_observer(lv_subject_t *subject, lv_observer_cb_t cb, lv_obj_t *obj, void *user_data);
+extern void gui_msg_setup_component(bool subscribe_enabled, bool event_enabled, lv_subject_t *subject, lv_obj_t *target_obj, gui_msg_data_t *msg_data, lv_observer_cb_t observer_cb, int32_t msg_id, gui_msg_action_t msg_action, gui_msg_data_type_t data_type, lv_event_cb_t event_cb);
 
-#if LV_USE_MSG
-#include "gui_model_msg.h"
+extern void gui_msg_set_label_text_by_string_cb(lv_observer_t *observer, lv_subject_t *subject);
+#if LV_USE_OBSERVER
+#include "./gui_model_msg.h"
+#define GUI_MSG_MAX_ID 0xc
 #endif
 
 extern gui_msg_data_t guider_msg_data;

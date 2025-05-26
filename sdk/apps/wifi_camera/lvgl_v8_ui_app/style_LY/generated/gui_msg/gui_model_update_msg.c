@@ -46,8 +46,6 @@ void gui_model_update_msg_init(lv_ui *ui)
     if (sub != NULL) {
         lv_subject_init_pointer(sub->subject, &guider_msg_data);
     }
-    gui_model_update_msg_init_ui();
-    gui_model_update_msg_init_events();
 }
 
 void gui_model_update_msg_init_ui()

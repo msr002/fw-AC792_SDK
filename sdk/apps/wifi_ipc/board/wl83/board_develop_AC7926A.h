@@ -21,14 +21,13 @@
 //                                   时钟配置                                      //
 //*********************************************************************************//
 #define TCFG_OSC_FREQUENCY                  24000000
-#define TCFG_SYS_CLK                        360000000         //240M,192M,160M,120M,96M,80M,64M,60M,48M,40M,32M,24M，其他值时启用SYS_PLL(最高支持300M)
+#define TCFG_SYS_CLK                        360000000         //360M,320M,240M,192M,160M,120M,96M,80M,64M,60M,48M,40M,32M,24M，其他值时启用SYS_PLL(最高支持360M)
 #define TCFG_LSB_CLK                        48000000          //96M,80M,60M,48M,40M,24M,20M,12M
 #define TCFG_HSB_CLK_DIV                    2                 //HSB_CLK = SYS_CLK / HSB_CLK_DIV
 #define TCFG_SFCTZ_CLK                      96000000          //SFC时钟，和加载代码的速度有关
 #define TCFG_SDRAM_CLK                      250000000         //SDRAM/DDR时钟
 #define TCFG_VIDEO_CLK                      TCFG_SYS_CLK      //EVA/PUB时钟，240M,192M,160M,120M,96M,80M,64M,60M,48M,TCFG_SYS_CLK(和cpu同频)
-#define TCFG_GPU_CLK                        TCFG_SYS_CLK      //GPU时钟，240M,192M,160M,120M,96M,80M,64M,60M,48M,TCFG_SYS_CLK(和cpu同频)
-
+#define TCFG_GPU_CLK                        TCFG_SYS_CLK      //GPU时钟，240M,192M,160M,120M,96M,80M,64M,60M,48M，TCFG_SYS_CLK(和cpu同频)
 
 
 
@@ -121,8 +120,8 @@
 #define TCFG_SD0_DET_MODE                   SD_CLK_DECT    //检测模式:命令检测，时钟检测，IO检测
 #define TCFG_SD0_DET_IO                     IO_PORTD_01    //SD_DET_MODE为SD_IO_DECT时有效
 #define TCFG_SD0_DET_IO_LEVEL               0              //IO检卡上线的电平(0/1),SD_DET_MODE为SD_IO_DECT时有效
-#define TCFG_SD0_CLK                        48000000       //SDIO时钟
-#define TCFG_SD0_HD_LEVEL                   0              //强驱等级
+#define TCFG_SD0_CLK                        40000000       //SDIO时钟
+#define TCFG_SD0_HD_LEVEL                   3              //强驱等级
 #define TCFG_SD0_POWER_ENABLE               0
 #define TCFG_SD0_PORTS_GROUP                'A'            //'A''B''C''D'表示使用固定组IO
 #define TCFG_SD0_PORTS                      {\
@@ -140,8 +139,8 @@
 #define TCFG_SD1_DET_MODE                   SD_CMD_DECT    //检测模式:命令检测，时钟检测，IO检测
 #define TCFG_SD1_DET_IO                     -1             //SD_DET_MODE为SD_IO_DECT时有效
 #define TCFG_SD1_DET_IO_LEVEL               0              //IO检卡上线的电平(0/1),SD_DET_MODE为SD_IO_DECT时有效
-#define TCFG_SD1_CLK                        24000000       //SDIO时钟
-#define TCFG_SD1_HD_LEVEL                   0              //强驱等级
+#define TCFG_SD1_CLK                        40000000       //SDIO时钟
+#define TCFG_SD1_HD_LEVEL                   3              //强驱等级
 #define TCFG_SD1_POWER_ENABLE               0
 #define TCFG_SD1_PORTS_GROUP                'A'            //'A''B'表示使用固定组IO
 #define TCFG_SD1_PORTS                      {\
@@ -304,14 +303,14 @@
 
 #define TCFG_SPI2_ENABLE                    1
 #define TCFG_SPI2_CS_IO                     -1
-#define TCFG_SPI2_CLK_IO                    IO_PORTC_07
-#define TCFG_SPI2_DO_IO                     IO_PORTB_10
-#define TCFG_SPI2_DI_IO                     IO_PORTB_11
-#define TCFG_SPI2_BAUDRATE                  10000000
-#define TCFG_SPI2_HD_LEVEL                  0
-#define TCFG_SPI2_MODE                      SPI_STD_MODE //SPI_DUAL_MODE
+#define TCFG_SPI2_CLK_IO                    IO_PORTA_13
+#define TCFG_SPI2_DO_IO                     IO_PORTA_12
+#define TCFG_SPI2_DI_IO                     -1
+#define TCFG_SPI2_BAUDRATE                  48000000
+#define TCFG_SPI2_HD_LEVEL                  GPIO_DRIVE_STRENGTH_18p5mA
+#define TCFG_SPI2_MODE                      SPI_1WIRE_MODE
 #define TCFG_SPI2_ATTR                      SPI_SCLK_L_UPL_SMPH
-#define TCFG_SPI2_ROLE                      SPI_MODE_SLAVE
+#define TCFG_SPI2_ROLE                      SPI_MODE_MASTER
 
 
 //*********************************************************************************//
@@ -348,7 +347,7 @@
 #define TCFG_PAP_READ_ACTIVE_LEVEL          PAP_RD_LEVEL_LOW
 #define TCFG_PAP_READ_ENABLE                0
 #define TCFG_PAP_WE_IO                      IO_PORTA_12
-#define TCFG_PAP_RE_IO                      -1
+#define TCFG_PAP_RE_IO                      IO_PORTA_14
 
 
 //*********************************************************************************//
@@ -363,8 +362,11 @@
 #define TCFG_LCD_MCU_ILI9481_320X480        0
 
 //MIPI LCD
-#define TCFG_LCD_MIPI_ST7701S_480x800       1
-#define TCFG_LCD_MIPI_ILI9881C_800x1280     0
+#define TCFG_LCD_MIPI_FL7707_480x1280                 0
+#define TCFG_LCD_MIPI_ST7701S_480x800                 0
+#define TCFG_LCD_MIPI_ST7701S_480x800_ROTATE_90       1
+#define TCFG_LCD_MIPI_ILI9881C_800x1280               0
+#define TCFG_LCD_MIPI_ST7701S_480x640_ROTATE_90       0
 
 //RGB_LCD
 #define TCFG_LCD_RGB_480x272                0
@@ -377,8 +379,25 @@
 #define TCFG_LCD_RGB_IO_HD_LEVEL            1
 #define TCFG_LCD_RGB_INPUT_FORMAT           LCD_IN_RGB565
 
+//SPI LCD
+#define TCFG_LCD_SPI_GC9307_240X296         0
+#define TCFG_LCD_SPI_GC9307_172X320         0
+#define TCFG_LCD_SPI_NV3006A_142X428        0
 
-#if TCFG_LCD_MIPI_ST7701S_480x800
+
+#if TCFG_LCD_MIPI_ST7701S_480x800 || TCFG_LCD_MIPI_ST7701S_480x800_ROTATE_90
+#define TCFG_LCD_BL_VALUE                   1
+#define TCFG_LCD_RESET_IO                   IO_PORTB_00
+#define TCFG_LCD_BL_IO                      IO_PORTB_01
+#define TCFG_LCD_RS_IO                      -1
+#define TCFG_LCD_CS_IO                      -1
+#elif TCFG_LCD_MIPI_FL7707_480x1280
+#define TCFG_LCD_BL_VALUE                   1
+#define TCFG_LCD_RESET_IO                   IO_PORTA_10
+#define TCFG_LCD_BL_IO                      IO_PORTA_12
+#define TCFG_LCD_RS_IO                      -1
+#define TCFG_LCD_CS_IO                      -1
+#elif TCFG_LCD_MIPI_ST7701S_480x640_ROTATE_90
 #define TCFG_LCD_BL_VALUE                   1
 #define TCFG_LCD_RESET_IO                   IO_PORTB_00
 #define TCFG_LCD_BL_IO                      IO_PORTB_01
@@ -396,6 +415,23 @@
 #define TCFG_LCD_BL_IO                      IO_PORTC_02
 #define TCFG_LCD_RS_IO                      -1
 #define TCFG_LCD_CS_IO                      -1
+#elif TCFG_LCD_SPI_GC9307_240X296 || TCFG_LCD_SPI_GC9307_172X320 || TCFG_LCD_SPI_NV3006A_142X428
+#define TCFG_LCD_BL_VALUE                   1
+#define TCFG_LCD_RESET_IO                   IO_PORTA_15
+#define TCFG_LCD_BL_IO                      -1
+#define TCFG_LCD_RS_IO                      IO_PORTB_01
+#define TCFG_LCD_CS_IO                      IO_PORTB_00
+#define TCFG_LCD_SPI_INTERFACE              "spi2"
+#define TCFG_LCD_TE_ENABLE                  1
+#define TCFG_LCD_TE_IO                      IO_PORTA_14
+#elif TCFG_LCD_MCU_ILI9488_320X480 || TCFG_LCD_MCU_ILI9481_320X480
+#define TCFG_LCD_BL_VALUE                   1
+#define TCFG_LCD_RESET_IO                   -1
+#define TCFG_LCD_BL_IO                      -1
+#define TCFG_LCD_RS_IO                      IO_PORTA_13
+#define TCFG_LCD_CS_IO                      -1
+#define TCFG_LCD_TE_ENABLE                  1
+#define TCFG_LCD_TE_IO                      IO_PORTA_14
 #else
 #define TCFG_LCD_BL_VALUE                   1
 #define TCFG_LCD_RESET_IO                   -1
@@ -406,7 +442,6 @@
 #define TCFG_LCD_SCL_IO                     IO_PORTC_01
 #endif
 
-
 //*********************************************************************************//
 //                               触摸面板配置                                      //
 //*********************************************************************************//
@@ -416,6 +451,7 @@
 #define TCFG_TP_GT911_ENABLE                0
 #define TCFG_TP_CST3240_ENABLE              1
 #define TCFG_TP_GT9271_ENABLE               0
+#define TCFG_TP_CST816D_ENABLE              0
 
 /*
  * TP旋转坐标常用的配置参数
@@ -429,14 +465,15 @@
  *  Y_MIRROR |     1      |     1     |      0      |
  * ---------------------------------------------------
 */
-#define TCFG_TP_SWAP_X_Y                    0///< 是否交换TP的X和Y坐标
+#define TCFG_TP_SWAP_X_Y                    1///< 是否交换TP的X和Y坐标
 #define TCFG_TP_X_MIRROR                    0///< 是否以TP的X中心轴镜像y坐标。
-#define TCFG_TP_Y_MIRROR                    0///< 是否以TP的Y中心轴镜像x坐标。
+#define TCFG_TP_Y_MIRROR                    1///< 是否以TP的Y中心轴镜像x坐标。
 #define TCFG_TP_RST_PIN                     IO_PORTE_06
 #define TCFG_TP_INT_PIN                     IO_PORTA_03
 #define TCFG_TP_COMMUNICATE_IF              "iic0"
 
 // #endif
+
 
 
 //*********************************************************************************//
@@ -581,18 +618,18 @@
 //                                AUDIO DAC配置                                    //
 //*********************************************************************************//
 #define TCFG_AUDIO_DAC_ENABLE               1
-#define TCFG_AUDIO_DAC_PA_AUTO_MUTE_ENABLE  1
+#define TCFG_AUDIO_DAC_PA_AUTO_MUTE_ENABLE  0
 #define TCFG_AUDIO_DAC_PA_MUTE_PORT         IO_PORTE_15
-#define TCFG_AUDIO_DAC_PA_MUTE_LEVEL        0
+#define TCFG_AUDIO_DAC_PA_MUTE_LEVEL        1
 #define TCFG_AUDIO_DAC_DIFFER_OUTPUT_ENABLE 0
 #define TCFG_AUDIO_DAC_HW_CHANNEL           (AUDIO_DAC_CH_L)// | AUDIO_DAC_CH_R)
-#define TCFG_AUDIO_DAC_VCM_CAP_ENABLE       0
+#define TCFG_AUDIO_DAC_VCM_CAP_ENABLE       1
 #if TCFG_AUDIO_DAC_VCM_CAP_ENABLE
 #define TCFG_AUDIO_DAC_VCM_INIT_DELAY_MS    1000
 #else
 #define TCFG_AUDIO_DAC_VCM_INIT_DELAY_MS    0
 #endif
-#define TCFG_AUDIO_DAC_PA_MUTE_DELAY_MS     500
+#define TCFG_AUDIO_DAC_PA_MUTE_DELAY_MS     0
 
 
 //*********************************************************************************//
@@ -601,11 +638,11 @@
 //--- AIN_AP0: PC7 AIN_AN0: PC6 AIN_BP0: PC11 AIN_BN0: PC12
 //--- AIN_AP1: PC3 AIN_AN1: PC2 AIN_BP1: PC4  AIN_BN1: PC5
 #define TCFG_AUDIO_ADC_ENABLE               1
-#define TCFG_MIC_IO_PORT                    {IO_PORTC_07/*MIC0P*/, IO_PORTC_06/*MIC0N*/, IO_PORTC_11/*MIC1P*/, IO_PORTC_12/*MIC1N*/}
-#define TCFG_MIC_CHANNEL_NUM                2
-#define TCFG_LINEIN_IO_PORT                 {IO_PORTC_07/*AUX0P*/, IO_PORTC_06/*AUX0N*/, IO_PORTC_11/*AUX1P*/, IO_PORTC_12/*AUX1N*/}
-#define TCFG_LINEIN_CHANNEL_NUM             2
-#define TCFG_AUDIO_ADC_ALL_CHANNEL_OPEN     1
+#define TCFG_MIC_IO_PORT                    {IO_PORTC_07/*MIC0P*/, IO_PORTC_06/*MIC0N*/, -1/*MIC1P*/, -1/*MIC1N*/}
+#define TCFG_MIC_CHANNEL_NUM                1
+#define TCFG_LINEIN_IO_PORT                 {-1/*AUX0P*/, -1/*AUX0N*/, IO_PORTC_11/*AUX1P*/, IO_PORTC_12/*AUX1N*/}
+#define TCFG_LINEIN_CHANNEL_NUM             1
+#define TCFG_AUDIO_ADC_ALL_CHANNEL_OPEN     0
 #define TCFG_DMIC_ENABLE                    0
 #define TCFG_DMIC_SCLK_FREQUENCY            2000000
 #define TCFG_DMIC_IO_SCLK                   IO_PORTC_11
@@ -664,8 +701,8 @@
 #define CONFIG_VOICE_NET_CFG_ADC_CHANNEL    0              //声波配网mic通道
 #define CONFIG_AISP_MIC0_ADC_CHANNEL        0              //本地唤醒左mic通道
 #define CONFIG_AISP_MIC1_ADC_CHANNEL        1              //本地唤醒右mic通道
-#define CONFIG_REVERB_ADC_CHANNEL           1              //混响mic通道
-#define CONFIG_PHONE_CALL_ADC_CHANNEL       1              //通话mic通道
+#define CONFIG_REVERB_ADC_CHANNEL           0              //混响mic通道
+#define CONFIG_PHONE_CALL_ADC_CHANNEL       0              //通话mic通道
 #define CONFIG_UAC_MIC_ADC_CHANNEL          0              //UAC mic通道
 #define CONFIG_AISP_LINEIN_ADC_CHANNEL      1              //本地唤醒LINEIN回采通道
 #define CONFIG_FM_LINEIN_ADC_CHANNEL        1              //FM音频流LINEIN回采通道
@@ -710,9 +747,9 @@
 #define TCFG_ETH_IRQ_PRIO                   1              //-1为查询  0-7 使用中断的优先级
 #define TCFG_ETH_HD_LEVEL                   0
 #define TCFG_ETH_RX_TASK_PRIO               2
-#define TCFG_ETH_RMII_BUS_CLK_IO            IO_PORTE_04
-#define TCFG_ETH_RMII_BUS_DAT_IO            IO_PORTE_05
-#define TCFG_ETH_RMII_BUS_RESET_IO          IO_PORTE_03
+#define TCFG_ETH_RMII_BUS_CLK_IO            IO_PORTE_03
+#define TCFG_ETH_RMII_BUS_DAT_IO            IO_PORTD_00
+#define TCFG_ETH_RMII_BUS_RESET_IO          IO_PORTD_14
 #define TCFG_ETH_RMII_BUS_HD_LEVEL          1
 
 
@@ -740,8 +777,8 @@
 #if TCFG_EQ_ONLINE_ENABLE
 #define USB_DEVICE_CLASS_CONFIG             (CDC_CLASS)
 #elif defined CONFIG_VIDEO_ENABLE && defined CONFIG_AUDIO_ENABLE
-#define USB_DEVICE_CLASS_CONFIG             (UVC_CLASS | SPEAKER_CLASS)
-#define USB_DEVICE_CLASS_CONFIG_2_0         (MASSSTORAGE_CLASS | UVC_CLASS | HID_CLASS | AUDIO_CLASS)
+#define USB_DEVICE_CLASS_CONFIG             (UVC_CLASS | SPEAKER_CLASS | CDC_CLASS)
+#define USB_DEVICE_CLASS_CONFIG_2_0         (MASSSTORAGE_CLASS | UVC_CLASS)
 #elif defined CONFIG_VIDEO_ENABLE
 #define USB_DEVICE_CLASS_CONFIG             (UVC_CLASS | CDC_CLASS)
 #define USB_DEVICE_CLASS_CONFIG_2_0         (MASSSTORAGE_CLASS | UVC_CLASS | HID_CLASS)
@@ -768,11 +805,12 @@
 #define TCFG_UDISK_ENABLE                   0              //U盘主机功能
 #define TCFG_HOST_CDC_ENABLE                0              //CDC主机功能
 #define TCFG_HID_HOST_ENABLE                0              //HID主机功能
+#define TCFG_HOST_HUB_ENABLE                0              //HUB主机功能
 #if defined CONFIG_AUDIO_ENABLE
 #define TCFG_HOST_AUDIO_ENABLE              0              //uac主机功能，用户需要自己补充uac_host_demo.c里面的两个函数
 #endif
 #if defined CONFIG_VIDEO_ENABLE
-#define TCFG_HOST_UVC_ENABLE                1              //UVC主机功能
+#define TCFG_HOST_UVC_ENABLE                0              //UVC主机功能
 #endif
 #if defined CONFIG_NET_ENABLE
 #define TCFG_HOST_WIRELESS_ENABLE           0
@@ -782,6 +820,21 @@
 
 #include "usb_std_class_def.h"
 #include "usb_common_def.h"
+
+#if TCFG_USB_SLAVE_HID_ENABLE
+#define USB_HID_KEYBOARD_ENABLE             0
+#define USB_HID_POS_ENABLE                  0
+
+#if (USB_HID_KEYBOARD_ENABLE + USB_HID_POS_ENABLE > 1)
+#error "they can not enable at the same time,just select one!!!"
+#endif
+#endif
+
+//*********************************************************************************//
+//                                 GSENSOR配置                                     //
+//*********************************************************************************//
+#define TCFG_GSENSOR_ENABLE                 0
+#define TCFG_GSENSOR_IIC_INTERFACE          "iic5"
 
 
 //*********************************************************************************//
@@ -796,9 +849,9 @@
 #define TCFG_LOW_POWER_AUTO_SHUTDOWN_ENABLE 0              //空闲自动倒数关机
 
 #if TCFG_POWER_INTERNAL_VDDIO_ENABLE
-#define TCFG_LOW_POWER_SHUTDOWN             350            //低电直接关机电压, 如果VDDIO使用内部LDO供电, 建议低于3.6V关机
-#define TCFG_LOW_POWER_OFF_VAL              360            //低电关机电压
-#define TCFG_LOW_POWER_WARN_VAL             370            //低电提醒电压
+#define TCFG_LOW_POWER_SHUTDOWN             280//350            //低电直接关机电压, 如果VDDIO使用内部LDO供电, 建议低于3.6V关机
+#define TCFG_LOW_POWER_OFF_VAL              290//360            //低电关机电压
+#define TCFG_LOW_POWER_WARN_VAL             300//370            //低电提醒电压
 #define TCFG_LOWPOWER_VDDIOM_LEVEL          VDDIOM_VOL_340V//强VDDIO电压档位
 #else
 #define TCFG_LOW_POWER_SHUTDOWN             320            //低电直接关机电压, 如果VDDIO使用内部LDO供电, 建议低于3.6V关机
@@ -841,12 +894,19 @@
 //*********************************************************************************//
 #ifdef CONFIG_VIDEO_ENABLE
 
-//#define CONFIG_VIDEO0_ENABLE
-#define CONFIG_VIDEO1_ENABLE
-#if TCFG_HOST_UVC_ENABLE
+#define CONFIG_VIDEO0_ENABLE
+// #define CONFIG_VIDEO1_ENABLE
 // #define CONFIG_VIDEO2_ENABLE
-#endif
 // #define CONFIG_VIDEO3_ENABLE
+
+#if TCFG_HOST_UVC_ENABLE
+#define CONFIG_UVC_VIDEO_ENABLE
+//#define CONFIG_UVC_VIDEO0_ENABLE
+//#define CONFIG_UVC_VIDEO1_ENABLE
+//#define CONFIG_UVC_VIDEO2_ENABLE
+#endif
+
+
 
 /*video0的IO组和硬件IO */
 #ifdef CONFIG_VIDEO0_ENABLE

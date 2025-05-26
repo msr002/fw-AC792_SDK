@@ -12,7 +12,7 @@
 
 #include <stddef.h>
 #include <stdint.h>
-#include <stdbool.h>
+//#include <stdbool.h>
 #include <string.h>
 #include "tuya_cloud_types.h"
 #include "tuya_hal_mutex.h"

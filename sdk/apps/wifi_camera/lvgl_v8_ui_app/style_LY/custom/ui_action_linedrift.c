@@ -30,13 +30,16 @@ int gui_src_action_lane(int action)
     app = get_current_app();
 
     printf("[chili] %s %d   \n", __func__, __LINE__);
-
+    lv_ui_line_drift *ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_LINE_DRIFT);
+    if (!ui_scr) {
+        return -1;
+    }
     switch (action) {
     case GUI_SCREEN_ACTION_LOAD:
 #if LV_DISP_UI_FB_NUM
-        lv_obj_set_style_bg_opa(guider_ui.line_drift, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+        lv_obj_set_style_bg_opa(ui_scr->line_drift, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
 #else
-        lv_obj_set_style_bg_opa(guider_ui.line_drift, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+        lv_obj_set_style_bg_opa(ui_scr->line_drift, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
 #endif
         if (app) {
             printf("[chili] %s %d   \n", app->name, __LINE__);
@@ -70,11 +73,15 @@ REGISTER_UI_SCREEN_ACTION_HANDLER(GUI_SCREEN_LINE_DRIFT)
 */
 void line_drift_page_show(int arg)
 {
+    lv_ui_line_drift *ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_LINE_DRIFT);
+    if (!ui_scr) {
+        return;
+    }
     printf("[chili]: %s %d\n", __func__, __LINE__);
     gui_scr_t *screen = gui_scr_get(GUI_SCREEN_LINE_DRIFT);
     if (screen == NULL) {
         printf("[chili]: %s %d\n", __func__, __LINE__);
-        screen = gui_scr_create(GUI_SCREEN_LINE_DRIFT, "line_drift", guider_ui.line_drift, (gui_scr_setup_cb_t)setup_scr_line_drift, (gui_scr_unload_cb_t)unload_scr_line_drift);
+        screen = gui_scr_create(GUI_SCREEN_LINE_DRIFT, "line_drift", ui_scr->line_drift, (gui_scr_setup_cb_t)setup_scr_line_drift, (gui_scr_unload_cb_t)unload_scr_line_drift);
     }
     ui_load_scr_anim(&guider_ui, screen, LV_SCR_LOAD_ANIM_NONE, 100, 100, true, true, false);//不压栈
 
@@ -90,11 +97,14 @@ void line_drift_page_hide(int arg)
 {
 
     printf("[chili]: %s %d\n", __func__, __LINE__);
-
+    lv_ui_sys_setting *ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_SYS_SETTING);
+    if (!ui_scr) {
+        return;
+    }
     gui_scr_t *screen = gui_scr_get(GUI_SCREEN_SYS_SETTING);
     if (screen == NULL) {
         printf("[chili]: %s %d\n", __func__, __LINE__);
-        screen = gui_scr_create(GUI_SCREEN_SYS_SETTING, "sys_setting", guider_ui.sys_setting, (gui_scr_setup_cb_t)setup_scr_sys_setting, (gui_scr_unload_cb_t)unload_scr_sys_setting);
+        screen = gui_scr_create(GUI_SCREEN_SYS_SETTING, "sys_setting", ui_scr->sys_setting, (gui_scr_setup_cb_t)setup_scr_sys_setting, (gui_scr_unload_cb_t)unload_scr_sys_setting);
     }
     ui_load_scr_anim(&guider_ui, screen, LV_SCR_LOAD_ANIM_NONE, 100, 100, true, true, false);
 

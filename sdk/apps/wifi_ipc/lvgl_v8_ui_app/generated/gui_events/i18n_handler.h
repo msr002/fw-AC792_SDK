@@ -5,7 +5,7 @@
 extern "C" {
 #endif
 
-#include "gui_guider.h"
+#include "../gui_guider.h"
 
 extern void i18n_refresh_texts(const char *page_name);
 extern void i18n_refresh_all_texts();

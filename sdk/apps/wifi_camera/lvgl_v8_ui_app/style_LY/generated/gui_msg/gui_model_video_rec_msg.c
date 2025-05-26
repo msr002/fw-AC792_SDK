@@ -497,8 +497,6 @@ void gui_model_video_rec_msg_init(lv_ui *ui)
     if (sub != NULL) {
         lv_subject_init_pointer(sub->subject, &guider_msg_data);
     }
-    gui_model_video_rec_msg_init_ui();
-    gui_model_video_rec_msg_init_events();
 }
 
 void gui_model_video_rec_msg_init_ui()
@@ -583,87 +581,75 @@ void gui_model_video_rec_msg_init_events()
     lv_subject_t *subject_flash_headlight = gui_msg_get_subject(GUI_MODEL_VIDEO_REC_MSG_ID_FLASH_HEADLIGHT);
     lv_subject_t *subject_rec_icon_state = gui_msg_get_subject(GUI_MODEL_VIDEO_REC_MSG_ID_REC_ICON_STATE);
     lv_subject_t *subject_key_state = gui_msg_get_subject(GUI_MODEL_VIDEO_REC_MSG_ID_KEY_STATE);
-    if (!guider_ui.video_rec_del) {
-        gui_model_video_rec_msg_exp_icon_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
-        lv_subject_add_observer_obj(subject_exp_icon, gui_model_video_rec_msg_video_rec_img_exp_state_set_img_path_cb, guider_ui.video_rec_img_exp_state, &guider_msg_data);
+    if (guider_ui.video_rec) {
+        lv_ui_video_rec *ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_VIDEO_REC);
+        gui_msg_setup_component(true, false, subject_cycrec_icon, ui_scr->video_rec_img_cyc_state, &guider_msg_data, gui_model_video_rec_msg_video_rec_img_cyc_state_set_img_path_cb, GUI_MODEL_VIDEO_REC_MSG_ID_CYCREC_ICON, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
+        gui_msg_setup_component(true, false, subject_cyc_state, ui_scr->video_rec_img_cyc_state, &guider_msg_data, gui_msg_set_visible_by_bool_cb, GUI_MODEL_VIDEO_REC_MSG_ID_CYC_STATE, GUI_MSG_ACCESS_GET, VALUE_BOOL, NULL);
 
-        gui_model_video_rec_msg_rec_icon_state_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_BOOL);
-        lv_subject_add_observer_obj(subject_rec_icon_state, gui_msg_set_visible_by_bool_cb, guider_ui.video_rec_img_rec_state, &guider_msg_data);
+        gui_msg_setup_component(true, false, subject_exp_icon, ui_scr->video_rec_img_exp_state, &guider_msg_data, gui_model_video_rec_msg_video_rec_img_exp_state_set_img_path_cb, GUI_MODEL_VIDEO_REC_MSG_ID_EXP_ICON, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
 
-        gui_model_video_rec_msg_motion_state_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_BOOL);
-        lv_subject_add_observer_obj(subject_motion_state, gui_msg_set_visible_by_bool_cb, guider_ui.video_rec_img_mot_state, &guider_msg_data);
+        gui_msg_setup_component(true, false, subject_motion_state, ui_scr->video_rec_img_mot_state, &guider_msg_data, gui_msg_set_visible_by_bool_cb, GUI_MODEL_VIDEO_REC_MSG_ID_MOTION_STATE, GUI_MSG_ACCESS_GET, VALUE_BOOL, NULL);
 
-        gui_model_video_rec_msg_guard_state_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_BOOL);
-        lv_subject_add_observer_obj(subject_guard_state, gui_msg_set_visible_by_bool_cb, guider_ui.video_rec_img_par_state, &guider_msg_data);
+        gui_msg_setup_component(true, false, subject_gap_state, ui_scr->video_rec_img_gap_state, &guider_msg_data, gui_msg_set_visible_by_bool_cb, GUI_MODEL_VIDEO_REC_MSG_ID_GAP_STATE, GUI_MSG_ACCESS_GET, VALUE_BOOL, NULL);
 
-        gui_model_video_rec_msg_sd_icon_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
-        lv_subject_add_observer_obj(subject_sd_icon, gui_model_video_rec_msg_video_rec_img_sd_set_img_path_cb, guider_ui.video_rec_img_sd, &guider_msg_data);
+        gui_msg_setup_component(true, false, subject_mic_icon, ui_scr->video_rec_img_mic_state, &guider_msg_data, gui_model_video_rec_msg_video_rec_img_mic_state_set_img_path_cb, GUI_MODEL_VIDEO_REC_MSG_ID_MIC_ICON, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
 
-        gui_model_video_rec_msg_mic_icon_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
-        lv_subject_add_observer_obj(subject_mic_icon, gui_model_video_rec_msg_video_rec_img_mic_state_set_img_path_cb, guider_ui.video_rec_img_mic_state, &guider_msg_data);
+        gui_msg_setup_component(true, false, subject_hdr_state, ui_scr->video_rec_img_hdr_state, &guider_msg_data, gui_msg_set_visible_by_bool_cb, GUI_MODEL_VIDEO_REC_MSG_ID_HDR_STATE, GUI_MSG_ACCESS_GET, VALUE_BOOL, NULL);
 
-        gui_model_video_rec_msg_car_nunber_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_STRING);
-        lv_subject_add_observer_obj(subject_car_nunber, gui_msg_set_label_text_by_string_cb, guider_ui.video_rec_lbl_num, &guider_msg_data);
-        gui_model_video_rec_msg_car_num_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_BOOL);
-        lv_subject_add_observer_obj(subject_car_num, gui_msg_set_visible_by_bool_cb, guider_ui.video_rec_lbl_num, &guider_msg_data);
+        gui_msg_setup_component(true, false, subject_gsensor_icon, ui_scr->video_rec_img_gra_state, &guider_msg_data, gui_model_video_rec_msg_video_rec_img_gra_state_set_img_path_cb, GUI_MODEL_VIDEO_REC_MSG_ID_GSENSOR_ICON, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
+        gui_msg_setup_component(true, false, subject_gra_state, ui_scr->video_rec_img_gra_state, &guider_msg_data, gui_msg_set_visible_by_bool_cb, GUI_MODEL_VIDEO_REC_MSG_ID_GRA_STATE, GUI_MSG_ACCESS_GET, VALUE_BOOL, NULL);
 
-        gui_model_video_rec_msg_gap_state_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_BOOL);
-        lv_subject_add_observer_obj(subject_gap_state, gui_msg_set_visible_by_bool_cb, guider_ui.video_rec_img_gap_state, &guider_msg_data);
+        gui_msg_setup_component(true, false, subject_guard_state, ui_scr->video_rec_img_par_state, &guider_msg_data, gui_msg_set_visible_by_bool_cb, GUI_MODEL_VIDEO_REC_MSG_ID_GUARD_STATE, GUI_MSG_ACCESS_GET, VALUE_BOOL, NULL);
 
-        gui_model_video_rec_msg_rec_reso_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_STRING);
-        lv_subject_add_observer_obj(subject_rec_reso, gui_msg_set_label_text_by_string_cb, guider_ui.video_rec_lbl_reso, &guider_msg_data);
+        gui_msg_setup_component(true, false, subject_rec_reso, ui_scr->video_rec_lbl_reso, &guider_msg_data, gui_msg_set_label_text_by_string_cb, GUI_MODEL_VIDEO_REC_MSG_ID_REC_RESO, GUI_MSG_ACCESS_GET, VALUE_STRING, NULL);
 
-        gui_model_video_rec_msg_cycrec_icon_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
-        lv_subject_add_observer_obj(subject_cycrec_icon, gui_model_video_rec_msg_video_rec_img_cyc_state_set_img_path_cb, guider_ui.video_rec_img_cyc_state, &guider_msg_data);
-        gui_model_video_rec_msg_cyc_state_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_BOOL);
-        lv_subject_add_observer_obj(subject_cyc_state, gui_msg_set_visible_by_bool_cb, guider_ui.video_rec_img_cyc_state, &guider_msg_data);
+        gui_msg_setup_component(true, false, subject_sd_icon, ui_scr->video_rec_img_sd, &guider_msg_data, gui_model_video_rec_msg_video_rec_img_sd_set_img_path_cb, GUI_MODEL_VIDEO_REC_MSG_ID_SD_ICON, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
 
-        gui_model_video_rec_msg_hdr_state_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_BOOL);
-        lv_subject_add_observer_obj(subject_hdr_state, gui_msg_set_visible_by_bool_cb, guider_ui.video_rec_img_hdr_state, &guider_msg_data);
+        gui_msg_setup_component(true, false, subject_rec_time_state, ui_scr->video_rec_digitclock_2, &guider_msg_data, gui_msg_set_control_state_by_int32_cb, GUI_MODEL_VIDEO_REC_MSG_ID_REC_TIME_STATE, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
+        gui_msg_setup_component(true, false, subject_rec_remain_time, ui_scr->video_rec_digitclock_2, &guider_msg_data, gui_model_video_rec_msg_video_rec_digitclock_2_set_digit_clock_time_cb, GUI_MODEL_VIDEO_REC_MSG_ID_REC_REMAIN_TIME, GUI_MSG_ACCESS_GET, VALUE_TIME, NULL);
 
-        gui_model_video_rec_msg_rec_remain_time_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_TIME);
-        lv_subject_add_observer_obj(subject_rec_remain_time, gui_model_video_rec_msg_video_rec_digitclock_2_set_digit_clock_time_cb, guider_ui.video_rec_digitclock_2, &guider_msg_data);
-        gui_model_video_rec_msg_rec_time_state_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
-        lv_subject_add_observer_obj(subject_rec_time_state, gui_msg_set_control_state_by_int32_cb, guider_ui.video_rec_digitclock_2, &guider_msg_data);
+        gui_msg_setup_component(true, false, subject_rec_icon_state, ui_scr->video_rec_img_rec_state, &guider_msg_data, gui_msg_set_visible_by_bool_cb, GUI_MODEL_VIDEO_REC_MSG_ID_REC_ICON_STATE, GUI_MSG_ACCESS_GET, VALUE_BOOL, NULL);
 
-        gui_model_video_rec_msg_gsensor_icon_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
-        lv_subject_add_observer_obj(subject_gsensor_icon, gui_model_video_rec_msg_video_rec_img_gra_state_set_img_path_cb, guider_ui.video_rec_img_gra_state, &guider_msg_data);
-        gui_model_video_rec_msg_gra_state_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_BOOL);
-        lv_subject_add_observer_obj(subject_gra_state, gui_msg_set_visible_by_bool_cb, guider_ui.video_rec_img_gra_state, &guider_msg_data);
+        gui_msg_setup_component(true, false, subject_car_nunber, ui_scr->video_rec_lbl_num, &guider_msg_data, gui_msg_set_label_text_by_string_cb, GUI_MODEL_VIDEO_REC_MSG_ID_CAR_NUNBER, GUI_MSG_ACCESS_GET, VALUE_STRING, NULL);
+        gui_msg_setup_component(true, false, subject_car_num, ui_scr->video_rec_lbl_num, &guider_msg_data, gui_msg_set_visible_by_bool_cb, GUI_MODEL_VIDEO_REC_MSG_ID_CAR_NUM, GUI_MSG_ACCESS_GET, VALUE_BOOL, NULL);
 
-        gui_model_video_rec_msg_flash_headlight_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_BOOL);
-        lv_subject_add_observer_obj(subject_flash_headlight, gui_msg_set_visible_by_bool_cb, guider_ui.video_rec_img_headlight, &guider_msg_data);
+        gui_msg_setup_component(true, false, subject_flash_headlight, ui_scr->video_rec_img_headlight, &guider_msg_data, gui_msg_set_visible_by_bool_cb, GUI_MODEL_VIDEO_REC_MSG_ID_FLASH_HEADLIGHT, GUI_MSG_ACCESS_GET, VALUE_BOOL, NULL);
 
-        gui_model_video_rec_msg_key_state_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_BOOL);
-        lv_subject_add_observer_obj(subject_key_state, gui_msg_set_visible_by_bool_cb, guider_ui.video_rec_img_key_state, &guider_msg_data);
+        gui_msg_setup_component(true, false, subject_key_state, ui_scr->video_rec_img_key_state, &guider_msg_data, gui_msg_set_visible_by_bool_cb, GUI_MODEL_VIDEO_REC_MSG_ID_KEY_STATE, GUI_MSG_ACCESS_GET, VALUE_BOOL, NULL);
 
 
         for (int i = 0; i < 30; i++) {
-            if (status[i].msg_id == GUI_MODEL_VIDEO_REC_MSG_ID_REC_RESO) {
+            if (status[i].msg_id == GUI_MODEL_VIDEO_REC_MSG_ID_CYCREC_ICON) {
                 status[i].is_subscribe = 1;
             }
-            if (status[i].msg_id == GUI_MODEL_VIDEO_REC_MSG_ID_KEY_STATE) {
+            if (status[i].msg_id == GUI_MODEL_VIDEO_REC_MSG_ID_CYC_STATE) {
                 status[i].is_subscribe = 1;
             }
-            if (status[i].msg_id == GUI_MODEL_VIDEO_REC_MSG_ID_GRA_STATE) {
+            if (status[i].msg_id == GUI_MODEL_VIDEO_REC_MSG_ID_EXP_ICON) {
                 status[i].is_subscribe = 1;
             }
             if (status[i].msg_id == GUI_MODEL_VIDEO_REC_MSG_ID_MOTION_STATE) {
                 status[i].is_subscribe = 1;
             }
-            if (status[i].msg_id == GUI_MODEL_VIDEO_REC_MSG_ID_HDR_STATE) {
+            if (status[i].msg_id == GUI_MODEL_VIDEO_REC_MSG_ID_GAP_STATE) {
                 status[i].is_subscribe = 1;
             }
             if (status[i].msg_id == GUI_MODEL_VIDEO_REC_MSG_ID_MIC_ICON) {
                 status[i].is_subscribe = 1;
             }
-            if (status[i].msg_id == GUI_MODEL_VIDEO_REC_MSG_ID_CAR_NUM) {
+            if (status[i].msg_id == GUI_MODEL_VIDEO_REC_MSG_ID_HDR_STATE) {
                 status[i].is_subscribe = 1;
             }
             if (status[i].msg_id == GUI_MODEL_VIDEO_REC_MSG_ID_GSENSOR_ICON) {
                 status[i].is_subscribe = 1;
             }
-            if (status[i].msg_id == GUI_MODEL_VIDEO_REC_MSG_ID_CYC_STATE) {
+            if (status[i].msg_id == GUI_MODEL_VIDEO_REC_MSG_ID_GRA_STATE) {
+                status[i].is_subscribe = 1;
+            }
+            if (status[i].msg_id == GUI_MODEL_VIDEO_REC_MSG_ID_GUARD_STATE) {
+                status[i].is_subscribe = 1;
+            }
+            if (status[i].msg_id == GUI_MODEL_VIDEO_REC_MSG_ID_REC_RESO) {
                 status[i].is_subscribe = 1;
             }
             if (status[i].msg_id == GUI_MODEL_VIDEO_REC_MSG_ID_SD_ICON) {
@@ -672,35 +658,29 @@ void gui_model_video_rec_msg_init_events()
             if (status[i].msg_id == GUI_MODEL_VIDEO_REC_MSG_ID_REC_TIME_STATE) {
                 status[i].is_subscribe = 1;
             }
-            if (status[i].msg_id == GUI_MODEL_VIDEO_REC_MSG_ID_GUARD_STATE) {
-                status[i].is_subscribe = 1;
-            }
-            if (status[i].msg_id == GUI_MODEL_VIDEO_REC_MSG_ID_CAR_NUNBER) {
-                status[i].is_subscribe = 1;
-            }
-            if (status[i].msg_id == GUI_MODEL_VIDEO_REC_MSG_ID_CYCREC_ICON) {
-                status[i].is_subscribe = 1;
-            }
             if (status[i].msg_id == GUI_MODEL_VIDEO_REC_MSG_ID_REC_REMAIN_TIME) {
-                status[i].is_subscribe = 1;
-            }
-            if (status[i].msg_id == GUI_MODEL_VIDEO_REC_MSG_ID_EXP_ICON) {
-                status[i].is_subscribe = 1;
-            }
-            if (status[i].msg_id == GUI_MODEL_VIDEO_REC_MSG_ID_FLASH_HEADLIGHT) {
                 status[i].is_subscribe = 1;
             }
             if (status[i].msg_id == GUI_MODEL_VIDEO_REC_MSG_ID_REC_ICON_STATE) {
                 status[i].is_subscribe = 1;
             }
-            if (status[i].msg_id == GUI_MODEL_VIDEO_REC_MSG_ID_GAP_STATE) {
+            if (status[i].msg_id == GUI_MODEL_VIDEO_REC_MSG_ID_CAR_NUNBER) {
+                status[i].is_subscribe = 1;
+            }
+            if (status[i].msg_id == GUI_MODEL_VIDEO_REC_MSG_ID_CAR_NUM) {
+                status[i].is_subscribe = 1;
+            }
+            if (status[i].msg_id == GUI_MODEL_VIDEO_REC_MSG_ID_FLASH_HEADLIGHT) {
+                status[i].is_subscribe = 1;
+            }
+            if (status[i].msg_id == GUI_MODEL_VIDEO_REC_MSG_ID_KEY_STATE) {
                 status[i].is_subscribe = 1;
             }
         }
     }
-    if (!guider_ui.video_photo_del) {
-        gui_model_video_rec_msg_sd_icon_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
-        lv_subject_add_observer_obj(subject_sd_icon, gui_model_video_rec_msg_video_photo_img_sd_icon_set_img_path_cb, guider_ui.video_photo_img_sd_icon, &guider_msg_data);
+    if (guider_ui.video_photo) {
+        lv_ui_video_photo *ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_VIDEO_PHOTO);
+        gui_msg_setup_component(true, false, subject_sd_icon, ui_scr->video_photo_img_sd_icon, &guider_msg_data, gui_model_video_rec_msg_video_photo_img_sd_icon_set_img_path_cb, GUI_MODEL_VIDEO_REC_MSG_ID_SD_ICON, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
 
 
         for (int i = 0; i < 30; i++) {

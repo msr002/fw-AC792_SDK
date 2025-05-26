@@ -827,7 +827,6 @@ c_SRC_FILES := \
 	../../../../apps/wifi_camera/lvgl_v8_ui_app/style_JL/custom/custom.c \
 	../../../../apps/wifi_camera/lvgl_v8_ui_app/style_JL/custom/multi_language.c \
 	../../../../apps/wifi_camera/lvgl_v8_ui_app/style_JL/custom/sim_database.c \
-	../../../../apps/wifi_camera/lvgl_v8_ui_app/style_JL/custom/ui_action_animation.c \
 	../../../../apps/wifi_camera/lvgl_v8_ui_app/style_JL/custom/ui_action_linedrift.c \
 	../../../../apps/wifi_camera/lvgl_v8_ui_app/style_JL/custom/ui_action_list.c \
 	../../../../apps/wifi_camera/lvgl_v8_ui_app/style_JL/custom/ui_action_main.c \

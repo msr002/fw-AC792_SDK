@@ -14,7 +14,8 @@ void gui_model_sys_setting_msg_sys_setting_lbl_funkey2_set_text_cb(lv_observer_t
     }
 
     gui_msg_data_t *data = (gui_msg_data_t *)observer->user_data;
-    lv_label_set_text(guider_ui.sys_setting_lbl_funkey2_label, data->value_string);
+    lv_ui_sys_setting *ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_SYS_SETTING);
+    lv_label_set_text(ui_scr->sys_setting_lbl_funkey2_label, data->value_string);
 }
 
 GUI_WEAK int gui_model_sys_setting_msg_funkey4_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type)
@@ -452,8 +453,6 @@ void gui_model_sys_setting_msg_init(lv_ui *ui)
     if (sub != NULL) {
         lv_subject_init_pointer(sub->subject, &guider_msg_data);
     }
-    gui_model_sys_setting_msg_init_ui();
-    gui_model_sys_setting_msg_init_events();
 }
 
 void gui_model_sys_setting_msg_init_ui()
@@ -536,51 +535,93 @@ void gui_model_sys_setting_msg_init_events()
     lv_subject_t *subject_hide_funkey8 = gui_msg_get_subject(GUI_MODEL_SYS_SETTING_MSG_ID_HIDE_FUNKEY8);
     lv_subject_t *subject_show_funkey8 = gui_msg_get_subject(GUI_MODEL_SYS_SETTING_MSG_ID_SHOW_FUNKEY8);
     lv_subject_t *subject_state_funkey8 = gui_msg_get_subject(GUI_MODEL_SYS_SETTING_MSG_ID_STATE_FUNKEY8);
-    if (!guider_ui.sys_setting_del) {
-        gui_msg_setup_component(true, false, subject_hide_viewcarnum, guider_ui.sys_setting_view_carmun, &guider_msg_data, gui_msg_set_flag_by_int32_cb, GUI_MODEL_SYS_SETTING_MSG_ID_HIDE_VIEWCARNUM, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
-        gui_msg_setup_component(true, false, subject_show_viewcarnum, guider_ui.sys_setting_view_carmun, &guider_msg_data, gui_msg_set_clear_flag_by_int32_cb, GUI_MODEL_SYS_SETTING_MSG_ID_SHOW_VIEWCARNUM, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
-
-        gui_msg_setup_component(true, false, subject_hide_viewdate, guider_ui.sys_setting_view_date, &guider_msg_data, gui_msg_set_flag_by_int32_cb, GUI_MODEL_SYS_SETTING_MSG_ID_HIDE_VIEWDATE, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
-        gui_msg_setup_component(true, false, subject_show_viewdate, guider_ui.sys_setting_view_date, &guider_msg_data, gui_msg_set_clear_flag_by_int32_cb, GUI_MODEL_SYS_SETTING_MSG_ID_SHOW_VIEWDATE, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
-
-        gui_msg_setup_component(true, false, subject_funkey6, guider_ui.sys_setting_lbl_funkey6, &guider_msg_data, gui_msg_set_label_text_by_string_cb, GUI_MODEL_SYS_SETTING_MSG_ID_FUNKEY6, GUI_MSG_ACCESS_GET, VALUE_STRING, NULL);
-        gui_msg_setup_component(true, false, subject_state_funkey6, guider_ui.sys_setting_lbl_funkey6, &guider_msg_data, gui_msg_set_control_state_by_int32_cb, GUI_MODEL_SYS_SETTING_MSG_ID_STATE_FUNKEY6, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
-        gui_msg_setup_component(true, false, subject_hide_funkey6, guider_ui.sys_setting_lbl_funkey6, &guider_msg_data, gui_msg_set_flag_by_int32_cb, GUI_MODEL_SYS_SETTING_MSG_ID_HIDE_FUNKEY6, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
-        gui_msg_setup_component(true, false, subject_show_funkey6, guider_ui.sys_setting_lbl_funkey6, &guider_msg_data, gui_msg_set_clear_flag_by_int32_cb, GUI_MODEL_SYS_SETTING_MSG_ID_SHOW_FUNKEY6, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
-
-        gui_msg_setup_component(true, false, subject_funkey7, guider_ui.sys_setting_lbl_funkey7, &guider_msg_data, gui_msg_set_label_text_by_string_cb, GUI_MODEL_SYS_SETTING_MSG_ID_FUNKEY7, GUI_MSG_ACCESS_GET, VALUE_STRING, NULL);
-        gui_msg_setup_component(true, false, subject_state_funkey7, guider_ui.sys_setting_lbl_funkey7, &guider_msg_data, gui_msg_set_control_state_by_int32_cb, GUI_MODEL_SYS_SETTING_MSG_ID_STATE_FUNKEY7, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
-        gui_msg_setup_component(true, false, subject_hide_funkey7, guider_ui.sys_setting_lbl_funkey7, &guider_msg_data, gui_msg_set_flag_by_int32_cb, GUI_MODEL_SYS_SETTING_MSG_ID_HIDE_FUNKEY7, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
-        gui_msg_setup_component(true, false, subject_show_funkey7, guider_ui.sys_setting_lbl_funkey7, &guider_msg_data, gui_msg_set_clear_flag_by_int32_cb, GUI_MODEL_SYS_SETTING_MSG_ID_SHOW_FUNKEY7, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
-
-        gui_msg_setup_component(true, false, subject_subpage_warning, guider_ui.sys_setting_lbl_subpage_warning, &guider_msg_data, gui_msg_set_label_text_by_string_cb, GUI_MODEL_SYS_SETTING_MSG_ID_SUBPAGE_WARNING, GUI_MSG_ACCESS_GET, VALUE_STRING, NULL);
-        gui_msg_setup_component(true, false, subject_hide_subpagewarning, guider_ui.sys_setting_lbl_subpage_warning, &guider_msg_data, gui_msg_set_flag_by_int32_cb, GUI_MODEL_SYS_SETTING_MSG_ID_HIDE_SUBPAGEWARNING, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
-        gui_msg_setup_component(true, false, subject_show_subpagewarning, guider_ui.sys_setting_lbl_subpage_warning, &guider_msg_data, gui_msg_set_clear_flag_by_int32_cb, GUI_MODEL_SYS_SETTING_MSG_ID_SHOW_SUBPAGEWARNING, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
-
-        gui_msg_setup_component(true, false, subject_funkey8, guider_ui.sys_setting_lbl_funkey2, &guider_msg_data, gui_model_sys_setting_msg_sys_setting_lbl_funkey2_set_text_cb, GUI_MODEL_SYS_SETTING_MSG_ID_FUNKEY8, GUI_MSG_ACCESS_GET, VALUE_STRING, NULL);
-        gui_msg_setup_component(true, false, subject_state_funkey8, guider_ui.sys_setting_lbl_funkey2, &guider_msg_data, gui_msg_set_control_state_by_int32_cb, GUI_MODEL_SYS_SETTING_MSG_ID_STATE_FUNKEY8, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
-        gui_msg_setup_component(true, false, subject_hide_funkey8, guider_ui.sys_setting_lbl_funkey2, &guider_msg_data, gui_msg_set_flag_by_int32_cb, GUI_MODEL_SYS_SETTING_MSG_ID_HIDE_FUNKEY8, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
-        gui_msg_setup_component(true, false, subject_show_funkey8, guider_ui.sys_setting_lbl_funkey2, &guider_msg_data, gui_msg_set_clear_flag_by_int32_cb, GUI_MODEL_SYS_SETTING_MSG_ID_SHOW_FUNKEY8, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
-
-        gui_msg_setup_component(true, false, subject_state_funkey4, guider_ui.sys_setting_lbl_funkey4, &guider_msg_data, gui_msg_set_control_state_by_int32_cb, GUI_MODEL_SYS_SETTING_MSG_ID_STATE_FUNKEY4, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
-
-        gui_msg_setup_component(true, false, subject_hide_viewlist, guider_ui.sys_setting_view_list, &guider_msg_data, gui_msg_set_flag_by_int32_cb, GUI_MODEL_SYS_SETTING_MSG_ID_HIDE_VIEWLIST, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
-        gui_msg_setup_component(true, false, subject_show_viewlist, guider_ui.sys_setting_view_list, &guider_msg_data, gui_msg_set_clear_flag_by_int32_cb, GUI_MODEL_SYS_SETTING_MSG_ID_SHOW_VIEWLIST, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
-
-        gui_msg_setup_component(true, false, subject_funkey5, guider_ui.sys_setting_lbl_funkey5, &guider_msg_data, gui_msg_set_label_text_by_string_cb, GUI_MODEL_SYS_SETTING_MSG_ID_FUNKEY5, GUI_MSG_ACCESS_GET, VALUE_STRING, NULL);
-        gui_msg_setup_component(true, false, subject_state_funkey5, guider_ui.sys_setting_lbl_funkey5, &guider_msg_data, gui_msg_set_control_state_by_int32_cb, GUI_MODEL_SYS_SETTING_MSG_ID_STATE_FUNKEY5, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
-        gui_msg_setup_component(true, false, subject_hide_funkey5, guider_ui.sys_setting_lbl_funkey5, &guider_msg_data, gui_msg_set_flag_by_int32_cb, GUI_MODEL_SYS_SETTING_MSG_ID_HIDE_FUNKEY5, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
-        gui_msg_setup_component(true, false, subject_show_funkey5, guider_ui.sys_setting_lbl_funkey5, &guider_msg_data, gui_msg_set_clear_flag_by_int32_cb, GUI_MODEL_SYS_SETTING_MSG_ID_SHOW_FUNKEY5, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
+    if (guider_ui.video_rec) {
+        lv_ui_video_rec *ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_VIDEO_REC);
+        gui_msg_setup_component(true, false, subject_state_funkey4, ui_scr->video_rec_lbl_funkey4, &guider_msg_data, gui_msg_set_control_state_by_int32_cb, GUI_MODEL_SYS_SETTING_MSG_ID_STATE_FUNKEY4, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
 
 
         for (int i = 0; i < 29; i++) {
-            if (status[i].msg_id == GUI_MODEL_SYS_SETTING_MSG_ID_HIDE_VIEWCARNUM) {
+            if (status[i].msg_id == GUI_MODEL_SYS_SETTING_MSG_ID_STATE_FUNKEY4) {
                 status[i].is_subscribe = 1;
             }
-            if (status[i].msg_id == GUI_MODEL_SYS_SETTING_MSG_ID_HIDE_SUBPAGEWARNING) {
+        }
+    }
+    if (guider_ui.sys_setting) {
+        lv_ui_sys_setting *ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_SYS_SETTING);
+        gui_msg_setup_component(true, false, subject_state_funkey4, ui_scr->sys_setting_lbl_funkey4, &guider_msg_data, gui_msg_set_control_state_by_int32_cb, GUI_MODEL_SYS_SETTING_MSG_ID_STATE_FUNKEY4, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
+
+        gui_msg_setup_component(true, false, subject_state_funkey5, ui_scr->sys_setting_lbl_funkey5, &guider_msg_data, gui_msg_set_control_state_by_int32_cb, GUI_MODEL_SYS_SETTING_MSG_ID_STATE_FUNKEY5, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
+        gui_msg_setup_component(true, false, subject_funkey5, ui_scr->sys_setting_lbl_funkey5, &guider_msg_data, gui_msg_set_label_text_by_string_cb, GUI_MODEL_SYS_SETTING_MSG_ID_FUNKEY5, GUI_MSG_ACCESS_GET, VALUE_STRING, NULL);
+        gui_msg_setup_component(true, false, subject_show_funkey5, ui_scr->sys_setting_lbl_funkey5, &guider_msg_data, gui_msg_set_clear_flag_by_int32_cb, GUI_MODEL_SYS_SETTING_MSG_ID_SHOW_FUNKEY5, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
+        gui_msg_setup_component(true, false, subject_hide_funkey5, ui_scr->sys_setting_lbl_funkey5, &guider_msg_data, gui_msg_set_flag_by_int32_cb, GUI_MODEL_SYS_SETTING_MSG_ID_HIDE_FUNKEY5, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
+
+        gui_msg_setup_component(true, false, subject_state_funkey6, ui_scr->sys_setting_lbl_funkey6, &guider_msg_data, gui_msg_set_control_state_by_int32_cb, GUI_MODEL_SYS_SETTING_MSG_ID_STATE_FUNKEY6, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
+        gui_msg_setup_component(true, false, subject_funkey6, ui_scr->sys_setting_lbl_funkey6, &guider_msg_data, gui_msg_set_label_text_by_string_cb, GUI_MODEL_SYS_SETTING_MSG_ID_FUNKEY6, GUI_MSG_ACCESS_GET, VALUE_STRING, NULL);
+        gui_msg_setup_component(true, false, subject_show_funkey6, ui_scr->sys_setting_lbl_funkey6, &guider_msg_data, gui_msg_set_clear_flag_by_int32_cb, GUI_MODEL_SYS_SETTING_MSG_ID_SHOW_FUNKEY6, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
+        gui_msg_setup_component(true, false, subject_hide_funkey6, ui_scr->sys_setting_lbl_funkey6, &guider_msg_data, gui_msg_set_flag_by_int32_cb, GUI_MODEL_SYS_SETTING_MSG_ID_HIDE_FUNKEY6, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
+
+        gui_msg_setup_component(true, false, subject_state_funkey7, ui_scr->sys_setting_lbl_funkey7, &guider_msg_data, gui_msg_set_control_state_by_int32_cb, GUI_MODEL_SYS_SETTING_MSG_ID_STATE_FUNKEY7, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
+        gui_msg_setup_component(true, false, subject_funkey7, ui_scr->sys_setting_lbl_funkey7, &guider_msg_data, gui_msg_set_label_text_by_string_cb, GUI_MODEL_SYS_SETTING_MSG_ID_FUNKEY7, GUI_MSG_ACCESS_GET, VALUE_STRING, NULL);
+        gui_msg_setup_component(true, false, subject_show_funkey7, ui_scr->sys_setting_lbl_funkey7, &guider_msg_data, gui_msg_set_clear_flag_by_int32_cb, GUI_MODEL_SYS_SETTING_MSG_ID_SHOW_FUNKEY7, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
+        gui_msg_setup_component(true, false, subject_hide_funkey7, ui_scr->sys_setting_lbl_funkey7, &guider_msg_data, gui_msg_set_flag_by_int32_cb, GUI_MODEL_SYS_SETTING_MSG_ID_HIDE_FUNKEY7, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
+
+        gui_msg_setup_component(true, false, subject_show_viewlist, ui_scr->sys_setting_view_list, &guider_msg_data, gui_msg_set_clear_flag_by_int32_cb, GUI_MODEL_SYS_SETTING_MSG_ID_SHOW_VIEWLIST, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
+        gui_msg_setup_component(true, false, subject_hide_viewlist, ui_scr->sys_setting_view_list, &guider_msg_data, gui_msg_set_flag_by_int32_cb, GUI_MODEL_SYS_SETTING_MSG_ID_HIDE_VIEWLIST, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
+
+        gui_msg_setup_component(true, false, subject_subpage_warning, ui_scr->sys_setting_lbl_subpage_warning, &guider_msg_data, gui_msg_set_label_text_by_string_cb, GUI_MODEL_SYS_SETTING_MSG_ID_SUBPAGE_WARNING, GUI_MSG_ACCESS_GET, VALUE_STRING, NULL);
+        gui_msg_setup_component(true, false, subject_show_subpagewarning, ui_scr->sys_setting_lbl_subpage_warning, &guider_msg_data, gui_msg_set_clear_flag_by_int32_cb, GUI_MODEL_SYS_SETTING_MSG_ID_SHOW_SUBPAGEWARNING, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
+        gui_msg_setup_component(true, false, subject_hide_subpagewarning, ui_scr->sys_setting_lbl_subpage_warning, &guider_msg_data, gui_msg_set_flag_by_int32_cb, GUI_MODEL_SYS_SETTING_MSG_ID_HIDE_SUBPAGEWARNING, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
+
+        gui_msg_setup_component(true, false, subject_show_viewdate, ui_scr->sys_setting_view_date, &guider_msg_data, gui_msg_set_clear_flag_by_int32_cb, GUI_MODEL_SYS_SETTING_MSG_ID_SHOW_VIEWDATE, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
+        gui_msg_setup_component(true, false, subject_hide_viewdate, ui_scr->sys_setting_view_date, &guider_msg_data, gui_msg_set_flag_by_int32_cb, GUI_MODEL_SYS_SETTING_MSG_ID_HIDE_VIEWDATE, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
+
+        gui_msg_setup_component(true, false, subject_show_viewcarnum, ui_scr->sys_setting_view_carmun, &guider_msg_data, gui_msg_set_clear_flag_by_int32_cb, GUI_MODEL_SYS_SETTING_MSG_ID_SHOW_VIEWCARNUM, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
+        gui_msg_setup_component(true, false, subject_hide_viewcarnum, ui_scr->sys_setting_view_carmun, &guider_msg_data, gui_msg_set_flag_by_int32_cb, GUI_MODEL_SYS_SETTING_MSG_ID_HIDE_VIEWCARNUM, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
+
+        gui_msg_setup_component(true, false, subject_state_funkey8, ui_scr->sys_setting_lbl_funkey2, &guider_msg_data, gui_msg_set_control_state_by_int32_cb, GUI_MODEL_SYS_SETTING_MSG_ID_STATE_FUNKEY8, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
+        gui_msg_setup_component(true, false, subject_funkey8, ui_scr->sys_setting_lbl_funkey2, &guider_msg_data, gui_model_sys_setting_msg_sys_setting_lbl_funkey2_set_text_cb, GUI_MODEL_SYS_SETTING_MSG_ID_FUNKEY8, GUI_MSG_ACCESS_GET, VALUE_STRING, NULL);
+        gui_msg_setup_component(true, false, subject_show_funkey8, ui_scr->sys_setting_lbl_funkey2, &guider_msg_data, gui_msg_set_clear_flag_by_int32_cb, GUI_MODEL_SYS_SETTING_MSG_ID_SHOW_FUNKEY8, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
+        gui_msg_setup_component(true, false, subject_hide_funkey8, ui_scr->sys_setting_lbl_funkey2, &guider_msg_data, gui_msg_set_flag_by_int32_cb, GUI_MODEL_SYS_SETTING_MSG_ID_HIDE_FUNKEY8, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
+
+
+        for (int i = 0; i < 29; i++) {
+            if (status[i].msg_id == GUI_MODEL_SYS_SETTING_MSG_ID_STATE_FUNKEY4) {
                 status[i].is_subscribe = 1;
             }
-            if (status[i].msg_id == GUI_MODEL_SYS_SETTING_MSG_ID_SHOW_VIEWCARNUM) {
+            if (status[i].msg_id == GUI_MODEL_SYS_SETTING_MSG_ID_STATE_FUNKEY5) {
+                status[i].is_subscribe = 1;
+            }
+            if (status[i].msg_id == GUI_MODEL_SYS_SETTING_MSG_ID_FUNKEY5) {
+                status[i].is_subscribe = 1;
+            }
+            if (status[i].msg_id == GUI_MODEL_SYS_SETTING_MSG_ID_SHOW_FUNKEY5) {
+                status[i].is_subscribe = 1;
+            }
+            if (status[i].msg_id == GUI_MODEL_SYS_SETTING_MSG_ID_HIDE_FUNKEY5) {
+                status[i].is_subscribe = 1;
+            }
+            if (status[i].msg_id == GUI_MODEL_SYS_SETTING_MSG_ID_STATE_FUNKEY6) {
+                status[i].is_subscribe = 1;
+            }
+            if (status[i].msg_id == GUI_MODEL_SYS_SETTING_MSG_ID_FUNKEY6) {
+                status[i].is_subscribe = 1;
+            }
+            if (status[i].msg_id == GUI_MODEL_SYS_SETTING_MSG_ID_SHOW_FUNKEY6) {
+                status[i].is_subscribe = 1;
+            }
+            if (status[i].msg_id == GUI_MODEL_SYS_SETTING_MSG_ID_HIDE_FUNKEY6) {
+                status[i].is_subscribe = 1;
+            }
+            if (status[i].msg_id == GUI_MODEL_SYS_SETTING_MSG_ID_STATE_FUNKEY7) {
+                status[i].is_subscribe = 1;
+            }
+            if (status[i].msg_id == GUI_MODEL_SYS_SETTING_MSG_ID_FUNKEY7) {
+                status[i].is_subscribe = 1;
+            }
+            if (status[i].msg_id == GUI_MODEL_SYS_SETTING_MSG_ID_SHOW_FUNKEY7) {
+                status[i].is_subscribe = 1;
+            }
+            if (status[i].msg_id == GUI_MODEL_SYS_SETTING_MSG_ID_HIDE_FUNKEY7) {
                 status[i].is_subscribe = 1;
             }
             if (status[i].msg_id == GUI_MODEL_SYS_SETTING_MSG_ID_SHOW_VIEWLIST) {
@@ -589,64 +630,34 @@ void gui_model_sys_setting_msg_init_events()
             if (status[i].msg_id == GUI_MODEL_SYS_SETTING_MSG_ID_HIDE_VIEWLIST) {
                 status[i].is_subscribe = 1;
             }
-            if (status[i].msg_id == GUI_MODEL_SYS_SETTING_MSG_ID_SHOW_FUNKEY5) {
-                status[i].is_subscribe = 1;
-            }
-            if (status[i].msg_id == GUI_MODEL_SYS_SETTING_MSG_ID_SHOW_FUNKEY6) {
-                status[i].is_subscribe = 1;
-            }
-            if (status[i].msg_id == GUI_MODEL_SYS_SETTING_MSG_ID_HIDE_VIEWDATE) {
+            if (status[i].msg_id == GUI_MODEL_SYS_SETTING_MSG_ID_SUBPAGE_WARNING) {
                 status[i].is_subscribe = 1;
             }
             if (status[i].msg_id == GUI_MODEL_SYS_SETTING_MSG_ID_SHOW_SUBPAGEWARNING) {
                 status[i].is_subscribe = 1;
             }
-            if (status[i].msg_id == GUI_MODEL_SYS_SETTING_MSG_ID_FUNKEY8) {
-                status[i].is_subscribe = 1;
-            }
-            if (status[i].msg_id == GUI_MODEL_SYS_SETTING_MSG_ID_FUNKEY7) {
-                status[i].is_subscribe = 1;
-            }
-            if (status[i].msg_id == GUI_MODEL_SYS_SETTING_MSG_ID_STATE_FUNKEY4) {
-                status[i].is_subscribe = 1;
-            }
-            if (status[i].msg_id == GUI_MODEL_SYS_SETTING_MSG_ID_FUNKEY6) {
-                status[i].is_subscribe = 1;
-            }
-            if (status[i].msg_id == GUI_MODEL_SYS_SETTING_MSG_ID_STATE_FUNKEY5) {
-                status[i].is_subscribe = 1;
-            }
-            if (status[i].msg_id == GUI_MODEL_SYS_SETTING_MSG_ID_STATE_FUNKEY6) {
-                status[i].is_subscribe = 1;
-            }
-            if (status[i].msg_id == GUI_MODEL_SYS_SETTING_MSG_ID_FUNKEY5) {
+            if (status[i].msg_id == GUI_MODEL_SYS_SETTING_MSG_ID_HIDE_SUBPAGEWARNING) {
                 status[i].is_subscribe = 1;
             }
             if (status[i].msg_id == GUI_MODEL_SYS_SETTING_MSG_ID_SHOW_VIEWDATE) {
                 status[i].is_subscribe = 1;
             }
-            if (status[i].msg_id == GUI_MODEL_SYS_SETTING_MSG_ID_STATE_FUNKEY7) {
+            if (status[i].msg_id == GUI_MODEL_SYS_SETTING_MSG_ID_HIDE_VIEWDATE) {
                 status[i].is_subscribe = 1;
             }
-            if (status[i].msg_id == GUI_MODEL_SYS_SETTING_MSG_ID_SHOW_FUNKEY7) {
+            if (status[i].msg_id == GUI_MODEL_SYS_SETTING_MSG_ID_SHOW_VIEWCARNUM) {
+                status[i].is_subscribe = 1;
+            }
+            if (status[i].msg_id == GUI_MODEL_SYS_SETTING_MSG_ID_HIDE_VIEWCARNUM) {
                 status[i].is_subscribe = 1;
             }
             if (status[i].msg_id == GUI_MODEL_SYS_SETTING_MSG_ID_STATE_FUNKEY8) {
                 status[i].is_subscribe = 1;
             }
+            if (status[i].msg_id == GUI_MODEL_SYS_SETTING_MSG_ID_FUNKEY8) {
+                status[i].is_subscribe = 1;
+            }
             if (status[i].msg_id == GUI_MODEL_SYS_SETTING_MSG_ID_SHOW_FUNKEY8) {
-                status[i].is_subscribe = 1;
-            }
-            if (status[i].msg_id == GUI_MODEL_SYS_SETTING_MSG_ID_SUBPAGE_WARNING) {
-                status[i].is_subscribe = 1;
-            }
-            if (status[i].msg_id == GUI_MODEL_SYS_SETTING_MSG_ID_HIDE_FUNKEY5) {
-                status[i].is_subscribe = 1;
-            }
-            if (status[i].msg_id == GUI_MODEL_SYS_SETTING_MSG_ID_HIDE_FUNKEY7) {
-                status[i].is_subscribe = 1;
-            }
-            if (status[i].msg_id == GUI_MODEL_SYS_SETTING_MSG_ID_HIDE_FUNKEY6) {
                 status[i].is_subscribe = 1;
             }
             if (status[i].msg_id == GUI_MODEL_SYS_SETTING_MSG_ID_HIDE_FUNKEY8) {
@@ -654,18 +665,9 @@ void gui_model_sys_setting_msg_init_events()
             }
         }
     }
-    if (!guider_ui.video_rec_del) {
-        gui_msg_setup_component(true, false, subject_state_funkey4, guider_ui.video_rec_lbl_funkey4, &guider_msg_data, gui_msg_set_control_state_by_int32_cb, GUI_MODEL_SYS_SETTING_MSG_ID_STATE_FUNKEY4, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
-
-
-        for (int i = 0; i < 29; i++) {
-            if (status[i].msg_id == GUI_MODEL_SYS_SETTING_MSG_ID_STATE_FUNKEY4) {
-                status[i].is_subscribe = 1;
-            }
-        }
-    }
-    if (!guider_ui.video_photo_del) {
-        gui_msg_setup_component(true, false, subject_state_funkey4, guider_ui.video_photo_lbl_funkey4, &guider_msg_data, gui_msg_set_control_state_by_int32_cb, GUI_MODEL_SYS_SETTING_MSG_ID_STATE_FUNKEY4, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
+    if (guider_ui.video_photo) {
+        lv_ui_video_photo *ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_VIDEO_PHOTO);
+        gui_msg_setup_component(true, false, subject_state_funkey4, ui_scr->video_photo_lbl_funkey4, &guider_msg_data, gui_msg_set_control_state_by_int32_cb, GUI_MODEL_SYS_SETTING_MSG_ID_STATE_FUNKEY4, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
 
 
         for (int i = 0; i < 29; i++) {

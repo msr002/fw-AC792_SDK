@@ -126,10 +126,10 @@ void lvgl_key_value_remap(uint8_t key_value, uint32_t *key_remap)
 {
     switch (key_value) {
     case KEY_MODE:
-        *key_remap = LV_KEY_RIGHT;  //对应设备的模式（mode）键，UI工具仿真时LV_KEY_RIGHT代替
+        *key_remap = LV_KEY_RIGHT;  //对应机器的模式（mode）键
         break;
     case KEY_MENU:
-        *key_remap = LV_KEY_HOME;  //对应设备的菜单（menu）键，UI工具仿真时LV_KEY_LEFT代替
+        *key_remap = LV_KEY_HOME;  //对应机器的菜单（menu）键
         break;
     case KEY_UP:
         key_scroll_to_view();
@@ -179,8 +179,8 @@ static int rec_menu_status(void)
 #if 0
     int flag0 = 0, flag1 = 0;
 
-    if (lv_obj_is_valid(guider_ui.video_rec_view_menu)) {
-        if (!lv_obj_has_flag(guider_ui.video_rec_view_menu, LV_OBJ_FLAG_HIDDEN)) {
+    if (lv_obj_is_valid(ui_scr->video_rec_view_menu)) {
+        if (!lv_obj_has_flag(ui_scr->video_rec_view_menu, LV_OBJ_FLAG_HIDDEN)) {
             flag0 = 1;
         } else {
             flag0 = 0;
@@ -188,8 +188,8 @@ static int rec_menu_status(void)
         printf(">>>>>flag0: %d\n", flag0);
     }
 
-    if (lv_obj_is_valid(guider_ui.sys_setting_view_menu)) {
-        if (!lv_obj_has_flag(guider_ui.sys_setting_view_menu, LV_OBJ_FLAG_HIDDEN)) {
+    if (lv_obj_is_valid(ui_scr->sys_setting_view_menu)) {
+        if (!lv_obj_has_flag(ui_scr->sys_setting_view_menu, LV_OBJ_FLAG_HIDDEN)) {
             flag1 = 1;
         } else {
             flag1 = 0;
@@ -202,9 +202,9 @@ static int rec_menu_status(void)
 #else
     int flag = 0;
 
-    if (lv_obj_is_valid(guider_ui.video_rec_view_scan)) {
+    if (lv_obj_is_valid(ui_scr->video_rec_view_scan)) {
         printf("--->%s()----->%d\n", __func__, __LINE__);
-        if (lv_obj_has_flag(guider_ui.video_rec_view_scan, LV_OBJ_FLAG_HIDDEN)) {
+        if (lv_obj_has_flag(ui_scr->video_rec_view_scan, LV_OBJ_FLAG_HIDDEN)) {
             flag = 1;
         } else {
             flag = 0;
@@ -234,20 +234,24 @@ static int key_filter_event_handler(struct sys_event *e)
 {
     struct key_event *key = (struct key_event *)e->payload;
     // printf(">>>%s()-----key action: %d, value: %d\n", __func__, key->action, key->value);
-
-    if (rec_running && (key->value == KEY_MENU)) {  //开录像状态下，过滤掉menu按键消息，但在菜单页面下已经是录像状态，则不过滤
+    /* 开录像状态下，过滤掉menu按键消息，但在菜单页面下已经是录像状态，则不过滤 */
+    if (rec_running && (key->value == KEY_MENU)) {
         if (get_menu_status()) {
             return 0;
         } else {
-            return -EINVAL;  //过滤掉按键消息，不发给UI
+            return -EINVAL;  //过滤掉menu按键消息，不发给UI
         }
-    } else if (rec_running && (key->value == KEY_MODE)) {  //录像状态下，mode键对当前文件加解锁
+    } else if (rec_running && (key->value == KEY_MODE)) {
         if (key->action == KEY_EVENT_DOWN) {
             rec_lock_setting();
         }
         return -EINVAL;  //过滤掉按键消息，不发给UI
     }
 
+    /* 菜单页面下，过滤掉mode键消息 */
+    if (get_menu_status() && (key->value == KEY_MODE)) {
+        return -EINVAL;
+    }
     return 0;
 }
 
@@ -374,12 +378,48 @@ int rec_ask_app_open_menu(void)
 
 
 
+
+
+
+
+
+void setting_reset(void)
+{
+    int reset_err = 0;
+    char *carnumber_cn_init;
+
+    reset_err = db_reset();
+
+    update_date = true;  //rtc时间
+
+    /* 车牌 */
+    carnumber_cn_init = (char *)lvgl_module_msg_get_ptr(GUI_MODEL_VIDEO_REC_MSG_ID_CAR_NUNBER, 16);
+    strcpy(carnumber_cn_init, "京A00000");
+    lvgl_module_msg_send_ptr(carnumber_cn_init, 0);
+
+    /* 语言 */
+    lv_i18n_set_locale("zh_cn");
+    i18n_refresh_all_texts(); //语言即可生效
+
+    if (reset_err < 0) {
+        sys_prompt_show_ctl(3000, (void *)_("sys_reset_failed"));
+    } else {
+        sys_prompt_show_ctl(3000, (void *)_("sys_reset"));
+    }
+}
+
+
+
 void hide_label_timer_cb(lv_timer_t *timer)
 {
     // 隐藏标签
     lv_timer_del(timer);
-    if (lv_obj_is_valid(guider_ui.video_play_lbl_msg)) {
-        lv_obj_add_flag(guider_ui.video_play_lbl_msg, LV_OBJ_FLAG_HIDDEN);
+    lv_ui_video_play *ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_VIDEO_PLAY);
+    if (!ui_scr) {
+        return;
+    }
+    if (lv_obj_is_valid(ui_scr->video_play_lbl_msg)) {
+        lv_obj_add_flag(ui_scr->video_play_lbl_msg, LV_OBJ_FLAG_HIDDEN);
     }
 }
 
@@ -536,7 +576,7 @@ void carnum_utf8_to_gb2312(const uint8_t *utf_8, uint8_t *gb2312_data, int selec
 }
 
 //sd卡状态图标更新
-void post_msg2sd_icon(const char *type, uint32_t online)
+void post_msg2sd_icon(int online)
 {
 #ifdef USE_LVGL_V8_UI_DEMO
     if (online) {
@@ -553,79 +593,83 @@ void post_msg2sd_icon(const char *type, uint32_t online)
 */
 void subpage_show(struct subpage_data *my_subpage)
 {
+    lv_ui_video_rec *ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_VIDEO_REC);
+    if (!ui_scr) {
+        return;
+    }
     printf("[chili] %s %d   \n", __func__, __LINE__);
 
     //roller显隐控制
     if (my_subpage->roller_opt && my_subpage->roller) {
-        lv_obj_clear_flag(guider_ui.video_rec_roller_mutifunc, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_clear_flag(ui_scr->video_rec_roller_mutifunc, LV_OBJ_FLAG_HIDDEN);
         //配置roller被选项
         lv_roller_set_options(my_subpage->roller, my_subpage->roller_opt, LV_ROLLER_MODE_INFINITE);
         lv_roller_set_selected(my_subpage->roller, my_subpage->roller_sel, LV_ANIM_OFF);
-        lv_group_focus_obj(guider_ui.video_rec_roller_mutifunc);
+        lv_group_focus_obj(ui_scr->video_rec_roller_mutifunc);
         printf("[chili] %s %d   \n", __func__, __LINE__);
     } else {
-        lv_obj_add_flag(guider_ui.video_rec_roller_mutifunc, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_add_flag(ui_scr->video_rec_roller_mutifunc, LV_OBJ_FLAG_HIDDEN);
     }
 
     //车牌设置区域
     if (my_subpage->car_num_view) {
-        lv_obj_clear_flag(guider_ui.video_rec_view_carnum, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_clear_flag(ui_scr->video_rec_view_carnum, LV_OBJ_FLAG_HIDDEN);
 #if !LV_USE_GUIBUILDER_SIMULATOR
         set_car_num_part_a(db_select("cna"));
         set_car_num_part_b(db_select("cnb"));
-        lv_dropdown_set_selected(guider_ui.video_rec_ddlist_1, db_select("proc"));
-        lv_dropdown_set_selected(guider_ui.video_rec_ddlist_2, (video_rec_car_num[3] - 'A'));
-        lv_dropdown_set_selected(guider_ui.video_rec_ddlist_3, (video_rec_car_num[4] - '0'));
-        lv_dropdown_set_selected(guider_ui.video_rec_ddlist_4, (video_rec_car_num[5] - '0'));
-        lv_dropdown_set_selected(guider_ui.video_rec_ddlist_5, (video_rec_car_num[6] - '0'));
-        lv_dropdown_set_selected(guider_ui.video_rec_ddlist_6, (video_rec_car_num[7] - '0'));
-        lv_dropdown_set_selected(guider_ui.video_rec_ddlist_7, (video_rec_car_num[8] - '0'));
+        lv_dropdown_set_selected(ui_scr->video_rec_ddlist_1, db_select("proc"));
+        lv_dropdown_set_selected(ui_scr->video_rec_ddlist_2, (video_rec_car_num[3] - 'A'));
+        lv_dropdown_set_selected(ui_scr->video_rec_ddlist_3, (video_rec_car_num[4] - '0'));
+        lv_dropdown_set_selected(ui_scr->video_rec_ddlist_4, (video_rec_car_num[5] - '0'));
+        lv_dropdown_set_selected(ui_scr->video_rec_ddlist_5, (video_rec_car_num[6] - '0'));
+        lv_dropdown_set_selected(ui_scr->video_rec_ddlist_6, (video_rec_car_num[7] - '0'));
+        lv_dropdown_set_selected(ui_scr->video_rec_ddlist_7, (video_rec_car_num[8] - '0'));
 #endif
-        lv_group_focus_obj(guider_ui.video_rec_ddlist_1);
+        lv_group_focus_obj(ui_scr->video_rec_ddlist_1);
     } else {
-        lv_obj_add_flag(guider_ui.video_rec_view_carnum, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_add_flag(ui_scr->video_rec_view_carnum, LV_OBJ_FLAG_HIDDEN);
     }
 
     //显示或隐藏子菜单的功能键，以及显示功能键的内容
     if (my_subpage->funkey1) {
-        lv_obj_clear_flag(guider_ui.video_rec_rec_submenu_btn_1, LV_OBJ_FLAG_HIDDEN);
-        update_btn_label(guider_ui.video_rec_rec_submenu_btn_1, (char *)my_subpage->funkey1);
+        lv_obj_clear_flag(ui_scr->video_rec_rec_submenu_btn_1, LV_OBJ_FLAG_HIDDEN);
+        update_btn_label(ui_scr->video_rec_rec_submenu_btn_1, (char *)my_subpage->funkey1);
     } else {
-        lv_obj_add_flag(guider_ui.video_rec_rec_submenu_btn_1, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_add_flag(ui_scr->video_rec_rec_submenu_btn_1, LV_OBJ_FLAG_HIDDEN);
     }
     if (my_subpage->funkey2) {
-        lv_obj_clear_flag(guider_ui.video_rec_rec_submenu_btn_2, LV_OBJ_FLAG_HIDDEN);
-        update_btn_label(guider_ui.video_rec_rec_submenu_btn_2, (char *)my_subpage->funkey2);
+        lv_obj_clear_flag(ui_scr->video_rec_rec_submenu_btn_2, LV_OBJ_FLAG_HIDDEN);
+        update_btn_label(ui_scr->video_rec_rec_submenu_btn_2, (char *)my_subpage->funkey2);
     } else {
-        lv_obj_add_flag(guider_ui.video_rec_rec_submenu_btn_2, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_add_flag(ui_scr->video_rec_rec_submenu_btn_2, LV_OBJ_FLAG_HIDDEN);
     }
     if (my_subpage->funkey3) {
-        lv_obj_clear_flag(guider_ui.video_rec_rec_submenu_btn_3, LV_OBJ_FLAG_HIDDEN);
-        update_btn_label(guider_ui.video_rec_rec_submenu_btn_3, (char *)my_subpage->funkey3);
+        lv_obj_clear_flag(ui_scr->video_rec_rec_submenu_btn_3, LV_OBJ_FLAG_HIDDEN);
+        update_btn_label(ui_scr->video_rec_rec_submenu_btn_3, (char *)my_subpage->funkey3);
     } else {
-        lv_obj_add_flag(guider_ui.video_rec_rec_submenu_btn_3, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_add_flag(ui_scr->video_rec_rec_submenu_btn_3, LV_OBJ_FLAG_HIDDEN);
     }
     if (my_subpage->funkey4) {
-        lv_obj_clear_flag(guider_ui.video_rec_rec_submenu_btn_4, LV_OBJ_FLAG_HIDDEN);
-        update_btn_label(guider_ui.video_rec_rec_submenu_btn_4, (char *)my_subpage->funkey4);
+        lv_obj_clear_flag(ui_scr->video_rec_rec_submenu_btn_4, LV_OBJ_FLAG_HIDDEN);
+        update_btn_label(ui_scr->video_rec_rec_submenu_btn_4, (char *)my_subpage->funkey4);
     } else {
-        lv_obj_add_flag(guider_ui.video_rec_rec_submenu_btn_4, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_add_flag(ui_scr->video_rec_rec_submenu_btn_4, LV_OBJ_FLAG_HIDDEN);
     }
 
     //高亮子菜单相应的功能键
     printf(">>>btn_focus_id: %d\n", my_subpage->btn_focus_id);
     switch (my_subpage->btn_focus_id) {
     case SUBPAGE_FUNKEY1:
-        lv_group_focus_obj(guider_ui.video_rec_rec_submenu_btn_1);
+        lv_group_focus_obj(ui_scr->video_rec_rec_submenu_btn_1);
         break;
     case SUBPAGE_FUNKEY2:
-        lv_group_focus_obj(guider_ui.video_rec_rec_submenu_btn_2);
+        lv_group_focus_obj(ui_scr->video_rec_rec_submenu_btn_2);
         break;
     case SUBPAGE_FUNKEY3:
-        lv_group_focus_obj(guider_ui.video_rec_rec_submenu_btn_3);
+        lv_group_focus_obj(ui_scr->video_rec_rec_submenu_btn_3);
         break;
     case SUBPAGE_FUNKEY4:
-        lv_group_focus_obj(guider_ui.video_rec_rec_submenu_btn_4);
+        lv_group_focus_obj(ui_scr->video_rec_rec_submenu_btn_4);
         break;
     }
 }
@@ -633,116 +677,122 @@ void subpage_show(struct subpage_data *my_subpage)
 void photo_submenu_update(struct photo_submenu_data *my_subpage)
 {
     printf("[chili] %s %d   \n", __func__, __LINE__);
-
+    lv_ui_video_photo *ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_VIDEO_PHOTO);
+    if (!ui_scr) {
+        return;
+    }
     //roller显隐控制
     if (my_subpage->roller_opt && my_subpage->roller) {
-        lv_obj_clear_flag(guider_ui.video_photo_roller_mutifunc, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_clear_flag(ui_scr->video_photo_roller_mutifunc, LV_OBJ_FLAG_HIDDEN);
         //配置roller被选项
         lv_roller_set_options(my_subpage->roller, my_subpage->roller_opt, LV_ROLLER_MODE_INFINITE);
         lv_roller_set_selected(my_subpage->roller, my_subpage->roller_sel, LV_ANIM_OFF);
-        lv_group_focus_obj(guider_ui.video_photo_roller_mutifunc);
+        lv_group_focus_obj(ui_scr->video_photo_roller_mutifunc);
         printf("[chili] %s %d   \n", __func__, __LINE__);
     } else {
-        lv_obj_add_flag(guider_ui.video_photo_roller_mutifunc, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_add_flag(ui_scr->video_photo_roller_mutifunc, LV_OBJ_FLAG_HIDDEN);
     }
 
     //显示或隐藏子菜单的功能键，以及显示功能键的内容
     if (my_subpage->funkey1) {
-        lv_obj_clear_flag(guider_ui.video_photo_submenu_btn_1, LV_OBJ_FLAG_HIDDEN);
-        update_btn_label(guider_ui.video_photo_submenu_btn_1, (char *)my_subpage->funkey1);
+        lv_obj_clear_flag(ui_scr->video_photo_submenu_btn_1, LV_OBJ_FLAG_HIDDEN);
+        update_btn_label(ui_scr->video_photo_submenu_btn_1, (char *)my_subpage->funkey1);
     } else {
-        lv_obj_add_flag(guider_ui.video_photo_submenu_btn_1, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_add_flag(ui_scr->video_photo_submenu_btn_1, LV_OBJ_FLAG_HIDDEN);
     }
     if (my_subpage->funkey2) {
-        lv_obj_clear_flag(guider_ui.video_photo_submenu_btn_2, LV_OBJ_FLAG_HIDDEN);
-        update_btn_label(guider_ui.video_photo_submenu_btn_2, (char *)my_subpage->funkey2);
+        lv_obj_clear_flag(ui_scr->video_photo_submenu_btn_2, LV_OBJ_FLAG_HIDDEN);
+        update_btn_label(ui_scr->video_photo_submenu_btn_2, (char *)my_subpage->funkey2);
     } else {
-        lv_obj_add_flag(guider_ui.video_photo_submenu_btn_2, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_add_flag(ui_scr->video_photo_submenu_btn_2, LV_OBJ_FLAG_HIDDEN);
     }
     if (my_subpage->funkey3) {
-        lv_obj_clear_flag(guider_ui.video_photo_submenu_btn_3, LV_OBJ_FLAG_HIDDEN);
-        update_btn_label(guider_ui.video_photo_submenu_btn_3, (char *)my_subpage->funkey3);
+        lv_obj_clear_flag(ui_scr->video_photo_submenu_btn_3, LV_OBJ_FLAG_HIDDEN);
+        update_btn_label(ui_scr->video_photo_submenu_btn_3, (char *)my_subpage->funkey3);
     } else {
-        lv_obj_add_flag(guider_ui.video_photo_submenu_btn_3, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_add_flag(ui_scr->video_photo_submenu_btn_3, LV_OBJ_FLAG_HIDDEN);
     }
     if (my_subpage->funkey4) {
-        lv_obj_clear_flag(guider_ui.video_photo_submenu_btn_4, LV_OBJ_FLAG_HIDDEN);
-        update_btn_label(guider_ui.video_photo_submenu_btn_4, (char *)my_subpage->funkey4);
+        lv_obj_clear_flag(ui_scr->video_photo_submenu_btn_4, LV_OBJ_FLAG_HIDDEN);
+        update_btn_label(ui_scr->video_photo_submenu_btn_4, (char *)my_subpage->funkey4);
     } else {
-        lv_obj_add_flag(guider_ui.video_photo_submenu_btn_4, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_add_flag(ui_scr->video_photo_submenu_btn_4, LV_OBJ_FLAG_HIDDEN);
     }
 
     //高亮子菜单相应的功能键
     printf(">>>btn_focus_id: %d\n", my_subpage->btn_focus_id);
     switch (my_subpage->btn_focus_id) {
     case SUBPAGE_FUNKEY1:
-        lv_group_focus_obj(guider_ui.video_photo_submenu_btn_1);
+        lv_group_focus_obj(ui_scr->video_photo_submenu_btn_1);
         break;
     case SUBPAGE_FUNKEY2:
-        lv_group_focus_obj(guider_ui.video_photo_submenu_btn_2);
+        lv_group_focus_obj(ui_scr->video_photo_submenu_btn_2);
         break;
     case SUBPAGE_FUNKEY3:
-        lv_group_focus_obj(guider_ui.video_photo_submenu_btn_3);
+        lv_group_focus_obj(ui_scr->video_photo_submenu_btn_3);
         break;
     case SUBPAGE_FUNKEY4:
-        lv_group_focus_obj(guider_ui.video_photo_submenu_btn_4);
+        lv_group_focus_obj(ui_scr->video_photo_submenu_btn_4);
         break;
     }
 }
 
 void decmenu_subpage_show(struct dec_submenu_data *my_subpage)
 {
+    lv_ui_video_file *ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_VIDEO_FILE);
+    if (!ui_scr) {
+        return;
+    }
     printf("[chili] %s %d   \n", __func__, __LINE__);
-
     //警告提示语
     if (my_subpage->warning) {
-        lv_obj_clear_flag(guider_ui.video_file_lbl_submenu_warning, LV_OBJ_FLAG_HIDDEN);
-        lv_label_set_text(guider_ui.video_file_lbl_submenu_warning, (char *)my_subpage->warning);
+        lv_obj_clear_flag(ui_scr->video_file_lbl_submenu_warning, LV_OBJ_FLAG_HIDDEN);
+        lv_label_set_text(ui_scr->video_file_lbl_submenu_warning, (char *)my_subpage->warning);
     } else {
-        lv_obj_add_flag(guider_ui.video_file_lbl_submenu_warning, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_add_flag(ui_scr->video_file_lbl_submenu_warning, LV_OBJ_FLAG_HIDDEN);
     }
 
     //显示或隐藏子菜单的功能键，以及显示功能键的内容
     if (my_subpage->funkey1) {
-        lv_obj_clear_flag(guider_ui.video_file_submenu_btn_1, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_clear_flag(ui_scr->video_file_submenu_btn_1, LV_OBJ_FLAG_HIDDEN);
 
-        update_btn_label(guider_ui.video_file_submenu_btn_1, (char *)my_subpage->funkey1);
+        update_btn_label(ui_scr->video_file_submenu_btn_1, (char *)my_subpage->funkey1);
     } else {
-        lv_obj_add_flag(guider_ui.video_file_submenu_btn_1, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_add_flag(ui_scr->video_file_submenu_btn_1, LV_OBJ_FLAG_HIDDEN);
     }
     if (my_subpage->funkey2) {
-        lv_obj_clear_flag(guider_ui.video_file_submenu_btn_2, LV_OBJ_FLAG_HIDDEN);
-        update_btn_label(guider_ui.video_file_submenu_btn_2, (char *)my_subpage->funkey2);
+        lv_obj_clear_flag(ui_scr->video_file_submenu_btn_2, LV_OBJ_FLAG_HIDDEN);
+        update_btn_label(ui_scr->video_file_submenu_btn_2, (char *)my_subpage->funkey2);
     } else {
-        lv_obj_add_flag(guider_ui.video_file_submenu_btn_2, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_add_flag(ui_scr->video_file_submenu_btn_2, LV_OBJ_FLAG_HIDDEN);
     }
     if (my_subpage->funkey3) {
-        lv_obj_clear_flag(guider_ui.video_file_submenu_btn_3, LV_OBJ_FLAG_HIDDEN);
-        update_btn_label(guider_ui.video_file_submenu_btn_3, (char *)my_subpage->funkey3);
+        lv_obj_clear_flag(ui_scr->video_file_submenu_btn_3, LV_OBJ_FLAG_HIDDEN);
+        update_btn_label(ui_scr->video_file_submenu_btn_3, (char *)my_subpage->funkey3);
     } else {
-        lv_obj_add_flag(guider_ui.video_file_submenu_btn_3, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_add_flag(ui_scr->video_file_submenu_btn_3, LV_OBJ_FLAG_HIDDEN);
     }
     if (my_subpage->funkey4) {
-        lv_obj_clear_flag(guider_ui.video_file_submenu_btn_4, LV_OBJ_FLAG_HIDDEN);
-        update_btn_label(guider_ui.video_file_submenu_btn_4, (char *)my_subpage->funkey4);
+        lv_obj_clear_flag(ui_scr->video_file_submenu_btn_4, LV_OBJ_FLAG_HIDDEN);
+        update_btn_label(ui_scr->video_file_submenu_btn_4, (char *)my_subpage->funkey4);
     } else {
-        lv_obj_add_flag(guider_ui.video_file_submenu_btn_4, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_add_flag(ui_scr->video_file_submenu_btn_4, LV_OBJ_FLAG_HIDDEN);
     }
 
     //高亮子菜单相应的功能键
     printf(">>>btn_focus_id: %d\n", my_subpage->btn_focus_id);
     switch (my_subpage->btn_focus_id) {
     case SUBPAGE_FUNKEY1:
-        lv_group_focus_obj(guider_ui.video_file_submenu_btn_1);
+        lv_group_focus_obj(ui_scr->video_file_submenu_btn_1);
         break;
     case SUBPAGE_FUNKEY2:
-        lv_group_focus_obj(guider_ui.video_file_submenu_btn_2);
+        lv_group_focus_obj(ui_scr->video_file_submenu_btn_2);
         break;
     case SUBPAGE_FUNKEY3:
-        lv_group_focus_obj(guider_ui.video_file_submenu_btn_3);
+        lv_group_focus_obj(ui_scr->video_file_submenu_btn_3);
         break;
     case SUBPAGE_FUNKEY4:
-        lv_group_focus_obj(guider_ui.video_file_submenu_btn_4);
+        lv_group_focus_obj(ui_scr->video_file_submenu_btn_4);
         break;
     }
 }
@@ -751,16 +801,20 @@ void decmenu_subpage_show(struct dec_submenu_data *my_subpage)
 static int ui_update_rtc_time(void)
 {
     struct sys_time time;
+    lv_ui_sys_setting *ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_SYS_SETTING);
+    if (!ui_scr) {
+        return -1;
+    }
     void *fd = dev_open("rtc", NULL);
     if (fd) {
         dev_ioctl(fd, IOCTL_GET_SYS_TIME, (u32)&time);
         printf("cur rtc time: %d/%d/%d %d:%d:%d\n", time.year, time.month, time.day, time.hour, time.min, time.sec);
-        lv_dropdown_set_selected(guider_ui.sys_setting_ddlist_year, time.year - 2024);
-        lv_dropdown_set_selected(guider_ui.sys_setting_ddlist_month, time.month - 1);
-        lv_dropdown_set_selected(guider_ui.sys_setting_ddlist_day, time.day - 1);
-        lv_dropdown_set_selected(guider_ui.sys_setting_ddlist_hour, time.hour);
-        lv_dropdown_set_selected(guider_ui.sys_setting_ddlist_min, time.min);
-        lv_dropdown_set_selected(guider_ui.sys_setting_ddlist_sec, time.sec);
+        lv_dropdown_set_selected(ui_scr->sys_setting_ddlist_year, time.year - 2024);
+        lv_dropdown_set_selected(ui_scr->sys_setting_ddlist_month, time.month - 1);
+        lv_dropdown_set_selected(ui_scr->sys_setting_ddlist_day, time.day - 1);
+        lv_dropdown_set_selected(ui_scr->sys_setting_ddlist_hour, time.hour);
+        lv_dropdown_set_selected(ui_scr->sys_setting_ddlist_min, time.min);
+        lv_dropdown_set_selected(ui_scr->sys_setting_ddlist_sec, time.sec);
         dev_close(fd);
     }
     return 0;
@@ -772,95 +826,95 @@ static int ui_update_rtc_time(void)
 */
 void sysmenu_subpage_show(struct sysmenu_subpage_data *my_subpage)
 {
+    lv_ui_sys_setting *ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_SYS_SETTING);
+    if (!ui_scr) {
+        return;
+    }
     printf("[chili] %s %d   \n", __func__, __LINE__);
-
     //roller显隐控制
     if (my_subpage->roller_opt && my_subpage->roller) {
-        lv_obj_clear_flag(guider_ui.sys_setting_roller_mutifunc, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_clear_flag(ui_scr->sys_setting_roller_mutifunc, LV_OBJ_FLAG_HIDDEN);
         //配置roller被选项
         lv_roller_set_options(my_subpage->roller, my_subpage->roller_opt, LV_ROLLER_MODE_INFINITE);
         lv_roller_set_selected(my_subpage->roller, my_subpage->roller_sel, LV_ANIM_OFF);
-        lv_group_focus_obj(guider_ui.sys_setting_roller_mutifunc);
+        lv_group_focus_obj(ui_scr->sys_setting_roller_mutifunc);
         printf("[chili] %s %d   \n", __func__, __LINE__);
     } else {
-        lv_obj_add_flag(guider_ui.sys_setting_roller_mutifunc, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_add_flag(ui_scr->sys_setting_roller_mutifunc, LV_OBJ_FLAG_HIDDEN);
     }
 
     //警告提示语
     if (my_subpage->warning) {
-        lv_obj_clear_flag(guider_ui.sys_setting_lbl_submenu_warning, LV_OBJ_FLAG_HIDDEN);
-        lv_label_set_text(guider_ui.sys_setting_lbl_submenu_warning, (char *)my_subpage->warning);
+        lv_obj_clear_flag(ui_scr->sys_setting_lbl_submenu_warning, LV_OBJ_FLAG_HIDDEN);
+        lv_label_set_text(ui_scr->sys_setting_lbl_submenu_warning, (char *)my_subpage->warning);
         //开关焦点功能，默认不开
         switch (my_subpage->now_subpage) {
         case SUBPAGE_VERSION:
-            lv_group_add_obj(lv_group_get_default(), guider_ui.sys_setting_lbl_submenu_warning);
-            // lv_group_focus_obj(guider_ui.sys_setting_lbl_submenu_warning);
+            lv_group_add_obj(lv_group_get_default(), ui_scr->sys_setting_lbl_submenu_warning);
+            // lv_group_focus_obj(ui_scr->sys_setting_lbl_submenu_warning);
             break;
         default:
-            lv_group_remove_obj(guider_ui.sys_setting_lbl_submenu_warning);
+            lv_group_remove_obj(ui_scr->sys_setting_lbl_submenu_warning);
             break;
         }
     } else {
-        lv_obj_add_flag(guider_ui.sys_setting_lbl_submenu_warning, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_add_flag(ui_scr->sys_setting_lbl_submenu_warning, LV_OBJ_FLAG_HIDDEN);
     }
 
     //时间设置区域
     if (my_subpage->time_num_view) {
-        lv_obj_clear_flag(guider_ui.sys_setting_view_time_mun, LV_OBJ_FLAG_HIDDEN);
-        lv_group_focus_obj(guider_ui.sys_setting_ddlist_year);
+        lv_obj_clear_flag(ui_scr->sys_setting_view_time_mun, LV_OBJ_FLAG_HIDDEN);
+        lv_group_focus_obj(ui_scr->sys_setting_ddlist_year);
 #if !LV_USE_GUIBUILDER_SIMULATOR
         ui_update_rtc_time();
 #endif
     } else {
-        lv_obj_add_flag(guider_ui.sys_setting_view_time_mun, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_add_flag(ui_scr->sys_setting_view_time_mun, LV_OBJ_FLAG_HIDDEN);
     }
 
     //显示或隐藏子菜单的功能键，以及显示功能键的内容
     if (my_subpage->funkey1) {
-        lv_obj_clear_flag(guider_ui.sys_setting_submenu_btn_1, LV_OBJ_FLAG_HIDDEN);
-        update_btn_label(guider_ui.sys_setting_submenu_btn_1, (char *)my_subpage->funkey1);
+        lv_obj_clear_flag(ui_scr->sys_setting_submenu_btn_1, LV_OBJ_FLAG_HIDDEN);
+        update_btn_label(ui_scr->sys_setting_submenu_btn_1, (char *)my_subpage->funkey1);
     } else {
-        lv_obj_add_flag(guider_ui.sys_setting_submenu_btn_1, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_add_flag(ui_scr->sys_setting_submenu_btn_1, LV_OBJ_FLAG_HIDDEN);
     }
     if (my_subpage->funkey2) {
-        lv_obj_clear_flag(guider_ui.sys_setting_submenu_btn_2, LV_OBJ_FLAG_HIDDEN);
-        update_btn_label(guider_ui.sys_setting_submenu_btn_2, (char *)my_subpage->funkey2);
+        lv_obj_clear_flag(ui_scr->sys_setting_submenu_btn_2, LV_OBJ_FLAG_HIDDEN);
+        update_btn_label(ui_scr->sys_setting_submenu_btn_2, (char *)my_subpage->funkey2);
     } else {
-        lv_obj_add_flag(guider_ui.sys_setting_submenu_btn_2, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_add_flag(ui_scr->sys_setting_submenu_btn_2, LV_OBJ_FLAG_HIDDEN);
     }
     if (my_subpage->funkey3) {
-        lv_obj_clear_flag(guider_ui.sys_setting_submenu_btn_3, LV_OBJ_FLAG_HIDDEN);
-        update_btn_label(guider_ui.sys_setting_submenu_btn_3, (char *)my_subpage->funkey3);
+        lv_obj_clear_flag(ui_scr->sys_setting_submenu_btn_3, LV_OBJ_FLAG_HIDDEN);
+        update_btn_label(ui_scr->sys_setting_submenu_btn_3, (char *)my_subpage->funkey3);
     } else {
-        lv_obj_add_flag(guider_ui.sys_setting_submenu_btn_3, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_add_flag(ui_scr->sys_setting_submenu_btn_3, LV_OBJ_FLAG_HIDDEN);
     }
     if (my_subpage->funkey4) {
-        lv_obj_clear_flag(guider_ui.sys_setting_submenu_btn_4, LV_OBJ_FLAG_HIDDEN);
-        update_btn_label(guider_ui.sys_setting_submenu_btn_4, (char *)my_subpage->funkey4);
+        lv_obj_clear_flag(ui_scr->sys_setting_submenu_btn_4, LV_OBJ_FLAG_HIDDEN);
+        update_btn_label(ui_scr->sys_setting_submenu_btn_4, (char *)my_subpage->funkey4);
     } else {
-        lv_obj_add_flag(guider_ui.sys_setting_submenu_btn_4, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_add_flag(ui_scr->sys_setting_submenu_btn_4, LV_OBJ_FLAG_HIDDEN);
     }
 
     //高亮子菜单相应的功能键
     printf(">>>btn_focus_id: %d\n", my_subpage->btn_focus_id);
     switch (my_subpage->btn_focus_id) {
     case SUBPAGE_FUNKEY1:
-        lv_group_focus_obj(guider_ui.sys_setting_submenu_btn_1);
+        lv_group_focus_obj(ui_scr->sys_setting_submenu_btn_1);
         break;
     case SUBPAGE_FUNKEY2:
-        lv_group_focus_obj(guider_ui.sys_setting_submenu_btn_2);
+        lv_group_focus_obj(ui_scr->sys_setting_submenu_btn_2);
         break;
     case SUBPAGE_FUNKEY3:
-        lv_group_focus_obj(guider_ui.sys_setting_submenu_btn_3);
+        lv_group_focus_obj(ui_scr->sys_setting_submenu_btn_3);
         break;
     case SUBPAGE_FUNKEY4:
-        lv_group_focus_obj(guider_ui.sys_setting_submenu_btn_4);
+        lv_group_focus_obj(ui_scr->sys_setting_submenu_btn_4);
         break;
     }
 }
-
-
-
 
 
 

@@ -1,6 +1,5 @@
 #include "app_config.h"
 #ifdef CONFIG_UI_STYLE_JL_ENABLE
-
 #ifndef __SIM_DATABASE_H_
 #define __SIM_DATABASE_H_
 #ifdef __cplusplus

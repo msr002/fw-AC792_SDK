@@ -34,13 +34,24 @@ static const char *rec_path[][2] = {
 #endif
 };
 
+static const char *rec_uvc_path[][2] = {
+    {CONFIG_REC_PATH_UVC0, CONFIG_REC_PATH_UVC0},
+    {CONFIG_REC_PATH_UVC1, CONFIG_REC_PATH_UVC1},
+    {CONFIG_REC_PATH_UVC2, CONFIG_REC_PATH_UVC2},
+};
+
+
 #define FILE_NAME_MAX_SIZE 128
 
 static struct VideoConfig *video_configs;
+static struct VideoConfig *video_uvc_configs;
 static int  config_video_num;
+static int  config_video_uvc_num;
 static int  bp_num;
+static int  bp_uvc_num;
 //默认最多三路
 static char date_file[3][FILE_NAME_MAX_SIZE];
+static char date_uvc_file[3][FILE_NAME_MAX_SIZE];
 static struct video_rec_hdl *rec_handler = NULL;
 #define __this 	(rec_handler)
 
@@ -50,6 +61,7 @@ extern long int atol(const char *__nptr);
 extern int get_bp_num(void);
 //默认最多三路
 static bp_db_t db[3] = {{0}, {0}, {0}};
+static bp_db_t db_uvc[3] = {{0}, {0}, {0}};
 static u8  db_init = 0;
 static u8 cloud_playback_list_kill = 0;
 
@@ -76,6 +88,16 @@ bp_db_t get_db_element(int index)
     }
 
     return db[index];
+}
+
+bp_db_t get_db_uvc_element(int index)
+{
+    if (index < 0 || index >= 3) {
+        log_error("db uvc index is out of range!");
+        ASSERT(0);
+    }
+
+    return db_uvc[index];
 }
 
 #define FOURYEARDAY (365+365+365+366)  //4年一个周期内的总天数（1970~2038不存在2100这类年份，故暂不优化）
@@ -169,6 +191,13 @@ int cloud_playback_list_clear(void)
             int channel = video_configs[i].channel;
             bp_close(&db[channel]);
         }
+
+        for (int i = 0; i < bp_uvc_num; i++) {
+            log_info("list clear bp_uvc_num =%d\n", bp_uvc_num);
+            int channel = video_uvc_configs[i].channel;
+            bp_close(&db_uvc[channel]);
+        }
+
         db_init = 0;
     }
     /* fdelete_by_name(db.filename); */
@@ -239,21 +268,24 @@ int cloud_playback_list_add(char *path, int dev_id)
     }
 
     os_mutex_pend(&cloud_playback_list_mutex, 0);
-#ifdef CONFIG_BOARD_FPGA		    // FPGA
 
-    int length = 60;
-#else
-    int ret =  avi_net_preview_unpkg_init(fd, 0);
-    if (ret) {
+    int length = 0;
+    if (dev_id >= 10 &&
+        video_uvc_configs[dev_id - 10].req.rec.format == VIDEO_FMT_MOV) {
+
+        //mov暂时只支持录60s
+        length = 60;
+    } else {
+        int ret =  avi_net_preview_unpkg_init(fd, 0);
+        if (ret) {
+            avi_net_unpkg_exit(fd, 0);
+            fclose(fd);
+            return -1;
+        }
+
+        length = avi_get_file_time(fd, 0);
         avi_net_unpkg_exit(fd, 0);
-        fclose(fd);
-        return -1;
     }
-
-    int length = avi_get_file_time(fd, 0);
-
-    avi_net_unpkg_exit(fd, 0);
-#endif
 
     CLOUD_PLAYBACK_LIST_INFO info = {0};
     info.length = length;
@@ -293,8 +325,16 @@ int cloud_playback_list_add(char *path, int dev_id)
     value.value  = (char *)&info;
 
     if (db_init) {
-        log_debug("db[%d]:%x", dev_id, &db[dev_id]);
-        bp_set(&db[dev_id], &key, &value);
+        if (dev_id >= 10) {
+
+            log_debug("db_uvc[%d]:%x", dev_id, &db_uvc[dev_id - 10]);
+            bp_set(&db_uvc[dev_id - 10], &key, &value);
+
+        } else {
+
+            log_debug("db[%d]:%x", dev_id, &db[dev_id]);
+            bp_set(&db[dev_id], &key, &value);
+        }
 
     }
 
@@ -453,6 +493,78 @@ int delete_first_left_file(int dev_id)
     return 0;
 }
 
+int delete_first_left_uvc_file(int dev_id)
+{
+    u32 start_time = 0;
+    u32 end_time = 2015201473;
+    char start_time_str[20] = {0};
+    char end_time_str[20]    = {0};
+    char delete_time_str[20]    = {0};
+    int err = 0;
+    uint64_t arg = 0;
+    sprintf(start_time_str, "%d", start_time);
+    sprintf(end_time_str, "%d", end_time);
+
+    os_mutex_pend(&cloud_playback_list_mutex, 0);
+
+    log_info("dev_id_delete_first =%d\n", dev_id);
+    bp_get_ranges(&db_uvc[dev_id], start_time_str, end_time_str, __first_file_cb, &arg);
+
+    log_debug("arg =%d\n", arg);
+
+    if (arg <= 1640966400) {
+        log_error("db is null!\n");
+        os_mutex_post(&cloud_playback_list_mutex);
+        return DB_NULL;
+    }
+
+    /* sprintf(delete_time_str, "%d", arg); */
+    sprintf(delete_time_str, "%lld", arg);
+
+    log_debug("dev_id_bp_removes=%d\n", dev_id);
+    log_debug("delete_time_str=%s\n", delete_time_str);
+    err = bp_removes(&db_uvc[dev_id], delete_time_str);
+    if (err) {
+        log_error("bp_removes_err =%x\n", err);
+    }
+
+    os_mutex_post(&cloud_playback_list_mutex);
+
+    char time_str[64] = {0};
+    char name[FILE_NAME_MAX_SIZE];
+    u8 dir_len = 0;
+    struct tm timeinfo = {0};
+    time_t timestamp = arg;
+    localtime_r(&timestamp, &timeinfo);//将UTC时间转化为当地对应时间
+
+    strcpy(time_str, rec_uvc_path[dev_id][0]);
+    dir_len = strlen(time_str);
+    if (video_uvc_configs[dev_id].req.rec.format == VIDEO_FMT_AVI) {
+        strftime(time_str + dir_len, sizeof(time_str) - dir_len, "VID_%Y%m%d_%H%M%S.AVI", &timeinfo);
+    } else if (video_uvc_configs[dev_id].req.rec.format == VIDEO_FMT_MOV) {
+        strftime(time_str + dir_len, sizeof(time_str) - dir_len, "VID_%Y%m%d_%H%M%S.MOV", &timeinfo);
+    }
+    log_info("recorder file name : %s\n", time_str);//拼接完成由bp表拿到的时间
+
+
+    int len;
+    char path_file[FILE_NAME_MAX_SIZE];
+
+    //长文件名转化utf8
+    len = long_file_name_encode(time_str, (u8 *)path_file, sizeof(path_file));
+    memcpy(name, path_file, len);
+
+
+    void *fd = fopen(name, "r");
+    if (fd) {
+        fdelete(fd);
+    } else {
+        log_error("fopen %s fail\n", time_str);
+        return -1;
+    }
+    return 0;
+}
+
 void cloud_playback_list_task(void *priv)
 {
     int len;
@@ -482,6 +594,22 @@ void cloud_playback_list_task(void *priv)
         }
         db_init = 0;
         bp_open(&db[channel], file_path);
+
+    }
+
+    for (int i = 0; i < bp_uvc_num; i++) {
+        int channel = video_uvc_configs[i].channel;
+        strcpy(file_path, rec_uvc_path[channel][0]);
+        strcat(file_path, file_extension);
+
+        void *fp_uvc = fopen(file_path, "r");
+        fp_uvc = fopen(file_path, "r");
+        if (fp_uvc) {
+            bp_find = 1;
+            fclose(fp_uvc);
+        }
+        db_init = 0;
+        bp_open(&db_uvc[channel], file_path);
     }
 
     db_init = 1;
@@ -496,8 +624,11 @@ int cloud_playback_list_init()
 {
     rec_handler  = (struct video_rec_hdl *)get_video_rec_handler();
     video_configs = get_video_configs();
+    video_uvc_configs = get_video_uvc_configs();
     config_video_num = get_config_viedo_num();
+    config_video_uvc_num = get_config_viedo_uvc_num();
     bp_num = get_bp_num();
+    bp_uvc_num = get_bp_uvc_num();
 
     os_mutex_create(&cloud_playback_list_mutex);
     cloud_playback_list_kill = 0;
@@ -578,49 +709,6 @@ static int video_rec_finish_notify(char *path, int dev_id)
 
 static int __get_sys_time(struct sys_time *time)
 {
-
-//todo
-#ifdef CONFIG_BOARD_FPGA		    // FPGA
-
-    struct tm fixed_time = {0};
-    fixed_time.tm_year = 2024 - 1900; // 年份要减去1900
-    fixed_time.tm_mon = 1 - 1; // 月份需要减去1
-    fixed_time.tm_mday = 23;
-    fixed_time.tm_hour = 9;
-    fixed_time.tm_min = 0;
-    fixed_time.tm_sec = 0;
-
-// 获取系统运行时间（秒）
-    u32 system_run_time = sys_timer_get_ms() / 1000;
-    printf("system_run_time ==%d\n", system_run_time);
-
-// 将固定时间转换为秒数
-    time_t fixed_time_sec = mktime(&fixed_time);
-
-// 计算加上系统运行时间后的秒数
-    time_t after_time_sec = fixed_time_sec + system_run_time;
-
-// 将加上系统运行时间后的秒数转换为时间结构体
-    struct tm *after_timeinfo = localtime(&after_time_sec);
-
-// 输出加上系统运行时间后的日期和时间
-    printf("After time: %d-%02d-%02d %02d:%02d:%02d\n",
-           after_timeinfo->tm_year,
-           after_timeinfo->tm_mon,
-           after_timeinfo->tm_mday,
-           after_timeinfo->tm_hour,
-           after_timeinfo->tm_min,
-           after_timeinfo->tm_sec);
-
-    time->year = after_timeinfo->tm_year;
-    time->month = after_timeinfo->tm_mon;
-    time->day = after_timeinfo->tm_mday;
-    time->hour = after_timeinfo->tm_hour;
-    time->min = after_timeinfo->tm_min;
-    time->sec = after_timeinfo->tm_sec;
-
-    return 0;
-#else
     void *fd = dev_open("rtc", NULL);
     if (fd) {
         dev_ioctl(fd, IOCTL_GET_SYS_TIME, (u32)time);
@@ -629,7 +717,6 @@ static int __get_sys_time(struct sys_time *time)
     }
 
     return -EINVAL;
-#endif
 }
 
 void get_sys_time(struct sys_time *time)
@@ -719,6 +806,51 @@ __exit:
     return 0;
 }
 
+static int video_rec_create_uvc_file(int id, u32 fsize, int format, const char *path)
+{
+    FILE *file;
+    int try_cnt = 0;
+    char file_path[FILE_NAME_MAX_SIZE];
+    char file_name[FILE_NAME_MAX_SIZE];
+
+    rec_file_name(format, file_name);
+    sprintf(file_path, "%s%s", path, file_name);
+
+    log_info("id:%d , fopen: %s, min space %dMB\n", id, file_path, fsize >> 20);
+
+    memcpy(date_uvc_file[id], file_path, sizeof(file_path)); //将按时间创建出来的文件给到关闭录像时使用
+
+    char path_file[FILE_NAME_MAX_SIZE];
+    int len;
+    //拼接的长文件名转UTF8才能创建文件
+    len = long_file_name_encode(file_path, (u8 *)path_file, sizeof(path_file));
+    memcpy(file_path, path_file, sizeof(path_file));
+    do {
+        file = fopen(file_path, "w+");
+        if (!file) {
+            log_error("video_rec_create_file fopen faild\n");
+            break;
+        }
+        /* #ifdef CONFIG_NET_ENABLE */
+        goto __exit;//在写第一帧时候再seek整个文件大小
+        /* #endif */
+        if (fseek(file, fsize, SEEK_SET)) {
+            goto __exit;
+        }
+        fdelete(file);
+
+    } while (++try_cnt < 2);
+
+    return -EIO;
+
+__exit:
+    fseek(file, 0, SEEK_SET);
+    __this->new_file_uvc_size[id] = 0;
+    __this->new_file_uvc[id] = file;
+
+    return 0;
+}
+
 static int get_channel_with_max_file_number()
 {
     struct vfscan *fs[3] = {0};//文件扫描结构体句柄
@@ -726,7 +858,12 @@ static int get_channel_with_max_file_number()
 
     // 扫描路径，搜索.avi格式文件-tAVI，按照文件号排序-sn
     for (int i = 0; i < config_video_num; i++) {
-        fs[i] = fscan(video_configs[i].path_main, "-tAVI -sn", 1);
+
+        if (video_uvc_configs[i].req.rec.format == VIDEO_FMT_AVI) {
+            fs[i] = fscan(video_configs[i].path_main, "-tAVI -sn", 1);
+        } else if (video_uvc_configs[i].req.rec.format == VIDEO_FMT_MOV) {
+            fs[i] = fscan(video_configs[i].path_main, "-tMOV -sn", 1);
+        }
         if (fs[i] == NULL) {
             printf("fscan_faild\n");
             return -1;
@@ -745,6 +882,41 @@ static int get_channel_with_max_file_number()
 
     return channel;
 }
+
+static int get_channel_with_max_uvc_file_number()
+{
+    struct vfscan *fs[3] = {0};//文件扫描结构体句柄
+    struct vfs_attr attr[3] = {0};
+
+    // 扫描路径，搜索.avi格式文件-tAVI，按照文件号排序-sn
+    for (int i = 0; i < config_video_uvc_num; i++) {
+        if (video_uvc_configs[i].req.rec.format == VIDEO_FMT_AVI) {
+            fs[i] = fscan(video_uvc_configs[i].path_main, "-tAVI -sn", 1);
+        } else if (video_uvc_configs[i].req.rec.format == VIDEO_FMT_MOV) {
+
+            fs[i] = fscan(video_uvc_configs[i].path_main, "-tMOV -sn", 1);
+        }
+        if (fs[i] == NULL) {
+            printf("fscan_faild\n");
+            return -1;
+        }
+    }
+
+    int max_num = fs[0]->file_number;
+    int channel = 0;
+
+    for (int i = 1; i < config_video_uvc_num; i++) {
+        if (fs[i]->file_number > max_num) {
+            max_num = fs[i]->file_number;
+            channel = video_uvc_configs[i].channel;
+        }
+    }
+
+    return channel;
+}
+
+
+
 int video_rec_del_old_file(int dev_id)
 {
     int i, err;
@@ -816,6 +988,78 @@ int video_rec_del_old_file(int dev_id)
     return 0;
 }
 
+int video_rec_del_old_uvc_file(int dev_id)
+{
+    int i, err;
+    FILE *file;
+    int fsize[3] = {0, 0, 0};
+    u32 cur_space = 0;
+    u32 need_space = 0;
+    int cyc_time = db_select("cyc");
+
+    int channel = 0;
+    int create_id = dev_id;
+
+    config_video_uvc_num = get_config_viedo_uvc_num();
+
+    if (!db_init) {
+        log_info("db table is not ready!\n");
+        return -1;
+    }
+    for (i = 0; i < config_video_uvc_num; i++) {
+        if (dev_id == video_uvc_configs[i].channel) {
+            channel = i;
+            break;
+        }
+    }
+    if (!__this->new_file_uvc[dev_id]) {
+        fsize[dev_id] = video_rec_get_fsize(cyc_time, video_uvc_configs[channel].req.rec.width, video_uvc_configs[channel].req.rec.format);
+        need_space += fsize[dev_id];
+    }
+    err = fget_free_space(CONFIG_ROOT_PATH, &cur_space);
+    if (err) {
+        return err;
+    }
+
+    log_info("space: %dMB, %dMB\n", cur_space / 1024, need_space / 1024 / 1024);
+    log_debug("fsize%d\n = %x", dev_id, fsize[dev_id]);
+
+    if (cur_space >= (need_space / 1024) * 3) {
+        err = video_rec_create_uvc_file(video_uvc_configs[channel].channel, fsize[dev_id], video_uvc_configs[channel].req.rec.format, video_uvc_configs[channel].path_main);
+        if (err) {
+            return err;
+        }
+        return 0;
+    }
+
+    while (1) {
+        if (cur_space >= (need_space / 1024) * 3) {
+            break;
+        }
+        //对两路以上删除bp表做处理，删除数目多的
+        if (config_video_uvc_num > 1) {
+            dev_id = get_channel_with_max_uvc_file_number();
+        }
+
+        int ret = delete_first_left_uvc_file(dev_id);
+        if (ret == DB_NULL) {
+            log_error("please free space for bp!\n");
+            return ret;
+        }
+        if (ret) {
+            log_error("delete_first_left_uvc_file open file fail!\n");
+        }
+        fget_free_space(CONFIG_ROOT_PATH, &cur_space);
+    }
+    log_debug("create_fsize%d = %x", create_id, fsize[create_id]);
+    err = video_rec_create_uvc_file(video_uvc_configs[channel].channel, fsize[create_id], video_uvc_configs[channel].req.rec.format, video_uvc_configs[channel].path_main);
+    if (err) {
+        return err;
+    }
+    return 0;
+}
+
+
 void video_rec_close_file(int dev_id)
 {
     if (!__this->file[dev_id]) {
@@ -834,6 +1078,26 @@ void video_rec_close_file(int dev_id)
         video_rec_finish_notify(path, dev_id);
     }
 }
+
+void video_rec_uvc_close_file(int dev_id)
+{
+    if (!__this->file_uvc[dev_id]) {
+        return;
+    }
+
+    char is_emf = 0;
+    char *path;
+    path = date_uvc_file[dev_id];
+    log_info("video_rec_uvc_close_file path =%s", path);
+
+    fclose(__this->file_uvc[dev_id]);
+    __this->file_uvc[dev_id] = NULL;
+
+    if (path) { //必须关闭文件之后才能调用，否则在读取文件信息不全！！！
+        video_rec_finish_notify(path, dev_id + 10);
+    }
+}
+
 
 /*
  *注意：循环录像的时候，虽然要重新传参，但是要和start传的参数保持一致！！！
@@ -906,6 +1170,96 @@ int video_rec_savefile(int dev_id)
         err = server_request(__this->video_rec2, VIDEO_REQ_REC, &req);
     } else if (dev_id == 3) {
         err = server_request(__this->video_rec3, VIDEO_REQ_REC, &req);
+    }
+    if (err != 0) {
+        log_error("rec_save_file: err=%d\n", err);
+        goto __err;
+    }
+
+    __this->state = VIDREC_STA_START;
+
+    log_info("rec_savefile ok .....\n\n");
+    return 0;
+
+__err:
+    err = video_rec_stop(0);
+    if (err) {
+        log_error("\nsave wrong0 %x\n", err);
+    }
+    __this->state = VIDREC_STA_STOP;
+    log_error("rec_savefile err .....\n\n");
+    return -EFAULT;
+}
+
+int video_rec_uvc_savefile(int dev_id)
+{
+    int i;
+    int err;
+    int post_msg = 0;
+    log_info(">>>>>> video_rec_uvc_savefile : 0x%x \n\n", dev_id);
+
+    if (__this->state != VIDREC_STA_START) {
+        return 0;
+    }
+
+    if (__this->need_restart_rec) {
+        log_debug("need restart rec\n");
+        video_rec_stop(0);
+        video_rec_start();
+        return 0;
+    }
+
+    log_debug("\nvideo_rec_uvc_start_new_file: %d\n", dev_id);
+
+    /* video_rec_close_file(dev_id); */
+    video_rec_uvc_close_file(dev_id);
+
+    if (__this->new_file_uvc[dev_id] == NULL) {
+
+        /* os_mutex_pend(&delete_file_mutex,0); */
+        err = video_rec_del_old_uvc_file(dev_id);
+        /* os_mutex_post(&delete_file_mutex); */
+        if (err) {
+            goto __err;
+        }
+        post_msg = 1;
+    }
+    __this->file_uvc[dev_id]     = __this->new_file_uvc[dev_id];
+    __this->new_file_uvc[dev_id] = NULL;
+
+    union video_req req = {0};
+    struct video_text_osd text_osd = {0};
+
+    if (!__this->file_uvc[dev_id]) {
+        return -ENOENT;
+    }
+
+    int channel = 0;
+    for (int i = 0; i < config_video_uvc_num; i++) {
+        if (dev_id == video_uvc_configs[dev_id].channel) {
+            channel = i;
+            break;
+        }
+    }
+    assign_video_rec_params(&req, &text_osd, &video_uvc_configs[channel]);
+    req.rec.file        = __this->file_uvc[dev_id];
+    req.rec.fsize       = __this->new_file_uvc_size[dev_id];
+    req.rec.audio.buf   = __this->audio_buf;
+    req.rec.buf         = __this->video_uvc_buf[dev_id];
+    req.rec.state       = VIDEO_STATE_SAVE_FILE;
+    req.rec.online      = 0;
+    req.rec.enable_dri      = 0;
+    /* #ifdef CONFIG_UVC_VIDEO2_ENABLE */
+    /* req.rec.uvc_id       = uvc_host_online(); */
+    req.rec.uvc_id       = dev_id;
+    /* #endif */
+
+    if (dev_id == 0) {
+        err = server_request(__this->video_uvc_rec0, VIDEO_REQ_REC, &req);
+    } else if (dev_id == 1) {
+        err = server_request(__this->video_uvc_rec1, VIDEO_REQ_REC, &req);
+    } else if (dev_id == 2) {
+        err = server_request(__this->video_uvc_rec2, VIDEO_REQ_REC, &req);
     }
     if (err != 0) {
         log_error("rec_save_file: err=%d\n", err);

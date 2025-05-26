@@ -102,3 +102,20 @@ OPERATE_RET tkl_timer_get(TUYA_TIMER_NUM_E timer_id, UINT_T *us)
     // --- END: user implements ---
 }
 
+
+/*******************自定义********************/
+OPERATE_RET tuya_start_sleep_timer(TUYA_TIMER_NUM_E timer_id, UINT_T *us)
+{
+    // --- BEGIN: user implements ---
+    return OPRT_NOT_SUPPORTED;
+    // --- END: user implements ---
+}
+
+OPERATE_RET tuya_stop_sleep_timer(TUYA_TIMER_NUM_E timer_id, UINT_T *us)
+{
+    // --- BEGIN: user implements ---
+    return OPRT_NOT_SUPPORTED;
+    // --- END: user implements ---
+}
+
+

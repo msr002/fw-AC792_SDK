@@ -554,7 +554,6 @@ vpkg_server_info
 vpkg_fsys_ops
 avi_pkg_ops
 camera_subdev
-djpeg_subdev
 video_dev_ops
 
 #ifdef CONFIG_VIDEO_DEC_ENABLE

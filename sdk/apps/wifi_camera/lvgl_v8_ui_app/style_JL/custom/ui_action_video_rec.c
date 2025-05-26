@@ -1,6 +1,5 @@
 #include "app_config.h"
 #ifdef CONFIG_UI_STYLE_JL_ENABLE
-
 unsigned char rec_running = 0;
 char video_rec_car_num[64];
 #if !LV_USE_GUIBUILDER_SIMULATOR
@@ -295,8 +294,12 @@ void rec_set_lock_crash(void)
 //录像走时
 int video_rec_record_time()
 {
+    lv_ui_video_rec *ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_VIDEO_REC);
+    if (!ui_scr) {
+        return -1;
+    }
     if (rec_running) {
-        if (!lv_obj_is_valid(guider_ui.video_rec_digitclock_record_time)) {
+        if (!lv_obj_is_valid(ui_scr->video_rec_digitclock_record_time)) {
             printf("obj no valid \n");
             return 0;
         }
@@ -304,7 +307,7 @@ int video_rec_record_time()
         if (!count) {
             memset(&rec_running_time, 0, sizeof(rec_running_time));
             count = 1;
-            lv_label_set_text_fmt(guider_ui.video_rec_digitclock_record_time, "%02d:%02d:%02d", rec_running_time.tm_hour, rec_running_time.tm_min, rec_running_time.tm_sec);
+            lv_label_set_text_fmt(ui_scr->video_rec_digitclock_record_time, "%02d:%02d:%02d", rec_running_time.tm_hour, rec_running_time.tm_min, rec_running_time.tm_sec);
             return 0;
         }
         if (++rec_running_time.tm_sec > 59) {
@@ -320,7 +323,7 @@ int video_rec_record_time()
                 rec_running_time.tm_hour = 0;
             }
         }
-        lv_label_set_text_fmt(guider_ui.video_rec_digitclock_record_time, "%02d:%02d:%02d", rec_running_time.tm_hour, rec_running_time.tm_min, rec_running_time.tm_sec);
+        lv_label_set_text_fmt(ui_scr->video_rec_digitclock_record_time, "%02d:%02d:%02d", rec_running_time.tm_hour, rec_running_time.tm_min, rec_running_time.tm_sec);
         return 0;
     }
 }
@@ -353,14 +356,18 @@ int video_rec_record_time()
  */
 static int rec_on_handler(const char *type, u32 arg)
 {
+    lv_ui_video_rec *ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_VIDEO_REC);
+    if (!ui_scr) {
+        return -1;
+    }
     rec_remain_handler(0, 0);
     count = 0;
     lvgl_module_msg_send_value(GUI_MODEL_VIDEO_REC_MSG_ID_REC_BTN, LV_STATE_CHECKED, 0);
     rec_running = 1;
     lvgl_module_msg_send_global_ptr(GUI_MODEL_VIDEO_REC_MSG_ID_HIDE_REMAIN_TIME, (void *)LV_OBJ_FLAG_HIDDEN, 1, 0);
     lvgl_module_msg_send_global_ptr(GUI_MODEL_VIDEO_REC_MSG_ID_SHOW_RECORD_TIME, (void *)LV_OBJ_FLAG_HIDDEN, 1, 0);
-    if (guider_ui.video_rec_timer_1 != NULL) {
-        lv_timer_resume(guider_ui.video_rec_timer_1);
+    if (ui_scr->video_rec_timer_1 != NULL) {
+        lv_timer_resume(ui_scr->video_rec_timer_1);
     }
     lvgl_module_msg_send_global_ptr(GUI_MODEL_VIDEO_REC_MSG_ID_REC_TIME_STATE, (void *)LV_STATE_DISABLED, 1, 0);
 
@@ -369,15 +376,19 @@ static int rec_on_handler(const char *type, u32 arg)
 
 static int rec_off_handler(const char *type, u32 arg)
 {
+    lv_ui_video_rec *ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_VIDEO_REC);
+    if (!ui_scr) {
+        return -1;
+    }
     rec_running = 0;
-    if (guider_ui.video_rec_timer_1 != NULL) {
-        lv_timer_pause(guider_ui.video_rec_timer_1);
+    if (ui_scr->video_rec_timer_1 != NULL) {
+        lv_timer_pause(ui_scr->video_rec_timer_1);
     }
     lvgl_module_msg_send_global_ptr(GUI_MODEL_VIDEO_REC_MSG_ID_SHOW_REMAIN_TIME, (void *)LV_OBJ_FLAG_HIDDEN, 1, 0);
     lvgl_module_msg_send_global_ptr(GUI_MODEL_VIDEO_REC_MSG_ID_HIDE_RECORD_TIME, (void *)LV_OBJ_FLAG_HIDDEN, 1, 0);
     memset(&rec_running_time, 0, sizeof(rec_running_time));
-    if (lv_obj_is_valid(guider_ui.video_rec_digitclock_record_time)) {
-        lv_label_set_text_fmt(guider_ui.video_rec_digitclock_record_time, "%02d:%02d:%02d", rec_running_time.tm_hour, rec_running_time.tm_min, rec_running_time.tm_sec);
+    if (lv_obj_is_valid(ui_scr->video_rec_digitclock_record_time)) {
+        lv_label_set_text_fmt(ui_scr->video_rec_digitclock_record_time, "%02d:%02d:%02d", rec_running_time.tm_hour, rec_running_time.tm_min, rec_running_time.tm_sec);
     }
     lvgl_module_msg_send_value(GUI_MODEL_VIDEO_REC_MSG_ID_REC_BTN, LV_STATE_DEFAULT, 0);
     lvgl_module_msg_send_global_ptr(GUI_MODEL_VIDEO_REC_MSG_ID_REC_TIME_STATE, (void *)LV_STATE_DEFAULT, 1, 0);
@@ -580,29 +591,32 @@ int gui_src_action_video_rec(int action)
 {
     struct intent it;
     struct application *app;
-
+    lv_ui_video_rec *ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_VIDEO_REC);
+    if (!ui_scr) {
+        return -1;
+    }
     init_intent(&it);
 
     printf("[chili] %s %d   \n", __func__, __LINE__);
 
 #if LV_DISP_UI_FB_NUM
-    lv_obj_set_style_bg_opa(guider_ui.video_rec, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(ui_scr->video_rec, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
 #else
-    lv_obj_set_style_bg_opa(guider_ui.video_rec, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(ui_scr->video_rec, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
 #endif
 
     switch (action) {
     case GUI_SCREEN_ACTION_LOAD:
         usb_flag = false;
         if (db_select("num")) {
-            lv_obj_clear_flag(guider_ui.video_rec_lbl_4, LV_OBJ_FLAG_HIDDEN);  //开启车牌号码功能，取消隐藏
+            lv_obj_clear_flag(ui_scr->video_rec_lbl_4, LV_OBJ_FLAG_HIDDEN);  //开启车牌号码功能，取消隐藏
         } else {
-            lv_obj_add_flag(guider_ui.video_rec_lbl_4, LV_OBJ_FLAG_HIDDEN);    //未开启车牌号码功能，添加隐藏
+            lv_obj_add_flag(ui_scr->video_rec_lbl_4, LV_OBJ_FLAG_HIDDEN);    //未开启车牌号码功能，添加隐藏
         }
         if (db_select("dat")) {
-            lv_obj_clear_flag(guider_ui.video_rec_digitclock_2, LV_OBJ_FLAG_HIDDEN);
+            lv_obj_clear_flag(ui_scr->video_rec_digitclock_2, LV_OBJ_FLAG_HIDDEN);
         } else {
-            lv_obj_add_flag(guider_ui.video_rec_digitclock_2, LV_OBJ_FLAG_HIDDEN);
+            lv_obj_add_flag(ui_scr->video_rec_digitclock_2, LV_OBJ_FLAG_HIDDEN);
         }
         if (db_select("lag") == LANG_ENGLISH) {
             lv_i18n_set_locale("en");
@@ -1084,5 +1098,6 @@ int gui_model_video_rec_msg_flash_headlight_cb(gui_msg_action_t access, gui_msg_
 
 
 #endif
+
 
 #endif

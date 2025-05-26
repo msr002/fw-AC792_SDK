@@ -1,6 +1,5 @@
 #include "app_config.h"
 #ifdef CONFIG_UI_STYLE_LY_ENABLE
-
 #ifndef __SIM_DATABASE_H_
 #define __SIM_DATABASE_H_
 #ifdef __cplusplus
@@ -117,5 +116,6 @@ int db_reset(void);
 }
 #endif
 #endif /* __SIM_DATABASE_H_ */
+
 
 #endif

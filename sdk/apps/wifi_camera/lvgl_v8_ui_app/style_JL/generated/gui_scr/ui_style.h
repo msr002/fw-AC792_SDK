@@ -14,6 +14,10 @@ extern "C" {
 extern lv_style_t gui_digitclock_main_default_style;
 extern lv_style_t gui_digitclock_main_disabled_style;
 
+// digital_clock
+extern lv_style_t gui_digitclock_main_default_style;
+extern lv_style_t gui_digitclock_main_disabled_style;
+
 // img
 extern lv_style_t gui_img_main_default_style;
 extern lv_style_t gui_img_main_focused_style;
@@ -43,6 +47,13 @@ extern lv_style_t gui_ddlist_dropdown_list_default_style;
 extern lv_style_t gui_ddlist_scrollbar_default_style;
 extern lv_style_t gui_ddlist_main_focus_key_style;
 
+// dropdown
+extern lv_style_t gui_ddlist_main_default_style;
+extern lv_style_t gui_ddlist_selected_checked_style;
+extern lv_style_t gui_ddlist_dropdown_list_default_style;
+extern lv_style_t gui_ddlist_scrollbar_default_style;
+extern lv_style_t gui_ddlist_main_focus_key_style;
+
 // label
 extern lv_style_t gui_label_main_default_style;
 extern lv_style_t gui_label_main_disabled_style;
@@ -63,8 +74,23 @@ extern lv_style_t gui_roller_main_default_style;
 extern lv_style_t gui_roller_selected_default_style;
 extern lv_style_t gui_roller_main_focus_key_style;
 
+enum {
+    GUI_CTRL_DIGITALCLOCK,
+    GUI_CTRL_IMG,
+    GUI_CTRL_DATETEXT,
+    GUI_CTRL_BAR,
+    GUI_CTRL_SCR,
+    GUI_CTRL_IMGBTN,
+    GUI_CTRL_DROPDOWN,
+    GUI_CTRL_LABEL,
+    GUI_CTRL_CONT,
+    GUI_CTRL_BUTTON,
+    GUI_CTRL_ROLLER,
+};
+typedef uint8_t gui_ctrl_type_t;
 
 extern void ui_style_init(void);
+extern void ui_style_set(lv_obj_t *obj, gui_ctrl_type_t type);
 
 #ifdef __cplusplus
 }

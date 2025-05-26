@@ -1,7 +1,5 @@
 #include "app_config.h"
 #ifdef CONFIG_UI_STYLE_JL_ENABLE
-
-
 /*********************
  *      INCLUDES
  *********************/
@@ -30,15 +28,18 @@ int gui_src_action_lane(int action)
 
     init_intent(&it);
     app = get_current_app();
-
+    lv_ui_line_drift *ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_LINE_DRIFT);
+    if (!ui_scr) {
+        return -1;
+    }
     printf("[chili] %s %d   \n", __func__, __LINE__);
 
     switch (action) {
     case GUI_SCREEN_ACTION_LOAD:
 #if LV_DISP_UI_FB_NUM
-        lv_obj_set_style_bg_opa(guider_ui.line_drift, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+        lv_obj_set_style_bg_opa(ui_scr->line_drift, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
 #else
-        lv_obj_set_style_bg_opa(guider_ui.line_drift, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+        lv_obj_set_style_bg_opa(ui_scr->line_drift, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
 #endif
 
         if (app) {

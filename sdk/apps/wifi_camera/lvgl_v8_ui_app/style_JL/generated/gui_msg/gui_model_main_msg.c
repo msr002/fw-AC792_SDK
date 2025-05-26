@@ -322,8 +322,6 @@ void gui_model_main_msg_init(lv_ui *ui)
         lv_subject_init_pointer(sub->subject, &guider_msg_data);
     }
     _lv_ll_init(&timer_ll, sizeof(timer_dsc_t));
-    gui_model_main_msg_init_ui();
-    gui_model_main_msg_init_events();
 }
 
 void gui_model_main_msg_init_ui()
@@ -377,30 +375,64 @@ void gui_model_main_msg_init_events()
     lv_subject_t *subject_weekday = gui_msg_get_subject(GUI_MODEL_MAIN_MSG_ID_WEEKDAY);
     lv_subject_t *subject_show_home_btn = gui_msg_get_subject(GUI_MODEL_MAIN_MSG_ID_SHOW_HOME_BTN);
     lv_subject_t *subject_hide_home_btn = gui_msg_get_subject(GUI_MODEL_MAIN_MSG_ID_HIDE_HOME_BTN);
-    if (!guider_ui.home_page_del) {
-        gui_msg_setup_component(true, false, subject_battery, guider_ui.home_page_img_1, &guider_msg_data, gui_model_main_msg_home_page_img_1_set_img_path_cb, GUI_MODEL_MAIN_MSG_ID_BATTERY, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
+    if (guider_ui.video_rec) {
+        lv_ui_video_rec *ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_VIDEO_REC);
+        gui_msg_setup_component(true, false, subject_systime, ui_scr->video_rec_digitclock_2, &guider_msg_data, gui_model_main_msg_video_rec_digitclock_2_set_digit_clock_time_cb, GUI_MODEL_MAIN_MSG_ID_SYSTIME, GUI_MSG_ACCESS_GET, VALUE_TIME, NULL);
 
-        gui_msg_setup_component(true, false, subject_systime, guider_ui.home_page_digitclock_1, &guider_msg_data, gui_model_main_msg_home_page_digitclock_1_set_digit_clock_time_cb, GUI_MODEL_MAIN_MSG_ID_SYSTIME, GUI_MSG_ACCESS_GET, VALUE_TIME, NULL);
+        gui_msg_setup_component(true, false, subject_sd_icon, ui_scr->video_rec_img_9, &guider_msg_data, gui_model_main_msg_video_rec_img_9_set_img_path_cb, GUI_MODEL_MAIN_MSG_ID_SD_ICON, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
 
-        gui_msg_setup_component(true, false, subject_weekday, guider_ui.home_page_lbl_1, &guider_msg_data, gui_msg_set_label_text_by_string_cb, GUI_MODEL_MAIN_MSG_ID_WEEKDAY, GUI_MSG_ACCESS_GET, VALUE_STRING, NULL);
+        gui_msg_setup_component(true, false, subject_battery, ui_scr->video_rec_img_12, &guider_msg_data, gui_model_main_msg_video_rec_img_12_set_img_path_cb, GUI_MODEL_MAIN_MSG_ID_BATTERY, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
+
+        gui_msg_setup_component(true, false, subject_show_win_switch, ui_scr->video_rec_imgbtn_sw_window, &guider_msg_data, gui_msg_set_clear_flag_by_int32_cb, GUI_MODEL_MAIN_MSG_ID_SHOW_WIN_SWITCH, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
+        gui_msg_setup_component(true, false, subject_hide_win_switch, ui_scr->video_rec_imgbtn_sw_window, &guider_msg_data, gui_msg_set_flag_by_int32_cb, GUI_MODEL_MAIN_MSG_ID_HIDE_WIN_SWITCH, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
 
 
         for (int i = 0; i < 13; i++) {
+            if (status[i].msg_id == GUI_MODEL_MAIN_MSG_ID_SYSTIME) {
+                status[i].is_subscribe = 1;
+            }
+            if (status[i].msg_id == GUI_MODEL_MAIN_MSG_ID_SD_ICON) {
+                status[i].is_subscribe = 1;
+            }
+            if (status[i].msg_id == GUI_MODEL_MAIN_MSG_ID_BATTERY) {
+                status[i].is_subscribe = 1;
+            }
+            if (status[i].msg_id == GUI_MODEL_MAIN_MSG_ID_SHOW_WIN_SWITCH) {
+                status[i].is_subscribe = 1;
+            }
+            if (status[i].msg_id == GUI_MODEL_MAIN_MSG_ID_HIDE_WIN_SWITCH) {
+                status[i].is_subscribe = 1;
+            }
+        }
+
+        systime_timer_enable = true;
+    }
+    if (guider_ui.home_page) {
+        lv_ui_home_page *ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_HOME_PAGE);
+        gui_msg_setup_component(true, false, subject_battery, ui_scr->home_page_img_1, &guider_msg_data, gui_model_main_msg_home_page_img_1_set_img_path_cb, GUI_MODEL_MAIN_MSG_ID_BATTERY, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
+
+        gui_msg_setup_component(true, false, subject_systime, ui_scr->home_page_digitclock_1, &guider_msg_data, gui_model_main_msg_home_page_digitclock_1_set_digit_clock_time_cb, GUI_MODEL_MAIN_MSG_ID_SYSTIME, GUI_MSG_ACCESS_GET, VALUE_TIME, NULL);
+
+        gui_msg_setup_component(true, false, subject_weekday, ui_scr->home_page_lbl_1, &guider_msg_data, gui_msg_set_label_text_by_string_cb, GUI_MODEL_MAIN_MSG_ID_WEEKDAY, GUI_MSG_ACCESS_GET, VALUE_STRING, NULL);
+
+
+        for (int i = 0; i < 13; i++) {
+            if (status[i].msg_id == GUI_MODEL_MAIN_MSG_ID_BATTERY) {
+                status[i].is_subscribe = 1;
+            }
+            if (status[i].msg_id == GUI_MODEL_MAIN_MSG_ID_SYSTIME) {
+                status[i].is_subscribe = 1;
+            }
             if (status[i].msg_id == GUI_MODEL_MAIN_MSG_ID_WEEKDAY) {
                 status[i].is_subscribe = 1;
             }
-            if (status[i].msg_id == GUI_MODEL_MAIN_MSG_ID_SYSTIME) {
-                status[i].is_subscribe = 1;
-            }
-            if (status[i].msg_id == GUI_MODEL_MAIN_MSG_ID_BATTERY) {
-                status[i].is_subscribe = 1;
-            }
         }
 
         systime_timer_enable = true;
     }
-    if (!guider_ui.sys_prompt_del) {
-        gui_msg_setup_component(true, false, subject_sys_prompt, guider_ui.sys_prompt_lbl_warn, &guider_msg_data, gui_msg_set_label_text_by_string_cb, GUI_MODEL_MAIN_MSG_ID_SYS_PROMPT, GUI_MSG_ACCESS_GET, VALUE_STRING, NULL);
+    if (guider_ui.sys_prompt) {
+        lv_ui_sys_prompt *ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_SYS_PROMPT);
+        gui_msg_setup_component(true, false, subject_sys_prompt, ui_scr->sys_prompt_lbl_warn, &guider_msg_data, gui_msg_set_label_text_by_string_cb, GUI_MODEL_MAIN_MSG_ID_SYS_PROMPT, GUI_MSG_ACCESS_GET, VALUE_STRING, NULL);
 
 
         for (int i = 0; i < 13; i++) {
@@ -409,29 +441,20 @@ void gui_model_main_msg_init_events()
             }
         }
     }
-    if (!guider_ui.sys_popwin_del) {
-        gui_msg_setup_component(true, false, subject_sys_prompt, guider_ui.sys_popwin_lbl_1, &guider_msg_data, gui_msg_set_label_text_by_string_cb, GUI_MODEL_MAIN_MSG_ID_SYS_PROMPT, GUI_MSG_ACCESS_GET, VALUE_STRING, NULL);
+    if (guider_ui.video_photo) {
+        lv_ui_video_photo *ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_VIDEO_PHOTO);
+        gui_msg_setup_component(true, false, subject_systime, ui_scr->video_photo_digitclock_1, &guider_msg_data, gui_model_main_msg_video_photo_digitclock_1_set_digit_clock_time_cb, GUI_MODEL_MAIN_MSG_ID_SYSTIME, GUI_MSG_ACCESS_GET, VALUE_TIME, NULL);
+
+        gui_msg_setup_component(true, false, subject_show_win_switch, ui_scr->video_photo_imgbtn_1, &guider_msg_data, gui_msg_set_clear_flag_by_int32_cb, GUI_MODEL_MAIN_MSG_ID_SHOW_WIN_SWITCH, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
+        gui_msg_setup_component(true, false, subject_hide_win_switch, ui_scr->video_photo_imgbtn_1, &guider_msg_data, gui_msg_set_flag_by_int32_cb, GUI_MODEL_MAIN_MSG_ID_HIDE_WIN_SWITCH, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
+
+        gui_msg_setup_component(true, false, subject_sd_icon, ui_scr->video_photo_img_9, &guider_msg_data, gui_model_main_msg_video_photo_img_9_set_img_path_cb, GUI_MODEL_MAIN_MSG_ID_SD_ICON, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
+
+        gui_msg_setup_component(true, false, subject_battery, ui_scr->video_photo_img_12, &guider_msg_data, gui_model_main_msg_video_photo_img_12_set_img_path_cb, GUI_MODEL_MAIN_MSG_ID_BATTERY, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
 
 
         for (int i = 0; i < 13; i++) {
-            if (status[i].msg_id == GUI_MODEL_MAIN_MSG_ID_SYS_PROMPT) {
-                status[i].is_subscribe = 1;
-            }
-        }
-    }
-    if (!guider_ui.video_rec_del) {
-        gui_msg_setup_component(true, false, subject_sd_icon, guider_ui.video_rec_img_9, &guider_msg_data, gui_model_main_msg_video_rec_img_9_set_img_path_cb, GUI_MODEL_MAIN_MSG_ID_SD_ICON, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
-
-        gui_msg_setup_component(true, false, subject_battery, guider_ui.video_rec_img_12, &guider_msg_data, gui_model_main_msg_video_rec_img_12_set_img_path_cb, GUI_MODEL_MAIN_MSG_ID_BATTERY, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
-
-        gui_msg_setup_component(true, false, subject_systime, guider_ui.video_rec_digitclock_2, &guider_msg_data, gui_model_main_msg_video_rec_digitclock_2_set_digit_clock_time_cb, GUI_MODEL_MAIN_MSG_ID_SYSTIME, GUI_MSG_ACCESS_GET, VALUE_TIME, NULL);
-
-        gui_msg_setup_component(true, false, subject_hide_win_switch, guider_ui.video_rec_imgbtn_sw_window, &guider_msg_data, gui_msg_set_flag_by_int32_cb, GUI_MODEL_MAIN_MSG_ID_HIDE_WIN_SWITCH, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
-        gui_msg_setup_component(true, false, subject_show_win_switch, guider_ui.video_rec_imgbtn_sw_window, &guider_msg_data, gui_msg_set_clear_flag_by_int32_cb, GUI_MODEL_MAIN_MSG_ID_SHOW_WIN_SWITCH, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
-
-
-        for (int i = 0; i < 13; i++) {
-            if (status[i].msg_id == GUI_MODEL_MAIN_MSG_ID_SD_ICON) {
+            if (status[i].msg_id == GUI_MODEL_MAIN_MSG_ID_SYSTIME) {
                 status[i].is_subscribe = 1;
             }
             if (status[i].msg_id == GUI_MODEL_MAIN_MSG_ID_SHOW_WIN_SWITCH) {
@@ -440,7 +463,7 @@ void gui_model_main_msg_init_events()
             if (status[i].msg_id == GUI_MODEL_MAIN_MSG_ID_HIDE_WIN_SWITCH) {
                 status[i].is_subscribe = 1;
             }
-            if (status[i].msg_id == GUI_MODEL_MAIN_MSG_ID_SYSTIME) {
+            if (status[i].msg_id == GUI_MODEL_MAIN_MSG_ID_SD_ICON) {
                 status[i].is_subscribe = 1;
             }
             if (status[i].msg_id == GUI_MODEL_MAIN_MSG_ID_BATTERY) {
@@ -450,56 +473,37 @@ void gui_model_main_msg_init_events()
 
         systime_timer_enable = true;
     }
-    if (!guider_ui.video_photo_del) {
-        gui_msg_setup_component(true, false, subject_battery, guider_ui.video_photo_img_12, &guider_msg_data, gui_model_main_msg_video_photo_img_12_set_img_path_cb, GUI_MODEL_MAIN_MSG_ID_BATTERY, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
+    if (guider_ui.video_file) {
+        lv_ui_video_file *ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_VIDEO_FILE);
+        gui_msg_setup_component(true, false, subject_show_home_btn, ui_scr->video_file_imgbtn_5, &guider_msg_data, gui_msg_set_clear_flag_by_int32_cb, GUI_MODEL_MAIN_MSG_ID_SHOW_HOME_BTN, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
+        gui_msg_setup_component(true, false, subject_hide_home_btn, ui_scr->video_file_imgbtn_5, &guider_msg_data, gui_msg_set_flag_by_int32_cb, GUI_MODEL_MAIN_MSG_ID_HIDE_HOME_BTN, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
 
-        gui_msg_setup_component(true, false, subject_systime, guider_ui.video_photo_digitclock_1, &guider_msg_data, gui_model_main_msg_video_photo_digitclock_1_set_digit_clock_time_cb, GUI_MODEL_MAIN_MSG_ID_SYSTIME, GUI_MSG_ACCESS_GET, VALUE_TIME, NULL);
-
-        gui_msg_setup_component(true, false, subject_sd_icon, guider_ui.video_photo_img_9, &guider_msg_data, gui_model_main_msg_video_photo_img_9_set_img_path_cb, GUI_MODEL_MAIN_MSG_ID_SD_ICON, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
-
-        gui_msg_setup_component(true, false, subject_hide_win_switch, guider_ui.video_photo_imgbtn_1, &guider_msg_data, gui_msg_set_flag_by_int32_cb, GUI_MODEL_MAIN_MSG_ID_HIDE_WIN_SWITCH, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
-        gui_msg_setup_component(true, false, subject_show_win_switch, guider_ui.video_photo_imgbtn_1, &guider_msg_data, gui_msg_set_clear_flag_by_int32_cb, GUI_MODEL_MAIN_MSG_ID_SHOW_WIN_SWITCH, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
+        gui_msg_setup_component(true, false, subject_show_del_btn, ui_scr->video_file_imgbtn_2, &guider_msg_data, gui_msg_set_clear_flag_by_int32_cb, GUI_MODEL_MAIN_MSG_ID_SHOW_DEL_BTN, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
+        gui_msg_setup_component(true, false, subject_hide_del_btn, ui_scr->video_file_imgbtn_2, &guider_msg_data, gui_msg_set_flag_by_int32_cb, GUI_MODEL_MAIN_MSG_ID_HIDE_DEL_BTN, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
 
 
         for (int i = 0; i < 13; i++) {
-            if (status[i].msg_id == GUI_MODEL_MAIN_MSG_ID_SD_ICON) {
-                status[i].is_subscribe = 1;
-            }
-            if (status[i].msg_id == GUI_MODEL_MAIN_MSG_ID_SHOW_WIN_SWITCH) {
-                status[i].is_subscribe = 1;
-            }
-            if (status[i].msg_id == GUI_MODEL_MAIN_MSG_ID_HIDE_WIN_SWITCH) {
-                status[i].is_subscribe = 1;
-            }
-            if (status[i].msg_id == GUI_MODEL_MAIN_MSG_ID_SYSTIME) {
-                status[i].is_subscribe = 1;
-            }
-            if (status[i].msg_id == GUI_MODEL_MAIN_MSG_ID_BATTERY) {
-                status[i].is_subscribe = 1;
-            }
-        }
-
-        systime_timer_enable = true;
-    }
-    if (!guider_ui.video_file_del) {
-        gui_msg_setup_component(true, false, subject_hide_del_btn, guider_ui.video_file_imgbtn_2, &guider_msg_data, gui_msg_set_flag_by_int32_cb, GUI_MODEL_MAIN_MSG_ID_HIDE_DEL_BTN, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
-        gui_msg_setup_component(true, false, subject_show_del_btn, guider_ui.video_file_imgbtn_2, &guider_msg_data, gui_msg_set_clear_flag_by_int32_cb, GUI_MODEL_MAIN_MSG_ID_SHOW_DEL_BTN, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
-
-        gui_msg_setup_component(true, false, subject_hide_home_btn, guider_ui.video_file_imgbtn_5, &guider_msg_data, gui_msg_set_flag_by_int32_cb, GUI_MODEL_MAIN_MSG_ID_HIDE_HOME_BTN, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
-        gui_msg_setup_component(true, false, subject_show_home_btn, guider_ui.video_file_imgbtn_5, &guider_msg_data, gui_msg_set_clear_flag_by_int32_cb, GUI_MODEL_MAIN_MSG_ID_SHOW_HOME_BTN, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
-
-
-        for (int i = 0; i < 13; i++) {
-            if (status[i].msg_id == GUI_MODEL_MAIN_MSG_ID_SHOW_DEL_BTN) {
-                status[i].is_subscribe = 1;
-            }
             if (status[i].msg_id == GUI_MODEL_MAIN_MSG_ID_SHOW_HOME_BTN) {
                 status[i].is_subscribe = 1;
             }
             if (status[i].msg_id == GUI_MODEL_MAIN_MSG_ID_HIDE_HOME_BTN) {
                 status[i].is_subscribe = 1;
             }
+            if (status[i].msg_id == GUI_MODEL_MAIN_MSG_ID_SHOW_DEL_BTN) {
+                status[i].is_subscribe = 1;
+            }
             if (status[i].msg_id == GUI_MODEL_MAIN_MSG_ID_HIDE_DEL_BTN) {
+                status[i].is_subscribe = 1;
+            }
+        }
+    }
+    if (guider_ui.sys_popwin) {
+        lv_ui_sys_popwin *ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_SYS_POPWIN);
+        gui_msg_setup_component(true, false, subject_sys_prompt, ui_scr->sys_popwin_lbl_1, &guider_msg_data, gui_msg_set_label_text_by_string_cb, GUI_MODEL_MAIN_MSG_ID_SYS_PROMPT, GUI_MSG_ACCESS_GET, VALUE_STRING, NULL);
+
+
+        for (int i = 0; i < 13; i++) {
+            if (status[i].msg_id == GUI_MODEL_MAIN_MSG_ID_SYS_PROMPT) {
                 status[i].is_subscribe = 1;
             }
         }

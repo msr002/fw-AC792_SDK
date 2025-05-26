@@ -1,6 +1,8 @@
 /*Generate Code, Do NOT Edit!*/
+#if LV_USE_GUIBUILDER_SIMULATOR
 #include <stdio.h>
-#include "gui_guider.h"
+#endif
+#include "../gui_guider.h"
 #include "lvgl.h"
-#include "callback_handler.h"
+#include "./callback_handler.h"
 

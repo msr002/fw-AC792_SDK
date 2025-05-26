@@ -29,7 +29,12 @@
 #define TCFG_USER_VIDEO_SOURCE   "video2.1"
 #elif defined CONFIG_VIDEO3_ENABLE
 #define TCFG_USER_VIDEO_SOURCE   "video3.1"
-
+#elif defined CONFIG_UVC_VIDEO0_ENABLE
+#define TCFG_USER_VIDEO_SOURCE   "video10.1"
+#elif defined CONFIG_UVC_VIDEO1_ENABLE
+#define TCFG_USER_VIDEO_SOURCE   "video11.1"
+#elif defined CONFIG_UVC_VIDEO2_ENABLE
+#define TCFG_USER_VIDEO_SOURCE   "video12.1"
 #endif
 
 //小草平台
@@ -41,10 +46,13 @@
 
 #ifdef CONFIG_TUYA_SDK_ENABLE
 
-#define FIRMWARE_VER "3.4.0"
+#define FIRMWARE_VER "3.8.6"
 
 #endif // CONFIG_TUYA_SDK_ENABLE
 
+#ifdef     CONFIG_TUYA_SDK_ENABLE
+#define    VM_TUYA_MAC_IDX              2
+#endif // CONFIG_TUYA_SDK_ENABLE
 
 // #ifdef CONFIG_XCIOT_ENABLE
 // #define BT_NET_CFG_XC_EN                          1     //从机 小草配网专用
@@ -308,7 +316,7 @@
 #define CONFIG_AEC_ENC_ENABLE
 
 #ifdef CONFIG_AEC_ENC_ENABLE
-#define CONFIG_USB_AUDIO_AEC_ENABLE             //usb mic使能回声消除功能
+// #define CONFIG_USB_AUDIO_AEC_ENABLE             //usb mic使能回声消除功能
 // #define CONFIG_AEC_HW_REC_LINEIN_ENABLE      //AEC回采使用硬件通道数据
 // #define CONFIG_AEC_USE_PLAY_MUSIC_ENABLE     //播歌时需要使用AEC
 // #define CONFIG_AUDIO_ENC_AEC_DATA_CHECK      //打开查看AEC操作数据(mic/dac/aec数据)
@@ -321,6 +329,7 @@
 //                                  路径配置                                       //
 //*********************************************************************************//
 #define CONFIG_JLFAT_ENABLE
+#define TCFG_JLFAT_SUPPORT_OVERSECTOR_RW_ENABLE 1
 
 #if TCFG_SD0_ENABLE
 #define CONFIG_STORAGE_PATH                         "storage/sd0"   //定义对应SD0的路径
@@ -449,6 +458,12 @@
 #define CONFIG_REC_DIR_2       "DCIM/3/"
 #endif
 
+#define CONFIG_REC_UVC_DIR_0       "DCIM/UVC1/"
+#define CONFIG_REC_UVC_DIR_1       "DCIM/UVC2/"
+#define CONFIG_REC_UVC_DIR_2       "DCIM/UVC3/"
+
+
+
 #if TCFG_SD0_ENABLE
 #define CONFIG_STORAGE_PATH 	"storage/sd0"
 #define SDX_DEV					"sd0"
@@ -468,6 +483,12 @@
 #define CONFIG_REC_PATH_0       CONFIG_STORAGE_PATH"/C/"CONFIG_REC_DIR_0
 #define CONFIG_REC_PATH_1       CONFIG_STORAGE_PATH"/C/"CONFIG_REC_DIR_1
 #define CONFIG_REC_PATH_2       CONFIG_STORAGE_PATH"/C/"CONFIG_REC_DIR_2
+
+#define CONFIG_REC_PATH_UVC0       CONFIG_STORAGE_PATH"/C/"CONFIG_REC_UVC_DIR_0
+#define CONFIG_REC_PATH_UVC1       CONFIG_STORAGE_PATH"/C/"CONFIG_REC_UVC_DIR_1
+#define CONFIG_REC_PATH_UVC2       CONFIG_STORAGE_PATH"/C/"CONFIG_REC_UVC_DIR_2
+
+
 
 #define CONFIG_UDISK_STORAGE_PATH	"storage/udisk0"
 #define CONFIG_UDISK_ROOT_PATH     	CONFIG_UDISK_STORAGE_PATH"/C/"
@@ -504,10 +525,12 @@
 
 #if (defined CONFIG_VIDEO1_ENABLE) && (defined CONFIG_VIDEO2_ENABLE)
 #define THREE_WAY_ENABLE		1
-#define CONFIG_VIDEO_REC_NUM    4
+#define CONFIG_VIDEO_REC_NUM    3
+#define CONFIG_VIDEO_UVC_REC_NUM    3
 #else
 // #define THREE_WAY_ENABLE		0
-#define CONFIG_VIDEO_REC_NUM    4
+#define CONFIG_VIDEO_REC_NUM    3
+#define CONFIG_VIDEO_UVC_REC_NUM    3
 #endif
 
 
@@ -616,14 +639,14 @@
 #endif
 
 //描述当前SDK能够兼容的UI项目模板最低版本
-#define COMPATIBLE_UI_PRJ_TEMPLATE_VERSION_MIN_MAJOR 1
+#define COMPATIBLE_UI_PRJ_TEMPLATE_VERSION_MIN_MAJOR 0
 #define COMPATIBLE_UI_PRJ_TEMPLATE_VERSION_MIN_MINOR 0
-#define COMPATIBLE_UI_PRJ_TEMPLATE_VERSION_MIN_PATCH 0
+#define COMPATIBLE_UI_PRJ_TEMPLATE_VERSION_MIN_PATCH 1
 
 //描述当前SDK能够兼容的UI项目模板最高版本
-#define COMPATIBLE_UI_PRJ_TEMPLATE_VERSION_MAX_MAJOR 1
+#define COMPATIBLE_UI_PRJ_TEMPLATE_VERSION_MAX_MAJOR 2
 #define COMPATIBLE_UI_PRJ_TEMPLATE_VERSION_MAX_MINOR 0
-#define COMPATIBLE_UI_PRJ_TEMPLATE_VERSION_MAX_PATCH 0
+#define COMPATIBLE_UI_PRJ_TEMPLATE_VERSION_MAX_PATCH 1
 
 
 #define CONFIG_CXX_SUPPORT //使能C++支持

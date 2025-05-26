@@ -1,6 +1,6 @@
 /*Generate Code, Do NOT Edit!*/
-#include "gui_model_msg.h"
-#if LV_USE_MSG
+#include "./gui_model_msg.h"
+#if LV_USE_OBSERVER
 
 static lv_ll_t subs_ll;
 static lv_ll_t timer_ll;
@@ -30,92 +30,62 @@ static timer_dsc_t *insert_timer(lv_ll_t *ll_p, lv_timer_t *timer)
 void gui_model_msg_power_number_timer_cb(lv_timer_t *timer)
 {
     gui_msg_action_change(GUI_MODEL_MSG_ID_POWER_NUMBER, GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_STRING);
-    lv_msg_send(GUI_MODEL_MSG_ID_POWER_NUMBER, NULL);
+    lv_subject_t *subject = gui_msg_get_subject(GUI_MODEL_MSG_ID_POWER_NUMBER);
+    if (subject == NULL) {
+        return;
+    }
+    lv_subject_set_pointer(subject, &guider_msg_data);
 }
 void gui_model_msg_systime_timer_cb(lv_timer_t *timer)
 {
     gui_msg_action_change(GUI_MODEL_MSG_ID_SYSTIME, GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_TIME);
-    lv_msg_send(GUI_MODEL_MSG_ID_SYSTIME, NULL);
+    lv_subject_t *subject = gui_msg_get_subject(GUI_MODEL_MSG_ID_SYSTIME);
+    if (subject == NULL) {
+        return;
+    }
+    lv_subject_set_pointer(subject, &guider_msg_data);
 }
 
-void gui_model_msg_home_img_wifi_set_img_path_cb(lv_event_t *e)
+void gui_model_msg_home_img_wifi_set_img_path_cb(lv_observer_t *observer, lv_subject_t *subject)
 {
-    lv_obj_t *obj = lv_event_get_target(e);
-    if (guider_ui.home_del || obj == NULL) {
-        return;
-    }
-    lv_msg_t *msg = (lv_msg_t *)lv_event_get_param(e);
-    if (msg == NULL || msg->id != GUI_MODEL_MSG_ID_SIGNAL) {
+    lv_obj_t *obj = lv_observer_get_target_obj(observer);
+    if (obj == NULL || lv_obj_is_valid(obj) == false) {
         return;
     }
 
-    lv_img_set_src(obj, gui_get_res_path(guider_msg_data.value_int));
+    gui_msg_data_t *data = (gui_msg_data_t *)observer->user_data;
+    lv_img_set_src(obj, gui_get_res_path(data->value_int));
 }
-void gui_model_msg_home_lbl_bat_set_text_cb(lv_event_t *e)
+void gui_model_msg_home_digitclock_time_set_digit_clock_time_cb(lv_observer_t *observer, lv_subject_t *subject)
 {
-    lv_obj_t *obj = lv_event_get_target(e);
-    if (guider_ui.home_del || obj == NULL) {
-        return;
-    }
-    lv_msg_t *msg = (lv_msg_t *)lv_event_get_param(e);
-    if (msg == NULL || msg->id != GUI_MODEL_MSG_ID_POWER_NUMBER) {
+    lv_obj_t *obj = lv_observer_get_target_obj(observer);
+    if (obj == NULL || lv_obj_is_valid(obj) == false) {
         return;
     }
 
-    lv_label_set_text(obj, guider_msg_data.value_string);
-}
-void gui_model_msg_home_digitclock_time_set_digit_clock_time_cb(lv_event_t *e)
-{
-    lv_obj_t *obj = lv_event_get_target(e);
-    if (guider_ui.home_del || obj == NULL) {
-        return;
-    }
-    lv_msg_t *msg = (lv_msg_t *)lv_event_get_param(e);
-    if (msg == NULL || msg->id != GUI_MODEL_MSG_ID_SYSTIME) {
-        return;
-    }
-
-    struct tm time = guider_msg_data.value_time;
+    gui_msg_data_t *data = (gui_msg_data_t *)observer->user_data;
+    struct tm time = data->value_time;
     lv_label_set_text_fmt(obj, "%04d-%02d-%02d %02d:%02d:%02d", time.tm_year + 1900, time.tm_mon + 1, time.tm_mday, time.tm_hour, time.tm_min, time.tm_sec);
 }
-void gui_model_msg_home_img_weather_set_img_path_cb(lv_event_t *e)
+void gui_model_msg_home_img_weather_set_img_path_cb(lv_observer_t *observer, lv_subject_t *subject)
 {
-    lv_obj_t *obj = lv_event_get_target(e);
-    if (guider_ui.home_del || obj == NULL) {
-        return;
-    }
-    lv_msg_t *msg = (lv_msg_t *)lv_event_get_param(e);
-    if (msg == NULL || msg->id != GUI_MODEL_MSG_ID_WEATHER) {
+    lv_obj_t *obj = lv_observer_get_target_obj(observer);
+    if (obj == NULL || lv_obj_is_valid(obj) == false) {
         return;
     }
 
-    lv_img_set_src(obj, gui_get_res_path(guider_msg_data.value_int));
+    gui_msg_data_t *data = (gui_msg_data_t *)observer->user_data;
+    lv_img_set_src(obj, gui_get_res_path(data->value_int));
 }
-void gui_model_msg_home_img_bat_set_img_path_cb(lv_event_t *e)
+void gui_model_msg_home_img_bat_set_img_path_cb(lv_observer_t *observer, lv_subject_t *subject)
 {
-    lv_obj_t *obj = lv_event_get_target(e);
-    if (guider_ui.home_del || obj == NULL) {
-        return;
-    }
-    lv_msg_t *msg = (lv_msg_t *)lv_event_get_param(e);
-    if (msg == NULL || msg->id != GUI_MODEL_MSG_ID_POWER) {
+    lv_obj_t *obj = lv_observer_get_target_obj(observer);
+    if (obj == NULL || lv_obj_is_valid(obj) == false) {
         return;
     }
 
-    lv_img_set_src(obj, gui_get_res_path(guider_msg_data.value_int));
-}
-void gui_model_msg_home_lbl_note_set_text_cb(lv_event_t *e)
-{
-    lv_obj_t *obj = lv_event_get_target(e);
-    if (guider_ui.home_del || obj == NULL) {
-        return;
-    }
-    lv_msg_t *msg = (lv_msg_t *)lv_event_get_param(e);
-    if (msg == NULL || msg->id != GUI_MODEL_MSG_ID_TIPS) {
-        return;
-    }
-
-    lv_label_set_text(obj, guider_msg_data.value_string);
+    gui_msg_data_t *data = (gui_msg_data_t *)observer->user_data;
+    lv_img_set_src(obj, gui_get_res_path(data->value_int));
 }
 
 GUI_WEAK int gui_model_msg_power_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type)
@@ -138,7 +108,7 @@ GUI_WEAK int gui_model_msg_signal_cb(gui_msg_action_t access, gui_msg_data_t *da
 }
 GUI_WEAK int gui_model_msg_power_number_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type)
 {
-    static char power_number_init_var[] = "100%";
+    char power_number_init_var[] = "100%";
     static bool power_number_is_init = false;
     static char *power_number_var = NULL;
     if (power_number_is_init == false) {
@@ -165,7 +135,7 @@ GUI_WEAK int gui_model_msg_keyfun1_cb(gui_msg_action_t access, gui_msg_data_t *d
 }
 GUI_WEAK int gui_model_msg_tips_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type)
 {
-    static char tips_init_var[] = "";
+    char tips_init_var[] = "";
     static bool tips_is_init = false;
     static char *tips_var = NULL;
     if (tips_is_init == false) {
@@ -242,7 +212,7 @@ GUI_WEAK int gui_model_msg_keyfun3_cb(gui_msg_action_t access, gui_msg_data_t *d
 }
 GUI_WEAK int gui_model_msg_menu_title_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type)
 {
-    static char menu_title_init_var[] = "return_info";
+    char menu_title_init_var[] = "return_info";
     static bool menu_title_is_init = false;
     static char *menu_title_var = NULL;
     if (menu_title_is_init == false) {
@@ -261,107 +231,147 @@ GUI_WEAK int gui_model_msg_menu_title_cb(gui_msg_action_t access, gui_msg_data_t
 
 void gui_model_msg_init(lv_ui *ui)
 {
-    _lv_ll_init(&subs_ll, sizeof(gui_msg_sub_t));
+    gui_msg_sub_t *sub;
+    sub = gui_msg_create_sub(GUI_MODEL_MSG_ID_POWER);
+    if (sub != NULL) {
+        lv_subject_init_pointer(sub->subject, &guider_msg_data);
+    }
+    sub = gui_msg_create_sub(GUI_MODEL_MSG_ID_SIGNAL);
+    if (sub != NULL) {
+        lv_subject_init_pointer(sub->subject, &guider_msg_data);
+    }
+    sub = gui_msg_create_sub(GUI_MODEL_MSG_ID_POWER_NUMBER);
+    if (sub != NULL) {
+        lv_subject_init_pointer(sub->subject, &guider_msg_data);
+    }
+    sub = gui_msg_create_sub(GUI_MODEL_MSG_ID_KEYFUN1);
+    if (sub != NULL) {
+        lv_subject_init_pointer(sub->subject, &guider_msg_data);
+    }
+    sub = gui_msg_create_sub(GUI_MODEL_MSG_ID_TIPS);
+    if (sub != NULL) {
+        lv_subject_init_pointer(sub->subject, &guider_msg_data);
+    }
+    sub = gui_msg_create_sub(GUI_MODEL_MSG_ID_CALLTIME);
+    if (sub != NULL) {
+        lv_subject_init_pointer(sub->subject, &guider_msg_data);
+    }
+    sub = gui_msg_create_sub(GUI_MODEL_MSG_ID_WEATHER);
+    if (sub != NULL) {
+        lv_subject_init_pointer(sub->subject, &guider_msg_data);
+    }
+    sub = gui_msg_create_sub(GUI_MODEL_MSG_ID_SYSTIME);
+    if (sub != NULL) {
+        lv_subject_init_pointer(sub->subject, &guider_msg_data);
+    }
+    sub = gui_msg_create_sub(GUI_MODEL_MSG_ID_KEYFUN2);
+    if (sub != NULL) {
+        lv_subject_init_pointer(sub->subject, &guider_msg_data);
+    }
+    sub = gui_msg_create_sub(GUI_MODEL_MSG_ID_KEYFUN3);
+    if (sub != NULL) {
+        lv_subject_init_pointer(sub->subject, &guider_msg_data);
+    }
+    sub = gui_msg_create_sub(GUI_MODEL_MSG_ID_MENU_TITLE);
+    if (sub != NULL) {
+        lv_subject_init_pointer(sub->subject, &guider_msg_data);
+    }
     _lv_ll_init(&timer_ll, sizeof(timer_dsc_t));
-    gui_model_msg_init_ui();
-    gui_model_msg_init_events();
 }
 
 void gui_model_msg_init_ui()
 {
-    if (!guider_ui.home_del) {
-        gui_msg_action_change(GUI_MODEL_MSG_ID_POWER_NUMBER, GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_STRING);
-        lv_label_set_text(guider_ui.home_lbl_bat, guider_msg_data.value_string);
-
-        gui_msg_action_change(GUI_MODEL_MSG_ID_WEATHER, GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
-        lv_img_set_src(guider_ui.home_img_weather, gui_get_res_path(guider_msg_data.value_int));
-
-        gui_msg_action_change(GUI_MODEL_MSG_ID_SYSTIME, GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_TIME);
-        struct tm home_digitclock_time_time = guider_msg_data.value_time;
-        lv_label_set_text_fmt(guider_ui.home_digitclock_time, "%04d-%02d-%02d %02d:%02d:%02d", home_digitclock_time_time.tm_year + 1900, home_digitclock_time_time.tm_mon + 1, home_digitclock_time_time.tm_mday, home_digitclock_time_time.tm_hour, home_digitclock_time_time.tm_min, home_digitclock_time_time.tm_sec);
-
-        gui_msg_action_change(GUI_MODEL_MSG_ID_POWER, GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
-        lv_img_set_src(guider_ui.home_img_bat, gui_get_res_path(guider_msg_data.value_int));
-
-        gui_msg_action_change(GUI_MODEL_MSG_ID_SIGNAL, GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
-        lv_img_set_src(guider_ui.home_img_wifi, gui_get_res_path(guider_msg_data.value_int));
-
-        gui_msg_action_change(GUI_MODEL_MSG_ID_TIPS, GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_STRING);
-        lv_label_set_text(guider_ui.home_lbl_note, guider_msg_data.value_string);
-    }
 }
 
 void gui_model_msg_init_events()
 {
     void *res = NULL;
-    char sub_ids[11] = {0};
-    char unsub_ids[11] = {0};
-    int32_t first_id = GUI_MODEL_MSG_ID_POWER;
+    _gui_msg_status_t status[11] = {
+        {GUI_MODEL_MSG_ID_POWER, 0, 0},
+        {GUI_MODEL_MSG_ID_SIGNAL, 0, 0},
+        {GUI_MODEL_MSG_ID_POWER_NUMBER, 0, 0},
+        {GUI_MODEL_MSG_ID_KEYFUN1, 0, 0},
+        {GUI_MODEL_MSG_ID_TIPS, 0, 0},
+        {GUI_MODEL_MSG_ID_CALLTIME, 0, 0},
+        {GUI_MODEL_MSG_ID_WEATHER, 0, 0},
+        {GUI_MODEL_MSG_ID_SYSTIME, 0, 0},
+        {GUI_MODEL_MSG_ID_KEYFUN2, 0, 0},
+        {GUI_MODEL_MSG_ID_KEYFUN3, 0, 0},
+        {GUI_MODEL_MSG_ID_MENU_TITLE, 0, 0},
+    };
     lv_timer_t *timer = NULL;
     bool power_number_timer_enable = false;
     bool systime_timer_enable = false;
     delete_all_timer();
 
-    gui_msg_sub_t *head = _lv_ll_get_head(&subs_ll);
-    while (head != NULL) {
-        gui_msg_sub_t *next = _lv_ll_get_next(&subs_ll, head);
-        if (head->data != NULL && lv_obj_is_valid((((gui_msg_sub_dsc_t *)head->data)->_priv_data))) {
-            lv_msg_unsubscribe_obj(head->msg_id, ((gui_msg_sub_dsc_t *)head->data)->_priv_data);
+    for (int i = 0; i < 11; i++) {
+        lv_subject_t *subject = gui_msg_get_subject(status[i].msg_id);
+        if (subject == NULL) {
+            continue;
         }
-        unsub_ids[head->msg_id - first_id] = 1;
-        _lv_ll_remove(&subs_ll, head);
-        lv_mem_free(head);
-        head = next;
+        lv_ll_t subject_ll = subject->subs_ll;
+        gui_msg_sub_t *head = _lv_ll_get_head(&subject_ll);
+        if (head != NULL) {
+            status[i].is_unsubscribe = 1;
+        }
     }
 
-    if (!guider_ui.home_del) {
-        lv_obj_remove_event_cb(guider_ui.home_lbl_note, gui_model_msg_home_lbl_note_set_text_cb);
-        lv_obj_add_event_cb(guider_ui.home_lbl_note, gui_model_msg_home_lbl_note_set_text_cb, LV_EVENT_MSG_RECEIVED, NULL);
+    lv_subject_t *subject_power = gui_msg_get_subject(GUI_MODEL_MSG_ID_POWER);
+    lv_subject_t *subject_signal = gui_msg_get_subject(GUI_MODEL_MSG_ID_SIGNAL);
+    lv_subject_t *subject_power_number = gui_msg_get_subject(GUI_MODEL_MSG_ID_POWER_NUMBER);
+    lv_subject_t *subject_keyfun1 = gui_msg_get_subject(GUI_MODEL_MSG_ID_KEYFUN1);
+    lv_subject_t *subject_tips = gui_msg_get_subject(GUI_MODEL_MSG_ID_TIPS);
+    lv_subject_t *subject_calltime = gui_msg_get_subject(GUI_MODEL_MSG_ID_CALLTIME);
+    lv_subject_t *subject_weather = gui_msg_get_subject(GUI_MODEL_MSG_ID_WEATHER);
+    lv_subject_t *subject_systime = gui_msg_get_subject(GUI_MODEL_MSG_ID_SYSTIME);
+    lv_subject_t *subject_keyfun2 = gui_msg_get_subject(GUI_MODEL_MSG_ID_KEYFUN2);
+    lv_subject_t *subject_keyfun3 = gui_msg_get_subject(GUI_MODEL_MSG_ID_KEYFUN3);
+    lv_subject_t *subject_menu_title = gui_msg_get_subject(GUI_MODEL_MSG_ID_MENU_TITLE);
+    if (guider_ui.home) {
+        lv_ui_home *ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_HOME);
+        gui_msg_setup_component(true, false, subject_signal, ui_scr->home_img_wifi, &guider_msg_data, gui_model_msg_home_img_wifi_set_img_path_cb, GUI_MODEL_MSG_ID_SIGNAL, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
 
-        lv_obj_remove_event_cb(guider_ui.home_img_weather, gui_model_msg_home_img_weather_set_img_path_cb);
-        lv_obj_add_event_cb(guider_ui.home_img_weather, gui_model_msg_home_img_weather_set_img_path_cb, LV_EVENT_MSG_RECEIVED, NULL);
+        gui_msg_setup_component(true, false, subject_power_number, ui_scr->home_lbl_bat, &guider_msg_data, gui_msg_set_label_text_by_string_cb, GUI_MODEL_MSG_ID_POWER_NUMBER, GUI_MSG_ACCESS_GET, VALUE_STRING, NULL);
 
-        lv_obj_remove_event_cb(guider_ui.home_digitclock_time, gui_model_msg_home_digitclock_time_set_digit_clock_time_cb);
-        lv_obj_add_event_cb(guider_ui.home_digitclock_time, gui_model_msg_home_digitclock_time_set_digit_clock_time_cb, LV_EVENT_MSG_RECEIVED, NULL);
+        gui_msg_setup_component(true, false, subject_systime, ui_scr->home_digitclock_time, &guider_msg_data, gui_model_msg_home_digitclock_time_set_digit_clock_time_cb, GUI_MODEL_MSG_ID_SYSTIME, GUI_MSG_ACCESS_GET, VALUE_TIME, NULL);
 
-        lv_obj_remove_event_cb(guider_ui.home_img_bat, gui_model_msg_home_img_bat_set_img_path_cb);
-        lv_obj_add_event_cb(guider_ui.home_img_bat, gui_model_msg_home_img_bat_set_img_path_cb, LV_EVENT_MSG_RECEIVED, NULL);
+        gui_msg_setup_component(true, false, subject_weather, ui_scr->home_img_weather, &guider_msg_data, gui_model_msg_home_img_weather_set_img_path_cb, GUI_MODEL_MSG_ID_WEATHER, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
 
-        lv_obj_remove_event_cb(guider_ui.home_img_wifi, gui_model_msg_home_img_wifi_set_img_path_cb);
-        lv_obj_add_event_cb(guider_ui.home_img_wifi, gui_model_msg_home_img_wifi_set_img_path_cb, LV_EVENT_MSG_RECEIVED, NULL);
+        gui_msg_setup_component(true, false, subject_power, ui_scr->home_img_bat, &guider_msg_data, gui_model_msg_home_img_bat_set_img_path_cb, GUI_MODEL_MSG_ID_POWER, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
 
-        lv_obj_remove_event_cb(guider_ui.home_lbl_bat, gui_model_msg_home_lbl_bat_set_text_cb);
-        lv_obj_add_event_cb(guider_ui.home_lbl_bat, gui_model_msg_home_lbl_bat_set_text_cb, LV_EVENT_MSG_RECEIVED, NULL);
+        gui_msg_setup_component(true, false, subject_tips, ui_scr->home_lbl_note, &guider_msg_data, gui_msg_set_label_text_by_string_cb, GUI_MODEL_MSG_ID_TIPS, GUI_MSG_ACCESS_GET, VALUE_STRING, NULL);
 
-        res = lv_msg_subsribe_obj(GUI_MODEL_MSG_ID_TIPS, guider_ui.home_lbl_note, NULL);
-        gui_msg_insert_list(&subs_ll, res);
-        res = lv_msg_subsribe_obj(GUI_MODEL_MSG_ID_WEATHER, guider_ui.home_img_weather, NULL);
-        gui_msg_insert_list(&subs_ll, res);
-        res = lv_msg_subsribe_obj(GUI_MODEL_MSG_ID_SYSTIME, guider_ui.home_digitclock_time, NULL);
-        gui_msg_insert_list(&subs_ll, res);
-        res = lv_msg_subsribe_obj(GUI_MODEL_MSG_ID_POWER, guider_ui.home_img_bat, NULL);
-        gui_msg_insert_list(&subs_ll, res);
-        res = lv_msg_subsribe_obj(GUI_MODEL_MSG_ID_SIGNAL, guider_ui.home_img_wifi, NULL);
-        gui_msg_insert_list(&subs_ll, res);
-        res = lv_msg_subsribe_obj(GUI_MODEL_MSG_ID_POWER_NUMBER, guider_ui.home_lbl_bat, NULL);
-        gui_msg_insert_list(&subs_ll, res);
 
-        sub_ids[GUI_MODEL_MSG_ID_TIPS - first_id] = 1;
-        sub_ids[GUI_MODEL_MSG_ID_WEATHER - first_id] = 1;
-        sub_ids[GUI_MODEL_MSG_ID_SIGNAL - first_id] = 1;
-        sub_ids[GUI_MODEL_MSG_ID_POWER - first_id] = 1;
-        sub_ids[GUI_MODEL_MSG_ID_POWER_NUMBER - first_id] = 1;
-        sub_ids[GUI_MODEL_MSG_ID_SYSTIME - first_id] = 1;
+        for (int i = 0; i < 11; i++) {
+            if (status[i].msg_id == GUI_MODEL_MSG_ID_SIGNAL) {
+                status[i].is_subscribe = 1;
+            }
+            if (status[i].msg_id == GUI_MODEL_MSG_ID_POWER_NUMBER) {
+                status[i].is_subscribe = 1;
+            }
+            if (status[i].msg_id == GUI_MODEL_MSG_ID_SYSTIME) {
+                status[i].is_subscribe = 1;
+            }
+            if (status[i].msg_id == GUI_MODEL_MSG_ID_WEATHER) {
+                status[i].is_subscribe = 1;
+            }
+            if (status[i].msg_id == GUI_MODEL_MSG_ID_POWER) {
+                status[i].is_subscribe = 1;
+            }
+            if (status[i].msg_id == GUI_MODEL_MSG_ID_TIPS) {
+                status[i].is_subscribe = 1;
+            }
+        }
 
         power_number_timer_enable = true;
         systime_timer_enable = true;
     }
 
     for (int i = 0; i < 11; i++) {
-        if (sub_ids[i] == 0 && unsub_ids[i] == 1) {
-            gui_msg_subscribe_change(first_id + i, GUI_MSG_UNSUBSCRIBE);
-        } else if (sub_ids[i] == 1 && unsub_ids[i] == 0) {
-            gui_msg_subscribe_change(first_id + i, GUI_MSG_SUBSCRIBE);
+        if (status[i].is_subscribe == 0 && status[i].is_unsubscribe == 1) {
+            gui_msg_subscribe_change(status[i].msg_id, GUI_MSG_UNSUBSCRIBE);
+        } else if (status[i].is_subscribe == 1 && status[i].is_unsubscribe == 0) {
+            gui_msg_subscribe_change(status[i].msg_id, GUI_MSG_SUBSCRIBE);
         }
     }
     if (power_number_timer_enable) {
@@ -376,24 +386,96 @@ void gui_model_msg_init_events()
 
 void gui_model_msg_unsubscribe()
 {
-    char msg_ids[11] = {0};
-    int32_t first_id = GUI_MODEL_MSG_ID_POWER;
-    gui_msg_sub_t *head = _lv_ll_get_head(&subs_ll);
-    while (head != NULL) {
-        gui_msg_sub_t *next = _lv_ll_get_next(&subs_ll, head);
-        if (head->data != NULL && lv_obj_is_valid((((gui_msg_sub_dsc_t *)head->data)->_priv_data))) {
-            lv_msg_unsubscribe_obj(head->msg_id, (((gui_msg_sub_dsc_t *)head->data)->_priv_data));
-        }
-        msg_ids[head->msg_id - first_id] = 1;
-        _lv_ll_remove(&subs_ll, head);
-        lv_mem_free(head);
-        head = next;
-    }
+    _gui_msg_status_t status[11] = {
+        {GUI_MODEL_MSG_ID_POWER, 0, 0},
+        {GUI_MODEL_MSG_ID_SIGNAL, 0, 0},
+        {GUI_MODEL_MSG_ID_POWER_NUMBER, 0, 0},
+        {GUI_MODEL_MSG_ID_KEYFUN1, 0, 0},
+        {GUI_MODEL_MSG_ID_TIPS, 0, 0},
+        {GUI_MODEL_MSG_ID_CALLTIME, 0, 0},
+        {GUI_MODEL_MSG_ID_WEATHER, 0, 0},
+        {GUI_MODEL_MSG_ID_SYSTIME, 0, 0},
+        {GUI_MODEL_MSG_ID_KEYFUN2, 0, 0},
+        {GUI_MODEL_MSG_ID_KEYFUN3, 0, 0},
+        {GUI_MODEL_MSG_ID_MENU_TITLE, 0, 0},
+    };
     for (int i = 0; i < 11; i++) {
-        if (msg_ids[i] == 1) {
-            gui_msg_subscribe_change(first_id + i, GUI_MSG_UNSUBSCRIBE);
+        lv_subject_t *subject = gui_msg_get_subject(status[i].msg_id);
+        if (subject == NULL) {
+            continue;
+        }
+        lv_ll_t subject_ll = subject->subs_ll;
+        lv_observer_t *head = _lv_ll_get_head(&subject_ll);
+        if (head != NULL) {
+            status[i].is_unsubscribe = 1;
+        }
+        while (head != NULL) {
+            lv_obj_t *obj = head->target;
+            if (obj != NULL && lv_obj_is_valid(obj) == true) {
+                lv_subject_remove_all_obj(subject, obj);
+            }
+            head = _lv_ll_get_head(&subject_ll);
         }
     }
+
+    for (int i = 0; i < 11; i++) {
+        if (status[i].is_unsubscribe == 1) {
+            gui_msg_subscribe_change(status[i].msg_id, GUI_MSG_UNSUBSCRIBE);
+        }
+    }
+}
+
+gui_msg_data_t *gui_model_msg_get(int32_t msg_id)
+{
+    switch (msg_id) {
+    case GUI_MODEL_MSG_ID_POWER: {
+        gui_model_msg_power_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
+        break;
+    }
+    case GUI_MODEL_MSG_ID_SIGNAL: {
+        gui_model_msg_signal_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
+        break;
+    }
+    case GUI_MODEL_MSG_ID_POWER_NUMBER: {
+        gui_model_msg_power_number_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_STRING);
+        break;
+    }
+    case GUI_MODEL_MSG_ID_KEYFUN1: {
+        gui_model_msg_keyfun1_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
+        break;
+    }
+    case GUI_MODEL_MSG_ID_TIPS: {
+        gui_model_msg_tips_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_STRING);
+        break;
+    }
+    case GUI_MODEL_MSG_ID_CALLTIME: {
+        gui_model_msg_calltime_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_TIME);
+        break;
+    }
+    case GUI_MODEL_MSG_ID_WEATHER: {
+        gui_model_msg_weather_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
+        break;
+    }
+    case GUI_MODEL_MSG_ID_SYSTIME: {
+        gui_model_msg_systime_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_TIME);
+        break;
+    }
+    case GUI_MODEL_MSG_ID_KEYFUN2: {
+        gui_model_msg_keyfun2_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
+        break;
+    }
+    case GUI_MODEL_MSG_ID_KEYFUN3: {
+        gui_model_msg_keyfun3_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
+        break;
+    }
+    case GUI_MODEL_MSG_ID_MENU_TITLE: {
+        gui_model_msg_menu_title_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_STRING);
+        break;
+    }
+    default:
+        return NULL;
+    }
+    return &guider_msg_data;
 }
 
 void gui_model_msg_action_change(int32_t msg_id, gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type)
@@ -452,46 +534,35 @@ void gui_model_msg_action_change(int32_t msg_id, gui_msg_action_t access, gui_ms
 gui_msg_status_t gui_model_msg_send(int32_t msg_id, void *value, int32_t len)
 {
     if (msg_id == GUI_MODEL_MSG_ID) {
-        lv_msg_send(GUI_MODEL_MSG_ID_POWER, NULL);
-        lv_msg_send(GUI_MODEL_MSG_ID_SIGNAL, NULL);
-        lv_msg_send(GUI_MODEL_MSG_ID_POWER_NUMBER, NULL);
-        lv_msg_send(GUI_MODEL_MSG_ID_KEYFUN1, NULL);
-        lv_msg_send(GUI_MODEL_MSG_ID_TIPS, NULL);
-        lv_msg_send(GUI_MODEL_MSG_ID_CALLTIME, NULL);
-        lv_msg_send(GUI_MODEL_MSG_ID_WEATHER, NULL);
-        lv_msg_send(GUI_MODEL_MSG_ID_SYSTIME, NULL);
-        lv_msg_send(GUI_MODEL_MSG_ID_KEYFUN2, NULL);
-        lv_msg_send(GUI_MODEL_MSG_ID_KEYFUN3, NULL);
-        lv_msg_send(GUI_MODEL_MSG_ID_MENU_TITLE, NULL);
     } else {
         gui_msg_data_type_t data_type = VALUE_INT;
         switch (msg_id) {
         case GUI_MODEL_MSG_ID_POWER: {
-            data_type = VALUE_ARRAY;
+            data_type = VALUE_INT;
             guider_msg_data.value_array.ptr = value;
             guider_msg_data.value_array.len = len;
             break;
         }
         case GUI_MODEL_MSG_ID_SIGNAL: {
-            data_type = VALUE_ARRAY;
+            data_type = VALUE_INT;
             guider_msg_data.value_array.ptr = value;
             guider_msg_data.value_array.len = len;
             break;
         }
         case GUI_MODEL_MSG_ID_POWER_NUMBER: {
-            data_type = VALUE_ARRAY;
+            data_type = VALUE_STRING;
             guider_msg_data.value_array.ptr = value;
             guider_msg_data.value_array.len = len;
             break;
         }
         case GUI_MODEL_MSG_ID_KEYFUN1: {
-            data_type = VALUE_ARRAY;
+            data_type = VALUE_INT;
             guider_msg_data.value_array.ptr = value;
             guider_msg_data.value_array.len = len;
             break;
         }
         case GUI_MODEL_MSG_ID_TIPS: {
-            data_type = VALUE_ARRAY;
+            data_type = VALUE_STRING;
             guider_msg_data.value_array.ptr = value;
             guider_msg_data.value_array.len = len;
             break;
@@ -504,7 +575,7 @@ gui_msg_status_t gui_model_msg_send(int32_t msg_id, void *value, int32_t len)
             break;
         }
         case GUI_MODEL_MSG_ID_WEATHER: {
-            data_type = VALUE_ARRAY;
+            data_type = VALUE_INT;
             guider_msg_data.value_array.ptr = value;
             guider_msg_data.value_array.len = len;
             break;
@@ -517,19 +588,19 @@ gui_msg_status_t gui_model_msg_send(int32_t msg_id, void *value, int32_t len)
             break;
         }
         case GUI_MODEL_MSG_ID_KEYFUN2: {
-            data_type = VALUE_ARRAY;
+            data_type = VALUE_INT;
             guider_msg_data.value_array.ptr = value;
             guider_msg_data.value_array.len = len;
             break;
         }
         case GUI_MODEL_MSG_ID_KEYFUN3: {
-            data_type = VALUE_ARRAY;
+            data_type = VALUE_INT;
             guider_msg_data.value_array.ptr = value;
             guider_msg_data.value_array.len = len;
             break;
         }
         case GUI_MODEL_MSG_ID_MENU_TITLE: {
-            data_type = VALUE_ARRAY;
+            data_type = VALUE_STRING;
             guider_msg_data.value_array.ptr = value;
             guider_msg_data.value_array.len = len;
             break;
@@ -538,8 +609,11 @@ gui_msg_status_t gui_model_msg_send(int32_t msg_id, void *value, int32_t len)
             break;
         }
         gui_msg_action_change(msg_id, GUI_MSG_ACCESS_SET, &guider_msg_data, data_type);
-        bool found = lv_msg_send(msg_id, NULL);
-        return found ? GUI_MSG_STATUS_SUCCESS : GUI_MSG_STATUS_NO_SUBSCRIBE;
+        lv_subject_t *subject = gui_msg_get_subject(msg_id);
+        if (subject == NULL) {
+            return GUI_MSG_STATUS_NO_SUBSCRIBE;
+        }
+        lv_subject_set_pointer(subject, &guider_msg_data);
     }
     return GUI_MSG_STATUS_SUCCESS;
 }

@@ -788,7 +788,7 @@ static void rt_stream_cmd_analysis(u8 chl,  u32 add)
 
 }
 
-static void net_video_rec_set_bitrate(unsigned int bits_rate)
+void net_video_rec_set_bitrate(unsigned int bits_rate)
 {
     union video_req req = {0};
 

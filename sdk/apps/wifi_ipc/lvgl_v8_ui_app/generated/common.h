@@ -5,17 +5,22 @@
 extern "C" {
 #endif
 
-#include "res_common.h"
+#include "./gui_res/res_common.h"
 
 #define GUI_UIT_VERSION_MAJOR 1
 #define GUI_UIT_VERSION_MINOR 0
 #define GUI_UIT_VERSION_PATCH 0
-#define GUI_UIT_VERSION_INFO "20240708"
+#define GUI_UIT_VERSION_INFO "20250520"
 
-#define GUI_CORE_VERSION_MAJOR 1
-#define GUI_CORE_VERSION_MINOR 1
-#define GUI_CORE_VERSION_PATCH 2
+#define GUI_CORE_VERSION_MAJOR 3
+#define GUI_CORE_VERSION_MINOR 0
+#define GUI_CORE_VERSION_PATCH 0
 #define GUI_CORE_VERSION_INFO "GENERIC(with tools)"
+
+#define GUI_TEMPLATE_VERSION_MAJOR 1
+#define GUI_TEMPLATE_VERSION_MINOR 0
+#define GUI_TEMPLATE_VERSION_PATCH 1
+#define GUI_TEMPLATE_VERSION_INFO "emptyTemplate"
 
 typedef enum {
     GUI_SCREEN_ACTION_LOAD = 0,

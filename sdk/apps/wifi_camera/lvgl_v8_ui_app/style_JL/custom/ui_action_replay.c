@@ -1,6 +1,5 @@
 #include "app_config.h"
 #ifdef CONFIG_UI_STYLE_JL_ENABLE
-
 #include "custom.h"
 uint8_t no_select = 1;
 uint8_t lock_all_flag = 1;
@@ -73,8 +72,12 @@ void refresh_video_file_screen(void)
 {
     video_file_screen_unload();
     video_file_screen_load();
-    lv_obj_clear_flag(guider_ui.video_file_imgbtn_5, LV_OBJ_FLAG_HIDDEN);
-    lv_obj_add_flag(guider_ui.video_file_imgbtn_2, LV_OBJ_FLAG_HIDDEN);
+    lv_ui_video_file *ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_VIDEO_FILE);
+    if (!ui_scr) {
+        return;
+    }
+    lv_obj_clear_flag(ui_scr->video_file_imgbtn_5, LV_OBJ_FLAG_HIDDEN);
+    lv_obj_add_flag(ui_scr->video_file_imgbtn_2, LV_OBJ_FLAG_HIDDEN);
 }
 
 void dec_list_cur_page(int page_cur)
@@ -155,7 +158,11 @@ void video_dir_cb_event_handler(lv_event_t *e)
         //custom code video_dir_view_dir
         {
             lv_obj_t *child_contain = lv_obj_get_parent(src);
-            lv_obj_t *contain = lv_obj_get_child(guider_ui.video_file, 3);
+            lv_ui_video_file *ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_VIDEO_FILE);
+            if (!ui_scr) {
+                return;
+            }
+            lv_obj_t *contain = lv_obj_get_child(ui_scr->video_file, 3);
             int32_t child_index = lv_obj_get_index(child_contain);
             printf("Child is the %dth in the parent container\n", child_index);
             if (__this->edit_sel[child_index] == 0) {
@@ -221,11 +228,14 @@ int gui_scr_action_video_play_cb(int action)
 {
     struct intent it;
     init_intent(&it);
-
+    lv_ui_video_play *ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_VIDEO_PLAY);
+    if (!ui_scr) {
+        return -1;
+    }
 #if LV_DISP_UI_FB_NUM
-    lv_obj_set_style_bg_opa(guider_ui.video_play, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(ui_scr->video_play, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
 #else
-    lv_obj_set_style_bg_opa(guider_ui.video_play, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(ui_scr->video_play, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
 #endif
 
     switch (action) {
@@ -437,13 +447,16 @@ void edit_lock_file(lv_obj_t *dest, int dir)
             /* lv_obj_add_flag(child1, LV_OBJ_FLAG_CLICKABLE); */
         }
     }
-
+    lv_ui_video_file *ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_VIDEO_FILE);
+    if (!ui_scr) {
+        return;
+    }
     for (uint32_t i = start_index; i < num; i++) {
         lv_obj_t *child = lv_obj_get_child(src, i); // 获取第i个子控件}
         if (child) {
             lv_obj_t *edit_obj = lv_obj_get_child(child, 0);
 
-            if (lv_obj_has_flag(guider_ui.video_file_imgbtn_2, LV_OBJ_FLAG_HIDDEN)) {
+            if (lv_obj_has_flag(ui_scr->video_file_imgbtn_2, LV_OBJ_FLAG_HIDDEN)) {
                 if (__this->edit_sel[i] != 0) {
                     __this->edit_sel[i] = 0;  //清除上一次的标记
                 }
@@ -454,7 +467,7 @@ void edit_lock_file(lv_obj_t *dest, int dir)
             /* printf("is hidden:%d, %d", is_hidden, get_edit_flag()); */
             if (is_hidden) {
                 /* 控件是隐藏的 */
-                if (!lv_obj_has_flag(guider_ui.video_file_imgbtn_2, LV_OBJ_FLAG_HIDDEN)) {
+                if (!lv_obj_has_flag(ui_scr->video_file_imgbtn_2, LV_OBJ_FLAG_HIDDEN)) {
                     lv_obj_clear_flag(edit_obj, LV_OBJ_FLAG_HIDDEN);
                     lv_obj_clear_flag(child, LV_OBJ_FLAG_CLICKABLE);
                     if (__this->edit_sel[i]) {
@@ -479,17 +492,21 @@ void video_dec_edit_files(u8 mode)
     char file_name[50];
     struct vfscan *fs = NULL;
     __this->refresh_flag = 0; //每次进来要清空下重刷屏幕的标志位
-    const char *text_dir = lv_label_get_text(guider_ui.video_file_lbl_path); //路径
+    lv_ui_video_file *ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_VIDEO_FILE);
+    if (!ui_scr) {
+        return;
+    }
+    const char *text_dir = lv_label_get_text(ui_scr->video_file_lbl_path); //路径
     fs = fscan(text_dir, "-tMOVJPGAVI -sn", 3);
     strncpy(&__this->cur_path, text_dir, sizeof(__this->cur_path) - 1);
     __this->cur_path[sizeof(__this->cur_path) - 1] = '\0';
-    uint32_t child_cnt = lv_obj_get_child_cnt(guider_ui.video_file_view_3);
+    uint32_t child_cnt = lv_obj_get_child_cnt(ui_scr->video_file_view_3);
 
     for (int i = 0; i < child_cnt; i++) {
         if (__this->edit_sel[i]) {
             __this->file_index = i;
             __this->edit_sel[i] = 0;
-            lv_obj_t *child_contain = lv_obj_get_child(guider_ui.video_file_view_3, i);
+            lv_obj_t *child_contain = lv_obj_get_child(ui_scr->video_file_view_3, i);
             lv_obj_t *checkbox = lv_obj_get_child(child_contain, 0);
             lv_obj_clear_state(checkbox, LV_STATE_CHECKED);
             FILE *fp = fselect(fs, FSEL_BY_NUMBER, __this->file_num - i);
@@ -511,7 +528,7 @@ void video_dec_edit_files(u8 mode)
             switch (mode) {
             case 0:
                 cfun_dec_lock();
-                lv_obj_t *child_contain = lv_obj_get_child(guider_ui.video_file_view_3, __this->file_index);
+                lv_obj_t *child_contain = lv_obj_get_child(ui_scr->video_file_view_3, __this->file_index);
                 lv_obj_t *lock_flag = lv_obj_get_child(child_contain, 4);
                 if (lv_obj_is_valid(lock_flag)) {
                     if (lv_obj_has_flag(lock_flag, LV_OBJ_FLAG_HIDDEN)) {
@@ -534,7 +551,7 @@ void video_dec_edit_files(u8 mode)
             u8 flag = lock_all_flag;
             cfun_dec_lock_all(lock_all_flag);
             for (int i = 0; i < child_cnt; i++) {
-                lv_obj_t *child_contain = lv_obj_get_child(guider_ui.video_file_view_3, i);
+                lv_obj_t *child_contain = lv_obj_get_child(ui_scr->video_file_view_3, i);
                 lv_obj_t *lock_flag = lv_obj_get_child(child_contain, 4);
                 if (lv_obj_is_valid(lock_flag)) {
                     if (flag) {

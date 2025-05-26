@@ -1,7 +1,5 @@
 #include "app_config.h"
 #ifdef CONFIG_UI_STYLE_JL_ENABLE
-
-
 /**
  * @file C
  *
@@ -97,7 +95,11 @@ static void flex_cont_event_handler(lv_event_t *e)
             lv_indev_set_group(indev_keypad, def_group);
         }
 #endif
-        lv_group_focus_obj(guider_ui.sys_setting_img_5);
+        lv_ui_sys_setting *ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_SYS_SETTING);
+        if (!ui_scr) {
+            return;
+        }
+        lv_group_focus_obj(ui_scr->sys_setting_img_5);
 
     }
     break;
@@ -124,7 +126,11 @@ void flex_language_list(void)
     }
     //else
     {
-        flex_cont = lv_obj_create(guider_ui.sys_setting_view_subpage);
+        lv_ui_sys_setting *ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_SYS_SETTING);
+        if (!ui_scr) {
+            return;
+        }
+        flex_cont = lv_obj_create(ui_scr->sys_setting_view_subpage);
         lv_obj_set_pos(flex_cont, FLEX_POS_X, FLEX_POS_Y);//88
         lv_obj_set_size(flex_cont, FLEX_WIDTH, FLEX_HEIGHT);
         lv_obj_set_style_pad_all(flex_cont, 0, 0);//布局风格

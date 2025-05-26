@@ -1,6 +1,5 @@
 #include "app_config.h"
 #ifdef CONFIG_UI_STYLE_JL_ENABLE
-
 #if !LV_USE_GUIBUILDER_SIMULATOR
 #include "app_config.h"
 #include "custom.h"
@@ -174,7 +173,11 @@ static void send_msg2file_num(void)
 int get_cur_num()
 {
     int line_ = 0;
-    lv_obj_t *contain = lv_obj_get_child(guider_ui.video_file, 3);
+    lv_ui_video_file *ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_VIDEO_FILE);
+    if (!ui_scr) {
+        return -1;
+    }
+    lv_obj_t *contain = lv_obj_get_child(ui_scr->video_file, 3);
     cur_scroll_val = lv_obj_get_scroll_y(contain);
     if (total_file_num % 3) {
         line_ = total_file_num / 3 - 1;
@@ -282,6 +285,10 @@ static void video_dir_view_9_event_handler(lv_event_t *e)
     case LV_EVENT_CLICKED: {
         //custom code video_file
         {
+            lv_ui_video_dir *ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_VIDEO_DIR);
+            if (!ui_scr) {
+                return;
+            }
             lv_obj_t *dest = ui->video_dir;
             lv_obj_t *label = lv_obj_get_child(src, 2);
             if (!label) {
@@ -289,7 +296,7 @@ static void video_dir_view_9_event_handler(lv_event_t *e)
                 label = lv_obj_get_child(parent, 2);
             }
             const char *text1 = lv_label_get_text(label); //文件夹
-            const char *text2 = lv_label_get_text(ui->video_dir_lbl_path); //路径
+            const char *text2 = lv_label_get_text(ui_scr->video_dir_lbl_path); //路径
             char *full_path = lvgl_module_msg_get_ptr(GUI_MODEL_MSG_ID_FILE_PATH, strlen(text1) + strlen(text2) + 2);
             if (full_path) {
                 strcpy(full_path, text2);
@@ -329,7 +336,11 @@ void create_dir(int index, char *dir_name)
 {
     lv_group_t *def_group = lv_group_get_default();
     //Write codes video_dir_view_9
-    lv_obj_t *video_dir_view_new = lv_obj_create(guider_ui.video_dir);
+    lv_ui_video_dir *ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_VIDEO_DIR);
+    if (!ui_scr) {
+        return;
+    }
+    lv_obj_t *video_dir_view_new = lv_obj_create(ui_scr->video_dir);
     //Set style for video_dir_view_9. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
     lv_obj_set_style_radius(video_dir_view_new, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_color(video_dir_view_new, lv_color_make(0xff, 0xff, 0xff), LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -474,7 +485,6 @@ static void video_file_view_1_event_handler(lv_event_t *e)
     lv_obj_t *src = lv_event_get_target(e);
     switch (code) {
     case LV_EVENT_CLICKED: {
-
         if (pipeline_state == PIPELINE_RUNING) {
             return;
         } else if (pipeline_state == PIPELINE_IDLE) {
@@ -484,7 +494,11 @@ static void video_file_view_1_event_handler(lv_event_t *e)
 
         //记录当前页面和滚动条值
         to_play_video_page = cur_page;
-        lv_obj_t *contain = lv_obj_get_child(guider_ui.video_file, 3);
+        lv_ui_video_file *ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_VIDEO_FILE);
+        if (!ui_scr) {
+            return;
+        }
+        lv_obj_t *contain = lv_obj_get_child(ui_scr->video_file, 3);
         cur_scroll_val = lv_obj_get_scroll_y(contain);
 
 
@@ -495,7 +509,7 @@ static void video_file_view_1_event_handler(lv_event_t *e)
             label = lv_obj_get_child(parent, 2);
         }
         const char *text1 = lv_label_get_text(label); //文件名
-        const char *text2 = lv_label_get_text(ui->video_file_lbl_path); //路径
+        const char *text2 = lv_label_get_text(ui_scr->video_file_lbl_path); //路径
         char *file_path;
         asprintf(&file_path, "%s%s", text2, text1);
         printf("cur path: %s\n", file_path);
@@ -554,7 +568,11 @@ static void next_page(void)
     }
     line = 0;
     last_line = line;
-    lv_obj_t *contain = lv_obj_get_child(guider_ui.video_file, 3);
+    lv_ui_video_file *ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_VIDEO_FILE);
+    if (!ui_scr) {
+        return;
+    }
+    lv_obj_t *contain = lv_obj_get_child(ui_scr->video_file, 3);
     lv_obj_clean(contain);
     create_page(cur_page);
 
@@ -577,7 +595,11 @@ static void prev_page(void)
         cur_page = 1;
         return;
     }
-    lv_obj_t *contain = lv_obj_get_child(guider_ui.video_file, 3);
+    lv_ui_video_file *ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_VIDEO_FILE);
+    if (!ui_scr) {
+        return;
+    }
+    lv_obj_t *contain = lv_obj_get_child(ui_scr->video_file, 3);
     lv_obj_clean(contain);
     create_page(cur_page);
     //上一页的底部
@@ -707,8 +729,11 @@ static void update_img_text(int start_index, int end_index, u8 dir)
         img_index = last_img_index;
     }
     last_dir = dir;
-
-    lv_obj_t *contain = lv_obj_get_child(guider_ui.video_file, 3);
+    lv_ui_video_file *ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_VIDEO_FILE);
+    if (!ui_scr) {
+        return;
+    }
+    lv_obj_t *contain = lv_obj_get_child(ui_scr->video_file, 3);
     while (start_index < end_index) {
         lv_obj_t *img_cont = lv_obj_get_child(contain, start_index % ONE_PAGE_MAX_NUM);
         add_img_text(img_cont);
@@ -839,13 +864,21 @@ void scroll_update_position(int scroll_val)
         }
     }
     last_line = line;
-    edit_lock_file(guider_ui.video_file, 0);
+    lv_ui_video_file *ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_VIDEO_FILE);
+    if (!ui_scr) {
+        return;
+    }
+    edit_lock_file(ui_scr->video_file, 0);
 
 }
 
 void file_list_up(void)
 {
-    lv_obj_t *contain = lv_obj_get_child(guider_ui.video_file, 3);
+    lv_ui_video_file *ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_VIDEO_FILE);
+    if (!ui_scr) {
+        return;
+    }
+    lv_obj_t *contain = lv_obj_get_child(ui_scr->video_file, 3);
 
     int cur_scroll_val = lv_obj_get_scroll_y(contain);
     int line_h = IMG_CONT_H + IMG_CONT_ROW_SPACE;
@@ -862,7 +895,11 @@ void file_list_up(void)
 
 void file_list_down(void)
 {
-    lv_obj_t *contain = lv_obj_get_child(guider_ui.video_file, 3);
+    lv_ui_video_file *ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_VIDEO_FILE);
+    if (!ui_scr) {
+        return;
+    }
+    lv_obj_t *contain = lv_obj_get_child(ui_scr->video_file, 3);
 
     int cur_scroll_val = lv_obj_get_scroll_y(contain);
     int line_h = IMG_CONT_H + IMG_CONT_ROW_SPACE;
@@ -883,6 +920,10 @@ void file_list_down(void)
 //页面加载
 void video_dir_screen_load(void)
 {
+    lv_ui_video_dir *ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_VIDEO_DIR);
+    if (!ui_scr) {
+        return;
+    }
     if (storage_device_ready() == 0) {
         //sd卡未挂載
         printf("-NOT SD \n");
@@ -909,7 +950,7 @@ void video_dir_screen_load(void)
             dir = fselect(fs, FSEL_NEXT_FILE, 0);
         }
         fscan_release(fs);
-        lv_obj_update_layout(guider_ui.video_dir);
+        lv_obj_update_layout(ui_scr->video_dir);
     }
 }
 
@@ -920,7 +961,11 @@ static void create_page(int page)
     } else {
         create_num = total_file_num - ONE_PAGE_MAX_NUM * (page - 1);
     }
-    lv_obj_t *contain = lv_obj_get_child(guider_ui.video_file, 3);
+    lv_ui_video_file *ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_VIDEO_FILE);
+    if (!ui_scr) {
+        return;
+    }
+    lv_obj_t *contain = lv_obj_get_child(ui_scr->video_file, 3);
     lv_group_t *def_group = lv_group_get_default();
     for (int i = 0; i < create_num; i++) {
         lv_obj_t *img_cont = lv_obj_create(contain);
@@ -1007,8 +1052,12 @@ static void create_page(int page)
 
 static void post_func_flush_img(void)
 {
-    if (lv_obj_is_valid(guider_ui.video_file)) {
-        lv_obj_t *contain = lv_obj_get_child(guider_ui.video_file, 3);
+    lv_ui_video_file *ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_VIDEO_FILE);
+    if (!ui_scr) {
+        return;
+    }
+    if (lv_obj_is_valid(ui_scr->video_file)) {
+        lv_obj_t *contain = lv_obj_get_child(ui_scr->video_file, 3);
         if (lv_obj_is_valid(contain)) {
             lv_obj_invalidate(contain);
         }
@@ -1075,7 +1124,11 @@ void video_file_screen_load(void)
         video_dec_post_msg("noCard", 0);
         return;
     }
-    lv_obj_t *contain = lv_obj_get_child(guider_ui.video_file, 3);
+    lv_ui_video_file *ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_VIDEO_FILE);
+    if (!ui_scr) {
+        return;
+    }
+    lv_obj_t *contain = lv_obj_get_child(ui_scr->video_file, 3);
     lv_obj_set_style_pad_column(contain, IMG_CONT_COL_SPACE, 0);  // 设置列间距
     lv_obj_set_style_pad_row(contain, IMG_CONT_ROW_SPACE, 0);     // 设置行间距
     lv_obj_clear_flag(contain, LV_OBJ_FLAG_SCROLL_CHAIN_HOR);
@@ -1153,13 +1206,17 @@ void video_file_screen_load(void)
 
 void video_file_screen_unload(void)
 {
+    lv_ui_video_file *ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_VIDEO_FILE);
+    if (!ui_scr) {
+        return;
+    }
     if (deleting_flag) {
         to_play_video_page = cur_page;
-        lv_obj_t *contain = lv_obj_get_child(guider_ui.video_file, 3);
+        lv_obj_t *contain = lv_obj_get_child(ui_scr->video_file, 3);
         cur_scroll_val = lv_obj_get_scroll_y(contain);
 
-        if (lv_obj_is_valid(guider_ui.video_file_view_3)) {
-            lv_obj_clean(guider_ui.video_file_view_3);
+        if (lv_obj_is_valid(ui_scr->video_file_view_3)) {
+            lv_obj_clean(ui_scr->video_file_view_3);
         }
         deleting_flag = 0;
     }
@@ -1467,7 +1524,9 @@ static int jpeg2yuv_pipeline_init(struct video_format *f)
         return -1;
     }
 
+
     char *source_name = plugin_factory_find("virtual");
+    //pipe_core->channel = plugin_source_to_channel(source_name);
     virtual_filter = pipeline_filter_add(pipe_core, source_name);
     jpeg_dec_filter = pipeline_filter_add(pipe_core, plugin_factory_find("jpeg_dec"));
     rep_filter = pipeline_filter_add(pipe_core, "rep1");
@@ -1623,4 +1682,5 @@ exit:
 }
 
 #endif
+
 #endif

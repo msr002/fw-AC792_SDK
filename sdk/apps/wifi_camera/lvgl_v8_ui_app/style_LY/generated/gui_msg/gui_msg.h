@@ -70,6 +70,7 @@ typedef enum {
     GUI_MODEL_MAIN_MSG_ID = 0x001F,
     GUI_MODEL_SYS_SETTING_MSG_ID = 0x0028,
     GUI_MODEL_UPDATE_MSG_ID = 0x0042,
+    GUI_MODEL_VIDEO_DEC_MSG_ID = 0x007C,
     GUI_MODEL_VIDEO_PHOTO_MSG_ID = 0x0045,
     GUI_MODEL_VIDEO_REC_MSG_ID = 0x0052,
     GUI_SYS_MODEL_MSG_ID = 0xf000,
@@ -102,18 +103,24 @@ extern lv_subject_t *gui_msg_get_subject(int32_t msg_id);
 extern gui_msg_sub_t *gui_msg_get_sub(int32_t msg_id);
 extern gui_msg_sub_t *gui_msg_create_sub(int32_t msg_id);
 extern gui_msg_data_t *gui_msg_get_data();
+extern bool gui_msg_has_observer(lv_subject_t *subject, lv_observer_cb_t cb, lv_obj_t *obj, void *user_data);
+extern void gui_msg_setup_component(bool subscribe_enabled, bool event_enabled, lv_subject_t *subject, lv_obj_t *target_obj, gui_msg_data_t *msg_data, lv_observer_cb_t observer_cb, int32_t msg_id, gui_msg_action_t msg_action, gui_msg_data_type_t data_type, lv_event_cb_t event_cb);
 
 extern void gui_msg_set_visible_by_bool_cb(lv_observer_t *observer, lv_subject_t *subject);
 extern void gui_msg_set_label_text_by_string_cb(lv_observer_t *observer, lv_subject_t *subject);
 extern void gui_msg_set_control_state_by_int32_cb(lv_observer_t *observer, lv_subject_t *subject);
 extern void gui_msg_set_roller_roller_name_by_string_cb(lv_observer_t *observer, lv_subject_t *subject);
 extern void gui_msg_set_bar_bar_value_by_int32_cb(lv_observer_t *observer, lv_subject_t *subject);
+extern void gui_msg_set_imglist_selected_index_by_int32_cb(lv_observer_t *observer, lv_subject_t *subject);
+extern void gui_msg_set_textarea_text_by_string_cb(lv_observer_t *observer, lv_subject_t *subject);
+extern void gui_msg_change_textarea_text_cb(lv_event_t *e);
 #if LV_USE_OBSERVER
 #include "./gui_model_msg.h"
 #include "./gui_model_global_subpage_msg.h"
 #include "./gui_model_main_msg.h"
 #include "./gui_model_sys_setting_msg.h"
 #include "./gui_model_update_msg.h"
+#include "./gui_model_video_dec_msg.h"
 #include "./gui_model_video_photo_msg.h"
 #include "./gui_model_video_rec_msg.h"
 #include "./gui_sys_model_msg.h"

@@ -23,6 +23,7 @@ extern lv_font_t lv_font_montserratMedium_22;
 extern lv_font_t lv_font_FangZhengKaiTiJianTi_1_24;
 extern lv_font_t lv_font_FangZhengKaiTiJianTi_1_16;
 extern lv_font_t lv_font_montserratMedium_16;
+extern lv_font_t lv_font_montserratMedium_20;
 
 void init_gui_fonts();
 

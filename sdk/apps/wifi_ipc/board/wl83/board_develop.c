@@ -10,6 +10,7 @@
 #include "device/gpio.h"
 #include "server/audio_dev.h"
 #include "asm/includes.h"
+#include "asm/exti.h"
 #if TCFG_USB_SLAVE_ENABLE || TCFG_USB_HOST_ENABLE
 #include "otg.h"
 #include "usb_host.h"
@@ -452,7 +453,7 @@ PAP_PLATFORM_DATA_BEGIN(pap_data)
     .port_sel               = PAP_PORT_A,
     .timing_setup           = PAP_TS_0_CLK,
     .timing_hold            = PAP_TH_0_CLK,
-    .timing_width           = PAP_TW_1_CLK,
+    .timing_width           = PAP_TW_3_CLK,
 PAP_PLATFORM_DATA_END();
 #endif
 
@@ -955,7 +956,7 @@ static const struct video_platform_data video1_data = {
 #endif // CONFIG_VIDEO1_ENABLE
 
 
-#ifdef CONFIG_VIDEO2_ENABLE
+#ifdef CONFIG_UVC_VIDEO_ENABLE
 UVC_PLATFORM_DATA_BEGIN(uvc_data)
     .width = 1280,//1280,
     .height = 720,//480,
@@ -965,13 +966,30 @@ UVC_PLATFORM_DATA_BEGIN(uvc_data)
     .put_msg = 0,
 UVC_PLATFORM_DATA_END()
 
-static const struct video_subdevice_data video2_subdev_data[] = {
+static const struct video_subdevice_data video10_subdev_data[] = {
     { VIDEO_TAG_UVC, (void *)&uvc_data },
 };
-static const struct video_platform_data video2_data = {
-    .data = video2_subdev_data,
-    .num = ARRAY_SIZE(video2_subdev_data),
+static const struct video_platform_data video10_data = {
+    .data = video10_subdev_data,
+    .num = ARRAY_SIZE(video10_subdev_data),
 };
+
+static const struct video_subdevice_data video11_subdev_data[] = {
+    { VIDEO_TAG_UVC, (void *)&uvc_data },
+};
+static const struct video_platform_data video11_data = {
+    .data = video11_subdev_data,
+    .num = ARRAY_SIZE(video11_subdev_data),
+};
+
+static const struct video_subdevice_data video12_subdev_data[] = {
+    { VIDEO_TAG_UVC, (void *)&uvc_data },
+};
+static const struct video_platform_data video12_data = {
+    .data = video12_subdev_data,
+    .num = ARRAY_SIZE(video12_subdev_data),
+};
+
 #endif
 
 
@@ -1029,32 +1047,32 @@ static const struct video_platform_data video3_data = {
 #if defined CONFIG_BT_ENABLE || TCFG_WIFI_ENABLE
 #include "wifi/wifi_connect.h"
 const struct wifi_calibration_param wifi_calibration_param = {
-    .xosc_l     = 0x7,// 调节左晶振电容
-    .xosc_r     = 0x7,// 调节右晶振电容
+    .xosc_l     = 0xb,// 调节左晶振电容
+    .xosc_r     = 0xb,// 调节右晶振电容
     .pa_trim_data = {1, 7, 4, 7, 11, 1, 7},// 根据MP测试生成PA TRIM值
 	.mcs_dgain    = {
-        50,//11B_1M
-        50,//11B_2.2M
-        50,//11B_5.5M
-        50,//11B_11M
+        43,//11B_1M
+        42,//11B_2.2M
+        42,//11B_5.5M
+        41,//11B_11M
 
-        72,//11G_6M
-        72,//11G_9M
-        85,//11G_12M
-        80,//11G_18M
-        64,//11G_24M
-        64,//11G_36M
-        62,//11G_48M
-        52,//11G_54M
+        51,//11G_6M
+        50,//11G_9M
+        60,//11G_12M
+        51,//11G_18M
+        44,//11G_24M
+        44,//11G_36M
+        43,//11G_48M
+        38,//11G_54M
 
-        72,//11N_MCS0
-        90,//11N_MCS1
-        80,//11N_MCS2
-        64,//11N_MCS3
-        64,//11N_MCS4
-        64,//11N_MCS5
-        50,//11N_MCS6
-        43,//11N_MCS7
+        50,//11N_MCS0
+        71,//11N_MCS1
+        52,//11N_MCS2
+        44,//11N_MCS3
+        44,//11N_MCS4
+        43,//11N_MCS5
+        38,//11N_MCS6
+        33,//11N_MCS7
     }
 };
 #endif
@@ -1234,7 +1252,6 @@ REGISTER_DEVICES(device_table) = {
     { "video1.*",  &video_dev_ops, (void *)&video1_data },
 #endif
 #ifdef CONFIG_VIDEO2_ENABLE
-    {"uvc", &uvc_dev_ops, NULL},
     { "video2.*",  &video_dev_ops, (void *)&video2_data },
 #endif
 
@@ -1248,6 +1265,12 @@ REGISTER_DEVICES(device_table) = {
 #endif
     { "videoengine",  &video_engine_ops, NULL },
 
+#ifdef CONFIG_UVC_VIDEO_ENABLE
+    {"uvc", &uvc_dev_ops, NULL},
+    { "video10.*",  &video_dev_ops, (void *)&video10_data },
+    { "video11.*",  &video_dev_ops, (void *)&video11_data },
+    { "video12.*",  &video_dev_ops, (void *)&video12_data },
+#endif
 
 
 #if defined CONFIG_VIDEO_ENABLE || defined CONFIG_UI_ENABLE
