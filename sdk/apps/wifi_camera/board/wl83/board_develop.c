@@ -905,8 +905,8 @@ static const struct camera_platform_data camera0_data_mipi = {
         .clk_inv = 0,
         .d0_rmap = CSI2_X1_LANE,
         .d0_inv = 0,
-        .tval_hstt = 12,
-        .tval_stto = 12,
+        .tval_hstt = 52,
+        .tval_stto = 52,
     }
 };
 

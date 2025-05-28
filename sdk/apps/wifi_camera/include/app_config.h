@@ -424,6 +424,8 @@
 //默认间隔录影不允许连接实时流
 #define CONFIG_NET_VDIEO_GAP_ENABLE 0
 
+#define CONFIG_NET_SCR  /*网络投屏*/
+
 /*-------------网络端口----------------*/
 #define CTP_CTRL_PORT   	3333
 #define CDP_CTRL_PORT   	2228

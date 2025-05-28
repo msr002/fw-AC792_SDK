@@ -2,7 +2,8 @@
     "compile":{
 		"macroPath":"./SDK/apps/wifi_soundbox/board/wl83/sdk_config.h",
 		"constPath":"./SDK/apps/wifi_soundbox/board/wl83/sdk_config.c",
-        "streamMacroPath":"./SDK/apps/wifi_soundbox/board/wl83/jlstream_node_cfg.h"
+        "streamMacroPath":"./SDK/apps/wifi_soundbox/board/wl83/jlstream_node_cfg.h",
+		"makeTask":"ac792n_wifi_soundbox"
 	},
     "protocol":{
 	 "version": 1

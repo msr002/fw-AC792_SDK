@@ -1237,6 +1237,9 @@
 <Unit filename="../../../../apps/common/rf_fcc_tool/include/rf_fcc_main.h" />
 <Unit filename="../../../../apps/common/rf_fcc_tool/rf_fcc_main.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/common/rf_fcc_tool/wifi_adaptivity.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="../../../../apps/common/screen_mirror/screen_mirror_adapter.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="../../../../apps/common/screen_mirror/screen_mirror_api.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="../../../../apps/common/screen_mirror/screen_mirror_api.h" />
 <Unit filename="../../../../apps/common/system/app_power_manage.h" />
 <Unit filename="../../../../apps/common/system/device_mount.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/common/system/flash_write_protect.c"><Option compilerVer="CC"/></Unit>

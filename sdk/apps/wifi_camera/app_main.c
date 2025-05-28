@@ -191,7 +191,7 @@ const struct task_info task_info_table[] = {
 #endif
     { "file_cache",          26,     512,      0 },
     { "write_file",          25,     512,      0 },
-    { "vir_data_tx",         25,     256,      0 },
+    { "vir_data_tx",         25,     768,      0 },
     /* 麦克风音效任务优先级要高 */
     { "mic_effect",          26,     768,      0 },
     /* 为了防止dac buf太大，通话一开始一直解码，导致编码输入数据需要很大的缓存，这里提高编码的优先级 */
@@ -520,11 +520,11 @@ void app_main()
 
     it.name	= "video_rec";//APP状态机在：video_rec.c
     it.action = ACTION_VIDEO_REC_MAIN;
-    start_app(&it);
+    /* start_app(&it); */
+    app_mode_change(APP_MODE_REC);
+    app_send_message(APP_MSG_REC_MAIN, 0);
+
 #endif
-
-    /* app_mode_change(APP_MODE_LOCAL); */
-
     /*生成文件列表*/
     if (dev_online(SDX_DEV)) {
         char buf[64];

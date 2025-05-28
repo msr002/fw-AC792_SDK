@@ -115,7 +115,7 @@ __exit0:
 
 }
 
-int video_rec_recorder_close(void *priv)
+int video_mic_recorder_close(void *priv)
 {
     struct video_rec_recorder *recorder = (struct video_rec_recorder *)priv;
 

@@ -6,7 +6,6 @@
 # 3. 确认 ulimit -n 的结果足够大（建议大于8096），否则链接可能会因为打开文件太多而失败
 #   可以通过 ulimit -n 8096 来设置一个较大的值
 # 支持的目标
-# make ac792n_wifi_soundbox
 # make ac792n_demo_demo_ui
 # make ac792n_demo_demo_hello
 # make ac792n_demo_demo_edr
@@ -16,19 +15,13 @@
 # make ac792n_demo_demo_ble
 # make ac792n_wifi_camera
 
-.PHONY: all clean ac792n_wifi_soundbox ac792n_demo_demo_ui ac792n_demo_demo_hello ac792n_demo_demo_edr ac792n_demo_demo_wifi ac792n_demo_demo_wifi_ext ac792n_demo_demo_audio ac792n_demo_demo_ble ac792n_wifi_camera clean_ac792n_wifi_soundbox clean_ac792n_demo_demo_ui clean_ac792n_demo_demo_hello clean_ac792n_demo_demo_edr clean_ac792n_demo_demo_wifi clean_ac792n_demo_demo_wifi_ext clean_ac792n_demo_demo_audio clean_ac792n_demo_demo_ble clean_ac792n_wifi_camera
+.PHONY: all clean ac792n_demo_demo_ui ac792n_demo_demo_hello ac792n_demo_demo_edr ac792n_demo_demo_wifi ac792n_demo_demo_wifi_ext ac792n_demo_demo_audio ac792n_demo_demo_ble ac792n_wifi_camera clean_ac792n_demo_demo_ui clean_ac792n_demo_demo_hello clean_ac792n_demo_demo_edr clean_ac792n_demo_demo_wifi clean_ac792n_demo_demo_wifi_ext clean_ac792n_demo_demo_audio clean_ac792n_demo_demo_ble clean_ac792n_wifi_camera
 
-all: ac792n_wifi_soundbox ac792n_demo_demo_ui ac792n_demo_demo_hello ac792n_demo_demo_edr ac792n_demo_demo_wifi ac792n_demo_demo_wifi_ext ac792n_demo_demo_audio ac792n_demo_demo_ble ac792n_wifi_camera
+all: ac792n_demo_demo_ui ac792n_demo_demo_hello ac792n_demo_demo_edr ac792n_demo_demo_wifi ac792n_demo_demo_wifi_ext ac792n_demo_demo_audio ac792n_demo_demo_ble ac792n_wifi_camera
 	@echo +ALL DONE
 
-clean: clean_ac792n_wifi_soundbox clean_ac792n_demo_demo_ui clean_ac792n_demo_demo_hello clean_ac792n_demo_demo_edr clean_ac792n_demo_demo_wifi clean_ac792n_demo_demo_wifi_ext clean_ac792n_demo_demo_audio clean_ac792n_demo_demo_ble clean_ac792n_wifi_camera
+clean: clean_ac792n_demo_demo_ui clean_ac792n_demo_demo_hello clean_ac792n_demo_demo_edr clean_ac792n_demo_demo_wifi clean_ac792n_demo_demo_wifi_ext clean_ac792n_demo_demo_audio clean_ac792n_demo_demo_ble clean_ac792n_wifi_camera
 	@echo +CLEAN DONE
-
-ac792n_wifi_soundbox:
-	$(MAKE) -C apps/wifi_soundbox/board/wl83 -f Makefile
-
-clean_ac792n_wifi_soundbox:
-	$(MAKE) -C apps/wifi_soundbox/board/wl83 -f Makefile clean
 
 ac792n_demo_demo_ui:
 	$(MAKE) -C apps/demo/demo_ui/board/wl83 -f Makefile

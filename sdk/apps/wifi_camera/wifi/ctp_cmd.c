@@ -21,6 +21,7 @@
 #include "wifi/wifi_connect.h"
 #include "event/key_event.h"
 #include "asm/includes.h"
+#include "screen_mirror/screen_mirror_api.h"
 #if TCFG_USB_SLAVE_ENABLE || TCFG_USB_HOST_ENABLE
 #include "usb_stack.h"
 #endif
