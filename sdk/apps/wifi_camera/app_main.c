@@ -14,7 +14,7 @@
 #include "asm/gpio.h"
 #include "asm/clock.h"
 #include "ctp_server.h"
-/* #include "logo_show.h" */
+#include "app_power_manage.h"
 #include "audio_config.h"
 #include "mic_effect.h"
 #if TCFG_LOCAL_TWS_ENABLE
@@ -51,6 +51,12 @@ const struct irq_info irq_info_table[] = {
     { IRQ_SOFT4_IDX,      7,   1    }, //此中断强制注册到cpu1
     { -2,     			-2,   -2   },//如果加入了该行, 那么只有该行之前的中断注册到对应核, 其他所有中断强制注册到CPU0
 #endif
+
+    { IRQ_BT_TIMEBASE_IDX,  5,   0 },
+    { IRQ_BLE_RX_IDX,       5,   0 },
+    { IRQ_BLE_EVENT_IDX,    5,   0 },
+    { IRQ_BT_CLKN_IDX,      5,   0 },
+    { IRQ_BREDR_IDX,        5,   0 },
 
     { -1,     -1,   -1    },
 };
@@ -250,7 +256,6 @@ int net_video_event_hander(void *e)
         return true;
         break;
     case NET_EVENT_DATA:
-        /* printf("IN NET_EVENT_DATA\n"); */
         break;
     }
     return false;
@@ -264,9 +269,6 @@ int net_video_event_hander(void *e)
  */
 static void sd_event_handler(struct device_event *event)
 {
-
-
-    /* struct vfs_partition *part = NULL; */
     switch (event->event) {
 
     case DEVICE_EVENT_IN:
@@ -285,13 +287,8 @@ static void sd_event_handler(struct device_event *event)
 }
 
 
-#include "app_power_manage.h"
 static void power_off_timer_cb(void *p)
 {
-    //杀掉lvgl线程
-
-
-    //软关机
     sys_power_poweroff();
 }
 
@@ -369,34 +366,102 @@ static int device_event_handler(struct sys_event *e)
 }
 
 
-/*
- *录像app的按键响应函数
- */
-static int default_key_event_handler(struct key_event *key)
+void app_default_volume_change_handler(int inc)
 {
-    int err;
+    if (inc) {
+        app_audio_volume_up(10);
+#if TCFG_LOCAL_TWS_ENABLE && TCFG_LOCAL_TWS_SYNC_VOL
+        local_tws_sync_vol();
+#endif
+#if (THIRD_PARTY_PROTOCOLS_SEL & MULTI_BOX_ADV_EN)
+        multi_box_bis_change_volume_notify();
+#endif
+    } else {
+        app_audio_volume_down(10);
 
-
-    switch (key->action) {
-    case KEY_EVENT_LONG:
-        switch (key->value) {
-        case KEY_POWER:
-            sys_power_shutdown();
-            break;
+        if (app_audio_get_volume(APP_AUDIO_CURRENT_STATE) == app_audio_get_max_volume()) {
+            if (tone_player_runing() == 0) {
+#if TCFG_MAX_VOL_PROMPT
+                play_tone_file(get_tone_files()->max_vol);
+#endif
+            }
         }
-        break;
+#if TCFG_LOCAL_TWS_ENABLE || TCFG_LOCAL_TWS_SYNC_VOL
+        local_tws_sync_vol();
+#endif
+#if (THIRD_PARTY_PROTOCOLS_SEL & MULTI_BOX_ADV_EN)
+        multi_box_bis_change_volume_notify();
+#endif
+    }
+}
 
-    case KEY_EVENT_DOUBLE_CLICK:
-        printf("----%s----%d\n", __func__, __LINE__);
+static void app_default_key_click(struct key_event *key)
+{
+    switch (key->value) {
+    case KEY_OK:
+        break;
+    case KEY_VOLUME_DEC:
+    case KEY_UP:
+    case KEY_PREV:
+        app_default_volume_change_handler(0);
+        break;
+    case KEY_VOLUME_INC:
+    case KEY_DOWN:
+    case KEY_NEXT:
+        app_default_volume_change_handler(1);
+        break;
+    case KEY_MODE:
+        app_mode_change_next();
         break;
     default:
         break;
     }
-
-    return false;
 }
 
+static void app_default_key_long(struct key_event *key)
+{
+    switch (key->value) {
+    case KEY_OK:
+#if TCFG_MIC_EFFECT_ENABLE
+        if (mic_effect_player_runing()) {
+            mic_effect_player_close();
+        } else {
+            mic_effect_player_open();
+        }
+#endif
+        break;
+    case KEY_DOWN:
+        /* app_mode_change(APP_MODE_BT); */
+        /* config_network_start(); */
+        break;
 
+    case KEY_UP:
+        /* app_mode_change(APP_MODE_BT); */
+        /* config_network_start(); */
+        break;
+
+
+
+    default:
+        break;
+    }
+}
+
+static void app_default_key_event_handler(struct key_event *key)
+{
+    switch (key->action) {
+    case KEY_EVENT_CLICK:
+        app_default_key_click(key);
+        break;
+    case KEY_EVENT_LONG:
+        app_default_key_long(key);
+        break;
+    case KEY_EVENT_HOLD:
+        break;
+    default:
+        break;
+    }
+}
 
 /*
  * 默认的系统事件处理函数
@@ -404,9 +469,17 @@ static int default_key_event_handler(struct key_event *key)
  */
 void app_default_event_handler(struct sys_event *event)
 {
+    const struct app_event_handler *handler;
+
+    for_each_app_event_handler(handler) {
+        if (event->type == handler->event && handler->from == event->from) {
+            handler->handler(event->payload);
+        }
+    }
+
     switch (event->type) {
     case SYS_KEY_EVENT:
-        default_key_event_handler((struct key_event *)event->payload);
+        app_default_key_event_handler((struct key_event *)event->payload);
         break;
     case SYS_TOUCH_EVENT:
         break;
@@ -424,26 +497,6 @@ void app_default_event_handler(struct sys_event *event)
         ASSERT(0, "unknow event type: %s\n", __func__);
         break;
     }
-}
-static void pipe_test()
-{
-#if 0
-    JL_PORTA->DIR = 0;
-    JL_PORTB->DIR = 0;
-    JL_PORTC->DIR = 0;
-    JL_PORTD->DIR = 0;
-    JL_PORTE->DIR = 0;
-    while (1) {
-        JL_PORTB->OUT ^= 0XFFFF;
-        JL_PORTC->OUT ^= 0XFFFF;
-        JL_PORTA->OUT ^= 0XFFFF;
-        JL_PORTD->OUT ^= 0XFFFF;
-        JL_PORTE->OUT ^= 0XFFFF;
-    }
-#endif
-    os_time_dly(200);
-    extern void pipeline_base_test();
-    pipeline_base_test();
 }
 
 /*
@@ -492,13 +545,7 @@ void app_main()
     u8 lcd_tools_main(void);
     lcd_tools_main();
 #endif
-
-
-    init_intent(&it);
-    it.name = "video_system";
-    it.action = ACTION_SYSTEM_MAIN;
-    start_app(&it);
-
+    app_mode_change(APP_MODE_SYSTEM);
 
 #ifdef USE_LVGL_V8_UI_DEMO
     int lvgl_main_task_init(void);
@@ -515,15 +562,11 @@ void app_main()
 #else
 
     puts("------------- wifi_camera app main-------------\n");
-    init_intent(&it);
     key_event_enable();
 
-    it.name	= "video_rec";//APP状态机在：video_rec.c
-    it.action = ACTION_VIDEO_REC_MAIN;
-    /* start_app(&it); */
     app_mode_change(APP_MODE_REC);
     app_send_message(APP_MSG_REC_MAIN, 0);
-
+    /* app_mode_change(APP_MODE_BT); */
 #endif
     /*生成文件列表*/
     if (dev_online(SDX_DEV)) {

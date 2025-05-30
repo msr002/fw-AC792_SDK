@@ -1094,11 +1094,11 @@ void sysmenu_subpage_btnlist_keyevent_cb(lv_ui *ui)
             sys_prompt_show_ctl(3000, (void *)_("nosd"));
             return;
         }
+        sys_prompt_show_ctl(30000, (void *)_("being_formatted"));
         lv_ui_sys_prompt *sys_prompt_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_SYS_PROMPT);
         if (!sys_prompt_scr) {
             return;
         }
-        sys_prompt_show_ctl(30000, (void *)_("being_formatted"));
         lv_obj_clear_flag(sys_prompt_scr->sys_prompt_img_warn, LV_OBJ_FLAG_CLICKABLE);
         extern void video_system_format(void);
         video_system_format();

@@ -190,6 +190,10 @@
 //*********************************************************************************//
 //                                  网络相关配置                                   //
 //*********************************************************************************//
+
+#define TCFG_AI_SERVER_DISABLE                  1
+#define TCFG_DUER_ENABLE                        0
+
 #ifdef CONFIG_NET_ENABLE
 // #define CONFIG_LTE_PHY_ENABLE                //usb网卡
 #define CONFIG_WIFI_ENABLE                   //无线WIFI
@@ -782,76 +786,8 @@
 #define TCFG_POWER_ON_ENABLE_BLE                0   //开机自动打开BLE
 #define TCFG_USER_BT_CLASSIC_ENABLE             1   //经典蓝牙功能
 #define TCFG_USER_BLE_ENABLE                    1   //BLE功能使能
-#define TCFG_USER_EDR_ENABLE                    0   //EDR用户自定义协议功能
 #define TCFG_USER_EMITTER_ENABLE                0   //蓝牙发射功能
 #define TCFG_BT_DUAL_CONN_ENABLE                1   //经典蓝牙支持同时连接2台设备
-
-
-#if TCFG_USER_BLE_ENABLE
-
-#define TCFG_BLE_SECURITY_EN                    0   //配对加密使能
-
-#define TCFG_BLE_MESH_ENABLE                    0   //SIG MESH功能
-
-#ifdef CONFIG_NET_ENABLE
-
-#ifdef CONFIG_DUER_SDK_ENABLE
-#define TCFG_BT_NET_CFG_DUEROS_EN               1   //从机 百度配网专用
-#else
-#define TCFG_BT_NET_CFG_DUEROS_EN               0   //从机 百度配网专用
-#endif
-
-#ifdef CONFIG_DUI_SDK_ENABLE
-#define TCFG_BT_NET_CFG_DUI_EN                  1   //从机 思必驰配网专用
-#else
-#define TCFG_BT_NET_CFG_DUI_EN                  0   //从机 思必驰配网专用
-#endif
-
-#ifdef CONFIG_TURING_SDK_ENABLE
-#define TCFG_BT_NET_CFG_TURING_EN               1   //从机 图灵配网专用
-#else
-#define TCFG_BT_NET_CFG_TURING_EN               0   //从机 图灵配网专用
-#endif
-
-#ifdef CONFIG_TVS_SDK_ENABLE
-#define TCFG_BT_NET_CFG_TENCENT_EN              1   //从机 腾讯云配网专用
-#else
-#define TCFG_BT_NET_CFG_TENCENT_EN              0   //从机 腾讯云配网专用
-#endif
-
-#if TCFG_BT_NET_CFG_TURING_EN + TCFG_BT_NET_CFG_DUEROS_EN + TCFG_BT_NET_CFG_DUI_EN + TCFG_BT_NET_CFG_TENCENT_EN + TCFG_APP_BT_ENABLE > 0
-#define TCFG_BT_NET_CFG_EN                      0   //从机 杰理配网专用
-#else
-#define TCFG_BT_NET_CFG_EN                      0   //从机 杰理配网专用
-#endif
-
-#define TCFG_TRANS_DATA_EN                      0   //从机 传输数据
-
-#else
-
-#define TCFG_BT_NET_CFG_DUEROS_EN               0   //从机 思必驰配网专用
-#define TCFG_BT_NET_CFG_DUI_EN                  0   //从机 思必驰配网专用
-#define TCFG_BT_NET_CFG_TURING_EN               0   //从机 图灵配网专用
-#define TCFG_BT_NET_CFG_TENCENT_EN              0   //从机 腾讯云配网专用
-#define TCFG_BT_NET_CFG_EN                      0   //从机 配网专用
-#define TCFG_TRANS_DATA_EN                      1   //从机 传输数据
-
-#endif
-
-#define TCFG_BLE_MASTER_CENTRAL_EN              0   //主机 client角色
-#define TCFG_BLE_HID_EN                         0   //从机 hid
-#define TCFG_TRANS_MULTI_BLE_EN                 0   //多机通讯
-#define TCFG_NONCONN_24G_EN                     0   //2.4g加密通讯
-
-#if (TCFG_TRANS_MULTI_BLE_EN + TCFG_BT_NET_CFG_TURING_EN + TCFG_BT_NET_CFG_DUEROS_EN + TCFG_BT_NET_CFG_DUI_EN + TCFG_BT_NET_CFG_EN + TCFG_BLE_HID_EN + TCFG_TRANS_DATA_EN + TCFG_APP_BT_ENABLE + TCFG_NONCONN_24G_EN > 1)
-#error "they can not enable at the same time, just select one!!!"
-#endif
-#endif
-
-#if TCFG_TRANS_MULTI_BLE_EN
-#define TCFG_TRANS_MULTI_BLE_SLAVE_NUMS         1
-#define TCFG_TRANS_MULTI_BLE_MASTER_NUMS        1
-#endif
 
 #endif
 
@@ -925,6 +861,70 @@
 #define TCFG_LE_AUDIO_APP_CONFIG                0
 #endif
 
+
+//*********************************************************************************//
+//                                  pay 配置                                       //
+//*********************************************************************************//
+#define TCFG_PAY_ALIOS_ENABLE                   0
+
+#define TCFG_PAY_ALIOS_WAY_T_HEAD               1  // 平头哥
+#define TCFG_PAY_ALIOS_WAY_SEL                  TCFG_PAY_ALIOS_WAY_T_HEAD
+
+#if (TCFG_PAY_ALIOS_WAY_SEL==TCFG_PAY_ALIOS_WAY_T_HEAD)
+#define TCFG_PAY_ALIOS_PRODUCT_MODEL            ""
+#define TCFG_PAY_ALIOS_COMPANY_NAME             "" //需要客户申请
+#define ALIPAY_SE_FW_V2_0                       1  //SE版本固件为2.0设置为1,否则设置为0
+#define ALIPAY_SE_USE_RESET_PIN                 0  //置1加密芯片采用reset管脚复位进低功耗，置0 上下电进低功耗
+#define SE_POWER_GPIO                           0  //使用GPIO口给SE芯片电源脚供电
+#endif
+
+
+//*********************************************************************************//
+//                                   AI配置                                        //
+//*********************************************************************************//
+#define RCSP_MODE_EN                            (1 << 0)
+#define TRANS_DATA_EN                           (1 << 1)
+#define LL_SYNC_EN                              (1 << 2)
+#define TUYA_DEMO_EN                            (1 << 3)
+#define ANCS_CLIENT_EN                          (1 << 4)
+#define GFPS_EN                                 (1 << 5)
+#define REALME_EN                               (1 << 6)
+#define TME_EN                                  (1 << 7)
+#define DMA_EN                                  (1 << 8)
+#define GMA_EN                                  (1 << 9)
+#define MMA_EN                                  (1 << 10)
+#define FMNA_EN                                 (1 << 11)
+#define SWIFT_PAIR_EN                           (1 << 12)
+#define LE_AUDIO_CIS_RX_EN                      (1 << 13)
+#define LE_AUDIO_CIS_TX_EN                      (1 << 14)
+#define LE_AUDIO_BIS_RX_EN                      (1 << 15)
+#define LE_AUDIO_BIS_TX_EN                      (1 << 16)
+#define HONOR_EN                                (1 << 17)
+#define ONLINE_DEBUG_EN                         (1 << 18)
+#define CUSTOM_DEMO_EN                          (1 << 19)   // 第三方协议的demo，用于示例客户开发自定义协议
+#define MULTI_BOX_ADV_EN                        (1 << 20)
+#define MIJIA_EN                                (1 << 21)
+#define DUEROS_EN                               (1 << 28)
+#define NET_CFG_EN                              (1 << 29)
+#define LE_HOGP_EN                              (1 << 30)
+#define ALIPAY_EN                               (1 << 31)
+
+#if TCFG_THIRD_PARTY_PROTOCOLS_ENABLE
+#if TCFG_PAY_ALIOS_ENABLE
+#define ALIPAY_SEL                              ALIPAY_EN
+#else
+#define ALIPAY_SEL                              0
+#endif
+#if TCFG_AI_SERVER == TCFG_DUER_ENABLE
+#define THIRD_PARTY_PROTOCOLS_SEL               ((TCFG_THIRD_PARTY_PROTOCOLS_SEL & ~NET_CFG_EN) | DUEROS_EN)
+#else
+#define THIRD_PARTY_PROTOCOLS_SEL               (TCFG_THIRD_PARTY_PROTOCOLS_SEL|ALIPAY_SEL)
+#endif
+#endif
+
+#ifndef THIRD_PARTY_PROTOCOLS_SEL
+#define THIRD_PARTY_PROTOCOLS_SEL               0
+#endif
 
 
 //*********************************************************************************//

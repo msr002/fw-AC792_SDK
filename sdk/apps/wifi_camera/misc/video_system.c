@@ -1,11 +1,8 @@
-#include "system/includes.h"
-/* #include "server/ui_server.h" */
-#include "video_system.h"
-
-#include "action.h"
-/* #include "style.h" */
 #include "app_config.h"
-
+#include "system/includes.h"
+#include "video_system.h"
+#include "action.h"
+#include "app_msg.h"
 
 extern int video_sys_set_config(struct intent *it);
 
@@ -24,15 +21,6 @@ static int video_sys_init(void)
     }
     return 0;
 }
-static int show_main_ui()
-{
-
-    return 0;
-}
-static void hide_main_ui()
-{
-}
-
 
 static int state_machine(struct application *app, enum app_state state, struct intent *it)
 {
@@ -40,34 +28,13 @@ static int state_machine(struct application *app, enum app_state state, struct i
 
     switch (state) {
     case APP_STA_CREATE:
+
+        printf("===========================%s  %d", __func__, __LINE__);
         video_sys_init();
         sys_fun_restore();
 
         break;
     case APP_STA_START:
-        if (!it) {
-            break;
-        }
-        switch (it->action) {
-        case ACTION_SYSTEM_MAIN:
-            break;
-        case ACTION_SYSTEM_SD_CARD_FORMAT:
-#if defined CONFIG_ENABLE_VLIST
-            FILE_LIST_EXIT();
-#endif
-            err = sdcard_storage_device_format(SDX_DEV);
-#if defined CONFIG_ENABLE_VLIST
-            FILE_LIST_IN_MEM(1);
-#endif
-#ifdef CONFIG_WIFI_ENABLE
-            net_video_rec_fmt_notify();
-#endif
-            break;
-        case ACTION_SYSTEM_SET_CONFIG:
-            err = video_sys_set_config(it);
-            /* db_flush(); */
-            break;
-        }
         break;
     case APP_STA_PAUSE:
         break;
@@ -83,6 +50,41 @@ static int state_machine(struct application *app, enum app_state state, struct i
 }
 
 
+static int msg_handler(struct application *app, int *msg)
+{
+    int err = 0;
+    int ret = 0;
+    struct intent *it = NULL;
+
+    printf("===========================%s  %d", __func__, __LINE__);
+    it = (struct intent *)msg[1];
+    switch (msg[0]) {
+    case APP_MSG_SUSPEND:
+        break;
+    case APP_MSG_RESUME:
+        break;
+    case APP_MSG_STOP:
+        break;
+    case APP_MSG_SYSTEM_SD_CARD_FORMAT:
+        printf("===========================%s  %d", __func__, __LINE__);
+#if defined CONFIG_ENABLE_VLIST
+        FILE_LIST_EXIT();
+#endif
+        err = sdcard_storage_device_format(SDX_DEV);
+#if defined CONFIG_ENABLE_VLIST
+        FILE_LIST_IN_MEM(1);
+#endif
+#ifdef CONFIG_WIFI_ENABLE
+        net_video_rec_fmt_notify();
+#endif
+        break;
+    case APP_MSG_SYSTEM_SET_CONFIG:
+        err = video_sys_set_config(it);
+        break;
+    default:
+        break;
+    }
+}
 
 
 
@@ -90,6 +92,7 @@ static int state_machine(struct application *app, enum app_state state, struct i
 static const struct application_operation video_system_ops = {
     .state_machine  = state_machine,
     .event_handler 	= NULL,
+    .msg_handler    = msg_handler,
 };
 
 REGISTER_APPLICATION(app_video_system) = {

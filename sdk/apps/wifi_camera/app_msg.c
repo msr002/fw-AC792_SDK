@@ -19,6 +19,7 @@ typedef struct app_mode_table {
 } app_mode_table_t;
 
 static const app_mode_table_t app_mode_table[] = {
+    { "video_system",          APP_MSG_SYSTEM_BOTTOM,           APP_MSG_SYSTEM_TOP,         APP_MODE_SYSTEM   },
     { "video_rec",             APP_MSG_REC_BOTTOM,              APP_MSG_REC_TOP,            APP_MODE_REC   },
     { "video_dec",             APP_MSG_DEC_BOTTOM,              APP_MSG_DEC_TOP,            APP_MODE_DEC   },
     { "video_photo",           APP_MSG_PHOTO_BOTTOM,            APP_MSG_PHOTO_TOP,          APP_MODE_PHOTO },

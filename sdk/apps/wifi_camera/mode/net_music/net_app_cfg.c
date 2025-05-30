@@ -49,7 +49,7 @@ static int net_wifi_event_handler(void *evt)
     case NET_EVENT_CONNECTED:
         log_info("NET_EVENT_CONNECTED");
         if (!is_in_config_network_state()) {
-#if TCFG_BT_NET_CFG_EN
+#if TCFG_BT_NET_CFG_EN || (THIRD_PARTY_PROTOCOLS_SEL & NET_CFG_EN)
             void ble_cfg_net_result_notify(int event);
             ble_cfg_net_result_notify(event->event);
 #endif

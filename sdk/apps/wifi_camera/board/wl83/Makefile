@@ -160,6 +160,7 @@ INCLUDES := \
 	-I../../../../apps/wifi_camera/misc \
 	-I../../../../include_lib/driver/device/video \
 	-I../../../../apps \
+	-I../../../../apps/common/third_party_profile \
 	-I../../../../apps/common/include \
 	-I../../../../apps/common/ui/include \
 	-I../../../../apps/common/system \
@@ -226,6 +227,10 @@ INCLUDES := \
 	-I../../../../apps/common/product_test_tool/includes \
 	-I../../../../apps/common/gsensor \
 	-I../../../../apps/common/net/testbox/include \
+	-I../../../../apps/common/third_party_profile/mijia \
+	-I../../../../apps/common/third_party_profile/mijia/mijia_ble_api \
+	-I../../../../apps/common/third_party_profile/mijia/mijia_ble_libs \
+	-I../../../../apps/common/third_party_profile/alipay \
 	-I../../../../apps/common/lcd/include \
 	-I../../../../apps/wifi_camera/mode/bt/le_audio/include \
 	-I../../../../apps/wifi_camera/mode/bt/le_audio/include/big \
@@ -826,6 +831,27 @@ c_SRC_FILES := \
 	../../../../apps/common/system/perf_counter/perf_counter.c \
 	../../../../apps/common/system/power_manage.c \
 	../../../../apps/common/system/version.c \
+	../../../../apps/common/third_party_profile/alipay/le_alipay.c \
+	../../../../apps/common/third_party_profile/custom_protocol_demo/custom_protocol.c \
+	../../../../apps/common/third_party_profile/le_hogp/le_hogp.c \
+	../../../../apps/common/third_party_profile/mijia/mijia_api.c \
+	../../../../apps/common/third_party_profile/mijia/mijia_ble_api/mible_api.c \
+	../../../../apps/common/third_party_profile/mijia/mijia_ble_api/mible_mcu.c \
+	../../../../apps/common/third_party_profile/mijia/mijia_ble_libs/mi_config.c \
+	../../../../apps/common/third_party_profile/mijia/mijia_ble_libs/third_party/SEGGER_RTT/SEGGER_RTT.c \
+	../../../../apps/common/third_party_profile/mijia/mijia_ble_libs/third_party/SEGGER_RTT/SEGGER_RTT_printf.c \
+	../../../../apps/common/third_party_profile/mijia/mijia_ble_libs/third_party/mbedtls/ccm.c \
+	../../../../apps/common/third_party_profile/mijia/mijia_ble_libs/third_party/mbedtls/sha256_hkdf.c \
+	../../../../apps/common/third_party_profile/mijia/mijia_ble_libs/third_party/micro-ecc/uECC.c \
+	../../../../apps/common/third_party_profile/mijia/mijia_ble_libs/third_party/pt/pt_misc.c \
+	../../../../apps/common/third_party_profile/mijia/mijia_main.c \
+	../../../../apps/common/third_party_profile/multi_box_adv/multi_box_adv.c \
+	../../../../apps/common/third_party_profile/multi_box_adv/multi_box_role.c \
+	../../../../apps/common/third_party_profile/multi_box_adv/multi_box_scan.c \
+	../../../../apps/common/third_party_profile/multi_protocol_common.c \
+	../../../../apps/common/third_party_profile/multi_protocol_event.c \
+	../../../../apps/common/third_party_profile/multi_protocol_main.c \
+	../../../../apps/common/third_party_profile/net_cfg/le_net_cfg.c \
 	../../../../apps/common/update/fs_update.c \
 	../../../../apps/common/update/http_update.c \
 	../../../../apps/common/update/net_update.c \
