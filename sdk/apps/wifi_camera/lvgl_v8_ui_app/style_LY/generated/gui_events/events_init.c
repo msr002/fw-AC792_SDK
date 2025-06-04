@@ -1311,6 +1311,7 @@ static void sys_prompt_img_warn_event_handler(lv_event_t *e)
             }
             if (ui_scr->sys_prompt_del == false && lv_obj_is_valid(ui_scr->sys_prompt)) {
                 lv_obj_add_flag(ui_scr->sys_prompt, LV_OBJ_FLAG_HIDDEN);
+                unload_scr_sys_prompt(&guider_ui);
             }
 
         }

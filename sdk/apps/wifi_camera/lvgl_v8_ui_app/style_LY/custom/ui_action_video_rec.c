@@ -1005,6 +1005,9 @@ void video_rec_post_msg(const char *msg, ...)
         rec_fs_err_handler(msg, 0);
     } else if (strstr(msg, "gapErr")) {
         rec_gap_err_handler(msg, 0);
+    } else if (strstr(msg, "sdStatus")) {
+        post_msg2sd_icon(msg, va_arg(argptr, int)); //获取第一个int数据
+
     } else {
         printf("[chili] %s your msg [%s] no callback! \n", __func__, msg, __LINE__);
     }

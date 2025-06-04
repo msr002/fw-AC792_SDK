@@ -18,10 +18,13 @@ static void sys_prompt_timer_cb(lv_timer_t *timer)
 {
     printf("[chili]: %s %d\n", __func__, __LINE__);
     lv_ui_sys_prompt *ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_SYS_PROMPT);
-    if (ui_scr != NULL) {
+    if (ui_scr && ui_scr->sys_prompt_del == false && lv_obj_is_valid(ui_scr->sys_prompt)) {
         lv_obj_add_flag(ui_scr->sys_prompt, LV_OBJ_FLAG_HIDDEN);
         unload_scr_sys_prompt(&guider_ui);
-        lv_obj_clean(ui_scr->sys_prompt);
+        /*lv_obj_clean(ui_scr->sys_prompt);*/
+        gui_msg_init_ui();
+        gui_msg_init_events();
+        gui_timelines_delete();
     }
     if (prompt_timer) {//删除定时器
         lv_timer_del(prompt_timer);
@@ -53,17 +56,15 @@ void sys_prompt_show_ctl(int32_t show_time, void *tips)
             prompt_timer = lv_timer_create(sys_prompt_timer_cb, show_time, 0);
         }
         lv_ui_sys_prompt *ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_SYS_PROMPT);
-        if (!ui_scr) {
-            printf("[chili]: %s %d\n", __func__, __LINE__);
+        if (ui_scr && ui_scr->sys_prompt_del == false && lv_obj_is_valid(ui_scr->sys_prompt)) {
+            //lv_obj_clear_flag(ui_scr->sys_prompt, LV_OBJ_FLAG_HIDDEN);
+        } else {
             setup_scr_sys_prompt(&guider_ui);
             ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_SYS_PROMPT);
             lv_obj_clear_flag(ui_scr->sys_prompt, LV_OBJ_FLAG_HIDDEN);
-            printf("[chili]: %s %d\n", __func__, __LINE__);
             gui_model_main_msg_init_ui();
-            printf("[chili]: %s %d\n", __func__, __LINE__);
             gui_model_main_msg_init_events();
-        } else {
-            //lv_obj_clear_flag(ui_scr->sys_prompt, LV_OBJ_FLAG_HIDDEN);
+
 
         }
         lvgl_module_msg_send_global_ptr(GUI_MODEL_MAIN_MSG_ID_SYS_PROMPT, tips, strlen(tips), 0);
@@ -75,7 +76,7 @@ void sys_prompt_show_ctl(int32_t show_time, void *tips)
         if (ui_scr->sys_prompt_del == false && lv_obj_is_valid(ui_scr->sys_prompt)) {
             lv_obj_add_flag(ui_scr->sys_prompt, LV_OBJ_FLAG_HIDDEN);
             unload_scr_sys_prompt(&guider_ui);
-            lv_obj_clean(ui_scr->sys_prompt);
+            /*lv_obj_clean(ui_scr->sys_prompt);*/
             gui_msg_init_ui();
             gui_msg_init_events();
             delete_gui_timelines();

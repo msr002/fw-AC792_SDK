@@ -12,13 +12,14 @@
 #define  ENC_MODE_BIT_IS_SET(val, mode)   (((((val) & (mode)) == (mode)) && \
                                                  	 ((mode) !=  0u))    ? (1) : (0))
 
+
 ///  \cond DO_NOT_DOCUMENT
 enum WIFI_MODE {
     STA_MODE = 1,//STA_MODE位置必须为第一个
     AP_MODE,
+    P2P_MODE,
     SMP_CFG_MODE,
     MP_TEST_MODE,
-    P2P_MODE,
     NONE_MODE,
 };
 
@@ -41,7 +42,7 @@ enum WSC_CFG_MODE {
 struct wifi_store_info {
     enum WIFI_MODE mode;
     u8 pwd[2][64];
-    u8 ssid[2][33];
+    u8 ssid[3][33];
     enum P2P_ROLE p2p_role;
     u8 sta_cnt;
     u8 	connect_best_network;
@@ -127,9 +128,11 @@ enum WIFI_EVENT {
 
     WIFI_EVENT_P2P_START,
     WIFI_EVENT_P2P_STOP,
+    WIFI_EVENT_P2P_GC_CONNECTED,
     WIFI_EVENT_P2P_GC_DISCONNECTED,
     WIFI_EVENT_P2P_GC_NETWORK_STACK_DHCP_SUCC,
     WIFI_EVENT_P2P_GC_NETWORK_STACK_DHCP_TIMEOUT,
+    WIFI_EVENT_P2P_GO_STA_CONNECTED,
     WIFI_EVENT_PM_SUSPEND,
     WIFI_EVENT_PM_RESUME,
     WIFI_FORCE_MODE_TIMEOUT,

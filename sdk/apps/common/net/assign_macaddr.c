@@ -285,11 +285,18 @@ int init_net_device_mac_addr(char *macaddr, char ap_mode)
             } while (!bytecmp((u8 *)macaddr, 0, 6));
             //此处用户可自行修改为本地生成mac地址的算法
             macaddr[0] &= ~((1 << 0) | (1 << 1));
+
+            //p2p mac地址格式要求
+            if ((macaddr[5] & 0x01) == 0x01) {
+                macaddr[5] -= 1;
+            }
+
             memcpy(s_mac_addr, macaddr, 6);
             first = 0;
         } else {
             memcpy(macaddr, s_mac_addr, 6);
         }
+
         if (ap_mode) {
             int ret = set_flash_wifi_mac(macaddr); //AP模式需要保存mac地址,否则改密码 ios手机 重连有问题
             if (ret < 0) {
@@ -324,7 +331,14 @@ int init_net_device_mac_addr(char *macaddr, char ap_mode)
         } while (!bytecmp((u8 *)macaddr, 0, 6));
         //此处用户可自行修改为本地生成mac地址的算法
         macaddr[0] &= ~((1 << 0) | (1 << 1));
+
+        //p2p mac地址格式要求
+        if ((macaddr[5] & 0x01) == 0x01) {
+            macaddr[5] -= 1;
+        }
         memcpy(s_mac_addr, macaddr, 6);
+
+
 
         int ret = set_flash_wifi_mac(macaddr);
         if (ret < 0) {
@@ -342,3 +356,4 @@ int init_net_device_mac_addr(char *macaddr, char ap_mode)
 #endif
 
 #endif
+

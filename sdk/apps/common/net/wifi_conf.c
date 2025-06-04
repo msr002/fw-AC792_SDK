@@ -76,15 +76,11 @@ const char wifi_ap_scan_support = 0; //ap扫描开关，0为关闭，1为开启
 
 const char wifi_ap_miss_owndevice_channel = 0; //自己设备信道错开功能，0为关闭，1为开启
 
-#if defined CONFIG_NO_SDRAM_ENABLE
-const u16 MAX_PACKETS_IN_QUEUE = 16; //配置WiFi驱动最大发送数据包队列
-const u16 MAX_PACKETS_IN_MCAST_PS_QUEUE	= 4;	//配置WiFi驱动最大发送数据包队列 //8	16 modify by lyx 32
-const u16 MAX_PACKETS_IN_PS_QUEUE	=	2;	//配置WiFi驱动最大发送数据包队列  //128	/*16 */
-#else
+const char wifi_ap_rate_adapt_strategy = 0; //ap模式下的wifi速率控制策略，0为使用默认策略，1为使用新策略
+
 const u16 MAX_PACKETS_IN_QUEUE = 64; //配置WiFi驱动最大发送数据包队列
-const u16 MAX_PACKETS_IN_MCAST_PS_QUEUE = 8;  //配置WiFi驱动最大发送MCAST-power-save包队列 //modify by lyx 32
-const u16 MAX_PACKETS_IN_PS_QUEUE	= 16; //配置WiFi驱动最大发送power-save队列	//128	/*16 */
-#endif
+const u16 MAX_PACKETS_IN_MCAST_PS_QUEUE = 16;  //配置WiFi驱动最大发送MCAST-power-save包队列 //modify by lyx 32
+const u16 MAX_PACKETS_IN_PS_QUEUE	= 128; //配置WiFi驱动最大发送power-save队列	//128	/*16 */
 
 #if TCFG_RF_FCC_TEST_ENABLE
 const u8 RFIinitUseTrimValue = 0;//记忆wifi rf 初始化使用vm记忆的trim的值,可大大降低wifi初始化时间
@@ -957,3 +953,4 @@ const char log_tag_const_d_WT AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(FALSE);
 const char log_tag_const_i_WT AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(TRUE);
 const char log_tag_const_w_WT AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(TRUE);
 const char log_tag_const_e_WT AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(TRUE);
+

@@ -23,7 +23,7 @@ static void sys_prompt_timer_cb(lv_timer_t *timer)
     }
     if (ui_scr->sys_prompt_del == false && lv_obj_is_valid(ui_scr->sys_prompt)) {
         lv_obj_add_flag(ui_scr->sys_prompt, LV_OBJ_FLAG_HIDDEN);
-        //unload_scr_sys_prompt(&guider_ui);
+        unload_scr_sys_prompt(&guider_ui);
         //lv_obj_del(ui_scr->sys_prompt);
     }
     if (prompt_timer) {//删除定时器
@@ -43,10 +43,6 @@ static void sys_prompt_timer_cb(lv_timer_t *timer)
 */
 void sys_prompt_show_ctl(int32_t show_time, void *tips)
 {
-    lv_ui_sys_prompt *ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_SYS_PROMPT);
-    if (!ui_scr) {
-        return;
-    }
     printf("[chili]: %s show_time %d\n", __func__, show_time);
     if (show_time) {
         //倒计时隐藏
@@ -54,11 +50,14 @@ void sys_prompt_show_ctl(int32_t show_time, void *tips)
         if (prompt_timer == NULL) {
             prompt_timer = lv_timer_create(sys_prompt_timer_cb, show_time, 0);
         }
-        if (ui_scr->sys_prompt_del == false && lv_obj_is_valid(ui_scr->sys_prompt)) {
+        lv_ui_sys_prompt *ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_SYS_PROMPT);
+        if (ui_scr && ui_scr->sys_prompt_del == false && lv_obj_is_valid(ui_scr->sys_prompt)) {
             lv_obj_clear_flag(ui_scr->sys_prompt, LV_OBJ_FLAG_HIDDEN);
         } else {
             printf("[chili]: %s %d\n", __func__, __LINE__);
             setup_scr_sys_prompt(&guider_ui);
+            ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_SYS_PROMPT);
+            lv_obj_clear_flag(ui_scr->sys_prompt, LV_OBJ_FLAG_HIDDEN);
             printf("[chili]: %s %d\n", __func__, __LINE__);
             gui_model_main_msg_init_ui();
             printf("[chili]: %s %d\n", __func__, __LINE__);
@@ -66,6 +65,10 @@ void sys_prompt_show_ctl(int32_t show_time, void *tips)
         }
         lvgl_module_msg_send_global_ptr(GUI_MODEL_MAIN_MSG_ID_SYS_PROMPT, tips, strlen(tips), 0);
     } else {
+        lv_ui_sys_prompt *ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_SYS_PROMPT);
+        if (!ui_scr) {
+            return;
+        }
         if (ui_scr->sys_prompt_del == false && lv_obj_is_valid(ui_scr->sys_prompt)) {
             lv_obj_add_flag(ui_scr->sys_prompt, LV_OBJ_FLAG_HIDDEN);
             unload_scr_sys_prompt(&guider_ui);
