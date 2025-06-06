@@ -179,7 +179,7 @@ const struct task_info task_info_table[] = {
     {"jpg_dec",             10,     1024,   32    },
     {"video_dec_server",    16,     1024,   256   },
     {"vunpkg_server",       16,     1024,   128   },
-    {"lvgl_v8_main_task",   7,     2048,  1024   },
+    {"lvgl_v8_main_task",   25,     2048,  1024   },
 
 #ifdef CONFIG_MEDIA_ENABLE
 #if TCFG_ENC_AMR_16K_ENABLE //16k amr enc

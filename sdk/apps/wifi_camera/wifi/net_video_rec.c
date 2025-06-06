@@ -3145,17 +3145,13 @@ static int net_video_rec_state_machine(struct application *app, enum app_state s
         case ACTION_NET_SCR_REC_OPEN:
             printf("%s ACTION_NET_SCR_REC_OPEN\n", __func__);
             extern int net_video_disp_stop(int id);
-            extern int net_hide_main_ui(void);
             net_video_disp_stop(0);
-            net_hide_main_ui();
             break;
 
         case ACTION_NET_SCR_REC_CLOSE:
             printf("%s ACTION_NET_SCR_REC_CLOSE\n", __func__);
             extern int net_video_disp_start(int id);
-            extern int net_show_main_ui(void);
             net_video_disp_start(0);
-            net_show_main_ui();
             break;
 #endif
         }

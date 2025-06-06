@@ -22,6 +22,7 @@
 #include "event/key_event.h"
 #include "asm/includes.h"
 #include "screen_mirror/screen_mirror_api.h"
+#include "lcd_config.h"
 #if TCFG_USB_SLAVE_ENABLE || TCFG_USB_HOST_ENABLE
 #include "usb_stack.h"
 #endif
@@ -747,8 +748,9 @@ static int cmd_put_net_scr(void *priv, char *content)
     tmp  = json_object_object_get(parm, "status");
     s_str = json_object_get_string(tmp);
     status = atoi(s_str);
-    snprintf(buf, sizeof(buf), "status:%d", status);
+    snprintf(buf, sizeof(buf), "status:%d,w:%d,h:%d,fps:25", status, LCD_W, LCD_H);
     if (1 == status) {
+#if 0   //最新协商,采用设备主动发送过去的宽高,FPS
         tmp  = json_object_object_get(parm, "w");
         s_str = json_object_get_string(tmp);
         cfg.src_w = atoi(s_str);
@@ -760,6 +762,7 @@ static int cmd_put_net_scr(void *priv, char *content)
         tmp  = json_object_object_get(parm, "fps");
         s_str = json_object_get_string(tmp);
         cfg.fps = atoi(s_str);
+#endif
         if (ctp_srv_get_cli_addr(priv)) {
             memcpy(&cfg.cli_addr, ctp_srv_get_cli_addr(priv), sizeof(struct sockaddr_in));
         } else {

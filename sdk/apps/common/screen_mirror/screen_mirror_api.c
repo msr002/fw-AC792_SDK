@@ -45,10 +45,16 @@ int net_scr_init(struct __NET_SCR_CFG *cfg)
     imc_filter = pipeline_filter_add(pipe_core, find_use_for_display_plugin("imc"));
     disp_filter = pipeline_filter_add(pipe_core, plugin_factory_find("disp"));
 
+#if 0   //最新协商,采用设备主动发送过去的宽高,FPS
     //数据源数据格式
     f.src_width = __ALIGN_16(net_scr_info.cfg.src_w);   //为了兼容YUV420格式, 如确认是YUV422/444格式, 可配置8对齐
     f.src_height = net_scr_info.cfg.src_h;
     f.fps = net_scr_info.cfg.fps;
+#else
+    f.src_width = LCD_W;
+    f.src_height = LCD_H;
+    f.fps = 25;
+#endif
 
     //显示配置
     f.win.left 	 = 0;

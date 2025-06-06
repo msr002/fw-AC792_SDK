@@ -32,6 +32,7 @@
 #define WIFI_AP_PWD        "12345678"           //配置 AP模式的密码
 #define WIFI_STA_SSID      "WL83"               //配置 STA模式的SSID
 #define WIFI_STA_PWD       "12345678"           //配置 STA模式的密码
+#define WIFI_P2P_DEVICE_NAME "AP79N-P2P"
 
 
 #ifdef CONFIG_RELEASE_ENABLE

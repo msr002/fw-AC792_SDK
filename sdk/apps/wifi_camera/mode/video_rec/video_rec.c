@@ -1,6 +1,5 @@
 #include "system/includes.h"
 #include "asm/includes.h"
-/* #include "server/ui_server.h" */
 #include "server/video_server.h"
 #include "server/video_engine_server.h"
 #include "video_rec.h"
@@ -162,8 +161,6 @@ extern int net_video_rec_event_start(void);
 static int video_rec_get_abr(u32 width);
 static void video_disp_stop(int id);
 static int video_disp_start(int id, const struct video_window *win);
-static int show_main_ui();
-static void hide_main_ui();
 
 /**********************************************************************************/
 #endif
@@ -392,16 +389,6 @@ int net_video_disp_stop(int id)
 int net_video_disp_start(int id)
 {
     video_disp_start(id, &disp_window[0][0]);
-    return 0;
-}
-int net_hide_main_ui(void)
-{
-    /* hide_main_ui(); */
-    return 0;
-}
-int net_show_main_ui(void)
-{
-    /* show_main_ui(); */
     return 0;
 }
 
@@ -5226,48 +5213,6 @@ int video_rec_set_exposure(u32 exp)
 
 
 
-#ifdef DIGITAL_SCALE
-/* req.display.src_crop_enable = 1;////支持通过配置比例对IMC源数据进行裁剪,使用数字变焦src_crop_enable需要写1 */
-int video_rec_digital_zoom(u16 x, u16 y, u16 tar_w, u16 tar_h)
-{
-#if 0 //def CONFIG_UI_ENABLE
-    union video_req req = {0};
-    struct video_crop_sca *crop_result;
-    if (!__this->video_display[0]) {
-        return 1;
-    }
-    static u8 test_expand = 0;
-    if (!test_expand) {
-        x_offset -= 16;
-        y_offset -= 9;
-        if (x_offset <= 0 || y_offset <= 0) {
-            x_offset = 0;
-            y_offset = 0;
-            test_expand = 1;
-        }
-    } else {
-        x_offset += 10;
-        y_offset += 10;
-        if ((x_offset >= 1280) || (y_offset >= 720)) {
-            x_offset = 1280;
-            y_offset = 720;
-            test_expand = 0;
-        }
-    }
-    req.sca.x = (1280 - x_offset) / 2;
-    req.sca.y = (720 - y_offset) / 2;
-    req.sca.tar_w = x_offset;
-    req.sca.tar_h = y_offset;
-    server_request(__this->video_display[0], VIDEO_REQ_DISP_SCA, &req);
-#endif
-    return 0;
-}
-void sca_test(void *p)
-{
-    video_rec_digital_zoom(0, 0, 0, 0);
-}
-#endif
-
 
 #ifdef PHOTO_STICKER_ENABLE_SMALL_MEM
 extern u8 stk_name[64];
@@ -5376,127 +5321,6 @@ static void switch_sticker()
 
 }
 #endif
-
-static u8 page_main_flag = 0;
-static u8 page_park_flag = 0;
-static int show_main_ui()
-{
-#if 0 //def CONFIG_UI_ENABLE
-    union uireq req;
-
-    if (page_main_flag) {
-        return 0;
-    }
-    if (!__this->ui) {
-        return -1;
-    }
-
-    puts("show_main_ui\n");
-    req.show.id = ID_WINDOW_VIDEO_REC;
-    server_request_async(__this->ui, UI_REQ_SHOW, &req);
-    page_main_flag = 1;
-#endif
-
-    return 0;
-}
-
-
-static int show_park_ui()
-{
-#if 0 //def CONFIG_UI_ENABLE
-    union uireq req;
-
-    if (page_park_flag) {
-        return 0;
-    }
-    if (!__this->ui) {
-        return -1;
-    }
-
-    puts("show_park_ui\n");
-    req.show.id = ID_WINDOW_PARKING;
-    server_request_async(__this->ui, UI_REQ_SHOW, &req);
-    page_park_flag = 1;
-#endif
-
-    return 0;
-}
-
-static int show_lane_set_ui()
-{
-#if 0 //def CONFIG_UI_ENABLE
-    union uireq req;
-
-    if (!__this->ui) {
-        return -1;
-    }
-
-    req.show.id = ID_WINDOW_LANE;
-    server_request_async(__this->ui, UI_REQ_SHOW, &req);
-#endif
-
-    return 0;
-}
-
-static void hide_main_ui()
-{
-#if 0 //def CONFIG_UI_ENABLE
-    union uireq req;
-
-    if (page_main_flag == 0) {
-        return;
-    }
-    if (!__this->ui) {
-        puts("__this->ui == NULL!!!!\n");
-        return;
-    }
-
-    puts("hide_main_ui\n");
-
-    req.hide.id = ID_WINDOW_VIDEO_REC;
-    server_request(__this->ui, UI_REQ_HIDE, &req);
-    page_main_flag = 0;
-#endif
-}
-
-static void hide_home_main_ui()
-{
-#ifdef CONFIG_UI_STYLE_JL02_ENABLE
-    union uireq req;
-
-    if (!__this->ui) {
-        puts("__this->ui == NULL!!!!\n");
-        return;
-    }
-
-    puts("hide_home_main_ui\n");
-
-    req.hide.id = ID_WINDOW_MAIN_PAGE;
-    server_request(__this->ui, UI_REQ_HIDE, &req);
-#endif
-}
-
-static void hide_park_ui()
-{
-#if 0 //def CONFIG_UI_ENABLE
-    union uireq req;
-
-    if (page_park_flag == 0) {
-        video_rec_get_remain_time();
-        return;
-    }
-    if (!__this->ui) {
-        puts("__this->ui == NULL!!!!\n");
-        return;
-    }
-
-    puts("hide_park_ui\n");
-
-    req.hide.id = ID_WINDOW_PARKING;
-    server_request(__this->ui, UI_REQ_HIDE, &req);
-    page_park_flag = 0;
-#endif
-}
 
 static int video_rec_storage_device_ready(void *p)
 {
@@ -5607,54 +5431,6 @@ static void video_rec_park_wait_timeout(void *priv)
     sys_power_shutdown();
 }
 
-int lane_det_setting_disp()
-{
-    u32 err = 0;
-#ifdef CONFIG_VIDEO0_ENABLE
-    struct video_window win;
-
-    video_disp_stop(1);
-
-    u16 dis_w = 640 * SCREEN_H / 352 / 16 * 16;
-    dis_w = dis_w > SCREEN_W ? SCREEN_W : dis_w;
-
-    printf("lane dis %d x %d\n", dis_w, SCREEN_H);
-
-    win.top             = 0;
-    win.left            = (SCREEN_H - dis_w) / 2 / 16 * 16;
-    win.width           = dis_w;
-    win.height          = SCREEN_H;
-    win.border_left     = 0;
-    win.border_right    = 0;
-    win.border_top      = 0;
-    win.border_bottom   = 0;
-    err = video_disp_start(0, &win);
-    show_lane_set_ui();
-#endif
-#ifdef CONFIG_VIDEO4_ENABLE
-    struct video_window win;
-
-    video_disp_stop(1);
-
-    u16 dis_w = 640 * SCREEN_H / 352 / 16 * 16;
-    dis_w = dis_w > SCREEN_W ? SCREEN_W : dis_w;
-
-    printf("lane dis %d x %d\n", dis_w, SCREEN_H);
-
-    win.top             = 0;
-    win.left            = (SCREEN_H - dis_w) / 2 / 16 * 16;
-    win.width           = dis_w;
-    win.height          = SCREEN_H;
-    win.border_left     = 0;
-    win.border_right    = 0;
-    win.border_top      = 0;
-    win.border_bottom   = 0;
-    err = video_disp_start(4, &win);
-    show_lane_set_ui();
-#endif
-    return err;
-}
-
 static void check_usb_gpio_state(void)
 {
     static u8 prev_gpio_state;
@@ -5685,8 +5461,6 @@ static int video_rec_init()
         __this->get_isp_lv_timer = sys_timer_add_to_task("app_core", NULL, get_isp_lv_timer_cb, 1500);
     }
 
-    /* ve_server_open(0); */
-
 #if (CONFIG_VIDEO_PARK_DECT == 1)
     __this->disp_park_sel = 1;
 #elif (CONFIG_VIDEO_PARK_DECT == 3)
@@ -5705,7 +5479,7 @@ static int video_rec_init()
 #endif
 #ifdef CONFIG_VIDEO0_ENABLE
     __this->video_online[0] = 1;
-    err = video_disp_start(0, &disp_window[DISP_MAIN_WIN][0]);
+    /* err = video_disp_start(0, &disp_window[DISP_MAIN_WIN][0]); */
 #endif
 
 #ifdef CONFIG_VIDEO1_ENABLE
@@ -5735,21 +5509,10 @@ static int video_rec_init()
     __this->disp_state = DISP_MAIN_WIN;
     __this->second_disp_dev = 0;
 
-
-#ifdef CONFIG_PARK_ENABLE
-    if (get_parking_status()) {
-        show_park_ui();
-    } else {
-        show_main_ui();
-    }
-#else
-    show_main_ui();
-#endif
     video_rec_get_remain_time();
 
 
 #ifdef CONFIG_GSENSOR_ENABLE
-    /* if (!strcmp(sys_power_get_wakeup_reason(), "wkup_port:wkup_gsen")) { */
     if (sys_power_get_wakeup_reason()) {
         if (db_select("par")) {
             __this->gsen_lock = 0xff;
@@ -5757,7 +5520,6 @@ static int video_rec_init()
             __this->park_wait = wait_completion(storage_device_ready,
                                                 video_rec_park_wait, NULL, NULL);
         }
-        /* sys_power_clr_wakeup_reason("wkup_port:wkup_gsen"); */
     } else {
         __this->sd_wait = wait_completion(storage_device_ready,
                                           video_rec_storage_device_ready, 0, 0);
@@ -5782,7 +5544,6 @@ static int video_rec_init()
     if (__this->video_online[4] && __this->video_online[5])
 #endif
     {
-        printf("%d, %s", __LINE__, __func__);
         video_rec_post_msg("swWinicon", 1);
     }
 
@@ -5870,9 +5631,6 @@ static int video_rec_mode_sw()
             __this->audio_buf[i] = NULL;
         }
     }
-
-
-
 
     if (__this->cap_buf) {
         free(__this->cap_buf);
@@ -6059,265 +5817,12 @@ static int video_rec_key_event_handler(struct key_event *key)
             break;
         }
         break;
-    /* case KEY_EVENT_LONG: */
-    /* switch (key->value) { */
-    /* case 7: */
-    /* app_mode_change_replace(APP_MODE_PHOTO); */
-    /* break; */
-    /* case 17: */
-    /* app_mode_change_replace(APP_MODE_DEC); */
-    /* break; */
-    /* } */
-    /* break; */
-
     default:
         break;
     }
 
     return false;
 }
-
-
-#if 0
-/*
- *录像app的设备响应函数
- */
-static int video_rec_device_event_handler(struct sys_event *event)
-{
-    int err;
-    struct intent it;
-
-    if (!ASCII_StrCmp(event->arg, "sd*", 4)) {
-        switch (event->u.dev.event) {
-        case DEVICE_EVENT_IN:
-            video_rec_sd_in();
-            break;
-        case DEVICE_EVENT_OUT:
-            if (!fdir_exist(CONFIG_STORAGE_PATH)) {
-                video_rec_sd_out();
-            }
-            break;
-        }
-    } else if (!ASCII_StrCmp(event->arg, "sys_power", 7)) {
-        switch (event->u.dev.event) {
-        case DEVICE_EVENT_POWER_CHARGER_IN:
-            puts("\n\ncharger in\n\n");
-            if ((__this->state == VIDREC_STA_IDLE) ||
-                (__this->state == VIDREC_STA_STOP)) {
-                if (__this->char_wait == 0) {
-                    __this->char_wait = wait_completion(storage_device_ready,
-                                                        video_rec_start, (void *)0);
-                    /* video_rec_storage_device_ready, (void*)1); */
-                    /* video_rec_start(); */
-                }
-            }
-            break;
-        case DEVICE_EVENT_POWER_CHARGER_OUT:
-            puts("charger out\n");
-            /*if (__this->state == VIDREC_STA_START) {
-                video_rec_stop(0);
-            }*/
-            break;
-        }
-    } else if (!ASCII_StrCmp(event->arg, "parking", 7)) {
-        switch (event->u.dev.event) {
-        case DEVICE_EVENT_IN:
-            puts("parking on\n");	//parking on
-
-            hide_main_ui();
-#ifdef CONFIG_UI_STYLE_JL02_ENABLE
-            hide_home_main_ui();//录像在后台进入倒车隐藏主界面
-#endif
-            show_park_ui();
-            video_disp_win_switch(DISP_WIN_SW_SHOW_PARKING, 0);
-            sys_power_auto_shutdown_pause();
-
-            return true;
-
-        case DEVICE_EVENT_OUT://parking off
-            hide_park_ui();
-            show_main_ui();
-            puts("parking off\n");
-            video_disp_win_switch(DISP_WIN_SW_HIDE_PARKING, 0);
-            video_rec_get_remain_time();
-            if (__this->state == VIDREC_STA_START) {
-                sys_power_auto_shutdown_pause();
-            }
-            return true;
-        }
-    }
-#if defined CONFIG_VIDEO1_ENABLE || defined CONFIG_VIDEO3_ENABLE
-    else if (!strncmp(event->arg, "video1", 6) || !strncmp(event->arg, "video3", 6)) {
-#ifdef CONFIG_WIFI_ENABLE
-        net_video_rec_event_notify();
-#endif
-        switch (event->u.dev.event) {
-        case DEVICE_EVENT_IN:
-        case DEVICE_EVENT_ONLINE:
-            if (!__this->video_online[1]) {
-                __this->video_online[1] = true;
-
-                video_disp_win_switch(DISP_WIN_SW_DEV_IN, 1);
-
-                if (__this->state == VIDREC_STA_START) {
-#ifdef CONFIG_WIFI_ENABLE
-                    net_video_rec_event_stop();
-#endif
-                    video_rec_stop(0);
-                    video_rec_start();
-#ifdef CONFIG_WIFI_ENABLE
-                    net_video_rec_event_start();
-#endif
-                }
-            }
-            break;
-        case DEVICE_EVENT_OUT:
-            if (__this->video_online[1]) {
-                __this->video_online[1] = false;
-
-                video_disp_win_switch(DISP_WIN_SW_DEV_OUT, 1);
-
-                if (__this->state == VIDREC_STA_START) {
-#ifdef CONFIG_WIFI_ENABLE
-                    net_video_rec_event_stop();
-#endif
-                    video_rec_stop(0);
-                    video_rec_start();
-#ifdef CONFIG_WIFI_ENABLE
-                    net_video_rec_event_start();
-#endif
-                }
-            }
-            break;
-        }
-    }
-#endif
-
-#ifdef CONFIG_VIDEO2_ENABLE
-    else if (!strncmp((char *)event->arg, "uvc", 3)) {
-#ifdef CONFIG_WIFI_ENABLE
-        net_video_rec_event_notify();
-#endif
-        switch (event->u.dev.event) {
-        case DEVICE_EVENT_IN:
-        case DEVICE_EVENT_ONLINE:
-            if (!__this->video_online[2]) {
-                if (!usb_is_charging()) {
-                    break;
-                }
-                __this->video_online[2] = true;
-                __this->uvc_id = ((char *)event->arg)[3] - '0';
-
-                printf("DEVICE_EVENT_ONLINE: uvc_id = %d\n", __this->uvc_id);
-                video_disp_win_switch(DISP_WIN_SW_DEV_IN, 2);
-
-                if (__this->state == VIDREC_STA_START) {
-#ifdef CONFIG_WIFI_ENABLE
-                    net_video_rec_event_stop();
-#endif
-                    video_rec_stop(0);
-                    video_rec_start();
-#ifdef CONFIG_WIFI_ENABLE
-                    net_video_rec_event_start();
-#endif
-                }
-            }
-            break;
-        case DEVICE_EVENT_OUT:
-            puts("DEVICE_EVENT_OFFLINE: uvc\n");
-            if (__this->video_online[2]) {
-                __this->video_online[2] = false;
-
-                video_disp_win_switch(DISP_WIN_SW_DEV_OUT, 2);
-
-                if (__this->state == VIDREC_STA_START) {
-#ifdef CONFIG_WIFI_ENABLE
-                    net_video_rec_event_stop();
-#endif
-                    video_rec_stop(0);
-                    video_rec_start();
-#ifdef CONFIG_WIFI_ENABLE
-                    net_video_rec_event_start();
-#endif
-                }
-            }
-            break;
-        }
-    }
-#endif
-
-
-
-#ifdef CONFIG_GSENSOR_ENABLE
-    else if (!strcmp(event->arg, "gsen_lock")) {
-        switch (event->u.dev.event) {
-        case DEVICE_EVENT_CHANGE:
-            if (__this->state == VIDREC_STA_START) {
-                if (db_select("gra")) {
-                    __this->gsen_lock = 0xff;
-                    video_rec_post_msg("lockREC");
-                }
-            }
-            break;
-        }
-    }
-#endif
-
-    else if (!strncmp(event->arg, "lane_set_open", strlen("lane_set_open"))) {
-        switch (event->u.dev.event) {
-        case DEVICE_EVENT_CHANGE: {
-            u32 aToint;
-            ASCII_StrToInt(event->arg + strlen("lane_set_open"), &aToint, strlen(event->arg) - strlen("lane_set_open"));
-            __this->car_head_y = aToint & 0x0000ffff;
-            __this->vanish_y   = (aToint >> 16) & 0x0000ffff;
-            ve_lane_det_start(1);
-        }
-        break;
-        }
-    } else if (!strncmp(event->arg, "lane_set_close", strlen("lane_set_close"))) {
-        switch (event->u.dev.event) {
-        case DEVICE_EVENT_CHANGE:
-            ve_lane_det_stop(1);
-            break;
-        }
-    } else if (!strcmp(event->arg, "camera0_err")) {
-        log_e("camera0_err\n");
-        video_disp_win_switch(DISP_WIN_SW_DEV_OUT, 0);
-
-        if (__this->state == VIDREC_STA_START) {
-            video_rec_stop(0);
-            ve_mdet_reset();
-            ve_lane_det_reset();
-            video_rec_start();
-        }
-
-    } else if (!strcmp((char *)event->arg, "usb mic")) {
-        extern int play_usb_mic_start();
-        extern int play_usb_mic_stop();
-        switch (event->u.dev.event) {
-        case DEVICE_EVENT_IN:
-            play_usb_mic_start();
-            break;
-        case DEVICE_EVENT_OUT:
-            play_usb_mic_stop();
-            break;
-        }
-    } else if (!strcmp((char *)event->arg, "usb speaker")) {
-        extern int play_usb_speaker_start();
-        extern int play_usb_speaker_stop();
-        switch (event->u.dev.event) {
-        case DEVICE_EVENT_IN:
-            play_usb_speaker_start();
-            break;
-        case DEVICE_EVENT_OUT:
-            play_usb_speaker_stop();
-            break;
-        }
-    }
-
-    return false;
-}
-#endif
 
 /*
  *设备响应函数
@@ -6416,7 +5921,7 @@ static int video_rec_device_event_handler(struct sys_event *sys_eve)
             break;
         }
 #endif
-#if 1
+
     } else if (sys_eve->from == DEVICE_EVENT_FROM_VIDEO && !strncmp((const char *)device_eve->arg, "parking", 7)) {
         /* } else if (!ASCII_StrCmp(event->arg, "parking", 7)) { */
         switch (device_eve->event) {
@@ -6446,7 +5951,6 @@ static int video_rec_device_event_handler(struct sys_event *sys_eve)
             }
             return true;
         }
-#endif
 
     } else if (sys_eve->from == DEVICE_EVENT_FROM_VIDEO && !strncmp((const char *)device_eve->arg, "video_rec_time", 14)) {
         switch (device_eve->event) {
@@ -6477,28 +5981,11 @@ static int video_rec_device_event_handler(struct sys_event *sys_eve)
 void in_app_stop_display(u8 state)
 {
     printf("============ %s , state:%d\n", __func__, state);
-//    video_disp_stop(0);
-//    video_disp_stop(1);
-//    video_disp_stop(2);
-//    if(state == 0){
-//        video_disp_start(0,&disp_window[DISP_FRONT_WIN][0]);
-//        __this->disp_state = DISP_FRONT_WIN;
-//    }else if(state == 1){
-//        video_disp_start(1,&disp_window[DISP_BACK_WIN][1]);
-//        __this->disp_state = DISP_INTERNAL_WIN;
-//    }else if(state == 2){
-//        video_disp_start(2,&disp_window[DISP_BACK_WIN][2]);
-//        __this->disp_state = DISP_BACK_WIN;
-//    }
 }
 
 void out_app_start_display()
 {
     printf("============ %s\n", __func__);
-//    video_disp_stop(0);
-//    video_disp_start(0,&disp_window[DISP_FRONT_WIN][0]);
-//    video_disp_win_switch(DISP_WIN_SW_SHOW_SMALL,0);
-//    __this->disp_state = DISP_MAIN_WIN;
 }
 
 u8 get_now_video_state()        //获取当前录像状态
@@ -6551,26 +6038,6 @@ static int video_rec_msg_handler(struct application *app, int *msg)
         break;
     case APP_MSG_REC_PHOTO:
         video_rec_take_photo();
-        //break;
-#if 0
-#ifdef PHOTO_STICKER_ENABLE_SMALL_MEM
-        __this->sticker_num++;
-        if (__this->sticker_num > STICKER_NUM) {
-            __this->sticker_num = 0;
-        }
-        log_d("__this->sticker_num %d\n", __this->sticker_num);
-        switch_sticker();
-        db_update("stk", __this->sticker_num);
-        /* db_flush(); */
-        break;
-#endif
-
-#ifdef DIGITAL_SCALE
-        sca_test(NULL);
-#else
-        video_disp_win_switch(DISP_WIN_SW_SHOW_NEXT, 0);
-#endif
-#endif // 0
         break;
     case APP_MSG_REC_MUTE:
 #ifdef UVC_CMA_GRAY
@@ -6598,19 +6065,7 @@ static int video_rec_msg_handler(struct application *app, int *msg)
         /* it = (struct intent *)msg[1]; */
         /* printf("it:%p", it); */
         printf("\n -[function] %s -[line] %d\n", __FUNCTION__, __LINE__);
-        if (it != NULL) {
-            /* if (it->data && !strcmp(it->data, "lan_setting")) { */
-            /* __this->lan_det_setting = 1; */
-            /* ve_server_open(1); */
-            /* lane_det_setting_disp(); */
-            /* } else { */
-            video_rec_init();
-            /* }	 */
-        } else  {
-            video_rec_init();
-        }
-        /* free(it); */
-        /* it = NULL; */
+        video_rec_init();
         break;
     case APP_MSG_REC_SET_CONFIG:
         it = (struct intent *)msg[1];

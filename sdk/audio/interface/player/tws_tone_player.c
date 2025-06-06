@@ -381,6 +381,7 @@ static void tws_tone_play_in_task(struct tws_tone_message *msg)
     player->player.callback = tws_tone_player_callback;
     player->player.scene    = msg->scene;
     player->player.coexist  = msg->coexist;
+    player->player.play_by_tws  = 1;
 
     player->func_uuid       = msg->func_uuid;
     player->timestamp       = msg->timestamp;

@@ -498,7 +498,11 @@ static int wifi_event_callback(void *network_ctx, enum WIFI_EVENT event)
     case WIFI_EVENT_P2P_GO_STA_CONNECTED:
         log_info("network_user_callback->WIFI_EVENT_P2P_GO_STA_CONNECTED");
         break;
-
+    case WIFI_EVENT_P2P_GO_STA_DISCONNECTED:
+        log_info("network_user_callback->WIFI_EVENT_P2P_GO_STA_DISCONNECTED");
+        void wifi_p2p_reset(const char *device_name);
+        wifi_p2p_reset(WIFI_P2P_DEVICE_NAME);
+        break;
     default:
         break;
     }
@@ -668,10 +672,10 @@ static void wifi_demo_task(void *priv)
 #endif
 
     //wifi p2p
-#if 0
+#if 1
     //注意：p2p对mac地址有一定格式要求，在assign_macaddr.c已经做了更改，需要在download.c中通过-format all
     //擦除一下flash，重新生成mac地址
-    wifi_enter_p2p_mode(P2P_GO_MODE, "JLWiFi-P2P");
+    wifi_enter_p2p_mode(P2P_GO_MODE, WIFI_P2P_DEVICE_NAME);
 
     while (1) {
         os_time_dly(500);

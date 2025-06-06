@@ -12,7 +12,6 @@
 
 static struct tone_player *g_ring_player;
 static OS_MUTEX g_ring_mutex;
-static struct audio_repeat_mode_param rep = {0};//设置循环播放的参数
 
 static void ring_player_callback(void *_player_id, int event)
 {
@@ -55,9 +54,10 @@ static int ring_dec_repeat_cb(void *priv)
     return 0; //return 0继续循环,return 1停止循环
 }
 
-int ring_set_repeat_en(struct jlstream *stream)
+static int ring_set_repeat_en(struct jlstream *stream)
 {
     if (stream) {
+        struct audio_repeat_mode_param rep = {0};
         rep.flag = 1; //使能
         rep.callback_priv = NULL;
         rep.repeat_callback = ring_dec_repeat_cb;
@@ -103,6 +103,7 @@ int ring_player_start(struct tone_player *player)
     }
 
     if (player->coding_type == AUDIO_CODING_MTY) {
+        os_time_dly(player->play_by_tws ? 20 : 10);    //增加延时防止解码器还没有打开成功设置失败
         ring_set_repeat_en(player->stream);
     }
 

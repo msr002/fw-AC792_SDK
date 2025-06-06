@@ -234,7 +234,7 @@ static void wifi_set_lan_setting_info(void)
 
         .WIRELESS_IP_ADDR0  = 192,
         .WIRELESS_IP_ADDR1  = 168,
-        .WIRELESS_IP_ADDR2  = 1,
+        .WIRELESS_IP_ADDR2  = 4,
         .WIRELESS_IP_ADDR3  = 1,
 
         .WIRELESS_NETMASK0  = 255,
@@ -244,17 +244,17 @@ static void wifi_set_lan_setting_info(void)
 
         .WIRELESS_GATEWAY0  = 192,
         .WIRELESS_GATEWAY1  = 168,
-        .WIRELESS_GATEWAY2  = 1,
+        .WIRELESS_GATEWAY2  = 4,
         .WIRELESS_GATEWAY3  = 1,
 
         .SERVER_IPADDR1  = 192,
         .SERVER_IPADDR2  = 168,
-        .SERVER_IPADDR3  = 1,
+        .SERVER_IPADDR3  = 4,
         .SERVER_IPADDR4  = 1,
 
         .CLIENT_IPADDR1  = 192,
         .CLIENT_IPADDR2  = 168,
-        .CLIENT_IPADDR3  = 1,
+        .CLIENT_IPADDR3  = 4,
         .CLIENT_IPADDR4  = 2,
 
         .SUB_NET_MASK1   = 255,
@@ -709,13 +709,14 @@ static void wifi_app_task(void *priv)
 
     wifi_set_event_callback(wifi_event_callback);
     wifi_on();
+    wifi_enter_p2p_mode(P2P_GO_MODE, "JLWiFi-P2P");
 
     //非量产模式下的AP和ST设置
 #ifndef CONFIG_MASS_PRODUCTION_ENABLE
     //以下在wifi启动之后可以设置模式、名称、密码，不使用则是默认AP模式、wifi_camera_wl8x_xxxx、12345678
 #ifdef CONFIG_WIFI_STA_MODE
-    /* wifi_enter_sta_mode(STA_WIFI_SSID, STA_WIFI_PWD);//设置wifi进入STA模式以及STA名称和密码 */
-    /* wifi_store_mode_info(STA_MODE, STA_WIFI_SSID, STA_WIFI_PWD);//保存默认模式 */
+    wifi_enter_sta_mode(STA_WIFI_SSID, STA_WIFI_PWD);//设置wifi进入STA模式以及STA名称和密码
+    wifi_store_mode_info(STA_MODE, STA_WIFI_SSID, STA_WIFI_PWD);//保存默认模式
 #else
     //设置WIFI模式和名称密码，注意：不同AP和STA模式需要对应的库
     /*wifi_enter_ap_mode("test_123456", "12345678");//设置wifi进入AP模式以及AP名称和密码*/

@@ -18,6 +18,7 @@ struct tone_player {
     u8 stream_index;
     u8 player_id;
     u8 channel_mode;
+    u8 play_by_tws;
     enum stream_scene scene;
     enum stream_coexist coexist;
     u16 fname_uuid;
