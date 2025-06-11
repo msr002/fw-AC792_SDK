@@ -75,10 +75,10 @@ iot_basic_config_t *iot_config_dup(const iot_basic_config_t *src)
         (src->product_secret && !dst->product_secret) ||
         (src->device_name && !dst->device_name) ||
         (src->device_secret && !dst->device_secret) ||
-        (src->ssl_ca_path && !dst->ssl_ca_path)) {
+        (src->ssl_ca_path && !dst->ssl_ca_path) ||
+        (src->ssl_ca_cert && !dst->ssl_ca_cert)) {
 
         iot_config_free(dst); // 需要配套的释放函数
-        free(dst);
         return NULL;
     }
 
@@ -91,33 +91,37 @@ iot_basic_config_t *iot_config_dup(const iot_basic_config_t *src)
 void iot_config_free(iot_basic_config_t *config)
 {
     if (config) {
-        if (config->http_host) {
+        if (config->http_host != NULL) {
             free((void *)config->http_host);
             config->http_host = NULL;
         }
-        if (config->instance_id) {
+        if (config->instance_id != NULL) {
             free((void *)config->instance_id);
             config->instance_id = NULL;
         }
-        if (config->product_key) {
+        if (config->product_key != NULL) {
             free((void *)config->product_key);
             config->product_key = NULL;
         }
-        if (config->product_secret) {
+        if (config->product_secret != NULL) {
             free((void *)config->product_secret);
             config->product_secret = NULL;
         }
-        if (config->device_name) {
+        if (config->device_name != NULL) {
             free((void *)config->device_name);
             config->device_name = NULL;
         }
-        if (config->device_secret) {
+        if (config->device_secret != NULL) {
             free((void *)config->device_secret);
             config->device_secret = NULL;
         }
-        if (config->ssl_ca_path) {
+        if (config->ssl_ca_path != NULL) {
             free((void *)config->ssl_ca_path);
             config->ssl_ca_path = NULL;
+        }
+        if (config->ssl_ca_cert != NULL) {
+            free((void *)config->ssl_ca_cert);
+            config->ssl_ca_cert = NULL;
         }
         free(config);
         config = NULL;

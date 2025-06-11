@@ -691,23 +691,25 @@ void chat_free_response(chat_response_t *response)
         chat_message_t *msg = &response->choices[i].message;
         if (msg->tool_calls) {
             for (int j = 0; j < msg->tool_calls_count; j++) {
-                chat_tool_call_t tc = msg->tool_calls[j];
-                if (tc.id) {
-                    free(tc.id);
+                chat_tool_call_t *tc = &msg->tool_calls[j];
+                if (tc->id) {
+                    free(tc->id);
                 }
-                if (tc.type) {
-                    free(tc.type);
+                if (tc->type) {
+                    free(tc->type);
                 }
-                if (tc.function.name) {
-                    free(tc.function.name);
+                if (tc->function.name) {
+                    free(tc->function.name);
                 }
-                if (tc.function.arguments) {
-                    free(tc.function.arguments);
+                if (tc->function.arguments) {
+                    free(tc->function.arguments);
                 }
-
+                // 移除 free(tc) 因为 tc 是指向数组元素的指针，不是单独分配的
             }
+            // 改为释放整个 tool_calls 数组
+            free(msg->tool_calls);
             free(msg->tool_call_id);
-
+            free((void *)msg->role);
         }
     }
     // 释放 choices 数组内存

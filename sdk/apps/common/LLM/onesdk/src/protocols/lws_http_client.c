@@ -414,7 +414,6 @@ callback_onesdk_http(struct lws *wsi, enum lws_callback_reasons reason,
             // 完整事件块准备解析
 //				printf("\n -[function] %s -[line] %d\n", __FUNCTION__, __LINE__);
             lwsl_debug("SSE chunk_len: %d, bytes : %s\n", chunk_len, chunk_start);
-            // printf("SSE chunk_len: %zu, bytes : |%s|\n", chunk_len, chunk_start);
             parse_sse_message(sse, chunk_start, chunk_len);
             if (http_ctx->on_get_sse_cb != NULL) {
 //                    printf("\n -[function] %s -[line] %d\n", __FUNCTION__, __LINE__);
@@ -461,7 +460,6 @@ callback_onesdk_http(struct lws *wsi, enum lws_callback_reasons reason,
 
         // 处理普通数据
     if (http_ctx->on_get_body_cb) {
-//		    printf("\n -[function] %s -[line] %d\n", __FUNCTION__, __LINE__);
         lwsl_debug("LWS_CALLBACK_RECEIVE_CLIENT_HTTP_READ: on_get_body_cb, len=%d\n", len);
         http_ctx->on_get_body_cb(in, len, false, http_ctx->on_get_body_cb_user_data);
     }
@@ -480,25 +478,17 @@ callback_onesdk_http(struct lws *wsi, enum lws_callback_reasons reason,
         return 0;
     }
     if (http_ctx->response != NULL) {
-//		    printf("\n -[function] %s -[line] %d\n", __FUNCTION__, __LINE__);
         if (http_ctx->response->response_body == NULL && http_ctx->response->body_size == 0) {
             http_ctx->response->response_body = (char *)malloc(len + 1);
             if (http_ctx->response->response_body == NULL) {
                 lwsl_err("malloc failed response_body\n");
                 return VOLC_ERR_HTTP_MALLOC_FAILED;
             }
-//				printf("len:%d", len);
-//				printf("in:%p", in);
-//				printf("in:%s", in);
             memset(http_ctx->response->response_body, 0, len + 1);
             memcpy(http_ctx->response->response_body, in, len);
             http_ctx->response->response_body[len] = '\0'; // avoid strlen panic
             http_ctx->response->body_size = len;
-//                printf("\n -[function] %s -[line] %d\n", __FUNCTION__, __LINE__);
-//                printf("http_ctx->response->response_body:%p", http_ctx->response->response_body);
-//                printf("http_ctx->response->response_body:%s", http_ctx->response->response_body);
             lwsl_debug("http_ctx->response->body_size: %d, %s\n", http_ctx->response->body_size, http_ctx->response->response_body);
-//				printf("\n -[function] %s -[line] %d\n", __FUNCTION__, __LINE__);
         } else {
             // 接收新内容
             char *curr = http_ctx->response->response_body;
@@ -517,7 +507,6 @@ callback_onesdk_http(struct lws *wsi, enum lws_callback_reasons reason,
             memcpy(new_curr + curr_len, in, len);
             http_ctx->response->response_body[new_len] = '\0';
             http_ctx->response->body_size = new_len;
-//				lwsl_debug("http_ctx->response->body_size: %zu, %s\n", http_ctx->response->body_size, http_ctx->response->response_body);
             lwsl_debug("http_ctx->response->body_size: %d, %s\n", http_ctx->response->body_size, http_ctx->response->response_body);
         }
     }

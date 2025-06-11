@@ -8,6 +8,7 @@
 #include "server/audio_server.h"
 #include "server/server_core.h"
 #include "generic/circular_buf.h"
+#include "jlstream.h"
 
 #define MSG_START_NET_AUDIO_PLAY   1
 #define MSG_START_LOCAL_AUDIO_PLAY   2
@@ -51,6 +52,16 @@
 #define AEC_MODE_SIMPLEX	(ANS_EN)
 #define AEC_MODE_KWS	(AEC_EN | ANS_EN)
 #endif
+
+extern void *video_mic_recorder_open(u16 sample_rate, u8 code_type, void *priv, void (*cb)(void *, u8 *, u32));
+extern int video_mic_recorder_close(void *priv);
+
+extern void *vir_source_player_open(void *file, struct stream_file_ops *ops);
+extern int vir_source_player_pp(void *player_);
+extern int vir_source_player_resume(void *player_);
+extern int vir_source_player_pause(void *player_);
+extern int vir_source_player_start(void *player_);
+extern void vir_source_player_close(void *player_);
 
 typedef struct {
     CHAR_T *play_src;
@@ -148,7 +159,7 @@ static int _send_audio_msg(IN CONST unsigned int msgid, IN CONST VOID *data, IN 
 int _device_get_voice_data(VOID *data, unsigned int max_len)
 {
     cbuffer_t *cbuf = (cbuffer_t *)&g_audio_hdl.pcm_cbuff_w;
-    unsigned int rlen;
+    unsigned int rlen = 0;
     static flag = 1;
 
 #ifdef CONFIG_VOLC_RTC_ENABLE
@@ -156,10 +167,10 @@ int _device_get_voice_data(VOID *data, unsigned int max_len)
 #endif
     rlen = cbuf_get_data_size(cbuf);
     if (rlen == 0) {
-        //    audio_debug("device_get_voice_data no data");
+        /* audio_debug("device_get_voice_data no data"); */
         return 0;
     } else {
-        // audio_debug("device_get_voice_data %d",rlen);
+        /* audio_debug("device_get_voice_data %d",rlen); */
     }
 
     if (voice_buf_size <= cbuf_get_data_size(cbuf)) {
@@ -177,14 +188,16 @@ int _device_write_voice_data(VOID *data, unsigned int len)
     int  i = 0;
 
     unsigned int write_len = cbuf_write(cbuf, data, len);
-    // printf("len=%d wite_len=%d", len, write_len);
+    /* printf("%s, len=%d wite_len=%d", __FUNCTION__, len, write_len); */
     if (0 == write_len) {
         //上层buf写不进去时清空一下，避免出现声音滞后的情况
         cbuf_clear(cbuf);
-        //audio_debug("cbuf_write full");
+        /* audio_debug("cbuf_write full"); */
     } else if (write_len != len) {
         unsigned int rlen = cbuf_get_data_size(cbuf);
-        // audio_debug("wite_len %d len %d rlen %d", write_len, len, rlen);
+        /* audio_debug("wite_len %d len %d rlen %d", write_len, len, rlen); */
+    } else {
+        /* audio_debug("write_len %d len %d", write_len, len); */
     }
 
     os_sem_post(&g_audio_ctrl.r_sem);
@@ -192,21 +205,70 @@ int _device_write_voice_data(VOID *data, unsigned int len)
     return len;
 }
 
-//编码器输出PCM数据
-static int recorder_vfs_fwrite(VOID *file, VOID *data, unsigned int len)
+
+static int virtual_dev_read(void *file, u8 *buf, int len)
 {
-    static int cnt;
+    cbuffer_t *cbuf = NULL;
+    cbuf = (cbuffer_t *)&g_audio_hdl.pcm_cbuff_r;
+    int tmp_len;
+    int rlen = len;
+    unsigned int cbuf_len = 0;
+    u8 *p = (u8 *)buf;
+    do {
+        cbuf_len = cbuf_get_data_size(cbuf);
+        tmp_len = cbuf_len > rlen ? rlen : cbuf_len;
+        cbuf_read(cbuf, p, tmp_len);
+        rlen -= tmp_len;
+        p += tmp_len;
+        cbuf_len = cbuf_get_data_size(cbuf);
+        if (cbuf_len == 0) {
+            /* g_audio_ctrl.pcm_wait_sem = 1; */
+            /* os_sem_pend(&g_audio_ctrl.r_sem, _AUDIO_WAIT_TIMEOUT); */
+            os_sem_pend(&g_audio_ctrl.r_sem, 0);
+            /* g_audio_ctrl.pcm_wait_sem = 0; */
+        }
+    } while (rlen > 0);
+
+    return len - rlen;
+}
+
+static int virtual_dev_get_fmt(void *file, struct stream_fmt *fmt)
+{
+    /* if (!file) { */
+    /* return -1; */
+    /* } */
+
+    fmt->sample_rate = SAMPLE_RATE;
+    fmt->coding_type = AUDIO_CODING_PCM;
+    fmt->channel_mode = AUDIO_CH_L;
+    /* fmt->bit_wide = 16; */
+    fmt->frame_dms = 4;
+
+    return 0;
+}
+
+static const struct stream_file_ops virtual_dev_ops = {
+    .read       = virtual_dev_read,
+    .get_fmt    = virtual_dev_get_fmt,
+};
+
+
+//编码器输出PCM数据
+static void recorder_vfs_fwrite(void *file, u8 *data, u32 len)
+{
+    /* static int cnt; */
     int ret;
-    cbuffer_t *cbuf = (cbuffer_t *)file;
+    /* cbuffer_t *cbuf = (cbuffer_t *)file; */
+    cbuffer_t *cbuf = (cbuffer_t *)&g_audio_hdl.pcm_cbuff_w;
 
     if (0 == cbuf_write(cbuf, data, len)) {
         // 上层buf写不进去时清空一下，避免出现声音滞后的情况
         cbuf_clear(cbuf);
     } else {
-        // audio_debug("cbuf write %d data", len);
+        /* audio_debug("cbuf write %d data", len); */
     }
 
-    return len;
+    /* return len; */
 }
 
 static CONST struct audio_vfs_ops recorder_vfs_ops = {
@@ -303,14 +365,14 @@ static VOID audio_recoder_init()
 }
 
 
-static VOID _audio_recoder_stop()
+static int _audio_recoder_stop()
 {
     int err;
     union audio_req req = {0};
     req.enc.cmd             = AUDIO_ENC_STOP;
     err = server_request(g_audio_hdl.enc_server, AUDIO_REQ_ENC, &req);
     audio_debug("_audio_recoder_stop err=%d", err);
-
+    return err;
 }
 
 
@@ -328,7 +390,6 @@ static int audio_play_net_vfs_fread(VOID *file, VOID *data, unsigned int len)
 
         rlen = cbuf_len > len ? len : cbuf_len;
         c_rlen = cbuf_read(cbuf, data, rlen);
-        // printf("cbuf_len=%d , clen=%d, len=%d", cbuf_len, c_rlen, len);
         if (c_rlen > 0) {
             //audio_debug("c_rlen=%d rlen=%d cbuf_len=%d len=%d",c_rlen,rlen,cbuf_len,len);
             break;
@@ -413,7 +474,7 @@ __err :
 
 }
 
-static VOID _audio_player_stop()
+static int _audio_player_stop()
 {
     int err;
     union audio_req req = {0};
@@ -490,6 +551,7 @@ static VOID __audio_task(void *pArg)
 {
     int op_ret = 0;
     _AUDIO_CTRL_MSG *msg_data;
+    int err;
     int msg[16] = {0,};
     while (1) {
         //阻塞等待消息
@@ -505,34 +567,66 @@ static VOID __audio_task(void *pArg)
         case MSG_START_NET_AUDIO_PLAY: {
             cbuf_clear(&g_audio_hdl.pcm_cbuff_r);
             if (g_audio_hdl.is_audio_play_open) {
-                _audio_player_stop();
+                vir_source_player_close(g_audio_hdl.dec_server);
+                err = _audio_recoder_stop();
+                if (err == 0) {
+                    audio_recoder_init();
+                    break;
+                }
+                g_audio_hdl.dec_server = NULL;
+            }
+            if (!g_audio_hdl.dec_server) {
+                g_audio_hdl.dec_server = vir_source_player_open(&g_audio_hdl.pcm_cbuff_r,  &virtual_dev_ops);
+                if (!g_audio_hdl.dec_server) {
+                    printf("dev flow open err");
+                } else  {
+                    audio_debug("dec server_open succ!");
+                    /* mdelay(1*1000); */
+                    vir_source_player_start(g_audio_hdl.dec_server);
+                }
             }
             g_audio_hdl.is_audio_play_open = TRUE;
-            audio_player_net_init();
         }
         break;
 
         case MSG_STOP_NET_AUDIO_PLAY: {
             cbuf_clear(&g_audio_hdl.pcm_cbuff_r);
             g_audio_hdl.is_audio_play_open = FALSE;
-            _audio_player_stop();
+            err = _audio_player_stop();
+            if (err != 0) {
+                vir_source_player_close(g_audio_hdl.dec_server);
+            }
+            g_audio_hdl.dec_server = NULL;
         }
         break;
 
         case MSG_START_AUDIO_RECORDER: {
             cbuf_clear(&g_audio_hdl.pcm_cbuff_w);
             if (g_audio_hdl.is_audio_record_open) {
-                _audio_recoder_stop();
+                err = video_mic_recorder_close(g_audio_hdl.enc_server);
+                if (err == -1) {
+                    _audio_recoder_stop();
+                } else {
+                    g_audio_hdl.enc_server = NULL;
+                }
+            }
+            if (!g_audio_hdl.enc_server) {
+                g_audio_hdl.enc_server = video_mic_recorder_open(SAMPLE_RATE, 0, NULL, recorder_vfs_fwrite);
+            } else {
+                audio_recoder_init();
             }
             g_audio_hdl.is_audio_record_open = true;
-            audio_recoder_init();
         }
         break;
 
         case MSG_STOP_AUDIO_RECORDER: {
             cbuf_clear(&g_audio_hdl.pcm_cbuff_w);
             g_audio_hdl.is_audio_record_open = FALSE;
-            _audio_recoder_stop();
+            err = _audio_recoder_stop();
+            if (err != 0) {
+                video_mic_recorder_close(g_audio_hdl.enc_server);
+            }
+            g_audio_hdl.enc_server = NULL;
         }
         break;
 
@@ -574,17 +668,47 @@ static int _audio_soft_init(VOID)
     pcm_buff_r = malloc(SAMPLE_RATE * CHANNEL * 1);
     cbuf_init(&g_audio_hdl.pcm_cbuff_r, pcm_buff_r, SAMPLE_RATE * CHANNEL * 1);
 
+    op_ret = os_sem_create(&g_audio_ctrl.r_sem, 0);
+    if (op_ret != 0) {
+        audio_debug("_hal_semaphore_create_init create semphore err:%d", op_ret);
+        return op_ret;
+    }
+
+    g_audio_hdl.enc_server = video_mic_recorder_open(SAMPLE_RATE, 0, NULL, recorder_vfs_fwrite);
+    if (g_audio_hdl.enc_server) {
+        audio_debug("enc server_open succ!");
+        g_audio_hdl.is_audio_record_open = true;
+        goto play_;
+    } else {
+    }
+
+#if 1
     if (!g_audio_hdl.enc_server) {
         g_audio_hdl.enc_server = server_open("audio_server", "enc");
         if (!g_audio_hdl.enc_server) {
             op_ret = -1;
             audio_debug("server_open err:%d", op_ret);
-            return op_ret;
+            /* return op_ret; */
+            goto play_;
         }
         audio_debug("enc server_open succ!");
         server_register_event_handler_to_task(g_audio_hdl.enc_server, NULL, enc_server_event_handler, "app_core");
     }
+#endif
 
+play_:
+    g_audio_hdl.dec_server = vir_source_player_open(&g_audio_hdl.pcm_cbuff_r,  &virtual_dev_ops);
+    if (!g_audio_hdl.dec_server) {
+        printf("dev flow open err");
+    } else  {
+        audio_debug("dec server_open succ!");
+        /* mdelay(1*1000); */
+        vir_source_player_start(g_audio_hdl.dec_server);
+        printf("\n -[function] %s -[line] %d\n", __FUNCTION__, __LINE__);
+        goto task_;
+    }
+
+#if 1
     if (!g_audio_hdl.dec_server) {
         g_audio_hdl.dec_server = server_open("audio_server", "dec");
         if (!g_audio_hdl.dec_server) {
@@ -595,19 +719,19 @@ static int _audio_soft_init(VOID)
         audio_debug("dec server_open succ!");
         audio_debug("enc_server 0x%x dec_server 0x%x", g_audio_hdl.enc_server, g_audio_hdl.dec_server);
     }
+#endif
 
-    op_ret = os_sem_create(&g_audio_ctrl.r_sem, 0);
-    if (op_ret != 0) {
-        audio_debug("_hal_semaphore_create_init create semphore err:%d", op_ret);
-        return op_ret;
-    }
+task_:
 
     QS queue_size = (sizeof(_AUDIO_CTRL_MSG *) * 20 + sizeof(WORD) - 1) / sizeof(WORD);
     op_ret = os_q_create(&g_audio_ctrl.msg_que, queue_size);
 
-    thread_fork(_AUDIO_TASK_NAME, 5, 2 * 1024, 0, g_audio_ctrl.task_handle, __audio_task, NULL);
+    printf("msg que:%x, r_sem:%x", g_audio_ctrl.msg_que, g_audio_ctrl.r_sem);
+
+    thread_fork(_AUDIO_TASK_NAME, 5, 3 * 1024, 1 * 1024, g_audio_ctrl.task_handle, __audio_task, NULL);
 
     audio_debug("_audio_task create");
+    /* vir_source_player_start(g_audio_hdl.dec_server); */
     return op_ret;
 }
 

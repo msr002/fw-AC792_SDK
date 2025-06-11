@@ -709,7 +709,7 @@ static void wifi_app_task(void *priv)
 
     wifi_set_event_callback(wifi_event_callback);
     wifi_on();
-    wifi_enter_p2p_mode(P2P_GO_MODE, "JLWiFi-P2P");
+    /* wifi_enter_p2p_mode(P2P_GO_MODE, "JLWiFi-P2P"); */
 
     //非量产模式下的AP和ST设置
 #ifndef CONFIG_MASS_PRODUCTION_ENABLE

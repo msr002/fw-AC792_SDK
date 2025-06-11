@@ -6,6 +6,7 @@
 
 #include "onesdk.h"
 #include "error_code.h"
+#include "infer_realtime_ws.h"
 #include "iot_log.h"
 
 #define TAG_ONESDK "onesdk"
@@ -75,15 +76,15 @@ int onesdk_init(onesdk_ctx_t *ctx, const onesdk_config_t *config)
     ret = onesdk_iot_get_binding_aigw_info(llm_config, aigw_ws_config, iot_basic_ctx);
     if (VOLC_OK != ret) {
         onesdk_iot_basic_deinit(iot_basic_ctx);
-        free(aigw_ws_config);
+        aigw_ws_config_deinit(aigw_ws_config);
         return ret;
     }
     if (config->aigw_path != NULL) {
+        free((void *)aigw_ws_config->path);
         aigw_ws_config->path = strdup(config->aigw_path);
     }
     aigw_ws_config->send_ping = config->send_ping;
     aigw_ws_config->ping_interval_s = config->ping_interval_s;
-    aigw_ws_config->ca = iot_basic_ctx->config->ssl_ca_cert;
     if (config->ping_interval_s <= 0) {
         aigw_ws_config->ping_interval_s = PING_INTERVAL_S;
     }
@@ -92,13 +93,13 @@ int onesdk_init(onesdk_ctx_t *ctx, const onesdk_config_t *config)
     aigw_ws_ctx_t *aigw_ws_ctx = malloc(sizeof(aigw_ws_ctx_t));
     if (NULL == aigw_ws_ctx) {
         onesdk_iot_basic_deinit(iot_basic_ctx);
-        free(aigw_ws_config);
+        aigw_ws_config_deinit(aigw_ws_config);
         return VOLC_ERR_MALLOC;
     }
     memset(aigw_ws_ctx, 0, sizeof(aigw_ws_ctx_t));
 
     ret = aigw_ws_init(aigw_ws_ctx, aigw_ws_config);  // deep copy ws_config to ws_ctx
-    free(aigw_ws_config);
+    aigw_ws_config_deinit(aigw_ws_config);
     if (VOLC_OK != ret) {
         onesdk_iot_basic_deinit(iot_basic_ctx);
         free(aigw_ws_ctx);
@@ -182,6 +183,9 @@ int onesdk_deinit(const onesdk_ctx_t *ctx)
     // deinit iot_ws
     if (NULL != ctx->aigw_ws_ctx) {
         aigw_ws_deinit(ctx->aigw_ws_ctx);
+    }
+    if (NULL != ctx->rt_json_buf) {
+        free(ctx->rt_json_buf);
     }
 #endif
 

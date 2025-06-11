@@ -672,7 +672,7 @@ static void wifi_demo_task(void *priv)
 #endif
 
     //wifi p2p
-#if 1
+#if 0
     //注意：p2p对mac地址有一定格式要求，在assign_macaddr.c已经做了更改，需要在download.c中通过-format all
     //擦除一下flash，重新生成mac地址
     wifi_enter_p2p_mode(P2P_GO_MODE, WIFI_P2P_DEVICE_NAME);

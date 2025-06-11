@@ -139,6 +139,31 @@ typedef struct {
         .tools = NULL \
     }
 
+typedef struct {
+    char *input_audio_transcription; // 例如："火山引擎智能创作平台"
+    char *input_audio_translation;   // 例如："volcengine creative cloud"
+} aigw_ws_glossary_item_t;
+
+typedef struct {
+    char **hot_word_list;                 // 热词列表 (字符串数组)
+    size_t num_hot_words;                 // hot_word_list中的元素数量
+    aigw_ws_glossary_item_t *glossary_list; // 词汇表示例列表 (结构体数组)
+    size_t num_glossary_items;            // glossary_list中的元素数量
+} aigw_ws_add_vocab_t;
+
+typedef struct {
+    char *source_language;              // 源语言，例如："zh"
+    char *target_language;              // 目标语言，例如："en"
+    aigw_ws_add_vocab_t add_vocab;      // 词汇表增强配置
+} aigw_ws_input_audio_translation_config_t;
+
+typedef struct {
+    char *input_audio_format;                               // 输入音频格式，例如："pcm16"
+    char **modalities;                                      // 模式列表 (字符串数组)，例如：["text"]
+    size_t num_modalities;                                  // modalities数组中的元素数量
+    aigw_ws_input_audio_translation_config_t input_audio_translation; // 音频翻译特定配置
+} aigw_ws_translation_session_t;
+
 /**
  * @brief 更新会话的默认配置
  * @param ctx 上下文对象
@@ -163,6 +188,19 @@ int aigw_ws_input_audio_buffer_append(aigw_ws_ctx_t *ctx, const char *buffer, si
  */
 int aigw_ws_input_audio_buffer_commit(aigw_ws_ctx_t *ctx);
 
+/**
+ * @brief 更新翻译会话的默认配置
+ * @param ctx 上下文对象
+ * @return VOLC_OK 成功，其他为错误码
+*/
+int aigw_ws_translation_session_update(aigw_ws_ctx_t *ctx, const aigw_ws_translation_session_t *session);
+
+/**
+ * @brief 标记同声传译音频输入完成
+ * @param ctx 上下文对象
+ * @return VOLC_OK 成功，其他为错误码
+ */
+int aigw_ws_input_audio_done(aigw_ws_ctx_t *ctx);
 /**
  * @brief 向对话的上下文中添加一个新项目，包括消息、函数调用响应。目前只支持函数调用应答。
  * @param ctx 上下文对象

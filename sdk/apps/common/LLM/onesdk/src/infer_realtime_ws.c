@@ -1,5 +1,5 @@
 #include <stddef.h>
-
+#include <stdlib.h>
 #include "infer_realtime_ws.h"
 #include "aigw/auth.h"
 #include "iot/dynreg.h"
@@ -126,6 +126,8 @@ skip:
         lws_add_http_header_by_name(wsi, (const unsigned char *)HEADER_TIMESTAMP, (const unsigned char *)auth_header->timestamp,
                                     strlen(auth_header->timestamp), p, end);
 
+        aigw_auth_header_free(auth_header);
+
         char *hw_id = plat_hardware_id();
         lwsl_user("hardware_id: %s\n", hw_id);
         lws_add_http_header_by_name(wsi, (const unsigned char *)HEADER_AIGW_HARDWARE_ID, (const unsigned char *)hw_id, strlen(hw_id), p, end);
@@ -244,6 +246,14 @@ void iot_device_config_free(iot_basic_config_t *iot_device_config)
     if (NULL == iot_device_config) {
         return ;
     }
+    if (iot_device_config->http_host) {
+        free((void *)iot_device_config->http_host);
+        iot_device_config->http_host = NULL;
+    }
+    if (iot_device_config->http_host) {
+        free((void *)iot_device_config->http_host);
+        iot_device_config->http_host = NULL;
+    }
     if (iot_device_config->instance_id) {
         free((void *)iot_device_config->instance_id);
         iot_device_config->instance_id = NULL;
@@ -264,6 +274,14 @@ void iot_device_config_free(iot_basic_config_t *iot_device_config)
         free((void *)iot_device_config->device_secret);
         iot_device_config->device_secret = NULL;
     }
+    if (iot_device_config->ssl_ca_path) {
+        free((void *)iot_device_config->ssl_ca_path);
+        iot_device_config->ssl_ca_path = NULL;
+    }
+    if (iot_device_config->ssl_ca_cert) {
+        free((void *)iot_device_config->ssl_ca_cert);
+        iot_device_config->ssl_ca_cert = NULL;
+    }
     free(iot_device_config);
     iot_device_config = NULL;
 }
@@ -282,6 +300,7 @@ void aigw_ws_deinit(aigw_ws_ctx_t *ctx)
     }
     lws_pthread_mutex_destroy(&ctx->lock);
     free(ctx);
+    ctx = NULL;
 }
 
 int aigw_ws_connect(aigw_ws_ctx_t *ctx)
@@ -312,6 +331,7 @@ int aigw_ws_connect(aigw_ws_ctx_t *ctx)
     free(url);
     ctx->active_conn = lws_client_connect_via_info(&ccinfo);
 
+    free((void *)ccinfo.address);
     if (!ctx->active_conn) {
         return VOLC_ERR_CONNECT;
     }
@@ -475,6 +495,100 @@ int aigw_ws_input_audio_buffer_commit(aigw_ws_ctx_t *ctx)
     // 创建根 JSON 对象
     cJSON *root = cJSON_CreateObject();
     cJSON_AddStringToObject(root, "type", "input_audio_buffer.commit");
+    // 生成 JSON 字符串
+    const char *json_str = cJSON_PrintUnformatted(root);
+    // 释放内存
+    cJSON_Delete(root);
+    int ret = aigw_ws_send_request(ctx, json_str);
+    free((void *)json_str);
+    return ret;
+}
+
+int aigw_ws_translation_session_update(aigw_ws_ctx_t *ctx, const aigw_ws_translation_session_t *session)
+{
+    if (!session) {
+        return VOLC_ERR_INVALID_PARAM;
+    }
+    // 创建根 JSON 对象
+    cJSON *root = cJSON_CreateObject();
+    cJSON_AddStringToObject(root, "type", "session.update");
+    // 创建 "session" 对象
+    cJSON *session_obj = cJSON_CreateObject();
+    cJSON_AddItemToObject(root, "session", session_obj);
+
+    // 添加 "input_audio_format" 字段
+    if (session->input_audio_format) {
+        cJSON_AddStringToObject(session_obj, "input_audio_format", session->input_audio_format);
+    }
+
+    // 添加 "modalities" 数组
+    cJSON *modalities_array = cJSON_CreateArray();
+    if (session->modalities && session->num_modalities > 0) {
+        for (size_t i = 0; i < session->num_modalities; i++) {
+            if (session->modalities[i]) {
+                cJSON_AddItemToArray(modalities_array, cJSON_CreateString(session->modalities[i]));
+            }
+        }
+    }
+    cJSON_AddItemToObject(session_obj, "modalities", modalities_array);
+
+    // 创建 "input_audio_translation" 对象
+    cJSON *translation_config_obj = cJSON_CreateObject();
+    if (session->input_audio_translation.source_language) {
+        cJSON_AddStringToObject(translation_config_obj, "source_language", session->input_audio_translation.source_language);
+    }
+    if (session->input_audio_translation.target_language) {
+        cJSON_AddStringToObject(translation_config_obj, "target_language", session->input_audio_translation.target_language);
+    }
+
+    // 创建 "add_vocab" 对象
+    cJSON *add_vocab_obj = cJSON_CreateObject();
+    // 添加 "hot_word_list" 数组
+    cJSON *hot_word_list_array = cJSON_CreateArray();
+    if (session->input_audio_translation.add_vocab.hot_word_list && session->input_audio_translation.add_vocab.num_hot_words > 0) {
+        for (size_t i = 0; i < session->input_audio_translation.add_vocab.num_hot_words; i++) {
+            if (session->input_audio_translation.add_vocab.hot_word_list[i]) {
+                cJSON_AddItemToArray(hot_word_list_array, cJSON_CreateString(session->input_audio_translation.add_vocab.hot_word_list[i]));
+            }
+        }
+    }
+    cJSON_AddItemToObject(add_vocab_obj, "hot_word_list", hot_word_list_array);
+
+    // 添加 "glossary_list" 数组
+    cJSON *glossary_list_array = cJSON_CreateArray();
+    if (session->input_audio_translation.add_vocab.glossary_list && session->input_audio_translation.add_vocab.num_glossary_items > 0) {
+        for (size_t i = 0; i < session->input_audio_translation.add_vocab.num_glossary_items; i++) {
+            cJSON *glossary_item_obj = cJSON_CreateObject();
+            if (session->input_audio_translation.add_vocab.glossary_list[i].input_audio_transcription) {
+                cJSON_AddStringToObject(glossary_item_obj, "input_audio_transcription", session->input_audio_translation.add_vocab.glossary_list[i].input_audio_transcription);
+            }
+            if (session->input_audio_translation.add_vocab.glossary_list[i].input_audio_translation) {
+                cJSON_AddStringToObject(glossary_item_obj, "input_audio_translation", session->input_audio_translation.add_vocab.glossary_list[i].input_audio_translation);
+            }
+            cJSON_AddItemToArray(glossary_list_array, glossary_item_obj);
+        }
+    }
+    cJSON_AddItemToObject(add_vocab_obj, "glossary_list", glossary_list_array);
+    cJSON_AddItemToObject(translation_config_obj, "add_vocab", add_vocab_obj);
+    cJSON_AddItemToObject(session_obj, "input_audio_translation", translation_config_obj);
+
+    // 生成 JSON 字符串
+    char *json_str = cJSON_PrintUnformatted(root);
+    // 释放内存
+    cJSON_Delete(root);
+
+    int ret = aigw_ws_send_request(ctx, json_str);
+    if (json_str) {
+        free(json_str);
+    }
+    return ret;
+}
+
+int aigw_ws_input_audio_done(aigw_ws_ctx_t *ctx)
+{
+    // 创建根 JSON 对象
+    cJSON *root = cJSON_CreateObject();
+    cJSON_AddStringToObject(root, "type", "input_audio.done");
     // 生成 JSON 字符串
     const char *json_str = cJSON_PrintUnformatted(root);
     // 释放内存

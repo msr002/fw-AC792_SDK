@@ -87,6 +87,7 @@ static void byte_rtc_on_audio_data(byte_rtc_engine_t engine, const char *channel
 {
     // printf("\n byte_rtc_on_audio_data\n");
 // #ifdef AUDIO_TYPE_G711A
+#if 1
     size_t sample_count = data_len;  // 样本数 = 数据字节数（1字节/样本）
     short *pcm = malloc(sample_count * sizeof(short));
 
@@ -104,6 +105,7 @@ static void byte_rtc_on_audio_data(byte_rtc_engine_t engine, const char *channel
     // 网络音频数据写入播放
     _device_write_voice_data(pcm, sample_count * sizeof(short));
     free(pcm);
+#endif // 0
 // #else
 //     _device_write_voice_data(data_ptr, data_len);
 // #endif
@@ -267,41 +269,26 @@ int VolcEngineRTCDemo()
     options.auto_publish_video = 0;
     byte_rtc_join_room(engine, room_info->room_id, room_info->uid, room_info->token, &options);  //加入房间
     mdelay(20 * 1000); //等待房间连接成功
-// #ifdef AUDIO_TYPE_G711A
     const int DEFAULT_READ_SIZE = 320;
-// #else
-//     const int DEFAULT_READ_SIZE = 40;
-// #endif
     uint8_t *audio_buffer = malloc(DEFAULT_READ_SIZE);
     if (!audio_buffer) {
         printf("Failed to alloc audio buffer!");
         return -1;
     }
-
+    audio_frame_info_t audio_frame_info = {.data_type = AUDIO_DATA_TYPE_PCMA};
+    int i, j = 0, ret = 0;
+    short *pcm;
+    int len = DEFAULT_READ_SIZE / 2;
+    printf("------------------------------------------------------");
 #if 1
     while (true) {    // 发送音频数据，根据需要设置打断循环条件
         int ret = _device_get_voice_data(audio_buffer, DEFAULT_READ_SIZE);
         if (ret == DEFAULT_READ_SIZE && joined) {
-// #ifdef AUDIO_TYPE_G711A
-            // 发送音频数据
-            int i, j = 0, ret = 0;
-            short *pcm = (short *)audio_buffer;
-            int len = DEFAULT_READ_SIZE / 2;
-            for (i = 0; i < len; i++, j++) {
+            pcm = (short *)audio_buffer;
+            for (i = 0, j = 0; i < len; i++, j++) {
                 pcma[j] = linear2alaw(pcm[i]);
             }
-            audio_frame_info_t audio_frame_info = {.data_type = AUDIO_DATA_TYPE_PCMA};
             byte_rtc_send_audio_data(engine, room_info->room_id, pcma, len, &audio_frame_info);
-// #elif defined(AUDIO_TYPE_AACLC)
-//             // 发送音频数据
-//             audio_frame_info_t audio_frame_info = {.data_type = AUDIO_DATA_TYPE_AACLC};
-//             byte_rtc_send_audio_data(engine, room_info->room_id, audio_buffer, DEFAULT_READ_SIZE, &audio_frame_info);
-// #elif defined(AUDIO_TYPE_OPUS)
-//             // 发送音频数据
-//             audio_frame_info_t audio_frame_info = {.data_type = AUDIO_DATA_TYPE_OPUS};
-//             byte_rtc_send_audio_data(engine, room_info->room_id, audio_buffer, DEFAULT_READ_SIZE, &audio_frame_info);
-// #endif
-
         }
     }
 #endif
@@ -317,3 +304,4 @@ err:
     stop_voice_chat(room_info);
     free(room_info);
 }
+

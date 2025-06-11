@@ -1,6 +1,7 @@
 //
 // Created by lhk on 2025/2/26.
 //
+#include "infer_realtime_ws.h"
 #define ENABLE_AI_REALTIME
 
 #include "cJSON.h"
@@ -50,29 +51,55 @@ void rt_recv_cb(const char *message, size_t len, void *userdata)
             if (ctx->rt_event_cb) {
                 if (strcmp(type, "response.audio.delta") == 0 && delta) {
                     // 音频数据回调
-                    ctx->rt_event_cb->on_audio(
-                        delta->valuestring,
-                        cJSON_IsString(delta) ? strlen(delta->valuestring) : 0,
-                        ctx->user_data
-                    );
+                    if (ctx->rt_event_cb->on_audio) {
+                        ctx->rt_event_cb->on_audio(
+                            delta->valuestring,
+                            cJSON_IsString(delta) ? strlen(delta->valuestring) : 0,
+                            ctx->user_data
+                        );
+                    }
                 } else if (strcmp(type, "response.audio_transcript.done") == 0 && transcript) {
                     // 文本转录完成回调
-                    ctx->rt_event_cb->on_text(
-                        transcript->valuestring,
-                        cJSON_IsString(transcript) ? strlen(transcript->valuestring) : 0,
-                        ctx->user_data
-                    );
+                    if (ctx->rt_event_cb->on_text) {
+                        ctx->rt_event_cb->on_text(
+                            transcript->valuestring,
+                            cJSON_IsString(transcript) ? strlen(transcript->valuestring) : 0,
+                            ctx->user_data
+                        );
+                    }
+                } else if (strcmp(type, "response.audio_translation.delta") == 0 && delta) {
+                    if (ctx->rt_event_cb->on_translation_text) {
+                        ctx->rt_event_cb->on_translation_text(
+                            delta->valuestring,
+                            cJSON_IsString(delta) ? strlen(delta->valuestring) : 0,
+                            ctx->user_data
+                        );
+                    }
+                } else if (strcmp(type, "response.audio_transcript.delta") == 0 && delta) {
+                    if (ctx->rt_event_cb->on_transcript_text) {
+                        ctx->rt_event_cb->on_transcript_text(
+                            delta->valuestring,
+                            cJSON_IsString(delta) ? strlen(delta->valuestring) : 0,
+                            ctx->user_data
+                        );
+                    }
+                } else if (strcmp(type, "response.done") == 0) {
+                    if (ctx->rt_event_cb->on_response_done) {
+                        ctx->rt_event_cb->on_response_done(ctx->user_data);
+                    }
                 } else if (strcmp(type, "error") == 0) {
                     // 错误回调
                     cJSON *error = cJSON_GetObjectItem(root, "error");
                     cJSON *error_code = cJSON_GetObjectItem(error, "code");
                     cJSON *error_message = cJSON_GetObjectItem(error, "message");
                     if (error_code && cJSON_IsString(error_code) && error_message && cJSON_IsString(error_message)) {
-                        ctx->rt_event_cb->on_error(
-                            error_code->valuestring,
-                            error_message->valuestring,
-                            ctx->user_data
-                        );
+                        if (ctx->rt_event_cb->on_error) {
+                            ctx->rt_event_cb->on_error(
+                                error_code->valuestring,
+                                error_message->valuestring,
+                                ctx->user_data
+                            );
+                        }
                     }
                     // TODO：重新建立session
                 }
@@ -152,4 +179,33 @@ int onesdk_rt_audio_response_cancel(onesdk_ctx_t *ctx)
         return VOLC_ERR_INIT;
     }
     return aigw_ws_response_cancel(ctx->aigw_ws_ctx);
+}
+
+int onesdk_rt_translation_session_update(onesdk_ctx_t *ctx, aigw_ws_translation_session_t *session)
+{
+    int ret = VOLC_OK;
+    if (NULL == ctx || NULL == ctx->aigw_ws_ctx) {
+        return VOLC_ERR_INIT;
+    }
+    return aigw_ws_translation_session_update(ctx->aigw_ws_ctx, session);
+}
+
+int onesdk_rt_translation_audio_send(onesdk_ctx_t *ctx, const char *audio_data, size_t len, bool commit)
+{
+    int ret = VOLC_OK;
+    if (NULL == ctx || NULL == ctx->aigw_ws_ctx) {
+        return VOLC_ERR_INIT;
+    }
+    ret = aigw_ws_input_audio_buffer_append(ctx->aigw_ws_ctx, audio_data, len);
+    if (ret != VOLC_OK) {
+        return ret;
+    }
+    if (commit) {
+        ret = aigw_ws_input_audio_buffer_commit(ctx->aigw_ws_ctx);
+        if (ret != VOLC_OK) {
+            return ret;
+        }
+        ret = aigw_ws_input_audio_done(ctx->aigw_ws_ctx);
+    }
+    return ret;
 }

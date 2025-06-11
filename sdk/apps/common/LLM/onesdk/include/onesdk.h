@@ -66,6 +66,9 @@ typedef struct {
     void (*on_audio)(const void *audio_data, size_t audio_len, void *user_data);
     void (*on_text)(const void *text_data, size_t text_len, void *user_data);
     void (*on_error)(const char *error_code, const char *error_msg, void *user_data);
+    void (*on_transcript_text)(const void *transcript_data, size_t transcript_len, void *user_data);        // 转录文本流式回调（源语种）
+    void (*on_translation_text)(const void *translation_data, size_t translation_len, void *user_data);     // 翻译文本流式回调（目标语种）
+    void (*on_response_done)(void *user_data);
 } onesdk_rt_event_cb_t;
 
 #ifdef ENABLE_AI
@@ -182,14 +185,16 @@ void onesdk_chat_release_context(onesdk_ctx_t *ctx);
 
 #ifdef ENABLE_AI_REALTIME
 int onesdk_rt_set_event_cb(onesdk_ctx_t *ctx, onesdk_rt_event_cb_t *cb);
-
-int onesdk_rt_session_update(onesdk_ctx_t *ctx, aigw_ws_session_t *session);
-
 int onesdk_rt_session_keepalive(onesdk_ctx_t *ctx);
 
+// chat_agent interfaces
+int onesdk_rt_session_update(onesdk_ctx_t *ctx, aigw_ws_session_t *session);
 int onesdk_rt_audio_send(onesdk_ctx_t *ctx, const char *audio_data, size_t len, bool commit);
-
 int onesdk_rt_audio_response_cancel(onesdk_ctx_t *ctx);
+
+// translation_agent interfaces
+int onesdk_rt_translation_session_update(onesdk_ctx_t *ctx, aigw_ws_translation_session_t *session);
+int onesdk_rt_translation_audio_send(onesdk_ctx_t *ctx, const char *audio_data, size_t len, bool commit);
 #endif
 
 #ifdef ENABLE_IOT

@@ -106,6 +106,9 @@ int dynamic_register(iot_basic_ctx_t *ctx)
             iot_http_response_dynamic_register_t *result = parse_dynamic_register(alloc, response);
             if (result->result.len > 0) {
                 char *decoded = aes_decode(alloc, ctx->config->product_secret, result->result.payload, true);
+                if (ctx->config->device_secret != NULL) {
+                    free((void *)ctx->config->device_secret);
+                }
                 ctx->config->device_secret = decoded;
             } else {
                 ret = -1;
