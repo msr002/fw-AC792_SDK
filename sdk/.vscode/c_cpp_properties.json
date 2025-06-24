@@ -503,6 +503,7 @@
                 "${workspaceFolder}/apps/common/ble/include",
                 "${workspaceFolder}/apps/wifi_camera/include",
                 "${workspaceFolder}/apps/wifi_camera/misc",
+                "${workspaceFolder}/apps/wifi_camera/video_ops/include",
                 "${workspaceFolder}/include_lib/driver/device/video",
                 "${workspaceFolder}/apps",
                 "${workspaceFolder}/apps/common/third_party_profile",

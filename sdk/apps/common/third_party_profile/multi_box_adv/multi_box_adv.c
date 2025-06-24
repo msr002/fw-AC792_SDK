@@ -47,7 +47,7 @@ static u8 multi_box_fill_adv_data(u8 *adv_data)
     if (syscfg_read(CFG_BT_MAC_ADDR, edr_addr, 6) < 0) {
         memcpy(edr_addr, (void *)bt_get_mac_addr(), 6);
     }
-    int name_len = snprintf(ble_name, sizeof(ble_name), MULTI_BOX_ADV_PREFIX"%02X%02X", edr_addr[4], edr_addr[5]);
+    int name_len = snprintf(ble_name, sizeof(ble_name), MULTI_BOX_ADV_PREFIX"%02X%02X", edr_addr[1], edr_addr[0]);
     u8 manufacturer_specific_data[sizeof(company_id) + 2];
     memcpy(manufacturer_specific_data, company_id, sizeof(company_id));
     manufacturer_specific_data[sizeof(company_id)] = multi_box_data;

@@ -7,6 +7,10 @@
 
 #if TCFG_LCD_RGB_XXXX_480x272
 
+#define __LCD_W  LCD_W
+#define __LCD_H  LCD_H
+#define __LCD_ID LCD_ID
+
 static void lcd_480x272_xxxx_backctrl(struct lcd_board_cfg *bd_cfg, u8 on)
 {
     if (-1 == bd_cfg->lcd_io.backlight) {
@@ -42,10 +46,10 @@ REGISTER_IMD_DEVICE_BEGIN(lcd_480x272_xxxx_dev) = {
 #endif
         .test_mode_color = 0xff0000,
         .bg_color    	 = 0x00ff00,
-        .xres 			 = LCD_W,
-        .yres 			 = LCD_H,
-        .target_xres     = LCD_W,
-        .target_yres     = LCD_H,
+        .xres 			 = __LCD_W,
+        .yres 			 = __LCD_H,
+        .target_xres     = __LCD_W,
+        .target_yres     = __LCD_H,
         .sample          = SAMP_YUV420,
         .format          = FORMAT_RGB888,
         .interlaced_1st_filed = EVEN_FILED,
@@ -111,6 +115,7 @@ REGISTER_IMD_DEVICE_END()
 
 REGISTER_LCD_DEVICE_DRIVE(lcd_dev)  = {
     .logo            = "RGB_480x272_XXXX",
+    .id              = __LCD_ID,
     .type            = LCD_RGB,
     .dev             = &lcd_480x272_xxxx_dev,
     .init            = lcd_480x272_xxxx_init,

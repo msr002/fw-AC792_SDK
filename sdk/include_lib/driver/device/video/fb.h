@@ -30,6 +30,8 @@
 #define     FBIOPUT_FREE_FBUFFER        _IOW('F', 16, sizeof(int))
 #define 	FBIOGET_MAP_PENDING_STATUS	_IOR('F', 17, sizeof(int))
 
+#define FB_MAX_OUT_NUM  (2)
+
 enum fb_event {
     FB_EVT_PAUSE,
     FB_EVT_RESUME,
@@ -112,6 +114,7 @@ struct fb_var_screeninfo {
     u16 rotate;
     u16 mirror;
     u16 combine;        //是否需要参与fb合成
+    u8 out_id;          //fb输出设备ID(用于多屏)
     void *out_dev;      //fb输出句柄
 };
 
@@ -128,9 +131,14 @@ struct fb_evt_handler {
     int (*handler)(void *, enum fb_event evt);
 };
 
+struct fb_platform_data {
+    u8 num;
+};
+
 struct fb_info {
     struct list_head entry;
     const char *name;
+    u8 index;
     u8 format;
     u8 block;
     u8 pause;
@@ -152,6 +160,7 @@ struct fb_info {
 struct fb_out_t {
     struct list_head entry;
     struct device device;
+    u8 out_id;  //输出设备ID(用于多屏)
     char fb_name[4];
     u8 buf_num;
     u32 buf_addr[3];
@@ -176,6 +185,7 @@ struct fb_draw_info {
     u8  z_order;      //显示顺序
     u8  fb_num;       //显存个数
     u8  combine;      //是否需要参与fb合成
+    u8  out_id;       //输出设备ID(用于多屏)
     char *out_name;   //输出设备
     u16 rotate;
     u16 mirror;
@@ -188,6 +198,7 @@ struct fb_out_info {
     u16 width;        //显示区域宽度
     u16 height;       //显示区域高度
     u16 format;       //显示格式
+    u8  out_id;       //显示设备ID号(用于多屏)
     u8 *out_addr;     //显存初始地址
     u8  out_buf_num;  //显存个数
     u8  ext_buf;      //显示buffer指定方式 0:malloc 1:由外部指定
@@ -197,7 +208,7 @@ struct fb_out_info {
 extern const struct device_operations fb_dev_ops;
 extern const struct device_operations fb_out_dev_ops;
 
-int register_fbinfo(const char *fb_name);
+int register_fbinfo(const char *fb_name, void *pd);
 
 int fb_pause(struct fb_info *fb);
 

@@ -123,9 +123,10 @@ LV_ATTRIBUTE_TIMER_HANDLER uint32_t lv_timer_handler(void)
 
 #if LV_USE_PERF_MONITOR == 0 //只是为了适应LVGL_V9的benchmark帧率统计
     //解耦了刷新定时器，由外部事件来触发刷新，放在这里执行有利于下面统计时间更精确
-    /*if(lv_disp_get_default()->refr_timer==NULL)*/
-    void lv_display_refr_timer(lv_timer_t *tmr);
-    lv_display_refr_timer(NULL);
+    /* void lv_display_refr_timer(lv_timer_t *tmr); */
+    /* lv_display_refr_timer(NULL); */
+    void lv_port_refr_now(lv_display_t *disp);
+    lv_port_refr_now(NULL);
 #endif
 
     uint32_t time_until_next = LV_NO_TIMER_READY;

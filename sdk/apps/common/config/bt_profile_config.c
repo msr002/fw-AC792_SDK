@@ -48,6 +48,10 @@ SDP_RECORD_HANDLER_REGISTER(pan_sdp_record_item) = {
 };
 #endif
 
+#if (TCFG_BT_SUPPORT_PROFILE_BIP==1)
+u8 bip_profile_support = 1;
+#endif
+
 #if (TCFG_BT_SUPPORT_PROFILE_A2DP==1)
 extern const u8 sdp_a2dp_service_data[];
 u8 a2dp_profile_support = 1;

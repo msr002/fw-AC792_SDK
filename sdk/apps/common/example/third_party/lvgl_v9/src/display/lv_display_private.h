@@ -164,6 +164,8 @@ struct lv_display_t {
         lv_obj_t *mem_label;
 #endif
 
+        uint8_t disp_id;
+
     };
 
     /**********************

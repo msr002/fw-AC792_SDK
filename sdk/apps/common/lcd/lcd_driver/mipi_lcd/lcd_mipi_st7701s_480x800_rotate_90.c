@@ -11,6 +11,9 @@
 #include "asm/dsi_api.h"
 #include "gpio.h"
 
+#define __LCD_W  LCD_W
+#define __LCD_H  LCD_H
+#define __LCD_ID LCD_ID
 //------------------------------------------------------//
 // lcd command initial
 //------------------------------------------------------//
@@ -83,10 +86,10 @@ REGISTER_MIPI_DEVICE_BEGIN(mipi_dev_t) = {
 #else
         .test_mode 	        = false,
 #endif
-        .xres 			    = LCD_W,
-        .yres 			    = LCD_H,
-        .target_xres 	    = LCD_W,
-        .target_yres 	    = LCD_H,
+        .xres 			    = __LCD_W,
+        .yres 			    = __LCD_H,
+        .target_xres 	    = __LCD_W,
+        .target_yres 	    = __LCD_H,
         .interpolation_en 	= 0,
 
         .test_mode_color    = 0x0000ff,
@@ -233,6 +236,7 @@ static int st7701s_check_id(struct lcd_board_cfg *bd_cfg)
 
 REGISTER_LCD_DEVICE_DRIVE(dev)  = {
     .logo 	         = "MIPI_480x800_ST7701S_ROTATE90",
+    .id              = __LCD_ID,
     .type 	         = LCD_MIPI,
     .dev  	         = &mipi_dev_t,
     .init 	         = dsi_vdo_4lane_st7701s_init,

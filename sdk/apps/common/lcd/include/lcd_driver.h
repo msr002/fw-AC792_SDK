@@ -103,6 +103,7 @@ union lcd_dev_info {
 
 struct lcd_dev_drive {
     const char *logo;
+    unsigned int id;
     enum LCD_IF type;
     int (*init)(struct lcd_board_cfg *bd_cfg);
     int (*draw)(void *data);
@@ -125,16 +126,16 @@ extern struct lcd_dev_drive lcd_device_drive_begin[];
 extern struct lcd_dev_drive lcd_device_drive_end[];
 extern const struct device_operations lcd_dev_ops;
 
-void lcd_cs_pinstate(u8 state);
-void lcd_rs_pinstate(u8 state);
-void lcd_rst_pinstate(u8 state);
-void ReadDAT(u8 cmd, u8 *buf, u8 len);
-void WriteCOM(u8 cmd);
-void WriteDAT_8(u8 dat);
-void WriteDAT_one_page(u8 *dat, int len);
-u16 lcd_get_rotate(void);
-int lcd_touch_width_height_rotate(u16 *w, u16 *h);
-int lcd_touch_xy_coord_rotate(u16 *x, u16 *y, u8 status);
+void lcd_cs_pinstate(u8 lcd_id, u8 state);
+void lcd_rs_pinstate(u8 lcd_id, u8 state);
+void lcd_rst_pinstate(u8 lcd_id, u8 state);
+void ReadDAT(u8 lcd_id, u8 cmd, u8 *buf, u8 len);
+void WriteCOM(u8 lcd_id, u8 cmd);
+void WriteDAT_8(u8 lcd_id, u8 dat);
+void WriteDAT_one_page(u8 lcd_id, u8 *dat, int len);
+u16 lcd_get_rotate(u8 lcd_id);
+int lcd_touch_width_height_rotate(u8 lcd_id, u16 *w, u16 *h);
+int lcd_touch_xy_coord_rotate(u8 lcd_id, u16 *x, u16 *y, u8 status);
 
 #endif
 

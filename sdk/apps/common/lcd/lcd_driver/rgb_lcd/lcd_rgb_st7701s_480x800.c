@@ -7,6 +7,10 @@
 
 #if TCFG_LCD_RGB_ST7701S_480x800
 
+#define __LCD_W  LCD_W
+#define __LCD_H  LCD_H
+#define __LCD_ID LCD_ID
+
 #define SDI     TCFG_LCD_RGB_ST7701S_SDA
 #define SCL     TCFG_LCD_RGB_ST7701S_SCL
 
@@ -49,9 +53,9 @@ static void SPI_WriteComm(u8 c)
 {
     unsigned short temp = 0x00;
     temp = temp | c;
-    lcd_cs_pinstate(0);
+    lcd_cs_pinstate(__LCD_ID, 0);
     SPI_SendData(temp);
-    lcd_cs_pinstate(1);
+    lcd_cs_pinstate(__LCD_ID, 1);
     delay_us(1);
 }
 
@@ -60,9 +64,9 @@ static void SPI_WriteData(u8 c)
 {
     unsigned short temp = 0x100;
     temp = temp | c;
-    lcd_cs_pinstate(0);
+    lcd_cs_pinstate(__LCD_ID, 0);
     SPI_SendData(temp);
-    lcd_cs_pinstate(1);
+    lcd_cs_pinstate(__LCD_ID, 1);
     delay_us(1);
 }
 
@@ -89,12 +93,12 @@ static u8 SPI_Read_Register(u8 cmd)
     unsigned short temp = 0;
     u8 data;
     temp = temp | cmd;
-    lcd_cs_pinstate(0);
+    lcd_cs_pinstate(__LCD_ID, 0);
     delay_us(1);
     SPI_SendData(temp);
     delay_us(1);
     data = SPI_ReadData();
-    lcd_cs_pinstate(1);
+    lcd_cs_pinstate(__LCD_ID, 1);
     return data;
 }
 
@@ -111,14 +115,14 @@ static void W_D(uint8_t c)
 static int lcd_480x800_st7701s_init(struct lcd_board_cfg *bd_cfg)
 {
     printf("lcd 480x800_st7701s init ...\n");
-    lcd_cs_pinstate(1);
+    lcd_cs_pinstate(__LCD_ID, 1);
     if (bd_cfg->lcd_io.lcd_reset != -1) {
         printf("[sanqi] %s - %d\n", __FUNCTION__, __LINE__);
-        lcd_rst_pinstate(1);
+        lcd_rst_pinstate(__LCD_ID, 1);
         delay_ms(1);
-        lcd_rst_pinstate(0);
+        lcd_rst_pinstate(__LCD_ID, 0);
         delay_ms(1);
-        lcd_rst_pinstate(1);
+        lcd_rst_pinstate(__LCD_ID, 1);
         delay_ms(120);
     } else {
         // lcd复用了TP的reset时，加延时让lcd在reset信号之后再初始化，否则lcd可能不显示。
@@ -410,10 +414,10 @@ REGISTER_IMD_DEVICE_BEGIN(lcd_480x800_st7701s_dev) = {
 #endif
         .test_mode_color = 0xff0000,
         .bg_color    	 = 0x00ff00,
-        .xres 			 = LCD_W,
-        .yres 			 = LCD_H,
-        .target_xres     = LCD_W,
-        .target_yres     = LCD_H,
+        .xres 			 = __LCD_W,
+        .yres 			 = __LCD_H,
+        .target_xres     = __LCD_W,
+        .target_yres     = __LCD_H,
         .sample          = SAMP_YUV420,
         .format          = FORMAT_RGB888,
         .interlaced_1st_filed = EVEN_FILED,
@@ -478,6 +482,7 @@ REGISTER_IMD_DEVICE_END()
 
 REGISTER_LCD_DEVICE_DRIVE(lcd_dev) = {
     .logo            = "RGB_480x800_ST7701S",
+    .id              = __LCD_ID,
     .type            = LCD_RGB,
     .dev             = &lcd_480x800_st7701s_dev,
     .init            = lcd_480x800_st7701s_init,

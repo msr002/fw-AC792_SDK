@@ -139,7 +139,7 @@ static void broadcast_task(void *priv)
         wifi_set_channel(ch[(++idx) % ARRAY_SIZE(ch)]);
         for (u8 i = 0; i < 5; i++) {
             wifi_tx_data(&conn, sizeof(struct product_conn), 0, 0, 0);
-            if (!os_sem_accept(&__THIS->asem)) {
+            if (os_sem_accept(&__THIS->asem) > 0) {
                 os_sem_post(&__THIS->bsem);
                 if (__THIS->server_mode == AP_MODE) {
                     wifi_set_channel(PRODUCT_SER_AP_CH);
@@ -216,7 +216,7 @@ static void breathe_recv_task(void)
             }
         }
 
-        if (!os_sem_accept(&__THIS->br_sem)) {
+        if (os_sem_accept(&__THIS->br_sem) > 0) {
             os_sem_del(&__THIS->br_sem, OS_DEL_ALWAYS);
             return;
         }
@@ -239,7 +239,7 @@ static void breathe_send_task(void *priv)
         }
         os_time_dly(20);
 
-        if (!os_sem_accept(&__THIS->bs_sem)) {
+        if (os_sem_accept(&__THIS->bs_sem) > 0) {
             os_sem_del(&__THIS->bs_sem, OS_DEL_ALWAYS);
             return;
         }
@@ -537,7 +537,7 @@ static void camera_data_handle_task(void *priv)
             }
         }
 
-        if (!os_sem_accept(&__THIS->camera_sem)) {
+        if (os_sem_accept(&__THIS->camera_sem) > 0) {
             os_sem_del(&__THIS->camera_sem, OS_DEL_ALWAYS);
             free(camera_data);
             __THIS->camera_pid = 0;
@@ -638,7 +638,7 @@ static void audio_data_handle_task(void *priv)
             cbuf_write(&__THIS->mic_cbuf, recv_buf, recv_len);
         }
 
-        if (!os_sem_accept(&__THIS->audio_data_sem)) {
+        if (os_sem_accept(&__THIS->audio_data_sem) > 0) {
             os_sem_del(&__THIS->audio_data_sem, OS_DEL_ALWAYS);
             __THIS->audio_data_pid = 0;
             return;
@@ -1404,13 +1404,11 @@ static int mic_open(int value, u8 res)
     product_info("mic volume      : %d\n", f.volume);
     product_info("mic frame_len   : %d\n", f.frame_len);
 
-    printf("%s, line = %d\n", __FUNCTION__, __LINE__);
     if (dev_ioctl(__THIS->mic_hdl, AUDIOC_SET_FMT, (unsigned int)&f)) {
         product_err("mic set fmt err\n");
         goto _mic_exit_;
     }
 
-    printf("%s, line = %d\n", __FUNCTION__, __LINE__);
     if (dev_ioctl(__THIS->mic_hdl, AUDIOC_STREAM_ON, (u32)&__THIS->bindex)) {
         product_err("mic stream on err\n");
         goto _mic_exit_;
@@ -1615,5 +1613,6 @@ void audio_conn_init(int spk_value, int mic_value, u8 mic_res)
 #endif
 
 #endif
+
 
 

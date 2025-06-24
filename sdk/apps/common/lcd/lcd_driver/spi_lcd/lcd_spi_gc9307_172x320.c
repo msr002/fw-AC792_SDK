@@ -7,6 +7,10 @@
 
 /* #define LCD_TEST_MODE ///< 纯色测试模式。将一帧图像buf地址替换成准备好的纯色buf的地址。 */
 
+#define __LCD_W  LCD_W
+#define __LCD_H  LCD_H
+#define __LCD_ID LCD_ID
+
 #define REGFLAG_DELAY     0x45
 
 typedef struct {
@@ -70,39 +74,39 @@ static void lcd_init_code(const InitCode *code, u8 cnt)
             continue;
         }
 
-        WriteCOM(code[i].cmd);
+        WriteCOM(__LCD_ID, code[i].cmd);
         for (u8 j = 0; j < code[i].cnt; j++) {
-            WriteDAT_8(code[i].dat[j]);
+            WriteDAT_8(__LCD_ID, code[i].dat[j]);
         }
     }
 }
 
 static void lcd_spi_gc9307_enter_sleep(void)
 {
-    WriteCOM(0x28);
+    WriteCOM(__LCD_ID, 0x28);
     lcd_delay(120);
-    WriteCOM(0x10);
+    WriteCOM(__LCD_ID, 0x10);
     lcd_delay(50);
 }
 
 static void lcd_spi_gc9307_exit_sleep(void)
 {
-    WriteCOM(0x11);
+    WriteCOM(__LCD_ID, 0x11);
     lcd_delay(120) ;
-    WriteCOM(0x29);
+    WriteCOM(__LCD_ID, 0x29);
 }
 
 static void lcd_spi_172x320_gc9307_reset(void)
 {
-    lcd_rst_pinstate(1);
-    lcd_rs_pinstate(0);
-    lcd_cs_pinstate(1);
+    lcd_rst_pinstate(__LCD_ID, 1);
+    lcd_rs_pinstate(__LCD_ID, 0);
+    lcd_cs_pinstate(__LCD_ID, 1);
 
-    lcd_rst_pinstate(1);
+    lcd_rst_pinstate(__LCD_ID, 1);
     lcd_delay(50);
-    lcd_rst_pinstate(0);
+    lcd_rst_pinstate(__LCD_ID, 0);
     lcd_delay(50);
-    lcd_rst_pinstate(1);
+    lcd_rst_pinstate(__LCD_ID, 1);
     lcd_delay(120);
 }
 
@@ -118,14 +122,14 @@ static u8 *test_buf;
 static u8 *lcd_172x320_gc9307_test_buf_prepra(void)
 {
     static u8 *buf = NULL;
-    buf = malloc(LCD_W * LCD_H * 2);
+    buf = malloc(__LCD_W * __LCD_H * 2);
     if (!buf) {
         printf("[LCD]test mode malloc buf error\n");
         return NULL;
     }
 
     u32 color = RED;
-    for (u32 i = 0; i < LCD_W * LCD_H * 2; i += 2) {
+    for (u32 i = 0; i < __LCD_W * __LCD_H * 2; i += 2) {
         buf[i] = (color >> 8) & 0xff;
         buf[i + 1] = color & 0xff;
     }
@@ -136,15 +140,15 @@ static u8 *lcd_172x320_gc9307_test_buf_prepra(void)
 
 static int lcd_spi_172x320_gc9307_draw_page(void *data)
 {
-    WriteCOM(0x2c);
+    WriteCOM(__LCD_ID, 0x2c);
 
 #ifdef LCD_TEST_MODE
     if (!test_buf) {
         test_buf = lcd_172x320_gc9307_test_buf_prepra();
     }
-    WriteDAT_one_page(test_buf, LCD_RGB565_DATA_SIZE);
+    WriteDAT_one_page(__LCD_ID, test_buf, __LCD_W * __LCD_H * 2);
 #else
-    WriteDAT_one_page((u8 *)data, LCD_RGB565_DATA_SIZE);
+    WriteDAT_one_page(__LCD_ID, (u8 *)data, __LCD_W * __LCD_H * 2);
 #endif
 
     return 0;
@@ -175,9 +179,9 @@ static int lcd_spi_172x320_gc9307_check_id(struct lcd_board_cfg *bd_cfg)
 {
 #if 0 // 默认关闭
     u8 data[3] = {0};
-    ReadDAT(GC9307_CMD_ID1, &data[0], 1);
-    ReadDAT(GC9307_CMD_ID2, &data[1], 1);
-    ReadDAT(GC9307_CMD_ID3, &data[2], 1);
+    ReadDAT(__LCD_ID, GC9307_CMD_ID1, &data[0], 1);
+    ReadDAT(__LCD_ID, GC9307_CMD_ID2, &data[1], 1);
+    ReadDAT(__LCD_ID, GC9307_CMD_ID3, &data[2], 1);
     printf("read GC9307 ID :\n");
     put_buf(data, sizeof(data));
     if ((data[0] != GC9307_ID1) || (data[1] != GC9307_ID2) || (data[2] != GC9307_ID3)) {
@@ -190,8 +194,8 @@ static int lcd_spi_172x320_gc9307_check_id(struct lcd_board_cfg *bd_cfg)
 
 REGISTER_LCD_SPI_DEVICE_BEGIN(lcd_spi_172x320_gc9307_dev) = {
     .info = {
-        .target_xres 	 = LCD_W,
-        .target_yres 	 = LCD_H,
+        .target_xres 	 = __LCD_W,
+        .target_yres 	 = __LCD_H,
         .rotate          = ROTATE_0,
         .in_fmt          = TCFG_LCD_INPUT_FORMAT,
     },
@@ -202,6 +206,7 @@ REGISTER_LCD_SPI_DEVICE_END()
 
 REGISTER_LCD_DEVICE_DRIVE(lcd_spi_172x320_gc9307)  = {
     .logo            = "SPI_172x320_GC9307",
+    .id              = __LCD_ID,
     .type		     = LCD_SPI,
     .dev    	     = &lcd_spi_172x320_gc9307_dev,
     .init		     = lcd_spi_172x320_gc9307_init,

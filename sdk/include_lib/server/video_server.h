@@ -88,7 +88,8 @@ struct vs_audio {
     const char *sample_source;
     void *aec_attr;                           /*!< AEC回声消除算法配置参数 */
     const struct audio_vfs_ops *vfs_ops;      /*!< 虚拟文件操作句柄 */
-    int(*read_input)(u8 *buf, u32 len);       /*!< 用于虚拟采样源"virtual"编码时的数据读取操作读输入buf及其长度，返回负值自动停止编码并回调编码结束的事件 */
+    void *read_priv;
+    int(*read_input)(void *priv, u8 *buf, u32 len);       /*!< 用于虚拟采样源"virtual"编码时的数据读取操作读输入buf及其长度，返回负值自动停止编码并回调编码结束的事件 */
 
 };
 #endif
@@ -255,6 +256,7 @@ struct vs_video_display {
     u8 three_way_type;
     u8  uvc_id;
     u8  fb_num;
+    u8 disp_id;
     const char *fb;
     struct imc_presca_ctl *pctl;
     enum video_state state;

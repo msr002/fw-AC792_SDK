@@ -143,6 +143,13 @@ const char *bt_get_local_name(void)
     return edr_name;
 }
 
+void bt_reset_local_name(void)
+{
+    strcpy(edr_name, "JL-AC79XX-");
+    void hci_vendor_update_name(void);
+    hci_vendor_update_name();
+}
+
 const char *bt_get_pin_code(void)
 {
     return pincode;

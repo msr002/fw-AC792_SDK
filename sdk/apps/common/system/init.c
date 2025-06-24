@@ -135,6 +135,11 @@ void cpu_assert_debug()
     cpu_reset();
 }
 
+void cpu_assert(char *file, int line, bool condition, char *cond_str)
+{
+    //for compiles
+}
+
 #ifdef CONFIG_RTOS_STACK_CHECK_ENABLE
 static void rtos_stack_check_func(void *p)
 {

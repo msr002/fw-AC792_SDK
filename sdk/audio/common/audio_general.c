@@ -56,6 +56,10 @@ const int config_audio_cfg_online_enable = 0;
 #endif
 
 const int config_audio_dac_dma_buf_realloc_enable = 1;
+#ifdef TCFG_DAC_POWER_MODE
+const int config_audio_dac_power_mode = TCFG_DAC_POWER_MODE;
+#endif
+const int config_audio_dac_underrun_time_lea = 100; //le_audio 音频流欠载检测时间(us); 低延时模式建议不要超过100us
 
 const int config_audio_gain_enable = TCFG_GAIN_NODE_ENABLE;
 const int config_audio_split_gain_enable = TCFG_SPLIT_GAIN_NODE_ENABLE;

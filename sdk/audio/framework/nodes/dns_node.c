@@ -15,13 +15,13 @@
 #include "app_config.h"
 
 
-#if 1
-#define ns_log	printf
-#else
-#define ns_log(...)
-#endif/*log_en*/
-
 #if TCFG_DNS_NODE_ENABLE
+
+#define LOG_TAG             "[DNS_NODE]"
+#define LOG_ERROR_ENABLE
+/* #define LOG_DEBUG_ENABLE */
+#define LOG_INFO_ENABLE
+#include "debug.h"
 
 
 enum {
@@ -55,16 +55,17 @@ int dns_param_cfg_read(struct stream_node *node)
     struct ns_cfg_t config;
     struct dns_node_hdl *hdl = (struct dns_node_hdl *)node->private_data;
     int ret = 0;
+
     if (!hdl) {
-        return -1 ;
+        return -1;
     }
     /*
      *获取配置文件内的参数,及名字
      * */
     ret = jlstream_read_node_data_new(NODE_UUID_DNS_NOISE_SUPPRESSOR, node->subid, (void *)&config, hdl->name);
     if (ret != sizeof(config)) {
-        printf("%s, read node data err %d = %d\n", __FUNCTION__, ret, (int)sizeof(config));
-        return -1 ;
+        log_error("%s, read node data err %d = %d", __FUNCTION__, ret, (int)sizeof(config));
+        return -1;
     }
 
     /*
@@ -73,18 +74,18 @@ int dns_param_cfg_read(struct stream_node *node)
     if (config_audio_cfg_online_enable) {
         ret = jlstream_read_effects_online_param(hdl_node(hdl)->uuid, hdl->name, &config, sizeof(config));
         if (jlstream_read_effects_online_param(hdl_node(hdl)->uuid, hdl->name, &config, sizeof(config))) {
-            printf("get dns online param succ\n");
+            log_debug("get dns online param succ");
         }
     }
 
-    hdl->cfg = config;
+    memcpy(&hdl->cfg, &config, sizeof(config));
 
-    ns_log("bypass %d\n", hdl->cfg.bypass);
-    ns_log("type %d\n", hdl->cfg.ns_type);
-    ns_log("call_active_trigger %d\n", hdl->cfg.call_active_trigger);
-    ns_log("aggressfactor  %d/1000\n", (int)(hdl->cfg.aggressfactor * 1000.f));
-    ns_log("minsuppress    %d/1000\n", (int)(hdl->cfg.minsuppress * 1000.f));
-    ns_log("noiselevel     %d/1000\n", (int)(hdl->cfg.noiselevel * 1000.f));
+    log_debug("bypass %d", hdl->cfg.bypass);
+    log_debug("type %d", hdl->cfg.ns_type);
+    log_debug("call_active_trigger %d", hdl->cfg.call_active_trigger);
+    log_debug("aggressfactor  %d/1000", (int)(hdl->cfg.aggressfactor * 1000.f));
+    log_debug("minsuppress    %d/1000", (int)(hdl->cfg.minsuppress * 1000.f));
+    log_debug("noiselevel     %d/1000", (int)(hdl->cfg.noiselevel * 1000.f));
 
     return ret;
 }
@@ -118,6 +119,7 @@ static int ns_node_fixed_frame_run(void *priv, u8 *in, u8 *out, int len)
     }
     return wlen;
 }
+
 /*节点输出回调处理，可处理数据或post信号量*/
 static void dns_handle_frame(struct stream_iport *iport, struct stream_note *note)
 {
@@ -227,12 +229,10 @@ static int dns_ioc_negotiate(struct stream_iport *iport)
     return ret;
 }
 
-
 /*节点start函数*/
 static void dns_ioc_start(struct dns_node_hdl *hdl)
 {
-    /* struct stream_fmt *fmt = &hdl_node(hdl)->oport->fmt; */
-    printf("dns node start");
+    log_debug("dns node start");
 
     dns_param_t param = {
         .DNS_OverDrive = hdl->cfg.aggressfactor,
@@ -242,8 +242,7 @@ static void dns_ioc_start(struct dns_node_hdl *hdl)
         .DNS_rbRate = 0.3f,
         .sample_rate = hdl->sample_rate,
     };
-    overlay_load_code(OVERLAY_AEC);
-    aec_code_movable_load();
+
     /*打开算法*/
     hdl->dns = audio_dns_open(&param);
     hdl->trigger = 0;

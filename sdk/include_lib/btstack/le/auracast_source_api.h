@@ -38,6 +38,8 @@ typedef struct {
     uint8_t  bn;
     uint8_t  rtn;
     uint8_t  reserve;
+    uint32_t custom_sdu_interval_us;
+    uint32_t custom_octets_per_frame;
 } auracast_advanced_config_t;
 
 typedef struct {

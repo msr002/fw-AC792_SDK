@@ -19,6 +19,8 @@ void pc_spk_player_close(struct pc_spk_player *player);
 
 bool pc_spk_player_runing(void);
 
+bool pc_spk_player_mute_status(void);
+
 int pc_spk_player_pitch_up(struct pc_spk_player *player);
 
 int pc_spk_player_pitch_down(struct pc_spk_player *player);

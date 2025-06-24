@@ -5,6 +5,10 @@
  * @brief Bluetooth Stack Module
  */
 
+#if !TCFG_BT_BQB_PROFILE_TEST_ENABLE
+u8 hfp_more_feature_hf_indicators = 1;
+#endif
+
 const int CONFIG_BTSTACK_SUPPORT_FUN = HFP_UPDATE_BATTERY;
 
 const int CONFIG_BTSTACK_TWS_AUDIO_SHARE_ENABLE = 0;

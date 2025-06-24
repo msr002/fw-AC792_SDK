@@ -18,9 +18,10 @@
 
 #if TCFG_LOCAL_TWS_ENABLE
 
+#undef __LOG_ENABLE
 #define LOG_TAG     		"[LOCAL-TWS-FILE]"
 #define LOG_ERROR_ENABLE
-#define LOG_DEBUG_ENABLE
+/* #define LOG_DEBUG_ENABLE */
 #define LOG_INFO_ENABLE
 #define LOG_DUMP_ENABLE
 #define LOG_WARN_ENABLE
@@ -72,6 +73,11 @@ static enum stream_node_state local_tws_get_frame(void *file, struct stream_fram
         diff /= TIMESTAMP_US_DENOMINATOR;
         if (diff <= 12000) {
             log_debug("-rx : %u, %u, %dus", header.timestamp, current_time, diff);
+            putchar('T');
+        }
+
+        if (diff < -100000) {
+            tws_api_data_trans_clear(hdl->tws_channel);
         }
 
         int head_offset = sizeof(struct jl_tws_header);
@@ -157,6 +163,7 @@ static int local_tws_file_start(struct local_tws_file_handle *hdl)
     hdl->start = 1;
 
     if (hdl->tws_channel) {
+        tws_api_data_trans_clear(hdl->tws_channel);
         tws_api_data_trans_rx_notify_register(hdl->tws_channel, local_tws_wake_jlstream_run, hdl);
     }
 

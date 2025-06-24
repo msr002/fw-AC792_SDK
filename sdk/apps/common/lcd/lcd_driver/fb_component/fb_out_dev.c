@@ -41,19 +41,22 @@ static int fb_out_dev_init(const struct dev_node *node, void *_data)
 static int fb_out_dev_open(const char *name, struct device **device, void *arg)
 {
     int err = 0;
+    int ret = 0;
     if (!arg) {
         return -1;
     }
-    fb_combine_mutex_enter();
     //申请一个fb输出节点
     struct fb_out_t *p = (struct fb_out_t *)zalloc(sizeof(struct fb_out_t));
     struct fb_draw_info *info = (struct fb_draw_info *)arg;
+    u8 id = info->out_id;
+    fb_combine_mutex_enter(id);
     if (p) {
         *device = &p->device;
         (*device)->private_data = p;
         strcpy(p->fb_name, info->name);
         p->fb = info->priv;
         p->z_order = info->z_order;
+        p->out_id = info->out_id;
         err = dev_ioctl(p->fb, FBIOGET_ALLOC_FBUFFER, p->buf_addr);
         if (err) {
             p->buf_num = err;
@@ -64,7 +67,8 @@ static int fb_out_dev_open(const char *name, struct device **device, void *arg)
         }
         if (err == 0) {
             if (!fb_lcd_device_open(NULL)) {
-                return -1;
+                ret = -1;
+                goto __exit;
             }
             _open_fb++;
             fb_combine_prepare(info, _open_fb); /* fb 合成模块准备工作 */
@@ -76,12 +80,15 @@ static int fb_out_dev_open(const char *name, struct device **device, void *arg)
         out_info.width = info->width; //宽度
         out_info.height = info->height; //高度
         out_info.format = info->format;
+        out_info.out_id = info->out_id;
         out_info.out_addr = (err > 1) ? p->buf_addr[1] : p->buf_addr[0];
+        p->out_id = out_info.out_id;
         if (err == 3) {
             out_info.out_addr = p->buf_addr[2];
         }
         if (!fb_lcd_device_open(&out_info)) {
-            return -1;
+            ret = -1;
+            goto __exit;
         }
 
         _open_fb++;
@@ -92,8 +99,8 @@ static int fb_out_dev_open(const char *name, struct device **device, void *arg)
     }
 
 __exit:
-    fb_combine_mutex_exit();
-    return 0;
+    fb_combine_mutex_exit(id);
+    return ret;
 }
 
 static int fb_out_dev_putmap(struct fb_out_t *ep, struct fb_map_user *map)
@@ -126,8 +133,9 @@ static int fb_out_dev_close(struct device *device)
 {
     int err = 0;
     struct fb_out_t *p = (struct fb_out_t *)device->private_data;
+    u8 id = p->out_id;
 
-    fb_combine_mutex_enter();
+    fb_combine_mutex_enter(id);
     fb_combine_list_del(p);
     if (p) {
         free(p);
@@ -140,9 +148,10 @@ static int fb_out_dev_close(struct device *device)
         /* fb_lcd_device_close(); */
         /* fb_lcd_buf_clear(); */
 
-        fb_combine_close();
+        fb_combine_close(id);
     }
-    fb_combine_mutex_exit();
+    fb_combine_mutex_exit(id);
+    return 0;
 }
 const struct device_operations fb_out_dev_ops = {
     .init = fb_out_dev_init,

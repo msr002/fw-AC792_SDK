@@ -55,6 +55,7 @@ struct fb_lcd_t {
     u16 rotate;
     volatile u8 out_buf_index;
     volatile u8 lcd_push_task_run;
+    OS_SEM lcd_async_sem;
 };
 
 static u8 lcd_buf_num = FB_LCD_BUF_NUM;
@@ -64,12 +65,13 @@ static volatile u32 g_last_vsync_trig_time;
 static volatile u64 g_vsync_start_time;
 static volatile u16 g_dmm_line;
 
-static struct fb_lcd_t _fb_lcd = {0};
-#define  __this   (&_fb_lcd)
+static struct fb_lcd_t _fb_lcd[FB_MAX_OUT_NUM];
+#define  __this   (&_fb_lcd[id])
 
 int fb_frame_buf_rotate(uint8_t *image_src, uint8_t *image_dst, int src_width, int src_height, int src_stride,
                         int dst_width, int dst_height, int dst_stride, int degree, int xoffset, int yoffset,
                         int in_format, int out_format, uint8_t mirror);
+
 
 static void __fb_buf_clear(u8 *frame_buffer, u32 frame_size, u32 format)
 {
@@ -107,7 +109,7 @@ static u16 __fb_abs(int x, int y, u8 *flag)
     return ((y) - (x));
 }
 
-static int __fb_lcd_line_done_wait(u8 comp, u8 wait_line)
+static int __fb_lcd_line_done_wait(u8 id, u8 comp, u8 wait_line)
 {
     u32 cur_line = 0;
     if (!wait_line) {
@@ -133,6 +135,7 @@ static int __fb_lcd_line_done_wait(u8 comp, u8 wait_line)
 
 static void *__fb_lcd_frame_end_hook_func(void)
 {
+    u8 id = 0;
     if (!__this->next_disp) {
         return NULL; //软件还未渲染完整一帧，继续显示上一帧显存
     }
@@ -143,7 +146,7 @@ static void *__fb_lcd_frame_end_hook_func(void)
 }
 
 //数据与lcd显存交换
-static int __fb_lcd_frame_swap_flush(u8 *frame_buffer)
+static int __fb_lcd_frame_swap_flush(u8 id, u8 *frame_buffer)
 {
     if (__this->lcd_kick_start == 0) {
         if (__this->lcd) {
@@ -159,7 +162,7 @@ static int __fb_lcd_frame_swap_flush(u8 *frame_buffer)
 }
 
 //数据直接拷贝到lcd显存
-static int __fb_lcd_frame_copy_flush(u8 wait_line, u8 *frame_buffer, u16 x, u16 y)
+static int __fb_lcd_frame_copy_flush(u8 id, u8 wait_line, u8 *frame_buffer, u16 x, u16 y)
 {
 #define CALC_CNT  60
     static u8 statistics_cnt = CALC_CNT;
@@ -172,7 +175,7 @@ static int __fb_lcd_frame_copy_flush(u8 wait_line, u8 *frame_buffer, u16 x, u16 
     u32 dma2d_copy_start_time;
     //1.等lcd line pending
     if (wait_line) {
-        __fb_lcd_line_done_wait(0, statistics_cnt);
+        __fb_lcd_line_done_wait(id, 0, statistics_cnt);
     }
     dma2d_copy_start_time = get_system_us();
     //2.dma2d copy 推屏
@@ -250,7 +253,7 @@ static int __fb_lcd_frame_copy_flush(u8 wait_line, u8 *frame_buffer, u16 x, u16 
 }
 
 //数据旋转至lcd显存
-static int __fb_lcd_frame_rotate_copy_flush(u8 wait_line, u8 *frame_buffer, u8 *out_buffer)
+static int __fb_lcd_frame_rotate_copy_flush(u8 id, u8 wait_line, u8 *frame_buffer, u8 *out_buffer)
 {
     static u8 rotate_slow = 0;  //0:旋转速度比推屏快  1:旋转速度比推屏慢 旋转90度出现耗时比推1帧时间多
 #define CALC_CNT  10
@@ -267,7 +270,7 @@ static int __fb_lcd_frame_rotate_copy_flush(u8 wait_line, u8 *frame_buffer, u8 *
 
     //1.等lcd line pending
     if (wait_line) {
-        __fb_lcd_line_done_wait(rotate_slow, statistics_cnt);
+        __fb_lcd_line_done_wait(id, rotate_slow, statistics_cnt);
     }
 
 
@@ -349,18 +352,18 @@ static int __fb_lcd_frame_rotate_copy_flush(u8 wait_line, u8 *frame_buffer, u8 *
 }
 
 #if FB_LCD_FRAME_RATE_DEBUG_EN
-static int __fb_lcd_framerate_calc(void)
+static int __fb_lcd_framerate_calc(u8 id)
 {
-    static u32 time = 0;
-    static u16 frames = 0;
+    static u32 time[2];
+    static u16 frames[2];
     u32 cur_time = 0;
 
-    frames++;
+    frames[id]++;
     cur_time = get_system_ms();
-    if (time_after(cur_time, time)) {
-        log_info("lcd update: %dfps", frames * 1000 / (1000 + (cur_time - time)));
-        time = get_system_ms() + 1000;
-        frames = 0;
+    if (time_after(cur_time, time[id])) {
+        log_info("lcd[%d] update: %dfps", id, frames[id] * 1000 / (1000 + (cur_time - time[id])));
+        time[id] = get_system_ms() + 1000;
+        frames[id] = 0;
     }
     return 0;
 }
@@ -372,6 +375,7 @@ void dmm_vsync_int_handler(void)
     struct lcd_dev_drive *lcd = NULL;
     struct imd_dev *imd;
     struct mipi_dev *mipi;
+    u8 id = 0;
 #if 1 //跑几次，取最小值即可，然后可屏蔽代码写死行周期变量
     static u32 dmm_frame_period = 16000; //先给一个最小周期的值,单位微秒
     static u8 statistics_cnt = 0;
@@ -424,7 +428,7 @@ static void dump_frame_buffer(uint8_t *buffer, int buffer_size)
     }
 }
 
-static void *__fb_lcd_open_device(void)
+static void *__fb_lcd_open_device(u8 id)
 {
     struct lcd_dev_drive *lcd = NULL;
     //yuv422,rgb565,rgb888,argb888
@@ -435,7 +439,7 @@ static void *__fb_lcd_open_device(void)
         FB_COLOR_FORMAT_ARGB8888
     };
     if (__this->lcd == NULL) {
-        __this->lcd = dev_open("lcd", NULL);
+        __this->lcd = dev_open("lcd", (void *)&id);
         if (__this->lcd) {
             dev_ioctl(__this->lcd, IOCTL_LCD_RGB_GET_LCD_HANDLE, (u32)&lcd);
             dev_ioctl(__this->lcd, IOCTL_LCD_RGB_SET_ISR_CB, (u32)__fb_lcd_frame_end_hook_func);
@@ -491,20 +495,21 @@ static void __fb_lcd_async_push_task(void *p)
     u32 max_frame_period_us = 0;
     u32 frame_period_start_us = 0;
     u32 frame_period_us = 0;
+    u8 id = (u8)p;
     while (1) {
         ret = os_taskq_pend_timeout(msg, ARRAY_SIZE(msg), 0);
         /* printf("ret=%d\n",ret ); */
         if (ret == OS_TASKQ)  {
             /* printf("swap addr=%x\n",msg[1] ); */
             frame_period_start_us = get_system_us();
-            __fb_lcd_frame_swap_flush((u8 *)msg[1]);
+            __fb_lcd_frame_swap_flush(msg[0], (u8 *)msg[1]);
 #if FB_LCD_FRAME_RATE_DEBUG_EN
             frame_period_us = get_system_us() - frame_period_start_us;;
             if (max_frame_period_us < frame_period_us) {
                 max_frame_period_us = frame_period_us;
                 log_info("fb lcd max frame period : %dus", max_frame_period_us);
             }
-            __fb_lcd_framerate_calc();
+            __fb_lcd_framerate_calc(id);
 #endif
         }
     }
@@ -515,7 +520,7 @@ static void __fb_lcd_async_push_task(void *p)
  * @param:  需要检查的buf地址
  * @return: 0:不冲突 非0: 冲突
  **/
-int fb_lcd_buf_is_busy(u8 *buf)
+int fb_lcd_buf_is_busy(u8 id, u8 *buf)
 {
     u32 dmm_addr = 0;
     if (__this->out_buf_num > 1) {
@@ -541,9 +546,10 @@ void *fb_lcd_device_open(struct fb_out_info *out_info)
     void *fd = NULL;
     u32 lcd_out_addr = 0;
     u32 out_buf_size;
+    u8 id = out_info ? out_info->out_id : 0;
     if (__this->lcd == NULL) {
         // 打开lcd 设备
-        fd = __fb_lcd_open_device();
+        fd = __fb_lcd_open_device(id);
 
         lcd_out_addr = __this->out_buf[0];
         if (__this->rotate) {
@@ -553,7 +559,9 @@ void *fb_lcd_device_open(struct fb_out_info *out_info)
             __fb_lcd_set_buf_num(2);
             if (__this->lcd_push_task_run == 0) {
                 //创建线程,用于异步等待vsync的动作
-                thread_fork("async_lcd_task", 20, 1024, 256, 0, __fb_lcd_async_push_task, NULL);
+                char async_lcd_task_name[20];
+                sprintf(async_lcd_task_name, "async_lcd_task%d", id);
+                thread_fork(async_lcd_task_name, 20, 1024, 256, 0, __fb_lcd_async_push_task, (void *)id);
                 __this->lcd_push_task_run = 1;
 
             }
@@ -609,7 +617,7 @@ void *fb_lcd_device_open(struct fb_out_info *out_info)
  * @param:  none
  * @return:
  **/
-int fb_lcd_device_close(void)
+int fb_lcd_device_close(u8 id)
 {
     if (__this->lcd) {
         dev_close(__this->lcd);
@@ -619,25 +627,29 @@ int fb_lcd_device_close(void)
     return 0;
 }
 /**
- * @brief   异步更新lcd显示数据
+ * @brief   异步推屏
+ * @param:  id: 输出id
  * @param:  frame_buffer: 待更新帧数据
  * @return: none
  **/
-void fb_lcd_frame_buf_async_flush(u8 *frame_buffer)
+void fb_lcd_frame_buf_async_flush(u8 id, u8 *frame_buffer)
 {
-    int msg[1];
-    msg[0] = (int)frame_buffer;
+    int msg[2];
+    msg[0] = id;
+    msg[1] = (int)frame_buffer;
     int err =  os_taskq_post_type("async_lcd_task", Q_USER, ARRAY_SIZE(msg), msg);
     if (err) {
         printf("fb_lcd_async_flush post err=%d\n", err);
     }
 }
+
 /**
  * @brief   更新lcd显示数据
+ * @param:  id: lcd id号
  * @param:  frame_buffer: 待更新帧数据
  * @return: none
  **/
-void fb_lcd_frame_buf_update(u8 *frame_buffer)
+void fb_lcd_frame_buf_update(u8 id, u8 *frame_buffer)
 {
 #if 0 ////显存写卡调试
     int out_buf_size = __this->out_w * __this->out_h * dma2d_get_format_bpp(__this->out_format) / 8;
@@ -650,20 +662,20 @@ void fb_lcd_frame_buf_update(u8 *frame_buffer)
     if (__this->out_buf_num == 1) {
         if (__this->rotate) {
             if (__this->lcd_type == LCD_MIPI || __this->lcd_type == LCD_RGB) {
-                __fb_lcd_frame_rotate_copy_flush(1, frame_buffer, (u8 *)__this->out_buf[0]);
+                __fb_lcd_frame_rotate_copy_flush(id, 1, frame_buffer, (u8 *)__this->out_buf[0]);
             } else {
-                //mcu lcd
-                __fb_lcd_frame_rotate_copy_flush(0, frame_buffer, (u8 *)__this->out_buf[0]);
-                __fb_lcd_frame_swap_flush((u8 *)__this->out_buf[0]);
+                //mcu/spi lcd
+                __fb_lcd_frame_rotate_copy_flush(id, 0, frame_buffer, (u8 *)__this->out_buf[0]);
+                __fb_lcd_frame_swap_flush(id, (u8 *)__this->out_buf[0]);
                 goto _exit;
             }
         } else {
             if (__this->lcd_type == LCD_MIPI || __this->lcd_type == LCD_RGB) {
-                __fb_lcd_frame_copy_flush(1, frame_buffer, __this->out_buf_x, __this->out_buf_y);
+                __fb_lcd_frame_copy_flush(id, 1, frame_buffer, __this->out_buf_x, __this->out_buf_y);
             } else {
-                //mcu lcd
-                __fb_lcd_frame_copy_flush(0, frame_buffer, __this->out_buf_x, __this->out_buf_y);
-                __fb_lcd_frame_swap_flush((u8 *)__this->out_buf[0]);
+                //mcu/spi lcd
+                __fb_lcd_frame_copy_flush(id, 0, frame_buffer, __this->out_buf_x, __this->out_buf_y);
+                __fb_lcd_frame_swap_flush(id, (u8 *)__this->out_buf[0]);
                 goto _exit;
             }
         }
@@ -675,12 +687,12 @@ void fb_lcd_frame_buf_update(u8 *frame_buffer)
                 if (__this->out_buf[__this->out_buf_index] == (u8 *)dmm_addr) {
                     __this->out_buf_index = !__this->out_buf_index;
                 }
-                __fb_lcd_frame_rotate_copy_flush(0, frame_buffer, (u8 *)__this->out_buf[__this->out_buf_index]);
-                fb_lcd_frame_buf_async_flush((u8 *)__this->out_buf[__this->out_buf_index]);
+                __fb_lcd_frame_rotate_copy_flush(id, 0, frame_buffer, (u8 *)__this->out_buf[__this->out_buf_index]);
+                fb_lcd_frame_buf_async_flush(id, (u8 *)__this->out_buf[__this->out_buf_index]);
                 return;
             }
         }
-        __fb_lcd_frame_swap_flush(frame_buffer);
+        __fb_lcd_frame_swap_flush(id, frame_buffer);
     }
 #if FB_LCD_FRAME_RATE_DEBUG_EN
     frame_period_us = get_system_us() - frame_period_start_us;;
@@ -692,8 +704,42 @@ void fb_lcd_frame_buf_update(u8 *frame_buffer)
 
 _exit:
 #if FB_LCD_FRAME_RATE_DEBUG_EN
-    __fb_lcd_framerate_calc();
+    __fb_lcd_framerate_calc(id);
 #endif
+}
+
+static void _fb_lcd_update_async(u8 id, void *priv)
+{
+    u8 *frame_buffer = (u8 *)priv;
+    fb_lcd_frame_buf_update(id, frame_buffer);
+    os_sem_post(&__this->lcd_async_sem);
+}
+/**
+ * @brief   异步lcd显示数据
+ * @param:     id:输出id
+ * @param:     frame_buffer:显示数据
+ * @return:    0: ok  非0: error
+ **/
+int fb_lcd_frame_buf_update_async(u8 id, u8 *frame_buffer)
+{
+    if (!os_sem_valid(&__this->lcd_async_sem)) {
+        os_sem_create(&__this->lcd_async_sem, 1);
+    }
+
+    os_sem_pend(&__this->lcd_async_sem, 0);
+
+    int err;
+    int msg[4];
+    msg[0] = (int)_fb_lcd_update_async;
+    msg[1] = 2;
+    msg[2] = (int)id;
+    msg[3] = (int)frame_buffer;
+    err =  os_taskq_post_type("sys_timer", Q_CALLBACK, ARRAY_SIZE(msg), msg);
+    if (err) {
+        os_sem_post(&__this->lcd_async_sem);
+    }
+
+    return err;
 }
 
 /**
@@ -701,7 +747,7 @@ _exit:
  * @param:  none
  * @return: lcd插值与否
  **/
-u8 fb_lcd_get_interpolation(void)
+u8 fb_lcd_get_interpolation(u8 id)
 {
     return __this->interpolation_en;
 }
@@ -710,7 +756,7 @@ u8 fb_lcd_get_interpolation(void)
  * @param:  none
  * @return: lcd显存水平起始坐标
  **/
-u16 fb_lcd_get_buf_xoffset(void)
+u16 fb_lcd_get_buf_xoffset(u8 id)
 {
     return __this->out_buf_x;
 }
@@ -720,7 +766,7 @@ u16 fb_lcd_get_buf_xoffset(void)
  * @param:  none
  * @return: lcd显存垂直起始坐标
  **/
-u16 fb_lcd_get_buf_yoffset(void)
+u16 fb_lcd_get_buf_yoffset(u8 id)
 {
     return __this->out_buf_y;
 }
@@ -730,7 +776,7 @@ u16 fb_lcd_get_buf_yoffset(void)
  * @param:  none
  * @return: lcd屏幕宽度
  **/
-u16 fb_lcd_get_width(void)
+u16 fb_lcd_get_width(u8 id)
 {
     return __this->out_w;
 }
@@ -739,7 +785,7 @@ u16 fb_lcd_get_width(void)
  * @param:  none
  * @return: lcd屏幕高度
  **/
-u16 fb_lcd_get_height(void)
+u16 fb_lcd_get_height(u8 id)
 {
     return __this->out_h;
 }
@@ -749,7 +795,7 @@ u16 fb_lcd_get_height(void)
  * @param:  none
  * @return: lcd显存宽度
  **/
-u16 fb_lcd_get_buf_width(void)
+u16 fb_lcd_get_buf_width(u8 id)
 {
     return __this->out_buf_w;
 }
@@ -758,7 +804,7 @@ u16 fb_lcd_get_buf_width(void)
  * @param:  none
  * @return: lcd显存高度
  **/
-u16 fb_lcd_get_buf_height(void)
+u16 fb_lcd_get_buf_height(u8 id)
 {
     return __this->out_buf_h;
 }
@@ -768,7 +814,7 @@ u16 fb_lcd_get_buf_height(void)
  * @param:  none
  * @return: lcd屏显输入格式
  **/
-u16 fb_lcd_get_format(void)
+u16 fb_lcd_get_format(u8 id)
 {
     return __this->out_format;
 }
@@ -777,7 +823,7 @@ u16 fb_lcd_get_format(void)
  * @param:  none
  * @return: lcd屏显旋转角度
  **/
-u16 fb_lcd_get_rotate(void)
+u16 fb_lcd_get_rotate(u8 id)
 {
     return __this->rotate;
 }
@@ -787,7 +833,7 @@ u16 fb_lcd_get_rotate(void)
  * @param:  none
  * @return: lcd屏显显存buffer0
  **/
-u32 fb_lcd_get_buf0(void)
+u32 fb_lcd_get_buf0(u8 id)
 {
     return __this->out_buf[0];
 }
@@ -796,7 +842,7 @@ u32 fb_lcd_get_buf0(void)
  * @param:  none
  * @return: lcd屏显显存buffer1
  **/
-u32 fb_lcd_get_buf1(void)
+u32 fb_lcd_get_buf1(u8 id)
 {
     return __this->out_buf[1];
 }
@@ -805,7 +851,7 @@ u32 fb_lcd_get_buf1(void)
  * @param:  none
  * @return: lcd 空闲的显存buffer
  **/
-u32 fb_lcd_get_idle_buf(void)
+u32 fb_lcd_get_idle_buf(u8 id)
 {
     return __this->out_buf[__this->out_buf_index];
 }
@@ -815,7 +861,7 @@ u32 fb_lcd_get_idle_buf(void)
  * @param:  none
  * @return: lcd 显存个数
  **/
-u8 fb_lcd_get_buf_num(void)
+u8 fb_lcd_get_buf_num(u8 id)
 {
     return __this->out_buf_num;
 }
@@ -826,7 +872,7 @@ u8 fb_lcd_get_buf_num(void)
  * @param:  none
  * @return: 切换后可用的lcd显存buf
  **/
-u8 *fb_lcd_buf_index_swap(void)
+u8 *fb_lcd_buf_index_swap(u8 id)
 {
     /* 双输出缓存切换 */
     __this->out_buf_index = !__this->out_buf_index;
@@ -835,15 +881,16 @@ u8 *fb_lcd_buf_index_swap(void)
 
 /**
  * @brief   清除lcd显示数据
+ * @param:  id: 输出id
  * @param:  none
  * @return: none
  **/
-void fb_lcd_buf_clear(void)
+void fb_lcd_buf_clear(u8 id)
 {
-    u16 format = fb_lcd_get_format();
+    u16 format = fb_lcd_get_format(id);
     u8 *addr = (u8 *)fb_combine_get_outbuf(); //获取fb合成输出的地址
-    u16 out_width  = fb_lcd_get_width();
-    u16 out_height = fb_lcd_get_height();
+    u16 out_width  = fb_lcd_get_width(id);
+    u16 out_height = fb_lcd_get_height(id);
     uint32_t fb_get_format_bpp(uint32_t format);
     u32 size = out_width * out_height * fb_get_format_bpp(format) / 8;
     u32 ysize = out_width * out_height;
@@ -882,7 +929,8 @@ void fb_lcd_buf_clear(void)
         log_info("no fb ! clear lcd buf...\n");
         DcuFlushinvRegion((void *)addr, size);
 
-        fb_lcd_frame_buf_update(addr);
+        fb_lcd_frame_buf_update(id, addr);
     }
 }
 #endif
+

@@ -107,7 +107,11 @@
 #define SPK_AUDIO_RES               16
 #endif
 #ifndef SPK_AUDIO_RES_2
+#if TCFG_IIS_NODE_ENABLE && TCFG_AUDIO_BIT_WIDTH
+#define SPK_AUDIO_RES_2             24
+#else
 #define SPK_AUDIO_RES_2             0//24
+#endif
 #endif
 #ifndef SPK_CHANNEL
 #define SPK_CHANNEL                 2

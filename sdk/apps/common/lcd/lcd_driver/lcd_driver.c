@@ -22,10 +22,11 @@
 
 #if TCFG_LCD_ENABLE
 
+#define LCD_DRIVER_MAX_NUM  (2)
+
 struct lcd_device_info {
     struct device device;
     struct lcd_dev_drive *lcd;       ///< 屏驱配置
-    struct lcd_platform_data *pdata; ///< 板级配置
     struct lcd_board_cfg *bd_cfg;    ///< 板级配置项
     void *lcd_if_hdl;                      ///< spi/mcu屏的接口(spi/pap)句柄
     OS_SEM *lcd_wait_sem;                  ///< 指向等待init完成的信号量
@@ -36,8 +37,13 @@ struct lcd_device_info {
     u8 lcd_open_flag   : 1;                ///< lcd驱动open标志
     u8 is_early_init   : 6;                ///< 是否已经提前初始化标志(开机时进行初始化)
 };
-static struct lcd_device_info lcd_dev_info_t = {0};
-#define __this (&lcd_dev_info_t)
+
+static struct lcd_platform_data *lcd_pdata; ///< 板级配置
+
+/* static struct lcd_device_info lcd_dev_info_t = {0}; */
+/* #define __this (&lcd_dev_info_t) */
+static struct lcd_device_info lcd_dev_info_t[LCD_DRIVER_MAX_NUM] = {0};
+#define __this (&lcd_dev_info_t[lcd_id])
 
 
 #if TCFG_LCD_TE_ENABLE
@@ -58,37 +64,37 @@ static struct lcd_device_info lcd_dev_info_t = {0};
 #define LCD_TE_DEBUG_EN         0          ///< 开启TE调试。通过打印判断推屏速率是否在合适范围。
 #if LCD_TE_DEBUG_EN
 #include "perf_counter.h"
-static volatile u32 lcd_te_int_time;       ///< TE信号中断间隔时间
-static u32 lcd_push_data_time;             ///< 接口推一帧数据间隔时间
-static u32 lcd_push_data_start;            ///< 开始推数时间
-static u32 lcd_push_data_end;              ///< 推数结束时间
-static void lcd_te_int_time_calc(void)
+static volatile u32 lcd_te_int_time[LCD_DRIVER_MAX_NUM];       ///< TE信号中断间隔时间
+static u32 lcd_push_data_time[LCD_DRIVER_MAX_NUM];             ///< 接口推一帧数据间隔时间
+static u32 lcd_push_data_start[LCD_DRIVER_MAX_NUM];            ///< 开始推数时间
+static u32 lcd_push_data_end[LCD_DRIVER_MAX_NUM];              ///< 推数结束时间
+static void lcd_te_int_time_calc(u8 lcd_id)
 {
-    static u32 last_time;
+    static u32 last_time[LCD_DRIVER_MAX_NUM];
     u32 current_time;
     current_time = get_system_us();
-    if (last_time) {
-        lcd_te_int_time = current_time - last_time;
+    if (last_time[lcd_id]) {
+        lcd_te_int_time[lcd_id] = current_time - last_time[lcd_id];
     }
-    last_time = current_time;
+    last_time[lcd_id] = current_time;
 }
-static void lcd_push_data_time_calc_start(void)
+static void lcd_push_data_time_calc_start(u8 lcd_id)
 {
-    lcd_push_data_start = get_system_us();
+    lcd_push_data_start[lcd_id] = get_system_us();
 }
-static void lcd_push_data_time_calc_end(void)
+static void lcd_push_data_time_calc_end(u8 lcd_id)
 {
-    lcd_push_data_end = get_system_us();
-    lcd_push_data_time = lcd_push_data_end - lcd_push_data_start;
-    if (lcd_te_int_time) {
+    lcd_push_data_end[lcd_id] = get_system_us();
+    lcd_push_data_time[lcd_id] = lcd_push_data_end[lcd_id] - lcd_push_data_start[lcd_id];
+    if (lcd_te_int_time[lcd_id]) {
         log_info("\n~~~~~~~~~~~~~~~~~~LCD TE DEBUG~~~~~~~~~~~~~~~~~~\n");
-        log_info("lcd_push_data_time = %d\n", lcd_push_data_time);
-        if ((lcd_push_data_time < lcd_te_int_time) || (lcd_te_int_time * 2 < lcd_push_data_time)) {
+        log_info("lcd_push_data_time[%d] = %d\n", lcd_id, lcd_push_data_time[lcd_id]);
+        if ((lcd_push_data_time[lcd_id] < lcd_te_int_time[lcd_id]) || (lcd_te_int_time[lcd_id] * 2 < lcd_push_data_time[lcd_id])) {
             log_info("TE issue! Not within %d < lcd_push_data_time < %d scope\n", \
-                     lcd_te_int_time, 2 * lcd_te_int_time);
+                     lcd_te_int_time[lcd_id], 2 * lcd_te_int_time[lcd_id]);
         } else {
-            log_info("TE normal! lcd_te_int_time = %d, 2 * lcd_te_int_time = \n", \
-                     lcd_te_int_time, 2 * lcd_te_int_time);
+            log_info("TE normal! lcd_te_int_time[lcd_id] = %d, 2 * lcd_te_int_time[lcd_id] = \n", \
+                     lcd_te_int_time[lcd_id], 2 * lcd_te_int_time[lcd_id]);
         }
 
     }
@@ -101,7 +107,7 @@ extern int dma2d_init();
 extern int dma2d_free();
 extern void jldma2d_endian_trans(uint8_t *dest_buf, uint8_t *src_buf, uint32_t w, uint32_t h, uint32_t format);
 
-void lcd_cs_pinstate(u8 state)
+void lcd_cs_pinstate(u8 lcd_id, u8 state)
 {
     if (!__this->lcd || !__this->bd_cfg) {
         log_error("lcd / board_config is NULL!");
@@ -113,7 +119,7 @@ void lcd_cs_pinstate(u8 state)
     }
 }
 
-void lcd_rs_pinstate(u8 state)
+void lcd_rs_pinstate(u8 lcd_id, u8 state)
 {
     if (!__this->lcd || !__this->bd_cfg) {
         log_error("lcd / board_config is NULL - %d!", __LINE__);
@@ -125,7 +131,7 @@ void lcd_rs_pinstate(u8 state)
     }
 }
 
-void lcd_rst_pinstate(u8 state)
+void lcd_rst_pinstate(u8 lcd_id, u8 state)
 {
     if (!__this->lcd || !__this->bd_cfg) {
         log_error("lcd / board_config is NULL - %d!", __LINE__);
@@ -137,7 +143,7 @@ void lcd_rst_pinstate(u8 state)
     }
 }
 
-void lcd_backlight_ctrl(u8 onoff)
+void lcd_backlight_ctrl(u8 lcd_id, u8 onoff)
 {
     if (!__this->lcd || !__this->bd_cfg) {
         log_error("lcd / board_config is NULL - %d!", __LINE__);
@@ -155,7 +161,7 @@ void lcd_backlight_ctrl(u8 onoff)
     }
 }
 
-void WriteCOM(u8 cmd)
+void WriteCOM(u8 lcd_id, u8 cmd)
 {
     struct lcd_dev_drive *lcd = (struct lcd_dev_drive *)__this->lcd;
 
@@ -164,8 +170,8 @@ void WriteCOM(u8 cmd)
         return;
     }
 
-    lcd_cs_pinstate(0);
-    lcd_rs_pinstate(0);//cmd
+    lcd_cs_pinstate(lcd_id, 0);
+    lcd_rs_pinstate(lcd_id, 0);//cmd
 
     if (lcd->type == LCD_MCU_SINGLE_FRAME || lcd->type == LCD_MCU) {
         dev_ioctl(__this->lcd_if_hdl, IOCTL_PAP_ENABLE, 0);
@@ -174,10 +180,10 @@ void WriteCOM(u8 cmd)
         dev_ioctl(__this->lcd_if_hdl, IOCTL_SPI_SEND_BYTE, (u32)cmd);
     }
 
-    lcd_cs_pinstate(1);
+    lcd_cs_pinstate(lcd_id, 1);
 }
 
-void ReadDAT(u8 cmd, u8 *buf, u8 len)
+void ReadDAT(u8 lcd_id, u8 cmd, u8 *buf, u8 len)
 {
     struct lcd_dev_drive *lcd = (struct lcd_dev_drive *)__this->lcd;
 
@@ -187,26 +193,26 @@ void ReadDAT(u8 cmd, u8 *buf, u8 len)
     }
 
     if (lcd->type == LCD_SPI) {
-        lcd_cs_pinstate(0);
-        lcd_rs_pinstate(0);//cmd
+        lcd_cs_pinstate(lcd_id, 0);
+        lcd_rs_pinstate(lcd_id, 0);//cmd
         dev_ioctl(__this->lcd_if_hdl, IOCTL_SPI_SEND_BYTE, (u32)cmd);
-        lcd_rs_pinstate(1);//dat
+        lcd_rs_pinstate(lcd_id, 1);//dat
         for (u8 i = 0; i < len; i++) {
             dev_ioctl(__this->lcd_if_hdl, IOCTL_SPI_READ_BYTE, (u32)(buf + i));
         }
-        lcd_cs_pinstate(1);
+        lcd_cs_pinstate(lcd_id, 1);
     } else if (lcd->type == LCD_MCU_SINGLE_FRAME || lcd->type == LCD_MCU) {
-        lcd_cs_pinstate(0);
-        lcd_rs_pinstate(0);//cmd
+        lcd_cs_pinstate(lcd_id, 0);
+        lcd_rs_pinstate(lcd_id, 0);//cmd
         dev_ioctl(__this->lcd_if_hdl, IOCTL_PAP_ENABLE, 0);
         dev_write(__this->lcd_if_hdl, (void *)&cmd, 1);
-        lcd_rs_pinstate(1);//dat
+        lcd_rs_pinstate(lcd_id, 1);//dat
         dev_read(__this->lcd_if_hdl, (void *)buf, (u32)len);
-        lcd_cs_pinstate(1);
+        lcd_cs_pinstate(lcd_id, 1);
     }
 }
 
-void WriteDAT_8(u8 dat)
+void WriteDAT_8(u8 lcd_id, u8 dat)
 {
     struct lcd_dev_drive *lcd = (struct lcd_dev_drive *)__this->lcd;
 
@@ -215,8 +221,8 @@ void WriteDAT_8(u8 dat)
         return;
     }
 
-    lcd_cs_pinstate(0);
-    lcd_rs_pinstate(1);//dat
+    lcd_cs_pinstate(lcd_id, 0);
+    lcd_rs_pinstate(lcd_id, 1);//dat
 
     if (lcd->type == LCD_MCU_SINGLE_FRAME || lcd->type == LCD_MCU) {
         dev_ioctl(__this->lcd_if_hdl, IOCTL_PAP_ENABLE, 0);
@@ -225,10 +231,10 @@ void WriteDAT_8(u8 dat)
         dev_ioctl(__this->lcd_if_hdl, IOCTL_SPI_SEND_BYTE, (u32)dat);
     }
 
-    lcd_cs_pinstate(1);
+    lcd_cs_pinstate(lcd_id, 1);
 }
 
-void WriteDAT_one_page(u8 *dat, int len)
+void WriteDAT_one_page(u8 lcd_id, u8 *dat, int len)
 {
     struct lcd_dev_drive *lcd = (struct lcd_dev_drive *)__this->lcd;
 
@@ -237,8 +243,8 @@ void WriteDAT_one_page(u8 *dat, int len)
         return;
     }
 
-    lcd_cs_pinstate(0);
-    lcd_rs_pinstate(1);//dat
+    lcd_cs_pinstate(lcd_id, 0);
+    lcd_rs_pinstate(lcd_id, 1);//dat
 
     DcuFlushRegion((u32 *)dat, len);
 
@@ -251,7 +257,7 @@ void WriteDAT_one_page(u8 *dat, int len)
     }
 
 #if LCD_TE_DEBUG_EN
-    lcd_push_data_time_calc_start();
+    lcd_push_data_time_calc_start(lcd_id);
 #endif
 
     if (lcd->type == LCD_SPI) {
@@ -270,13 +276,13 @@ void WriteDAT_one_page(u8 *dat, int len)
     }
 
 #if LCD_TE_DEBUG_EN
-    lcd_push_data_time_calc_end();
+    lcd_push_data_time_calc_end(lcd_id);
 #endif
 
-    lcd_cs_pinstate(1);
+    lcd_cs_pinstate(lcd_id, 1);
 }
 
-u16 lcd_get_rotate(void)
+u16 lcd_get_rotate(u8 lcd_id)
 {
     if (__this->lcd) {
         return __this->lcd->dev->imd.info.rotate;
@@ -285,7 +291,7 @@ u16 lcd_get_rotate(void)
     return 0;
 }
 
-int lcd_touch_width_height_rotate(u16 *w, u16 *h)
+int lcd_touch_width_height_rotate(u8 lcd_id, u16 *w, u16 *h)
 {
     u16 lcd_w;
     u16 lcd_h;
@@ -305,7 +311,7 @@ int lcd_touch_width_height_rotate(u16 *w, u16 *h)
 
     return 0;
 }
-int lcd_touch_xy_coord_rotate(u16 *x, u16 *y, u8 status)
+int lcd_touch_xy_coord_rotate(u8 lcd_id, u16 *x, u16 *y, u8 status)
 {
     u16 rotate;
     u16 touch_w;
@@ -373,8 +379,22 @@ static struct lcd_dev_drive *lcd_dev_match(char *name)
     }
     return NULL;
 }
+static struct lcd_dev_drive *lcd_dev_match_by_id(u8 lcd_id)
+{
+    struct lcd_dev_drive *p;
+    list_for_each_lcd_device_drive(p) {
+        if (!p->logo) {
+            continue;
+        }
+        log_info("lcd dev match by id%d %s %d", lcd_id, p->logo, p->id);
+        if (p->id == lcd_id) {
+            return p;
+        }
+    }
+    return NULL;
+}
 
-static int lcd_early_init_wait_done(void)
+static int lcd_early_init_wait_done(u8 lcd_id)
 {
     int err = 0;
     if (!__this->lcd_wait_sem) {
@@ -391,7 +411,7 @@ static int lcd_early_init_wait_done(void)
     return err;
 }
 
-static int lcd_open_pap(void)
+static int lcd_open_pap(u8 lcd_id)
 {
     __this->lcd_if_hdl = dev_open("pap", NULL);
     if (!__this->lcd_if_hdl) {
@@ -403,8 +423,12 @@ static int lcd_open_pap(void)
     return 0;
 }
 
-static int lcd_open_spi(char *if_name)
+static int lcd_open_spi(u8 lcd_id, char *if_name)
 {
+    if (if_name == NULL) {
+        log_error("open spi if_name is null!");
+        return -1;
+    }
     __this->lcd_if_hdl = dev_open(if_name, NULL);
     if (!__this->lcd_if_hdl) {
         log_error("open spi fail\n");
@@ -434,7 +458,7 @@ static int lcd_open_send_code_port(struct lcd_dev_drive *lcd, struct lcd_board_c
     case LCD_MCU:
     case LCD_MCU_SINGLE_FRAME:
         // MCU屏依赖于PAP接口进行初始化，需要提前打开。注.板级中PAP设备注册位置在LCD前面。
-        if (lcd_open_pap() < 0) {
+        if (lcd_open_pap(lcd->id) < 0) {
             return -1;
         }
         break;
@@ -445,7 +469,7 @@ static int lcd_open_send_code_port(struct lcd_dev_drive *lcd, struct lcd_board_c
             log_error("open send code port fail! can't get board config parameter!!!\n");
             return -1;
         }
-        if (lcd_open_spi(bd_cfg->spi_lcd_interface) < 0) {
+        if (lcd_open_spi(lcd->id, bd_cfg->spi_lcd_interface) < 0) {
             return -1;
         }
         break;
@@ -455,8 +479,10 @@ static int lcd_open_send_code_port(struct lcd_dev_drive *lcd, struct lcd_board_c
 
 static void lcd_te_interrupt(void *arg, u32 parm)
 {
+    struct lcd_dev_drive *lcd = (struct lcd_dev_drive *)arg;
+    u8 lcd_id = lcd->id;
 #if LCD_TE_DEBUG_EN
-    lcd_te_int_time_calc();
+    lcd_te_int_time_calc(lcd_id);
 #endif
     os_sem_post(&__this->te_sem);
     /* putchar('a'); */
@@ -485,6 +511,7 @@ static int lcd_send_init_code(struct lcd_dev_drive *lcd, struct lcd_board_cfg *b
 
 static void lcd_early_init_task(void *arg)
 {
+    u8 lcd_id = *(u8 *)arg;
     struct lcd_dev_drive *lcd = __this->lcd;
     struct lcd_board_cfg *bd_cfg = __this->bd_cfg;
     OS_SEM _wait_sem;
@@ -522,28 +549,29 @@ static int lcd_dev_init(const struct dev_node *node, void *pdata)
     int lcd_num = 0;
     int bd_num;
     struct lcd_dev_drive *p;
-    __this->pdata = (struct lcd_platform_data *)pdata;
+    lcd_pdata = (struct lcd_platform_data *)pdata;
 
     list_for_each_lcd_device_drive(p) {
         lcd_num++;
     }
-    bd_num = __this->pdata->cfg_num;
+    bd_num = lcd_pdata->cfg_num;
 
 #if TCFG_LCD_SUPPORT_MULTI_DRIVER_EN
     // 支持多屏驱配置
     ASSERT(lcd_num > 0, "please enable at least 1 lcd, check board_xxx.h!!!\n");
     ASSERT(bd_num > 0, "you should have at least 1 lcd board config, check board_xxx.c!!!\n");
-    __this->is_early_init = 0;
 #else
     // 仅支持一个屏驱配置
     ASSERT(lcd_num < 2, "you have enable more than 2 lcd, check board_xxx.h!!!\n");
     ASSERT(bd_num > 0, "you should have at least 1 lcd board config, check board_xxx.c!!!\n");
 
-    __this->lcd = lcd_dev_match((char *)NULL);
-    __this->bd_cfg = lcd_bd_cfg_match((char *)NULL, __this->pdata);
+    p = lcd_dev_match(NULL);
+    u8 lcd_id = p->id;
+    __this->lcd = p;
+    __this->bd_cfg = lcd_bd_cfg_match((char *)NULL, lcd_pdata);
     __this->is_early_init = 1;
 
-    thread_fork("lcd_early_init_task", 30, 1024, 0, 0, lcd_early_init_task, NULL);
+    thread_fork("lcd_early_init_task", 30, 1024, 0, 0, lcd_early_init_task, (void *)&p->id);
 #endif
 
     return 0;
@@ -552,7 +580,8 @@ static int lcd_dev_init(const struct dev_node *node, void *pdata)
 static int __lcd_open(struct lcd_dev_drive *lcd, struct lcd_board_cfg *bd_cfg)
 {
     union lcd_dev_info *dev = lcd->dev;
-    struct te_mode_ctrl *te_mode = &__this->bd_cfg->te_mode;
+    struct te_mode_ctrl *te_mode = &bd_cfg->te_mode;
+    u8 lcd_id = lcd->id;
 
     if (__this->lcd_open_flag) {
         log_warn("lcd device has been open");
@@ -610,7 +639,7 @@ static int __lcd_open(struct lcd_dev_drive *lcd, struct lcd_board_cfg *bd_cfg)
             lcd_send_init_code(lcd, bd_cfg);
         }
         if (dev->imd.data_out_endian == MODE_BE) {
-            __this->draw_buf = malloc(LCD_RGB565_DATA_SIZE);
+            __this->draw_buf = malloc(dev->imd.info.target_xres * dev->imd.info.target_yres * 2);
             if (!__this->draw_buf) {
                 dev_close(__this->lcd_if_hdl);
                 log_error("lcd driver draw buf malloc fail!!!");
@@ -620,7 +649,7 @@ static int __lcd_open(struct lcd_dev_drive *lcd, struct lcd_board_cfg *bd_cfg)
         }
         if (te_mode && te_mode->te_mode_en) {
             os_sem_create(&__this->te_sem, 0);
-            __this->te_id = exti_init(te_mode->gpio, te_mode->edge, lcd_te_interrupt, NULL);
+            __this->te_id = exti_init(te_mode->gpio, te_mode->edge, lcd_te_interrupt, lcd);
             log_info("te mode en!");
         }
         log_info("open lcd_mcu ok");
@@ -640,7 +669,7 @@ static int __lcd_open(struct lcd_dev_drive *lcd, struct lcd_board_cfg *bd_cfg)
         dmm_config(&dev->imd.info);
         if (te_mode && te_mode->te_mode_en) {
             os_sem_create(&__this->te_sem, 0);
-            __this->te_id = exti_init(te_mode->gpio, te_mode->edge, lcd_te_interrupt, NULL);
+            __this->te_id = exti_init(te_mode->gpio, te_mode->edge, lcd_te_interrupt, lcd);
             log_info("te mode en!");
         }
         log_info("open lcd_mcu_imd ok");
@@ -656,7 +685,7 @@ static int __lcd_open(struct lcd_dev_drive *lcd, struct lcd_board_cfg *bd_cfg)
             lcd_send_init_code(lcd, bd_cfg);
         }
         if (dev->spi.data_out_endian == MODE_BE) {
-            __this->draw_buf = malloc(LCD_RGB565_DATA_SIZE);
+            __this->draw_buf = malloc(dev->spi.info.target_xres * dev->spi.info.target_yres * 2);
             if (!__this->draw_buf) {
                 dev_close(__this->lcd_if_hdl);
                 log_error("lcd driver draw buf malloc fail!!!");
@@ -666,7 +695,7 @@ static int __lcd_open(struct lcd_dev_drive *lcd, struct lcd_board_cfg *bd_cfg)
         }
         if (te_mode && te_mode->te_mode_en) {
             os_sem_create(&__this->te_sem, 0);
-            __this->te_id = exti_init(te_mode->gpio, te_mode->edge, lcd_te_interrupt, NULL);
+            __this->te_id = exti_init(te_mode->gpio, te_mode->edge, lcd_te_interrupt, lcd);
             log_info("te mode en!");
         }
         break;
@@ -677,10 +706,10 @@ static int __lcd_open(struct lcd_dev_drive *lcd, struct lcd_board_cfg *bd_cfg)
 
 static int lcd_dev_open(const char *name, struct device **device, void *arg)
 {
-    *device = &__this->device;
+    u8 lcd_id = 0;
+    struct lcd_dev_drive *lcd = NULL;
 
 #if TCFG_LCD_SUPPORT_MULTI_DRIVER_EN
-    struct lcd_dev_drive *lcd;
     if (arg == NULL) {
         // open时未指定屏型号，则遍历屏驱配置，check屏是否在线
         list_for_each_lcd_device_drive(lcd) {
@@ -688,13 +717,13 @@ static int lcd_dev_open(const char *name, struct device **device, void *arg)
                 log_error("lcd / board_config doesn't have a name!");
                 continue;
             }
-            __this->bd_cfg = lcd_bd_cfg_match((char *)lcd->logo, __this->pdata);
+            lcd_id = lcd->id;
+            __this->bd_cfg = lcd_bd_cfg_match((char *)lcd->logo, lcd_pdata);
             if (!__this->bd_cfg) {
                 continue;
             }
             __this->lcd = lcd;
             if (!__lcd_open(__this->lcd, __this->bd_cfg)) {
-                log_info("find matching LCD and board config!");
                 goto __find_lcd;
             }
         }
@@ -704,9 +733,14 @@ static int lcd_dev_open(const char *name, struct device **device, void *arg)
         return -ENODEV;
     } else {
         // open时指定了屏幕型号
-        __this->lcd = lcd_dev_match((char *)arg);
-        __this->bd_cfg = lcd_bd_cfg_match((char *)arg, __this->pdata);
-        ASSERT(__this->lcd, "can't find lcd, check board_xxx.h!!!\n");
+        lcd = lcd_dev_match_by_id(*(u8 *)arg);
+        if (lcd == NULL) {
+            lcd = lcd_dev_match((char *)arg);
+        }
+        ASSERT(lcd, "can't find lcd, check board_xxx.h!!!\n");
+        lcd_id = lcd->id;
+        __this->lcd = lcd;
+        __this->bd_cfg = lcd_bd_cfg_match((char *)lcd->logo, lcd_pdata);
         ASSERT(__this->bd_cfg, "can't find lcd board config, check board_xxx.c!!!\n");
 
         if (__lcd_open(__this->lcd, __this->bd_cfg)) {
@@ -715,10 +749,11 @@ static int lcd_dev_open(const char *name, struct device **device, void *arg)
         }
     }
 __find_lcd:
+    log_info("find matching LCD and board config : %s", __this->lcd->logo);
 
 #else
     if (__this->is_early_init) {
-        if (lcd_early_init_wait_done()) {///< 等待dev init里创建的初始化任务完成
+        if (lcd_early_init_wait_done(lcd_id)) {///< 等待dev init里创建的初始化任务完成
             return -ENODEV;
         }
     }
@@ -727,6 +762,7 @@ __find_lcd:
         return -ENODEV;
     }
 #endif
+    *device = &__this->device;
 
     (*device)->private_data = (void *)__this->lcd;
 
@@ -736,6 +772,8 @@ __find_lcd:
 static int lcd_dev_ioctl(struct device *device, u32 cmd, u32 arg)
 {
     struct lcd_dev_drive *lcd = (struct lcd_dev_drive *)device->private_data;
+
+    u8 lcd_id = lcd->id;
 
     if (!__this->lcd_open_flag) {
         log_error("LCD dev not open!!!");
@@ -763,14 +801,14 @@ static int lcd_dev_ioctl(struct device *device, u32 cmd, u32 arg)
             lcd->draw((void *)arg);
         } else if (lcd->type == LCD_MCU) {
             if (__this->lcd->dev->imd.data_out_endian == MODE_BE) {
-                jldma2d_endian_trans(__this->draw_buf, (uint8_t *)arg, LCD_W, LCD_H, JLDMA2D_FORMAT_RGB565);
+                jldma2d_endian_trans(__this->draw_buf, (uint8_t *)arg, lcd->dev->imd.info.target_xres, lcd->dev->spi.info.target_yres, JLDMA2D_FORMAT_RGB565);
                 lcd->draw((void *)__this->draw_buf);
             } else {
                 lcd->draw((void *)arg);
             }
         } else if (lcd->type == LCD_SPI) {
             if (__this->lcd->dev->spi.data_out_endian == MODE_BE) {
-                jldma2d_endian_trans(__this->draw_buf, (uint8_t *)arg, LCD_W, LCD_H, JLDMA2D_FORMAT_RGB565);
+                jldma2d_endian_trans(__this->draw_buf, (uint8_t *)arg, lcd->dev->spi.info.target_xres, lcd->dev->spi.info.target_yres, JLDMA2D_FORMAT_RGB565);
                 lcd->draw((void *)__this->draw_buf);
             } else {
                 lcd->draw((void *)arg);
@@ -811,7 +849,7 @@ static int lcd_dev_ioctl(struct device *device, u32 cmd, u32 arg)
 
         if (lcd->type == LCD_MCU) {
             if (__this->lcd->dev->imd.data_out_endian == MODE_BE) {
-                jldma2d_endian_trans(__this->draw_buf, (uint8_t *)arg, LCD_W, LCD_H, JLDMA2D_FORMAT_RGB565);
+                jldma2d_endian_trans(__this->draw_buf, (uint8_t *)arg, lcd->dev->imd.info.target_xres, lcd->dev->spi.info.target_yres, JLDMA2D_FORMAT_RGB565);
                 lcd->draw((void *)__this->draw_buf);
             } else {
                 lcd->draw((void *)arg);
@@ -820,14 +858,14 @@ static int lcd_dev_ioctl(struct device *device, u32 cmd, u32 arg)
 
         if (lcd->type == LCD_SPI) {
             if (__this->lcd->dev->spi.data_out_endian == MODE_BE) {
-                jldma2d_endian_trans(__this->draw_buf, (uint8_t *)arg, LCD_W, LCD_H, JLDMA2D_FORMAT_RGB565);
+                jldma2d_endian_trans(__this->draw_buf, (uint8_t *)arg, lcd->dev->spi.info.target_xres, lcd->dev->spi.info.target_yres, JLDMA2D_FORMAT_RGB565);
                 lcd->draw((void *)__this->draw_buf);
             } else {
                 lcd->draw((void *)arg);
             }
         }
 
-        lcd_backlight_ctrl(true);//开启背光
+        lcd_backlight_ctrl(lcd->id, true);//开启背光
         break;
 
     case IOCTL_LCD_RGB_GET_LCD_HANDLE:
@@ -841,6 +879,7 @@ static int lcd_dev_ioctl(struct device *device, u32 cmd, u32 arg)
 static int lcd_dev_close(struct device *device)
 {
     struct lcd_dev_drive *lcd = (struct lcd_dev_drive *)device->private_data;
+    u8 lcd_id = lcd->id;
 
     if (!__this->lcd_open_flag) {
         log_warn("The LCD has already been in the closed state!");

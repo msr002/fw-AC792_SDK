@@ -758,6 +758,13 @@ const char log_tag_const_i_APP_CFG_TOOL = CONFIG_DEBUG_LIB(TRUE);
 const char log_tag_const_w_APP_CFG_TOOL = CONFIG_DEBUG_LIB(TRUE);
 const char log_tag_const_e_APP_CFG_TOOL = CONFIG_DEBUG_LIB(TRUE);
 
+const char log_tag_const_v_AUDIO_EDET = CONFIG_DEBUG_LIB(FALSE);
+const char log_tag_const_c_AUDIO_EDET = CONFIG_DEBUG_LIB(FALSE);
+const char log_tag_const_d_AUDIO_EDET = CONFIG_DEBUG_LIB(FALSE);
+const char log_tag_const_i_AUDIO_EDET = CONFIG_DEBUG_LIB(FALSE);
+const char log_tag_const_w_AUDIO_EDET = CONFIG_DEBUG_LIB(FALSE);
+const char log_tag_const_e_AUDIO_EDET = CONFIG_DEBUG_LIB(FALSE);
+
 const char log_tag_const_v_LYRICS = CONFIG_DEBUG_LIB(FALSE);
 const char log_tag_const_c_LYRICS = CONFIG_DEBUG_LIB(FALSE);
 const char log_tag_const_d_LYRICS = CONFIG_DEBUG_LIB(TRUE);

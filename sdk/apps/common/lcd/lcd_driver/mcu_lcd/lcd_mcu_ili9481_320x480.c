@@ -5,31 +5,35 @@
 
 #if TCFG_LCD_MCU_ILI9481_320X480
 
+#define __LCD_W  LCD_W
+#define __LCD_H  LCD_H
+#define __LCD_ID LCD_ID
+
 #define REGFLAG_DELAY 0x45
 
 static void ili9481_set_direction(u8 dir)
 {
     if (dir == 0) {
-        WriteCOM(0x36);
-        WriteDAT_8(0x58);
+        WriteCOM(__LCD_ID, 0x36);
+        WriteDAT_8(__LCD_ID, 0x58);
     } else {
-        WriteCOM(0x36);
-        WriteDAT_8(0x98);
+        WriteCOM(__LCD_ID, 0x36);
+        WriteDAT_8(__LCD_ID, 0x98);
     }
 }
 
 static void ili9481_reset(void)
 {
     printf("ili9481 mcu lcd reset\n");
-    lcd_rst_pinstate(1);
-    lcd_rs_pinstate(1);
-    lcd_cs_pinstate(1);
+    lcd_rst_pinstate(__LCD_ID, 1);
+    lcd_rs_pinstate(__LCD_ID, 1);
+    lcd_cs_pinstate(__LCD_ID, 1);
 
-    lcd_rst_pinstate(1);
+    lcd_rst_pinstate(__LCD_ID, 1);
     lcd_delay(60);
-    lcd_rst_pinstate(0);
+    lcd_rst_pinstate(__LCD_ID, 0);
     lcd_delay(10);
-    lcd_rst_pinstate(1);
+    lcd_rst_pinstate(__LCD_ID, 1);
     lcd_delay(100);
 }
 
@@ -80,9 +84,9 @@ static void ili9481_init_code(const InitCode *code, u8 cnt)
         if (code[i].cmd == REGFLAG_DELAY) {
             lcd_delay(code[i].cnt);
         } else {
-            WriteCOM(code[i].cmd);
+            WriteCOM(__LCD_ID, code[i].cmd);
             for (u8 j = 0; j < code[i].cnt; j++) {
-                WriteDAT_8(code[i].dat[j]);
+                WriteDAT_8(__LCD_ID, code[i].dat[j]);
             }
         }
     }
@@ -90,8 +94,8 @@ static void ili9481_init_code(const InitCode *code, u8 cnt)
 
 static int ili9481_show_page(void *data)
 {
-    WriteCOM(0x2c);
-    WriteDAT_one_page((u8 *)data, LCD_RGB565_DATA_SIZE);
+    WriteCOM(__LCD_ID, 0x2c);
+    WriteDAT_one_page(__LCD_ID, (u8 *)data, __LCD_W * __LCD_H * 2);
 
     return 0;
 }
@@ -101,40 +105,40 @@ static void ili9481_test(void)
     static u8 *buf = NULL;
     u32 color;
     u32 i;
-    buf = malloc(LCD_W * LCD_H * 2);
+    buf = malloc(__LCD_W * __LCD_H * 2);
     if (buf == NULL) {
         printf("[ili9481] malloc buf error\n");
         return;
     }
 
     color = RED;
-    for (i = 0; i < LCD_W * LCD_H * 1 / 4; i++) {
+    for (i = 0; i < __LCD_W * __LCD_H * 1 / 4; i++) {
         buf[2 * i] = (color >> 8) & 0xff;
         buf[2 * i + 1] = color & 0xff;
     }
 
     color = GREEN;
-    for (; i < LCD_W * LCD_H * 2 / 4; i++) {
+    for (; i < __LCD_W * __LCD_H * 2 / 4; i++) {
         buf[2 * i] = (color >> 8) & 0xff;
         buf[2 * i + 1] = color & 0xff;
     }
 
     color = BLUE;
-    for (; i < LCD_W * LCD_H * 3 / 4; i++) {
+    for (; i < __LCD_W * __LCD_H * 3 / 4; i++) {
         buf[2 * i] = (color >> 8) & 0xff;
         buf[2 * i + 1] = color & 0xff;
     }
 
     color = YELLOW;
-    for (; i < LCD_W * LCD_H * 4 / 4; i++) {
+    for (; i < __LCD_W * __LCD_H * 4 / 4; i++) {
         buf[2 * i] = (color >> 8) & 0xff;
         buf[2 * i + 1] = color & 0xff;
     }
 
     while (1) {
         printf("ili9481_test");
-        for (int j = 0;  j < LCD_W * LCD_H * 2; j++) {
-            WriteDAT_8(buf[j]);
+        for (int j = 0;  j < __LCD_W * __LCD_H * 2; j++) {
+            WriteDAT_8(__LCD_ID, buf[j]);
         }
         os_time_dly(100);
     }
@@ -179,10 +183,10 @@ REGISTER_IMD_DEVICE_BEGIN(lcd_mcu_dev) = {
         .test_mode       = false,
         .test_mode_color = 0x0000ff,
         .bg_color    	 = 0x00ff00,
-        .xres 			 = LCD_W,
-        .yres 			 = LCD_H,
-        .target_xres 	 = LCD_W,
-        .target_yres 	 = LCD_H,
+        .xres 			 = __LCD_W,
+        .yres 			 = __LCD_H,
+        .target_xres 	 = __LCD_W,
+        .target_yres 	 = __LCD_H,
         .sample          = SAMP_YUV420,
         .format          = FORMAT_RGB565,
         .len 			 = LEN_256,
@@ -242,6 +246,7 @@ REGISTER_IMD_DEVICE_END()
 
 REGISTER_LCD_DEVICE_DRIVE(lcd_dev_mcu)  = {
     .logo            = "MCU_320x480_ILI9481",
+    .id              = __LCD_ID,
     .type		     = LCD_MCU_SINGLE_FRAME,
     .dev    	     = &lcd_mcu_dev,
     .init		     = ili9481_init,

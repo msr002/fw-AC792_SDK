@@ -64,7 +64,6 @@
 #define VIDEO_LARGE_IMAGE		0
 #endif
 
-#ifndef MULTI_LCD_EN
 #define SCREEN_W        LCD_W
 #define SCREEN_H        LCD_H
 #if LCD_W > 1280
@@ -76,14 +75,6 @@
 #else
 #define SMALL_SCREEN_W          480 //16 aline
 #define SMALL_SCREEN_H           320//16 aline
-#endif
-#else
-
-#define SCREEN_W        720//LCD_W
-#define SCREEN_H        480//LCD_H
-
-#define SMALL_SCREEN_W          320 //16 aline
-#define SMALL_SCREEN_H          240 //16 aline
 #endif
 
 #define MOTION_STOP_SEC     20
@@ -161,6 +152,8 @@ extern int net_video_rec_event_start(void);
 static int video_rec_get_abr(u32 width);
 static void video_disp_stop(int id);
 static int video_disp_start(int id, const struct video_window *win);
+static int show_main_ui();
+static void hide_main_ui();
 
 /**********************************************************************************/
 #endif
@@ -604,16 +597,15 @@ int video_pre_create(int id, int open)
     return err;
 }
 
-#ifndef MULTI_LCD_EN
 int video_disp_start(int id, const struct video_window *win)
-#else
-int video_disp_start(int id, struct video_window *win)
-#endif
 {
     int err = 0;
     union video_req req = {0};
     char dev_name[12] = {0};
     char fb_name [12] = {0};
+    /* if(id == 1) { */
+    /* return 0; */
+    /* } */
 #ifdef CONFIG_DISPLAY_ENABLE
 
     if (win->width == (u16) - 1) {
@@ -638,50 +630,8 @@ int video_disp_start(int id, struct video_window *win)
         log_e("open video_server: faild, id = %d\n", id);
         return -EFAULT;
     }
-#ifdef MULTI_LCD_EN
-    if (!id) {
-        switch (win->win_type) {
-        case DISP_MAIN_WIN:
-            win->width = LCD_W;
-            break;
-        case DISP_HALF_WIN:
-            win->width = LCD_W / 2;
-            break;
-        case DISP_FRONT_WIN:
-            win->width = LCD_W;
-            break;
-        case DISP_BACK_WIN:
-            break;
-        case DISP_PARK_WIN:
-            break;
-        default:
-            break;
-        }
-    } else {
-        switch (win->win_type) {
-        case DISP_MAIN_WIN:
-            break;
-        case DISP_HALF_WIN:
-            win->left = LCD_W / 2;
-            win->width = LCD_W / 2;
-            win->height = LCD_H;
-            break;
-        case DISP_FRONT_WIN:
-            break;
-        case DISP_BACK_WIN:
-            win->width = LCD_W;
-            win->height = LCD_H;
-            break;
-        case DISP_PARK_WIN:
-            win->width = LCD_W;
-            win->height = LCD_H;
+    req.display.disp_id	        = id; //test
 
-            break;
-        default:
-            break;
-        }
-    }
-#endif
     req.display.fb 		        = fb_name;
     req.display.left  	        = win->left;
     req.display.top 	        = win->top;
@@ -5509,6 +5459,14 @@ static int video_rec_init()
     __this->disp_state = DISP_MAIN_WIN;
     __this->second_disp_dev = 0;
 
+
+#ifdef CONFIG_PARK_ENABLE
+    if (get_parking_status()) {
+        //UI TODO
+    } else {
+        //UI TODO
+    }
+#endif
     video_rec_get_remain_time();
 
 

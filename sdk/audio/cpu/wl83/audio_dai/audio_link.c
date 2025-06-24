@@ -720,8 +720,8 @@ void *alink_init(void *hw_alink)
     //===================================//
     ALINK_DMA_MODE_SEL(module, hw_alink_parm->buf_mode);
     if (hw_alink_parm->buf_mode == ALINK_BUF_CIRCLE) {
-        /* ALINK_OPNS_SET(module, hw_alink_parm->dma_len / 16); */
-        ALINK_OPNS_SET(module, hw_alink_parm->dma_len / 4 * 2 / 3);
+        ALINK_OPNS_SET(module, hw_alink_parm->dma_len / 16);
+        /* ALINK_OPNS_SET(module, hw_alink_parm->dma_len / 4 * 2 / 3); */
         if (hw_alink_parm->rx_pns) {
             ALINK_IPNS_SET(module, hw_alink_parm->rx_pns);
         } else {

@@ -5,8 +5,8 @@
 typedef struct {
     s8(*init)(void);
     s8(*online)(void);
-    s8(*read)(u8 *, u32);
-    s8(*write)(u8 *, u32);
+    u32(*read)(u8 *, u32);
+    u32(*write)(u8 *, u32);
 } prod_comm_type;
 
 

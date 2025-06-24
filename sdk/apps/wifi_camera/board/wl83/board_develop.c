@@ -481,6 +481,23 @@ LCD_PLATFORM_DATA_BEGIN(lcd_bd_cfg)
         .edge               = EDGE_NEGATIVE,
     },
     .spi_lcd_interface      = TCFG_LCD_SPI_INTERFACE,
+#if TCFG_LCD_SUPPORT_MULTI_DRIVER_EN
+LCD_PLATFORM_DATA_ADD()
+    .lcd_name               = TCFG_LCD1_DEVICE_NAME,
+    .lcd_io                 = {
+        .backlight          = TCFG_LCD1_BL_IO,
+        .backlight_value    = TCFG_LCD1_BL_VALUE,
+        .lcd_reset          = TCFG_LCD1_RESET_IO,
+        .lcd_cs             = TCFG_LCD1_CS_IO,
+        .lcd_rs             = TCFG_LCD1_RS_IO,
+    },
+    .te_mode                = {
+        .te_mode_en         = TCFG_LCD1_TE_ENABLE,
+        .gpio               = TCFG_LCD1_TE_IO,
+        .edge               = EDGE_NEGATIVE,
+    },
+    .spi_lcd_interface      = TCFG_LCD1_SPI_INTERFACE,
+#endif
 LCD_PLATFORM_DATA_END()
 
 static const struct lcd_platform_data lcd_data = {
@@ -890,15 +907,15 @@ extern const struct device_operations cdrom_dev_ops;
 #endif
 #endif
 
-#ifdef CONFIG_VIDEO0_ENABLE
+#if TCFG_VIDEO0_ENABLE
 static const struct camera_platform_data camera0_data_mipi = {
-    .iic_sel        = "iic2",
-    .xclk_gpio      = IO_PORTE_10,
-    .pwdn_gpio      = IO_PORTE_11,
-    .reset_gpio     = IO_PORTE_12,
+    .iic_sel        = TCFG_VIDEO0_IIC_SEL,
+    .xclk_gpio      = TCFG_VIDEO0_XCLK,
+    .pwdn_gpio      = TCFG_VIDEO0_PWDN,
+    .reset_gpio     = TCFG_VIDEO0_RESET,
     .online_detect  = NULL,
     .power_value    = 0,
-    .interface      = 2,//SEN_INTERFACE_CSI2,
+    .interface      = TCFG_VIDEO0_INTERFACE,//SEN_INTERFACE_CSI2,
     .csi2 = {
         .data_lane_num = 1,
         .clk_rmap = CSI2_X0_LANE,
@@ -918,22 +935,16 @@ static const struct video_platform_data video0_data = {
     .data = video0_subdev_data,
     .num = ARRAY_SIZE(video0_subdev_data),
 };
+#endif
 
-
-
-#endif // CONFIG_VIDEO0_ENABLE
-
-
-
-
-#ifdef CONFIG_VIDEO1_ENABLE
+#if TCFG_VIDEO1_ENABLE
 const struct camera_platform_data camera1_data = {
-    .iic_sel        = "iic1",
-	.xclk_gpio      = IO_PORTD_08,//注意： 如果硬件xclk接到芯片IO，则会占用OUTPUT_CHANNEL1
-    .reset_gpio     = IO_PORTE_09,
-    .pwdn_gpio      = -1,
+    .iic_sel        = TCFG_VIDEO1_IIC_SEL,
+	.xclk_gpio      = TCFG_VIDEO1_XCLK,//注意： 如果硬件xclk接到芯片IO，则会占用OUTPUT_CHANNEL1
+    .reset_gpio     = TCFG_VIDEO1_RESET,
+    .pwdn_gpio      = TCFG_VIDEO1_PWDN,
     .power_value    = 0,
-    .interface      = 0,//SEN_INTERFACE_CSI2,
+    .interface      = TCFG_VIDEO1_INTERFACE,//SEN_INTERFACE_CSI2,
     .dvp = {
 		.group_port  = 0,
         .reverse = 0,
@@ -959,9 +970,6 @@ const struct camera_platform_data camera1_data = {
     }
 };
 
-
-
-
 static const struct video_subdevice_data video1_subdev_data[] = {
     { VIDEO_TAG_CAMERA, (void *)&camera1_data },
 };
@@ -969,10 +977,10 @@ static const struct video_platform_data video1_data = {
     .data = video1_subdev_data,
     .num = ARRAY_SIZE(video1_subdev_data),
 };
-#endif // CONFIG_VIDEO1_ENABLE
+#endif
 
 
-#ifdef CONFIG_VIDEO2_ENABLE
+#if TCFG_VIDEO2_ENABLE
 UVC_PLATFORM_DATA_BEGIN(uvc_data)
 #if THREE_WAY_ENABLE
     .width = 640,
@@ -1133,6 +1141,16 @@ static const struct video_platform_data video5_data = {
 
 #endif
 
+const struct fb_platform_data fb0_data = {
+     .num = 2,
+};
+const struct fb_platform_data fb1_data = {
+     .num = 2,
+};
+const struct fb_platform_data fb2_data = {
+     .num = 2,
+};
+
 #ifdef CONFIG_LTE_PHY_ENABLE
 extern const struct device_operations lte_module_dev_ops;
 LTE_MODULE_DATA_BEGIN(lte_module_data)
@@ -1217,6 +1235,10 @@ static struct dmsdx_platform_data dmsdx_data1 = {
 const struct gsensor_platform_data gsensor_data = {
     .iic                    = TCFG_GSENSOR_IIC_INTERFACE,
 };
+#endif
+
+#if TCFG_EXTFLASH_ENABLE
+extern const struct device_operations extflash_dev_ops;
 #endif
 
 
@@ -1376,9 +1398,9 @@ REGISTER_DEVICES(device_table) = {
 
 
 #if defined CONFIG_VIDEO_ENABLE || defined CONFIG_UI_ENABLE
-    { "fb0",   &fb_dev_ops, NULL },
-    { "fb1",   &fb_dev_ops, NULL },
-    { "fb2",   &fb_dev_ops, NULL },
+    { "fb0",   &fb_dev_ops, (void *)&fb0_data },
+    { "fb1",   &fb_dev_ops, (void *)&fb1_data },
+    { "fb2",   &fb_dev_ops, (void *)&fb2_data },
     { "fb3",   &fb_dev_ops, NULL },
     { "fb4",   &fb_dev_ops, NULL },
     { "fb5",   &fb_dev_ops, NULL },
@@ -1412,6 +1434,12 @@ REGISTER_DEVICES(device_table) = {
 
 #ifdef CONFIG_LTE_PHY_ENABLE
     { "lte",  &lte_module_dev_ops, (void *) &lte_module_data},
+#endif
+
+#ifdef PRODUCT_TEST_ENABLE
+#if TCFG_EXTFLASH_ENABLE
+    { "extflash",  &extflash_dev_ops, NULL},
+#endif
 #endif
 };
 

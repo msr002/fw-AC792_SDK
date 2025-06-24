@@ -76,7 +76,7 @@ const char wifi_ap_scan_support = 0; //ap扫描开关，0为关闭，1为开启
 
 const char wifi_ap_miss_owndevice_channel = 0; //自己设备信道错开功能，0为关闭，1为开启
 
-const char wifi_ap_rate_adapt_strategy = 0; //ap模式下的wifi速率控制策略，0为使用默认策略，1为使用新策略
+const char wifi_ap_rate_adapt_strategy = 0; //ap模式下的wifi速率控制策略，0为使用默认策略，1为用于图传的策略，2为用于iperf的策略
 
 const u16 MAX_PACKETS_IN_QUEUE = 64; //配置WiFi驱动最大发送数据包队列
 const u16 MAX_PACKETS_IN_MCAST_PS_QUEUE = 16;  //配置WiFi驱动最大发送MCAST-power-save包队列 //modify by lyx 32
@@ -953,4 +953,3 @@ const char log_tag_const_d_WT AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(FALSE);
 const char log_tag_const_i_WT AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(TRUE);
 const char log_tag_const_w_WT AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(TRUE);
 const char log_tag_const_e_WT AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(TRUE);
-

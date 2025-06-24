@@ -362,22 +362,14 @@ int cmd_put_app_access(void *priv, char *content)
     app = get_current_app();
 
     bool usb_app_flag = 0;
-#if TCFG_USB_SLAVE_ENABLE
-    u32 state;
-    for (usb_dev usb_id = 0; usb_id < USB_MAX_HW_NUM; usb_id++) {
-        state = usb_otg_online(usb_id);
-        if ((state == SLAVE_MODE) || (state == SLAVE_MODE_WAIT_CONFIRMATION)) {
-            usb_app_flag = 1;
-            break;
-        }
-    }
+#ifdef CONFIG_UI_ENABLE
+    extern bool get_usb_app_flag(void);
+    usb_app_flag = get_usb_app_flag();
+#else
+    usb_app_flag = 1;
 #endif
 
-// #if CONFIG_NET_VDIEO_GAP_ENABLE
-    int gap = 0;
-// #else
-//     int gap = db_select("gap");
-// #endif
+    int gap = db_select("gap");
 
     if ((!app || !app->name || !strstr(app->name, "video_rec")) && !usb_app_flag && !gap) {
         if (app && app->name) {
@@ -400,14 +392,6 @@ int cmd_put_app_access(void *priv, char *content)
 
     }
     in_app_stop_display(0);
-// #if THREE_WAY_ENABLE
-//     if (app && !strcmp(app->name, "video_rec")) {
-//         init_intent(&it);
-//         it.name = app->name;
-//         it.action = ACTION_BACK;
-//         start_app(&it);
-//     }
-// #endif
 
     printf("access_num : ctp %d , cdp %d \n\n", ctp_srv_get_cli_cnt(), cdp_srv_get_cli_cnt());
     if ((ctp_srv_get_cli_cnt() > ACCESS_NUM || cdp_srv_get_cli_cnt() > ACCESS_NUM) ||
@@ -426,15 +410,6 @@ int cmd_put_app_access(void *priv, char *content)
     ctp_info.cli = priv;
 
 err:
-    in_app_stop_display(0);
-// #if THREE_WAY_ENABLE
-//     if (app && !strcmp(app->name, "video_rec")) {
-//         init_intent(&it);
-//         it.name = app->name;
-//         it.action = ACTION_BACK;
-//         start_app(&it);
-//     }
-// #endif
     json_object_put(new_obj);
     return 0;
 }

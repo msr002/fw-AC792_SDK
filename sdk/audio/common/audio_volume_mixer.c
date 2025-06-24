@@ -1046,8 +1046,15 @@ void audio_app_volume_set(u8 state, s16 volume, u8 fade)
             volume = __this->max_volume[state];
         }
         u32 param = dvol_idx << 16 | volume;
-        sys_timeout_add((void *)param, app_audio_set_vol_timer_func, 5); //5ms后更新音量
+
+        if (strcmp(os_current_task(), "app_core") || cpu_in_irq() || cpu_irq_disabled()) {
+            sys_timeout_add_to_task("app_core", (void *)param, app_audio_set_vol_timer_func, 5); //5ms后更新音量
+        } else {
+            app_audio_set_vol_timer_func((void *)param);
+        }
 #endif/*SYS_VOL_TYPE == VOL_TYPE_DIGITAL*/
+
+#if TCFG_DAC_NODE_ENABLE
         if ((state == __this->state) && !app_audio_get_dac_digital_mute()) {
             if ((__this->state == APP_AUDIO_STATE_CALL) && (volume == 0)) {
                 //来电报号发下来通话音量为0的时候不设置模拟音量,避免来电报号音量突然变成0导致提示音不完整
@@ -1066,6 +1073,7 @@ void audio_app_volume_set(u8 state, s16 volume, u8 fade)
 #endif
             }
         }
+#endif
     }
 }
 

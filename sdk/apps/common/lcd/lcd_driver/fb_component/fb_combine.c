@@ -45,19 +45,19 @@ struct fb_combine_t {
     volatile u8 combine_task_run;
     volatile u8 combine_busy;
     u32 combine_out_buf[2];
-    int (*fb_combine_out_cb_func)(void *, u32, u32);
 
     u16 ui_timer_id;
     u8 *map_backup_baddr;
     int fb_frame_cnt[FB_COMBINE_MAX_NUM];
 };
 
-static struct fb_combine_t _fb_combine;
-#define  __this   (&_fb_combine)
+static struct fb_combine_t _fb_combine[FB_MAX_OUT_NUM];
+#define  __this   (&_fb_combine[id])
 
-static struct list_head head = LIST_HEAD_INIT(head); //合成fb 链表
-static DEFINE_SPINLOCK(fb_lock);
-static u32 fb_combine_async_run = 0;
+static spinlock_t fb_lock[FB_MAX_OUT_NUM] = {0};
+static struct list_head head[FB_MAX_OUT_NUM]; //合成fb 链表
+static u32 fb_combine_async_run[FB_MAX_OUT_NUM];
+int (*fb_combine_out_cb_func)(void *, u32, u32);
 
 #define _LVGL_UI_ENTER_FLUSH_TIMEOUT  (500)
 
@@ -75,19 +75,19 @@ enum {
 #define LAYER_GPU_ROTATE BIT(1)
 #define LAYER_GPU_MIRROR BIT(2)
 
-u16 fb_lcd_get_rotate(void);
-u16 fb_lcd_get_width(void);
-u16 fb_lcd_get_height(void);
-u16 fb_lcd_get_format(void);
-u32 fb_lcd_get_buf0(void);
-u32 fb_lcd_get_buf1(void);
-u32 fb_lcd_get_idle_buf(void);
-u8 fb_lcd_get_buf_num(void);
-u16 fb_lcd_get_buf_width(void);
-u16 fb_lcd_get_buf_height(void);
-u8 fb_lcd_get_interpolation(void);
+u16 fb_lcd_get_rotate(u8 id);
+u16 fb_lcd_get_width(u8 id);
+u16 fb_lcd_get_height(u8 id);
+u16 fb_lcd_get_format(u8 id);
+u32 fb_lcd_get_buf0(u8 id);
+u32 fb_lcd_get_buf1(u8 id);
+u32 fb_lcd_get_idle_buf(u8 id);
+u8 fb_lcd_get_buf_num(u8 id);
+u16 fb_lcd_get_buf_width(u8 id);
+u16 fb_lcd_get_buf_height(u8 id);
+u8 fb_lcd_get_interpolation(u8 id);
 
-int fb_lcd_buf_is_busy(u8 *buf);
+int fb_lcd_buf_is_busy(u8 id, u8 *buf);
 int fb_frame_buf_scale(uint8_t *dst, int dst_format, int dst_w, int dst_h,
                        uint8_t *src, int src_format, int src_w, int src_h, uint8_t mirror);
 int fb_frame_buf_rotate(uint8_t *image_src, uint8_t *image_dst, int src_width, int src_height, int src_stride,
@@ -95,7 +95,7 @@ int fb_frame_buf_rotate(uint8_t *image_src, uint8_t *image_dst, int src_width, i
                         int in_format, int out_format, uint8_t mirror);
 
 int fb_frame_buf_mirror(uint8_t *image_src, uint8_t *image_dst, int src_width, int src_height, int dst_width, int dst_height, int mirror, int src_format, int dst_format);
-int fb_combine_task(void *priv);
+int fb_combine_task(u8 id, void *priv);
 /********************** DMA2D 图层合成接口 *****************************/
 typedef struct {
     uint8_t *addr; /* 图层数据地址 */
@@ -599,6 +599,7 @@ static u8 __is_need_create_combine_task(u8 open_fb, struct fb_draw_info *info)
 {
     u16 lcd_w = 0;
     u16 lcd_h = 0;
+    u8 id = info->out_id;
 
 #if (defined CONFIG_UI_ENABLE && defined USE_LVGL_V8_UI_DEMO)
 #if (LV_DISP_UI_FB_NUM <= 1)
@@ -606,20 +607,20 @@ static u8 __is_need_create_combine_task(u8 open_fb, struct fb_draw_info *info)
     return 0;
 #endif
 #else
-    if (fb_lcd_get_buf_num() == 1) {
+    if (fb_lcd_get_buf_num(id) == 1) {
         __this->combine_task_run = FB_COMBINE_FUNC_RUN;
         return 0;
     }
 #endif
 
-    if (fb_lcd_get_rotate() == ROTATE_90 || fb_lcd_get_rotate() == ROTATE_270) {
-        lcd_w  = fb_lcd_get_height();
-        lcd_h = fb_lcd_get_width();
+    if (fb_lcd_get_rotate(id) == ROTATE_90 || fb_lcd_get_rotate(id) == ROTATE_270) {
+        lcd_w  = fb_lcd_get_height(id);
+        lcd_h = fb_lcd_get_width(id);
     } else {
-        lcd_w  = fb_lcd_get_width();
-        lcd_h = fb_lcd_get_height();
+        lcd_w  = fb_lcd_get_width(id);
+        lcd_h = fb_lcd_get_height(id);
     }
-    u16 lcd_format = fb_lcd_get_format();
+    u16 lcd_format = fb_lcd_get_format(id);
 
     if (open_fb > 1) {
         return 1;
@@ -687,12 +688,12 @@ static int __fb_buf_lock(struct fb_out_t *p, u8 *baddr)
 #endif
     return 0;
 }
-static int __fb_head_buf_unlock(u8 *baddr)
+static int __fb_head_buf_unlock(u8 id, u8 *baddr)
 {
 #if (FB_LCD_BUF_NUM == 1)
     struct fb_out_t *p = NULL;
-    spin_lock(&fb_lock);
-    list_for_each_entry(p, &head, entry) {
+    spin_lock(&fb_lock[id]);
+    list_for_each_entry(p, &head[id], entry) {
         for (int i = 0; i < p->buf_num; i++) {
             if (p->buf_addr[i]) {
                 if (p->buf_addr[i] == baddr) {
@@ -702,7 +703,7 @@ static int __fb_head_buf_unlock(u8 *baddr)
             }
         }
     }
-    spin_unlock(&fb_lock);
+    spin_unlock(&fb_lock[id]);
 #endif
     return 0;
 }
@@ -712,14 +713,14 @@ static int __fb_head_buf_unlock(u8 *baddr)
  * @param:   num:返回需要合成的图层数
  * @return:  返回最大的fb图层
  **/
-static struct fb_out_t *__fb_combine_buf_check(int *num)
+static struct fb_out_t *__fb_combine_buf_check(u8 id, int *num)
 {
     int max_map_size = 0;
     int fb_n = 0;
     struct fb_out_t *p = NULL;
     struct fb_out_t *p_max = NULL;
-    spin_lock(&fb_lock);
-    list_for_each_entry(p, &head, entry) {
+    spin_lock(&fb_lock[id]);
+    list_for_each_entry(p, &head[id], entry) {
         if (p->fb_name[2] - '0' != 0) {
             if (p->map.baddr) {
                 /* 找到最大尺寸的图层 */
@@ -731,7 +732,7 @@ static struct fb_out_t *__fb_combine_buf_check(int *num)
             }
         }
     }
-    spin_unlock(&fb_lock);
+    spin_unlock(&fb_lock[id]);
 
     *num = fb_n;
 
@@ -799,22 +800,23 @@ static int dump_combine_frame_buffer(dma2d_layer_t in[], dma2d_layer_t *out, int
 static void ui_set_flush_mode_timer_cb(void *p)
 {
     struct fb_out_t *p_max = NULL;
+    u8 id = (u8)p;
     int ret = 0;
     u8 mode = 1;
-    u8 *buf0 = (u8 *)fb_lcd_get_buf0();
-    u8 *buf1 = (u8 *)fb_lcd_get_buf1();
-    if (fb_lcd_get_buf_num() == 1) {
+    u8 *buf0 = (u8 *)fb_lcd_get_buf0(id);
+    u8 *buf1 = (u8 *)fb_lcd_get_buf1(id);
+    if (fb_lcd_get_buf_num(id) == 1) {
         buf0 = (u8 *)__this->combine_out_buf[0];
         buf1 = NULL;
     }
 #if (FB_LCD_BUF_NUM == 3)
-    if (fb_lcd_get_rotate()) {
+    if (fb_lcd_get_rotate(id)) {
         buf0 = (u8 *)__this->combine_out_buf[0];
         buf1 = NULL;
     }
 #endif
     if (buf0 == NULL && buf1 == NULL) {
-        p_max = __fb_combine_buf_check(&ret);
+        p_max = __fb_combine_buf_check(id, &ret);
         if (ret == 0) {
             mode = 2;//告诉UI需要自己额外申请一块buf
         }
@@ -852,19 +854,20 @@ static void ui_set_flush_mode_timer_cb(void *p)
     lvgl_set_ui_flush_mode(mode, (void *)buf1, (void *)buf0); /* lvgl UI自己刷新 */
 }
 
-int fb_combine_mutex_enter(void)
+int fb_combine_mutex_enter(u8 id)
 {
     return os_mutex_pend(&__this->mutex, 0);
 }
-void fb_combine_mutex_exit(void)
+void fb_combine_mutex_exit(u8 id)
 {
     os_mutex_post(&__this->mutex);
 }
 
 static void _fb_combine_async(void *priv)
 {
-    fb_combine_task(NULL);
-    --fb_combine_async_run;
+    u8 id = (u8)priv;
+    fb_combine_task((u8)id, NULL);
+    --fb_combine_async_run[id];
 }
 
 /**
@@ -872,24 +875,26 @@ static void _fb_combine_async(void *priv)
  * @param:     none
  * @return:    0: ok  非0: error
  **/
-int run_fb_combine_async(void)
+int run_fb_combine_async(u8 id)
 {
-    if (fb_combine_async_run) {
+    if (fb_combine_async_run[id]) {
         return -1;
     }
 
-    ++fb_combine_async_run;
+    ++fb_combine_async_run[id];
 
     int err;
-    int msg[2];
+    int msg[3];
     msg[0] = (int)_fb_combine_async;
-    msg[1] = (int)NULL;
+    msg[1] = 1;
+    msg[2] = (int)id;
     err =  os_taskq_post_type("sys_timer", Q_CALLBACK, ARRAY_SIZE(msg), msg);
     if (err) {
-        --fb_combine_async_run;
+        --fb_combine_async_run[id];
     }
     return err;
 }
+
 /**
  * @brief      设置fb合成模块输出回调
  * @param:     arg:回调函数地址
@@ -897,11 +902,11 @@ int run_fb_combine_async(void)
  **/
 void fb_combine_set_out_cb(u32 arg)
 {
-    __this->fb_combine_out_cb_func = (void *)arg;
+    fb_combine_out_cb_func = (void *)arg;
 }
 
 #if (defined USE_LVGL_V8_UI_DEMO)
-static void ui_timer_modify(void)
+static void ui_timer_modify(u8 id)
 {
 #if (LV_DISP_UI_FB_NUM <= 1)
     if (__this->ui_timer_id) {
@@ -917,22 +922,22 @@ static void ui_timer_modify(void)
  * @param:  none
  * @return: none
  **/
-static void fb_combine_set_outbuf(void)
+static void fb_combine_set_outbuf(u8 id)
 {
     u32 out_buf_size = 0;
     u32 lcd_buf_w, lcd_buf_h;
 
 #if (FB_LCD_BUF_NUM <= 2)
-    if (fb_lcd_get_buf_num() > 1) { // always no rotate
-        __this->combine_out_buf[0] = fb_lcd_get_buf0();
-        __this->combine_out_buf[1] = fb_lcd_get_buf1();
+    if (fb_lcd_get_buf_num(id) > 1) { // always no rotate
+        __this->combine_out_buf[0] = fb_lcd_get_buf0(id);
+        __this->combine_out_buf[1] = fb_lcd_get_buf1(id);
         log_info("fb_combine out buffer :%x %x\n", __this->combine_out_buf[0], __this->combine_out_buf[1]);
-    } else if (fb_lcd_get_buf_num() == 1) { // always rotate
+    } else if (fb_lcd_get_buf_num(id) == 1) { // always rotate
 #if (FB_LCD_BUF_NUM != 1)
         if (__this->combine_out_buf[0] == 0) {
-            lcd_buf_w = fb_lcd_get_interpolation() ? fb_lcd_get_buf_width() : fb_lcd_get_width();
-            lcd_buf_h  = fb_lcd_get_interpolation() ? fb_lcd_get_buf_height() : fb_lcd_get_height();
-            out_buf_size = lcd_buf_w * lcd_buf_h * dma2d_get_format_bpp(fb_lcd_get_format()) / 8;
+            lcd_buf_w = fb_lcd_get_interpolation(id) ? fb_lcd_get_buf_width(id) : fb_lcd_get_width(id);
+            lcd_buf_h  = fb_lcd_get_interpolation(id) ? fb_lcd_get_buf_height(id) : fb_lcd_get_height(id);
+            out_buf_size = lcd_buf_w * lcd_buf_h * dma2d_get_format_bpp(fb_lcd_get_format(id)) / 8;
             __this->combine_out_buf[0] = (u32)zalloc(out_buf_size);
             log_info("fb_combine out buffer alloc :%x size:%d\n", __this->combine_out_buf[0], out_buf_size);
             ASSERT(__this->combine_out_buf[0], "fb_combine out buffer alloc err!");
@@ -943,7 +948,7 @@ static void fb_combine_set_outbuf(void)
 #elif (FB_LCD_BUF_NUM == 3)
 
     if (__this->combine_out_buf[0] == 0) {
-        out_buf_size = fb_lcd_get_width() * fb_lcd_get_height() * dma2d_get_format_bpp(fb_lcd_get_format()) / 8;
+        out_buf_size = fb_lcd_get_width(id) * fb_lcd_get_height(id) * dma2d_get_format_bpp(fb_lcd_get_format(id)) / 8;
         __this->combine_out_buf[0] = zalloc(out_buf_size);
         log_info("fb_combine out other buffer alloc :%x size:%d\n", __this->combine_out_buf[0], out_buf_size);
         ASSERT(__this->combine_out_buf[0], "fb_combine out buffer alloc err!");
@@ -954,13 +959,13 @@ static void fb_combine_set_outbuf(void)
 
 /**
  * @brief      获取fb合成模块输出buf地址
- * @param:     none
+ * @param:     id
  * @return:    fb合成模块输出buf地址
  **/
-u8 *fb_combine_get_outbuf(void)
+u8 *fb_combine_get_outbuf(u8 id)
 {
     if (__this->combine_out_buf[0] && __this->combine_out_buf[1]) {
-        return (u8 *)fb_lcd_get_idle_buf();
+        return (u8 *)fb_lcd_get_idle_buf(id);
     } else if (__this->combine_out_buf[0]) {
         return (u8 *)__this->combine_out_buf[0];
     }
@@ -973,11 +978,12 @@ u8 *fb_combine_get_outbuf(void)
  *              当__this->combine_task_run == FB_COMBINE_STOP,该任务不跑
  *              当__this->combine_task_run == FB_COMBINE_FUNC_RUN,该任务当普通函数使用,只跑一次,由外部调用
  *              当__this->combine_task_run == FB_COMBINE_TASK_RUN,该任务是一个线程
+ * @param:      id :合成id
  * @param:      priv :合成的输出buffer; NULL时则内部自己选择输出buf
  *
  * @return:     返回合成的图层数
  **/
-int fb_combine_task(void *priv)
+int fb_combine_task(u8 id, void *priv)
 {
     struct fb_out_t *p = NULL;
     struct fb_out_t *p1 = NULL;
@@ -994,32 +1000,32 @@ int fb_combine_task(void *priv)
     u32 ui_use_time = 0;
     u32 lcd_use_time = 0;
     while (1) {
-        fb_combine_mutex_enter();
+        fb_combine_mutex_enter(id);
         if (__this->combine_task_run == FB_COMBINE_STOP) {
-            fb_combine_mutex_exit();
+            fb_combine_mutex_exit(id);
             break;
         }
         if (!out.addr) {
-            out.format = fb_lcd_get_format();
-            if (fb_lcd_get_rotate()) {
-                if (fb_lcd_get_rotate() == ROTATE_90 || fb_lcd_get_rotate() == ROTATE_270) {
-                    out.width  = fb_lcd_get_interpolation() ? fb_lcd_get_buf_height() : fb_lcd_get_height();
-                    out.height = fb_lcd_get_interpolation() ? fb_lcd_get_buf_width() : fb_lcd_get_width();
+            out.format = fb_lcd_get_format(id);
+            if (fb_lcd_get_rotate(id)) {
+                if (fb_lcd_get_rotate(id) == ROTATE_90 || fb_lcd_get_rotate(id) == ROTATE_270) {
+                    out.width  = fb_lcd_get_interpolation(id) ? fb_lcd_get_buf_height(id) : fb_lcd_get_height(id);
+                    out.height = fb_lcd_get_interpolation(id) ? fb_lcd_get_buf_width(id) : fb_lcd_get_width(id);
                 } else {
-                    out.width  = fb_lcd_get_interpolation() ? fb_lcd_get_buf_width() : fb_lcd_get_width();
-                    out.height = fb_lcd_get_interpolation() ? fb_lcd_get_buf_height() : fb_lcd_get_height();
+                    out.width  = fb_lcd_get_interpolation(id) ? fb_lcd_get_buf_width(id) : fb_lcd_get_width(id);
+                    out.height = fb_lcd_get_interpolation(id) ? fb_lcd_get_buf_height(id) : fb_lcd_get_height(id);
                 }
             } else {
-                out.width  = fb_lcd_get_interpolation() ? fb_lcd_get_buf_width() : fb_lcd_get_width();
-                out.height = fb_lcd_get_interpolation() ? fb_lcd_get_buf_height() : fb_lcd_get_height();
+                out.width  = fb_lcd_get_interpolation(id) ? fb_lcd_get_buf_width(id) : fb_lcd_get_width(id);
+                out.height = fb_lcd_get_interpolation(id) ? fb_lcd_get_buf_height(id) : fb_lcd_get_height(id);
             }
             if (priv) {
                 out.addr = (uint8_t *)priv;
             } else {
-                out.addr = (u8 *)fb_combine_get_outbuf(); //获取fb合成输出的地址
+                out.addr = (u8 *)fb_combine_get_outbuf(id); //获取fb合成输出的地址
             }
             //检查out地址是否和当前lcd推屏地址冲突
-            if (fb_lcd_buf_is_busy(out.addr)) {
+            if (fb_lcd_buf_is_busy(id, out.addr)) {
                 goto __combine_exit;
             }
             out.alpha = 253;
@@ -1034,9 +1040,9 @@ int fb_combine_task(void *priv)
         /* 对需要合成FB进行配置 */
         u8 need_combine = 0;
         int max_map_size = 0;
-        spin_lock(&fb_lock);
+        spin_lock(&fb_lock[id]);
         fb_n = 0;
-        list_for_each_entry(p, &head, entry) {
+        list_for_each_entry(p, &head[id], entry) {
             if (p->map.baddr) {
                 if (p->ready_combine) {
                     need_combine++;
@@ -1068,7 +1074,7 @@ int fb_combine_task(void *priv)
                 fb_n++;
             }
         }
-        spin_unlock(&fb_lock);
+        spin_unlock(&fb_lock[id]);
 
         if (out.addr && fb_n && need_combine) {
             if (out.addr == FB_COMBINE_OUT_USE_MAX_IMGBUF) {
@@ -1086,7 +1092,7 @@ int fb_combine_task(void *priv)
                 }
                 if (index == -1 || !__check_max_fb_is_support(&in[index], out.width, out.height)) {
                     for (u8 i = 0; i < fb_n; i++) {
-                        __fb_head_buf_unlock(in[i].addr);
+                        __fb_head_buf_unlock(id, in[i].addr);
                     }
                     goto __combine_exit;
                 }
@@ -1097,7 +1103,7 @@ int fb_combine_task(void *priv)
                 dma2d_combine_copy_frame(in[index].addr, __this->map_backup_baddr, 0, 0, in[index].width, in[index].height, in[index].width, in[index].height, in[index].format);
             }
 
-            /* log_info("fb combine task out addr:%x\n",out.addr); */
+            /* log_info("fb combine task out addr:%x\n", out.addr); */
 
 #if FB_COMBINE_TIME_DEBUG_EN
             dma2d_combine_use_time = get_system_us();
@@ -1112,14 +1118,14 @@ int fb_combine_task(void *priv)
                 if (in[i].addr == out.addr) {
                     continue;
                 }
-                __fb_head_buf_unlock(in[i].addr);
+                __fb_head_buf_unlock(id, in[i].addr);
             }
 
             //debug
             /* dump_combine_frame_buffer(in, &out, fb_n); */
 
             /* 合成输出用户回调 */
-            if (__this->fb_combine_out_cb_func) {
+            if (fb_combine_out_cb_func) {
                 //可用于UI直接在合成输出buffer上绘制
                 omap.baddr = out.addr;
                 omap.width = out.width;
@@ -1127,12 +1133,12 @@ int fb_combine_task(void *priv)
                 omap.format = out.format;
                 if (out.addr != FB_COMBINE_OUT_USE_MAX_IMGBUF) {
                     //如果合成输出buf是单独的buf, 即UI不是直接在图像FB上绘制的情况，可以提前释放锁
-                    fb_combine_mutex_exit();
+                    fb_combine_mutex_exit(id);
                 }
 #if FB_COMBINE_TIME_DEBUG_EN
                 ui_use_time = get_system_us();
 #endif
-                ret = __this->fb_combine_out_cb_func((void *)&omap, (u32)(in[0].addr), (u32)(in[1].addr));
+                ret = fb_combine_out_cb_func((void *)&omap, (u32)(in[0].addr), (u32)(in[1].addr));
 #if FB_COMBINE_TIME_DEBUG_EN
                 ui_use_time = get_system_us() - ui_use_time;
 #endif
@@ -1144,24 +1150,24 @@ __data2lcd:
                 lcd_use_time = get_system_us();
 #endif
                 //更新lcd显示
-                fb_lcd_frame_buf_update(out.addr);
+                fb_lcd_frame_buf_update(id, out.addr);
 #if FB_COMBINE_TIME_DEBUG_EN
                 lcd_use_time = get_system_us() - lcd_use_time;
 #endif
             }
 
             //unlock fb out buf
-            __fb_head_buf_unlock(out.addr);
+            __fb_head_buf_unlock(id, out.addr);
 
-            if (fb_lcd_get_buf_num() > 1) {
+            if (fb_lcd_get_buf_num(id) > 1) {
                 //lcd 双buf 索引切换
-                out.addr = fb_lcd_buf_index_swap();
+                out.addr = fb_lcd_buf_index_swap(id);
             } else {
                 out.addr = 0;
             }
 #if FB_COMBINE_TIME_DEBUG_EN
-            log_info("dma2d combine:%dus, ui use:%dus, lcd use:%dus", dma2d_combine_use_time, ui_use_time, lcd_use_time);
-            log_info("totoal use:%dus", dma2d_combine_use_time + ui_use_time + lcd_use_time);
+            log_info("[%d]dma2d combine:%dus, ui use:%dus, lcd use:%dus", id, dma2d_combine_use_time, ui_use_time, lcd_use_time);
+            log_info("[%d]totoal use:%dus", id, dma2d_combine_use_time + ui_use_time + lcd_use_time);
 #endif
 #if FB_COMBINE_FRAME_DEBUG_EN
             static unsigned int time_lapse_handle = 0;
@@ -1177,7 +1183,7 @@ __data2lcd:
 
         } else if (__this->combine_task_run == FB_COMBINE_TASK_RUN) {
             __this->combine_busy = 0;
-            fb_combine_mutex_exit();
+            fb_combine_mutex_exit(id);
             os_sem_pend(&__this->wait_sem, 0);
             continue;
         }
@@ -1187,13 +1193,18 @@ __combine_exit:
 
         if (__this->combine_task_run == FB_COMBINE_FUNC_RUN) {
             //单函数，只执行一次
-            fb_combine_mutex_exit();
+            fb_combine_mutex_exit(id);
             break;
         }
-        fb_combine_mutex_exit();
+        fb_combine_mutex_exit(id);
     }
 
     return fb_n;
+}
+static void __fb_task(void *p)
+{
+    log_info("fb task run....");
+    fb_combine_task((u8)p, NULL);
 }
 
 /**
@@ -1203,11 +1214,16 @@ __combine_exit:
  **/
 void fb_combine_init(void)
 {
-    memset(__this, 0, sizeof(struct fb_combine_t));
-    os_mutex_create(&__this->mutex);
-    os_sem_create(&__this->wait_sem, 0);
-    for (int i = 0; i < FB_COMBINE_MAX_NUM; i++) {
-        __this->fb_frame_cnt[i] = -1;
+    u8 id = 0;
+    for (int i = 0; i < sizeof(_fb_combine) / sizeof(_fb_combine[0]); i++) {
+        id = i;
+        memset(__this, 0, sizeof(struct fb_combine_t));
+        INIT_LIST_HEAD(&head[i]);
+        os_mutex_create(&__this->mutex);
+        os_sem_create(&__this->wait_sem, 0);
+        for (int j = 0; j < FB_COMBINE_MAX_NUM; j++) {
+            __this->fb_frame_cnt[j] = -1;
+        }
     }
 }
 
@@ -1219,15 +1235,18 @@ void fb_combine_init(void)
  **/
 void fb_combine_prepare(struct fb_draw_info *info, u8 open_fb)
 {
-    fb_combine_mutex_enter();
+    char fb_combine_task_name[20];
+    u8 id = info->out_id;
+    fb_combine_mutex_enter(id);
     if (__is_need_create_combine_task(open_fb, info)) {
         if (__this->combine_task_run == FB_COMBINE_STOP) {
             __this->combine_task_run = FB_COMBINE_TASK_RUN;
-            thread_fork("fb_combine_task", 25, 4096, 0, 0, fb_combine_task, NULL);
+            sprintf(fb_combine_task_name, "fb_combine_task%d", id);
+            thread_fork(fb_combine_task_name, 25, 4096, 0, 0, __fb_task, (void *)id);
         }
     }
 
-    fb_combine_set_outbuf(); //fb 合成输出buf配置
+    fb_combine_set_outbuf(id); //fb 合成输出buf配置
 
     if (!strcmp(info->name, "fb0")) {
         if (info->fb_num == 1) { //单buffer
@@ -1255,13 +1274,13 @@ void fb_combine_prepare(struct fb_draw_info *info, u8 open_fb)
                 task_name = LVGL_TASK_NAME;
             }
             /* 创建自刷模式检测定时器 */
-            __this->ui_timer_id = sys_timer_add_to_task(task_name, NULL, ui_set_flush_mode_timer_cb, _LVGL_UI_ENTER_FLUSH_TIMEOUT);
+            __this->ui_timer_id = sys_timer_add_to_task(task_name, (void *)id, ui_set_flush_mode_timer_cb, _LVGL_UI_ENTER_FLUSH_TIMEOUT);
         }
 #endif
 #endif
     }
 
-    fb_combine_mutex_exit();
+    fb_combine_mutex_exit(id);
 }
 
 /**
@@ -1272,17 +1291,18 @@ void fb_combine_prepare(struct fb_draw_info *info, u8 open_fb)
 void fb_combine_list_add(struct fb_out_t *ep)
 {
     struct fb_out_t *p0 = NULL;
-    spin_lock(&fb_lock);
+    u8 id = ep->out_id;
+    spin_lock(&fb_lock[id]);
     __this->fb_frame_cnt[ep->fb_name[2] - '0'] = 0;
-    list_for_each_entry(p0, &head, entry) {
+    list_for_each_entry(p0, &head[id], entry) {
         if (p0->z_order <= ep->z_order) { //按照由小到大排序,数字越大越顶层
             __list_add(&ep->entry, p0->entry.prev, &p0->entry);
-            spin_unlock(&fb_lock);
+            spin_unlock(&fb_lock[id]);
             return;
         }
     }
-    list_add_tail(&ep->entry, &head);
-    spin_unlock(&fb_lock);
+    list_add_tail(&ep->entry, &head[id]);
+    spin_unlock(&fb_lock[id]);
 
 }
 
@@ -1293,32 +1313,17 @@ void fb_combine_list_add(struct fb_out_t *ep)
  **/
 void fb_combine_list_del(struct fb_out_t *ep)
 {
-    spin_lock(&fb_lock);
+    u8 id = ep->out_id;
+    spin_lock(&fb_lock[id]);
     ep->map.baddr = 0;
     ep->map.baddr_bk = 0;
     __this->fb_frame_cnt[ep->fb_name[2] - '0'] = -1;
     if (ep->buf_addr[0] || ep->buf_addr[1]) {
         list_del(&ep->entry);
     }
-    spin_unlock(&fb_lock);
+    spin_unlock(&fb_lock[id]);
 }
 
-
-/**
- * @brief   检查fb 合成模块是否繁忙
- * @param:  none
- * @return: 0:空闲 非0:繁忙
- **/
-int fb_combine_busy_wait(void)
-{
-    u32 t = 0;
-    while (__this->combine_busy) {
-        if (t++ >= 200000) {
-            return -1;
-        }
-    }
-    return 0;
-}
 
 /**
  * @brief   fb 合成模块数据更新
@@ -1328,20 +1333,22 @@ int fb_combine_busy_wait(void)
 int fb_combine_updata(struct fb_out_t *ep, struct fb_map_user *map)
 {
     struct fb_out_t *p = NULL;
+    int err = 0;
     u8 need_combine = 0;
     u8 fb_index;
+    u8 id = ep->out_id;
 
     if (map->transp) {
         //不用合成,数据直推lcd 更新
-        fb_lcd_frame_buf_update(map->baddr);
+        fb_lcd_frame_buf_update(id, map->baddr);
         return 0;
     }
 
-    spin_lock(&fb_lock);
-    list_for_each_entry(p, &head, entry) {
+    spin_lock(&fb_lock[id]);
+    list_for_each_entry(p, &head[id], entry) {
         if (p == ep) {
             if (__fb_buf_is_lock(p, map->baddr)) {
-                spin_unlock(&fb_lock);
+                spin_unlock(&fb_lock[id]);
                 putchar('D');
                 return -1;
             }
@@ -1367,7 +1374,7 @@ int fb_combine_updata(struct fb_out_t *ep, struct fb_map_user *map)
             break;
         }
     }
-    spin_unlock(&fb_lock);
+    spin_unlock(&fb_lock[id]);
 
     if (need_combine) {
 #if (defined CONFIG_UI_ENABLE && defined USE_LVGL_V8_UI_DEMO)
@@ -1376,12 +1383,12 @@ int fb_combine_updata(struct fb_out_t *ep, struct fb_map_user *map)
 #if (FB_LCD_BUF_NUM == 1)
         u16 lcd_w = 0;
         u16 lcd_h = 0;
-        if (fb_lcd_get_rotate() == ROTATE_90 || fb_lcd_get_rotate() == ROTATE_270) {
-            lcd_w  = fb_lcd_get_height();
-            lcd_h = fb_lcd_get_width();
+        if (fb_lcd_get_rotate(id) == ROTATE_90 || fb_lcd_get_rotate(id) == ROTATE_270) {
+            lcd_w  = fb_lcd_get_height(id);
+            lcd_h = fb_lcd_get_width(id);
         } else {
-            lcd_w  = fb_lcd_get_width();
-            lcd_h = fb_lcd_get_height();
+            lcd_w  = fb_lcd_get_width(id);
+            lcd_h = fb_lcd_get_height(id);
         }
         if (ep->fb_name[2] - '0' != 0) {
             if (map->width == lcd_w && map->height == lcd_h) {
@@ -1391,19 +1398,21 @@ int fb_combine_updata(struct fb_out_t *ep, struct fb_map_user *map)
 #endif
         fb_index = ep->fb_name[2] - '0';
         if (fb_index != 0) {
-            int lvgl_send_fb_combine_event(void);
-            lvgl_send_fb_combine_event();
-
-            ui_timer_modify();
+            int lvgl_send_fb_combine_event(u8 id);
+            err = lvgl_send_fb_combine_event(id);
+            if (err == 0) {
+                __this->fb_frame_cnt[fb_index]++;
+            }
+            ui_timer_modify(id);
         } else if (__this->ui_timer_id == 0 || fb_index == 0) {
             //ui自刷
-            fb_combine_task(NULL);
+            fb_combine_task(id, NULL);
+            __this->fb_frame_cnt[fb_index]++;
         }
-        __this->fb_frame_cnt[fb_index]++;
 #endif
 #else
-        if (fb_lcd_get_buf_num() == 1) {
-            run_fb_combine_async();
+        if (fb_lcd_get_buf_num(id) == 1) {
+            run_fb_combine_async(id);
         }
 #endif
         os_sem_set(&__this->wait_sem, 0);
@@ -1411,7 +1420,13 @@ int fb_combine_updata(struct fb_out_t *ep, struct fb_map_user *map)
     }
 
     if (__this->combine_task_run == FB_COMBINE_STOP) {
-        fb_lcd_frame_buf_update(map->baddr);
+#if (defined CONFIG_UI_ENABLE && defined USE_LVGL_V8_UI_DEMO)
+#if (LV_DISP_UI_FB_NUM == 2 && FB_LCD_BUF_NUM == 1)
+        fb_lcd_frame_buf_update_async(id, map->baddr);
+        return 0;
+#endif
+#endif
+        fb_lcd_frame_buf_update(id, map->baddr);
     }
 
     return 0;
@@ -1422,7 +1437,7 @@ int fb_combine_updata(struct fb_out_t *ep, struct fb_map_user *map)
  * @param:  none
  * @return: 0:关闭成功 非0: 关闭失败
  **/
-int fb_combine_close(void)
+int fb_combine_close(u8 id)
 {
     if (__this->combine_task_run) {
         __this->combine_task_run = FB_COMBINE_STOP;

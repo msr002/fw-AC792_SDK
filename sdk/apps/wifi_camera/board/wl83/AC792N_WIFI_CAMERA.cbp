@@ -79,6 +79,7 @@
 <Add directory="../../../../apps/common/ble/include" />
 <Add directory="../../../../apps/wifi_camera/include" />
 <Add directory="../../../../apps/wifi_camera/misc" />
+<Add directory="../../../../apps/wifi_camera/video_ops/include" />
 <Add directory="../../../../include_lib/driver/device/video" />
 <Add directory="../../../../apps" />
 <Add directory="../../../../apps/common/third_party_profile" />
@@ -711,6 +712,7 @@
 <Unit filename="../../../../apps/common/example/third_party/sqlite/sqlite3.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/common/example/third_party/sqlite/sqlite3.h" />
 <Unit filename="../../../../apps/common/example/third_party/sqlite/sqlite_test_main.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="../../../../apps/common/fat_nor/extflash.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/common/file_operate/file_bs_deal.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/common/file_operate/file_bs_deal.h" />
 <Unit filename="../../../../apps/common/file_operate/file_manager.c"><Option compilerVer="CC"/></Unit>
@@ -1784,6 +1786,7 @@
 <Unit filename="../../../../apps/wifi_camera/mode/video_photo/video_photo.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/wifi_camera/mode/video_rec/video_rec.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/wifi_camera/mode/video_rec/video_rec_cfg.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="../../../../apps/wifi_camera/show_h264.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/wifi_camera/wifi/ctp_cli_recv_stream.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/wifi_camera/wifi/ctp_cmd.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/wifi_camera/wifi/ftpd_vfs_reg.c"><Option compilerVer="CC"/></Unit>

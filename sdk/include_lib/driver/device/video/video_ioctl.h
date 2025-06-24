@@ -175,6 +175,7 @@ struct video_format {
     u8 online;//0:是手动编码，1是联动
     u8 enable_dri;
     u8 three_way_type;
+    u8 disp_id;
     u8 disp_yuv_type;
     u8 disp_fb_buf_num;
     u8 uvc_id;

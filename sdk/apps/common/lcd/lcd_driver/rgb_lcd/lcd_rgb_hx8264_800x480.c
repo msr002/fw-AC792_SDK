@@ -7,6 +7,10 @@
 
 #if TCFG_LCD_RGB_HX8264_800x480
 
+#define __LCD_W  LCD_W
+#define __LCD_H  LCD_H
+#define __LCD_ID LCD_ID
+
 static void lcd_800x480_hx8264_backctrl(struct lcd_board_cfg *bd_cfg, u8 on)
 {
     if (-1 == bd_cfg->lcd_io.backlight) {
@@ -42,10 +46,10 @@ REGISTER_IMD_DEVICE_BEGIN(lcd_800x480_hx8264_dev) = {
 #endif
         .test_mode_color = 0xff0000,
         .bg_color    	 = 0x00ff00,
-        .xres 			 = LCD_W,
-        .yres 			 = LCD_H,
-        .target_xres     = LCD_W,
-        .target_yres     = LCD_H,
+        .xres 			 = __LCD_W,
+        .yres 			 = __LCD_H,
+        .target_xres     = __LCD_W,
+        .target_yres     = __LCD_H,
         .sample          = SAMP_YUV420,
         .format          = FORMAT_RGB888,
         .interlaced_1st_filed = EVEN_FILED,
@@ -95,14 +99,14 @@ REGISTER_IMD_DEVICE_BEGIN(lcd_800x480_hx8264_dev) = {
 #define  VFP                    13     //帧同步信号前肩 单位：行
 
         //以下信号均为高有效1 以下为固定公式勿动
-        .hori_total				= LCD_W * 1 + HBP + HFP + HSPW, //行总长 : 行像素*3 + 行同步信号后肩 + 行同步信号前肩 + 水平信号宽度
-        .hori_sync				= LCD_W * 1 + HBP + HFP, 		//行同步时间:  行像素*3 + 行同步信号后肩 + 行同步信号前肩
+        .hori_total				= __LCD_W * 1 + HBP + HFP + HSPW, //行总长 : 行像素*3 + 行同步信号后肩 + 行同步信号前肩 + 水平信号宽度
+        .hori_sync				= __LCD_W * 1 + HBP + HFP, 		//行同步时间:  行像素*3 + 行同步信号后肩 + 行同步信号前肩
         .hori_back_porth		= HBP,							//行同步信号后肩
-        .vert_total				= VSPW + VBP + LCD_H + VFP, 	//帧总长: 垂直信号宽度 + 帧同步信号后肩 + 像素高 + 帧同步信号后肩
+        .vert_total				= VSPW + VBP + __LCD_H + VFP, 	//帧总长: 垂直信号宽度 + 帧同步信号后肩 + 像素高 + 帧同步信号后肩
         .vert_sync				= VSPW,							//帧于帧之间间隔多少个行中断:?
         .vert_back_porth_odd	= VBP + VSPW, 					//帧信号开始的时候经过多少个行中断开始de: 帧同步信号后肩 +  水平信号宽度
-        .hori_pixel				= LCD_W,//像素宽
-        .vert_pixel				= LCD_H,//像素高
+        .hori_pixel				= __LCD_W,//像素宽
+        .vert_pixel				= __LCD_H,//像素高
         .vert_back_porth_even	= 0,//推隔行数据才需要配置
     },
 },
@@ -110,6 +114,7 @@ REGISTER_IMD_DEVICE_END()
 
 REGISTER_LCD_DEVICE_DRIVE(lcd_dev) = {
     .logo            = "RGB_800x480_HX8264",
+    .id              = __LCD_ID,
     .type            = LCD_RGB,
     .dev             = &lcd_800x480_hx8264_dev,
     .init            = lcd_800x480_hx8264_init,

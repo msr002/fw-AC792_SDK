@@ -307,6 +307,10 @@ static void cvp_handle_frame(struct stream_iport *iport, struct stream_note *not
     struct stream_frame *in_frame;
 
     while (1) {
+        if (jlstream_get_iport_frame_num(hdl_node(hdl)->oport->next) > 1) {
+            /*超过流程处理能力*/
+            break;
+        }
         in_frame = jlstream_pull_frame(iport, note);		//从iport读取数据
         if (!in_frame) {
             break;
@@ -369,6 +373,7 @@ static void cvp_handle_frame(struct stream_iport *iport, struct stream_note *not
             }
         }
         jlstream_free_frame(in_frame);	//释放iport资源
+        break;
     }
 }
 
@@ -446,7 +451,7 @@ static void cvp_ioc_start(struct cvp_node_hdl *hdl)
     u8 mic_num; //算法需要使用的MIC个数
 
 #if TCFG_AUDIO_CVP_OUTPUT_WAY_IIS_ENABLE && TCFG_IIS_NODE_ENABLE
-    audio_cvp_ref_src_open(hdl->scene, audio_iis_get_sample_rate(iis_hdl[0]), fmt->sample_rate, 2);
+    audio_cvp_ref_src_open(hdl->scene == STREAM_SCENE_PC_MIC ? STREAM_SCENE_PC_SPK : hdl->scene, audio_iis_get_sample_rate(iis_hdl[0]), fmt->sample_rate, 2);
 #endif
 
     audio_aec_init(&init_param);

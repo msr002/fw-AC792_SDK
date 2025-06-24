@@ -16,6 +16,8 @@
 #define LOG_CLI_ENABLE
 #include "debug.h"
 
+#define USB_HID_EP_DMA_BUFFER_KEEP_ENABLE  0
+
 typedef void (*hid_rx_handle_t)(const usb_dev usb_id, void *hdl, u8 *buffer, u32 len);
 struct custom_hid_hdl {
     u8 cfg_done;
@@ -295,8 +297,13 @@ u32 custom_hid_register(usb_dev usb_id)
     custom_hid_info[usb_id] = &_custom_hid_info;
 #endif
     memset(custom_hid_info[usb_id], 0, sizeof(struct custom_hid_hdl));
-    custom_hid_ep_in_dma[usb_id] = usb_alloc_ep_dmabuffer(usb_id, CUSTOM_HID_EP_IN | USB_DIR_IN, MAXP_SIZE_CUSTOM_HIDIN);
-    custom_hid_ep_out_dma[usb_id] = usb_alloc_ep_dmabuffer(usb_id, CUSTOM_HID_EP_OUT, MAXP_SIZE_CUSTOM_HIDOUT);
+    if (!custom_hid_ep_in_dma[usb_id]) {
+        custom_hid_ep_in_dma[usb_id] = usb_alloc_ep_dmabuffer(usb_id, CUSTOM_HID_EP_IN | USB_DIR_IN, MAXP_SIZE_CUSTOM_HIDIN);
+    }
+    if (!custom_hid_ep_out_dma[usb_id]) {
+        custom_hid_ep_out_dma[usb_id] = usb_alloc_ep_dmabuffer(usb_id, CUSTOM_HID_EP_OUT, MAXP_SIZE_CUSTOM_HIDOUT);
+    }
+
     return 0;
 }
 
@@ -306,6 +313,7 @@ void custom_hid_release(const usb_dev usb_id)
         return;
     }
 #if USB_MALLOC_ENABLE
+#if !USB_HID_EP_DMA_BUFFER_KEEP_ENABLE
     if (custom_hid_ep_in_dma[usb_id]) {
         usb_free_ep_dmabuffer(usb_id, custom_hid_ep_in_dma[usb_id]);
         custom_hid_ep_in_dma[usb_id] = NULL;
@@ -314,8 +322,8 @@ void custom_hid_release(const usb_dev usb_id)
         usb_free_ep_dmabuffer(usb_id, custom_hid_ep_out_dma[usb_id]);
         custom_hid_ep_out_dma[usb_id] = NULL;
     }
+#endif
     free(custom_hid_info[usb_id]);
-    custom_hid_info[usb_id] = NULL;
 #else
     memset(custom_hid_info[usb_id], 0, sizeof(struct custom_hid_hdl));
 #endif

@@ -783,7 +783,6 @@
 // #define CONFIG_VIDEO3_ENABLE
 // #define CONFIG_VIDEO4_ENABLE
 // #define CONFIG_VIDEO5_ENABLE
-/*video0的IO组和硬件IO */
 
 
 #define TCFG_SLAVE_UVC0_JPEG_DATA_SOURCE    "video0.2"

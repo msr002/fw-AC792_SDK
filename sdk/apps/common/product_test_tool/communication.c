@@ -67,7 +67,7 @@ static s8 comm_dev_online(void)
 }
 
 
-static s32 comm_dev_read(u8 *data, u32 size)
+static u32 comm_dev_read(u8 *data, u32 size)
 {
     //os_sem_set(&cdc_sem, 0);
     os_sem_pend(&cdc_sem, 0);
@@ -75,7 +75,7 @@ static s32 comm_dev_read(u8 *data, u32 size)
 }
 
 
-static s32 comm_dev_write(u8 *data, u32 size)
+static u32 comm_dev_write(u8 *data, u32 size)
 {
     return cdc_write_data(product_usb_id, data, size);
 }
@@ -128,7 +128,7 @@ u8 get_product_id(void)
 
 static void *host_sock = NULL;
 static u8 online_flag = 0;
-static u8 conn_flag = 0, reset;
+static u8 conn_flag = 0, reset = 0;
 static struct product_conn conn;
 static __attribute__((aligned(4))) u8 *wifi_send_pkg = NULL;
 

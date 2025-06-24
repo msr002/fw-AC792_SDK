@@ -65,7 +65,7 @@ extern const int config_wanson_asr_enable;
 #define VOICE_DATA_BUFFER_SIZE     2 * 1024
 #endif
 
-#if ((defined TCFG_AUDIO_DATA_EXPORT_ENABLE && TCFG_AUDIO_DATA_EXPORT_ENABLE) || SMART_VOICE_TEST_WRITE_FILE)
+#if ((defined TCFG_AUDIO_DATA_EXPORT_ENABLE && TCFG_AUDIO_DATA_EXPORT_ENABLE))
 #define CONFIG_VAD_KWS_DETECT_ENABLE    0
 #else
 #define CONFIG_VAD_KWS_DETECT_ENABLE    1
@@ -94,7 +94,7 @@ static inline void smart_voice_data_write_file(struct smart_voice_context *sv, v
 {
 #if SMART_VOICE_TEST_WRITE_FILE
     if (sv->file) {
-        fwrite(sv->file, data, sizeof(data));
+        fwrite(data, len, 1, sv->file);
     }
 #endif
 }
@@ -108,6 +108,7 @@ static void voice_mic_data_debug_stop(struct smart_voice_context *sv)
 #endif
 #if SMART_VOICE_TEST_WRITE_FILE
     if (sv->file) {
+        log_info("SMART_VOICE_TEST_WRITE_FILE CLOSE");
         fclose(sv->file);
         sv->file = NULL;
     }
@@ -117,7 +118,12 @@ static void voice_mic_data_debug_stop(struct smart_voice_context *sv)
 static void voice_mic_data_debug_start(struct smart_voice_context *sv)
 {
 #if SMART_VOICE_TEST_WRITE_FILE
-    sv->file = fopen("storage/sd0/C/AudioVAD/vad***.raw", "w+");
+    extern int storage_device_ready(void);
+    while (!storage_device_ready()) {//等待sd文件系统挂载完成
+        os_time_dly(1);
+    }
+    log_info("SMART_VOICE_TEST_WRITE_FILE OPEN");
+    sv->file = fopen("storage/sd0/C/test.pcm", "w+");
     if (!sv->file) {
         log_info("Open file failed, can not test.\n");
     }
@@ -200,6 +206,7 @@ static int smart_voice_data_handler(struct smart_voice_context *sv)
 #if KWS_AEC_DATA_TO_SD
             aec_data_to_sd_close();
 #endif
+            voice_mic_data_debug_stop(sv);
             log_info("audio kws wakeup result : %d\n", result);
         }
         smart_voice_kws_event_handler(sv->kws_model, result);
@@ -224,6 +231,7 @@ int smart_voice_core_handler(void *priv, int taskq_type, int *msg)
 #if KWS_AEC_DATA_TO_SD
             aec_data_to_sd_open();
 #endif
+            voice_mic_data_debug_start(sv);
             sv->mic = voice_mic_data_open(msg[1], msg[2], msg[3]);
             if (!sv->mic) {
                 log_error("VAD mic open failed");
@@ -254,7 +262,6 @@ int smart_voice_core_handler(void *priv, int taskq_type, int *msg)
         case SMART_VOICE_MSG_WAKE:
             err = ASR_CORE_WAKEUP;
             /* putchar('W'); */
-            voice_mic_data_debug_start(sv);
             smart_voice_wakeup = 1;
             break;
         case SMART_VOICE_MSG_STANDBY:
@@ -262,7 +269,6 @@ int smart_voice_core_handler(void *priv, int taskq_type, int *msg)
             if (sv->mic) {
                 voice_mic_data_clear(sv->mic);
             }
-            voice_mic_data_debug_stop(sv);
             break;
         case SMART_VOICE_MSG_DMA:
             err = ASR_CORE_WAKEUP;

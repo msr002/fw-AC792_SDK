@@ -12,6 +12,7 @@
 #include "lv_ll.h"
 #include "lv_gc.h"
 #include "lv_profiler.h"
+#include "../hal/lv_hal_disp.h"
 
 /*********************
  *      DEFINES
@@ -127,8 +128,10 @@ uint32_t LV_ATTRIBUTE_TIMER_HANDLER lv_timer_handler(void)
 
     //解耦了刷新定时器，由外部事件来触发刷新，放在这里执行有利于下面统计时间更精确
     /*if(lv_disp_get_default()->refr_timer==NULL)*/
-    void _lv_disp_refr_timer(lv_timer_t *tmr);
-    _lv_disp_refr_timer(NULL);
+    /* void _lv_disp_refr_timer(lv_timer_t *tmr); */
+    /* _lv_disp_refr_timer(NULL); */
+    void lv_port_refr_now(lv_disp_t *disp);
+    lv_port_refr_now(NULL);
 
     uint32_t time_till_next = LV_NO_TIMER_READY;
     next = _lv_ll_get_head(&LV_GC_ROOT(_lv_timer_ll));

@@ -337,6 +337,23 @@ LCD_PLATFORM_DATA_BEGIN(lcd_bd_cfg)
         .edge               = EDGE_NEGATIVE,
     },
     .spi_lcd_interface      = TCFG_LCD_SPI_INTERFACE,
+#if TCFG_LCD_SUPPORT_MULTI_DRIVER_EN
+LCD_PLATFORM_DATA_ADD()
+    .lcd_name               = TCFG_LCD1_DEVICE_NAME,
+    .lcd_io                 = {
+        .backlight          = TCFG_LCD1_BL_IO,
+        .backlight_value    = TCFG_LCD1_BL_VALUE,
+        .lcd_reset          = TCFG_LCD1_RESET_IO,
+        .lcd_cs             = TCFG_LCD1_CS_IO,
+        .lcd_rs             = TCFG_LCD1_RS_IO,
+    },
+    .te_mode                = {
+        .te_mode_en         = TCFG_LCD1_TE_ENABLE,
+        .gpio               = TCFG_LCD1_TE_IO,
+        .edge               = EDGE_NEGATIVE,
+    },
+    .spi_lcd_interface      = TCFG_LCD1_SPI_INTERFACE,
+#endif
 LCD_PLATFORM_DATA_END()
 
 static const struct lcd_platform_data lcd_data = {

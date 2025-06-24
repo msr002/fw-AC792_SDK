@@ -29,6 +29,7 @@
 #include "system/init.h"
 #include "update.h"
 #include "asm/gpio.h"
+#include "asm/power_interface.h"
 
 #if (SYS_VOL_TYPE == VOL_TYPE_DIGITAL)
 #include "audio_dvol.h"
@@ -115,6 +116,13 @@ const struct adc_platform_cfg adc_platform_cfg_table[AUDIO_ADC_MAX_NUM] = {
 #endif
 };
 #endif
+
+void audio_dac_power_state(u8 state)
+{
+    if (state == DAC_ANALOG_OPEN_PREPARE) {
+
+    }
+}
 
 int audio_setup_dac_get_sample_rate(void)
 {
@@ -301,6 +309,16 @@ u8 audio_disable_all(void)
 REGISTER_UPDATE_TARGET(audio_update_target) = {
     .name = "audio",
     .driver_close = audio_disable_all,
+};
+
+static u8 audio_iis_idle_query(void)
+{
+    return (JL_ALNK->CON0 & BIT(11)) == 0;
+}
+
+REGISTER_LP_TARGET(audio_iis_lp_target) = {
+    .name       = "alnk",
+    .is_idle    = audio_iis_idle_query,
 };
 
 void dac_power_on(void)

@@ -39,7 +39,7 @@ typedef struct {
     u8 channel;
     s16 *ref_tmp_buf;
     cbuffer_t cbuf;
-    u8 ref_buf[2048 * 10];//和输入的数据大小有关系
+    u8 ref_buf[2048 * TCFG_AUDIO_DAC_BUFFER_TIME_MS];//和输入的数据大小有关系
     u8 align_flag;
     u8 bit_width;
     u8 data_multiple;//输入输出数据倍数
@@ -101,10 +101,11 @@ int audio_cvp_ref_data_align_reset(void)
 {
     iis_read_pos = IIS_READ_MAGIC;
     cvp_ref_src_t *hdl = cvp_ref_src;
-    if (hdl) {
+    if (hdl && hdl->state) {
+        hdl->busy = 1;
         hdl->align_flag = 0;
         cbuf_clear(&hdl->cbuf);
-
+        hdl->busy = 0;
     }
     return 0;
 }
@@ -115,11 +116,12 @@ void audio_cvp_ref_data_align()
     cvp_ref_src_t *hdl = cvp_ref_src;
     /* !iis_read_pos ： iis有数据了才么开始对齐
        !hdl->align_flag ： 表示还没有做对齐*/
-    if (hdl && !hdl->align_flag && !iis_read_pos) {
-        int iis_data_len = get_alink_data_len(ALINK_CH_IDX);
-        int cbuf_total_len = cbuf_get_data_len(&hdl->cbuf);
+    if (hdl && hdl->state && !hdl->align_flag && !iis_read_pos) {
+        hdl->busy = 1;
+        int iis_data_len = get_alink_data_len(ALINK_CH_IDX);        //IIS DMA还有多少数据还未播放
+        int cbuf_total_len = cbuf_get_data_len(&hdl->cbuf);         //cbuf已经写入的数据长度
         printf("hdl->cbuf len %d ", cbuf_total_len);
-        int need_read_len = cbuf_total_len - iis_data_len;
+        int need_read_len = cbuf_total_len - iis_data_len;          //针对性修改偏移，第一次mic中断起来的时候减掉未播放的IIS DMA数据长度就是应该偏移的指针
         printf("adc_iis_data_align: %d %d", iis_data_len, need_read_len);
         if (need_read_len >= 0) {
             cbuf_read_updata(&hdl->cbuf, need_read_len);
@@ -129,6 +131,7 @@ void audio_cvp_ref_data_align()
         hdl->align_flag = 1;
         //有参考数据进来，并且对齐后，取消忽略参考数据
         audio_cvp_ioctl(CVP_OUTWAY_REF_IGNORE, 0, NULL);
+        hdl->busy = 0;
     }
 }
 
@@ -170,10 +173,10 @@ static void audio_cvp_ref_src_task(void *p)
         os_taskq_pend("taskq", msg, ARRAY_SIZE(msg));
         hdl = cvp_ref_src;
         if (hdl && hdl->state) {
+            hdl->busy = 1;
             s16 *data = (s16 *)msg[1];
             int len = msg[2];
             /* putchar('r'); */
-            hdl->busy = 1;
             int cbuf_data_len = cbuf_get_data_len(&hdl->cbuf);
             /*判断cbuf的缓存够一帧数据，并且参考数据可写长度大于1帧时*/
             while (cbuf_data_len >= CVP_REF_SRC_FRAME_SIZE && (get_audio_cvp_output_way_writable_len() * hdl->data_multiple) >= CVP_REF_SRC_FRAME_SIZE) {
@@ -192,7 +195,7 @@ int audio_cvp_ref_src_data_fill(void *p, s16 *data, int len)
     int ret = 0;
     if ((!esco_player_runing()
 #if TCFG_USB_SLAVE_AUDIO_ENABLE && TCFG_USB_SLAVE_AUDIO_SPK_ENABLE
-         && !pc_spk_player_runing()
+         && (!pc_spk_player_runing() || pc_spk_player_mute_status())
 #endif
         ) || (len == 0)) {
         return 0;
@@ -200,9 +203,11 @@ int audio_cvp_ref_src_data_fill(void *p, s16 *data, int len)
 
     if (hdl && hdl->state) {
         if (0 == cbuf_write(&hdl->cbuf, data, len) && hdl->align_flag) {
-            cbuf_clear(&hdl->cbuf);
-            hdl->align_flag = 0;
+            /* cbuf_clear(&hdl->cbuf); */
+            /* hdl->align_flag = 0; */
             printf("ref src cbuf wfail!!");
+            /*保证延时不变化*/
+            cbuf_read_goback(&hdl->cbuf, len);
         }
         if (hdl->align_flag) {
             if (cbuf_get_data_len(&hdl->cbuf) >= CVP_REF_SRC_FRAME_SIZE) {
@@ -216,7 +221,8 @@ int audio_cvp_ref_src_data_fill(void *p, s16 *data, int len)
 static void iis_write_callback(void *data, int len)
 {
     cvp_ref_src_t *hdl = cvp_ref_src;
-    if (hdl) {
+    if (hdl && hdl->state) {
+        hdl->busy = 1;
         if (iis_read_pos == IIS_READ_MAGIC) {
             u32 iis_hwptr = get_alink_hwptr(ALINK_CH_IDX);
             if (iis_hwptr) {
@@ -227,13 +233,14 @@ static void iis_write_callback(void *data, int len)
         if (iis_read_pos == 0) {
             if (esco_player_runing()
 #if TCFG_USB_SLAVE_AUDIO_ENABLE && TCFG_USB_SLAVE_AUDIO_SPK_ENABLE
-                || pc_spk_player_runing()
+                || (pc_spk_player_runing() && !pc_spk_player_mute_status())
 #endif
                ) {
                 audio_cvp_ref_start(1);
             }
         }
         audio_cvp_ref_src_data_fill(NULL, data, len);
+        hdl->busy = 0;
     }
 }
 

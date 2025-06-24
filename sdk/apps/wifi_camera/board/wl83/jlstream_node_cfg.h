@@ -29,6 +29,7 @@
 #define TCFG_2BAND_MERGE_ENABLE 0 // 2Band Merge
 #define TCFG_3BAND_MERGE_ENABLE 1 // 3Band Merge
 #define TCFG_3D_PLUS_MODULE_NODE_ENABLE 0 // 3D Plus
+#define TCFG_A2DP_TX_NODE_ENABLE 0 // A2DP_TX
 #define TCFG_ACOUSTIC_COMMUNICATION_NODE_ENABLE 1 // 声波配网
 #define TCFG_ADC_NODE_ENABLE 1 // ADC
 #define TCFG_AI_TX_NODE_ENABLE 1 // AI_TX
@@ -333,8 +334,8 @@
 #define TCFG_AUDIO_EFX_6700_RUN_MODE EFx_BW_UNUSED // Stereo Spatial Wider
 #define TCFG_AUDIO_EFX_97AA_RUN_MODE EFx_BW_UNUSED // Distortion Clipping
 #define TCFG_AUDIO_EFX_BFE4_RUN_MODE EFx_BW_UNUSED // Frequency Compressor
+#define TCFG_AUDIO_EFX_F9B7_RUN_MODE EFx_BW_UNUSED // A2DP_TX
 // ------------流程图节点位宽定义------------
-
 
 // ------------流程图EQ节点类型宏定义------------
 #define EQ_CFG_TYPE_HIGH_PASS 1 // High Pass

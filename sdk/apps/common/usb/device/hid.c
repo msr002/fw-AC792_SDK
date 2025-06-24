@@ -11,6 +11,7 @@
 #endif
 
 #if TCFG_USB_SLAVE_HID_ENABLE
+
 #define LOG_TAG_CONST       USB
 #define LOG_TAG             "[USB]"
 #define LOG_ERROR_ENABLE
@@ -20,6 +21,7 @@
 #define LOG_CLI_ENABLE
 #include "debug.h"
 
+#define USB_HID_EP_DMA_BUFFER_KEEP_ENABLE  0
 
 #define TMPBUFLEN           (64 + 2)
 #define CBUF_SIZE           (TMPBUFLEN * 50)
@@ -544,8 +546,12 @@ u32 hid_register(const usb_dev usb_id)
 #endif
         cbuf_init(&hid_info[usb_id]->cbuf, hid_info[usb_id]->stream, CBUF_SIZE);
 
-        hid_ep_in_dma[usb_id] = usb_alloc_ep_dmabuffer(usb_id, HID_EP_IN | USB_DIR_IN, MAXP_SIZE_HIDIN);
-        hid_ep_out_dma[usb_id] = usb_alloc_ep_dmabuffer(usb_id, HID_EP_OUT, MAXP_SIZE_HIDOUT);
+        if (!hid_ep_in_dma[usb_id]) {
+            hid_ep_in_dma[usb_id] = usb_alloc_ep_dmabuffer(usb_id, HID_EP_IN | USB_DIR_IN, MAXP_SIZE_HIDIN);
+        }
+        if (!hid_ep_out_dma[usb_id]) {
+            hid_ep_out_dma[usb_id] = usb_alloc_ep_dmabuffer(usb_id, HID_EP_OUT, MAXP_SIZE_HIDOUT);
+        }
     }
     return 0;
 __exit:
@@ -579,6 +585,7 @@ void hid_release(const usb_dev usb_id)
         //hid_set_output_handle(usb_id, NULL);
         //hid_set_report_desc(usb_id, NULL, 0);
         hid_info[usb_id]->cfg_done = 0;
+#if !USB_HID_EP_DMA_BUFFER_KEEP_ENABLE
         if (hid_ep_in_dma[usb_id]) {
             usb_free_ep_dmabuffer(usb_id, hid_ep_in_dma[usb_id]);
             hid_ep_in_dma[usb_id] = NULL;
@@ -587,6 +594,7 @@ void hid_release(const usb_dev usb_id)
             usb_free_ep_dmabuffer(usb_id, hid_ep_out_dma[usb_id]);
             hid_ep_out_dma[usb_id] = NULL;
         }
+#endif
 #if USB_MALLOC_ENABLE
         //if (hid_info[usb_id]->hid_tx_buf) {
         //    free(hid_info[usb_id]->hid_tx_buf);

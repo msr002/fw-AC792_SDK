@@ -34,7 +34,6 @@ struct virtual_dev_player_hdl {
 };
 
 static struct virtual_dev_player_hdl g_vir_dev_player;
-
 static const struct stream_file_ops virtual_dev_ops;
 
 static void virtual_player_free(struct vir_player *player)
@@ -98,92 +97,6 @@ static void virtual_player_callback(void *priv, int event)
         break;
     }
 }
-
-static int virtual_dev_read(void *file, u8 *buf, int len)
-{
-    int offset = 0;
-    struct vir_player *player = (struct vir_player *)file;
-
-    while (len) {
-        if (!player->file) {
-            break;
-        }
-
-        int rlen = 0;
-
-#if 0//TCFG_DEC_DECRYPT_ENABLE
-        u32 addr;
-        addr = ftell(player->file);
-        rlen = fread(buf + offset, len, 1, player->file);
-        if ((rlen > 0) && (rlen <= len)) {
-            cryptanalysis_buff(&player->mply_cipher, buf + offset, addr, rlen); //解密了
-        }
-#else
-        rlen = net_buf_read(buf + offset, len, player->file);
-#endif
-
-        if (rlen <= 0) {
-            if (rlen == -2) {
-                player->read_err  = 1; //file error
-            } else {
-                if (rlen != 0) {
-                    player->read_err = 2;    //disk error
-                    return -1; //拔卡读不到数
-                }
-            }
-            break;
-        }
-        player->read_err = 0;
-        offset += rlen;
-        if ((len -= rlen) == 0) {
-            break;
-        }
-    }
-
-    return offset;
-}
-
-static int virtual_dev_seek(void *file, int offset, int fromwhere)
-{
-    struct vir_player *player = (struct vir_player *)file;
-    return net_buf_seek(offset, fromwhere, player->file);
-}
-
-static int virtual_dev_flen(void *file)
-{
-    return -1;
-}
-
-static int virtual_dev_close(void *file)
-{
-    return 0;
-}
-
-static int virtual_dev_get_fmt(void *file, struct stream_fmt *fmt)
-{
-#if 0
-    u8 name[16];
-    struct vir_player *player = (struct vir_player *)file;
-
-    struct stream_file_info info = {
-        .file = player,
-        .fname = "virtual.mp3",
-        .ops  = &virtual_dev_ops,
-        .scene = player->scene,
-    };
-
-    return jldemuxer_get_tone_file_fmt(&info, fmt);
-#else
-    return -EINVAL;
-#endif
-}
-
-static const struct stream_file_ops virtual_dev_ops = {
-    .read       = virtual_dev_read,
-    .seek       = virtual_dev_seek,
-    .close      = virtual_dev_close,
-    .get_fmt    = virtual_dev_get_fmt,
-};
 
 int virtual_dev_player_pp(struct vir_player *virtual_player)
 {
@@ -641,9 +554,13 @@ int vir_dev_dec_id3_post(struct vir_player *player)
     return true;
 }
 
-int virtual_player_start(struct vir_player *player)
+int virtual_player_start(struct vir_player *player, struct stream_file_ops *ops)
 {
     int err = -EINVAL;
+
+    if (ops == NULL) {
+        ops = &virtual_dev_ops;
+    }
 
     os_mutex_pend(&g_vir_dev_player.mutex, 0);
 
@@ -661,7 +578,7 @@ int virtual_player_start(struct vir_player *player)
     jlstream_node_ioctl(player->stream, NODE_UUID_DECODER,
                         NODE_IOC_SET_NET_FILE, player->break_point->fptr ? (u32)player->break_point->header : 0);
     jlstream_node_ioctl(player->stream, NODE_UUID_DECODER,
-                        NODE_IOC_SET_FILE_LEN, (int)virtual_dev_flen(player));
+                        NODE_IOC_SET_FILE_LEN, -1);
 
 #if 0
     //时间戳使能，多设备播放才需要配置，需接入播放同步节点
@@ -676,11 +593,11 @@ int virtual_player_start(struct vir_player *player)
         }
     }
 
-    jlstream_set_dec_file(player->stream, player, &virtual_dev_ops);
+    jlstream_set_dec_file(player->stream, player, ops);
 
     if (player->break_point->fptr == 0) {
-        virtual_dev_read(player, player->break_point->header, sizeof(player->break_point->header));
-        virtual_dev_seek(player, 0, SEEK_SET);
+        ops->read(player, player->break_point->header, sizeof(player->break_point->header));
+        ops->seek(player, 0, SEEK_SET);
     }
 
     err = jlstream_start(player->stream);
@@ -707,6 +624,7 @@ int virtual_player_start(struct vir_player *player)
 #endif
     }
 
+    os_mutex_post(&g_vir_dev_player.mutex);
     return 0;
 
 __exit1:
@@ -765,11 +683,11 @@ static struct vir_player *virtual_player_create(void *file, struct audio_dec_bre
     return player;
 }
 
-struct vir_player *virtual_player_add(struct vir_player *player)
+struct vir_player *virtual_player_add(struct vir_player *player, struct stream_file_ops *ops)
 {
     os_mutex_pend(&g_vir_dev_player.mutex, 0);
     if (list_empty(&(g_vir_dev_player.head))) {
-        int err = virtual_player_start(player);
+        int err = virtual_player_start(player, ops);
         if (err) {
             os_mutex_post(&g_vir_dev_player.mutex);
             virtual_player_free(player);
@@ -785,16 +703,16 @@ struct vir_player *virtual_player_add(struct vir_player *player)
     return player;
 }
 
-struct vir_player *virtual_dev_play(FILE *file, struct audio_dec_breakpoint *dbp)
+struct vir_player *virtual_dev_play(FILE *file, struct stream_file_ops *ops, struct audio_dec_breakpoint *dbp)
 {
     struct vir_player *player = virtual_player_create(file, dbp);
     if (!player) {
         return NULL;
     }
-    return virtual_player_add(player);
+    return virtual_player_add(player, ops);
 }
 
-struct vir_player *virtual_dev_play_callback(FILE *file, void *priv, music_player_cb_t callback, struct audio_dec_breakpoint *dbp)
+struct vir_player *virtual_dev_play_callback(FILE *file, struct stream_file_ops *ops, void *priv, music_player_cb_t callback, struct audio_dec_breakpoint *dbp)
 {
     struct vir_player *player = virtual_player_create(file, dbp);
     if (!player) {
@@ -802,7 +720,7 @@ struct vir_player *virtual_dev_play_callback(FILE *file, void *priv, music_playe
     }
     player->priv        = priv;
     player->callback    = callback;
-    return virtual_player_add(player);
+    return virtual_player_add(player, ops);
 }
 
 int virtual_player_runing(void)
@@ -822,7 +740,6 @@ void virtual_dev_player_stop(struct vir_player *player)
     list_for_each_entry_safe(p, n, &g_vir_dev_player.head, entry) {
         if (p == player) {
             __list_del_entry(&player->entry);
-            os_mutex_post(&g_vir_dev_player.mutex);
             goto __stop;
         }
     }
@@ -852,6 +769,8 @@ __stop:
     virtual_player_free(player);
 
     jlstream_event_notify(STREAM_EVENT_CLOSE_PLAYER, (int)"virtual");
+
+    os_mutex_post(&g_vir_dev_player.mutex);
 }
 
 void virtual_dev_player_stop_all(void)
@@ -907,3 +826,193 @@ static int __virtual_player_init(void)
 }
 __initcall(__virtual_player_init);
 
+
+static int virtual_dev_read(void *file, u8 *buf, int len)
+{
+    int offset = 0;
+    int rlen;
+    struct vir_player *player = (struct vir_player *)file;
+
+    while (len) {
+        if (!player->file) {
+            break;
+        }
+
+        rlen = net_buf_read(buf + offset, len, player->file);
+        if (rlen <= 0) {
+            if (rlen == -2) {
+                player->read_err  = 1; //file error
+            } else {
+                if (rlen != 0) {
+                    player->read_err = 2;    //disk error
+                    return -1; //拔卡读不到数
+                }
+            }
+            break;
+        }
+        player->read_err = 0;
+        offset += rlen;
+        if ((len -= rlen) == 0) {
+            break;
+        }
+    }
+
+    return offset;
+}
+
+static int virtual_dev_seek(void *file, int offset, int fromwhere)
+{
+    struct vir_player *player = (struct vir_player *)file;
+    return net_buf_seek(offset, fromwhere, player->file);
+}
+
+static int virtual_dev_close(void *file)
+{
+    return 0;
+}
+
+static int virtual_dev_get_fmt(void *file, struct stream_fmt *fmt)
+{
+    struct vir_player *player = (struct vir_player *)file;
+    u8 buf[80];
+
+    //需要手动填写解码类型
+    /* fmt->coding_type = AUDIO_CODING_PCM;  */
+    fmt->coding_type = AUDIO_CODING_MP3;
+    /* fmt->coding_type = AUDIO_CODING_UNKNOW;  */
+    /* fmt->coding_type = AUDIO_CODING_OPUS;  */
+
+    if (fmt->coding_type == AUDIO_CODING_SPEEX) {
+        virtual_dev_ops.seek(player, 0, SEEK_SET);
+        virtual_dev_ops.read(player, buf, 4);
+
+        if ((buf[1] == 0x00) && (buf[3] == 0x00) && (buf[2] == 0x54 || buf[2] == 0x53)) {
+            fmt->with_head_data = 1;
+        }
+        if (fmt->with_head_data) {
+            fmt->sample_rate = buf[2] == 0x54 ? 16000 : 8000;
+        }
+        fmt->channel_mode = AUDIO_CH_MIX;
+        fmt->quality = CONFIG_SPEEX_DEC_FILE_QUALITY;
+        if (!fmt->with_head_data) {
+            fmt->sample_rate = CONFIG_SPEEX_DEC_FILE_SAMPLERATE;
+        }
+        virtual_dev_ops.seek(player, 0, SEEK_SET);
+        return 0;
+    }
+
+    if (fmt->coding_type == AUDIO_CODING_OPUS) {
+        fmt->quality = CONFIG_OPUS_DEC_FILE_TYPE;
+        if (fmt->quality == AUDIO_ATTR_OPUS_CBR_PKTLEN_TYPE) {
+            fmt->opus_pkt_len = 160;//CONFIG_OPUS_DEC_PACKET_LEN;
+        }
+        return -EINVAL;
+    }
+
+    if (fmt->coding_type == AUDIO_CODING_PCM) {
+        fmt->sample_rate   = CONFIG_PCM_DEC_FILE_SAMPLERATE;
+        fmt->channel_mode  = AUDIO_CH_LR;
+        fmt->pcm_file_mode = 1;
+        return 0;
+    }
+
+    return -EINVAL;
+}
+
+static const struct stream_file_ops virtual_dev_ops = {
+    .read       = virtual_dev_read,
+    .seek       = virtual_dev_seek,
+    .close      = virtual_dev_close,
+    .get_fmt    = virtual_dev_get_fmt,
+};
+
+
+#define VIRTUAL_PLAY_TEST 0
+
+#if VIRTUAL_PLAY_TEST
+
+#include "fs/fs.h"
+
+typedef struct {
+    struct vir_player *player;
+} vir_music_hdl;
+
+static vir_music_hdl vir_hdl;
+
+#define __this (&vir_hdl)
+
+
+static void virtual_thread(void *net_buf)
+{
+    FILE *vfd = fopen("storage/sd0/C/2.mp3", "r");
+    /* FILE *vfd = fopen("storage/sd0/C/2.opu", "r"); */
+    /* FILE *vfd = fopen("storage/sd0/C/2.pcm", "r"); */
+    if (!vfd) {
+        printf("===virtual_thread vfd open fail!");
+    }
+    u8 wbuf[512];
+    u32 wlen, nwlen;
+    while (1) {
+        if (vfd) {
+            wlen = fread(wbuf, 1, 512, vfd);
+            if (wlen == 0) {
+                fclose(vfd);
+                vfd = NULL;
+                //写入完数据需要set end,让read那边把最后剩余数据全部读出
+                net_buf_set_file_end(net_buf);
+                break;
+            }
+            nwlen = net_buf_write(wbuf, wlen, net_buf);
+        }
+    }
+}
+
+static int virtual_music_player_decode_event_callback(void *priv, int parm, enum stream_event event)
+{
+    switch (event) {
+    case STREAM_EVENT_START:
+        log_info("STREAM_EVENT_START");
+        break;
+    case STREAM_EVENT_STOP:
+        log_info("STREAM_EVENT_STOP");
+        virtual_dev_player_stop(__this->player);
+        break;
+    case STREAM_EVENT_END:
+        log_info("STREAM_EVENT_END");
+        break;
+    default:
+        break;
+    }
+
+    return 0;
+}
+
+//如果是只使用pcm的数据，可去掉net_buf进行管理的过程,在virtual_dev_ops的read中进行喂入数据解码即可
+//net_buf管理是为了带格式的音频数据可以进行seek解码使用
+void virtual_test()
+{
+    //初始化net buf
+    u32 bufsize = 32 * 1024;
+    u8 *net_buf = net_buf_init(&bufsize, NULL);
+
+    net_buf = net_buf_init(&bufsize, NULL);
+    if (!net_buf) {
+        printf("virtual_test net_buf_init fail");
+    }
+    net_buf_active(net_buf);
+    net_buf_set_time_out(100, net_buf);
+
+    extern int storage_device_ready(void);
+    while (!storage_device_ready()) {//等待sd文件系统挂载完成
+        os_time_dly(2);
+    }
+    //net_buf_write写入数据
+    thread_fork("virtual_thread", 20, 1024, 0, 0, virtual_thread, net_buf);
+
+    os_time_dly(10);
+
+    //虚拟源输入读取net buf数据解码
+    __this->player = virtual_dev_play_callback((FILE *)net_buf, &virtual_dev_ops, NULL, virtual_music_player_decode_event_callback, NULL);
+}
+
+#endif //VIRTUAL_PLAY_TEST

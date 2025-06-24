@@ -17,6 +17,7 @@
 #include "app_power_manage.h"
 #include "audio_config.h"
 #include "mic_effect.h"
+#include "fs/fs.h"
 #if TCFG_LOCAL_TWS_ENABLE
 #include "local_tws.h"
 #endif
@@ -330,7 +331,25 @@ static int device_event_handler(struct sys_event *e)
         }
 #ifdef USE_LVGL_V8_UI_DEMO
         u8 time_out = 2;
-        const char *image_path = "mnt/sdfile/EXT_RESERVED/logopackres/logo/poweroff.jpg";
+        const char *image_path = NULL;
+#ifdef PRODUCT_TEST_ENABLE
+        if (mount("extflash", "mnt/extflash", "jlfat", 32, NULL)) {
+            printf("extflash mount succ");
+            FILE *fp = fopen("mnt/extflash/C/poweroff.jpg", "r");
+            if (fp) {
+                fclose(fp);
+                image_path = "mnt/extflash/C/poweroff.jpg";
+            } else {
+                printf("fopen poweroff err");
+                image_path = "mnt/sdfile/EXT_RESERVED/logopackres/logo/poweroff.jpg";
+            }
+        } else {
+            printf("extflash mount failed!!!");
+            image_path = "mnt/sdfile/EXT_RESERVED/logopackres/logo/poweroff.jpg";
+        }
+#else
+        image_path = "mnt/sdfile/EXT_RESERVED/logopackres/logo/poweroff.jpg";
+#endif
         const char *audio_path = "mnt/sdfile/EXT_RESERVED/logopackres/logo/poweroff.mp3";
         int ret = logo_show(image_path, audio_path, time_out, NULL);
 #endif
@@ -550,7 +569,26 @@ void app_main()
 #ifdef USE_LVGL_V8_UI_DEMO
     int lvgl_main_task_init(void);
     u8 time_out = 2; //播放开机动画时间
-    const char *image_path = "mnt/sdfile/EXT_RESERVED/logopackres/logo/poweron.jpg";
+    const char *image_path = NULL;
+#ifdef PRODUCT_TEST_ENABLE
+    if (mount("extflash", "mnt/extflash", "jlfat", 32, NULL)) {
+        printf("extflash mount succ");
+        FILE *fp = fopen("mnt/extflash/C/poweron.jpg", "r");
+        if (fp) {
+            printf("fopen succ\n");
+            fclose(fp);
+            image_path = "mnt/extflash/C/poweron.jpg";
+        } else {
+            printf("fopen poweron err");
+            image_path = "mnt/sdfile/EXT_RESERVED/logopackres/logo/poweron.jpg";
+        }
+    } else {
+        printf("extflash mount failed!!!");
+        image_path = "mnt/sdfile/EXT_RESERVED/logopackres/logo/poweron.jpg";
+    }
+#else
+    image_path = "mnt/sdfile/EXT_RESERVED/logopackres/logo/poweron.jpg";
+#endif
     const char *audio_path = "mnt/sdfile/EXT_RESERVED/logopackres/logo/poweron.mp3";
     key_event_disable();
     int ret = logo_show(image_path, audio_path, time_out, (void *)logo_poweron_play_end);
@@ -580,6 +618,12 @@ void app_main()
     }
 
 }
+//TODO undefine
+void a2dp_energy_detect_handler(void)
+{
+
+}
+
 
 
 

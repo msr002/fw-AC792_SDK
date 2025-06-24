@@ -793,7 +793,7 @@ typedef struct {
 } JL_CTMU_TypeDef;
 
 #define JL_CTMU_BASE                    (ls_base + map_adr(0x42, 0x00))
-#define JL_CTMU                         ((JL_SHA_TypeDef *)JL_CTMU_BASE)
+#define JL_CTMU                         ((JL_CTMU_BASE *)JL_CTMU_BASE)
 
 //............. 0x4300 - 0x43ff............ for
 

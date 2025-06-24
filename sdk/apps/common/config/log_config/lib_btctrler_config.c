@@ -53,9 +53,12 @@ const int CONFIG_LMP_CONNECTION_LIMIT_NUM           = 1;
 const int CONFIG_LMP_NAME_REQ_ENABLE                = 1;
 const int CONFIG_LMP_PASSKEY_ENABLE                 = 0;
 const int CONFIG_LMP_OOB_ENABLE                     = 0;
+#if TCFG_BT_BQB_PROFILE_TEST_ENABLE
+const int CONFIG_LMP_MASTER_ESCO_ENABLE             = 1;
+#else
 const int CONFIG_LMP_MASTER_ESCO_ENABLE             = 0;
-const int CONFIG_BTCTLER_QOS_ENABLE                 = 1;
-const int CONFIG_MASTER_QOS_POLL                    = 0;
+#endif
+const int CONFIG_BTCTLER_QOS_ENABLE                 = 0;
 const int CONFIG_BTCTLER_FAST_CONNECT_ENABLE        = 0;
 #ifdef CONFIG_NO_SDRAM_ENABLE
 const int CONFIG_BTCTLER_RAM_MALLOC_ENABLE          = 0;
@@ -120,9 +123,13 @@ const int CONFIG_TEST_FCC_CODE                      = 1;
 const int CONFIG_TEST_DUT_ONLY_BOX_CODE             = 0;
 const int CONFIG_BREDR_AFH_USER                     = 0;
 #if TCFG_USER_EMITTER_ENABLE
+const int CONFIG_MASTER_QOS_POLL                    = 1;
 const int CONFIG_BREDR_INQUIRY                      = 1;
+const int CONFIG_INQUIRY_PAGE_OFFSET_ADJUST         = 1;
 #else
+const int CONFIG_MASTER_QOS_POLL                    = 0;
 const int CONFIG_BREDR_INQUIRY                      = 0;
+const int CONFIG_INQUIRY_PAGE_OFFSET_ADJUST         = 0;
 #endif
 
 const int CONFIG_A2DP_DATA_CACHE_LOW_AAC            = 100;
@@ -192,7 +199,7 @@ const int config_btctler_le_hw_nums                 = 6;
 #elif (TCFG_LEA_CIG_CENTRAL_EN || TCFG_LEA_CIG_PERIPHERAL_EN)
 const int config_btctler_le_hw_nums                 = 5;
 #elif (TCFG_LE_AUDIO_APP_CONFIG & (LE_AUDIO_AURACAST_SOURCE_EN | LE_AUDIO_AURACAST_SINK_EN))
-const int config_btctler_le_hw_nums                 = 7;
+const int config_btctler_le_hw_nums                 = 8;
 #elif TCFG_TRANS_MULTI_BLE_EN
 const int config_btctler_le_hw_nums                 = TCFG_TRANS_MULTI_BLE_SLAVE_NUMS + TCFG_TRANS_MULTI_BLE_MASTER_NUMS;
 #elif TCFG_BLE_MESH_ENABLE

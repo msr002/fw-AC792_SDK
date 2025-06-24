@@ -12,7 +12,7 @@
 //*****************************************//
 //                定义屏尺寸               //
 //*****************************************//
-// 多屏驱支持(目前仅支持具有相同分辨率的屏, 适用于一个case有多款屏混用的情况，比如因为缺货)
+// 多屏驱支持
 #if TCFG_LCD_SUPPORT_MULTI_DRIVER_EN == 0
 
 //MCU LCD
@@ -109,9 +109,18 @@
 #define LCD_H 428
 #endif
 
-#else
-#define LCD_W 480
-#define LCD_H 800
+#define LCD_ID  0
+
+#else /* TCFG_LCD_SUPPORT_MULTI_DRIVER_EN */
+//LCD0 宽高和ID号定义
+#define LCD_W  800// 480
+#define LCD_H  480// 800
+#define LCD_ID  0
+/***** 不同分辨率的屏定义 *****/
+//LCD1 宽高和ID号定义
+#define LCD1_W   296//240
+#define LCD1_H   240//296
+#define LCD1_ID  1
 #endif // TCFG_LCD_SUPPORT_MULTI_DRIVER_EN
 
 //*****************************************//

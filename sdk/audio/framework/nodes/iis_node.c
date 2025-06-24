@@ -21,10 +21,11 @@
 
 #if TCFG_IIS_NODE_ENABLE
 
+#undef __LOG_ENABLE
 #define LOG_TAG     "[IIS_NODE]"
 #define LOG_ERROR_ENABLE
 #define LOG_INFO_ENABLE
-#define LOG_DEBUG_ENABLE
+/* #define LOG_DEBUG_ENABLE */
 #define LOG_DUMP_ENABLE
 #include "debug.h"
 
@@ -333,11 +334,6 @@ static void iis_write_data(struct stream_iport *iport, struct stream_note *note)
 
 #if !IIS_USE_DOUBLE_BUF_MODE_EN//MASTER_IIS_DEBUG
         if (audio_iis_get_buffered_frames(hdl->iis_ch.iis, hdl->attr.ch_idx) < 10) {
-            if (hdl->module_idx) {
-                putchar('T');
-            } else {
-                putchar('t');
-            }
             putchar('A' + hdl->attr.ch_idx);
             log_debug("module[%d] iis[%d] will empty\n", hdl->module_idx, hdl->attr.ch_idx);
         }

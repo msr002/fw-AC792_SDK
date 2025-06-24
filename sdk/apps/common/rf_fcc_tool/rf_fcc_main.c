@@ -2658,6 +2658,9 @@ u8 is_fcc_auth(void)
 #if TCFG_RF_PRODUCT_TEST_ENABLE
     return 0;
 #endif
+    if (!__THIS) {
+        return 0;
+    }
     return __THIS->test_mode;
 }
 

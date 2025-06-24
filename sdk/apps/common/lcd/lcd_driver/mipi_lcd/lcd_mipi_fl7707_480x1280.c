@@ -12,6 +12,10 @@
 #include "gpio.h"
 //#include "lcd_backlight_pwm.h"
 
+#define __LCD_W  LCD_W
+#define __LCD_H  LCD_H
+#define __LCD_ID LCD_ID
+
 //------------------------------------------------------//
 // lcd command initial
 //------------------------------------------------------//
@@ -92,10 +96,10 @@ REGISTER_MIPI_DEVICE_BEGIN(mipi_dev_t) = {
 #else
         .test_mode 	    = false,
 #endif
-        .xres 			= LCD_W,
-        .yres 			= LCD_H,
-        .target_xres 	= LCD_W,
-        .target_yres 	= LCD_H,
+        .xres 			= __LCD_W,
+        .yres 			= __LCD_H,
+        .target_xres 	= __LCD_W,
+        .target_yres 	= __LCD_H,
 
         .test_mode_color = 0x0000ff,
         .bg_color   = 0xff0000,
@@ -233,6 +237,7 @@ static int fl7707_check_id(struct lcd_board_cfg *bd_cfg)
 
 REGISTER_LCD_DEVICE_DRIVE(dev)  = {
     .logo 	         = "MIPI_480x1280_FL7707",
+    .id              = __LCD_ID,
     .type 	         = LCD_MIPI,
     .dev  	         = &mipi_dev_t,
     .init 	         = dsi_vdo_4lane_fl7707_init,

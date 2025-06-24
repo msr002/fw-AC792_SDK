@@ -20,9 +20,8 @@
 /*********************
  *      DEFINES
  *********************/
-#define MY_DISP_HOR_RES        LCD_W
-#define MY_DISP_VER_RES        LCD_H
 
+#define LV_DISP_DRV_MAX_NUM  (2)
 
 /**********************
  *      TYPEDEFS
@@ -38,7 +37,7 @@
  *  STATIC PROTOTYPES
  **********************/
 
-static void disp_init(void);
+static void disp_init(uint8_t id);
 static void *lv_lcd_frame_end_hook_func(void);
 static void disp_flush(lv_display_t *disp, const lv_area_t *area, uint8_t *px_map);
 
@@ -49,60 +48,77 @@ static void disp_flush(lv_display_t *disp, const lv_area_t *area, uint8_t *px_ma
 static u32 debug_draw_time_ms; //用于观察从开始渲染一帧开始到渲染完成一帧(推屏之前)需要的时间
 static u64 debug_lcd_latency_us;//用于观察每帧推屏引起的延迟,如果有开TE,等TE时间也会计算进入,如果单纯评估测试DMA造成的时延,请关闭TE测试
 static u32 debug_draw_max_time_ms;//用于观察记录从绘制完第一帧的第一片后开始推屏到绘制完最后一片消耗的历史最长时间
-static uint8_t first_render = 1;
-static uint32_t lcd_rotate_task_pid = 0;
+static uint8_t first_render[LV_DISP_DRV_MAX_NUM];
+static uint32_t lcd_rotate_task_pid[LV_DISP_DRV_MAX_NUM];
 
 /**********************
  *      MACROS
  **********************/
-//#define THREE_FB_ACCELERATION  //利用3FB加速 ,防止LVGL渲染完要等待LCD垂直同步才能够切换BUF, 但是LVGL每部没实现3FB，因此需要这里自行切换buf_act ,实际意义不大，比2FB还要差
 
 
 struct lv_fb_t {
+    lv_display_t *disp;
     LV_PIXEL_COLOR_T *fb;
 };
-volatile static struct lv_fb_t next_disp;/* 下一帧待显示的next_fb地址 */
+volatile static struct lv_fb_t next_disp[LV_DISP_DRV_MAX_NUM];/* 下一帧待显示的next_fb地址 */
 
-#ifdef THREE_FB_ACCELERATION
-#include "spinlock.h"
-#include "asm/dma.h"
-static LV_PIXEL_COLOR_T buf_3_3[MY_DISP_HOR_RES * MY_DISP_VER_RES] __attribute__((aligned(32)));            /*3th screen sized buffer*/
-static struct lv_fb_t cur_disp;/*当前LCD的显示显存 online_fb*/
-static struct lv_fb_t next_offline_disp;/* 上一帧online_fb，也是下一帧offline_fb */
-static spinlock_t fb_lock; //双核互斥锁
-static OS_SEM dma_cpy_done_sem;
-static void dma_copy_done_irq_cb(dma_execute_status_t status)
-{
-    os_sem_post(&dma_cpy_done_sem);
-    ASSERT(status == DMA_EXEC_STATUS_COMPLETE);
-}
-#endif //THREE_FB_ACCELERATION
-
-static void *lcd_dev = NULL;
-static uint8_t *lcd_disp_buffer = NULL;
-static uint16_t lcd_rotate;
-static uint16_t lcd_format;
+static void *lcd_dev[LV_DISP_DRV_MAX_NUM];
+static lv_display_t *lv_disp[LV_DISP_DRV_MAX_NUM];
+static uint8_t *lcd_disp_buffer[LV_DISP_DRV_MAX_NUM];
+static uint16_t lcd_rotate[LV_DISP_DRV_MAX_NUM];
+static uint16_t lcd_format[LV_DISP_DRV_MAX_NUM];
 static volatile u8  g_dmm_line_period; //dmm读取一行所需时间
 static volatile u32 g_last_vsync_trig_time;
 static volatile u64 g_vsync_start_time;
 static volatile u16 g_dmm_line;
 static volatile u16 lcd_vert_total = 0;
-static OS_SEM rotate_sem;
+static OS_SEM rotate_sem[LV_DISP_DRV_MAX_NUM];
 
 /**********************
  *   GLOBAL FUNCTIONS
  **********************/
+lv_display_t *lv_port_get_disp(uint8_t id)
+{
+    lv_display_t *disp = lv_disp[id];
+    if (disp == NULL) {
+        return lv_disp[0];
+    }
+    return disp;
+}
+void lv_port_refr_now(lv_display_t *disp)
+{
+    lv_timer_t tmr = {0};
+    /* lv_anim_refr_now(); */
+    if (disp) {
+        tmr.user_data = disp;
+        lv_display_refr_timer(&tmr);
+    } else {
+        lv_display_t *d;
+        d = lv_display_get_next(NULL);
+        while (d) {
+            tmr.user_data = d;
+            lv_display_refr_timer(&tmr);
+            d = lv_display_get_next(d);
+        }
+    }
+}
+
 void lv_port_disp_init(void)
 {
+
+    lv_display_t *disp = NULL;
     /*-------------------------
      * Initialize your display
      * -----------------------*/
-    disp_init();
+    disp_init(0);
 
     /*------------------------------------
      * Create a display and set a flush_cb
      * -----------------------------------*/
-    lv_display_t *disp = lv_display_create(MY_DISP_HOR_RES, MY_DISP_VER_RES);
+    disp = lv_display_create(LCD_W, LCD_H);
+    disp->disp_id = 0;
+    lv_disp[disp->disp_id] = disp;
+    first_render[disp->disp_id] = 1;
     lv_display_set_flush_cb(disp, disp_flush);
 
 #if LV_USE_PERF_MONITOR == 0 //只是为了适应LVGL_V9的benchmark帧率统计
@@ -113,18 +129,30 @@ void lv_port_disp_init(void)
     /* Example 3
      * Two buffers screen sized buffer for double buffering.
      * Both LV_DISPLAY_RENDER_MODE_DIRECT and LV_DISPLAY_RENDER_MODE_FULL works, see their comments*/
-    static LV_PIXEL_COLOR_T buf_3_1[MY_DISP_HOR_RES * MY_DISP_VER_RES] __attribute__((aligned(32)));            /*A screen sized buffer*/
-    static LV_PIXEL_COLOR_T buf_3_2[MY_DISP_HOR_RES * MY_DISP_VER_RES] __attribute__((aligned(32)));            /*Another screen sized buffer*/
+    static LV_PIXEL_COLOR_T buf_3_1[LCD_W * LCD_H] __attribute__((aligned(32)));            /*A screen sized buffer*/
+    static LV_PIXEL_COLOR_T buf_3_2[LCD_W * LCD_H] __attribute__((aligned(32)));            /*Another screen sized buffer*/
 
-#ifdef THREE_FB_ACCELERATION
-    //每次都重绘整个FB
-    /*lv_display_set_buffers(disp, buf_3_1, buf_3_2, buf_3_3, sizeof(buf_3_1), LV_DISPLAY_RENDER_MODE_FULL);*/
-    //3FB 暂未很好完善脏矩形刷新机制, 因为LVGL内部不支持3FB，需要修改refr_sync_areas对3个FB同步
-    lv_display_set_buffers(disp, buf_3_1, buf_3_2, buf_3_3, sizeof(buf_3_1), LV_DISPLAY_RENDER_MODE_DIRECT);
-#else
     //RGB/MIPI屏幕配置FB必须是屏幕大小，使得LVGL内部直接渲染到FB对应的绝对坐标 && 内部会同步双BUF脏矩阵区域
     lv_display_set_buffers(disp, buf_3_1, buf_3_2, sizeof(buf_3_1), LV_DISPLAY_RENDER_MODE_DIRECT);
-#endif //THREE_FB_ACCELERATION
+
+
+#if TCFG_LCD_SUPPORT_MULTI_DRIVER_EN //双屏显示
+    disp_init(1);
+    disp = lv_display_create(LCD1_W, LCD1_H);
+    disp->disp_id = 1;
+    lv_disp[disp->disp_id] = disp;
+    first_render[disp->disp_id] = 1;
+    lv_display_set_flush_cb(disp, disp_flush);
+#if LV_USE_PERF_MONITOR == 0 //只是为了适应LVGL_V9的benchmark帧率统计
+    lv_timer_delete(disp->refr_timer);
+    disp->refr_timer = NULL;
+#endif
+    static LV_PIXEL_COLOR_T buf_2_1[LCD1_W * LCD1_H] __attribute__((aligned(32)));            /*A screen sized buffer*/
+    static LV_PIXEL_COLOR_T buf_2_2[LCD1_W * LCD1_H] __attribute__((aligned(32)));            /*Another screen sized buffer*/
+
+    lv_display_set_buffers(disp, buf_2_1, buf_2_2, sizeof(buf_2_1), LV_DISPLAY_RENDER_MODE_DIRECT);
+
+#endif
 }
 
 /**********************
@@ -142,25 +170,13 @@ static u16 __lcd_abs(int x, int y)
 
 static void *lv_lcd_frame_end_hook_func(void)
 {
-    if (!next_disp.fb) {
+    u8 id = 0;
+    if (!next_disp[id].fb) {
         return NULL; //软件还未渲染完整一帧，继续显示上一帧显存
     }
-#ifdef THREE_FB_ACCELERATION
-    spin_lock(&fb_lock);
-    /* next_offline_fb 变量保存上一帧的 online_fb 地址 */
-    next_offline_disp.fb = cur_disp.fb;
-    /* 把已经绘制好的next_disp fb地址设置为 online_fb 的地址 */
-    cur_disp.fb = next_disp.fb;
-    next_disp.fb = NULL;
-    spin_unlock(&fb_lock);
-
-    /*返回 online_fb 的地址为当前 LCD 的显示显存 */
-    return ((lv_draw_buf_t *)cur_disp.fb)->data;
-#else
-    lv_draw_buf_t *cur_fb = next_disp.fb;
-    next_disp.fb = NULL;
+    lv_draw_buf_t *cur_fb = next_disp[id].fb;
+    next_disp[id].fb = NULL;
     return cur_fb->data;
-#endif
 }
 
 void dmm_vsync_int_handler(void)
@@ -170,13 +186,14 @@ void dmm_vsync_int_handler(void)
     struct mipi_dev *mipi;
     static u32 dmm_frame_period = 16000; //先给一个最小周期的值,单位微秒
     static u8 statistics_cnt = 0;
+    u8 id = 0; //默认mipi/lcd 屏id号是0
     if (statistics_cnt < 10) {
         /* 计算dmm 读取一行最小周期 */
         ++statistics_cnt;
         dmm_frame_period = get_system_us() - g_last_vsync_trig_time;
         g_last_vsync_trig_time = get_system_us();
-        if (lcd_dev && lcd_rotate) {
-            dev_ioctl(lcd_dev, IOCTL_LCD_RGB_GET_LCD_HANDLE, (u32)&lcd);
+        if (lcd_dev[id] && lcd_rotate) {
+            dev_ioctl(lcd_dev[id], IOCTL_LCD_RGB_GET_LCD_HANDLE, (u32)&lcd);
             lcd_vert_total = lcd->dev->imd.info.target_xres;
             if (lcd->type == LCD_MIPI) {
                 mipi = &lcd->dev->mipi;
@@ -196,35 +213,45 @@ void dmm_vsync_int_handler(void)
 static void lcd_rotate_task(void *p)
 {
 #define CALC_CNT  60
+    struct lcd_dev_drive *lcd = NULL;
     int ret = 0;
     u32 rotate_start_time, rotate_use_time;
     int msg[3] = {0};
-    uint8_t *frame_buffer = (uint8_t *)p;
+    struct lv_fb_t *fh = (struct lv_fb_t *)p;
+    uint8_t *frame_buffer = (uint8_t *)fh->fb;
     u8 statistics_cnt = CALC_CNT;
     u32 *rotate_times = NULL;
     u8 err_cnt = 0;
+    lv_display_t *disp = fh->disp;
+    u8 id = disp->disp_id;
 
-    u16 out_w = (lcd_rotate == ROTATE_180) ? MY_DISP_HOR_RES : MY_DISP_VER_RES;
-    u16 out_h = (lcd_rotate == ROTATE_180) ? MY_DISP_VER_RES : MY_DISP_HOR_RES;
+    u16 out_w = (lcd_rotate[id] == ROTATE_180) ? disp->hor_res : disp->ver_res;
+    u16 out_h = (lcd_rotate[id] == ROTATE_180) ? disp->ver_res : disp->hor_res;
 
-    os_sem_create(&rotate_sem, 1);
-    printf("lcd_rotate_task run...\n");
+    dev_ioctl(lcd_dev[id], IOCTL_LCD_RGB_GET_LCD_HANDLE, (u32)&lcd);
+
+    os_sem_create(&rotate_sem[id], 1);
+    printf("lcd_rotate_task%d run...\n", id);
     rotate_start_time = get_system_us();
-    fb_frame_buf_rotate(frame_buffer, lcd_disp_buffer, MY_DISP_HOR_RES, MY_DISP_VER_RES, 0, out_w, out_h, 0, lcd_rotate, 0, 0, lcd_format, lcd_format, 0);
+    fb_frame_buf_rotate(frame_buffer, lcd_disp_buffer[id], disp->hor_res, disp->ver_res, 0, out_w, out_h, 0, lcd_rotate[id], 0, 0, lcd_format[id], lcd_format[id], 0);
     rotate_use_time = get_system_us() - rotate_start_time;
-    g_dmm_line = __lcd_abs(lcd_vert_total, (rotate_use_time / g_dmm_line_period));
+    if (g_dmm_line_period) {
+        g_dmm_line = __lcd_abs(lcd_vert_total, (rotate_use_time / g_dmm_line_period));
+    }
     dmm_line_pend_init(g_dmm_line);
     while (1) {
         ret = os_taskq_pend_timeout(msg, ARRAY_SIZE(msg), 0);
         if (ret == OS_TASKQ)  {
             frame_buffer = msg[1];
             //1. wait line pend
-            if (lcd_dev) {
-                dev_ioctl(lcd_dev, IOCTL_LCD_RGB_WAIT_LINE_FINISH, (u32)0);
+            if (lcd->type == LCD_MIPI || lcd->type == LCD_RGB) {
+                if (lcd_dev[id]) {
+                    dev_ioctl(lcd_dev[id], IOCTL_LCD_RGB_WAIT_LINE_FINISH, (u32)0);
+                }
             }
             //2. rotate to lcd buffer
             rotate_start_time = get_system_us();
-            fb_frame_buf_rotate(frame_buffer, lcd_disp_buffer, MY_DISP_HOR_RES, MY_DISP_VER_RES, 0, out_w, out_h, 0, lcd_rotate, 0, 0, lcd_format, lcd_format, 0);
+            fb_frame_buf_rotate(frame_buffer, lcd_disp_buffer[id], disp->hor_res, disp->ver_res, 0, out_w, out_h, 0, lcd_rotate[id], 0, 0, lcd_format[id], lcd_format[id], 0);
             rotate_use_time = get_system_us() - rotate_start_time;
             //下面是旋转时间统计
             if (statistics_cnt > 0) {
@@ -273,85 +300,49 @@ static void lcd_rotate_task(void *p)
                 }
             }
 
-            os_sem_post(&rotate_sem);
+            if (!(lcd->type == LCD_MIPI || lcd->type == LCD_RGB)) {
+                //mcu/spi屏
+                if (lcd_dev[id]) {
+                    dev_ioctl(lcd_dev[id], IOCTL_LCD_RGB_WAIT_FB_SWAP_FINISH, (u32)lcd_disp_buffer[id]);
+                }
+            }
+            os_sem_post(&rotate_sem[id]);
         }
     }
 }
 static void lv_lcd_swap_fb(lv_display_t *disp_drv, const lv_area_t *area, LV_PIXEL_COLOR_T *px_map)
 {
-#ifdef THREE_FB_ACCELERATION
-
-    if (lcd_dev == NULL) { //LVGL首次启动渲染
-        lcd_dev = dev_open("lcd", NULL);
-        dev_ioctl(lcd_dev, IOCTL_LCD_RGB_SET_ISR_CB, (u32)lv_lcd_frame_end_hook_func);
-
-        cur_disp.fb = LV_GLOBAL_DEFAULT()->disp_refresh->buf_1;//LVGL第一轮渲染在BUF1，因此设置为第一个推屏显存
-        LV_GLOBAL_DEFAULT()->disp_refresh->buf_act = LV_GLOBAL_DEFAULT()->disp_refresh->buf_2; //切换LVGL第二轮渲染在BUF2
-
-        dev_ioctl(lcd_dev, IOCTL_LCD_RGB_START_DISPLAY, (u32)(((lv_draw_buf_t *)cur_disp.fb)->data)); //启动推屏显示
-
-        if (LV_GLOBAL_DEFAULT()->disp_refresh->render_mode != LV_DISPLAY_RENDER_MODE_FULL) {
-            os_sem_create(&dma_cpy_done_sem, 0);
-        }
-        return;
-    }
-
-    if (next_offline_disp.fb == NULL) {
-        //这个时刻是LVGL第二轮渲染，由于有3FB，因此不需要等待LCD Vsync SWAP完成就可以渲染下一个FB
-        next_offline_disp.fb = LV_GLOBAL_DEFAULT()->disp_refresh->buf_3;//准备LVGL第三轮渲染在BUF3
-    } else {
-        //第三轮渲染以后都要等待LCD Vsync SWAP FB完成
-        /*while (next_disp.fb != NULL) {};*/
-        lv_draw_buf_t *cur_fb = next_disp.fb;
-        dev_ioctl(lcd_dev, IOCTL_LCD_RGB_WAIT_FB_SWAP_FINISH, (u32)cur_fb->data);
-    }
-
-    if (LV_GLOBAL_DEFAULT()->disp_refresh->render_mode != LV_DISPLAY_RENDER_MODE_FULL) {
-        //FIXME,由于LVGL没实现3FB，因此需要修改refr_sync_area对online_fb的脏矩阵也要同步到buf_act
-        dma_copy_async_with_execute_status(((lv_draw_buf_t *)next_offline_disp.fb)->data, NO_CACHE_ADDR(LV_GLOBAL_DEFAULT()->disp_refresh->buf_act->data), MY_DISP_HOR_RES * MY_DISP_VER_RES * sizeof(LV_PIXEL_COLOR_T), dma_copy_done_irq_cb);
-    }
-
-    spin_lock(&fb_lock);
-    /* 将绘制好的 offline_fb 设置为 next_fb */
-    next_disp.fb = LV_GLOBAL_DEFAULT()->disp_refresh->buf_act;
-    /* 把上一帧的 online_fb 作为下一帧的 offline_fb */
-    LV_GLOBAL_DEFAULT()->disp_refresh->buf_act = next_offline_disp.fb;
-
-    if (LV_GLOBAL_DEFAULT()->disp_refresh->render_mode != LV_DISPLAY_RENDER_MODE_FULL) {
-        //FIXME:这两步是为了弥补3FB情况下让LVGL内部可以从屏上显存复制脏矩阵到正在渲染的显存
-        LV_GLOBAL_DEFAULT()->disp_refresh->buf_1 = LV_GLOBAL_DEFAULT()->disp_refresh->buf_act;
-        LV_GLOBAL_DEFAULT()->disp_refresh->buf_2 = next_disp.fb;
-    }
-    spin_unlock(&fb_lock);
-    if (LV_GLOBAL_DEFAULT()->disp_refresh->render_mode != LV_DISPLAY_RENDER_MODE_FULL) {
-        os_sem_pend(&dma_cpy_done_sem, 0);
-    }
-#else
-
-    if (first_render == 1) { //LVGL首次启动渲染
-        first_render = 0;
-        if (lcd_rotate != 0) {
-            thread_fork("lcd_rotate_task", 20, 1024, 256, &lcd_rotate_task_pid, lcd_rotate_task, px_map);
+    u8 id = disp_drv->disp_id;
+    char rotate_task_name[20];
+    if (first_render[id] == 1) { //LVGL首次启动渲染
+        first_render[id] = 0;
+        if (lcd_rotate[id] != 0) {
+            static struct lv_fb_t disp_fh[LV_DISP_DRV_MAX_NUM];
+            disp_fh[id].disp = disp_drv;
+            disp_fh[id].fb = px_map;
+            sprintf(rotate_task_name, "lcd_rotate_task%d", id);
+            thread_fork(rotate_task_name, 20, 1024, 256, &lcd_rotate_task_pid[id], lcd_rotate_task, (void *)&disp_fh[id]);
         } else {
-            dev_ioctl(lcd_dev, IOCTL_LCD_RGB_SET_ISR_CB, (u32)lv_lcd_frame_end_hook_func);
-            dev_ioctl(lcd_dev, IOCTL_LCD_RGB_START_DISPLAY, (u32)LV_GLOBAL_DEFAULT()->disp_refresh->buf_act->data);
+            dev_ioctl(lcd_dev[id], IOCTL_LCD_RGB_SET_ISR_CB, (u32)lv_lcd_frame_end_hook_func);
+            dev_ioctl(lcd_dev[id], IOCTL_LCD_RGB_START_DISPLAY, (u32)LV_GLOBAL_DEFAULT()->disp_refresh->buf_act->data);
         }
         return;
     }
-    if (lcd_rotate) {
+    if (lcd_rotate[id]) {
         int msg[1];
         msg[0] = (int)px_map;
-        os_sem_pend(&rotate_sem, 0);
-        os_taskq_post_type("lcd_rotate_task", Q_USER, ARRAY_SIZE(msg), msg);
+        sprintf(rotate_task_name, "lcd_rotate_task%d", id);
+        os_sem_pend(&rotate_sem[id], 0);
+        os_taskq_post_type(rotate_task_name, Q_USER, ARRAY_SIZE(msg), msg);
         return;
     }
-    next_disp.fb = LV_GLOBAL_DEFAULT()->disp_refresh->buf_act;
-    lv_draw_buf_t *cur_fb = next_disp.fb;
-    dev_ioctl(lcd_dev, IOCTL_LCD_RGB_WAIT_FB_SWAP_FINISH, (u32)cur_fb->data);
-#endif
+    next_disp[id].fb = LV_GLOBAL_DEFAULT()->disp_refresh->buf_act;
+    lv_draw_buf_t *cur_fb = next_disp[id].fb;
+    dev_ioctl(lcd_dev[id], IOCTL_LCD_RGB_WAIT_FB_SWAP_FINISH, (u32)cur_fb->data);
+
 }
 /*Initialize your display and the required peripherals.*/
-void disp_init(void)
+void disp_init(uint8_t id)
 {
     struct lcd_dev_drive *lcd = NULL;
     //yuv422,rgb565,rgb888,argb888
@@ -361,37 +352,37 @@ void disp_init(void)
         FB_COLOR_FORMAT_RGB888,
         FB_COLOR_FORMAT_ARGB8888
     };
-    if (lcd_dev == NULL) {
-        lcd_dev = dev_open("lcd", NULL);
-        dev_ioctl(lcd_dev, IOCTL_LCD_RGB_GET_LCD_HANDLE, (u32)&lcd);
-        lcd_rotate = lcd->dev->imd.info.rotate;
-        lcd_format = lcd_in_format[lcd->dev->imd.info.in_fmt];
-        if (lcd_rotate != 0) {
-            if (lcd_disp_buffer == NULL) {
-                lcd_disp_buffer = zalloc(MY_DISP_HOR_RES * MY_DISP_VER_RES * sizeof(LV_PIXEL_COLOR_T));
-                DcuFlushRegion((void *)lcd_disp_buffer, MY_DISP_HOR_RES * MY_DISP_VER_RES * sizeof(LV_PIXEL_COLOR_T));
-                dev_ioctl(lcd_dev, IOCTL_LCD_RGB_SET_ISR_CB, (u32)lv_lcd_frame_end_hook_func);
-                dev_ioctl(lcd_dev, IOCTL_LCD_RGB_START_DISPLAY, (u32)lcd_disp_buffer);
+    if (lcd_dev[id] == NULL) {
+        lcd_dev[id] = dev_open("lcd", (void *)&id);
+        dev_ioctl(lcd_dev[id], IOCTL_LCD_RGB_GET_LCD_HANDLE, (u32)&lcd);
+        lcd_rotate[id] = lcd->dev->imd.info.rotate;
+        lcd_format[id] = lcd_in_format[lcd->dev->imd.info.in_fmt];
+        if (lcd_rotate[id] != 0) {
+            if (lcd_disp_buffer[id] == NULL) {
+                lcd_disp_buffer[id] = zalloc(lcd->dev->imd.info.target_xres * lcd->dev->imd.info.target_yres * sizeof(LV_PIXEL_COLOR_T));
+                DcuFlushRegion((void *)lcd_disp_buffer[id], lcd->dev->imd.info.target_xres * lcd->dev->imd.info.target_yres * sizeof(LV_PIXEL_COLOR_T));
+                dev_ioctl(lcd_dev[id], IOCTL_LCD_RGB_SET_ISR_CB, (u32)lv_lcd_frame_end_hook_func);
+                dev_ioctl(lcd_dev[id], IOCTL_LCD_RGB_START_DISPLAY, (u32)lcd_disp_buffer[id]);
                 os_time_dly(50); //为了稳定计算dmm读取一行所需时间
             }
         }
     }
 }
-void disp_uninit(void)
+void disp_uninit(uint8_t id)
 {
-    if (lcd_dev) {
-        dev_close(lcd_dev);
-        lcd_dev = NULL;
+    if (lcd_dev[id]) {
+        dev_close(lcd_dev[id]);
+        lcd_dev[id] = NULL;
     }
-    if (lcd_disp_buffer) {
-        free(lcd_disp_buffer);
-        lcd_disp_buffer = NULL;
+    if (lcd_disp_buffer[id]) {
+        free(lcd_disp_buffer[id]);
+        lcd_disp_buffer[id] = NULL;
     }
-    if (lcd_rotate_task_pid) {
-        thread_kill(&lcd_rotate_task_pid, KILL_WAIT);
-        lcd_rotate_task_pid = 0;
+    if (lcd_rotate_task_pid[id]) {
+        thread_kill(&lcd_rotate_task_pid[id], KILL_WAIT);
+        lcd_rotate_task_pid[id] = 0;
     }
-    first_render = 1;
+    first_render[id] = 1;
 }
 
 /*Flush the content of the internal buffer the specific area on the display.
@@ -402,7 +393,7 @@ void disp_uninit(void)
 static void disp_flush(lv_display_t *disp_drv, const lv_area_t *area, uint8_t *px_map)
 {
     u64 temp_system_us;
-    /*printf("disp_flush->0x%x,%d,%d,%d,%d",px_map,area->x1, area->x2, area->y1, area->y2);*/
+    /* printf("[%d]disp_flush->0x%x,%d,%d,%d,%d", disp_drv->disp_id, px_map, area->x1, area->x2, area->y1, area->y2); */
     if (LV_GLOBAL_DEFAULT()->disp_refresh->render_mode != LV_DISPLAY_RENDER_MODE_FULL) {
 
         if (LV_GLOBAL_DEFAULT()->disp_refresh->flushing_last) {
@@ -415,7 +406,7 @@ static void disp_flush(lv_display_t *disp_drv, const lv_area_t *area, uint8_t *p
             }
 
             temp_system_us = get_system_us();
-            DcuFlushRegion(px_map, MY_DISP_HOR_RES * MY_DISP_VER_RES * sizeof(LV_PIXEL_COLOR_T));//这个地方可以优化，仅flush脏矩形部分的区域即可(需要从LVGL内部获取得到), 但是二维的，因此最好cache那边封装一个接口出来用
+            DcuFlushRegion(px_map, disp_drv->hor_res * disp_drv->ver_res * sizeof(LV_PIXEL_COLOR_T));//这个地方可以优化，仅flush脏矩形部分的区域即可(需要从LVGL内部获取得到), 但是二维的，因此最好cache那边封装一个接口出来用
             //局部脏矩形刷新策略下，当一帧里面最后一个脏矩形被渲染完毕才切换帧BUF
             lv_lcd_swap_fb(disp_drv, area, px_map);
             debug_lcd_latency_us += (get_system_us() - temp_system_us);
@@ -430,7 +421,7 @@ static void disp_flush(lv_display_t *disp_drv, const lv_area_t *area, uint8_t *p
             }
         }
         temp_system_us = get_system_us();
-        DcuFlushRegion(px_map, MY_DISP_HOR_RES * MY_DISP_VER_RES * sizeof(LV_PIXEL_COLOR_T));
+        DcuFlushRegion(px_map, disp_drv->hor_res * disp_drv->ver_res * sizeof(LV_PIXEL_COLOR_T));
         lv_lcd_swap_fb(disp_drv, area, px_map);
         debug_lcd_latency_us += (get_system_us() - temp_system_us);
     }

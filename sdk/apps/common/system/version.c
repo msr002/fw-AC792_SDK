@@ -7,7 +7,7 @@ extern char __VERSION_END[];
 
 const char *sdk_version(void)
 {
-    return "AC792N SDK on branch [release/AC792N_SDK_V3] tag AC792N_SDK_BETA_V3.0.1_2025-06-06";
+    return "AC792N SDK on branch [release/AC792N_SDK_V3] tag AC792N_SDK_BETA_V3.0.2_2025-06-24";
 }
 
 static int app_version_check()
@@ -15,6 +15,9 @@ static int app_version_check()
     char *version;
 
     printf("================= SDK Version    %s     ===============\n", sdk_version());
+#ifdef CONFIG_WIFI_SOUNDBOX_PROJECT_ENABLE
+    printf("================= Media SDK Version %s ===============\n", "AC792N_soundbox_V1.0.0_2025-6-17_14-00");
+#endif
     for (version = __VERSION_BEGIN; version < __VERSION_END;) {
         printf("%s\n", version);
         version += strlen(version) + 1;

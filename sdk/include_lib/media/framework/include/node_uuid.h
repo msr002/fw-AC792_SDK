@@ -23,6 +23,7 @@
 #define NODE_UUID_IIS1_RX           0xF5C4
 #define NODE_UUID_ADC               0xD06D
 #define NODE_UUID_A2DP_RX           0xF975
+#define NODE_UUID_A2DP_TX           0xF9B7
 #define NODE_UUID_ESCO_RX           0x8458
 #define NODE_UUID_ESCO_TX           0x849A
 #define NODE_UUID_VIR_DATA_TX       0X219F

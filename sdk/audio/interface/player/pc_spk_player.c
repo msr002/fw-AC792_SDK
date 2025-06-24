@@ -110,6 +110,7 @@ struct pc_spk_player *pc_spk_player_open(struct stream_fmt *fmt)
     return player;
 
 __exit1:
+    list_del(&player->entry);
     jlstream_release(player->stream);
 __exit0:
     free(player);
@@ -120,6 +121,10 @@ __exit0:
 // 返回1说明player 在运行
 bool pc_spk_player_runing(void)
 {
+    if (list_empty(&head)) {
+        return FALSE;
+    }
+
     return uac_speaker_stream_status(0)
 #if USB_MAX_HW_NUM > 1
            || uac_speaker_stream_status(1)

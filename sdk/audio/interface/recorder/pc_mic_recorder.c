@@ -61,7 +61,7 @@ static void pc_mic_recorder_callback(void *private_data, int event)
         log_info("pc mic vol: %d, ret: %d", volume, err);
 #if TCFG_AUDIO_CVP_OUTPUT_WAY_IIS_ENABLE && TCFG_IIS_NODE_ENABLE
         /*打开pc mic，没有开skp，忽略外部参考数据*/
-        if (!pc_spk_player_runing()) {
+        if (!pc_spk_player_runing() || pc_spk_player_mute_status()) {
             log_info("CVP_OUTWAY_REF_IGNORE");
             audio_cvp_ioctl(CVP_OUTWAY_REF_IGNORE, 1, NULL);
         }
@@ -116,6 +116,8 @@ struct pc_mic_recorder *pc_mic_recorder_open(struct stream_fmt *fmt)
     jlstream_set_scene(recorder->stream, STREAM_SCENE_PC_MIC);
 
     list_add_tail(&recorder->entry, &head);
+
+    jlstream_add_thread(recorder->stream, NULL);
 
     err = jlstream_start(recorder->stream);
     if (err) {

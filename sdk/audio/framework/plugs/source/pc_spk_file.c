@@ -6,6 +6,7 @@
 #endif
 #include "source_node.h"
 #include "media/audio_splicing.h"
+#include "cvp/cvp_common.h"
 #include "audio_config.h"
 #include "jlstream.h"
 #include "effects/effects_adj.h"
@@ -52,13 +53,19 @@ struct pc_spk_file_hdl {
     u16 det_timer_id;
     u8 start;
     u8 data_run;
-    u8 player_close;
+    u8 det_mute;
     u8 repair_flag;
     struct pc_spk_fmt_t fmt;
 };
 
 #define SPK_PUSH_FRAME_NUM 5 //SPK一次push的帧数，单位：uac rx中断间隔
 
+static bool mute_status;
+
+bool pc_spk_player_mute_status(void)
+{
+    return mute_status;
+}
 
 static void pc_spk_data_isr_cb(void *priv, void *buf, int len)
 {
@@ -69,14 +76,6 @@ static void pc_spk_data_isr_cb(void *priv, void *buf, int len)
         return;
     }
 
-    if (!hdl->data_run && hdl->player_close) {
-        printf(">>>>>>> PCSPK CONNECT !!<<<<<<<");
-        struct device_event event = {0};
-        event.event = USB_AUDIO_PLAY_OPEN;
-        event.arg = (void *)(int)hdl->fmt.id;
-        device_event_notify(DEVICE_EVENT_FROM_UAC, &event);
-        hdl->player_close = 0;
-    }
     if (!hdl->start) {
         return;
     }
@@ -154,11 +153,34 @@ static void pcspk_det_timer_cb(void *priv)
     if (hdl && hdl->start) {
         if (hdl->irq_cnt) {
             hdl->irq_cnt = 0;
+            if (hdl->det_mute) {
+                hdl->det_mute = 0;
+#if TCFG_AUDIO_CVP_OUTPUT_WAY_IIS_ENABLE && TCFG_IIS_NODE_ENABLE
+                //先开pc mic，后开spk，需要取消忽略外部数据，重启aec
+                if (audio_aec_status()) {
+                    audio_aec_reboot(0);
+                    audio_cvp_ref_data_align_reset();
+                }
+#endif
+                mute_status = FALSE;
+                //user_apm_mute(0);
+            }
         } else {
-            if (hdl->data_run) {
+            if (hdl->data_run && !hdl->det_mute) {
+                hdl->det_mute = 1;
+                mute_status = TRUE;
+#if TCFG_AUDIO_CVP_OUTPUT_WAY_IIS_ENABLE && TCFG_IIS_NODE_ENABLE
+                if (audio_aec_status()) {
+                    //忽略参考数据
+                    audio_cvp_ioctl(CVP_OUTWAY_REF_IGNORE, 1, NULL);
+                    audio_cvp_ref_data_align_reset();
+                }
+#endif
                 //已经往后面推数据突然中断没有起的情况
-                hdl->data_run = 0;
                 printf(">>>>>>> PCSPK LOST CONNECT <<<<<<<");
+                //user_apm_mute(1);
+                return;
+                hdl->data_run = 0;
 #if (TCFG_LEA_BIG_CTRLER_TX_EN || TCFG_LEA_BIG_CTRLER_RX_EN)
                 if (get_broadcast_role() == 1) {
                     //广播（发送端）
@@ -171,7 +193,6 @@ static void pcspk_det_timer_cb(void *priv)
                     event.event = USB_AUDIO_PLAY_CLOSE;
                     event.arg = (void *)(int)hdl->fmt.id;
                     device_event_notify(DEVICE_EVENT_FROM_UAC, &event);
-                    hdl->player_close = 1;
                 }
             }
         }
@@ -268,8 +289,9 @@ static int pc_spk_ioctl(void *_hdl, int cmd, int arg)
             pcspk_open_det_timer(hdl);
 #endif
             hdl->data_run = 0;
+            hdl->det_mute = 0;
             hdl->start = 1;
-            hdl->player_close = 0;
+            mute_status = FALSE;
         }
         break;
     case NODE_IOC_SUSPEND:
@@ -277,6 +299,7 @@ static int pc_spk_ioctl(void *_hdl, int cmd, int arg)
         if (hdl->start) {
             hdl->start = 0;
         }
+        mute_status = FALSE;
         break;
     }
 

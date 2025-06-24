@@ -158,6 +158,7 @@ INCLUDES := \
 	-I../../../../apps/common/ble/include \
 	-I../../../../apps/wifi_camera/include \
 	-I../../../../apps/wifi_camera/misc \
+	-I../../../../apps/wifi_camera/video_ops/include \
 	-I../../../../include_lib/driver/device/video \
 	-I../../../../apps \
 	-I../../../../apps/common/third_party_profile \
@@ -436,6 +437,7 @@ c_SRC_FILES := \
 	../../../../apps/common/example/third_party/sqlite/os_jl.c \
 	../../../../apps/common/example/third_party/sqlite/sqlite3.c \
 	../../../../apps/common/example/third_party/sqlite/sqlite_test_main.c \
+	../../../../apps/common/fat_nor/extflash.c \
 	../../../../apps/common/file_operate/file_bs_deal.c \
 	../../../../apps/common/file_operate/file_manager.c \
 	../../../../apps/common/gsensor/da380.c \
@@ -1146,6 +1148,7 @@ c_SRC_FILES := \
 	../../../../apps/wifi_camera/mode/video_photo/video_photo.c \
 	../../../../apps/wifi_camera/mode/video_rec/video_rec.c \
 	../../../../apps/wifi_camera/mode/video_rec/video_rec_cfg.c \
+	../../../../apps/wifi_camera/show_h264.c \
 	../../../../apps/wifi_camera/wifi/ctp_cli_recv_stream.c \
 	../../../../apps/wifi_camera/wifi/ctp_cmd.c \
 	../../../../apps/wifi_camera/wifi/ftpd_vfs_reg.c \

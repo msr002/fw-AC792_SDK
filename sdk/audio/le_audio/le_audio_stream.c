@@ -42,7 +42,7 @@ struct le_audio_tx_stream {
 
 #if LE_AUDIO_TX_TEST
     u16 test_timer;
-    int sdu_period_len;
+    int isoIntervalUs_len;
     void *test_buf;
 #endif
 };
@@ -50,13 +50,14 @@ struct le_audio_tx_stream {
 struct le_audio_rx_stream {
     struct le_audio_stream_buf buf;
     struct list_head frames;
-    int sdu_period_len;
+    int isoIntervalUs_len;
     int frames_len;
     int frames_max_size;
     u32 coding_type;
     atomic_t ref;
     void *parent;
     u32 timestamp;
+    u16 fill_data_timer;
     u8 online;
 };
 
@@ -89,7 +90,7 @@ void *le_audio_stream_create(u16 conn, struct le_audio_stream_format *fmt)
     memcpy(&ctx->fmt, fmt, sizeof(ctx->fmt));
 
     log_info("le audio stream : %d, %d, 0x%x, %d, %d, %d", ctx->fmt.nch, ctx->fmt.bit_rate, ctx->fmt.coding_type,
-             ctx->fmt.frame_dms, ctx->fmt.sdu_period, ctx->fmt.sample_rate);
+             ctx->fmt.frame_dms, ctx->fmt.isoIntervalUs, ctx->fmt.sample_rate);
 
     spin_lock_init(&ctx->lock);
     ctx->conn = conn;
@@ -139,7 +140,7 @@ static int __le_audio_stream_tx_data_handler(void *stream, void *data, int len, 
     }
 
     if (cbuf_get_data_len(&tx_stream->buf.cbuf) < len ||
-        (rx_stream && cbuf_get_data_len(&rx_stream->buf.cbuf) < rx_stream->sdu_period_len)) {
+        (rx_stream && cbuf_get_data_len(&rx_stream->buf.cbuf) < rx_stream->isoIntervalUs_len)) {
         /*对于需要本地播放的必须满足播放与发送都有一个interval的数据*/
         /*y_printf("no data : %u, %d\n", timestamp, latency);*/
         return 0;
@@ -152,7 +153,7 @@ static int __le_audio_stream_tx_data_handler(void *stream, void *data, int len, 
     }
 
     if (ctx->tx_tick_handler) {
-        ctx->tx_tick_handler(ctx->tx_tick_priv, ctx->fmt.sdu_period, timestamp);
+        ctx->tx_tick_handler(ctx->tx_tick_priv, ctx->fmt.isoIntervalUs, timestamp);
     }
 
     if (tx_stream->tick_handler) {
@@ -162,7 +163,7 @@ static int __le_audio_stream_tx_data_handler(void *stream, void *data, int len, 
     /*putchar('B');*/
     if (rx_stream) {
         void *addr = cbuf_read_alloc(&rx_stream->buf.cbuf, &read_alloc_len);
-        if (read_alloc_len < rx_stream->sdu_period_len) {
+        if (read_alloc_len < rx_stream->isoIntervalUs_len) {
             log_error("local not align to tx.");
             return rlen;
         }
@@ -183,9 +184,9 @@ static int __le_audio_stream_tx_data_handler(void *stream, void *data, int len, 
 #endif
         }
         timestamp = (timestamp + latency) & 0xfffffff;
-        __le_audio_stream_rx_frame(rx_stream, addr, rx_stream->sdu_period_len, timestamp);
-        cbuf_read_updata(&rx_stream->buf.cbuf, rx_stream->sdu_period_len);
-        /*printf("-%d-\n", rx_stream->sdu_period_len);*/
+        __le_audio_stream_rx_frame(rx_stream, addr, rx_stream->isoIntervalUs_len, timestamp);
+        cbuf_read_updata(&rx_stream->buf.cbuf, rx_stream->isoIntervalUs_len);
+        /*printf("-%d-\n", rx_stream->isoIntervalUs_len);*/
     }
 
     return rlen;
@@ -212,7 +213,7 @@ static void le_audio_tx_test_timer(void *stream)
 {
     struct le_audio_tx_stream *tx_stream = (struct le_audio_tx_stream *)stream;
 
-    __le_audio_stream_tx_data_handler(tx_stream, tx_stream->test_buf, tx_stream->sdu_period_len, 0x12345678);
+    __le_audio_stream_tx_data_handler(tx_stream, tx_stream->test_buf, tx_stream->isoIntervalUs_len, 0x12345678);
 }
 #endif
 
@@ -252,8 +253,8 @@ void *le_audio_stream_tx_open(void *le_audio, int coding_type, void *priv, int (
         //TODO : 其他格式的buffer设置
     }
 
-    int sdu_period_len = (ctx->fmt.sdu_period / 100 / ctx->fmt.frame_dms) * frame_size;
-    tx_stream->buf.size = sdu_period_len * 8;
+    int isoIntervalUs_len = (ctx->fmt.isoIntervalUs / 100 / ctx->fmt.frame_dms) * frame_size;
+    tx_stream->buf.size = isoIntervalUs_len * 8;
     tx_stream->buf.addr = malloc(tx_stream->buf.size);
 
     log_debug("tx stream buffer : 0x%x, %d", (u32)tx_stream->buf.addr, tx_stream->buf.size);
@@ -268,9 +269,9 @@ void *le_audio_stream_tx_open(void *le_audio, int coding_type, void *priv, int (
     ctx->tx_stream = tx_stream;
 
 #if LE_AUDIO_TX_TEST
-    tx_stream->test_timer = sys_hi_timer_add(tx_stream, le_audio_tx_test_timer, ctx->fmt.sdu_period / 1000);
-    tx_stream->test_buf = malloc(sdu_period_len);
-    tx_stream->sdu_period_len = sdu_period_len;
+    tx_stream->test_timer = sys_hi_timer_add(tx_stream, le_audio_tx_test_timer, ctx->fmt.isoIntervalUs / 1000);
+    tx_stream->test_buf = malloc(isoIntervalUs_len);
+    tx_stream->isoIntervalUs_len = isoIntervalUs_len;
 #else
     /* le_audio_set_tx_data_handler(ctx->conn, tx_stream, le_audio_stream_tx_data_handler); */
 #endif
@@ -366,7 +367,7 @@ void *le_audio_stream_rx_open(void *le_audio, int coding_type)
     rx_stream->frames_max_size = iso_interval_len * (ctx->fmt.flush_timeout ? (ctx->fmt.flush_timeout + 5) : 10);
     rx_stream->buf.size = rx_stream->frames_max_size;
     rx_stream->buf.addr = malloc(rx_stream->frames_max_size);
-    rx_stream->sdu_period_len = iso_interval_len;
+    rx_stream->isoIntervalUs_len = iso_interval_len;
     rx_stream->parent = ctx;
     rx_stream->coding_type = coding_type;
     rx_stream->online = 1;
@@ -392,7 +393,9 @@ void le_audio_stream_rx_close(void *stream)
     if (atomic_dec(&rx_stream->ref) == 0) {
         ctx->rx_stream = NULL;
         spin_unlock(&ctx->lock);
-
+        if (rx_stream->fill_data_timer) {
+            sys_hi_timer_del(rx_stream->fill_data_timer);
+        }
         if (rx_stream->buf.addr) {
             free(rx_stream->buf.addr);
         }
@@ -575,22 +578,21 @@ static int __le_audio_stream_rx_frame(void *stream, void *data, int len, u32 tim
     return len;
 }
 
-static int le_audio_stream_rx_fill_frame(struct le_audio_rx_stream *rx_stream)
+static void le_audio_stream_rx_fill_frame(struct le_audio_rx_stream *rx_stream)
 {
     struct le_audio_stream_context *ctx = (struct le_audio_stream_context *)rx_stream->parent;
 
     if (rx_stream->coding_type == AUDIO_CODING_LC3 || rx_stream->coding_type == AUDIO_CODING_JLA || rx_stream->coding_type == AUDIO_CODING_JLA_V2) {
-        rx_stream->timestamp = (rx_stream->timestamp + ctx->fmt.sdu_period) & 0xfffffff;
+        rx_stream->timestamp = (rx_stream->timestamp + ctx->fmt.isoIntervalUs) & 0xfffffff;
         u8 jla_err_frame[2] = {0x02, 0x00};
         u8 err_packet[10] = {0};
-        u8 frame_num = ctx->fmt.sdu_period / 100 / ctx->fmt.frame_dms;
+        u8 frame_num = ctx->fmt.isoIntervalUs / 100 / ctx->fmt.frame_dms;
         for (int i = 0; i < frame_num; i++) {
             memcpy(&err_packet[i * 2], jla_err_frame, 2);
         }
         __le_audio_stream_rx_frame(rx_stream, err_packet, frame_num * 2, rx_stream->timestamp);
     }
 
-    return 0;
 }
 
 void le_audio_stream_rx_disconnect(void *stream)
@@ -601,6 +603,9 @@ void le_audio_stream_rx_disconnect(void *stream)
     spin_lock(&ctx->lock);
     rx_stream->online = 0;
     le_audio_stream_rx_fill_frame(rx_stream);
+
+    rx_stream->fill_data_timer = sys_hi_timer_add(rx_stream, (void *)le_audio_stream_rx_fill_frame, ctx->fmt.isoIntervalUs / 1000);
+
     spin_unlock(&ctx->lock);
 }
 
@@ -615,18 +620,18 @@ struct le_audio_frame *le_audio_stream_get_frame(void *le_audio)
     }
 
     spin_lock(&ctx->lock);
-get_frame:
+    /* get_frame: */
     if (!list_empty(&rx_stream->frames)) {
         frame = list_first_entry(&rx_stream->frames, struct le_audio_frame, entry);
         list_del(&frame->entry);
     }
 
-    if (!frame && !rx_stream->online) {
-        if (rx_stream->coding_type == AUDIO_CODING_LC3 || rx_stream->coding_type == AUDIO_CODING_JLA || rx_stream->coding_type == AUDIO_CODING_JLA_V2) {
-            le_audio_stream_rx_fill_frame(rx_stream);
-            goto get_frame;
-        }
-    }
+    //if (!frame && !rx_stream->online) {
+    //  if (rx_stream->coding_type == AUDIO_CODING_LC3 || rx_stream->coding_type == AUDIO_CODING_JLA || rx_stream->coding_type == AUDIO_CODING_JLA_V2) {
+    //   le_audio_stream_rx_fill_frame(rx_stream);
+    //    goto get_frame;
+    // }
+    //}
 
     spin_unlock(&ctx->lock);
 
@@ -645,7 +650,7 @@ int le_audio_stream_get_frame_num(void *le_audio)
         return 0;
     }
 
-    return rx_stream->frames_len / rx_stream->sdu_period_len;
+    return rx_stream->frames_len / rx_stream->isoIntervalUs_len;
 }
 
 void le_audio_stream_free_frame(void *le_audio, struct le_audio_frame *frame)

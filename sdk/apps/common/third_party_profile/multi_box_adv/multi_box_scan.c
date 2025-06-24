@@ -750,12 +750,6 @@ void user_client_report_data_callback(att_data_report_t *report_data)
     }
 }
 
-__attribute__((weak))
-void multi_box_adv_volume_change(u8 *adv_address, u8 adv_data, u8 volume)
-{
-
-}
-
 //	PRIMARY_SERVICE,AE30
 /* static const u16 test_services_uuid16 = 0xae30; */
 
@@ -885,7 +879,6 @@ static bool resolve_adv_report(u8 *adv_address, u8 data_length, u8 *data, s8 rss
                 return 0;
             } else {
                 multi_box_adv_data_handle(adv_address, adv_data_pt[sizeof(company_id)]);
-                multi_box_adv_volume_change(adv_address, adv_data_pt[sizeof(company_id)], adv_data_pt[sizeof(company_id) + 1]);
             }
 #endif
             if (check_device_is_match(CLI_CREAT_BY_TAG, adv_data_pt, lenght - 1)) {

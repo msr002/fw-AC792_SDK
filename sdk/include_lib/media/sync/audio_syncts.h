@@ -109,4 +109,6 @@ int audio_syncts_frame_resample(void *syncts, struct resample_frame *in_frame, s
 
 void audio_syncts_compensate_filter_latency(void *syncts, u8 enable);
 
+int audio_syncts_get_resample_phase(void *syncts);
+
 #endif

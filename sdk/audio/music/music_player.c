@@ -22,6 +22,9 @@
 //播放参数，文件扫描时用，文件后缀等
 static const char scan_parm[] = "-t"
                                 "PCM"
+#if (TCFG_DEC_WTG_ENABLE)
+                                "WTG"
+#endif
 #if (TCFG_DEC_MP3_ENABLE)
                                 "MP1MP2MP3"
 #endif

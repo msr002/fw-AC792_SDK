@@ -432,7 +432,7 @@ void multi_protocol_bt_init(void)
     custom_demo_all_init();
 #endif
 
-#if (THIRD_PARTY_PROTOCOLS_SEL & NET_CFG_EN) && !TCFG_POWER_ON_ENABLE_BLE
+#if (THIRD_PARTY_PROTOCOLS_SEL & NET_CFG_EN) && TCFG_POWER_ON_ENABLE_BLE
     le_net_cfg_all_init();
 #endif
 

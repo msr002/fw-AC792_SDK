@@ -77,12 +77,12 @@ void multi_box_adv_data_handle(u8 *mac_addr, u8 adv_data)
         }
     }
 
-    if (adv_data & BIT(7)) {
-        multi_box_bis_enable = 1;
-    }
-
     if (!new_mac_addr) {
         return;
+    }
+
+    if (adv_data & BIT(7)) {
+        multi_box_bis_enable = 1;
     }
 
     p = (mac_list_t *)malloc(sizeof(mac_list_t));

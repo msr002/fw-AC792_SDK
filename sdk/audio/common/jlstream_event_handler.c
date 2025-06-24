@@ -33,31 +33,7 @@
 #define PIPELINE_UUID_VIDEO_REC     0xF7A2
 #define PIPELINE_UUID_VIDEO_DEC     0xBC14
 
-static u8 g_a2dp_slience;
-static u32 g_a2dp_slience_begin;
-
-static void a2dp_energy_detect_handler(int *arg)
-{
-    // cppcheck-suppress knownConditionTrueFalse
-    if (config_a2dp_energy_calc_enable == 0)  {
-        return;
-    }
-    int energy = arg[0];
-    if (energy == 0) {
-        if (g_a2dp_slience_begin == 0) {
-            g_a2dp_slience_begin = jiffies_msec();
-        } else {
-            int msec = jiffies_msec2offset(g_a2dp_slience_begin, jiffies_msec());
-            if (msec >= 2000 && g_a2dp_slience == 0) {
-                g_a2dp_slience = 1;
-                /* audio_event_to_user(AUDIO_EVENT_A2DP_NO_ENERGY); */
-            }
-        }
-    } else {
-        g_a2dp_slience = 0;
-        g_a2dp_slience_begin = 0;
-    }
-}
+void a2dp_energy_detect_handler(int *arg);
 
 int get_system_stream_bit_width(void *par)
 {
@@ -179,8 +155,6 @@ int decoder_check_frame_unit_size(int dest_len)
 static int load_decoder_handler(struct stream_decoder_info *info)
 {
     if (info->scene == STREAM_SCENE_A2DP) {
-        g_a2dp_slience = 0;
-        g_a2dp_slience_begin = 0;
         info->task_name = "a2dp_dec";
 
 #if TCFG_VIRTUAL_SURROUND_PRO_MODULE_NODE_ENABLE

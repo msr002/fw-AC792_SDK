@@ -15,7 +15,7 @@ static void ui_lcd_light_on(void)
 {
     puts("====ui_lcd_light_on====\n");
 #if TCFG_LCD_ENABLE
-    lcd_backlight_ctrl(true);
+    lcd_backlight_ctrl(0, true);
 #endif
     touch_event_produce();
 }
@@ -24,7 +24,7 @@ static void ui_lcd_light_off(void)
 {
     puts("====ui_lcd_light_off====\n");
 #if TCFG_LCD_ENABLE
-    lcd_backlight_ctrl(false);
+    lcd_backlight_ctrl(0, false);
 #endif
     touch_event_consume();
 }
