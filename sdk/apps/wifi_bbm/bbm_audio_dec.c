@@ -20,7 +20,7 @@ static int vfs_audio_dec_fread(void *file, void *data, u32 len)
         }
     } while (rlen);
 
-    return len;
+    return rlen ? rlen : -2;
 }
 
 static int vfs_audio_dec_fclose(void *file)
@@ -47,6 +47,7 @@ static int audio_dec_write_cbuf(u8 *buf, u32 size)
     cur_size =  cbuf_get_data_size(&audio_dec_save_cbuf);
 
     if (cur_size + (size * 2) >= AUDIO_DEC_BUF_MAX_LEN) {
+        printf("bbm audio dec clear cbuf \n");
         cbuf_clear(&audio_dec_save_cbuf);
     }
 

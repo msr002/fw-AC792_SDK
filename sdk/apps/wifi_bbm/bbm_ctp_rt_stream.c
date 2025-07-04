@@ -230,6 +230,14 @@ struct rt_stream_dev {
     avi_t *rec_out_fd;
 };
 
+static int ctp_recv_sock_cb(enum sock_api_msg_type type, void *priv)
+{
+    if (ctp_rt_recv_task_exit) {
+        printf("cpt recv cb func exit\n");
+        return -1;
+    }
+    return 0;
+}
 
 static int parse_recv_packet(u8 *recv_buf, int recv_len, struct parse_info *parse_info)
 {
@@ -340,9 +348,6 @@ static void ctp_rt_recv_task(void *priv)
         printf("ctp recv task malloc recv buff err \n");
         goto exit;
     }
-
-
-    sock_set_recv_timeout(ctp_rt_recv_sockfd, CTP_RT_RECV_TIMEOUT);
 
     while (1) {
         if (ctp_rt_recv_task_exit) {
@@ -633,7 +638,7 @@ static int bbm_rt_recv_init(void)
     conn_addr.sin_addr.s_addr = htonl(INADDR_ANY);
     conn_addr.sin_port = htons(CTP_RT_RECV_PORT);
 
-    ctp_rt_recv_sockfd = sock_reg(AF_INET, SOCK_DGRAM, 0, NULL, NULL);
+    ctp_rt_recv_sockfd = sock_reg(AF_INET, SOCK_DGRAM, 0, ctp_recv_sock_cb, NULL);
     if (ctp_rt_recv_sockfd == NULL) {
         printf("sock_reg err\n");
         return -1;

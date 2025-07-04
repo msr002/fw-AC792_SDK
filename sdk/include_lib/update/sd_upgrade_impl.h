@@ -53,6 +53,9 @@ typedef enum {
     USER_NORFLASH_UFW_UPDATA,
     NET_UFW_UPDATA,
     USB_HID_UPDATA,
+    UPDIFF_FLASH_UPDATA,
+    COMBAK_FLASH_UPDATA,
+    DEV_UPDATA_MAX,
 
     NON_DEV = 0xFFFF,
 } UPDATA_TYPE;
@@ -86,6 +89,11 @@ typedef struct _UPDATA_SD {
     u8 control_io_cmd;
     u8 control_io_dat;
 } UPDATA_SD;
+
+typedef struct _UPDATA_UDISK {
+    u8 usb_id; //0:usb0 1:usb1
+    u8 speed;  //0:fusb 1:husb
+} UPDATA_UDISK;
 
 // uart
 typedef struct _UPDATA_UART {

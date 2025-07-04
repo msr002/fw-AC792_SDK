@@ -364,7 +364,7 @@ static lv_res_t _lv_gpu_jl_gpu2p5d_zoom_rotate(lv_draw_ctx_t *draw_ctx, const lv
     }
 
     lv_area_move(dest_area, coords->x1, coords->y1);
-    surface.x = 0;
+    surface.x = LV_ABS(dest_area->x1 - map_area->x1);
     surface.y = LV_ABS(dest_area->y1 - map_area->y1);
 
     jlvg_start_frame(g_gpu2p5d, &surface);
@@ -551,7 +551,8 @@ void LV_ATTRIBUTE_FAST_MEM lv_draw_jl_gpu2p5d_img_decoded_with_mask(struct _lv_d
                 __img_trans.zoom = draw_dsc->zoom;
                 __img_trans.angle = draw_dsc->angle;
                 __img_trans.src_buf = (void *)src_buf;
-                lv_area_set(&__img_trans.transform_area, draw_ctx->clip_area->x1, draw_ctx->clip_area->y1, a.x2, a.y2);
+                lv_area_set(&__img_trans.transform_area, a.x1, a.y1, a.x2, a.y2);
+                //lv_area_set(&__img_trans.transform_area, draw_ctx->clip_area->x1, draw_ctx->clip_area->y1, a.x2, a.y2);
 
                 /* 保存变换第一次的区域，用于GPU做整张图变换 */
                 lv_area_copy(&__img_trans.clip_area, &blend_area);

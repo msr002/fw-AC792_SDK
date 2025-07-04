@@ -160,7 +160,17 @@ static void fs_update_param_private_handle(UPDATA_PARM *p)
         sd.power = 0;//是否启用SDPG电源引脚，1则开启SDPG电源
         memcpy((void *)p->parm_priv, (void *)&sd, sizeof(UPDATA_SD));
     } else if (up_type == USB_UPDATA) {
+#if TCFG_UDISK_ENABLE
         //
+        UPDATA_UDISK udisk = {0};
+        char *udisk_path = CONFIG_UDISK_STORAGE_PATH;
+        udisk.usb_id = udisk_path[strlen(udisk_path) - 1] - '0';
+        udisk.speed = 1; //fusb
+        if (udisk.usb_id == 0) {
+            udisk.speed = 0;
+        }
+        memcpy((void *)p->parm_priv, (void *)&udisk, sizeof(UPDATA_UDISK));
+#endif
     }
     memcpy(p->file_patch, updata_file_name, strlen(updata_file_name));
 }
@@ -248,11 +258,21 @@ int update_test(void)
 extern int storage_device_ready(void);
 static void fs_update_start(void *priv)
 {
+#if TCFG_UDISK_ENABLE
+    char *udisk_path = CONFIG_UDISK_STORAGE_PATH;
+    int id = udisk_path[strlen(udisk_path) - 1] - '0';
+    printf("udisk path=%s id=%d\n", udisk_path, id);
+    while (!udisk_storage_device_ready(id)) {//等待文件系统挂载完成
+        os_time_dly(30);
+    }
+    printf(">>>Udisk%d is ready <<<", id);
+#else
     while (!storage_device_ready()) {//等待文件系统挂载完成
         os_time_dly(30);
     }
-
     printf(">>>SD card is ready <<<");
+#endif
+
 
     update_test();
 }

@@ -1009,7 +1009,6 @@ static void video_rec_view_submenu_event_handler(lv_event_t *e)
                     lv_dropdown_get_selected_str(ui_scr->video_rec_ddlist_6, &carnumber_cn[7], 2);
                     lv_dropdown_get_selected_str(ui_scr->video_rec_ddlist_7, &carnumber_cn[8], 2);
                     printf("[chili] %s carnumber_cn:%s   \n", __func__, carnumber_cn);
-                    lvgl_module_msg_send_ptr(carnumber_cn, 0);
                     int  selected_idx = lv_dropdown_get_selected(ui_scr->video_rec_ddlist_1);
                     db_update("proc", selected_idx);
                     unsigned char gb2312Data[16] = {0};
@@ -1017,6 +1016,7 @@ static void video_rec_view_submenu_event_handler(lv_event_t *e)
                     uint32_t *carnum_p = gb2312Data;
                     db_update("cna", carnum_p[0]);
                     db_update("cnb", carnum_p[1]);
+                    lvgl_module_msg_send_ptr(carnumber_cn, 0);
                     // printf("p0: %x, p1: %x, p2: %x\n", );
                 }
                 break;
@@ -1311,6 +1311,7 @@ static void sys_prompt_img_warn_event_handler(lv_event_t *e)
             }
             if (ui_scr->sys_prompt_del == false && lv_obj_is_valid(ui_scr->sys_prompt)) {
                 lv_obj_add_flag(ui_scr->sys_prompt, LV_OBJ_FLAG_HIDDEN);
+                unload_scr_sys_prompt(&guider_ui);
             }
 
         }

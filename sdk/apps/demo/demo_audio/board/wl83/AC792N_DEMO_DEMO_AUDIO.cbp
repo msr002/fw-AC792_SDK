@@ -150,8 +150,7 @@
 <Add option="../../../../../cpu/wl83/liba/lib_dvad.a" />
 <Add option="../../../../../cpu/wl83/liba/libdns.a" />
 <Add option="../../../../../cpu/wl83/liba/libjlsp.a" />
-<Add option="../../../../../cpu/wl83/liba/libjlsp_kws_far_keyword.a" />
-<Add option="../../../../../cpu/wl83/liba/libjlsp_kws_common.a" />
+<Add option="../../../../../cpu/wl83/liba/libjlsp_traffic_recorder.a" />
 <Add option="../../../../../cpu/wl83/liba/lib_usb_syn.a" />
 <Add option="../../../../../cpu/wl83/liba/libaisp_single.a" />
 <Add option="../../../../../cpu/wl83/liba/libauth_aisp.a" />
@@ -204,7 +203,7 @@
 </Build>
 <Unit filename="../../../../../apps/common/asr/aisp/aisp.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../../apps/common/asr/jlkws/jlkws.c"><Option compilerVer="CC"/></Unit>
-<Unit filename="../../../../../apps/common/asr/jlkws/jlsp_far_keyword.h" />
+<Unit filename="../../../../../apps/common/asr/jlkws/jlsp_traffic_recorder_keyword.h" />
 <Unit filename="../../../../../apps/common/audio_music/audio_config.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../../apps/common/audio_music/audio_eff_default_parm.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../../apps/common/audio_music/effects_adj.c"><Option compilerVer="CC"/></Unit>
@@ -212,6 +211,7 @@
 <Unit filename="../../../../../apps/common/audio_music/music_decrypt.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../../apps/common/audio_music/pcm_play_api.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../../apps/common/audio_music/usb_audio_api.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="../../../../../apps/common/config/log_config/app_config.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../../apps/common/config/log_config/lib_driver_config.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../../apps/common/config/log_config/lib_power_config.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../../apps/common/config/log_config/lib_system_config.c"><Option compilerVer="CC"/></Unit>

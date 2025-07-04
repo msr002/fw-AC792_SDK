@@ -218,7 +218,6 @@ INCLUDES := \
 
 # 需要编译的 .c 文件
 c_SRC_FILES := \
-	../../../../apps/common/asr/jlkws/jlkws.c \
 	../../../../apps/common/audio_music/audio_config.c \
 	../../../../apps/common/audio_music/usb_audio_api.c \
 	../../../../apps/common/camera/GC1084_DVP/GC1084_DVP.c \
@@ -274,6 +273,7 @@ c_SRC_FILES := \
 	../../../../apps/common/dma2d_gpu/filter/dma2d_adapter.c \
 	../../../../apps/common/dma2d_gpu/filter/gpu_adapter.c \
 	../../../../apps/common/example/peripheral/lcd/lcd_driver_test.c \
+	../../../../apps/common/fat_nor/extflash.c \
 	../../../../apps/common/gsensor/da380.c \
 	../../../../apps/common/gsensor/gSensor_manage.c \
 	../../../../apps/common/gsensor/gma301.c \
@@ -1045,9 +1045,6 @@ LFLAGS := \
 	../../../../cpu/wl83/liba/libcrypto_mbedtls.a \
 	../../../../cpu/wl83/liba/lwip_2_2_0.a \
 	../../../../cpu/wl83/liba/wl_wifi.a \
-	../../../../cpu/wl83/liba/profile.a \
-	../../../../cpu/wl83/liba/libjlsp_kws_far_keyword.a \
-	../../../../cpu/wl83/liba/libkwscommon.a \
 	../../../../cpu/wl83/liba/wpasupplicant.a \
 	../../../../cpu/wl83/liba/stream_media_server.a \
 	../../../../cpu/wl83/liba/ftpserver_new.a \

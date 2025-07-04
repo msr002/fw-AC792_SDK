@@ -275,6 +275,7 @@ c_SRC_FILES := \
 	../../../../apps/common/dma2d_gpu/dma2d_common_api.c \
 	../../../../apps/common/dma2d_gpu/filter/gpu_adapter.c \
 	../../../../apps/common/example/peripheral/lcd/lcd_driver_test.c \
+	../../../../apps/common/fat_nor/extflash.c \
 	../../../../apps/common/gsensor/da380.c \
 	../../../../apps/common/gsensor/gSensor_manage.c \
 	../../../../apps/common/gsensor/gma301.c \
@@ -901,6 +902,8 @@ c_SRC_FILES := \
 	../../../../apps/wifi_bbm/wifi/video_playback.c \
 	../../../../apps/wifi_bbm/wifi/video_playback_udp.c \
 	../../../../apps/wifi_bbm/wifi/video_preview.c \
+	../../../../apps/wifi_bbm/wifi/wifi_ap_raw_disp_demo.c \
+	../../../../apps/wifi_bbm/wifi/wifi_ap_raw_init_demo.c \
 	../../../../apps/wifi_bbm/wifi/wifi_app_task.c \
 	../../../../cpu/wl83/adc_api.c \
 	../../../../cpu/wl83/debug.c \
@@ -997,8 +1000,6 @@ LFLAGS := \
 	../../../../cpu/wl83/liba/lwip_2_2_0.a \
 	../../../../cpu/wl83/liba/wl_wifi.a \
 	../../../../cpu/wl83/liba/profile.a \
-	../../../../cpu/wl83/liba/libjlsp_kws_far_keyword.a \
-	../../../../cpu/wl83/liba/libkwscommon.a \
 	../../../../cpu/wl83/liba/wpasupplicant.a \
 	../../../../cpu/wl83/liba/stream_media_server.a \
 	../../../../cpu/wl83/liba/ftpserver_new.a \

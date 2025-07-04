@@ -4,9 +4,8 @@
 #include "os/os_api.h"
 #include "event.h"
 #include "app_config.h"
-#include "jlsp_far_keyword.h"
+#include "jlsp_traffic_recorder_keyword.h"
 #include "event/key_event.h"
-/* #include "jlsp_kws_aec.h" */
 
 #if (defined CONFIG_ASR_ALGORITHM) && (CONFIG_ASR_ALGORITHM == JLKWS_ALGORITHM)
 
@@ -57,10 +56,20 @@ static struct {
 
 #define __this (&aisp_server)
 
-static const float confidence[8] = {
-    0.5, 0.5, 0.5, 0.5, //小杰小杰，小杰同学，播放音乐，暂停播放
-    0.5, 0.5, 0.5, 0.5, //增大音量，减小音量，上一首, 下一首
+static const float confidence[11] = {
+    0.25,   //小杰小杰  2
+    0.28,   //打开车内  3
+    0.3,    //打开后录  4 
+    0.3,    //打开录音  5
+    0.26,   //打开屏幕  6
+    0.28,   //打开前录  7
+    0.28,   //关闭录音  8
+    0.28,   //关闭屏幕  9
+    0.32,   //紧急录像  10
+    0.28,   //我要拍照  11
+    0.28,   //显示主界面 12
 };
+
 
 enum {
     PLAY_MUSIC_EVENT = 4,
@@ -80,9 +89,9 @@ static void aisp_task(void *priv)
     int model_size, private_heap_size, share_heap_size;
     void *kws = NULL;
     u8 *private_heap = NULL, *share_heap = NULL;
-    int online = 0;
+    int online = 1;
 
-    jl_far_kws_model_get_heap_size(model, &model_size, &private_heap_size, &share_heap_size);
+    jl_kws_model_get_heap_size(model, &model_size, &private_heap_size, &share_heap_size);
 
     private_heap = zalloc(private_heap_size);
     if (!private_heap) {
@@ -94,7 +103,7 @@ static void aisp_task(void *priv)
         goto __exit;
     }
 
-    kws = jl_far_kws_model_init(model, private_heap, private_heap_size, share_heap, share_heap_size, model_size, confidence, online);
+    kws = jl_kws_model_init(model, private_heap, private_heap_size, share_heap, share_heap_size, model_size, confidence, online);
     if (!kws) {
         goto __exit;
     }
@@ -130,7 +139,7 @@ static void aisp_task(void *priv)
         }
 
         time = timer_get_ms();
-        ret = jl_far_kws_model_process(kws, model, (u8 *)near_data_buf, sizeof(near_data_buf));
+        ret = jl_kws_model_process(kws, model, (u8 *)near_data_buf, sizeof(near_data_buf));
         if (ret > 1) {
             log_info("jlkws wakeup event : %d", ret);
 #if AEC_DATA_TO_SD
@@ -175,7 +184,7 @@ static void aisp_task(void *priv)
             key.type = KEY_EVENT_USER;
             key_event_notify(KEY_EVENT_FROM_USER, &key);
 
-            jl_far_kws_model_reset(kws);
+            jl_kws_model_reset(kws);
         }
 
         time_cnt += timer_get_ms() - time;
@@ -188,7 +197,7 @@ static void aisp_task(void *priv)
 __exit:
 
     if (kws) {
-        jl_far_kws_model_free(kws);
+        jl_kws_model_free(kws);
     }
     if (private_heap) {
         free(private_heap);

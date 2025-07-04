@@ -196,9 +196,6 @@
 <Add option="../../../../cpu/wl83/liba/libcrypto_mbedtls.a" />
 <Add option="../../../../cpu/wl83/liba/lwip_2_2_0.a" />
 <Add option="../../../../cpu/wl83/liba/wl_wifi.a" />
-<Add option="../../../../cpu/wl83/liba/profile.a" />
-<Add option="../../../../cpu/wl83/liba/libjlsp_kws_far_keyword.a" />
-<Add option="../../../../cpu/wl83/liba/libkwscommon.a" />
 <Add option="../../../../cpu/wl83/liba/wpasupplicant.a" />
 <Add option="../../../../cpu/wl83/liba/stream_media_server.a" />
 <Add option="../../../../cpu/wl83/liba/ftpserver_new.a" />
@@ -227,8 +224,6 @@
 </ExtraCommands>
 </Target>
 </Build>
-<Unit filename="../../../../apps/common/asr/jlkws/jlkws.c"><Option compilerVer="CC"/></Unit>
-<Unit filename="../../../../apps/common/asr/jlkws/jlsp_far_keyword.h" />
 <Unit filename="../../../../apps/common/audio_music/audio_config.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/common/audio_music/usb_audio_api.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/common/camera/GC1084_DVP/GC1084_DVP.c"><Option compilerVer="CC"/></Unit>
@@ -322,6 +317,7 @@
 <Unit filename="../../../../apps/common/dma2d_gpu/filter/gpu_adapter.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/common/dma2d_gpu/filter/gpu_adapter.h" />
 <Unit filename="../../../../apps/common/example/peripheral/lcd/lcd_driver_test.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="../../../../apps/common/fat_nor/extflash.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/common/gsensor/da380.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/common/gsensor/da380.h" />
 <Unit filename="../../../../apps/common/gsensor/gSensor_manage.c"><Option compilerVer="CC"/></Unit>

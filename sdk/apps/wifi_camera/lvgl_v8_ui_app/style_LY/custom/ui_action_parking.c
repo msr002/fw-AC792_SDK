@@ -42,15 +42,16 @@ void parking_page_show(int arg)
     }
     lv_ui_video_rec *video_rec_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_VIDEO_REC);
     if (!video_rec_scr) {
-        return;
-    }
-    if (video_rec_scr->video_rec_del != false) {
+        /*return;*/
+        /*}*/
+        /*if (video_rec_scr->video_rec_del != false) {*/
         gui_scr_t *screen = gui_scr_get(GUI_SCREEN_VIDEO_REC);
         if (screen == NULL) {
             screen = gui_scr_create(GUI_SCREEN_VIDEO_REC, "video_rec", guider_ui.video_rec, (gui_scr_setup_cb_t)setup_scr_video_rec, (gui_scr_unload_cb_t)unload_scr_video_rec);
         }
         ui_load_scr_anim(&guider_ui, screen, LV_SCR_LOAD_ANIM_NONE, 0, 0, true, true, false);
     }
+    video_rec_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_VIDEO_REC);
     if (video_rec_scr->video_rec_del == false && lv_obj_is_valid(video_rec_scr->video_rec)) {
         lv_obj_add_flag(video_rec_scr->video_rec, LV_OBJ_FLAG_HIDDEN);
     }

@@ -278,7 +278,7 @@ extern void wifi_set_tx_rate_control_tab(u32 tab);
 extern u32 wifi_get_channel(void);
 
 /**
- * @brief wifi_set_get_best_channel，用于混杂模式设置并获取WIFI最佳信道
+ * @brief wifi_set_get_best_channel，用于混杂模式获取WIFI最佳信道
  */
 extern u32 wifi_set_get_best_channel(void);
 

@@ -195,7 +195,7 @@ void  *H63_MIPI_get_ae_curve(u32 type, u32 fps, int *min_ev, int *max_ev)
             if (csi_tval_con) {
 
                 //csi_phy_con2->x0_hs_en = 1;
-                wrH63_MIPIReg(0x12, 0x00);
+                /* wrH63_MIPIReg(0x12, 0x00); */
             }
 
 

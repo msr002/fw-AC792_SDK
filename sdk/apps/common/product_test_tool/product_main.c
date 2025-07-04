@@ -241,7 +241,7 @@ static void msg_handle_task(void *priv)
     u16 len;
     u32 res_list;
     struct comm_msg *msg, *n;
-    struct product_rtc_time time = {0};
+    struct product_rtc_time time_ = {0};
     json_object *new_obj, *sub_obj, *opcode_obj, *rscorr_obj, *params_obj;
     u8 mac[PRODUCT_MAC_SIZE], uuid[PRODUCT_UUID_SIZE + 1] = {0}, sn[PRODUCT_SN_SIZE + 1] = {0}, macstr[3][32] = {0}, *str, opcode, rscorr, rscorr_str[4] = {0}, free_flag, license_flag = 0, dev_type, res_value;
     u8 ver_perfix[8] = {0};
@@ -265,7 +265,7 @@ static void msg_handle_task(void *priv)
 
             str = NULL;
             opcode = json_object_get_int(opcode_obj);
-
+            printf("----------------------------opcode :%d--------------------------", opcode);
             switch (opcode) {
             case OPC_GET_PROFILE:
 #ifdef PRODUCT_NET_CLIENT_ENABLE
@@ -277,7 +277,17 @@ static void msg_handle_task(void *priv)
                     strcpy(ver_perfix, "USB_1.0_");
                 }
 #endif
-                default_time_get(&time);
+                /* default_time_get(&time); */
+                time_t now;
+                struct tm *timeNow;
+                time(&now);
+                timeNow = localtime(&now);
+                time_.year  = timeNow->tm_year;
+                time_.month = timeNow->tm_mon;
+                time_.day   = timeNow->tm_mday;
+                time_.hour  = timeNow->tm_hour;
+                time_.min   = timeNow->tm_min;
+                time_.sec   = timeNow->tm_sec;
                 product_license_flag_wr(&license_flag, 0);
                 asprintf(&str, "{\"opcode\":\"%d\",\"rscorr\":\"%d\",\"params\":{\"ver_tool\":\"%s%s\",\"ver_chip\":\"%s\",\"ver_firmware\":\"%s\",\"license_flag\":\"%d\",\"UUID\":\"%s\",\"SN\":\"%s\",\"WIFI_MAC\":\"%s\",\"EDR_MAC\":\"%s\",\"BLE_MAC\":\"%s\",\"RTC_DTIME\":\"%d:%d:%d:%d:%d:%d\",%s}}", \
                          OPC_GET_PROFILE, ERR_NULL, ver_perfix, PD_TOOL_VERSION, PD_CHIP_VERSION, PD_SDK_VERSION, \
@@ -287,7 +297,7 @@ static void msg_handle_task(void *priv)
                          product_rf_mac_wr("WIFI", mac, 0) ? "NULL" : mac_bin_to_str(mac, macstr[0]), \
                          product_rf_mac_wr("EDR", mac, 0) ? "NULL" : mac_bin_to_str(mac, macstr[1]), \
                          product_rf_mac_wr("BLE", mac, 0) ? "NULL" : mac_bin_to_str(mac, macstr[2]), \
-                         time.year, time.month, time.day, time.hour, time.min, time.sec, \
+                         time_.year, time_.month, time_.day, time_.hour, time_.min, time_.sec, \
                          DEVICES_LIST);
                 break;
 
@@ -400,19 +410,19 @@ static void msg_handle_task(void *priv)
                 break;
 
             case OPC_RTC_DEF_TIME_WRITE:
-                time.year  = json_object_get_int(json_object_object_get(params_obj, "year"));
-                time.month = json_object_get_int(json_object_object_get(params_obj, "month"));
-                time.day   = json_object_get_int(json_object_object_get(params_obj, "day"));
-                time.hour  = json_object_get_int(json_object_object_get(params_obj, "hour"));
-                time.min   = json_object_get_int(json_object_object_get(params_obj, "min"));
-                time.sec   = json_object_get_int(json_object_object_get(params_obj, "sec"));
+                time_.year  = json_object_get_int(json_object_object_get(params_obj, "year"));
+                time_.month = json_object_get_int(json_object_object_get(params_obj, "month"));
+                time_.day   = json_object_get_int(json_object_object_get(params_obj, "day"));
+                time_.hour  = json_object_get_int(json_object_object_get(params_obj, "hour"));
+                time_.min   = json_object_get_int(json_object_object_get(params_obj, "min"));
+                time_.sec   = json_object_get_int(json_object_object_get(params_obj, "sec"));
                 rscorr = product_rtc_default_wr(&time, 1);
                 break;
 
             case OPC_RTC_DEF_TIME_READ:
                 rscorr = product_rtc_default_wr(&time, 0);
                 asprintf(&str, "{\"opcode\":\"%d\",\"rscorr\":\"%d\",\"params\":{\"year\":\"%d\",\"month\":\"%d\",\"day\":\"%d\",\"hour\":\"%d\",\"min\":\"%d\",\"sec\":\"%d\"}}", \
-                         opcode, rscorr, time.year, time.month, time.day, time.hour, time.min, time.sec);
+                         opcode, rscorr, time_.year, time_.month, time_.day, time_.hour, time_.min, time_.sec);
                 break;
 
             case OPC_ERASE_SCREENS:
@@ -477,7 +487,7 @@ _exit_list_:
 
 static void data_handle_task(void *priv)
 {
-    s32 len;
+    u32 len;
     u16 *crc_value;
     u8 rscorr, *data, *read_addr, *l_data, l_idx;
     u32 crc_len, recv_size, total_size, l_len;
@@ -493,8 +503,9 @@ static void data_handle_task(void *priv)
             continue;
         }
 
-        len = comm_ops()->read(__THIS->recv_buf, MAXP_SIZE_CDC_BULKOUT);
+        len = comm_ops()->read(__THIS->recv_buf, MAXP_SIZE_CDC_BULKOUT_HS);
         if (len < sizeof(struct comm_head)) {
+            printf("len :%d, sizeof(struct comm_head):%d", len, sizeof(struct comm_head));
             continue;
         }
 
@@ -506,7 +517,7 @@ static void data_handle_task(void *priv)
         read_addr  = __THIS->recv_buf + len;
         total_size = sizeof(struct comm_head) + head->len + sizeof(u16);
         while (recv_size < total_size) {
-            if ((len = comm_ops()->read(read_addr, MAXP_SIZE_CDC_BULKOUT)) <= 0) {
+            if ((len = comm_ops()->read(read_addr, MAXP_SIZE_CDC_BULKOUT_HS)) <= 0) {
                 break;
             }
             recv_size += len;
@@ -525,6 +536,7 @@ static void data_handle_task(void *priv)
             continue;
         }
 
+        printf("head->type:%d", head->type);
         switch (head->type) {
         case DATA_TYPE_OPCODE:
             msg = zalloc(sizeof(struct comm_msg));

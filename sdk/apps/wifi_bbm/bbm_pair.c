@@ -169,6 +169,8 @@ static int bbm_pairing_task(void *priv)
         wifi_raw_get_mac(src_mac);
         config_send_pkg_head(src_mac, set_bbm_tx_mac);
 
+        os_time_dly(30);
+
         //发送响应
         sprintf(tem_buf, PAIRING_ACK);
         send_len = package_assembly(tem_buf, strlen(tem_buf), send_buf, PACKAGE_MAX_SIZE);

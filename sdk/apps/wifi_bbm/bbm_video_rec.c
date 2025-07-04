@@ -12,6 +12,7 @@
 #include "stream_core.h"
 #include "sock_api/sock_api.h"
 #include "ctp_server.h"
+#include "net_stream_info.h"
 
 #define VIDEO_OSD_BUF_SIZE      64                  //水印缓存
 #define VIDEO_RT_BUF_SIZE       200 * 1024          //实时流缓存
@@ -80,7 +81,7 @@ static int vfs_audio_dec_fread(void *file, void *data, u32 len)
         }
     } while (rlen);
 
-    return len;
+    return rlen ? rlen : -2;
 }
 
 static int vfs_audio_dec_fclose(void *file)
@@ -135,7 +136,7 @@ static int audio_dec_init(struct audio_recv_hdl *hdl)
     req.dec.output_buf_len  = 4096;
     //使用双通道,避免叠音卡顿
     req.dec.channel         = 2;
-    req.dec.sample_rate     = 8000;
+    req.dec.sample_rate     = AUDIO_RX_ENC_SAMPLE_RATE;
     req.dec.priority        = 1;
     req.dec.vfs_ops         = &vfs_audio_dec_ops;
     req.dec.file            = hdl;
@@ -207,6 +208,7 @@ static int audio_dec_write_cbuf(cbuffer_t *cbuf, u8 *buf, u32 size)
     cur_size =  cbuf_get_data_size(cbuf);
 
     if (cur_size + (size * 2) >= AUDIO_DEC_BUF_MAX_LEN) {
+        printf("audio dec clear cbuf \n");
         cbuf_clear(cbuf);
     }
 
@@ -223,14 +225,23 @@ static int audio_dec_write_cbuf(cbuffer_t *cbuf, u8 *buf, u32 size)
     return 0;
 }
 
+static int recv_sock_cb_func(enum sock_api_msg_type type, void *priv)
+{
+    struct audio_recv_hdl *hdl = priv;
+    if (hdl->task_exit) {
+        printf("cb func task exit\n");
+        return -1;
+    }
+
+    return 0;
+}
+
 static void rt_audio_recv_task(void *priv)
 {
     int ret;
     int recv_len = 0;
 
     struct audio_recv_hdl *hdl = priv;
-
-    sock_set_recv_timeout(hdl->recv_sockfd, 100);
 
     while (1) {
         if (hdl->task_exit) {
@@ -240,7 +251,7 @@ static void rt_audio_recv_task(void *priv)
 
         recv_len = sock_recvfrom(hdl->recv_sockfd, hdl->recv_buf, hdl->recv_buf_len, 0, NULL, NULL);
         if (recv_len <= 0) {
-            putchar('e');
+            printf("rt_audio_recv err\n");
             continue;
         }
 
@@ -262,7 +273,7 @@ static int rt_audio_recv_init(struct audio_recv_hdl *hdl)
         return -1;
     }
 
-    hdl->recv_sockfd = sock_reg(AF_INET, SOCK_DGRAM, 0, NULL, NULL);
+    hdl->recv_sockfd = sock_reg(AF_INET, SOCK_DGRAM, 0, recv_sock_cb_func, hdl);
     if (hdl->recv_sockfd == NULL) {
         printf("sock_reg err\n");
         return -1;
@@ -648,11 +659,16 @@ static int video_start(struct video_rec_config *config)
 
     //实时流
     if (config->net_path) {
+        struct net_stream_info s_info = {0};
+        s_info.sample_rate = req.rec.audio.sample_rate;
+        s_info.fps = config->fps;
+        s_info.abr_kbps = config->abr_kbps;
+
         strcpy(req.rec.net_par.netpath, config->net_path);
         printf("\n @@@@@@ path = %s\n", req.rec.net_par.netpath);
         req.rec.target = VIDEO_TO_OUT;
         req.rec.out.path = req.rec.net_par.netpath;
-        req.rec.out.arg  = NULL ;
+        req.rec.out.arg  = &s_info;
         req.rec.out.open = stream_open;
         req.rec.out.send = stream_write;
         req.rec.out.close = stream_close;

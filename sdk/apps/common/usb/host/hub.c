@@ -29,6 +29,8 @@
 
 #if TCFG_HOST_HUB_ENABLE
 
+static u8 hub_dma_buf[64] SEC(.usb_fifo) __attribute__((aligned(64)));
+
 #include "usb/usb_common_def.h"
 
 static u32 _get_hub_descriptor(struct usb_host_device *host_dev, u8 *pBuf)
@@ -299,12 +301,12 @@ u32 usb_hub_process(u32 usb_id)
     u32 target_ep = (usb_if->dev.hub->ep_pair[0]) & 0x7f;
     u32 host_ep = usb_get_ep_num(usb_id, USB_DIR_IN, USB_ENDPOINT_XFER_INT);
     usb_if->dev.hub->ep_pair[host_ep] = target_ep;
-    u8 *buffer = (u8 *) & (usb_if->dev.hub->buf);
     usb_h_set_ep_isr(host_dev, host_ep | USB_DIR_IN, hub_isr, (void *)host_dev);
     /* usb_write_rxfuncaddr(usb_id, host_ep, host_dev->private_data.devnum); */
+    u8 *buffer = hub_dma_buf;
     usb_hub_rxreg_set(usb_id, host_ep, target_ep, &(host_dev->private_data.hub_info));
     usb_h_ep_config(usb_id,  host_ep | USB_DIR_IN, USB_ENDPOINT_XFER_INT, 1,
-                    4, buffer, 64); //interval 间隔有疑问,默认先给 4, HS=1ms, FS=4ms
+                    usb_if->dev.hub->interval, buffer, 64); //interval 间隔有疑问,默认先给 4, HS=1ms, FS=4ms
     usb_h_ep_read_async(usb_id, host_ep, target_ep, NULL, 0, USB_ENDPOINT_XFER_INT, 1);
     return 0;
 }

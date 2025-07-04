@@ -13,7 +13,7 @@ void filt_not_my_bssid(void)
 //example
 void filt_pack_not_need(void)
 {
-    wf_rx_filt_set(DROP_CRC_ERR | DROP_PHY_ERR | DROP_DUPL  \
+    wf_rx_filt_set(DROP_CRC_ERR | DROP_PHY_ERR \
                    | DROP_CFACK | DROP_CFEND | DROP_CTS | DROP_PSPOLL | DROP_RTS | DROP_BA | DROP_BAR | DROP_CTRL_RSV);
 }
 

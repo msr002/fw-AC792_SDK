@@ -660,18 +660,18 @@ static int camera_take_photo(void)
     req.icap.image_state = 0;
 
     if (__this->camera_id == 0) {
-        req.icap.path = CAMERA0_CAP_PATH"img_****.jpg";
+        req.icap.path = CAMERA0_CAP_PATH"IMG_****.JPG";
     } else if (__this->camera_id == 1) {
-        req.icap.path = CAMERA1_CAP_PATH"img_****.jpg";
+        req.icap.path = CAMERA1_CAP_PATH"IMG_****.JPG";
     } else if (__this->camera_id == 4) {
-        req.icap.path = CAMERA4_CAP_PATH"img_****.jpg";
+        req.icap.path = CAMERA4_CAP_PATH"IMG_****.JPG";
     } else if (__this->camera_id == 5) {
-        req.icap.path = CAMERA5_CAP_PATH"img_****.jpg";
+        req.icap.path = CAMERA5_CAP_PATH"IMG_****.JPG";
     } else {
 #if THREE_WAY_ENABLE
-        req.icap.path = CAMERA2_CAP_PATH"img_****.jpg";
+        req.icap.path = CAMERA2_CAP_PATH"IMG_****.JPG";
 #else
-        req.icap.path = CAMERA1_CAP_PATH"img_****.jpg";
+        req.icap.path = CAMERA1_CAP_PATH"IMG_****.JPG";
 #endif
     }
 

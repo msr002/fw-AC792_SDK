@@ -77,6 +77,8 @@ const char wifi_ap_scan_support = 0; //ap扫描开关，0为关闭，1为开启
 
 const char wifi_ap_miss_owndevice_channel = 0; //自己设备信道错开功能，0为关闭，1为开启
 
+const char wifi_ap_rate_adapt_strategy = 0; //ap模式下的wifi速率控制策略，0为使用默认策略，1为用于图传的策略，2为用于iperf的策略
+
 #if defined CONFIG_NO_SDRAM_ENABLE
 const u16 MAX_PACKETS_IN_QUEUE = 16; //配置WiFi驱动最大发送数据包队列
 const u16 MAX_PACKETS_IN_MCAST_PS_QUEUE	= 4;	//配置WiFi驱动最大发送数据包队列 //8	16 modify by lyx 32
@@ -110,7 +112,7 @@ const u8 WIFI_TX_FULL_WAIT_MODE = 0; // 可以设置为0,1,2, 数值越大一定
 const u8 WIFI_TX_FULL_WAIT_MODE = 1; // 可以设置为0,1,2, 数值越大一定程度上会提高wifi的吞吐率，但同时会加大wifi线程占据cpu的比重
 #endif
 
-const u8 WIFI_COLD_START_FAST_CONNECTION = 1; //启用WIFI冷启动快连, 0为关闭，1为开启
+const u8 WIFI_COLD_START_FAST_CONNECTION = 0; //启用WIFI冷启动快连, 0为关闭，1为开启
 
 #if defined CONFIG_NO_SDRAM_ENABLE
 const u8 MAX_LEN_OF_BSS_TABLE = 2; //BSS table 个数设置用于存放扫描结果，最少为1个，不能为0，个数越多占用内存越大

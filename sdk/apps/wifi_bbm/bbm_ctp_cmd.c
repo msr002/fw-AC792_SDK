@@ -735,27 +735,6 @@ static int cmd_put_time_axis_play_ctrl(void *priv, char *content)
 
 }
 
-void ctp_cmd_socket_unregister(void *priv)
-{
-    if (!priv) {
-        priv = info.cli;
-        if (!priv) {
-            return;
-        }
-    }
-    struct sockaddr_in *addr;
-    addr = (struct sockaddr_in *)ctp_srv_get_cli_addr(priv);
-    if (!addr) {
-        addr = (struct sockaddr_in *)cdp_srv_get_cli_addr(priv);
-    }
-    if (addr) {
-        extern int TCP_client_socket_quit(int addr);
-        extern int UDP_client_socket_unreg(int addr);
-        TCP_client_socket_quit(addr->sin_addr.s_addr);
-        UDP_client_socket_unreg(addr->sin_addr.s_addr);
-    }
-}
-
 static int cmd_put_ctp_cli_connected(void *priv, char *content)
 {
     return 0;
@@ -772,8 +751,6 @@ static int cmd_put_ctp_cli_disconnect(void *priv, char *content)
     }
     info.dest_addr = NULL;
     info.cli = NULL;
-
-    ctp_cmd_socket_unregister(priv);
 
     printf("|CLI_DISCONNECT 0x%x, 0x%x\n", (u32)priv, (u32)dest_addr->sin_addr.s_addr);
 

@@ -4,4 +4,4 @@
 
 include_lib_net_version:
 
-.asciz "INCLUDE_NET-$562df71"
+.asciz "INCLUDE_NET-$e6cdf66"

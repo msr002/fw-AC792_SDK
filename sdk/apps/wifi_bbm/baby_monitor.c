@@ -397,6 +397,7 @@ static int bbm_start_camera_by_ch(int ch, struct video_window *win)
     int ret;
 
     //可根据分辨率、码率调整
+    wifi_raw_set_txrate(WIFI_TXRATE_11M);
     if (win != &disp_win_1[0]) {
         bbm_ctp_send_modify_txrate(__this->bbm_client_hdl[ch]->ctp_cli_hdl, WIFI_TXRATE_11M);
     } else {

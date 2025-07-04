@@ -292,14 +292,6 @@ void gui_scr_action_cb(int page_id, int action)
     gui_scr_action_cb_ext(page_id, action);
 }
 
-_WEAK_ int gui_msg_action_change_ext(int32_t msg_id, int access, void *data)
-{
-    return 0;
-}
-_WEAK_ void gui_msg_action_change_guider(int32_t msg_id, int access, void *data)
-{
-}
-
 typedef enum {
     VALUE_INT = 1,
     VALUE_CHAR,
@@ -313,6 +305,15 @@ typedef enum {
     VALUE_TIME,
     VALUE_ARRAY,
 } gui_msg_data_type_t;
+
+_WEAK_ int gui_msg_action_change_ext(int32_t msg_id, int access, void *data, gui_msg_data_type_t data_type)
+{
+    return 0;
+}
+_WEAK_ void gui_msg_action_change_guider(int32_t msg_id, int access, void *data)
+{
+}
+
 
 typedef union {
     int32_t value_int;
@@ -439,7 +440,7 @@ void gui_msg_action_change(int32_t msg_id, int access, void *data, gui_msg_data_
         }
     }
 
-    gui_msg_action_change_ext(msg_id, access, data);
+    gui_msg_action_change_ext(msg_id, access, data, data_type);
 
     if (!found) {
         gui_msg_action_change_guider(msg_id, access, data);

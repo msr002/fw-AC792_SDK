@@ -1190,6 +1190,9 @@ u32 usb_host_unmount(const usb_dev id, u32 port)
         host_dev = &host_devices[usb_id];
     } else {
         host_dev = host_devices[usb_id].interface_info[0]->dev.hub->child_dev[port];
+        if (!host_dev) {
+            return 0;
+        }
     }
 
     /* struct device_event event = {0}; */

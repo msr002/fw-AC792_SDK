@@ -293,7 +293,7 @@ VM_LEN=32K;
 #if defined CONFIG_DOUBLE_BANK_ENABLE || TCFG_RF_FCC_TEST_ENABLE
 VM_OPT=0;
 #else
-VM_OPT=1;//单备份升级VM在升级时候默认VM不需要擦除,选择擦除会在ota_loader第二阶段擦除比较长，而且可能会造成VM丢失
+VM_OPT=0;//单备份升级VM在升级时候默认VM不需要擦除,选择擦除会在ota_loader第二阶段擦除比较长，而且可能会造成VM丢失
 #endif
 
 BTIF_ADR=AUTO; [设置资源]

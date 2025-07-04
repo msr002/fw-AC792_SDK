@@ -5,7 +5,7 @@
 #include "system/spinlock.h"
 #include "asm/efuse.h"
 #include "asm/gpio.h"
-#include "asm/power/p33/p33_api.h"
+#include "asm/power_interface.h"
 #include "os/os_api.h"
 
 #define LOG_TAG_CONST       GPADC
@@ -495,3 +495,27 @@ u32 adc_get_voltage_blocking(u32 ch)
 
     return adc_value_to_voltage(vbg_value, ch_adc_value);
 }
+
+static u8 request_gpadc_enter_low_power(u32 timeout)
+{
+    if (!(JL_ADC->CON & BIT(7))) {
+        while (!(JL_ADC->CON & BIT(30))) {} //WAIT PND
+        while (!(JL_ADC->CON & BIT(7))) {}  //WAIT IDLE
+    }
+
+    return 0;
+}
+
+static u8 request_gpadc_exit_low_power(u32 timeout)
+{
+    //p33_fast_access(P3_PMU_ADC0, BIT(5), 1);
+    //p33_fast_access(P3_PMU_ADC0, BIT(0), 1);
+
+    return 0;
+}
+
+REGISTER_LP_REQUEST(gpadc_lp_request) = {
+    .name           = "gpadc",
+    .request_enter  = request_gpadc_enter_low_power,
+    .request_exit   = request_gpadc_exit_low_power,
+};

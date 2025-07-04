@@ -36,7 +36,7 @@
 #define WIFI_PWR_MAX            6
 
 const u8 bbm_tx_pair_mac[6] = {0x88, 0x88, 0x88, 0x88, 0x88, 0x88};
-const u8 bbm_rx_src_mac[6] = {0x15, 0x81, 0x54, 0x33, 0x13, 0x87};
+const u8 bbm_rx_src_head[10] = {0x15, 0x81, 0x54, 0x33, 0x13, 0x87, 0x99, 0x55, 0x11, 0x82};
 const u8 bbm_bssid_mac[6] = {0x88, 0x88, 0x88, 0x99, 0x88, 0x77};
 const int bbm_tx_pair_wifi_channel = 1;
 static int cur_pwr;
@@ -56,6 +56,7 @@ static int net_state_timer;
 
 static int wifi_event_callback(void *network_ctx, enum WIFI_EVENT event);
 
+extern void wifi_raw_set_user_head(u8 *data, int len);
 #define DEST_IP_ADDR "192.168.1.1"
 
 static struct server *ctp = NULL;
@@ -154,6 +155,13 @@ static void wifi_raw_state_timer_func(void *p)
     //信号强度
     char rssi = wifi_raw_rssi_get();
     printf("rssi:%d pwr:%d \n", rssi, cur_pwr);
+
+    //debug
+    extern void wifi_get_tx_stats(u32 * TxRetransmit, u32 * TxSuccess, u32 * TxFailCount);
+    u32 retry, succ, fail;
+    wifi_get_tx_stats(&retry, &succ, &fail);
+    printf("retry:%d succ:%d fail:%d", retry, succ, fail);
+
 }
 
 static void wifi_state_timer_func(void *p)
@@ -378,6 +386,13 @@ static void multicast_recv_task(void)
             continue;
         }
 
+        //关闭实时流发送
+        struct intent it;
+        init_intent(&it);
+        it.name = "video_rec";
+        it.action = ACTION_VIDEO_STOP_ALL;
+        start_app(&it);
+
         //解析json
         deal_pair_request_package(payload_buf, &recv_pair_info);
 
@@ -393,9 +408,13 @@ static void multicast_recv_task(void)
         send_len = package_assembly(tem_buf, strlen(tem_buf), send_buf, PACKAGE_MAX_SIZE);
 
         //接收ack包
-        int timeout_cnt = 10;
+        int timeout_cnt = 20;
         int i;
         for (i = 0; i < timeout_cnt; i++) {
+
+            if (multicast_recv_task_exit) {
+                break;
+            }
 
             send_len = sock_sendto(multi_sock, send_buf, send_len, 0, &dstaddr, sizeof(dstaddr));
             if (send_len <= 0) {
@@ -403,6 +422,8 @@ static void multicast_recv_task(void)
                 continue;
             }
             printf("multi send ack \n");
+
+            os_time_dly(10);
 
             recv_len = sock_recvfrom(multi_sock, recv_buf, PACKAGE_MAX_SIZE, 0, &dstaddr, &addrlen);
             if (recv_len <= 0) {
@@ -482,14 +503,10 @@ void config_send_pkg_head(u8 *src_mac, u8 *dest_mac)
     //设置发送包的802.11头部信息, 设置源mac， 目标mac， seq号等信息
     phead_802_11 pHdr = wifi_get_wifi_send_pkg_ptr() + HEAD_802_11_OFFSET;
     memcpy(pHdr->addr1, dest_mac, 6);
-#ifdef CONFIG_BBM_RX
-    //对于RX设备,此MAC地址固定.用于鉴别是否有其他RX设备在同一信道
-    memcpy(pHdr->addr2, bbm_rx_src_mac, 6);
-#else
     memcpy(pHdr->addr2, src_mac, 6);
-#endif
     memcpy(pHdr->addr3, bbm_bssid_mac, 6);
     pHdr->frag = 8;
+    pHdr->sequence = 0;
 }
 
 #ifdef CONFIG_BBM_RX
@@ -498,10 +515,15 @@ void config_send_pkg_head(u8 *src_mac, u8 *dest_mac)
 static struct rx_device_check rx_dev;
 
 //lwip接收回调调用
-void check_wifi_mac(const u8 *mac)
+void wifi_raw_check_user_head(u8 *user_head, int len)
 {
+    if (len != sizeof(bbm_rx_src_head)) {
+        //len err;
+        return;
+    }
+
     //检查这些包是否有BBM_RX设备
-    if (!memcmp(mac, bbm_rx_src_mac, sizeof(bbm_rx_src_mac))) {
+    if (!memcmp(user_head, bbm_rx_src_head, sizeof(bbm_rx_src_head))) {
         rx_dev.online = 1;
         rx_dev.last_seen = jiffies;
     }
@@ -836,12 +858,25 @@ void wifi_raw_init(void)
     wifi_set_channel(wifi_channel);
 
     //重发时不降速
-    wf_tx_speed_maintain();
+    /* wf_tx_speed_maintain(); */
+
+#ifdef CONFIG_BBM_RX
+    //设置自定义数据头部，用于检查收包是否有BBM_RX设备
+    wifi_raw_set_user_head(bbm_rx_src_head, sizeof(bbm_rx_src_head));
+
+    //配置底层重传次数
+    wifi_set_short_retry(5);
+    wifi_set_long_retry(3);
+#endif
 
 #ifdef CONFIG_BBM_TX
     //raw不需要退避
     //会干扰到其他设备,暂不开启
     /* wifi_edca_parm_set(0, 255, 0, 0, 0); */
+
+    //配置底层重传次数
+    wifi_set_short_retry(1);
+    wifi_set_long_retry(1);
 #endif
 
     //过滤掉一些不用的包

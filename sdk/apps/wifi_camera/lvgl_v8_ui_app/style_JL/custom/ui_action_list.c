@@ -1206,12 +1206,13 @@ void video_file_screen_load(void)
 
 void video_file_screen_unload(void)
 {
-    lv_ui_video_file *ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_VIDEO_FILE);
-    if (!ui_scr) {
-        return;
-    }
     if (deleting_flag) {
         to_play_video_page = cur_page;
+        lv_ui_video_file *ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_VIDEO_FILE);
+        if (!ui_scr) {
+            printf("ui_get_scr_ptr err \n");
+            return;
+        }
         lv_obj_t *contain = lv_obj_get_child(ui_scr->video_file, 3);
         cur_scroll_val = lv_obj_get_scroll_y(contain);
 
