@@ -45,12 +45,6 @@ struct virtual_bass_classic_func {
     int(*run)(void *WorkBuf, int *tmpbuf, void *in, void *out, int per_channel_npoint);
 };
 
-struct hard_eq_func {
-    void *(*open)(void *coeff, unsigned char nsection, unsigned int sample_rate, unsigned int ch_num, unsigned int in_mode, unsigned int out_mode);
-    void(*run)(void *hdl, void *indata, void *outdata, unsigned int indata_len);
-    void(*update)(void *hdl, void *coeff);
-    void(*close)(void *hdl);
-};
 
 struct crossover_func {
     int(*need_buf)(CrossOverParam *param);

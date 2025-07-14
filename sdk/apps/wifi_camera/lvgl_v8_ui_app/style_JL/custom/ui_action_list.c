@@ -89,8 +89,7 @@ static OS_SEM sem;
 #define CHECK_BOX_H CHECK_BOX_H_BASE
 
 #define ONE_PAGE_MAX_NUM 60
-#define SCREEN_MAX_DISP_NUM 6
-#define IMG_BUF_NUM 9
+#define IMG_BUF_MAX_NUM 9
 
 #if THREE_WAY_ENABLE
 
@@ -147,8 +146,8 @@ static void create_page(int page);
 static void update_img_text(int start_index, int end_index, u8 dir);
 static struct vfscan *fs_file = NULL;
 static int jpeg_decode_scale(const char *path, u8 *img_buf, u16 dst_w, u16 dst_h);
-static lv_img_dsc_t image_dsc_list[IMG_BUF_NUM];
-static u8 *img_buf_list[IMG_BUF_NUM];
+static lv_img_dsc_t image_dsc_list[IMG_BUF_MAX_NUM];
+static u8 *img_buf_list[IMG_BUF_MAX_NUM];
 
 static u32 cur_page = 1;
 static u32 total_file_num = 0;
@@ -161,10 +160,14 @@ static u32 last_line;
 static char *dir_path;
 u8 deleting_flag = 0;
 
+static int line_obj_num = 0;
+static int img_buf_num = 0;
+static int max_show_num = 0;
+
 static void send_msg2file_num(void)
 {
     char *num = lvgl_module_msg_get_ptr(GUI_MODEL_MSG_ID_FILE_NUM, 24);
-    int cur_file = line * 3 + (cur_page - 1) * ONE_PAGE_MAX_NUM + SCREEN_MAX_DISP_NUM;
+    int cur_file = line * line_obj_num + (cur_page - 1) * ONE_PAGE_MAX_NUM + max_show_num;
     cur_file = cur_file < total_file_num ? cur_file : total_file_num;
     sprintf(num, "%d\n/\n%d", cur_file, total_file_num);
     lvgl_module_msg_send_ptr(num, 0);
@@ -576,9 +579,9 @@ static void next_page(void)
     lv_obj_clean(contain);
     create_page(cur_page);
 
-    start = (line * 3) + (cur_page - 1) * ONE_PAGE_MAX_NUM;
+    start = (line * line_obj_num) + (cur_page - 1) * ONE_PAGE_MAX_NUM;
     remain = create_num + (cur_page - 1) * ONE_PAGE_MAX_NUM - start;
-    remain = remain > 9 ? 9 : remain;
+    remain = remain > img_buf_num ? img_buf_num : remain;
     end = start + remain;
     update_img_text(start, end, 0);
     dec_list_cur_page(cur_page); //保存当前页数在结构体
@@ -603,16 +606,16 @@ static void prev_page(void)
     lv_obj_clean(contain);
     create_page(cur_page);
     //上一页的底部
-    max_line = ceil((float)create_num / 3) - 3;
+    max_line = ceil((float)create_num / line_obj_num) - line_obj_num;
     line = max_line;
     last_line = line;
     line_h = IMG_CONT_H + IMG_CONT_ROW_SPACE;
-    max_scroll_val = (line_h * ceil((float)create_num / 3) - line_h * 2);
+    max_scroll_val = (line_h * ceil((float)create_num / line_obj_num) - line_h * 2);
     lv_obj_scroll_to_y(contain, max_scroll_val, LV_ANIM_OFF);
 
-    start = (line * 3) + (cur_page - 1) * ONE_PAGE_MAX_NUM;
+    start = (line * line_obj_num) + (cur_page - 1) * ONE_PAGE_MAX_NUM;
     remain = create_num + (cur_page - 1) * ONE_PAGE_MAX_NUM - start;
-    remain = remain > 9 ? 9 : remain;
+    remain = remain > img_buf_num ? img_buf_num : remain;
     end = start + remain;
     update_img_text(start, end, 0);
     dec_list_cur_page(cur_page); //保存当前页数在结构体
@@ -778,27 +781,27 @@ static void update_img_text(int start_index, int end_index, u8 dir)
 
         last_img_index = img_index;
         if (dir == 0) {
-            img_index = (img_index + 1) % IMG_BUF_NUM;
+            img_index = (img_index + 1) % img_buf_num;
         } else {
-            img_index = (img_index - 1 + IMG_BUF_NUM) % IMG_BUF_NUM;
+            img_index = (img_index - 1 + img_buf_num) % img_buf_num;
         }
 
     }
 
     //确保每次操作buf数量正确
-    while (end_index % 3) {
+    while (end_index % line_obj_num) {
         last_img_index = img_index;
         if (dir == 0) {
-            img_index = (img_index + 1) % IMG_BUF_NUM;
+            img_index = (img_index + 1) % img_buf_num;
         } else {
-            img_index = (img_index - 1 + IMG_BUF_NUM) % IMG_BUF_NUM;
+            img_index = (img_index - 1 + img_buf_num) % img_buf_num;
         }
         end_index++;
     }
 
     //清空不显示的容器
     if (dir == 0) {
-        for (int i = last_line * 3; i < line * 3; i++) {
+        for (int i = last_line * line_obj_num; i < line * line_obj_num; i++) {
             lv_obj_t *clean_cont = lv_obj_get_child(contain, i);
             lv_obj_t *child = lv_obj_get_child(clean_cont, 1);
             while (child) {
@@ -807,7 +810,7 @@ static void update_img_text(int start_index, int end_index, u8 dir)
             }
         }
     } else {
-        for (int i = line * 3 + SCREEN_MAX_DISP_NUM + 3; i < last_line * 3 + SCREEN_MAX_DISP_NUM + 3; i++) {
+        for (int i = line * line_obj_num + max_show_num + line_obj_num; i < last_line * line_obj_num + max_show_num + line_obj_num; i++) {
             if (i > create_num - 1) {
                 continue;
             }
@@ -837,13 +840,13 @@ void scroll_update_position(int scroll_val)
         return;
     }
 
-    if (scroll_val > (ONE_PAGE_MAX_NUM - SCREEN_MAX_DISP_NUM) / 3 * (IMG_CONT_H + IMG_CONT_ROW_SPACE) +  EXTRA_SPACE) {
+    if (scroll_val > (ONE_PAGE_MAX_NUM - max_show_num) / line_obj_num * (IMG_CONT_H + IMG_CONT_ROW_SPACE) +  EXTRA_SPACE) {
         next_page();
         return;
     }
 
     line = scroll_val / (IMG_CONT_H + IMG_CONT_ROW_SPACE);
-    max_line = ceil((float)create_num / 3) - 3;
+    max_line = ceil((float)create_num / line_obj_num) - (img_buf_num / line_obj_num);
     if (line > max_line) {
         line  = max_line;
     }
@@ -852,14 +855,14 @@ void scroll_update_position(int scroll_val)
     if (line != last_line) {
         dir = line > last_line ? 0 : 1;
         if (dir == 0) {
-            start = ((last_line + 1) * 3 + SCREEN_MAX_DISP_NUM) + (cur_page - 1) * ONE_PAGE_MAX_NUM;
+            start = ((last_line + 1) * line_obj_num + max_show_num) + (cur_page - 1) * ONE_PAGE_MAX_NUM;
             remain = create_num + (cur_page - 1) * ONE_PAGE_MAX_NUM - start;
-            remain = remain > (line - last_line) * 3 ? (line - last_line) * 3 : remain;
+            remain = remain > (line - last_line) * line_obj_num ? (line - last_line) * line_obj_num : remain;
             end = start + remain;
             update_img_text(start, end, dir);
         } else {
-            start = (line * 3) + (cur_page - 1) * ONE_PAGE_MAX_NUM;
-            end = start + (last_line - line) * 3;
+            start = (line * line_obj_num) + (cur_page - 1) * ONE_PAGE_MAX_NUM;
+            end = start + (last_line - line) * line_obj_num;
             update_img_text(start, end, dir);
         }
     }
@@ -905,7 +908,7 @@ void file_list_down(void)
     int line_h = IMG_CONT_H + IMG_CONT_ROW_SPACE;
     int set_val = cur_scroll_val + line_h;
 
-    int max_scroll_val = (line_h * ceil((float)create_num / 3) - line_h * 2);
+    int max_scroll_val = (line_h * ceil((float)create_num / line_obj_num) - line_h * 2);
     if (set_val > max_scroll_val) {
         set_val = max_scroll_val;
         lv_obj_scroll_to_y(contain, set_val, LV_ANIM_OFF);
@@ -1138,6 +1141,21 @@ void video_file_screen_load(void)
     lv_obj_set_style_base_dir(contain, LV_BASE_DIR_LTR, 0);   // 设置基础方向为从左到右
     lv_obj_set_flex_flow(contain, LV_FLEX_FLOW_ROW_WRAP);     // 设置Flex流动方向为行包裹
 
+    lv_coord_t container_width = lv_obj_get_width(contain);     // 父控件宽度
+    lv_coord_t container_height = lv_obj_get_height(contain);
+
+    lv_coord_t column_space = IMG_CONT_COL_SPACE;              // 列间距
+    lv_coord_t row_space = IMG_CONT_ROW_SPACE;                 // 行间距
+
+    lv_coord_t child_width = IMG_CONT_W;                        // 子控件宽度
+    lv_coord_t child_height = IMG_CONT_H;
+
+    // 计算每行控件数
+    line_obj_num = (container_width + column_space) / (child_width + column_space);
+    max_show_num = (container_height + row_space) / (child_height + row_space) * line_obj_num;
+    img_buf_num = max_show_num + line_obj_num;
+    printf("line_obj_num:%d max_show_num:%d img_buf_num:%d \n\n", line_obj_num, max_show_num, img_buf_num);
+
     thread_fork(DECODE_TASK_NAME, 10, 1024, 1024, &task_pid, dec_img_task, NULL);
     fs_file = fscan(dir_path, "-tMOVJPGAVI -sn", 3);
     if (!fs_file) {
@@ -1159,7 +1177,7 @@ void video_file_screen_load(void)
         dec_list_file_num(total_file_num); //保存文件总数在结构体
         printf("total file:%d total page: %d\n", total_file_num, total_file_page);
 
-        for (int i = 0; i < IMG_BUF_NUM; i++) {
+        for (int i = 0; i < img_buf_num; i++) {
             u32 size = IMG_W * IMG_H * 2;
             img_buf_list[i] = malloc(size);
             if (img_buf_list[i] == NULL) {
@@ -1183,9 +1201,9 @@ void video_file_screen_load(void)
             reset_scroll_and_line(contain);
 
             lv_obj_scroll_to_y(contain, cur_scroll_val, LV_ANIM_OFF);
-            start = line * 3  + (cur_page - 1) * ONE_PAGE_MAX_NUM;
+            start = line * line_obj_num  + (cur_page - 1) * ONE_PAGE_MAX_NUM;
             remain = create_num + (cur_page - 1) * ONE_PAGE_MAX_NUM - start;
-            remain = remain > 9 ? 9 : remain;
+            remain = remain > img_buf_num ? img_buf_num : remain;
             end = start + remain;
             update_img_text(start, end, 0);
             to_play_video_page = 0;
@@ -1194,9 +1212,9 @@ void video_file_screen_load(void)
             line = 0;
             last_line = 0;
             create_page(cur_page);
-            start = line * 3  + (cur_page - 1) * ONE_PAGE_MAX_NUM;
+            start = line * line_obj_num  + (cur_page - 1) * ONE_PAGE_MAX_NUM;
             remain = create_num + (cur_page - 1) * ONE_PAGE_MAX_NUM - start;
-            remain = remain > 9 ? 9 : remain;
+            remain = remain > img_buf_num ? img_buf_num : remain;
             end = start + remain;
             update_img_text(start, end, 0);
         }
@@ -1231,7 +1249,7 @@ void video_file_screen_unload(void)
         fscan_release(fs_file);
         fs_file = NULL;
     }
-    for (int i = 0; i < IMG_BUF_NUM; i++) {
+    for (int i = 0; i < img_buf_num; i++) {
         if (img_buf_list[i]) {
             free(img_buf_list[i]);
             img_buf_list[i] = NULL;

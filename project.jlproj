@@ -1,6 +1,6 @@
 {
-  "type": "音箱",
-  "sdk": "wifi_soundbox",
+  "type": "记录仪",
+  "sdk": "wifi_camera",
   "chip": "AC792N",
   "version": "V3.0.0",
   "ingoreConfig": false,
@@ -12,7 +12,7 @@
     "flag": "empty_patch"
   },
   "specialPatchKey": "",
-  "projectType": "OfflineProject",
+  "projectType": "NormalProject",
   "tabform": [
     {
       "type": 1,
@@ -149,15 +149,29 @@
           "binName": "stream.bin",
           "showName": "LE_Audio",
           "data": ""
+        },
+        {
+          "type": 4,
+          "fileName": "src\\音频流程\\回放播放.x6flow",
+          "binName": "stream.bin",
+          "showName": "回放播放",
+          "data": ""
+        },
+        {
+          "type": 4,
+          "fileName": "src\\音频流程\\录像录音.x6flow",
+          "binName": "stream.bin",
+          "showName": "录像录音",
+          "data": ""
         }
       ]
     }
   ],
-  "create_time": "2025-04-21T01:21:45.057Z",
-  "update_time": "2025-04-24T01:30:31.104Z",
+  "create_time": "2025-06-24T09:28:47.878Z",
+  "update_time": "2025-07-03T02:54:55.276Z",
   "standardPatch": "",
-  "lastOpenToolVersion": "4.4.1",
-  "lastStencilFlowTime": "2025-04-24T09:03:18.2521428+08:00",
+  "lastOpenToolVersion": "4.4.12",
+  "lastStencilFlowTime": "2025-06-12T17:47:27.4707113+08:00",
   "versionName": "V3.0.0",
   "checkPatchTime": 0,
   "relateVersion": ""

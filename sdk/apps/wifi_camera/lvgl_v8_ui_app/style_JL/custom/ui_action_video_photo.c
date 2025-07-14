@@ -122,8 +122,6 @@ int gui_src_action_video_photo(int action)
         }
         app_mode_change_replace(APP_MODE_PHOTO);
         app_send_message(APP_MSG_PHOTO_TAKE_MAIN, 0);
-
-
         break;
     case GUI_SCREEN_ACTION_UNLOAD:
 

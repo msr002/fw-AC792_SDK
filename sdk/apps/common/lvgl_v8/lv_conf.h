@@ -603,6 +603,14 @@
 #define LV_USE_ANALOGCLOCK 1
 #define LV_USE_CAROUSEL 1
 #define LV_USE_OBSERVER    1
+#define LV_USE_ARCMENU 1
+#define LV_USE_GEARMENU 1
+#define LV_USE_CURVEMENU 1
+#define LV_USE_GRIDMENU 1
+#define LV_USE_LISTMENU 1
+#define LV_USE_POLYGONMENU 1
+#define LV_USE_KALEIDOSCOPEMENU 1
+
 #define LV_USE_JS_ANIM_EFFECT 0
 
 
@@ -668,7 +676,7 @@
  *--------------------*/
 /*RLE decoder library*/
 #define LV_USE_RLE 1
-#define LV_USE_GPU_RLE 0 /*rle直接通过gpu解码并贴图*/
+#define LV_USE_GPU_RLE 1 /*rle直接通过gpu解码并贴图*/
 
 /*PNG decoder library*/
 #define LV_USE_PNG 0
@@ -737,6 +745,8 @@
 #define LV_USE_GUI_SCR 1
 #define LV_USE_GUI_SCR_STACK 1
 #define LV_USE_GUI_PARSE_DYN 1
+#define LV_USE_GUI_SCR_MANAGER 1
+#define LV_USE_GUI_SCR_SWITCH 1
 #endif
 
 #define LV_USE_LZ4_INTERNAL 1

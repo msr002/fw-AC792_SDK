@@ -66,6 +66,40 @@ void logo_stop(void (*func)())
     }
 }
 
+static void dec_server_event_handler(void *priv, int argc, int *argv)
+{
+    switch (argv[0]) {
+    case VIDEO_DEC_EVENT_CURR_TIME:
+        /*
+         *解码中
+         */
+        int cur_time = argv[1];
+        printf("VIDEO_DEC_EVENT_CURR_TIME: %d\n", cur_time);
+        break;
+    case VIDEO_DEC_EVENT_FIRST_FRAME:
+        printf("VIDEO_DEC_EVENT_FIRST_FRAME\n");
+        break;
+    case VIDEO_DEC_EVENT_LAST_FRAME:
+        printf("VIDEO_DEC_EVENT_LAST_FRAME\n");
+        if (__this->dec_cyc) {
+            if (__this->video_dec) {
+                server_request(__this->video_dec, VIDEO_REQ_DEC_SET_SEEK, &__this->video_req);
+            }
+        }
+        break;
+    case VIDEO_DEC_EVENT_END:
+        printf("VIDEO_DEC_EVENT_END\n");
+        /*
+         *解码结束
+         */
+        break;
+    case VIDEO_DEC_EVENT_ERR:
+        /*
+         *解码出错，如果存储设备没有被拔出则播放前一个文件
+         */
+        break;
+    }
+}
 /*
     logo显示
     logo_path 传入需要视频logo或图片logo路径，视频音频只支持解码pcm格式；
@@ -128,7 +162,12 @@ int logo_show(char *logo_path, char *audio_path, int time_out, void (*func)())
         __this->video_req.dec.volume  = 100;
         __this->video_req.dec.pctl    = NULL;
 
-        logo_play_stop_ui(); //暂停当时UI显示
+        if (time_out == 0xffff) {
+            __this->dec_cyc = 1;
+        } else {
+
+            logo_play_stop_ui(); //暂停当时UI显示
+        }
         server_request(__this->video_dec, VIDEO_REQ_DEC_START, &__this->video_req);
 
         if (time_out > __this->video_req.dec.info.total_time) {
@@ -138,7 +177,10 @@ int logo_show(char *logo_path, char *audio_path, int time_out, void (*func)())
             logo_stop(func);
             return 0;
         }
-        sys_timeout_add_to_task("sys_timer", func, logo_stop, time_out * 1000);
+        server_register_event_handler(__this->video_dec, NULL, dec_server_event_handler);
+        if (__this->dec_cyc == 0) {
+            sys_timeout_add_to_task("sys_timer", func, logo_stop, time_out * 1000);
+        }
     } else { /* 非视频文件 */
         FILE *voice_file = fopen(audio_path, "r"); /* 先读取logo 音频文件 */
         if (!voice_file) {
@@ -190,7 +232,7 @@ int logo_show(char *logo_path, char *audio_path, int time_out, void (*func)())
         __this->video_req.dec.preview   = 1;
         __this->video_req.dec.pctl      = NULL;
 
-        logo_play_stop_ui(); //暂停当时UI显示
+        /* logo_play_stop_ui(); //暂停当时UI显示 */
         if (__this->video_dec) {
             err = server_request(__this->video_dec, VIDEO_REQ_DEC_START, &__this->video_req);
             if (err) {

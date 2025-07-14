@@ -29,7 +29,7 @@
 #if LV_COLOR_DEPTH==16
 #define LV_PIXEL_COLOR_T lv_color16_t
 #elif LV_COLOR_DEPTH==24
-#define LV_PIXEL_COLOR_T lv_color24_t
+#define LV_PIXEL_COLOR_T lv_color_t
 #elif LV_COLOR_DEPTH==32
 #define LV_PIXEL_COLOR_T lv_color32_t
 #endif

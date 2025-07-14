@@ -554,7 +554,7 @@ int vir_dev_dec_id3_post(struct vir_player *player)
     return true;
 }
 
-int virtual_player_start(struct vir_player *player, struct stream_file_ops *ops)
+int virtual_player_start(struct vir_player *player, const struct stream_file_ops *ops)
 {
     int err = -EINVAL;
 

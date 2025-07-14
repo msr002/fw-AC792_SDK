@@ -35,6 +35,7 @@
  **********************/
 #if LV_IMG_CACHE_DEF_SIZE
 static bool lv_img_cache_match(const void *src1, const void *src2);
+static bool lv_img_cache_match_for_bin(const void *src1, const void *src2);
 #endif
 
 /**********************
@@ -42,6 +43,7 @@ static bool lv_img_cache_match(const void *src1, const void *src2);
  **********************/
 #if LV_IMG_CACHE_DEF_SIZE
 static uint16_t entry_cnt;
+static bool *img_cache_custom_processed;
 #endif
 
 /**********************
@@ -65,6 +67,8 @@ _lv_img_cache_entry_t *_lv_img_cache_open(const void *src, lv_color_t color, int
     /*Is the image cached?*/
     _lv_img_cache_entry_t *cached_src = NULL;
 
+    lv_img_src_t src_type = lv_img_src_get_type(src);
+
 #if LV_IMG_CACHE_DEF_SIZE
     if (entry_cnt == 0) {
         LV_LOG_WARN("lv_img_cache_open: the cache size is 0");
@@ -81,10 +85,48 @@ _lv_img_cache_entry_t *_lv_img_cache_open(const void *src, lv_color_t color, int
         }
     }
 
+
+#if LV_IMG_CACHE_DEF_SIZE
+    uint16_t j;
+
+    lv_memset_00(img_cache_custom_processed, sizeof(bool) * entry_cnt);
+    for (i = 0; i < entry_cnt; i++) {
+        if (cache[i].not_release || cache[i].not_release_src == NULL || img_cache_custom_processed[i]) {
+            continue;
+        }
+        img_cache_custom_processed[i] = true;
+        for (j = i; j < entry_cnt; j++) {
+            bool match_result;
+            if (src_type == LV_IMG_SRC_BIN) {
+                match_result = lv_img_cache_match_for_bin(src, cache[i].bin_src);
+            } else {
+                match_result = lv_img_cache_match(src, cache[i].dec_dsc.src);
+            }
+            if (match_result) {
+                cache[i].life = LV_IMG_CACHE_LIFE_LIMIT;
+                img_cache_custom_processed[j] = true;
+                continue;
+            }
+        }
+    }
+#endif
+
+
     for (i = 0; i < entry_cnt; i++) {
         if (color.full == cache[i].dec_dsc.color.full &&
-            frame_id == cache[i].dec_dsc.frame_id &&
-            lv_img_cache_match(src, cache[i].dec_dsc.src)) {
+            frame_id == cache[i].dec_dsc.frame_id) {
+
+            bool match_result;
+            if (src_type == LV_IMG_SRC_BIN) {
+                match_result = lv_img_cache_match_for_bin(src, cache[i].bin_src);
+            } else {
+                match_result = lv_img_cache_match(src, cache[i].dec_dsc.src);
+            }
+
+            if (!match_result) {
+                continue;
+            }
+
             /*If opened increment its life.
              *Image difficult to open should live longer to keep avoid frequent their recaching.
              *Therefore increase `life` with `time_to_open`*/
@@ -114,6 +156,10 @@ _lv_img_cache_entry_t *_lv_img_cache_open(const void *src, lv_color_t color, int
     /*Close the decoder to reuse if it was opened (has a valid source)*/
     if (cached_src->dec_dsc.src) {
         lv_img_decoder_close(&cached_src->dec_dsc);
+        if (src_type == LV_IMG_SRC_BIN && cached_src->bin_src) {
+            lv_mem_free(cached_src->bin_src);
+            cached_src->bin_src = NULL;
+        }
         LV_LOG_INFO("image draw: cache miss, close and reuse an entry");
     } else {
         LV_LOG_INFO("image draw: cache miss, cached to an empty entry");
@@ -130,7 +176,12 @@ _lv_img_cache_entry_t *_lv_img_cache_open(const void *src, lv_color_t color, int
         cached_src->life = INT32_MIN; /*Make the empty entry very "weak" to force its us*/
         return NULL;
     }
-
+    if (src_type == LV_IMG_SRC_BIN) {
+        size_t src_save_len = strlen(src);
+        uint8_t *src_save = lv_mem_alloc(src_save_len + 1);
+        strcpy((char *)src_save, src);
+        cached_src->bin_src  = src_save;
+    }
     cached_src->life = 0;
 
     /*If `time_to_open` was not set in the open function set it here*/
@@ -141,6 +192,28 @@ _lv_img_cache_entry_t *_lv_img_cache_open(const void *src, lv_color_t color, int
     if (cached_src->dec_dsc.time_to_open == 0) {
         cached_src->dec_dsc.time_to_open = 1;
     }
+
+#if LV_IMG_CACHE_DEF_SIZE
+    for (i = 0; i < entry_cnt; i++) {
+        if (!cache[i].not_release) {
+            continue;
+        }
+
+        bool match_result;
+        if (src_type == LV_IMG_SRC_BIN) {
+            match_result = lv_img_cache_match_for_bin(src, cache[i].bin_src);
+        } else {
+            match_result = lv_img_cache_match(src, cache[i].dec_dsc.src);
+        }
+
+        if (match_result) {
+            cache[i].not_release = 1;
+            break;
+        }
+
+    }
+#endif
+
 
     return cached_src;
 }
@@ -172,6 +245,14 @@ void lv_img_cache_set_size(uint16_t new_entry_cnt)
     }
     entry_cnt = new_entry_cnt;
 
+
+#if LV_IMG_CACHE_DEF_SIZE
+    if (img_cache_custom_processed) {
+        lv_mem_free(img_cache_custom_processed);
+    }
+    img_cache_custom_processed = lv_mem_alloc(sizeof(bool) * entry_cnt);
+#endif
+
     /*Clean the cache*/
     lv_memset_00(LV_GC_ROOT(_lv_img_cache_array), entry_cnt * sizeof(_lv_img_cache_entry_t));
 #endif
@@ -190,17 +271,103 @@ void lv_img_cache_invalidate_src(const void *src)
 
     uint16_t i;
     for (i = 0; i < entry_cnt; i++) {
-        if (src == NULL || lv_img_cache_match(src, cache[i].dec_dsc.src)) {
+
+        if (src == NULL) {
             if (cache[i].dec_dsc.src != NULL) {
+                lv_img_src_t src_type = lv_img_src_get_type(cache[i].dec_dsc.src);
+
                 lv_img_decoder_close(&cache[i].dec_dsc);
+                if (src_type == LV_IMG_SRC_BIN) {
+                    if (cache[i].bin_src) {
+                        lv_mem_free(cache[i].bin_src);
+                        cache[i].bin_src = NULL;
+                    }
+
+#if LV_IMG_CACHE_DEF_SIZE
+                    if (cache[i].not_release_src) {
+                        lv_mem_free(cache[i].not_release_src);
+                        cache[i].not_release_src = NULL;
+                    }
+#endif
+
+                }
+
             }
 
             lv_memset_00(&cache[i], sizeof(_lv_img_cache_entry_t));
+        } else {
+            lv_img_src_t src_type = lv_img_src_get_type(src);
+
+            if (src_type == LV_IMG_SRC_BIN) {
+                if (lv_img_cache_match_for_bin(src, cache[i].bin_src)) {
+                    if (cache[i].dec_dsc.src != NULL) {
+                        lv_img_decoder_close(&cache[i].dec_dsc);
+                    }
+                    if (cache[i].bin_src) {
+                        lv_mem_free(cache[i].bin_src);
+                        cache[i].bin_src = NULL;
+                    }
+
+#if LV_IMG_CACHE_DEF_SIZE
+                    if (cache[i].not_release_src) {
+                        lv_mem_free(cache[i].not_release_src);
+                        cache[i].not_release_src = NULL;
+                    }
+#endif
+
+                    lv_memset_00(&cache[i], sizeof(_lv_img_cache_entry_t));
+                }
+
+            } else {
+                if (lv_img_cache_match(src, cache[i].dec_dsc.src)) {
+                    lv_img_decoder_close(&cache[i].dec_dsc);
+                    lv_memset_00(&cache[i], sizeof(_lv_img_cache_entry_t));
+                }
+            }
+
         }
     }
 #endif
 }
 
+
+#if LV_IMG_CACHE_DEF_SIZE
+void lv_img_cache_mark_not_auto_release_src(const void *src)
+{
+    uint16_t i;
+    _lv_img_cache_entry_t *cache = LV_GC_ROOT(_lv_img_cache_array);
+    lv_img_src_t src_type = lv_img_src_get_type(src);
+    bool match_result;
+
+    for (i = 0; i < entry_cnt; i++) {
+        if (src_type == LV_IMG_SRC_BIN) {
+            match_result = lv_img_cache_match_for_bin(src, cache[i].not_release_src);
+        } else {
+            match_result = lv_img_cache_match(src, cache[i].not_release_src);
+        }
+
+        if (match_result) {
+            return;
+        }
+
+    }
+
+    for (i = 0; i < entry_cnt; i++) {
+        if (cache[i].not_release_src == NULL) {
+            if (src_type == LV_IMG_SRC_BIN) {
+                size_t src_save_len = strlen(src);
+                uint8_t *src_save = lv_mem_alloc(src_save_len + 1);
+                strcpy((char *)src_save, src);
+                cache[i].not_release_src = src_save;
+            } else {
+                cache[i].not_release_src = src;
+            }
+            cache[i].not_release = 0;
+            return;
+        }
+    }
+}
+#endif
 /**********************
  *   STATIC FUNCTIONS
  **********************/
@@ -220,4 +387,12 @@ static bool lv_img_cache_match(const void *src1, const void *src2)
     }
     return strcmp(src1, src2) == 0;
 }
+static bool lv_img_cache_match_for_bin(const void *src1, const void *src2)
+{
+    if (src2) {
+        return strcmp(src1, src2) == 0;
+    }
+    return false;
+}
+
 #endif

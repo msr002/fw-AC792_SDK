@@ -823,9 +823,7 @@ jlvg_begin:
 
     uint8_t adr_mode = 1;
     uint8_t rle_en = 0;
-
-    //窗口初始化
-    jlvg_surface_init(&surface, dest_buf, fb_size, fb_width, fb_height, dest_stride, jlvg_dest_cf, 0, 1, 1, 0);
+    uint8_t dither_en = 0;
 
     //2、获取原始图像数据信息: 根据  坐标获取图像坐标
     uint32_t src_width = coords->x2 - coords->x1 + 1;
@@ -843,6 +841,14 @@ jlvg_begin:
             src_clut = (uint8_t *)src_buf + rle_info->lut_addr;
         }
         src_buf = (uint8_t *)src_buf + rle_info->addr;
+        if (has_indexed) {
+            if (clut_format == VGHW_CLUT_FORMAT_ARGB8888 || clut_format == VGHW_CLUT_FORMAT_RGB888) {
+                dither_en = 1;
+            }
+        }
+        if (jlvg_img_cf == VGHW_CLUT_FORMAT_ARGB8888 || jlvg_img_cf == VGHW_CLUT_FORMAT_RGB888) {
+            dither_en = 1;
+        }
         jlgpu_printf("[ debug ] %s() %d %x %dx%d rle block:%d rle format:%d", __func__, __LINE__, src_buf, rle_info->width, rle_info->height, rle_info->block, rle_info->format);
     } else {
         img_stride = src_width * img_bytes_per_pixel;
@@ -850,8 +856,13 @@ jlvg_begin:
         if (has_indexed) {
             src_clut = src_buf;
             src_buf += 1024;//256 * 4
+            dither_en = 1;
         }
     }
+
+    //窗口初始化
+    jlvg_surface_init(&surface, dest_buf, fb_size, fb_width, fb_height, dest_stride, jlvg_dest_cf, dither_en, 1, 1, 0);
+
     jlvg_image_t *image  = (jlvg_image_t *)lv_mem_alloc(sizeof(jlvg_image_t));
 
     lv_jl_gpu2p5d_flush_inv_dcache(src_buf, src_width, src_height, src_width, lv_img_cf_get_px_size(cf));

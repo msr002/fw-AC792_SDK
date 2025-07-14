@@ -17,6 +17,7 @@ const int config_btctler_modules                    = 0;
 #endif
 
 #if TCFG_RF_FCC_TEST_ENABLE || TCFG_RF_PRODUCT_TEST_ENABLE
+int CONFIG_DISTURB_SCAN_ENABLE                      = 0;
 int config_btctler_mode                             = TCFG_BT_MODE;
 #if TCFG_RF_FCC_TEST_ENABLE
 int config_btctler_hci_standard                     = 1;
@@ -24,6 +25,7 @@ int config_btctler_hci_standard                     = 1;
 int config_btctler_hci_standard                     = 0;
 #endif
 #else
+const int CONFIG_DISTURB_SCAN_ENABLE                = 0;
 const int config_btctler_mode                       = TCFG_BT_MODE;
 #if (TCFG_BT_MODE != BT_NORMAL)
 const int config_btctler_hci_standard               = 1;
@@ -40,7 +42,6 @@ const int CONFIG_ESCO_FORWARD_ENABLE                = 0;
 const int CONFIG_UPDATE_BT_LMP_EN                   = 0;
 const int CONFIG_AES_CCM_FOR_EDR_ENABLE             = 0;
 const int CONFIG_MPR_CLOSE_WHEN_ESCO                = 0;
-const int CONFIG_DISTURB_SCAN_ENABLE                = 0;
 #if TCFG_BT_DUAL_CONN_ENABLE
 const int CONFIG_LMP_SUPPORT_MULTI_CONN             = 1;
 const int CONFIG_LMP_CONNECTION_NUM                 = 2;

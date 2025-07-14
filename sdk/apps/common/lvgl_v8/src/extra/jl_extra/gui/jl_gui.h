@@ -16,6 +16,8 @@ extern "C" {
 
 #include "scr/gui_scr.h"
 #include "scr/gui_scr_stack.h"
+#include "scr/gui_scr_manager.h"
+#include "scr/gui_scr_switch.h"
 #include "dyn/gui_parse_dyn.h"
 
 /*********************

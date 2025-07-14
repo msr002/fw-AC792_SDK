@@ -24,7 +24,13 @@ extern "C" {
 #include "obj2p5d/lv_img2p5d.h"
 #include "keyboard/lv_ime_pinyin.h"
 #include "lyrics/lv_lyrics.h"
-
+#include "arcmenu/lv_arcmenu.h"
+#include "curvemenu/lv_curvemenu.h"
+#include "gearmenu/lv_gearmenu.h"
+#include "gridmenu/lv_gridmenu.h"
+#include "listmenu/lv_listmenu.h"
+#include "polygonmenu/lv_polygonmenu.h"
+#include "kaleidoscopemenu/lv_kaleidoscopemenu.h"
 /*********************
  *      DEFINES
  *********************/

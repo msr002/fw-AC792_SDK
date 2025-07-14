@@ -18,6 +18,7 @@ typedef struct pipeline_common {
     u16 width;
     u16 height;
     u32 fps;
+    int priv;
 } pipe_common_t;
 
 typedef struct pipeline_message_group {
@@ -102,8 +103,7 @@ enum {
     REP_SEM_DEC,
     REP_SEM_NUM,
     REP_SEM_POST,
-    ISP_DROP_FRAME,
-    ISP_FRAME_CNT,
+    CHECK_DROP_FRAME,
 
     PIPELINE_SET_IMC_RAW,
     PIPELINE_SET_FIRST_RAW_IMAGE,

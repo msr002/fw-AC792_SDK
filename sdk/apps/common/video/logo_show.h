@@ -17,6 +17,7 @@ struct logo_dec {
     u8 *video_buf;
     FILE *audio_file;
     u8 logo_state;
+    u8 dec_cyc;
 };
 
 #define LOGO_FILE_TYPE_MOVE      0

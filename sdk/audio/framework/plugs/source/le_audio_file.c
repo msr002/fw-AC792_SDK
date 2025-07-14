@@ -165,6 +165,11 @@ static int le_audio_file_start(struct le_audio_file_handle *hdl)
 
 static int le_audio_file_stop(struct le_audio_file_handle *hdl)
 {
+    if (hdl->reference) {
+        audio_reference_clock_exit(hdl->reference);
+        hdl->reference = 0;
+    }
+
     if (hdl->start) {
         le_audio_stream_set_rx_tick_handler(hdl->file, NULL, NULL);
 
@@ -196,10 +201,6 @@ static int le_audio_file_ioctl(void *file, int cmd, int arg)
         le_audio_file_start_abandon_data(hdl);
         break;
     case NODE_IOC_STOP:
-        if (hdl->reference) {
-            audio_reference_clock_exit(hdl->reference);
-        }
-        hdl->reference = 0;
         le_audio_file_stop(hdl);
         break;
     }

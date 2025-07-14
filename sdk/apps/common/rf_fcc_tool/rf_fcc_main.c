@@ -130,7 +130,7 @@ void wf_phy_rst(void);
 void wf_phy_tx_always_test(void);
 static void report_data(u8 opcode, void *data, u32 len);
 u8 set_search_bd_name(char *name);
-void bt_set_local_name(char *name);
+void bt_set_local_name(const char *name);
 void wf_tx_sine_test_reset(unsigned char reset);
 void bredr_set_dut_enble(u8 en, u8 phone);
 u8 rf_fcc_adj_res_read(char *str, void *data);
@@ -2437,11 +2437,13 @@ u8 rf_fcc_test_init(void)
 #ifdef CONFIG_NET_ENABLE
         wifi_set_mac(mac);
 #endif
+        extern int CONFIG_DISTURB_SCAN_ENABLE;
+        CONFIG_DISTURB_SCAN_ENABLE = 1;
         config_btctler_mode = BT_NORMAL;
         __THIS->test_mode = 0;
         config_btctler_hci_standard = 1;
         if (g_mode_info.params[0]) {
-            set_search_bd_name(&g_mode_info.params[1]);
+            /* set_search_bd_name(&g_mode_info.params[1]); */
             bt_set_local_name("JL-AC79XX-EDR_TSET");
         } else {
             bt_set_local_name(&g_mode_info.params[1]);

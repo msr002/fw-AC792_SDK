@@ -50,6 +50,16 @@ extern const int drc_detect_run_mode;
 
 extern const int virtual_bass_pro_soft_crossover;
 
+extern const int virtual_bass_eq_hard_select;
+
+extern const int virtualbass_noisegate_attack_time;
+
+extern const int virtualbass_noisegate_release_time;
+
+extern const int virtualbass_noisegate_hold_time;
+
+extern const float virtualbass_noisegate_threshold;
+
 extern const int plate_reverb_lite_run_mode;
 
 extern const int config_equall_loundness_en;

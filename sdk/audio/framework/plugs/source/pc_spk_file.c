@@ -32,6 +32,7 @@
 
 #define SPK_PUSH_FRAME_NUM        5 //SPK一次push的帧数，单位：uac rx中断间隔
 #define SPK_REPAIR_PACKET_ENABLE  0// pc_spk丢包修复使能,数据流内需在播放同步前接入plc node
+#define SPK_LOST_DATA_AUTO_CLOSE  1
 
 
 struct pc_spk_fmt_t {
@@ -60,17 +61,30 @@ struct pc_spk_file_hdl {
 
 #define SPK_PUSH_FRAME_NUM 5 //SPK一次push的帧数，单位：uac rx中断间隔
 
-static bool mute_status;
+static u8 mute_status;
 
 bool pc_spk_player_mute_status(void)
 {
-    return mute_status;
+    return mute_status ? TRUE : FALSE;
 }
 
 static void pc_spk_data_isr_cb(void *priv, void *buf, int len)
 {
     struct pc_spk_file_hdl *hdl = (struct pc_spk_file_hdl *)priv;
     struct stream_frame *frame;
+
+#if SPK_LOST_DATA_AUTO_CLOSE
+    if (mute_status) {
+        if (mute_status != 0xff) {
+            struct device_event event = {0};
+            event.event = USB_AUDIO_PLAY_OPEN;
+            event.arg = (void *)(int)mute_status - 1;
+            device_event_notify(DEVICE_EVENT_FROM_UAC, &event);
+            mute_status = 0xff;
+        }
+        return;
+    }
+#endif
 
     if (!hdl) {
         return;
@@ -154,7 +168,11 @@ static void pcspk_det_timer_cb(void *priv)
         if (hdl->irq_cnt) {
             hdl->irq_cnt = 0;
             if (hdl->det_mute) {
+#if SPK_LOST_DATA_AUTO_CLOSE
+                return;
+#endif
                 hdl->det_mute = 0;
+                mute_status = FALSE;
 #if TCFG_AUDIO_CVP_OUTPUT_WAY_IIS_ENABLE && TCFG_IIS_NODE_ENABLE
                 //先开pc mic，后开spk，需要取消忽略外部数据，重启aec
                 if (audio_aec_status()) {
@@ -162,13 +180,11 @@ static void pcspk_det_timer_cb(void *priv)
                     audio_cvp_ref_data_align_reset();
                 }
 #endif
-                mute_status = FALSE;
-                //user_apm_mute(0);
             }
         } else {
             if (hdl->data_run && !hdl->det_mute) {
                 hdl->det_mute = 1;
-                mute_status = TRUE;
+                mute_status = BIT(hdl->fmt.id);
 #if TCFG_AUDIO_CVP_OUTPUT_WAY_IIS_ENABLE && TCFG_IIS_NODE_ENABLE
                 if (audio_aec_status()) {
                     //忽略参考数据
@@ -179,8 +195,10 @@ static void pcspk_det_timer_cb(void *priv)
                 //已经往后面推数据突然中断没有起的情况
                 printf(">>>>>>> PCSPK LOST CONNECT <<<<<<<");
                 //user_apm_mute(1);
-                return;
                 hdl->data_run = 0;
+#if !SPK_LOST_DATA_AUTO_CLOSE
+                return;
+#endif
 #if (TCFG_LEA_BIG_CTRLER_TX_EN || TCFG_LEA_BIG_CTRLER_RX_EN)
                 if (get_broadcast_role() == 1) {
                     //广播（发送端）
@@ -291,7 +309,7 @@ static int pc_spk_ioctl(void *_hdl, int cmd, int arg)
             hdl->data_run = 0;
             hdl->det_mute = 0;
             hdl->start = 1;
-            mute_status = FALSE;
+            mute_status = 0;
         }
         break;
     case NODE_IOC_SUSPEND:
@@ -299,7 +317,7 @@ static int pc_spk_ioctl(void *_hdl, int cmd, int arg)
         if (hdl->start) {
             hdl->start = 0;
         }
-        mute_status = FALSE;
+        /* mute_status = 0; */
         break;
     }
 
@@ -317,7 +335,10 @@ static void pc_spk_release(void *_hdl)
 #if PC_SPK_ONLINE_DET_EN
     pcspk_close_det_timer(hdl);
 #endif
-    set_uac_speaker_rx_handler(hdl->fmt.id, NULL, NULL);
+#if SPK_LOST_DATA_AUTO_CLOSE
+    if (!hdl->det_mute)
+#endif
+        set_uac_speaker_rx_handler(hdl->fmt.id, NULL, NULL);
     free(hdl->cache_buf);
     free(hdl);
 }

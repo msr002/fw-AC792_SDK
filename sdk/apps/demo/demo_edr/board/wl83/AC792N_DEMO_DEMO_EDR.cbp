@@ -107,6 +107,7 @@
 <Add option="../../../../../cpu/wl83/liba/fs.a" />
 <Add option="../../../../../cpu/wl83/liba/cfg_tool.a" />
 <Add option="../../../../../cpu/wl83/liba/cpu.a" />
+<Add option="../../../../../cpu/wl83/liba/video.a" />
 <Add option="../../../../../cpu/wl83/liba/common_lib.a" />
 <Add option="../../../../../cpu/wl83/liba/libaec.a" />
 <Add option="../../../../../cpu/wl83/liba/wl_rf_common.a" />
@@ -297,6 +298,7 @@
 <Unit filename="../../../../../include_lib/driver/version.z.S" />
 <Unit filename="../../../../../include_lib/net/version.z.S" />
 <Unit filename="../../../../../include_lib/net/wifi/wifi_connect.h" />
+<Unit filename="../../../../../include_lib/net/wifi/wifi_def.h" />
 <Unit filename="../../../../../include_lib/newlib/include/assert.h" />
 <Unit filename="../../../../../include_lib/newlib/include/machine/time.h" />
 <Unit filename="../../../../../include_lib/newlib/include/machine/types.h" />

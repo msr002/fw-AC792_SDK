@@ -30,6 +30,13 @@ static unsigned char gRectSeg[] = {
 
 static VGHW_FragImage_TypeDef gFragImage = {0};
 static VGHW_CMD_TypeDef gCmd = {0};
+struct gFrag_ckey_t {
+    uint8_t ck_en;
+    uint8_t ck_red;
+    uint8_t ck_green;
+    uint8_t ck_blue;
+};
+static struct gFrag_ckey_t g_ckey = {0};
 
 #define MATRIX_COEFF_TO_FIXED(m)  (*(VGHWuint*)&(m))
 
@@ -87,10 +94,11 @@ static void setFragImage(VGHW_FragImage_TypeDef *gFragImage, float *matrix, VGHW
 
     convertMatrixX9(matrix, gFragImage);
 
-    gFragImage->ckey_blue = 0;
-    gFragImage->ckey_en = 0;
-    gFragImage->ckey_green = 0;
-    gFragImage->ckey_red = 0;
+    gFragImage->ckey_en = g_ckey.ck_en;
+    gFragImage->ckey_red = g_ckey.ck_red;
+    gFragImage->ckey_green = g_ckey.ck_green;
+    gFragImage->ckey_blue = g_ckey.ck_blue;
+
     gFragImage->clut_format = 0;
     gFragImage->img_adr_mode = adr_mode;
     gFragImage->img_a_color = 0;
@@ -104,7 +112,7 @@ static void setFragImage(VGHW_FragImage_TypeDef *gFragImage, float *matrix, VGHW
     gFragImage->img_lut_adr = 0;
     /* gFragImage->quality = VGHW_IMAGE_QUALITY_NONANTIALIASED; */
     gFragImage->quality = quality;
-    gFragImage->color_ext = 1; //fixed cfg
+    gFragImage->color_ext = 0; //fixed cfg
     gFragImage->margin_mode = 0;
     gFragImage->rle_mode = 0;
     if (adr_mode == 0) {
@@ -395,6 +403,14 @@ static int image_scale(uint8_t *dst, int dst_w, int dst_h, int dst_stride, int d
     /* printf("use=%dus\n", j1); */
 
     return run_time;
+}
+
+void fb_frame_buf_rotate_set_colorkey(u8 ckey_en, uint8_t ckey_red, uint8_t ckey_green, uint8_t ckey_blue)
+{
+    g_ckey.ck_en = ckey_en;
+    g_ckey.ck_red = ckey_red;
+    g_ckey.ck_green = ckey_green;
+    g_ckey.ck_blue = ckey_blue;
 }
 
 /**

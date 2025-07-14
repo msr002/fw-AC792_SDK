@@ -550,13 +550,55 @@ static int scr_message_callback(pipe_plugin_t *plugin, int cmd, void *arg)
     return ret;
 }
 
+#define SERVER_TCP_PORT 8888
+static int tcp_client_init(const char *server_ip, const int server_port)
+{
+    void *sock = NULL;
+    struct sockaddr_in dest;
 
+    //创建socket
+    sock = sock_reg(AF_INET, SOCK_STREAM, 0, NULL, NULL);
+    if (sock == NULL) {
+        printf("sock_reg fail.\n");
+        return -1;
+    }
 
+    dest.sin_family = AF_INET;
+    dest.sin_addr.s_addr = inet_addr(server_ip);
+    dest.sin_port = htons(server_port);
+    if (0 != sock_connect(sock, (struct sockaddr *)&dest, sizeof(struct sockaddr_in))) {
+        printf("sock_connect fail.\n");
+        sock_unreg(sock);
+        return -1;
+    }
 
+    printf("tcp_client_connect_task succ!");
+    if (sock) {
+        sock_unreg(sock);
+        sock = NULL;
+    }
 
+    return 0;
+}
 
+static void tcp_client_connect_task(void *priv)
+{
+    printf("---------------------------------------------->");
+    char gateway[16] = {0};
+    get_gateway(1, gateway);
 
+    printf("tcp connect : server ip[%s], port[%d]\n", gateway, SERVER_TCP_PORT);
 
+    tcp_client_init(gateway, SERVER_TCP_PORT);
+    printf("<----------------------------------------------");
+}
+
+void connect_to_server_port_8888(void)
+{
+    if (thread_fork("tcp_client_connect_task", 10, 512, 0, NULL, tcp_client_connect_task, NULL) != OS_NO_ERR) {
+        printf("thread fork fail\n");
+    }
+}
 
 
 REGISTER_PLUGIN(scr0) = {

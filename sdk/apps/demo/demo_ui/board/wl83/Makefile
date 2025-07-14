@@ -992,6 +992,7 @@ LFLAGS := \
 	../../../../../cpu/wl83/liba/fs.a \
 	../../../../../cpu/wl83/liba/common_lib.a \
 	../../../../../cpu/wl83/liba/update.a \
+	../../../../../cpu/wl83/liba/video.a \
 	--end-group \
 	../../../../../cpu/wl83/liba/lvgl_v9_extend.a \
 	../../../../../include_lib/newlib/pi32v2-lib/libm.a \

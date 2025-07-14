@@ -10,6 +10,15 @@
 #ifndef _AUDIO_DEF_H_
 #define _AUDIO_DEF_H_
 
+/*
+ *******************************************************************
+ *						Audio Common Definitions
+ *******************************************************************
+ */
+#define INT16MAX_P                      (32767)     //16bit正最大值
+#define INT16MAX_N                      (-32768)    //16bit负最大值
+#define INT24MAX_P                      (8388607)   //24bit正最大值
+#define INT24MAX_N                      (-8388608)  //24bit负最大值
 
 
 /*
@@ -102,13 +111,26 @@
 #define ADC_AIN_PORT3                       (1UL << 3)
 #define ADC_AIN_PORT4                       (1UL << 4)
 
-#define MIC_LDO_STA_CLOSE                   (0)   //MICLDO电源关闭
-#define MIC_LDO_STA_OPEN                    (1)   //MICLDO电源开启
+#define MIC_LDO_STA_CLOSE                   (0) //MICLDO电源关闭
+#define MIC_LDO_STA_OPEN                    (1) //MICLDO电源开启
 
-#define MIC_CAPLESS_VER0                    (0)
-#define MIC_CAPLESS_VER1                    (1)
-#define MIC_CAPLESS_VER2                    (2)
-#define MIC_CAPLESS_VER3                    (3)
+/*省电容MIC版本定义*/
+#define MIC_CAPLESS_VER0                    (0) //693N 695N 696N
+#define MIC_CAPLESS_VER1                    (1) //697N 897N 698N
+#define MIC_CAPLESS_VER2                    (2) //700N 701N
+#define MIC_CAPLESS_VER3                    (3) //703N 706N AW32N
+
+/*ADC性能模式*/
+#define ADC_MODE_HIGH_PERFORMANCE           (0) //高性能模式
+#define ADC_MODE_LOW_POWER                  (1) //低功耗模式
+
+/*MIC输入工作模式定义*/
+#define AUDIO_MIC_CAP_MODE                  0   //单端隔直电容模式
+#define AUDIO_MIC_CAP_DIFF_MODE             1   //差分隔直电容模式
+#define AUDIO_MIC_CAPLESS_MODE              2   //单端省电容模式
+#define AUDIO_LINEIN_SINGLE_MODE            2   //单端linein模式
+#define AUDIO_LINEIN_DIFF_MODE              3   //差分linein模式
+
 /*
  *******************************************************************
  *						FFT Definitions

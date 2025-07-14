@@ -488,6 +488,7 @@ static int wifi_event_callback(void *network_ctx, enum WIFI_EVENT event)
         break;
     case WIFI_EVENT_P2P_GC_DISCONNECTED:
         log_info("network_user_callback->WIFI_EVENT_P2P_GC_DISCONNECTED");
+        /* wifi_enter_p2p_mode(P2P_GC_MODE, WIFI_P2P_DEVICE_NAME); */
         break;
     case WIFI_EVENT_P2P_GC_NETWORK_STACK_DHCP_SUCC:
         log_info("network_user_callback->WIFI_EVENT_P2P_GC_NETWORK_STACK_DHCP_SUCC");
@@ -500,8 +501,7 @@ static int wifi_event_callback(void *network_ctx, enum WIFI_EVENT event)
         break;
     case WIFI_EVENT_P2P_GO_STA_DISCONNECTED:
         log_info("network_user_callback->WIFI_EVENT_P2P_GO_STA_DISCONNECTED");
-        void wifi_p2p_reset(const char *device_name);
-        wifi_p2p_reset(WIFI_P2P_DEVICE_NAME);
+        /* wifi_enter_p2p_mode(P2P_GO_MODE, WIFI_P2P_DEVICE_NAME); */
         break;
     default:
         break;
@@ -598,18 +598,27 @@ static void wifi_status(void *p)
     }
 }
 
-char *check_enc_mode(int enc)
+char *get_wifi_auth_mode(WIFI_802_11_AUTH_MODE mode)
 {
-    if (ENC_MODE_BIT_IS_SET(enc, ENC_WPA3)) {
-        return "ENC_WPA3";
-    } else if (ENC_MODE_BIT_IS_SET(enc, ENC_WPA2)) {
-        return "ENC_WPA2";
-    } else if (ENC_MODE_BIT_IS_SET(enc, ENC_WPA)) {
-        return "ENC_WPA";
-    } else if (ENC_MODE_BIT_IS_SET(enc, ENC_WEP)) {
-        return "ENC_WEP";
-    } else {
-        return "ENC_NONE";
+    switch (mode) {
+    case WIFI_AUTH_MODE_OPEN:
+        return "AUTH_MODE_OPEN";
+    case WIFI_AUTH_MODE_WEP:
+        return "AUTH_MODE_WEP";
+    case WIFI_AUTH_MODE_WPA:
+        return "AUTH_MODE_WPA";
+    case WIFI_AUTH_MODE_WPA2PSK:
+        return "AUTH_MODE_WPA2PSK";
+    case WIFI_AUTH_MODE_WPAWPA2PSK:
+        return "AUTH_MODE_WPAWPA2PSK";
+    case WIFI_AUTH_MODE_WPA3SAE:
+        return "AUTH_MODE_WPA3SAE";
+    case WIFI_AUTH_MODE_WPA2PSKWPA3SAE:
+        return "AUTH_MODE_WPA2PSKWPA3SAE";
+    case WIFI_AUTH_MODE_WPA3H2E:
+        return "AUTH_MODE_WPA3H2E";
+    default:
+        return "***Unknown Auth Mode***";
     }
 }
 
@@ -630,7 +639,8 @@ static void wifi_scan_test(void)
         sta_ssid_info = wifi_get_scan_result(&sta_ssid_num);
         log_info("wifi_sta_scan_channel_test channel %d, ssid_num =%d", ch, sta_ssid_num);
         for (int i = 0; i < sta_ssid_num; i++) {
-            log_info("wifi_sta_scan_channel_test ssid = [%s],rssi = %d,snr = %d, enc = %s", sta_ssid_info[i].ssid, sta_ssid_info[i].rssi, sta_ssid_info[i].snr, check_enc_mode(sta_ssid_info[i].enc));
+            log_info("wifi_sta_scan_channel_test ssid = [%s],rssi = %d,snr = %d, auth_mode = %s",
+                     sta_ssid_info[i].ssid, sta_ssid_info[i].rssi, sta_ssid_info[i].snr, get_wifi_auth_mode(sta_ssid_info[i].auth_mode));
         }
         free(sta_ssid_info);
     }
@@ -643,7 +653,8 @@ static void wifi_scan_test(void)
     log_info("wifi_sta_scan_test ssid_num =%d", sta_ssid_num);
 
     for (int i = 0; i < sta_ssid_num; i++) {
-        log_info("wifi_sta_scan_test ssid = [%s],rssi = %d,snr = %d, enc = %s", sta_ssid_info[i].ssid, sta_ssid_info[i].rssi, sta_ssid_info[i].snr, check_enc_mode(sta_ssid_info[i].enc));
+        log_info("wifi_sta_scan_test ssid = [%s],rssi = %d,snr = %d, auth_mode = %s",
+                 sta_ssid_info[i].ssid, sta_ssid_info[i].rssi, sta_ssid_info[i].snr, get_wifi_auth_mode(sta_ssid_info[i].auth_mode));
     }
 
     free(sta_ssid_info);
@@ -676,6 +687,7 @@ static void wifi_demo_task(void *priv)
     //注意：p2p对mac地址有一定格式要求，在assign_macaddr.c已经做了更改，需要在download.c中通过-format all
     //擦除一下flash，重新生成mac地址
     wifi_enter_p2p_mode(P2P_GO_MODE, WIFI_P2P_DEVICE_NAME);
+    /* wifi_enter_p2p_mode(P2P_GC_MODE, WIFI_P2P_DEVICE_NAME); */
 
     while (1) {
         os_time_dly(500);

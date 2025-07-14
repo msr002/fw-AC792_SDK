@@ -168,8 +168,12 @@ SDRAM_SIZE=2M;                          [SDRAM存储容量]
 #else
 SDRAM_SIZE=0M;                          [SDRAM存储容量]
 #endif
-SDRAM_REFRESH_TIME=32;                  [REFRESH_CYCLES]
-SDRAM_REFRESH_CYCLES=4K;                [4096|8192]
+SDRAM_REFRESH_TIME=32;                  [REFRESH_TIME_UNIT_IS_MS, 64(70度)|32(85度)|16(105度)]
+#if __SDRAM_SIZE__ < (32 * 1024 * 1024)
+SDRAM_REFRESH_CYCLES=4K;                [4K|8K]
+#else
+SDRAM_REFRESH_CYCLES=8K;                [4K|8K]
+#endif
 SDRAM_IO_HD=2;                          [SDRAM_IO_HIGH_DRIVE_LEVEL]
 SDRAM_TRIM_ENABLE=1;                    [SDRAM_TRIM_ENABLE]
 #if __SDRAM_SIZE__ >= (16 * 1024 * 1024)
@@ -189,8 +193,8 @@ SDRAM_TRCD=16;                          [ROW_TO_COLUMN_DELAY_UNIT_IS_NS]
 SDRAM_TRRD=8;                           [ACT_TO_ACT_DELAY_TIME_UNIT_IS_NS]
 SDRAM_TWTR=2;
 SDRAM_TRTW=4;
-SDRAM_TWR=15;
-SDRAM_TRC=52;
+SDRAM_TWR=15;                           [WRITE_RECOVER_TIME_UNIT_IS_NS]
+SDRAM_TRC=52;                           [AUTO_REFRESH_CMD_CYCLE_TIME_UNIT_IS_NS]
 SDRAM_WLCNT=0;
 #if TCFG_SDRAM_CLK >= 250000000
 SDRAM_RLCNT=4;
@@ -222,8 +226,8 @@ SDRAM_TRCD=21;                          [ROW_TO_COLUMN_DELAY_UNIT_IS_NS]
 SDRAM_TRRD=14;                          [ACT_TO_ACT_DELAY_TIME_UNIT_IS_NS]
 SDRAM_TWTR=2;
 SDRAM_TRTW=6;
-SDRAM_TWR=15;
-SDRAM_TRC=63;
+SDRAM_TWR=15;                           [WRITE_RECOVER_TIME_UNIT_IS_NS]
+SDRAM_TRC=63;                           [AUTO_REFRESH_CMD_CYCLE_TIME_UNIT_IS_NS]
 SDRAM_WLCNT=0;
 SDRAM_RLCNT=4;
 SDRAM_PHASE=3;

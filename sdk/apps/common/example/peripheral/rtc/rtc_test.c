@@ -52,8 +52,12 @@ static void time_rtc_test_task(void *arg)
     printf_time("set_sys_time:", time);
 
     // 设置闹钟
+#if 1
     time.sec = 59;
     dev_ioctl(rtc_hdl, IOCTL_SET_ALARM, (u32)&time);
+#else
+    dev_ioctl(rtc_hdl, IOCTL_SET_COUNTDOWN_ALARM, 30); ///< 设置倒计时闹钟，单位s
+#endif
 
     // 打开闹钟开关
     dev_ioctl(rtc_hdl, IOCTL_SET_ALARM_ENABLE, 1); ///< 闹钟使能。闹钟响铃回调函数接口在板级里配置

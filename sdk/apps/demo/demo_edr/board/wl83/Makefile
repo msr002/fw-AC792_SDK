@@ -254,6 +254,7 @@ LFLAGS := \
 	../../../../../cpu/wl83/liba/fs.a \
 	../../../../../cpu/wl83/liba/cfg_tool.a \
 	../../../../../cpu/wl83/liba/cpu.a \
+	../../../../../cpu/wl83/liba/video.a \
 	../../../../../cpu/wl83/liba/common_lib.a \
 	../../../../../cpu/wl83/liba/libaec.a \
 	../../../../../cpu/wl83/liba/wl_rf_common.a \

@@ -35,6 +35,12 @@ typedef struct {
      * Decrement all lifes by one every in every ::lv_img_cache_open.
      * If life == 0 the entry can be reused*/
     int32_t life;
+
+    //存放压缩资源路径
+    void *bin_src;
+    const void *not_release_src;
+    uint16_t not_release;
+
 } _lv_img_cache_entry_t;
 
 /**********************
@@ -66,6 +72,9 @@ void lv_img_cache_set_size(uint16_t new_slot_num);
  * @param src an image source path to a file or pointer to an `lv_img_dsc_t` variable.
  */
 void lv_img_cache_invalidate_src(const void *src);
+
+//指定资源不自动释放
+void lv_img_cache_mark_not_auto_release_src(const void *src);
 
 /**********************
  *      MACROS

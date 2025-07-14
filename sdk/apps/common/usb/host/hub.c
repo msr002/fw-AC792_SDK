@@ -29,6 +29,7 @@
 
 #if TCFG_HOST_HUB_ENABLE
 
+
 #include "usb/usb_common_def.h"
 
 static u32 _get_hub_descriptor(struct usb_host_device *host_dev, u8 *pBuf)
@@ -145,6 +146,7 @@ static const struct usb_interface_info _usb_if[USB_MAX_HW_NUM][1] = {
 
 int usb_hub_parser(struct usb_host_device *host_dev, u8 interface_num, const u8 *pBuf)
 {
+    printf("\n %s -[yhh] %d\n", __FUNCTION__, __LINE__);
     const u8 *ptr = pBuf;
     log_info("func:%s()\n", __func__);
     const usb_dev usb_id = host_device2id(host_dev);
@@ -298,14 +300,30 @@ u32 usb_hub_process(u32 usb_id)
     usb_if->dev.hub->nbrports = hub_desc.bNbrPorts;
     u32 target_ep = (usb_if->dev.hub->ep_pair[0]) & 0x7f;
     u32 host_ep = usb_get_ep_num(usb_id, USB_DIR_IN, USB_ENDPOINT_XFER_INT);
+    usb_if->dev.hub->host_epin = host_ep;
     usb_if->dev.hub->ep_pair[host_ep] = target_ep;
-    u8 *buffer = (u8 *) & (usb_if->dev.hub->buf);
     usb_h_set_ep_isr(host_dev, host_ep | USB_DIR_IN, hub_isr, (void *)host_dev);
     /* usb_write_rxfuncaddr(usb_id, host_ep, host_dev->private_data.devnum); */
+
+    usb_if->dev.hub->epin_buffer = usb_h_alloc_ep_buffer(usb_id, host_ep | USB_DIR_IN, 64);
+    if (!usb_if->dev.hub->epin_buffer) {
+        ret = -DEV_ERR_INVALID_BUF;
+        goto __exit_fail;
+    }
+
     usb_hub_rxreg_set(usb_id, host_ep, target_ep, &(host_dev->private_data.hub_info));
     usb_h_ep_config(usb_id,  host_ep | USB_DIR_IN, USB_ENDPOINT_XFER_INT, 1,
-                    4, buffer, 64); //interval 间隔有疑问,默认先给 4, HS=1ms, FS=4ms
+                    usb_if->dev.hub->interval, usb_if->dev.hub->epin_buffer, 64); //interval 间隔有疑问,默认先给 4, HS=1ms, FS=4ms
     usb_h_ep_read_async(usb_id, host_ep, target_ep, NULL, 0, USB_ENDPOINT_XFER_INT, 1);
+
+__exit_fail:
+    if (usb_if->dev.hub) {
+        if (usb_if->dev.hub->epin_buffer) {
+            usb_h_free_ep_buffer(usb_id, usb_if->dev.hub->epin_buffer);
+            usb_if->dev.hub->epin_buffer = NULL;
+        }
+    }
+
     return 0;
 }
 
@@ -382,4 +400,47 @@ u32 usb_hub_port_event(struct usb_host_device *host_dev, u32 value, enum hub_por
     }
     return 0;
 }
+
+u32 usb_hub_exit(u32 usb_id)
+{
+    struct usb_host_device *host_dev = (struct usb_host_device *)host_id2device(usb_id);
+    struct usb_host_device *child_dev;
+    struct hub_device_t *hub;
+
+    if (!host_dev) {
+        log_error("hub exit, host_dev");
+        return DEV_ERR_NONE;
+    }
+
+    hub = host_dev->interface_info[0]->dev.hub;
+
+    if (!hub) {
+        log_error("hub exit, host_dev");
+        return DEV_ERR_NONE;
+    }
+
+    usb_h_set_ep_isr(host_dev, hub->host_epin | USB_DIR_IN, NULL, NULL);
+    usb_clr_intr_rxe(usb_id, hub->host_epin);
+
+    if (hub->epin_buffer) {
+        usb_h_free_ep_buffer(usb_id, hub->epin_buffer);
+        hub->epin_buffer = NULL;
+    }
+
+    for (int port = 0; port < 7; port++) {
+        if (hub->child_dev[port] != NULL) {
+            usb_host_unmount(usb_id, port);
+            child_dev = hub->child_dev[port];
+            if (child_dev) {
+                free(child_dev);
+                hub->child_dev[port] = NULL;
+            }
+        }
+    }
+
+    host_dev->interface_info[0] = NULL;
+    hub = NULL;
+    return DEV_ERR_NONE;
+}
+
 #endif

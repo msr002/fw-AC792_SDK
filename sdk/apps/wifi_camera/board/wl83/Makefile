@@ -124,6 +124,8 @@ DEFINES := \
 	-DCONFIG_LMP_CONN_SUSPEND_ENABLE \
 	-DCONFIG_LMP_REFRESH_ENCRYPTION_KEY_ENABLE \
 	-DLVGL_COMMIT_HASH=\"release/v8.4_2409c8dfc6b8d9ae3f7970e1c333e743e0fd2911\" \
+	-DFREETYPE_COMMIT_HASH=\"45903920b984540bb629bc89f4c010159c23a89a\" \
+	-DFT2_BUILD_LIBRARY \
 	-D_POSIX_SOURCE \
 	-DFIONREAD \
 	-DFIONBIO \
@@ -221,6 +223,7 @@ INCLUDES := \
 	-I../../../../apps/wifi_camera/lvgl_v8_ui_app/style_JL/generated/gui_timelines \
 	-I../../../../apps/wifi_camera/lvgl_v8_ui_app/style_JL/generated/i18n \
 	-I../../../../apps/wifi_camera/lvgl_v8_ui_app/style_JL/custom \
+	-I../../../../apps/common/example/third_party/freetype/include \
 	-I../../../../include_lib/driver/device/usb \
 	-I../../../../include_lib/driver/device/usb/device \
 	-I../../../../include_lib/driver/device/usb/host \
@@ -434,9 +437,42 @@ c_SRC_FILES := \
 	../../../../apps/common/dma2d_gpu/filter/dma2d_adapter.c \
 	../../../../apps/common/dma2d_gpu/filter/gpu_adapter.c \
 	../../../../apps/common/example/peripheral/lcd/lcd_driver_test.c \
+	../../../../apps/common/example/third_party/freetype/src/autofit/autofit.c \
+	../../../../apps/common/example/third_party/freetype/src/base/ftbase.c \
+	../../../../apps/common/example/third_party/freetype/src/base/ftbitmap.c \
+	../../../../apps/common/example/third_party/freetype/src/base/ftdebug.c \
+	../../../../apps/common/example/third_party/freetype/src/base/ftglyph.c \
+	../../../../apps/common/example/third_party/freetype/src/base/ftinit.c \
+	../../../../apps/common/example/third_party/freetype/src/base/ftmm.c \
+	../../../../apps/common/example/third_party/freetype/src/base/ftsystem.c \
+	../../../../apps/common/example/third_party/freetype/src/bdf/bdf.c \
+	../../../../apps/common/example/third_party/freetype/src/bzip2/ftbzip2.c \
+	../../../../apps/common/example/third_party/freetype/src/cache/ftcache.c \
+	../../../../apps/common/example/third_party/freetype/src/cff/cff.c \
+	../../../../apps/common/example/third_party/freetype/src/cid/type1cid.c \
+	../../../../apps/common/example/third_party/freetype/src/dlg/dlgwrap.c \
+	../../../../apps/common/example/third_party/freetype/src/gxvalid/gxvalid.c \
+	../../../../apps/common/example/third_party/freetype/src/gzip/ftgzip.c \
+	../../../../apps/common/example/third_party/freetype/src/lzw/ftlzw.c \
+	../../../../apps/common/example/third_party/freetype/src/otvalid/otvalid.c \
+	../../../../apps/common/example/third_party/freetype/src/pcf/pcf.c \
+	../../../../apps/common/example/third_party/freetype/src/pfr/pfr.c \
+	../../../../apps/common/example/third_party/freetype/src/psaux/psaux.c \
+	../../../../apps/common/example/third_party/freetype/src/pshinter/pshinter.c \
+	../../../../apps/common/example/third_party/freetype/src/psnames/psnames.c \
+	../../../../apps/common/example/third_party/freetype/src/raster/raster.c \
+	../../../../apps/common/example/third_party/freetype/src/sdf/sdf.c \
+	../../../../apps/common/example/third_party/freetype/src/sfnt/sfnt.c \
+	../../../../apps/common/example/third_party/freetype/src/smooth/smooth.c \
+	../../../../apps/common/example/third_party/freetype/src/svg/svg.c \
+	../../../../apps/common/example/third_party/freetype/src/truetype/truetype.c \
+	../../../../apps/common/example/third_party/freetype/src/type1/type1.c \
+	../../../../apps/common/example/third_party/freetype/src/type42/type42.c \
+	../../../../apps/common/example/third_party/freetype/src/winfonts/winfnt.c \
 	../../../../apps/common/example/third_party/sqlite/os_jl.c \
 	../../../../apps/common/example/third_party/sqlite/sqlite3.c \
 	../../../../apps/common/example/third_party/sqlite/sqlite_test_main.c \
+	../../../../apps/common/example/video/image/jpeg/jpeg_disp_frame.c \
 	../../../../apps/common/fat_nor/extflash.c \
 	../../../../apps/common/file_operate/file_bs_deal.c \
 	../../../../apps/common/file_operate/file_manager.c \
@@ -1260,6 +1296,7 @@ c_SRC_FILES := \
 	../../../../audio/framework/nodes/esco_tx_node.c \
 	../../../../audio/framework/nodes/iis_node.c \
 	../../../../audio/framework/nodes/le_audio_source.c \
+	../../../../audio/framework/nodes/lhdc_x_node.c \
 	../../../../audio/framework/nodes/local_tws_source_node.c \
 	../../../../audio/framework/nodes/multi_ch_iis_node.c \
 	../../../../audio/framework/nodes/ns_node.c \
@@ -1454,6 +1491,7 @@ LFLAGS := \
 	../../../../cpu/wl83/liba/video_engine.a \
 	../../../../cpu/wl83/liba/video_rec_server.a \
 	../../../../cpu/wl83/liba/video_dec_server.a \
+	../../../../cpu/wl83/liba/video.a \
 	../../../../cpu/wl83/liba/media.a \
 	../../../../cpu/wl83/liba/media/lib_mp3_dec.a \
 	../../../../cpu/wl83/liba/media/lib_m4a_dec.a \

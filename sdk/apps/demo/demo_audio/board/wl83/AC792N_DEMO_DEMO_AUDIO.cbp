@@ -118,6 +118,7 @@
 <Add option="../../../../../cpu/wl83/liba/system.a" />
 <Add option="../../../../../cpu/wl83/liba/cfg_tool.a" />
 <Add option="../../../../../cpu/wl83/liba/cpu.a" />
+<Add option="../../../../../cpu/wl83/liba/video.a" />
 <Add option="../../../../../cpu/wl83/liba/update.a" />
 <Add option="../../../../../cpu/wl83/liba/common_lib.a" />
 <Add option="../../../../../cpu/wl83/liba/audio_server.a" />
@@ -150,7 +151,7 @@
 <Add option="../../../../../cpu/wl83/liba/libdns.a" />
 <Add option="../../../../../cpu/wl83/liba/libjlsp.a" />
 <Add option="../../../../../cpu/wl83/liba/libjlsp_kws_far_keyword.a" />
-<Add option="../../../../../cpu/wl83/liba/libjlsp_kws_common.a" />
+<Add option="../../../../../cpu/wl83/liba/libkwscommon.a" />
 <Add option="../../../../../cpu/wl83/liba/lib_usb_syn.a" />
 <Add option="../../../../../cpu/wl83/liba/libaisp_single.a" />
 <Add option="../../../../../cpu/wl83/liba/libauth_aisp.a" />
@@ -210,6 +211,7 @@
 <Unit filename="../../../../../apps/common/audio_music/music_decrypt.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../../apps/common/audio_music/pcm_play_api.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../../apps/common/audio_music/usb_audio_api.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="../../../../../apps/common/config/log_config/app_config.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../../apps/common/config/log_config/lib_driver_config.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../../apps/common/config/log_config/lib_power_config.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../../apps/common/config/log_config/lib_system_config.c"><Option compilerVer="CC"/></Unit>
@@ -506,6 +508,7 @@
 <Unit filename="../../../../../include_lib/net/server/net_server.h" />
 <Unit filename="../../../../../include_lib/net/version.z.S" />
 <Unit filename="../../../../../include_lib/net/wifi/wifi_connect.h" />
+<Unit filename="../../../../../include_lib/net/wifi/wifi_def.h" />
 <Unit filename="../../../../../include_lib/newlib/include/assert.h" />
 <Unit filename="../../../../../include_lib/newlib/include/machine/time.h" />
 <Unit filename="../../../../../include_lib/newlib/include/machine/types.h" />

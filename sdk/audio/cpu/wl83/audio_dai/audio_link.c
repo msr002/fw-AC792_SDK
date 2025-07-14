@@ -293,6 +293,7 @@ static void alink0_dma_isr(void)
     u8 ch = 0;
     u32 len = 0;
 
+    audio_alink_lock(0);
     u32 reg = JL_ALNK->CON2;
 
     for (ch = 0; ch < 4; ch++) {
@@ -313,13 +314,21 @@ static void alink0_dma_isr(void)
                     p_alink0_parm->ch_cfg[ch].isr_cb(p_alink0_parm->ch_cfg[ch].private_data, buf_addr, len);
                 } else {
                     u32 remain = 0;
+                    int out_len = (JL_ALNK->PNS & 0xffff) << 2;
                     len = alink_isr_get_len(p_alink0_parm, ch, &remain);
-                    p_alink0_parm->ch_cfg[ch].isr_cb(p_alink0_parm->ch_cfg[ch].private_data, buf_addr, len);
-                    if (remain) {
-                        buf_addr = (s32 *)(*ALNK0_BUF_ADR[ch]);
-                        p_alink0_parm->ch_cfg[ch].isr_cb(p_alink0_parm->ch_cfg[ch].private_data, buf_addr, remain);
+                    if (len >= out_len) {
+                        len = out_len;
+                        p_alink0_parm->ch_cfg[ch].isr_cb(p_alink0_parm->ch_cfg[ch].private_data, buf_addr, len);
+                    } else {
+                        p_alink0_parm->ch_cfg[ch].isr_cb(p_alink0_parm->ch_cfg[ch].private_data, buf_addr, len);
+                        if ((len + remain) >= out_len) {
+                            if (remain) {
+                                buf_addr = (s32 *)(*ALNK0_BUF_ADR[ch]);
+                                p_alink0_parm->ch_cfg[ch].isr_cb(p_alink0_parm->ch_cfg[ch].private_data, buf_addr, out_len - len);
+                            }
+                        }
                     }
-                    alink_set_shn(&p_alink0_parm->ch_cfg[ch], (remain + len) / 4);
+                    alink_set_shn(&p_alink0_parm->ch_cfg[ch], out_len / 4);
                 }
             } else {//兵乓buf
                 p_alink0_parm->ch_cfg[ch].isr_cb(p_alink0_parm->ch_cfg[ch].private_data, buf_addr, p_alink0_parm->dma_len / 2);
@@ -334,6 +343,7 @@ static void alink0_dma_isr(void)
 
         ALINK_CLR_CHx_PND(p_alink0_parm->module, ch);
     }
+    audio_alink_unlock(0);
 }
 
 static void alink_sr(void *hw_alink, u32 rate)

@@ -45,6 +45,7 @@ void audio_common_clock_switch(int clk_fre);
 void audio_common_power_open(void);
 void audio_common_power_close(void);
 void audio_common_power_down_close(void);
+int get_audio_common_power_status(void);
 int audio_common_clock_get(void);
 int audio_adc_digital_status_add_check(int add);
 int audio_adc_analog_status_add_check(u8 ch_index, int add);

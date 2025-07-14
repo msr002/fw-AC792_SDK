@@ -768,6 +768,8 @@ void audio_fade_in_fade_out(u8 left_vol, u8 right_vol)
 #endif/*SYS_VOL_TYPE == VOL_TYPE_DIGITAL_HW*/
 }
 
+extern const int config_vm_save_in_ram_enable;
+
 /*
  *************************************************************
  *					Audio Volume Save
@@ -793,13 +795,30 @@ static void app_audio_volume_save_do(void *priv)
     TIMER_EXIT_CRITICAL();
 }
 
+static void app_audio_volume_save_once(void)
+{
+    log_info("VOL_SAVE %d", get_music_volume());
+    s16 save_music_volume = get_music_volume();
+    syscfg_write(CFG_MUSIC_VOL, &save_music_volume, 2);//中断里不能操作vm 关中断不能操作vm
+}
+
+static void app_audio_volume_save_notify(void)
+{
+    int msg[2] = {(int)app_audio_volume_save_once, 0};
+    os_taskq_post_type("app_core", Q_CALLBACK, ARRAY_SIZE(msg), msg);
+}
+
 static void app_audio_volume_change(void)
 {
 #ifndef AUDIO_VOLUME_SAVE_DISABLE
     TIMER_ENTER_CRITICAL();
-    __this->save_vol_cnt = 0;
-    if (__this->save_vol_timer == 0) {
-        __this->save_vol_timer = sys_timer_add_to_task("app_core", NULL, app_audio_volume_save_do, 1000);//中断里不能操作vm 关中断不能操作vm
+    if (config_vm_save_in_ram_enable) {
+        app_audio_volume_save_notify();
+    } else {
+        __this->save_vol_cnt = 0;
+        if (__this->save_vol_timer == 0) {
+            __this->save_vol_timer = sys_timer_add_to_task("app_core", NULL, app_audio_volume_save_do, 1000);//中断里不能操作vm 关中断不能操作vm
+        }
     }
     TIMER_EXIT_CRITICAL();
 #endif

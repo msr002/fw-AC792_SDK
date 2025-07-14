@@ -173,6 +173,7 @@ c_SRC_FILES := \
 	../../../../../apps/common/audio_music/music_decrypt.c \
 	../../../../../apps/common/audio_music/pcm_play_api.c \
 	../../../../../apps/common/audio_music/usb_audio_api.c \
+	../../../../../apps/common/config/log_config/app_config.c \
 	../../../../../apps/common/config/log_config/lib_driver_config.c \
 	../../../../../apps/common/config/log_config/lib_power_config.c \
 	../../../../../apps/common/config/log_config/lib_system_config.c \
@@ -327,6 +328,7 @@ LFLAGS := \
 	../../../../../cpu/wl83/liba/system.a \
 	../../../../../cpu/wl83/liba/cfg_tool.a \
 	../../../../../cpu/wl83/liba/cpu.a \
+	../../../../../cpu/wl83/liba/video.a \
 	../../../../../cpu/wl83/liba/update.a \
 	../../../../../cpu/wl83/liba/common_lib.a \
 	../../../../../cpu/wl83/liba/audio_server.a \
@@ -359,7 +361,7 @@ LFLAGS := \
 	../../../../../cpu/wl83/liba/libdns.a \
 	../../../../../cpu/wl83/liba/libjlsp.a \
 	../../../../../cpu/wl83/liba/libjlsp_kws_far_keyword.a \
-	../../../../../cpu/wl83/liba/libjlsp_kws_common.a \
+	../../../../../cpu/wl83/liba/libkwscommon.a \
 	../../../../../cpu/wl83/liba/lib_usb_syn.a \
 	../../../../../cpu/wl83/liba/libaisp_single.a \
 	../../../../../cpu/wl83/liba/libauth_aisp.a \

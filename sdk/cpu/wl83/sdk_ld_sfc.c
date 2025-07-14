@@ -238,6 +238,7 @@ SECTIONS
     .boot_info ALIGN(4):
     {
         *(.boot_info)
+        *(.boot_info_dma)
         . = ALIGN(4); // must at tail, make ram0_data size align 4
     } > boot_info
 

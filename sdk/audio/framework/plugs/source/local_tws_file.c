@@ -73,7 +73,7 @@ static enum stream_node_state local_tws_get_frame(void *file, struct stream_fram
         diff /= TIMESTAMP_US_DENOMINATOR;
         if (diff <= 12000) {
             log_debug("-rx : %u, %u, %dus", header.timestamp, current_time, diff);
-            putchar('T');
+            putchar('L');
         }
 
         if (diff < -100000) {

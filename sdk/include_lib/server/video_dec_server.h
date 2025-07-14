@@ -9,6 +9,8 @@
 #define VIDEO_DEC_EVENT_END          0x20
 #define VIDEO_DEC_EVENT_CURR_TIME    0x21
 #define VIDEO_DEC_EVENT_ERR          0x22
+#define VIDEO_DEC_EVENT_FIRST_FRAME  0x23
+#define VIDEO_DEC_EVENT_LAST_FRAME   0x24
 
 
 /*struct jpeg_file {

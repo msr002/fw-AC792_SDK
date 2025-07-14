@@ -150,6 +150,13 @@ void bt_reset_local_name(void)
     hci_vendor_update_name();
 }
 
+void bt_set_local_name(const char *name)
+{
+    if (name && strlen(name) > 0) {
+        strncpy(edr_name, name, LOCAL_NAME_LEN);
+    }
+}
+
 const char *bt_get_pin_code(void)
 {
     return pincode;

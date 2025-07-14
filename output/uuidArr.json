@@ -10,6 +10,18 @@
     "defaultValue": "              CLK          CMD       SD0         SD1          SD2          SD3 \nA组IO：PB15       PB14       PB13       PB12       PB11       PB10 \nB组IO：PE00       PD15        PD14       PD13       PD12       PD11"
   },
   {
+    "uuid": "iic2",
+    "defaultValue": "iic2"
+  },
+  {
+    "uuid": "iic1",
+    "defaultValue": "iic1"
+  },
+  {
+    "uuid": "0",
+    "defaultValue": "0"
+  },
+  {
     "uuid": "RECORDER",
     "defaultValue": "RECORDER"
   },

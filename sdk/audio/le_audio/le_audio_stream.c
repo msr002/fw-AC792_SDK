@@ -244,11 +244,17 @@ void *le_audio_stream_tx_open(void *le_audio, int coding_type, void *priv, int (
     tx_stream = (struct le_audio_tx_stream *)zalloc(sizeof(struct le_audio_tx_stream));
 
     if (ctx->fmt.coding_type == AUDIO_CODING_LC3) {
-        frame_size = ctx->fmt.frame_dms * ctx->fmt.bit_rate / 8 / 10000 ;
+        frame_size = ctx->fmt.frame_dms * ctx->fmt.bit_rate / 8 / 10000;
     } else if (ctx->fmt.coding_type == AUDIO_CODING_JLA) {
         frame_size = ctx->fmt.frame_dms * ctx->fmt.bit_rate / 8 / 10000 + 2;
     } else if (ctx->fmt.coding_type == AUDIO_CODING_JLA_V2) {
         frame_size = ctx->fmt.frame_dms * ctx->fmt.bit_rate / 8 / 10000 + 2;
+#if (LE_AUDIO_CODEC_TYPE == AUDIO_CODING_JLA_LL)
+    } else if (ctx->fmt.coding_type == AUDIO_CODING_JLA_LL) {
+        frame_size = jla_ll_enc_frame_len();
+#endif
+    } else if (coding_type == AUDIO_CODING_JLA_LW) {
+        frame_size = ctx->fmt.frame_dms * ctx->fmt.bit_rate / 8 / 10000;
     } else {
         //TODO : 其他格式的buffer设置
     }
@@ -353,11 +359,17 @@ void *le_audio_stream_rx_open(void *le_audio, int coding_type)
 
     INIT_LIST_HEAD(&rx_stream->frames);
     if (coding_type == AUDIO_CODING_LC3) {
-        frame_size = ctx->fmt.frame_dms * ctx->fmt.bit_rate / 8 / 10000 ;
+        frame_size = ctx->fmt.frame_dms * ctx->fmt.bit_rate / 8 / 10000;
     } else if (coding_type == AUDIO_CODING_JLA) {
         frame_size = ctx->fmt.frame_dms * ctx->fmt.bit_rate / 8 / 10000 + 2;
     } else if (coding_type == AUDIO_CODING_JLA_V2) {
         frame_size = ctx->fmt.frame_dms * ctx->fmt.bit_rate / 8 / 10000 + 2;
+#if (LE_AUDIO_CODEC_TYPE == AUDIO_CODING_JLA_LL)
+    } else if (coding_type == AUDIO_CODING_JLA_LL) {
+        frame_size = jla_ll_enc_frame_len();;
+#endif
+    } else if (ctx->fmt.coding_type == AUDIO_CODING_JLA_LW) {
+        frame_size = ctx->fmt.frame_dms * ctx->fmt.bit_rate / 8 / 10000;
     } else if (coding_type == AUDIO_CODING_PCM) {
         frame_size = ctx->fmt.frame_dms * ctx->fmt.sample_rate * ctx->fmt.nch * (ctx->fmt.bit_width ? 4 : 2) / 10000;
     }

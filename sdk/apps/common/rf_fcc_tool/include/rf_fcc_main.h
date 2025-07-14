@@ -23,6 +23,8 @@ extern const u8 config_rf_test_enable;
 //#define RF_FCC_MODE_KEEP
 //#define FCC_USB_COMM
 
+#define CONFIG_FCC_BT_ADJ_ENABLE
+
 #define CONFIG_RF_FCC_TRIGGER_MODE   AUTO_STARTUP_MODE //RF_FCC触发方式配置
 
 #define CONFIG_RF_FCC_TRIGGER_IO_PORT   IO_PORTC_01    //RF_FCC"IO检测"IO配置

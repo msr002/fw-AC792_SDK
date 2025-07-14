@@ -56,6 +56,7 @@ struct fb_lcd_t {
     volatile u8 out_buf_index;
     volatile u8 lcd_push_task_run;
     OS_SEM lcd_async_sem;
+    OS_SEM lcd_async_busy_sem;
 };
 
 static u8 lcd_buf_num = FB_LCD_BUF_NUM;
@@ -68,9 +69,14 @@ static volatile u16 g_dmm_line;
 static struct fb_lcd_t _fb_lcd[FB_MAX_OUT_NUM];
 #define  __this   (&_fb_lcd[id])
 
+enum {
+    FB_LCD_MSG_ASYNC_WAIT_VSYNC,
+    FB_LCD_MSG_ASYNC_UPDATE,
+};
 int fb_frame_buf_rotate(uint8_t *image_src, uint8_t *image_dst, int src_width, int src_height, int src_stride,
                         int dst_width, int dst_height, int dst_stride, int degree, int xoffset, int yoffset,
                         int in_format, int out_format, uint8_t mirror);
+void fb_lcd_frame_buf_update(u8 id, u8 *frame_buffer);
 
 
 static void __fb_buf_clear(u8 *frame_buffer, u32 frame_size, u32 format)
@@ -500,17 +506,29 @@ static void __fb_lcd_async_push_task(void *p)
         ret = os_taskq_pend_timeout(msg, ARRAY_SIZE(msg), 0);
         /* printf("ret=%d\n",ret ); */
         if (ret == OS_TASKQ)  {
-            /* printf("swap addr=%x\n",msg[1] ); */
-            frame_period_start_us = get_system_us();
-            __fb_lcd_frame_swap_flush(msg[0], (u8 *)msg[1]);
+            switch (msg[1]) {
+            case FB_LCD_MSG_ASYNC_WAIT_VSYNC:
+                /* printf("swap addr=%x\n",msg[2] ); */
+                frame_period_start_us = get_system_us();
+                __fb_lcd_frame_swap_flush(id, (u8 *)msg[2]);
 #if FB_LCD_FRAME_RATE_DEBUG_EN
-            frame_period_us = get_system_us() - frame_period_start_us;;
-            if (max_frame_period_us < frame_period_us) {
-                max_frame_period_us = frame_period_us;
-                log_info("fb lcd max frame period : %dus", max_frame_period_us);
-            }
-            __fb_lcd_framerate_calc(id);
+                frame_period_us = get_system_us() - frame_period_start_us;;
+                if (max_frame_period_us < frame_period_us) {
+                    max_frame_period_us = frame_period_us;
+                    log_info("fb lcd max frame period : %dus", max_frame_period_us);
+                }
+                __fb_lcd_framerate_calc(id);
 #endif
+                break;
+            case FB_LCD_MSG_ASYNC_UPDATE:
+                fb_lcd_frame_buf_update(id, (u8 *)(msg[2]));
+                os_sem_post(&__this->lcd_async_sem);
+                if (os_sem_valid(&__this->lcd_async_busy_sem)) {
+                    os_sem_set(&__this->lcd_async_busy_sem, 0);
+                    os_sem_post(&__this->lcd_async_busy_sem);
+                }
+                break;
+            }
         }
     }
 }
@@ -634,10 +652,12 @@ int fb_lcd_device_close(u8 id)
  **/
 void fb_lcd_frame_buf_async_flush(u8 id, u8 *frame_buffer)
 {
-    int msg[2];
-    msg[0] = id;
+    char async_lcd_task_name[20];
+    int msg[3];
+    msg[0] = FB_LCD_MSG_ASYNC_WAIT_VSYNC;
     msg[1] = (int)frame_buffer;
-    int err =  os_taskq_post_type("async_lcd_task", Q_USER, ARRAY_SIZE(msg), msg);
+    sprintf(async_lcd_task_name, "async_lcd_task%d", id);
+    int err =  os_taskq_post_type(async_lcd_task_name, Q_USER, ARRAY_SIZE(msg), msg);
     if (err) {
         printf("fb_lcd_async_flush post err=%d\n", err);
     }
@@ -708,11 +728,16 @@ _exit:
 #endif
 }
 
-static void _fb_lcd_update_async(u8 id, void *priv)
+int fb_lcd_frame_async_wait(u8 id)
 {
-    u8 *frame_buffer = (u8 *)priv;
-    fb_lcd_frame_buf_update(id, frame_buffer);
-    os_sem_post(&__this->lcd_async_sem);
+    if (!os_sem_valid(&__this->lcd_async_sem)) {
+        return 0;
+    }
+    if (!os_sem_valid(&__this->lcd_async_busy_sem)) {
+        os_sem_create(&__this->lcd_async_busy_sem, 1);
+    }
+
+    return os_sem_pend(&__this->lcd_async_busy_sem, 50);
 }
 /**
  * @brief   异步lcd显示数据
@@ -722,26 +747,49 @@ static void _fb_lcd_update_async(u8 id, void *priv)
  **/
 int fb_lcd_frame_buf_update_async(u8 id, u8 *frame_buffer)
 {
+    char async_lcd_task_name[20];
+    sprintf(async_lcd_task_name, "async_lcd_task%d", id);
+    if (__this->lcd_push_task_run == 0) {
+        //创建线程,用于异步推屏线程
+        thread_fork(async_lcd_task_name, 20, 1024, 256, 0, __fb_lcd_async_push_task, (void *)id);
+        __this->lcd_push_task_run = 1;
+
+    }
     if (!os_sem_valid(&__this->lcd_async_sem)) {
         os_sem_create(&__this->lcd_async_sem, 1);
     }
 
-    os_sem_pend(&__this->lcd_async_sem, 0);
+    os_sem_pend(&__this->lcd_async_sem, 50);
 
     int err;
-    int msg[4];
-    msg[0] = (int)_fb_lcd_update_async;
-    msg[1] = 2;
-    msg[2] = (int)id;
-    msg[3] = (int)frame_buffer;
-    err =  os_taskq_post_type("sys_timer", Q_CALLBACK, ARRAY_SIZE(msg), msg);
+    int msg[3];
+    msg[0] = FB_LCD_MSG_ASYNC_UPDATE;
+    msg[1] = frame_buffer;
+    err =  os_taskq_post_type(async_lcd_task_name, Q_USER, ARRAY_SIZE(msg), msg);
     if (err) {
         os_sem_post(&__this->lcd_async_sem);
+        if (os_sem_valid(&__this->lcd_async_busy_sem)) {
+            os_sem_post(&__this->lcd_async_busy_sem);
+        }
     }
 
     return err;
 }
 
+/**
+ * @brief   lcd显存交换
+ * @param:  id: 输出id
+ * @param:  frame_buffer:待交互的显存
+ * @return: none
+ **/
+int fb_lcd_frame_buf_swap(u8 id, u8 *frame_buffer)
+{
+    int ret = 0;
+    ret = __fb_lcd_frame_swap_flush(id, frame_buffer);
+#if FB_LCD_FRAME_RATE_DEBUG_EN
+    __fb_lcd_framerate_calc(id);
+#endif
+}
 /**
  * @brief   获取lcd是否插值显示
  * @param:  none
@@ -836,6 +884,26 @@ u16 fb_lcd_get_rotate(u8 id)
 u32 fb_lcd_get_buf0(u8 id)
 {
     return __this->out_buf[0];
+}
+/**
+ * @brief   设置lcd屏显显存buffer0
+ * @param:  id
+ * @param:  buffer
+ * @return: none
+ **/
+void fb_lcd_set_buf0(u8 id, u8 *buffer)
+{
+    __this->out_buf[0] = buffer;
+}
+/**
+ * @brief   设置lcd屏显显存buffer1
+ * @param:  id
+ * @param:  buffer
+ * @return: none
+ **/
+void fb_lcd_set_buf1(u8 id, u8 *buffer)
+{
+    __this->out_buf[1] = buffer;
 }
 /**
  * @brief   获取lcd屏显显存buffer1

@@ -15,6 +15,7 @@
 #define IOCTL_GET_ALARM                 _IOR(RTC_MAGIC, 3, struct sys_time *)
 #define IOCTL_SET_ALARM                 _IOW(RTC_MAGIC, 4, struct sys_time *)
 #define IOCTL_SET_ALARM_ENABLE          _IOW(RTC_MAGIC, 5, bool)
+#define IOCTL_SET_COUNTDOWN_ALARM       _IOW(RTC_MAGIC, 6, u32)
 /* \} name */
 
 /**

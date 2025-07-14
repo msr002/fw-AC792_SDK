@@ -1047,7 +1047,6 @@ void sysmenu_subpage_btnlist_keyevent_cb(lv_ui *ui)
             lv_dropdown_get_selected_str(ui_scr->sys_setting_ddlist_6, &carnumber_cn[7], 2);
             lv_dropdown_get_selected_str(ui_scr->sys_setting_ddlist_7, &carnumber_cn[8], 2);
             printf("[chili] %s carnumber_cn:%s   \n", __func__, carnumber_cn);
-            lvgl_module_msg_send_ptr(carnumber_cn, 0);
             int  selected_idx = lv_dropdown_get_selected(ui_scr->sys_setting_ddlist_1);
             db_update("proc", selected_idx);
             unsigned char gb2312Data[16] = {0};
@@ -1055,6 +1054,7 @@ void sysmenu_subpage_btnlist_keyevent_cb(lv_ui *ui)
             uint32_t *carnum_p = gb2312Data;
             db_update("cna", carnum_p[0]);
             db_update("cnb", carnum_p[1]);
+            lvgl_module_msg_send_ptr(carnumber_cn, 0);
             break;
         default:
             break;

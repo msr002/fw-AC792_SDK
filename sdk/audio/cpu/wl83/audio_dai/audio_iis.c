@@ -68,6 +68,15 @@ static const struct limiter_param_tool_set limiter_parm = {
     },
 };
 
+void audio_alink_lock(u8 module_idx)
+{
+    spin_lock(&lock[module_idx]);
+}
+void audio_alink_unlock(u8 module_idx)
+{
+    spin_unlock(&lock[module_idx]);
+}
+
 int alink_fifo_buffered_frames(struct _iis_hdl *hdl, u8 ch_idx);
 int audio_iis_get_buffered_frames(void *hdl, u8 ch_idx)
 {
@@ -324,14 +333,14 @@ static void iis_txx_handle(void *priv, void *addr, int len, u8 ch_idx)
     struct alnk_hw_ch *hw_channel_parm = (struct alnk_hw_ch *)(hdl->hw_alink_ch[ch_idx]);
     audio_iis_buf_frames_fade_out(hdl, ch_idx, alink_fifo_buffered_frames(hdl, ch_idx));
     struct audio_iis_channel *ch;
-    spin_lock(&lock[hdl->alink_parm.module]);
+    /* spin_lock(&lock[hdl->alink_parm.module]); */
     list_for_each_entry(ch, &hdl->tx_irq_list[ch_idx], entry) {
         if (ch->attr.ch_idx == ch_idx) {
             ch->fade_out = 1;
         }
     }
     alink_set_ch_ie(hw_channel_parm, 0);
-    spin_unlock(&lock[hdl->alink_parm.module]);
+    /* spin_unlock(&lock[hdl->alink_parm.module]); */
     if (hdl->alink_parm.module) {
         putchar('V');
     } else {
@@ -363,11 +372,11 @@ static void iis_rxx_handle(void *priv, void *addr, int len, u8 ch_idx)
 {
     struct _iis_hdl *hdl = (struct _iis_hdl *)priv;
     struct audio_iis_rx_output_hdl *p;
-    spin_lock(&lock[hdl->alink_parm.module]);
+    /* spin_lock(&lock[hdl->alink_parm.module]); */
     list_for_each_entry(p, &hdl->rx_irq_list[ch_idx], entry) {
         p->handler(p->priv, addr, len);
     }
-    spin_unlock(&lock[hdl->alink_parm.module]);
+    /* spin_unlock(&lock[hdl->alink_parm.module]); */
 }
 static void iis_rx0_handle(void *priv, void *addr, int len)	//中断回调
 {
@@ -1278,7 +1287,7 @@ int audio_iis_add_syncts_with_timestamp(void *iis_ch, void *syncts, u32 timestam
             /* } */
         }
     }
-    os_mutex_post(&hdl->mutex[ch->attr.ch_idx]);
+    /* os_mutex_post(&hdl->mutex[ch->attr.ch_idx]); */
     /* }else{ */
     /* list_for_each_entry(node, &hdl->sync_list[ch->attr.ch_idx], entry) { */
     /* if ((u32)node->hdl == (u32)syncts) { */
@@ -1301,7 +1310,7 @@ int audio_iis_add_syncts_with_timestamp(void *iis_ch, void *syncts, u32 timestam
     node->network = sound_pcm_get_syncts_network(syncts);
     node->timestamp = timestamp;
     node->ch = ch;
-    os_mutex_pend(&hdl->mutex[ch->attr.ch_idx], 0);
+    /* os_mutex_pend(&hdl->mutex[ch->attr.ch_idx], 0); */
     spin_lock(&lock[hdl->alink_parm.module]);
     list_add(&node->entry, &hdl->sync_list[ch->attr.ch_idx]);
     spin_unlock(&lock[hdl->alink_parm.module]);

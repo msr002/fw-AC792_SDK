@@ -153,6 +153,9 @@ static  struct usb_uvc *device_to_uvc(struct device *device)
     struct usb_host_device *host_dev = device_to_usbdev(device);
     struct usb_uvc *uvc;
 
+    if (!host_dev) {
+        return 0;
+    }
     if (host_dev->father) {
         usb_dev uvc_id = usbdev_to_usbid(device);
         uvc = uvc_host_inf[uvc_id].dev.uvc;
@@ -212,7 +215,7 @@ int usb_host_video_init(const usb_dev usb_id, const u8 sub_id)
             goto __exit_fail;
         }
         uvc->host_ep = usb_get_ep_num(usb_id, USB_DIR_IN, USB_ENDPOINT_XFER_ISOC);
-        if ((int)uvc->host_ep < 0) {
+        if (uvc->host_ep < 0 || uvc->host_ep >= 255) {
             log_error("uvc get ep_num fail");
             ret = -DEV_ERR_INUSE;
             goto __exit_fail;
@@ -861,7 +864,8 @@ static void vs_iso_handler(struct usb_host_device *host_dev, u32 ep)
         return;
     }
     uvc = device_to_uvc(device);
-    if (!host_dev) {
+    /* if (!host_dev) { */
+    if (!uvc) {
         return;
     }
     hdl->in_irq = 1;
@@ -973,7 +977,7 @@ static void vs_iso_burst_handler(struct usb_host_device *host_dev, u32 ep)
         return;
     }
     uvc = device_to_uvc(device);
-    if (!host_dev) {
+    if (!uvc) {
         return;
     }
     hdl->in_irq = 1;
@@ -1972,6 +1976,9 @@ int uvc_host_camera_out(const usb_dev usb_id)
         usb_h_free_ep_buffer(usb_id, uvc->ep_buffer);
         uvc->ep_buffer = NULL;
     }
+
+    usb_free_ep_num(usb_id, uvc->host_ep | USB_DIR_IN);
+    hdl->online = 0;
     free(uvc);
     if (hdl->buffer) {
         free(hdl->buffer);

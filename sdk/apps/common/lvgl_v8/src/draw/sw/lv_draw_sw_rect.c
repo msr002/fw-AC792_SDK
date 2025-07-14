@@ -1304,8 +1304,13 @@ void draw_border_generic(lv_draw_ctx_t *draw_ctx, const lv_area_t *outer_area, c
 
     lv_draw_sw_blend_dsc_t blend_dsc;
     lv_memset_00(&blend_dsc, sizeof(blend_dsc));
-    blend_dsc.mask_buf = lv_mem_buf_get(draw_area_w);;
+    blend_dsc.mask_buf = lv_mem_buf_get(draw_area_w);
 
+#if LV_COLOR_DEPTH_EXTEN == 24
+    uint8_t *original_mask_buf = blend_dsc.mask_buf;
+    lv_coord_t original_x1 = 0;
+    lv_coord_t original_x2 = 0;
+#endif
     /*Create mask for the outer area*/
     int16_t mask_rout_id = LV_MASK_ID_INV;
     lv_draw_mask_radius_param_t mask_rout_param;
@@ -1444,6 +1449,291 @@ void draw_border_generic(lv_draw_ctx_t *draw_ctx, const lv_area_t *outer_area, c
             }
         }
     } else {
+
+
+#if LV_COLOR_DEPTH_EXTEN == 24
+        /*Left corners*/
+        blend_area.x1 = draw_area.x1;
+        blend_area.x2 = LV_MIN(draw_area.x2, core_area.x1 - 1);
+
+        original_x1 = blend_area.x1;
+        original_x2 = blend_area.x2;
+
+        blend_w = lv_area_get_width(&blend_area);
+
+        if (blend_w > 0) {
+            if (left_side || top_side) {
+
+                for (h = draw_area.y1; h < core_area.y1; h++) {
+                    blend_area.y1 = h;
+                    blend_area.y2 = h;
+
+                    lv_memset_ff(blend_dsc.mask_buf, blend_w);
+                    blend_dsc.mask_res = lv_draw_mask_apply(blend_dsc.mask_buf, blend_area.x1, h, blend_w);
+
+                    //改成打点
+                    if (blend_dsc.mask_res == LV_DRAW_MASK_RES_TRANSP) {
+                        //全透明
+                        //blend_dsc.mask_buf = NULL;
+                    } else if (blend_dsc.mask_res == LV_DRAW_MASK_RES_FULL_COVER) {
+                        blend_dsc.mask_buf = NULL;
+                        lv_draw_sw_blend(draw_ctx, &blend_dsc);
+                        blend_dsc.mask_buf = original_mask_buf;
+                    } else if (blend_dsc.mask_res == LV_DRAW_MASK_RES_CHANGED) {
+                        //lv_draw_sw_blend(draw_ctx, &blend_dsc);
+
+                        // 部分绘制，需要解析mask_buf
+                        // mask_buf是uint8_t数组，每个字节对应一个像素的mask值（0xff有效，0x00无效）
+                        uint8_t *mask_buf = blend_dsc.mask_buf;
+                        int start_x = -1;
+                        for (int i = 0; i < blend_w; i++) {
+                            if (mask_buf[i] != 0x00) {
+                                if (start_x < 0) {
+                                    start_x = i;
+                                }
+                            } else {
+                                if (start_x >= 0) {
+                                    // 找到一段有效区间，绘制
+                                    blend_area.x1 = original_x1 + start_x;
+                                    blend_area.x2 = original_x1 + i - 1;
+                                    //lv_draw_fill(draw_ctx, &blend_area, fill_color);
+
+                                    blend_dsc.mask_buf = NULL;
+                                    lv_draw_sw_blend(draw_ctx, &blend_dsc);
+                                    blend_dsc.mask_buf = original_mask_buf;
+
+                                    blend_area.x1 = original_x1;
+                                    blend_area.x2 = original_x2;
+
+                                    start_x = -1;
+                                }
+                            }
+                        }
+                        // 处理最后一段有效区间
+                        if (start_x >= 0) {
+                            blend_area.x1 = original_x1 + start_x;
+                            blend_area.x2 = original_x1 + blend_w - 1;
+                            //lv_draw_fill(draw_ctx, &blend_area, fill_color);
+                            blend_dsc.mask_buf = NULL;
+                            lv_draw_sw_blend(draw_ctx, &blend_dsc);
+                            blend_dsc.mask_buf = original_mask_buf;
+
+                            blend_area.x1 = original_x1;
+                            blend_area.x2 = original_x2;
+                        }
+
+                    }
+
+                }//for
+
+
+
+            }
+
+            if (left_side || bottom_side) {
+                for (h = core_area.y2 + 1; h <= draw_area.y2; h++) {
+                    blend_area.y1 = h;
+                    blend_area.y2 = h;
+                    lv_memset_ff(blend_dsc.mask_buf, blend_w);
+                    blend_dsc.mask_res = lv_draw_mask_apply(blend_dsc.mask_buf, blend_area.x1, h, blend_w);
+                    //改成打点
+                    if (blend_dsc.mask_res == LV_DRAW_MASK_RES_TRANSP) {
+                        //全透明
+                        //blend_dsc.mask_buf = NULL;
+                    } else if (blend_dsc.mask_res == LV_DRAW_MASK_RES_FULL_COVER) {
+                        blend_dsc.mask_buf = NULL;
+                        lv_draw_sw_blend(draw_ctx, &blend_dsc);
+                        blend_dsc.mask_buf = original_mask_buf;
+                    } else if (blend_dsc.mask_res == LV_DRAW_MASK_RES_CHANGED) {
+                        //lv_draw_sw_blend(draw_ctx, &blend_dsc);
+
+                        // 部分绘制，需要解析mask_buf
+                        // mask_buf是uint8_t数组，每个字节对应一个像素的mask值（0xff有效，0x00无效）
+                        uint8_t *mask_buf = blend_dsc.mask_buf;
+                        int start_x = -1;
+                        for (int i = 0; i < blend_w; i++) {
+                            if (mask_buf[i] != 0x00) {
+                                if (start_x < 0) {
+                                    start_x = i;
+                                }
+                            } else {
+                                if (start_x >= 0) {
+                                    // 找到一段有效区间，绘制
+                                    blend_area.x1 = original_x1 + start_x;
+                                    blend_area.x2 = original_x1 + i - 1;
+                                    //lv_draw_fill(draw_ctx, &blend_area, fill_color);
+
+                                    blend_dsc.mask_buf = NULL;
+                                    lv_draw_sw_blend(draw_ctx, &blend_dsc);
+                                    blend_dsc.mask_buf = original_mask_buf;
+
+                                    blend_area.x1 = original_x1;
+                                    blend_area.x2 = original_x2;
+
+                                    start_x = -1;
+                                }
+                            }
+                        }
+                        // 处理最后一段有效区间
+                        if (start_x >= 0) {
+                            blend_area.x1 = original_x1 + start_x;
+                            blend_area.x2 = original_x1 + blend_w - 1;
+                            //lv_draw_fill(draw_ctx, &blend_area, fill_color);
+                            blend_dsc.mask_buf = NULL;
+                            lv_draw_sw_blend(draw_ctx, &blend_dsc);
+                            blend_dsc.mask_buf = original_mask_buf;
+
+                            blend_area.x1 = original_x1;
+                            blend_area.x2 = original_x2;
+                        }
+
+                    }
+                }
+            }
+
+
+        }
+
+
+        /*Right corners*/
+        blend_area.x1 = LV_MAX(draw_area.x1, core_area.x2 + 1);
+        blend_area.x2 = draw_area.x2;
+        blend_w = lv_area_get_width(&blend_area);
+
+        original_x1 = blend_area.x1;
+        original_x2 = blend_area.x2;
+
+        if (blend_w > 0) {
+            if (right_side || top_side) {
+
+
+                for (h = draw_area.y1; h < core_area.y1; h++) {
+                    blend_area.y1 = h;
+                    blend_area.y2 = h;
+
+                    lv_memset_ff(blend_dsc.mask_buf, blend_w);
+                    blend_dsc.mask_res = lv_draw_mask_apply(blend_dsc.mask_buf, blend_area.x1, h, blend_w);
+                    //改成打点
+                    if (blend_dsc.mask_res == LV_DRAW_MASK_RES_TRANSP) {
+                        //全透明
+                        //blend_dsc.mask_buf = NULL;
+                    } else if (blend_dsc.mask_res == LV_DRAW_MASK_RES_FULL_COVER) {
+                        blend_dsc.mask_buf = NULL;
+                        lv_draw_sw_blend(draw_ctx, &blend_dsc);
+                        blend_dsc.mask_buf = original_mask_buf;
+                    } else if (blend_dsc.mask_res == LV_DRAW_MASK_RES_CHANGED) {
+                        //lv_draw_sw_blend(draw_ctx, &blend_dsc);
+
+                        // 部分绘制，需要解析mask_buf
+                        // mask_buf是uint8_t数组，每个字节对应一个像素的mask值（0xff有效，0x00无效）
+                        uint8_t *mask_buf = blend_dsc.mask_buf;
+                        int start_x = -1;
+                        for (int i = 0; i < blend_w; i++) {
+                            if (mask_buf[i] != 0x00) {
+                                if (start_x < 0) {
+                                    start_x = i;
+                                }
+                            } else {
+                                if (start_x >= 0) {
+                                    // 找到一段有效区间，绘制
+                                    blend_area.x1 = original_x1 + start_x;
+                                    blend_area.x2 = original_x1 + i - 1;
+                                    //lv_draw_fill(draw_ctx, &blend_area, fill_color);
+
+                                    blend_dsc.mask_buf = NULL;
+                                    lv_draw_sw_blend(draw_ctx, &blend_dsc);
+                                    blend_dsc.mask_buf = original_mask_buf;
+
+                                    blend_area.x1 = original_x1;
+                                    blend_area.x2 = original_x2;
+
+                                    start_x = -1;
+                                }
+                            }
+                        }
+                        // 处理最后一段有效区间
+                        if (start_x >= 0) {
+                            blend_area.x1 = original_x1 + start_x;
+                            blend_area.x2 = original_x1 + blend_w - 1;
+                            //lv_draw_fill(draw_ctx, &blend_area, fill_color);
+                            blend_dsc.mask_buf = NULL;
+                            lv_draw_sw_blend(draw_ctx, &blend_dsc);
+                            blend_dsc.mask_buf = original_mask_buf;
+
+                            blend_area.x1 = original_x1;
+                            blend_area.x2 = original_x2;
+                        }
+
+                    }
+                }
+
+
+            }
+
+            if (right_side || bottom_side) {
+                for (h = core_area.y2 + 1; h <= draw_area.y2; h++) {
+                    blend_area.y1 = h;
+                    blend_area.y2 = h;
+
+                    lv_memset_ff(blend_dsc.mask_buf, blend_w);
+                    blend_dsc.mask_res = lv_draw_mask_apply(blend_dsc.mask_buf, blend_area.x1, h, blend_w);
+                    //改成打点
+                    if (blend_dsc.mask_res == LV_DRAW_MASK_RES_TRANSP) {
+                        //全透明
+                        //blend_dsc.mask_buf = NULL;
+                    } else if (blend_dsc.mask_res == LV_DRAW_MASK_RES_FULL_COVER) {
+                        blend_dsc.mask_buf = NULL;
+                        lv_draw_sw_blend(draw_ctx, &blend_dsc);
+                        blend_dsc.mask_buf = original_mask_buf;
+                    } else if (blend_dsc.mask_res == LV_DRAW_MASK_RES_CHANGED) {
+                        //lv_draw_sw_blend(draw_ctx, &blend_dsc);
+
+                        // 部分绘制，需要解析mask_buf
+                        // mask_buf是uint8_t数组，每个字节对应一个像素的mask值（0xff有效，0x00无效）
+                        uint8_t *mask_buf = blend_dsc.mask_buf;
+                        int start_x = -1;
+                        for (int i = 0; i < blend_w; i++) {
+                            if (mask_buf[i] != 0x00) {
+                                if (start_x < 0) {
+                                    start_x = i;
+                                }
+                            } else {
+                                if (start_x >= 0) {
+                                    // 找到一段有效区间，绘制
+                                    blend_area.x1 = original_x1 + start_x;
+                                    blend_area.x2 = original_x1 + i - 1;
+                                    //lv_draw_fill(draw_ctx, &blend_area, fill_color);
+
+                                    blend_dsc.mask_buf = NULL;
+                                    lv_draw_sw_blend(draw_ctx, &blend_dsc);
+                                    blend_dsc.mask_buf = original_mask_buf;
+
+                                    blend_area.x1 = original_x1;
+                                    blend_area.x2 = original_x2;
+
+                                    start_x = -1;
+                                }
+                            }
+                        }
+                        // 处理最后一段有效区间
+                        if (start_x >= 0) {
+                            blend_area.x1 = original_x1 + start_x;
+                            blend_area.x2 = original_x1 + blend_w - 1;
+                            //lv_draw_fill(draw_ctx, &blend_area, fill_color);
+                            blend_dsc.mask_buf = NULL;
+                            lv_draw_sw_blend(draw_ctx, &blend_dsc);
+                            blend_dsc.mask_buf = original_mask_buf;
+
+                            blend_area.x1 = original_x1;
+                            blend_area.x2 = original_x2;
+                        }
+
+                    }
+                }
+            }
+        }
+
+#else
         /*Left corners*/
         blend_area.x1 = draw_area.x1;
         blend_area.x2 = LV_MIN(draw_area.x2, core_area.x1 - 1);
@@ -1500,6 +1790,8 @@ void draw_border_generic(lv_draw_ctx_t *draw_ctx, const lv_area_t *outer_area, c
                 }
             }
         }
+#endif
+
     }
 
     lv_draw_mask_free_param(&mask_rin_param);

@@ -43,16 +43,6 @@ Notes:以下为芯片规格定义，不可修改，仅供引用
 #define AUDIO_ADC_MIC_CH            AUDIO_ADC_MIC_0
 
 /********************************************************************************
-                          mic_mode 工作模式配置
- ********************************************************************************/
-// TCFG_AUDIO_MICx_MODE
-#define AUDIO_MIC_CAP_MODE          0   //单端隔直电容模式
-#define AUDIO_MIC_CAP_DIFF_MODE     1   //差分隔直电容模式
-// #define AUDIO_MIC_CAPLESS_MODE   2   //单端省电容模式
-#define AUDIO_LINEIN_SINGLE_MODE    2   //单端 linein 模式
-#define AUDIO_LINEIN_DIFF_MODE      3   //差分 linein 模式
-
-/********************************************************************************
                 MICx  输入IO配置(要注意IO与mic bias 供电IO配置互斥)
  ********************************************************************************/
 // TCFG_AUDIO_MIC0_AIN_SEL

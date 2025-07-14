@@ -976,7 +976,6 @@ void net_file_player_stop(struct net_file_player *player)
     list_for_each_entry_safe(p, n, &g_file_player.head, entry) {
         if (p == player) {
             __list_del_entry(&player->entry);
-            os_mutex_post(&g_file_player.mutex);
             goto __stop;
         }
     }
@@ -1010,6 +1009,8 @@ __stop:
     net_player_free(player);
 
     jlstream_event_notify(STREAM_EVENT_CLOSE_PLAYER, (int)"net_music");
+
+    os_mutex_post(&g_file_player.mutex);
 }
 
 struct net_file_player *get_net_file_player(void) //返回第一个打开的音乐播放器指针

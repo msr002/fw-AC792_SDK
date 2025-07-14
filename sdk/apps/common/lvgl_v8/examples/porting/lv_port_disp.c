@@ -537,7 +537,7 @@ static void disp_flush(lv_disp_drv_t *disp_drv, const lv_area_t *area, lv_color_
         u32 tdiff = time_lapse(&time_lapse_hdl, 1000);
         if (tdiff) {//注意由于中途打印,或者被其他高优先级任务抢占导致的统计不准
             /* printf("lv render %u mspf, render+flush %d fps\n", debug_draw_time_ms / fps_cnt, fps_cnt *  1000 / tdiff); */
-            printf("lv render %ums pf\n", debug_draw_time_ms / fps_cnt);
+            printf("lv render %ums pf %dfps\n", debug_draw_time_ms / fps_cnt, fps_cnt);
             fps_cnt = 0;
             debug_draw_time_ms = 0;
         }
