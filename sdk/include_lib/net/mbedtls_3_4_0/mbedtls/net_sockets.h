@@ -110,6 +110,7 @@ mbedtls_net_context;
 #else
 
 typedef struct mbedtls_net_context {
+    int fd;
     struct sock_hdl *hdl;             /**< The underlying file descriptor                 */
     void *fd_priv;
     int (*cb_func)(enum sock_api_msg_type type, void *priv);

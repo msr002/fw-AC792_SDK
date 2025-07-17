@@ -91,5 +91,9 @@ void *lbuf_peek_queue_btctrler(lbuf_queue_t *queue_head);
 
 void lbuf_clear_queue_btctrler(lbuf_queue_t *queue_head);
 
+void lbuf_push_queue_head_btctrler(lbuf_queue_t *queue_head, void *lbuf);
+
+uint8_t lbuf_get_queue_nums_btctrler(lbuf_queue_t *queue_head);
+
 #endif
 
