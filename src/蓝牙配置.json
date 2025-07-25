@@ -2611,7 +2611,7 @@
                     "label": "TWS本地音乐音量同步",
                     "tag": "el-switch",
                     "tagIcon": "switch",
-                    "defaultValue": 0,
+                    "defaultValue": 1,
                     "span": 6,
                     "showLabel": true,
                     "labelWidth": 200,

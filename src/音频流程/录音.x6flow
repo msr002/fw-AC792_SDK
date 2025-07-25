@@ -4,17 +4,20 @@
   "uuid": "0x49EC",
   "childrenGroup": [
     {
-      "id": "id_1745198625209_18",
+      "id": "id_1726047780966_17",
       "title": "默认分组",
       "select": true,
       "tabs": [
         {
           "uuid": 48452,
           "title": "标准",
-          "id": "id_1745198624461_9"
+          "id": "id_1726047780025_9",
+          "selected": "A",
+          "preset": "",
+          "disable": false
         }
       ],
-      "curTab": "id_1745198624461_9"
+      "curTab": "id_1726047780025_9"
     },
     {
       "id": "id_1711595654095_3",
@@ -5084,7 +5087,7 @@
         },
         "view": "vue-shape-view",
         "shape": "vue-shape",
-        "id": "2153efe3-d45d-48a3-8b34-c9863cd803e2",
+        "id": "f8a844d4-c04e-4ddc-ac0d-2dce3900f236",
         "component": "node-cust",
         "group": "hardware",
         "data": {
@@ -5131,9 +5134,9 @@
             "name": "ADC6",
             "list": [
               {
-                "modeId": "id_1745198624461_9",
+                "modeId": "id_1726047780025_9",
                 "name": "ADC6",
-                "current": "",
+                "current": "arg1",
                 "originSize": 0,
                 "list": [
                   {
@@ -5177,10 +5180,58 @@
                           }
                         ]
                       }
-                    ]
+                    ],
+                    "bypass": false
                   }
                 ],
-                "originCount": 1
+                "originCount": 1,
+                "preset": [
+                  {
+                    "name": "arg1",
+                    "enable": true,
+                    "data": [
+                      {
+                        "id": "id_1726724330130_2",
+                        "list": [
+                          {
+                            "id": "id_1726724330129_0",
+                            "value": [
+                              2
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "id": "id_1726724330130_8",
+                        "list": [
+                          {
+                            "id": "id_1726724330130_4",
+                            "value": 20
+                          },
+                          {
+                            "id": "id_1726724330130_6",
+                            "value": 1
+                          }
+                        ]
+                      },
+                      {
+                        "id": "id_1726724330130_14",
+                        "list": [
+                          {
+                            "id": "id_1726724330130_10",
+                            "value": 20
+                          },
+                          {
+                            "id": "id_1726724330130_12",
+                            "value": 1
+                          }
+                        ]
+                      }
+                    ],
+                    "bypass": false
+                  }
+                ],
+                "bypass": false
               }
             ]
           },
@@ -5188,7 +5239,7 @@
           "nodeName": "ADC6",
           "inBitWidth": 16,
           "outBitWidth": 16,
-          "itemId": "id_1745198625209_18"
+          "itemId": "id_1726047780966_17"
         },
         "zIndex": 10001,
         "visible": true,
@@ -5266,7 +5317,7 @@
         },
         "view": "vue-shape-view",
         "shape": "vue-shape",
-        "id": "13e34ea1-145b-4e3e-9501-e6caa495f77d",
+        "id": "d777a9b1-d76b-4772-b5ff-424408a3aed8",
         "component": "node-cust",
         "group": "hardware",
         "data": {
@@ -5291,7 +5342,7 @@
               "y": 500
             }
           },
-          "itemId": "id_1745198625209_18",
+          "itemId": "id_1726047780966_17",
           "inBit": 2,
           "bitConsistency": true,
           "outBit": 2,
@@ -5308,7 +5359,7 @@
             "name": "MIXER16",
             "list": [
               {
-                "modeId": "id_1745198624461_9",
+                "modeId": "id_1726047780025_9",
                 "name": "MIXER16",
                 "current": "",
                 "originSize": 0,
@@ -5383,7 +5434,78 @@
                     ]
                   }
                 ],
-                "originCount": 1
+                "originCount": 1,
+                "preset": [
+                  {
+                    "name": "arg1",
+                    "enable": true,
+                    "data": [
+                      {
+                        "id": "id_1725438750944_579",
+                        "list": [
+                          {
+                            "id": "id_1725438750944_582",
+                            "value": 1
+                          },
+                          {
+                            "id": "id_1693469541112_2",
+                            "value": 1
+                          },
+                          {
+                            "id": "id_1693469541968_3",
+                            "value": 1
+                          },
+                          {
+                            "id": "id_1693469542656_4",
+                            "value": 1
+                          },
+                          {
+                            "id": "id_1693469543266_5",
+                            "value": 1
+                          },
+                          {
+                            "id": "id_1693469544016_6",
+                            "value": 1
+                          },
+                          {
+                            "id": "id_1694660183626_0",
+                            "value": 1
+                          },
+                          {
+                            "id": "id_1696938086525_0",
+                            "value": 1
+                          },
+                          {
+                            "id": "id_1708417612901_2",
+                            "value": 1
+                          },
+                          {
+                            "id": "id_1708417613613_3",
+                            "value": 1
+                          },
+                          {
+                            "id": "id_1708417615676_4",
+                            "value": 1
+                          },
+                          {
+                            "id": "id_1708417713332_5",
+                            "value": 1
+                          }
+                        ]
+                      },
+                      {
+                        "id": "id_1708417559152_0",
+                        "list": [
+                          {
+                            "id": "id_1708417599972_1",
+                            "value": 0
+                          }
+                        ],
+                        "expand": 1
+                      }
+                    ]
+                  }
+                ]
               }
             ]
           },
@@ -5743,7 +5865,7 @@
         },
         "view": "vue-shape-view",
         "shape": "vue-shape",
-        "id": "0546bc77-a897-4e1c-ae30-b0e8aad470ab",
+        "id": "c2f2512f-1e18-46a3-a141-337456ca9f14",
         "component": "node-cust",
         "group": "hardware",
         "data": {
@@ -5767,7 +5889,7 @@
               "y": 310
             }
           },
-          "itemId": "id_1745198625209_18",
+          "itemId": "id_1726047780966_17",
           "inBit": 2,
           "bitConsistency": true,
           "outBit": 2,
@@ -5894,7 +6016,7 @@
         },
         "view": "vue-shape-view",
         "shape": "vue-shape",
-        "id": "acc9fc7f-b512-4bfa-874f-0ed01be14b4c",
+        "id": "02c0f37e-5266-46e8-b13a-315bae970541",
         "component": "node-cust",
         "group": "hardware",
         "data": {
@@ -5919,15 +6041,15 @@
               "y": 730
             }
           },
-          "itemId": "id_1745198625209_18",
+          "itemId": "id_1726047780966_17",
           "subId": 14,
           "configs": {
             "name": "config26047",
             "list": [
               {
-                "modeId": "id_1745198624461_9",
+                "modeId": "id_1726047780025_9",
                 "name": "config26047",
-                "current": "",
+                "current": "arg1",
                 "originSize": 0,
                 "list": [
                   {
@@ -5963,10 +6085,50 @@
                           }
                         ]
                       }
-                    ]
+                    ],
+                    "bypass": false
                   }
                 ],
-                "originCount": 1
+                "originCount": 1,
+                "preset": [
+                  {
+                    "name": "arg1",
+                    "enable": true,
+                    "data": [
+                      {
+                        "id": "id_1682580902370_0",
+                        "list": [
+                          {
+                            "id": "id_1682666755532_2",
+                            "value": 1
+                          },
+                          {
+                            "id": "id_1713834265905_0",
+                            "value": 0
+                          },
+                          {
+                            "id": "id_1719316377982_0",
+                            "value": 100
+                          },
+                          {
+                            "id": "id_1682666801718_3",
+                            "value": 44100
+                          },
+                          {
+                            "id": "id_1682667012781_7",
+                            "value": 64000
+                          },
+                          {
+                            "id": "id_1682580918689_1",
+                            "value": 1
+                          }
+                        ]
+                      }
+                    ],
+                    "bypass": false
+                  }
+                ],
+                "bypass": false
               }
             ]
           },
@@ -6071,7 +6233,7 @@
         },
         "view": "vue-shape-view",
         "shape": "vue-shape",
-        "id": "0fb712a3-8325-4e01-bfe0-0d5d319ff8af",
+        "id": "5c6d0586-4399-45a9-9052-6f5a8ec47c39",
         "component": "node-cust",
         "group": "hardware",
         "data": {
@@ -6095,7 +6257,7 @@
               "y": 630
             }
           },
-          "itemId": "id_1745198625209_18",
+          "itemId": "id_1726047780966_17",
           "marco": "TCFG_WRITE_FILE_NODE_ENABLE",
           "sAlias": "",
           "dynamicPort": {
@@ -6204,7 +6366,7 @@
         },
         "view": "vue-shape-view",
         "shape": "vue-shape",
-        "id": "f8becddf-503b-412b-9d04-79259f3ef35f",
+        "id": "56f3f806-01d8-429e-aa08-19157cb7cdbe",
         "component": "node-cust",
         "group": "hardware",
         "data": {
@@ -6249,9 +6411,9 @@
             "name": "LINEIN9",
             "list": [
               {
-                "modeId": "id_1745198624461_9",
+                "modeId": "id_1726047780025_9",
                 "name": "LINEIN9",
-                "current": "",
+                "current": "arg0",
                 "originSize": 0,
                 "list": [
                   {
@@ -6295,10 +6457,58 @@
                           }
                         ]
                       }
-                    ]
+                    ],
+                    "bypass": false
                   }
                 ],
-                "originCount": 1
+                "originCount": 1,
+                "preset": [
+                  {
+                    "name": "arg0",
+                    "enable": true,
+                    "data": [
+                      {
+                        "id": "id_1726724330130_3",
+                        "list": [
+                          {
+                            "id": "id_1726724330129_1",
+                            "value": [
+                              1
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "id": "id_1726724330130_9",
+                        "list": [
+                          {
+                            "id": "id_1726724330130_5",
+                            "value": 7
+                          },
+                          {
+                            "id": "id_1726724330130_7",
+                            "value": 0
+                          }
+                        ]
+                      },
+                      {
+                        "id": "id_1726724330130_15",
+                        "list": [
+                          {
+                            "id": "id_1726724330130_11",
+                            "value": 7
+                          },
+                          {
+                            "id": "id_1726724330130_13",
+                            "value": 0
+                          }
+                        ]
+                      }
+                    ],
+                    "bypass": false
+                  }
+                ],
+                "bypass": false
               }
             ]
           },
@@ -6306,7 +6516,7 @@
           "nodeName": "LINEIN9",
           "inBitWidth": 16,
           "outBitWidth": 16,
-          "itemId": "id_1745198625209_18"
+          "itemId": "id_1726047780966_17"
         },
         "zIndex": 10042,
         "visible": true,
@@ -6384,7 +6594,7 @@
         },
         "view": "vue-shape-view",
         "shape": "vue-shape",
-        "id": "ab9937a8-2fd0-4bd5-abb2-efe781f0b338",
+        "id": "29fd00d4-2b25-4e73-ba58-86d9c19bc2d2",
         "component": "node-cust",
         "group": "hardware",
         "data": {
@@ -6410,9 +6620,9 @@
             "name": "ChannelExpand21",
             "list": [
               {
-                "modeId": "id_1745198624461_9",
+                "modeId": "id_1726047780025_9",
                 "name": "ChannelExpand21",
-                "current": "",
+                "current": "arg1",
                 "originSize": 0,
                 "list": [
                   {
@@ -6428,10 +6638,30 @@
                           }
                         ]
                       }
-                    ]
+                    ],
+                    "bypass": false
                   }
                 ],
-                "originCount": 1
+                "originCount": 1,
+                "preset": [
+                  {
+                    "name": "arg1",
+                    "enable": true,
+                    "data": [
+                      {
+                        "id": "id_1666765139448_1",
+                        "list": [
+                          {
+                            "id": "id_1675923289365_0",
+                            "value": 0
+                          }
+                        ]
+                      }
+                    ],
+                    "bypass": false
+                  }
+                ],
+                "bypass": false
               }
             ]
           },
@@ -6439,7 +6669,7 @@
           "nodeName": "ChannelExpand21",
           "inBitWidth": 16,
           "outBitWidth": 16,
-          "itemId": "id_1745198625209_18"
+          "itemId": "id_1726047780966_17"
         },
         "zIndex": 10058,
         "visible": true,
@@ -6562,20 +6792,39 @@
               "strokeWidth": 2,
               "fill": "#A4A5A9",
               "stroke": "#A4A5A9"
-            }
+            },
+            "distance": 40
+          },
+          "class": {
+            "0": "c",
+            "1": "l",
+            "2": "a",
+            "3": "s",
+            "4": "s",
+            "5": "-",
+            "6": "e",
+            "7": "d",
+            "8": "g",
+            "9": "e",
+            "10": "-",
+            "11": "t",
+            "12": "e",
+            "13": "s",
+            "14": "t"
           }
         },
-        "id": "cb4d6992-5d53-49a8-a4cd-a267d02235ff",
+        "id": "9ead9f3b-c786-419e-a8a4-6fe6b2a534ea",
         "data": {
-          "itemId": "id_1745198625209_18"
+          "itemId": "id_1726047780966_17"
         },
         "zIndex": 10059,
+        "visible": true,
         "source": {
-          "cell": "2153efe3-d45d-48a3-8b34-c9863cd803e2",
+          "cell": "f8a844d4-c04e-4ddc-ac0d-2dce3900f236",
           "port": "5114f0b1-23ea-4659-844f-a8bd9b1e634d"
         },
         "target": {
-          "cell": "ab9937a8-2fd0-4bd5-abb2-efe781f0b338",
+          "cell": "29fd00d4-2b25-4e73-ba58-86d9c19bc2d2",
           "port": "33b19f43-b00e-4fe0-ac29-8da7c779b47c"
         }
       },
@@ -6591,20 +6840,39 @@
               "strokeWidth": 2,
               "fill": "#A4A5A9",
               "stroke": "#A4A5A9"
-            }
+            },
+            "distance": 40
+          },
+          "class": {
+            "0": "c",
+            "1": "l",
+            "2": "a",
+            "3": "s",
+            "4": "s",
+            "5": "-",
+            "6": "e",
+            "7": "d",
+            "8": "g",
+            "9": "e",
+            "10": "-",
+            "11": "t",
+            "12": "e",
+            "13": "s",
+            "14": "t"
           }
         },
-        "id": "7bb0e393-4ee9-4b9f-92a9-03cb3c1a94de",
+        "id": "b9e674e6-e7d0-49d2-bc0d-67cc29e9122b",
         "data": {
-          "itemId": "id_1745198625209_18"
+          "itemId": "id_1726047780966_17"
         },
         "zIndex": 10060,
+        "visible": true,
         "source": {
-          "cell": "ab9937a8-2fd0-4bd5-abb2-efe781f0b338",
+          "cell": "29fd00d4-2b25-4e73-ba58-86d9c19bc2d2",
           "port": "26a73669-18e9-4f00-8182-803e041a07e5"
         },
         "target": {
-          "cell": "13e34ea1-145b-4e3e-9501-e6caa495f77d",
+          "cell": "d777a9b1-d76b-4772-b5ff-424408a3aed8",
           "port": "68f23822-e867-4587-95f2-ea2fdc782457"
         }
       },
@@ -6623,17 +6891,18 @@
             }
           }
         },
-        "id": "0b61d300-3f48-4683-b2cd-89c65cb6d0d5",
+        "id": "f7e6980d-edb8-4f5a-978e-1b9fe395b4d4",
         "data": {
-          "itemId": "id_1745198625209_18"
+          "itemId": "id_1726047780966_17"
         },
         "zIndex": 10061,
+        "visible": true,
         "source": {
-          "cell": "13e34ea1-145b-4e3e-9501-e6caa495f77d",
+          "cell": "d777a9b1-d76b-4772-b5ff-424408a3aed8",
           "port": "abe42cff-6cb6-4840-828c-522499261749"
         },
         "target": {
-          "cell": "0546bc77-a897-4e1c-ae30-b0e8aad470ab",
+          "cell": "c2f2512f-1e18-46a3-a141-337456ca9f14",
           "port": "14c9c71a-e725-4f0f-abf1-78be39cbb35f"
         }
       },
@@ -6649,20 +6918,39 @@
               "strokeWidth": 2,
               "fill": "#A4A5A9",
               "stroke": "#A4A5A9"
-            }
+            },
+            "distance": 40
+          },
+          "class": {
+            "0": "c",
+            "1": "l",
+            "2": "a",
+            "3": "s",
+            "4": "s",
+            "5": "-",
+            "6": "e",
+            "7": "d",
+            "8": "g",
+            "9": "e",
+            "10": "-",
+            "11": "t",
+            "12": "e",
+            "13": "s",
+            "14": "t"
           }
         },
-        "id": "eac45282-db0b-4ec7-a1a0-1870142b67b5",
+        "id": "a836037e-ee7f-493a-927e-38c52152f3c8",
         "data": {
-          "itemId": "id_1745198625209_18"
+          "itemId": "id_1726047780966_17"
         },
         "zIndex": 10062,
+        "visible": true,
         "source": {
-          "cell": "0546bc77-a897-4e1c-ae30-b0e8aad470ab",
+          "cell": "c2f2512f-1e18-46a3-a141-337456ca9f14",
           "port": "49d0bf9f-e0f8-49fc-9103-30eabb9a687d"
         },
         "target": {
-          "cell": "acc9fc7f-b512-4bfa-874f-0ed01be14b4c",
+          "cell": "02c0f37e-5266-46e8-b13a-315bae970541",
           "port": "25ac1764-1e03-461d-8a28-4d109b881a7f"
         }
       },
@@ -6677,7 +6965,7 @@
         },
         "view": "vue-shape-view",
         "shape": "vue-shape",
-        "id": "f247d9bf-216b-4739-9b9e-64b36e56d531",
+        "id": "408e285d-d636-4847-ab97-91c16f48dc09",
         "component": "node-cust",
         "group": "hardware",
         "data": {
@@ -6699,9 +6987,9 @@
             "name": "config580591",
             "list": [
               {
-                "modeId": "id_1745198624461_9",
+                "modeId": "id_1726047780025_9",
                 "name": "config580591",
-                "current": "",
+                "current": "arg1",
                 "originSize": 0,
                 "list": [
                   {
@@ -6717,10 +7005,30 @@
                           }
                         ]
                       }
-                    ]
+                    ],
+                    "bypass": false
                   }
                 ],
-                "originCount": 1
+                "originCount": 1,
+                "preset": [
+                  {
+                    "name": "arg1",
+                    "enable": true,
+                    "data": [
+                      {
+                        "id": "id_1682646307477_1",
+                        "list": [
+                          {
+                            "id": "id_1682646315278_2",
+                            "value": 0
+                          }
+                        ]
+                      }
+                    ],
+                    "bypass": false
+                  }
+                ],
+                "bypass": false
               }
             ]
           },
@@ -6728,7 +7036,7 @@
           "nodeName": "config580591",
           "inBitWidth": 16,
           "outBitWidth": 16,
-          "itemId": "id_1745198625209_18"
+          "itemId": "id_1726047780966_17"
         },
         "zIndex": 10075,
         "visible": true,
@@ -6852,20 +7160,39 @@
               "strokeWidth": 2,
               "fill": "#A4A5A9",
               "stroke": "#A4A5A9"
-            }
+            },
+            "distance": 40
+          },
+          "class": {
+            "0": "c",
+            "1": "l",
+            "2": "a",
+            "3": "s",
+            "4": "s",
+            "5": "-",
+            "6": "e",
+            "7": "d",
+            "8": "g",
+            "9": "e",
+            "10": "-",
+            "11": "t",
+            "12": "e",
+            "13": "s",
+            "14": "t"
           }
         },
-        "id": "e0fd8ea2-ed3e-4208-87df-c47737cd8b3e",
+        "id": "3bd131b1-8b6e-461d-8d16-b3b784beee2c",
         "data": {
-          "itemId": "id_1745198625209_18"
+          "itemId": "id_1726047780966_17"
         },
         "zIndex": 10076,
+        "visible": true,
         "source": {
-          "cell": "acc9fc7f-b512-4bfa-874f-0ed01be14b4c",
+          "cell": "02c0f37e-5266-46e8-b13a-315bae970541",
           "port": "5114f0b1-23ea-4659-844f-a8bd9b1e634d"
         },
         "target": {
-          "cell": "f247d9bf-216b-4739-9b9e-64b36e56d531",
+          "cell": "408e285d-d636-4847-ab97-91c16f48dc09",
           "port": "a0f639b3-23b8-4cba-b32a-21bfd720d9d2"
         }
       },
@@ -6884,17 +7211,18 @@
             }
           }
         },
-        "id": "f51bc8ad-360e-4c37-b396-ce9c7ff55824",
+        "id": "dfe92b75-d826-4756-87c7-0ff00c183b71",
         "data": {
-          "itemId": "id_1745198625209_18"
+          "itemId": "id_1726047780966_17"
         },
         "zIndex": 10077,
+        "visible": true,
         "source": {
-          "cell": "f247d9bf-216b-4739-9b9e-64b36e56d531",
+          "cell": "408e285d-d636-4847-ab97-91c16f48dc09",
           "port": "7eb9e321-078a-40c3-a0ea-862d03a8b394"
         },
         "target": {
-          "cell": "0fb712a3-8325-4e01-bfe0-0d5d319ff8af",
+          "cell": "5c6d0586-4399-45a9-9052-6f5a8ec47c39",
           "port": "46a56cd2-7413-4418-af9c-5ee79649a2b1"
         }
       },
@@ -6910,25 +7238,45 @@
               "strokeWidth": 2,
               "fill": "#A4A5A9",
               "stroke": "#A4A5A9"
-            }
+            },
+            "distance": 40
+          },
+          "class": {
+            "0": "c",
+            "1": "l",
+            "2": "a",
+            "3": "s",
+            "4": "s",
+            "5": "-",
+            "6": "e",
+            "7": "d",
+            "8": "g",
+            "9": "e",
+            "10": "-",
+            "11": "t",
+            "12": "e",
+            "13": "s",
+            "14": "t"
           }
         },
-        "id": "521b8430-c9b6-4d85-ad93-e0c7ff27ba11",
+        "id": "b06fe68a-185c-4d9b-915c-6c4587d16faf",
         "data": {
-          "itemId": "id_1745198625209_18"
+          "itemId": "id_1726047780966_17"
         },
         "zIndex": 10078,
+        "visible": true,
         "source": {
-          "cell": "f8becddf-503b-412b-9d04-79259f3ef35f",
+          "cell": "56f3f806-01d8-429e-aa08-19157cb7cdbe",
           "port": "5114f0b1-23ea-4659-844f-a8bd9b1e634d"
         },
         "target": {
-          "cell": "13e34ea1-145b-4e3e-9501-e6caa495f77d",
+          "cell": "d777a9b1-d76b-4772-b5ff-424408a3aed8",
           "port": "d089f635-dcad-425d-a915-8497629d0051"
         }
       }
     ]
   },
   "bitWidth": 16,
-  "showConfigName": true
+  "showConfigName": true,
+  "abFlow": false
 }
