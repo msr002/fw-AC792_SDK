@@ -359,11 +359,7 @@ static int audio_pcmic_channel_fifo_write(struct audio_pcmic_channel *ch, void *
         return 0;
     }
 
-    if (is_fixed_data) {
-        w_len = audio_cfifo_channel_write_fixed_data(&ch->fifo, (s16)data, len);
-    } else {
-        w_len = audio_cfifo_channel_write(&ch->fifo, data, len);
-    }
+    w_len = audio_cfifo_channel_write(&ch->fifo, data, len, is_fixed_data);
 
     return w_len;
 }

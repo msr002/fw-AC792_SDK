@@ -81,6 +81,12 @@ extern const int CONFIG_BT_FUNCTION;
 
 #define BT_FUNCTION_IS(x)           (CONFIG_BT_FUNCTION & (x))
 
+
+/*----------------------  MASTER QOS SELECT-------------------------------------*/
+extern const int CONFIG_MASTER_QOS_POLL;
+#define BT_QOS_EMITTER              BIT(0)
+#define BT_QOS_TWS                  BIT(1)
+
 /*---------------------- tws fun-------------------------------------*/
 
 extern const int CONFIG_BTCTLER_TWS_FUN;

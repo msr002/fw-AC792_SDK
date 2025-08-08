@@ -25,6 +25,8 @@ const int config_media_tws_en = 1;
 const int config_media_tws_en = 0;
 #endif
 
+const int config_audio_dac_ng_debug = 0;
+
 /* 16bit数据流中也存在32bit位宽数据的处理 */
 const int config_ch_adapter_32bit_enable = 1;
 const int config_mixer_32bit_enable = 1;

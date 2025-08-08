@@ -30,8 +30,6 @@ static u32 old_times = 0;
 static u32 new_times = 0;
 static struct rt_stream_info *rt_info = NULL;
 extern int atoi(const char *__nptr);
-extern int net_video_rec_get_list_vframe(void);
-extern int net_video_buff_set_frame_cnt(void);
 
 static int  path_analyze(struct rt_stream_info *info, const *path)
 {
@@ -65,20 +63,11 @@ static int  path_analyze(struct rt_stream_info *info, const *path)
 static int net_rt_pkg_udp_callback(enum sock_api_msg_type type, void *p)
 {
     //缓存大于2帧丢帧
-    struct rt_stream_info *info = (struct rt_stream_info *)p;
-    int vcnt = net_video_rec_get_list_vframe();
-    int set_cnt = net_video_buff_set_frame_cnt();
-    if (vcnt > set_cnt && set_cnt > 0) {
-        if (info) {
-            info->cb_flag = 1;
-        }
-        return -1;
-    }
     return 0;
 }
 
 
-static void *get_sock_handler(int (*cb_func)(enum sock_api_msg_type type, void *priv), void *priv)
+static void *get_sock_handler(void)
 {
     void *fd = NULL;
 
@@ -87,7 +76,7 @@ static void *get_sock_handler(int (*cb_func)(enum sock_api_msg_type type, void *
         //add P2P code
     } else {
 
-        fd = sock_reg(AF_INET, SOCK_DGRAM, 0, cb_func, priv);
+        fd = sock_reg(AF_INET, SOCK_DGRAM, 0, NULL, NULL);
 
         if (fd == NULL) {
             printf("%s %d->Error in socket()\n", __func__, __LINE__);
@@ -129,7 +118,7 @@ struct rt_stream_info *net_rt_vpkg_open(const char *path, const char *mode)
         return NULL;
     }
 
-    info->fd = get_sock_handler(net_rt_pkg_udp_callback, info);
+    info->fd = get_sock_handler();
     if (!info->fd) {
         printf("%s %d->Error get_sock_handler\n", __func__, __LINE__);
         free(info);
@@ -227,16 +216,6 @@ int net_rt_send_frame(struct rt_stream_info *info, char *buffer, size_t len, u8 
 #endif
 
 
-    //缓存大于2帧丢帧
-    int vcnt = net_video_rec_get_list_vframe();
-    int set_cnt = net_video_buff_set_frame_cnt();
-    if (vcnt > set_cnt && set_cnt > 0) {
-        os_mutex_post(&info->mutex);
-        return len;
-    }
-
-    info->cb_flag = 0;
-
     frame_head.offset = 0;
     frame_head.frm_sz = len;
     frame_head.type &= ~LAST_FREG_MAKER;
@@ -305,11 +284,6 @@ int net_rt_send_frame(struct rt_stream_info *info, char *buffer, size_t len, u8 
 
         if ((total_udp_send == UDP_SEND_BUF_SIZE) || (payload_len < MAX_PAYLOAD)) {
             if ((ret = net_rt_vpkg_write(info, info->udp_send_buf, total_udp_send, (struct sockaddr *)&info->addr, sizeof(struct sockaddr_in))) != total_udp_send) {
-
-                if (info->cb_flag) {
-                    os_mutex_post(&info->mutex);
-                    return len;
-                }
                 /* printf("ret:%d    total_udp_send:%d\n", ret, total_udp_send); */
                 puts("rt_stream_sent error!\n");
                 os_mutex_post(&info->mutex);

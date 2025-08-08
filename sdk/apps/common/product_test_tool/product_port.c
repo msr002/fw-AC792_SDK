@@ -1464,7 +1464,31 @@ u8 product_led_ctl(u8 cmd)
     }
     return rscorr;
 }
+#include "action.h"
+#include "net_server.h"
+int product_tcp_video_start()
+{
+    struct intent it;
+    init_intent(&it);
+    it.name = "net_video_rec";
+//设置参数
+    it.action = ACTION_VIDEO0_OPEN_RT_STREAM;
 
+    char mark = 2;
+    struct rt_stream_app_info info;
+
+    info.width = 640;
+    info.height = 480;
+
+    info.fps    = NET_VIDEO_REC_FPS0;//NET_VIDEO_REC_FPS1
+    info.type = NET_VIDEO_FMT_AVI;
+    info.priv = 0;
+
+    it.data = (const char *)&mark;//打开视频
+    it.exdata = (u32) &info; //视频参数
+
+    start_app(&it);
+}
 
 #endif
 

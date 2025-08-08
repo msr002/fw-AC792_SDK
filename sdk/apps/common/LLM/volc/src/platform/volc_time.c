@@ -13,8 +13,11 @@ uint64_t volc_get_time(void)
 #define CLOCK_MONOTONIC 4
 uint64_t volc_get_montionic_time(void)
 {
+    /* struct timespec now_time; */
+    /* clock_gettime(CLOCK_MONOTONIC, &now_time); */
+    /* return (uint64_t)now_time.tv_sec * VOLC_HUNDREDS_OF_NANOS_IN_A_SECOND + (uint64_t)now_time.tv_nsec / VOLC_DEFAULT_TIME_UNIT_IN_NANOS; */
     struct timespec now_time;
-    clock_gettime(CLOCK_MONOTONIC, &now_time);
+    clock_gettime(CLOCK_REALTIME, &now_time);
     return (uint64_t)now_time.tv_sec * VOLC_HUNDREDS_OF_NANOS_IN_A_SECOND + (uint64_t)now_time.tv_nsec / VOLC_DEFAULT_TIME_UNIT_IN_NANOS;
 };
 
@@ -75,8 +78,6 @@ uint32_t volc_generate_timestamp_str(uint64_t timestamp, char *format_str, char 
 uint32_t volc_get_time_str(char *time_str, uint32_t maxsize)
 {
 #if 1
-//    volc_debug("%s\n", __FUNCTION__);
-//    printf("%s\n", __FUNCTION__);
     uint32_t ret = VOLC_STATUS_SUCCESS;
     time_t timestamp_seconds = volc_get_time() / VOLC_HUNDREDS_OF_NANOS_IN_A_SECOND;
     VOLC_CHK(time_str != NULL, VOLC_STATUS_NULL_ARG);

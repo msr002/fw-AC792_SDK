@@ -172,8 +172,11 @@
 <Unit filename="../../../../../apps/demo/demo_wifi/board/wl83/board_config.h" />
 <Unit filename="../../../../../apps/demo/demo_wifi/board/wl83/board_demo.h" />
 <Unit filename="../../../../../apps/demo/demo_wifi/board/wl83/chip_cfg.h" />
+<Unit filename="../../../../../apps/demo/demo_wifi/examples/scan_list.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="../../../../../apps/demo/demo_wifi/examples/scan_list.h" />
 <Unit filename="../../../../../apps/demo/demo_wifi/examples/wifi_raw_test.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../../apps/demo/demo_wifi/include/app_config.h" />
+<Unit filename="../../../../../apps/demo/demo_wifi/uart_cmd.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../../apps/demo/demo_wifi/wifi_demo_task.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../../cpu/wl83/adc_api.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../../cpu/wl83/debug.c"><Option compilerVer="CC"/></Unit>

@@ -30,6 +30,7 @@
 #include "update.h"
 #include "asm/gpio.h"
 #include "asm/power_interface.h"
+#include "media/audio_adc.h"
 
 #if (SYS_VOL_TYPE == VOL_TYPE_DIGITAL)
 #include "audio_dvol.h"
@@ -101,6 +102,13 @@ const struct adc_platform_cfg adc_platform_cfg_table[AUDIO_ADC_MAX_NUM] = {
         .power_io             = TCFG_ADC0_POWER_IO,
         .mic_dcc              = TCFG_ADC0_DCC_LEVEL,
         .inside_bias_resistor = TCFG_ADC0_INSIDE_BIAS_RESISTOR_ENABLE,
+        .dmic_enable          = TCFG_DMIC_ENABLE,
+        .dmic_sclk_fre        = TCFG_DMIC_SCLK_FREQUENCY,
+        .dmic_io_sclk         = TCFG_DMIC_IO_SCLK,
+        .dmic_io_idat0        = TCFG_DMIC_IO_IDAT0,
+        .dmic_io_idat1        = TCFG_DMIC_IO_IDAT1,
+        .dmic_ch0_mode        = TCFG_DMIC_CH0_MODE,
+        .dmic_ch1_mode        = TCFG_DMIC_CH1_MODE,
     },
 #endif
 #if TCFG_ADC1_ENABLE
@@ -112,6 +120,13 @@ const struct adc_platform_cfg adc_platform_cfg_table[AUDIO_ADC_MAX_NUM] = {
         .power_io             = TCFG_ADC1_POWER_IO,
         .mic_dcc              = TCFG_ADC1_DCC_LEVEL,
         .inside_bias_resistor = TCFG_ADC1_INSIDE_BIAS_RESISTOR_ENABLE,
+        .dmic_enable          = TCFG_DMIC_ENABLE,
+        .dmic_sclk_fre        = TCFG_DMIC_SCLK_FREQUENCY,
+        .dmic_io_sclk         = TCFG_DMIC_IO_SCLK,
+        .dmic_io_idat0        = TCFG_DMIC_IO_IDAT0,
+        .dmic_io_idat1        = TCFG_DMIC_IO_IDAT1,
+        .dmic_ch0_mode        = TCFG_DMIC_CH0_MODE,
+        .dmic_ch1_mode        = TCFG_DMIC_CH1_MODE,
     },
 #endif
 };

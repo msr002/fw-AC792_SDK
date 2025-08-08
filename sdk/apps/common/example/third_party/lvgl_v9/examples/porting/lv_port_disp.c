@@ -23,6 +23,7 @@
 
 #define LV_DISP_DRV_MAX_NUM  (2)
 
+#define LV_LCD_DISP_BUF_NUM  (1) //屏幕显存数
 /**********************
  *      TYPEDEFS
  **********************/
@@ -64,7 +65,7 @@ volatile static struct lv_fb_t next_disp[LV_DISP_DRV_MAX_NUM];/* 下一帧待显
 
 static void *lcd_dev[LV_DISP_DRV_MAX_NUM];
 static lv_display_t *lv_disp[LV_DISP_DRV_MAX_NUM];
-static uint8_t *lcd_disp_buffer[LV_DISP_DRV_MAX_NUM];
+static uint8_t *lcd_disp_buffer[LV_DISP_DRV_MAX_NUM][LV_LCD_DISP_BUF_NUM];
 static uint16_t lcd_rotate[LV_DISP_DRV_MAX_NUM];
 static uint16_t lcd_format[LV_DISP_DRV_MAX_NUM];
 static volatile u8  g_dmm_line_period; //dmm读取一行所需时间
@@ -179,6 +180,23 @@ static void *lv_lcd_frame_end_hook_func(void)
     return cur_fb->data;
 }
 
+/**
+ * @brief      获取到空闲的lcd显存
+ * @param:     id: lcd id号
+ * @param:     index: 当前正在使用的lcd buf 索引(0/1)
+ *
+ * @return:    返回空闲的lcd显存buffer
+ **/
+static uint8_t *lv_get_lcd_idle_buf(u8 id, u8 index)
+{
+#if (LV_LCD_DISP_BUF_NUM == 2)
+    return lcd_disp_buffer[id][!index];
+#else
+    return lcd_disp_buffer[id][0];
+#endif
+}
+
+#if (LV_LCD_DISP_BUF_NUM == 1)
 void dmm_vsync_int_handler(void)
 {
     struct lcd_dev_drive *lcd = NULL;
@@ -209,6 +227,7 @@ void dmm_vsync_int_handler(void)
     }
     g_vsync_start_time = get_system_us(); //记录Vsync起始时间点
 }
+#endif
 
 static void lcd_rotate_task(void *p)
 {
@@ -224,6 +243,9 @@ static void lcd_rotate_task(void *p)
     u8 err_cnt = 0;
     lv_display_t *disp = fh->disp;
     u8 id = disp->disp_id;
+    lv_draw_buf_t fb = {0};
+
+    u8 lcd_buf_index = 0; //记录当前显示的lcd buf是哪一块
 
     u16 out_w = (lcd_rotate[id] == ROTATE_180) ? disp->hor_res : disp->ver_res;
     u16 out_h = (lcd_rotate[id] == ROTATE_180) ? disp->ver_res : disp->hor_res;
@@ -233,7 +255,7 @@ static void lcd_rotate_task(void *p)
     os_sem_create(&rotate_sem[id], 1);
     printf("lcd_rotate_task%d run...\n", id);
     rotate_start_time = get_system_us();
-    fb_frame_buf_rotate(frame_buffer, lcd_disp_buffer[id], disp->hor_res, disp->ver_res, 0, out_w, out_h, 0, lcd_rotate[id], 0, 0, lcd_format[id], lcd_format[id], 0);
+    fb_frame_buf_rotate(frame_buffer, lv_get_lcd_idle_buf(id, 0), disp->hor_res, disp->ver_res, 0, out_w, out_h, 0, lcd_rotate[id], 0, 0, lcd_format[id], lcd_format[id], 0);
     rotate_use_time = get_system_us() - rotate_start_time;
     if (g_dmm_line_period) {
         g_dmm_line = __lcd_abs(lcd_vert_total, (rotate_use_time / g_dmm_line_period));
@@ -243,15 +265,19 @@ static void lcd_rotate_task(void *p)
         ret = os_taskq_pend_timeout(msg, ARRAY_SIZE(msg), 0);
         if (ret == OS_TASKQ)  {
             frame_buffer = msg[1];
+#if (LV_LCD_DISP_BUF_NUM == 1)
             //1. wait line pend
             if (lcd->type == LCD_MIPI || lcd->type == LCD_RGB) {
                 if (lcd_dev[id]) {
                     dev_ioctl(lcd_dev[id], IOCTL_LCD_RGB_WAIT_LINE_FINISH, (u32)0);
                 }
             }
-            //2. rotate to lcd buffer
             rotate_start_time = get_system_us();
-            fb_frame_buf_rotate(frame_buffer, lcd_disp_buffer[id], disp->hor_res, disp->ver_res, 0, out_w, out_h, 0, lcd_rotate[id], 0, 0, lcd_format[id], lcd_format[id], 0);
+#endif
+            //2. rotate to lcd buffer
+            fb_frame_buf_rotate(frame_buffer, lv_get_lcd_idle_buf(id, lcd_buf_index), disp->hor_res, disp->ver_res, 0, out_w, out_h, 0, lcd_rotate[id], 0, 0, lcd_format[id], lcd_format[id], 0);
+
+#if (LV_LCD_DISP_BUF_NUM == 1)
             rotate_use_time = get_system_us() - rotate_start_time;
             //下面是旋转时间统计
             if (statistics_cnt > 0) {
@@ -299,14 +325,23 @@ static void lcd_rotate_task(void *p)
                     }
                 }
             }
-
             if (!(lcd->type == LCD_MIPI || lcd->type == LCD_RGB)) {
                 //mcu/spi屏
                 if (lcd_dev[id]) {
-                    dev_ioctl(lcd_dev[id], IOCTL_LCD_RGB_WAIT_FB_SWAP_FINISH, (u32)lcd_disp_buffer[id]);
+                    dev_ioctl(lcd_dev[id], IOCTL_LCD_RGB_WAIT_FB_SWAP_FINISH, (u32)lcd_disp_buffer[id][0]);
                 }
             }
             os_sem_post(&rotate_sem[id]);
+
+#elif (LV_LCD_DISP_BUF_NUM == 2)
+
+            fb.data = lv_get_lcd_idle_buf(id, lcd_buf_index);
+            next_disp[id].fb = (LV_PIXEL_COLOR_T *)&fb;
+            dev_ioctl(lcd_dev[id], IOCTL_LCD_RGB_WAIT_FB_SWAP_FINISH, (u32)fb.data);
+            lcd_buf_index = !lcd_buf_index;
+            os_sem_post(&rotate_sem[id]);
+#endif
+
         }
     }
 }
@@ -345,6 +380,7 @@ static void lv_lcd_swap_fb(lv_display_t *disp_drv, const lv_area_t *area, LV_PIX
 void disp_init(uint8_t id)
 {
     struct lcd_dev_drive *lcd = NULL;
+    uint8_t i = 0;
     //yuv422,rgb565,rgb888,argb888
     const u8 lcd_in_format[] = {
         FB_COLOR_FORMAT_YUV422,
@@ -358,11 +394,16 @@ void disp_init(uint8_t id)
         lcd_rotate[id] = lcd->dev->imd.info.rotate;
         lcd_format[id] = lcd_in_format[lcd->dev->imd.info.in_fmt];
         if (lcd_rotate[id] != 0) {
-            if (lcd_disp_buffer[id] == NULL) {
-                lcd_disp_buffer[id] = zalloc(lcd->dev->imd.info.target_xres * lcd->dev->imd.info.target_yres * sizeof(LV_PIXEL_COLOR_T));
-                DcuFlushRegion((void *)lcd_disp_buffer[id], lcd->dev->imd.info.target_xres * lcd->dev->imd.info.target_yres * sizeof(LV_PIXEL_COLOR_T));
-                dev_ioctl(lcd_dev[id], IOCTL_LCD_RGB_SET_ISR_CB, (u32)lv_lcd_frame_end_hook_func);
-                dev_ioctl(lcd_dev[id], IOCTL_LCD_RGB_START_DISPLAY, (u32)lcd_disp_buffer[id]);
+            for (i = 0; i < LV_LCD_DISP_BUF_NUM; i++) {
+                if (lcd_disp_buffer[id][i] == NULL) {
+                    lcd_disp_buffer[id][i] = zalloc(lcd->dev->imd.info.target_xres * lcd->dev->imd.info.target_yres * sizeof(LV_PIXEL_COLOR_T));
+                    DcuFlushRegion((void *)lcd_disp_buffer[id][i], lcd->dev->imd.info.target_xres * lcd->dev->imd.info.target_yres * sizeof(LV_PIXEL_COLOR_T));
+                }
+                printf("lvgl v9 lcd disp buffer [%d],%d x %d, malloc %d bytes at 0x%x.", i, lcd->dev->imd.info.target_xres, lcd->dev->imd.info.target_yres, lcd->dev->imd.info.target_xres * lcd->dev->imd.info.target_yres * sizeof(LV_PIXEL_COLOR_T), lcd_disp_buffer[id][i]);
+            }
+            dev_ioctl(lcd_dev[id], IOCTL_LCD_RGB_SET_ISR_CB, (u32)lv_lcd_frame_end_hook_func);
+            dev_ioctl(lcd_dev[id], IOCTL_LCD_RGB_START_DISPLAY, (u32)lcd_disp_buffer[id][0]);
+            if (i == 1) {
                 os_time_dly(50); //为了稳定计算dmm读取一行所需时间
             }
         }
@@ -374,9 +415,11 @@ void disp_uninit(uint8_t id)
         dev_close(lcd_dev[id]);
         lcd_dev[id] = NULL;
     }
-    if (lcd_disp_buffer[id]) {
-        free(lcd_disp_buffer[id]);
-        lcd_disp_buffer[id] = NULL;
+    for (int i = 0; i < LV_LCD_DISP_BUF_NUM; i++) {
+        if (lcd_disp_buffer[id][i]) {
+            free(lcd_disp_buffer[id][i]);
+            lcd_disp_buffer[id][i] = NULL;
+        }
     }
     if (lcd_rotate_task_pid[id]) {
         thread_kill(&lcd_rotate_task_pid[id], KILL_WAIT);

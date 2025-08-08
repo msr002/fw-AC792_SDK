@@ -273,6 +273,11 @@ EX_SDCARD=SD_1_0_2_1_24;
 BTBOX_MIN_VER=1.2.4.f;
 //###########################################
 
+#if defined(CONFIG_DOUBLE_BANK_ENABLE) && defined(CONFIG_UPDATE_COMPRESS)
+[FW_ADDITIONAL]
+FILE_LIST=(file=ota.bin:type=100);
+#endif
+
 /*
 ########flash空间使用配置区域###############################################
 #PDCTNAME:    产品名，对应此代码，用于标识产品，升级时可以选择匹配产品名
@@ -313,6 +318,12 @@ PRCT_OPT=2;
 USER_ADR=AUTO; [固定预留给客户，避免客户量产后，想通过升级新增重要信息的保存却没有预先预留空间]
 USER_LEN=0x1000;
 USER_OPT=1;
+
+#if defined CONFIG_SAVE_EXCEPTION_LOG_IN_FLASH
+LOG_ADR=AUTO; [异常打印信息]
+LOG_LEN=0x1000;
+LOG_OPT=0;
+#endif
 
 #if defined CONFIG_DUER_SDK_ENABLE
 DUEROS_ADR=AUTO; [小度profile]
@@ -395,4 +406,9 @@ UIPACKRES_OPT=1;
 [BURNER_CONFIG]
 SIZE=32;
 
+#if defined(CONFIG_DOUBLE_BANK_ENABLE) && defined(CONFIG_UPDATE_COMPRESS)
+[COMPRESS_BACKUP]
+AREA_SIZE=0;
+BLOCK_SIZE=65536;
+#endif
 

@@ -1397,9 +1397,10 @@ REGISTER_DEVICES(device_table) = {
 #ifdef CONFIG_VIDEO_DEC_ENABLE
 	{ "video_dec",  &video_dev_ops, NULL },
 #endif
+
+#ifdef CONFIG_VIDEO_ENABLE
     { "videoengine",  &video_engine_ops, NULL },
-
-
+#endif
 
 #if defined CONFIG_VIDEO_ENABLE || defined CONFIG_UI_ENABLE
     { "fb0",   &fb_dev_ops, (void *)&fb0_data },
@@ -1674,9 +1675,6 @@ void sys_power_poweroff_wait_powerkey_up(void)
 void power_early_flowing(void)
 {
     PORT_TABLE(g);
-
-    // 默认关闭MCLR
-    p33_and_1byte(P3_PR_PWR, (u8)~(BIT(3)));
 
     // 默认关闭长按复位0，由key_driver配置
     gpio_longpress_pin0_reset_config(IO_PORTD_01, 0, 0, 1, 1);

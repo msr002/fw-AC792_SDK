@@ -46,6 +46,7 @@ struct fb_combine_t {
     volatile u8 combine_busy;
     u32 combine_out_buf[2];
 
+    u8  fb_number;
     u16 ui_timer_id;
     u8 *map_backup_baddr;
     int fb_frame_cnt[FB_COMBINE_MAX_NUM];
@@ -197,6 +198,7 @@ static int __dma2d_frame_buf_combine(dma2d_layer_t *fg, dma2d_layer_t *bg, dma2d
     out_layer_param.stride = (out->stride == 0) ? out->width * _out_bpp : out->stride;
     out_layer_param.format = out->format;
     out_layer_param.rbs = out->rbs;
+    out_layer_param.dither_en = 1;
 
     fg_layer_param.data = (uint8_t *)fg->addr;
     fg_layer_param.stride = (fg->stride == 0) ? fg->width * _fg_bpp : fg->stride;
@@ -507,6 +509,9 @@ static int dma2d_combine_method(u8 id, dma2d_layer_t in[], dma2d_layer_t *out, i
             //前景背景和输出同尺寸,前景和背景直接混合输出,可以少做一次copy
             in[fb_nums - 1].alpha = 253;
             in[fb_nums - 1].alpha_mode = JLDMA2D_REPLACE_ALPHA;
+            if (out->format == JLDMA2D_FORMAT_YUV422_BT601) {
+                out->rbs = 1;
+            }
             __dma2d_frame_buf_combine(&in[fb_nums - 2], &in[fb_nums - 1], out);
             in[fb_nums - 1].alpha = 0;
             in[fb_nums - 1].alpha_mode = 0;
@@ -583,6 +588,8 @@ __dma2d_second:
             __dma2d_frame_buf_clear(out);
             __dma2d_frame_buf_combine(&in[0], out, out);
         }
+    } else if (fb_nums == -1) {
+        __dma2d_frame_buf_clear(out);
     }
 
 __exit:
@@ -1106,6 +1113,18 @@ int fb_combine_task(u8 id, void *priv)
             }
         }
         spin_unlock(&fb_lock[id]);
+#if 0
+        if (__this->fb_number > fb_n) {
+            need_combine = 1;
+            __this->fb_number = fb_n;
+        } else if (__this->fb_number && fb_n == 0) {
+            __this->fb_number = 0;
+            need_combine = 1;
+            fb_n = -1;
+        } else {
+            __this->fb_number = fb_n;
+        }
+#endif
 
         if (out.addr && fb_n && need_combine) {
             if (out.addr == FB_COMBINE_OUT_USE_MAX_IMGBUF) {
@@ -1357,8 +1376,10 @@ void fb_combine_list_add(struct fb_out_t *ep)
  **/
 void fb_combine_list_del(struct fb_out_t *ep)
 {
+    struct fb_out_t _ep = {0};
     u8 id = ep->out_id;
     spin_lock(&fb_lock[id]);
+    memcpy(&_ep, ep, sizeof(struct fb_out_t));
     ep->map.baddr = 0;
     ep->map.baddr_bk = 0;
     __this->fb_frame_cnt[ep->fb_name[2] - '0'] = -1;
@@ -1366,6 +1387,8 @@ void fb_combine_list_del(struct fb_out_t *ep)
         list_del(&ep->entry);
     }
     spin_unlock(&fb_lock[id]);
+    _ep.ready_combine = 0xff;
+    fb_combine_updata(&_ep, NULL); //当前fb图层删除了应该触发一次合成
 }
 
 
@@ -1382,10 +1405,13 @@ int fb_combine_updata(struct fb_out_t *ep, struct fb_map_user *map)
     u8 fb_index;
     u8 id = ep->out_id;
 
-    if (map->transp) {
+    if (map && map->transp) {
         //不用合成,数据直推lcd 更新
         fb_lcd_frame_buf_update(id, map->baddr);
         return 0;
+    }
+    if (map == NULL && ep->ready_combine == 0xff) {
+        need_combine = 1;
     }
 
     spin_lock(&fb_lock[id]);
@@ -1435,8 +1461,10 @@ int fb_combine_updata(struct fb_out_t *ep, struct fb_map_user *map)
             lcd_h = fb_lcd_get_height(id);
         }
         if (ep->fb_name[2] - '0' != 0) {
-            if (map->width == lcd_w && map->height == lcd_h) {
-                __this->map_backup_baddr = NULL;
+            if (map) {
+                if (map->width == lcd_w && map->height == lcd_h) {
+                    __this->map_backup_baddr = NULL;
+                }
             }
         }
 #endif

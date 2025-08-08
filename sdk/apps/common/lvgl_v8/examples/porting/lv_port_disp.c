@@ -31,6 +31,7 @@ static void *lv_lcd_frame_end_hook_func(void);
 static void disp_flush(lv_disp_drv_t *disp_drv, const lv_area_t *area, lv_color_t *color_p);
 void disp_clear(struct _lv_disp_drv_t *disp_drv, uint8_t *buf, uint32_t size);
 void ui_render_begin_cb(struct _lv_disp_drv_t *disp_drv);
+lv_disp_t *lv_port_get_disp(uint8_t id);
 
 /**********************
  *  STATIC VARIABLES
@@ -79,9 +80,13 @@ void lv_disp_draw_buf_user_config(void *buf1, void *buf2)
 {
     struct lv_disp_user_data_t *_disp_fh = NULL;
     lv_disp_t *d = lv_disp_get_next(NULL);
+    if (d == NULL) {
+        d = lv_port_get_disp(0);
+    }
     while (d) {
         _disp_fh = (struct lv_disp_user_data_t *)(d->driver->user_data);
         lv_disp_draw_buf_init(&_disp_fh->draw_buf_dsc, buf1, buf2, _disp_fh->disp_w * _disp_fh->disp_h);
+        d = lv_disp_get_next(d);
     }
 }
 #if (LV_DISP_UI_FB_NUM <= 1)
@@ -111,6 +116,16 @@ int lvgl_send_fb_combine_event(u8 id)
         task_name = LVGL_TASK_NAME;
     }
 
+
+#if (LV_DISP_UI_FB_NUM == 1)
+    /* if(get_system_ms() < 2000) { */
+    /* //2000ms是开机logo时间 */
+    /* //有开机logo放UI图层上面,实现logo和UI并行加载的需求 */
+    /* //UI如果渲染比较久,就不能post到lvgl线程了，否则导致logo丢失一部分内容 */
+    /* task_name = "app_core"; */
+    /* } */
+#endif
+
     int err;
     int msg[3];
     msg[0] = (int)_fb_combine_task;
@@ -132,6 +147,9 @@ static void lvgl_redraw_all_now()
     int err;
     int msg[2];
     lv_disp_t *disp = lv_disp_get_next(NULL);
+    if (disp == NULL) {
+        disp = lv_port_get_disp(0);
+    }
     while (disp) {
         lv_area_t a;
         lv_area_set(&a, 0, 0, lv_disp_get_hor_res(disp) - 1, lv_disp_get_ver_res(disp) - 1);
@@ -147,6 +165,7 @@ void lvgl_set_ui_flush_mode(u8 mode, void *buf1, void *buf2)
     static uint8_t *_ui_draw_buf;
     void *p1 = NULL;
     void *p2 = NULL;
+    struct lv_disp_user_data_t *_disp_fh = NULL;
     lvgl_set_flush_mode(mode);
     if (mode) {
         if (buf1) {
@@ -164,8 +183,17 @@ void lvgl_set_ui_flush_mode(u8 mode, void *buf1, void *buf2)
         } else {
             lv_disp_draw_buf_user_config(p1, p2);
         }
-        if (fb) {
-            lvgl_ui_resume();
+
+        lv_disp_t *d = lv_disp_get_next(NULL);
+        if (d == NULL) {
+            d = lv_port_get_disp(0);
+        }
+        while (d) {
+            _disp_fh = (struct lv_disp_user_data_t *)(d->driver->user_data);
+            if (_disp_fh->fb) {
+                lvgl_ui_resume();
+            }
+            d = lv_disp_get_next(d); //获取下一个disp
         }
     } else {
         if (_ui_draw_buf) {
@@ -222,6 +250,9 @@ static void _lv_ui_suspend_resume_cb(uint8_t state)
 
     struct lv_disp_user_data_t *_disp_fh = NULL;
     lv_disp_t *d = lv_disp_get_next(NULL);
+    if (d == NULL) {
+        d = lv_port_get_disp(0);
+    }
     while (d) {
         _disp_fh = (struct lv_disp_user_data_t *)(d->driver->user_data);
         if (state == 0) {
@@ -287,7 +318,9 @@ static void _lv_port_disp_prepare(u8 id, u16 disp_w, u16 disp_h)
     /*-------------------------
      * Initialize your display by id
      * -----------------------*/
+#if (LV_DISP_UI_FB_NUM)
     _disp_fh->fb = disp_init(id, disp_w, disp_h);
+#endif
 
     _disp_fh->id = id;
     _disp_fh->disp_w = disp_w;
@@ -338,6 +371,8 @@ static void _lv_port_disp_prepare(u8 id, u16 disp_w, u16 disp_h)
         }
     }
     lv_disp_draw_buf_init(&_disp_fh->draw_buf_dsc, buf_2_1, buf_2_2, disp_w * disp_h);   /*Initialize the display buffer*/
+#else
+    lv_disp_draw_buf_init(&_disp_fh->draw_buf_dsc, NULL, NULL, disp_w * disp_h);   /*Initialize the display buffer*/
 #endif
 
     /*-----------------------------------
@@ -378,6 +413,9 @@ static void _lv_port_disp_prepare(u8 id, u16 disp_w, u16 disp_h)
     s_disp_drv->user_data = (void *)_disp_fh; //use user data
     lv_disp_t *disp = lv_disp_drv_register(s_disp_drv);
     lv_disp[id] = disp;
+#if (LV_DISP_UI_FB_NUM == 0)
+    _disp_fh->fb = disp_init(id, disp_w, disp_h);
+#endif
     lv_timer_del(disp->refr_timer);
     disp->refr_timer = NULL;
 }
@@ -397,6 +435,9 @@ void lv_port_refr_now(lv_disp_t *disp)
     } else {
         lv_disp_t *d;
         d = lv_disp_get_next(NULL);
+        if (d == NULL) {
+            d = lv_port_get_disp(0);
+        }
         while (d) {
             tmr.user_data = d;
             _lv_disp_refr_timer(&tmr);

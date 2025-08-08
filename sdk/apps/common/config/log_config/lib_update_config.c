@@ -14,6 +14,13 @@ const int support_dual_bank_update_en = 1;
 const int support_dual_bank_update_en = 0;
 #endif  //CONFIG_DOUBLE_BANK_ENABLE
 
+//是否双备份升级方案，但appcore1的区域相比appcore0更小
+#if CONFIG_DOUBLE_BANK_LESS
+const int support_dual_bank_less_en = 1;
+#else
+const int support_dual_bank_less_en = 0;
+#endif  //CONFIG_DOUBLE_BANK_LESS
+
 //是否支持外挂flash升级,需要打开Board.h中的TCFG_NOR_FS_ENABLE
 const int support_norflash_update_en = 0;
 

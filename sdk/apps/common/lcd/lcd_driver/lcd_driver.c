@@ -26,8 +26,8 @@
 
 struct lcd_device_info {
     struct device device;
-    struct lcd_dev_drive *lcd;       ///< 屏驱配置
-    struct lcd_board_cfg *bd_cfg;    ///< 板级配置项
+    struct lcd_dev_drive *lcd;             ///< 屏驱配置
+    struct lcd_board_cfg *bd_cfg;          ///< 板级配置项
     void *lcd_if_hdl;                      ///< spi/mcu屏的接口(spi/pap)句柄
     OS_SEM *lcd_wait_sem;                  ///< 指向等待init完成的信号量
     u8 *draw_buf;                          ///< spi/mcu屏图像大小端转换的存放buf
@@ -35,7 +35,9 @@ struct lcd_device_info {
     OS_SEM te_sem;                         ///< TE信号到来的信号量
     u8 start_disp_flag : 1;                ///< 启动显示标志
     u8 lcd_open_flag   : 1;                ///< lcd驱动open标志
-    u8 is_early_init   : 6;                ///< 是否已经提前初始化标志(开机时进行初始化)
+    u8 is_early_init   : 1;                ///< 是否已经提前初始化标志(开机时进行初始化)
+    u8 fmt_need_tran   : 1;                ///< SPI、MCU屏是否需要格式/端序转换
+    u8 reserve         : 4;                ///< 保留
 };
 
 static struct lcd_platform_data *lcd_pdata; ///< 板级配置
@@ -105,7 +107,7 @@ static void lcd_push_data_time_calc_end(u8 lcd_id)
 
 extern int dma2d_init();
 extern int dma2d_free();
-extern void jldma2d_endian_trans(uint8_t *dest_buf, uint8_t *src_buf, uint32_t w, uint32_t h, uint32_t format);
+extern int jldma2d_format(uint8_t *dest_buf, uint8_t *src_buf, uint32_t dest_stride, uint32_t src_stride, uint32_t in_format, uint32_t out_format, uint32_t w, uint32_t h, uint32_t endian, uint32_t out_rbs);
 
 void lcd_cs_pinstate(u8 lcd_id, u8 state)
 {
@@ -280,6 +282,51 @@ void WriteDAT_one_page(u8 lcd_id, u8 *dat, int len)
 #endif
 
     lcd_cs_pinstate(lcd_id, 1);
+}
+
+
+jldma2d_format_t lcd_get_dma2d_in_format(u8 lcd_in_format)
+{
+    switch (lcd_in_format) {
+    case LCD_IN_YUV422:
+        return JLDMA2D_FORMAT_YUV422_BT601;
+    case LCD_IN_RGB565:
+        return JLDMA2D_FORMAT_RGB565;
+    case LCD_IN_RGB888:
+        return JLDMA2D_FORMAT_RGB888;
+    case LCD_IN_ARGB888:
+        return JLDMA2D_FORMAT_ARGB8888;
+    default:
+        log_error("lcd in format error!");
+        return 0xFF;
+    }
+}
+
+jldma2d_format_t lcd_get_dma2d_out_format(u8 lcd_out_format)
+{
+    switch (lcd_out_format) {
+    case LCD_OUT_YUV422:
+        return JLDMA2D_FORMAT_YUV422_BT601;
+    case LCD_OUT_RGB565:
+        return JLDMA2D_FORMAT_RGB565;
+    case LCD_OUT_RGB888:
+        return JLDMA2D_FORMAT_RGB888;
+    case LCD_OUT_RGB666:
+    default:
+        log_error("lcd out format error!");
+        return 0xFF;
+    }
+}
+
+void jldma2d_endian_and_format_trans(u8 *dest_buf, u8 *src_buf, u8 endian_swap, u32 w, u32 h, u32 in_format, u32 out_format)
+{
+    u32 in_stride = w * dma2d_get_format_bpp(in_format) / 8;
+    u32 out_stride = w * dma2d_get_format_bpp(out_format) / 8;
+    if (out_format == JLDMA2D_FORMAT_RGB565) {
+        jldma2d_format(dest_buf, src_buf, out_stride, in_stride, in_format, out_format, w, h, endian_swap, 0);
+    } else {
+        jldma2d_format(dest_buf, src_buf, out_stride, in_stride, in_format, out_format, w, h, 0, endian_swap);
+    }
 }
 
 u16 lcd_get_rotate(u8 lcd_id)
@@ -582,6 +629,7 @@ static int __lcd_open(struct lcd_dev_drive *lcd, struct lcd_board_cfg *bd_cfg)
     union lcd_dev_info *dev = lcd->dev;
     struct te_mode_ctrl *te_mode = &bd_cfg->te_mode;
     u8 lcd_id = lcd->id;
+    u8 out_fmt_size_map[] = {2, 2, 3, 3};
 
     if (__this->lcd_open_flag) {
         log_warn("lcd device has been open");
@@ -638,8 +686,13 @@ static int __lcd_open(struct lcd_dev_drive *lcd, struct lcd_board_cfg *bd_cfg)
             }
             lcd_send_init_code(lcd, bd_cfg);
         }
-        if (dev->imd.data_out_endian == MODE_BE) {
-            __this->draw_buf = malloc(dev->imd.info.target_xres * dev->imd.info.target_yres * 2);
+
+        if ((dev->imd.data_out_endian == MODE_BE) || \
+            (dev->imd.info.in_fmt != dev->imd.info.out_fmt)) {
+            __this->fmt_need_tran = 1;
+            __this->draw_buf = malloc(dev->imd.info.target_xres * \
+                                      dev->imd.info.target_yres * \
+                                      out_fmt_size_map[dev->imd.info.out_fmt]);
             if (!__this->draw_buf) {
                 dev_close(__this->lcd_if_hdl);
                 log_error("lcd driver draw buf malloc fail!!!");
@@ -684,8 +737,12 @@ static int __lcd_open(struct lcd_dev_drive *lcd, struct lcd_board_cfg *bd_cfg)
             }
             lcd_send_init_code(lcd, bd_cfg);
         }
-        if (dev->spi.data_out_endian == MODE_BE) {
-            __this->draw_buf = malloc(dev->spi.info.target_xres * dev->spi.info.target_yres * 2);
+        if ((dev->spi.data_out_endian == MODE_BE) || \
+            (dev->spi.info.in_fmt != dev->spi.info.out_fmt)) {
+            __this->fmt_need_tran = 1;
+            __this->draw_buf = malloc(dev->spi.info.target_xres * \
+                                      dev->spi.info.target_yres * \
+                                      out_fmt_size_map[dev->imd.info.out_fmt]);
             if (!__this->draw_buf) {
                 dev_close(__this->lcd_if_hdl);
                 log_error("lcd driver draw buf malloc fail!!!");
@@ -800,15 +857,27 @@ static int lcd_dev_ioctl(struct device *device, u32 cmd, u32 arg)
         if (lcd->type == LCD_MCU_SINGLE_FRAME) {
             lcd->draw((void *)arg);
         } else if (lcd->type == LCD_MCU) {
-            if (__this->lcd->dev->imd.data_out_endian == MODE_BE) {
-                jldma2d_endian_trans(__this->draw_buf, (uint8_t *)arg, lcd->dev->imd.info.target_xres, lcd->dev->spi.info.target_yres, JLDMA2D_FORMAT_RGB565);
+            if (__this->fmt_need_tran) {
+                jldma2d_endian_and_format_trans(__this->draw_buf, \
+                                                (u8 *)arg, \
+                                                !lcd->dev->imd.data_out_endian, \
+                                                lcd->dev->imd.info.target_xres, \
+                                                lcd->dev->imd.info.target_yres, \
+                                                lcd_get_dma2d_in_format(lcd->dev->imd.info.in_fmt), \
+                                                lcd_get_dma2d_out_format(lcd->dev->imd.info.out_fmt));
                 lcd->draw((void *)__this->draw_buf);
             } else {
                 lcd->draw((void *)arg);
             }
         } else if (lcd->type == LCD_SPI) {
-            if (__this->lcd->dev->spi.data_out_endian == MODE_BE) {
-                jldma2d_endian_trans(__this->draw_buf, (uint8_t *)arg, lcd->dev->spi.info.target_xres, lcd->dev->spi.info.target_yres, JLDMA2D_FORMAT_RGB565);
+            if (__this->fmt_need_tran) {
+                jldma2d_endian_and_format_trans(__this->draw_buf, \
+                                                (u8 *)arg, \
+                                                !lcd->dev->spi.data_out_endian, \
+                                                lcd->dev->spi.info.target_xres, \
+                                                lcd->dev->spi.info.target_yres, \
+                                                lcd_get_dma2d_in_format(lcd->dev->spi.info.in_fmt), \
+                                                lcd_get_dma2d_out_format(lcd->dev->spi.info.out_fmt));
                 lcd->draw((void *)__this->draw_buf);
             } else {
                 lcd->draw((void *)arg);
@@ -848,8 +917,14 @@ static int lcd_dev_ioctl(struct device *device, u32 cmd, u32 arg)
         __this->start_disp_flag = 1;
 
         if (lcd->type == LCD_MCU) {
-            if (__this->lcd->dev->imd.data_out_endian == MODE_BE) {
-                jldma2d_endian_trans(__this->draw_buf, (uint8_t *)arg, lcd->dev->imd.info.target_xres, lcd->dev->spi.info.target_yres, JLDMA2D_FORMAT_RGB565);
+            if (__this->fmt_need_tran) {
+                jldma2d_endian_and_format_trans(__this->draw_buf, \
+                                                (u8 *)arg, \
+                                                !lcd->dev->imd.data_out_endian, \
+                                                lcd->dev->imd.info.target_xres, \
+                                                lcd->dev->imd.info.target_yres, \
+                                                lcd_get_dma2d_in_format(lcd->dev->imd.info.in_fmt), \
+                                                lcd_get_dma2d_out_format(lcd->dev->imd.info.out_fmt));
                 lcd->draw((void *)__this->draw_buf);
             } else {
                 lcd->draw((void *)arg);
@@ -857,8 +932,14 @@ static int lcd_dev_ioctl(struct device *device, u32 cmd, u32 arg)
         }
 
         if (lcd->type == LCD_SPI) {
-            if (__this->lcd->dev->spi.data_out_endian == MODE_BE) {
-                jldma2d_endian_trans(__this->draw_buf, (uint8_t *)arg, lcd->dev->spi.info.target_xres, lcd->dev->spi.info.target_yres, JLDMA2D_FORMAT_RGB565);
+            if (__this->fmt_need_tran) {
+                jldma2d_endian_and_format_trans(__this->draw_buf, \
+                                                (u8 *)arg, \
+                                                !lcd->dev->spi.data_out_endian, \
+                                                lcd->dev->spi.info.target_xres, \
+                                                lcd->dev->spi.info.target_yres, \
+                                                lcd_get_dma2d_in_format(lcd->dev->spi.info.in_fmt), \
+                                                lcd_get_dma2d_out_format(lcd->dev->spi.info.out_fmt));
                 lcd->draw((void *)__this->draw_buf);
             } else {
                 lcd->draw((void *)arg);
@@ -945,6 +1026,7 @@ static int lcd_dev_close(struct device *device)
     }
     __this->is_early_init = 0; ///< 提前初始化仅在开机时有效，该变量close后置零，以让open时能走初始化
     __this->lcd_open_flag = 0;
+    __this->fmt_need_tran = 0;
 
     return 0;
 }

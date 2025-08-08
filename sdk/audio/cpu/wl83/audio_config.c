@@ -59,6 +59,13 @@ void audio_adc_param_fill(struct mic_open_param *mic_param, struct adc_platform_
     mic_param->mic_bias_rsel        = platform_cfg->mic_bias_rsel;
     mic_param->mic_dcc              = platform_cfg->mic_dcc;
     mic_param->inside_bias_resistor = platform_cfg->inside_bias_resistor;
+    mic_param->dmic_enable          = platform_cfg->dmic_enable;
+    mic_param->dmic_sclk_fre        = platform_cfg->dmic_sclk_fre;
+    mic_param->dmic_io_sclk         = platform_cfg->dmic_io_sclk;
+    mic_param->dmic_io_idat0        = platform_cfg->dmic_io_idat0;
+    mic_param->dmic_io_idat1        = platform_cfg->dmic_io_idat1;
+    mic_param->dmic_ch0_mode        = platform_cfg->dmic_ch0_mode;
+    mic_param->dmic_ch1_mode        = platform_cfg->dmic_ch1_mode;
 }
 
 void audio_linein_param_fill(struct linein_open_param *linein_param, const struct adc_platform_cfg *platform_cfg)

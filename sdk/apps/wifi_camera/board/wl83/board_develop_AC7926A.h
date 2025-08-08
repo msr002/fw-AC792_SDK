@@ -711,7 +711,7 @@
 #endif
 
 #define TCFG_EXTFLASH_ENABLE                TCFG_EXTFLASH_UDISK_ENABLE   //截取flash中的一段空间作为extflash
-#define TCFG_USB_DEBUG_ID                   0
+#define TCFG_USB_DEBUG_ID                   1
 
 
 

@@ -94,6 +94,7 @@ struct video_dec_param {
     u16 sample_rate;
     u8 *sample_source;
     FILE *file;
+    u32 file_len;
     const char *ftype;
     const char *fb;
     struct vds_image_info image;
@@ -105,6 +106,7 @@ struct video_dec_param {
     u32 jaggy;
     u32 rotate;
     float speed;
+    u8 dec_cyc;
 };
 
 

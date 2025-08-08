@@ -513,7 +513,6 @@ jpeg_dec0
 jpeg_dec1
 jpeg_dec2
 jpeg_dec3
-soft_h264_dec0
 file0
 uvc0
 uvc1

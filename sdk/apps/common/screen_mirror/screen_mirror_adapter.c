@@ -11,6 +11,7 @@
 #define LOG_DUMP_ENABLE
 #include "debug.h"
 
+#ifdef CONFIG_NET_SCR
 struct scr_handle {
     u8 channel;
     u8 ref;
@@ -614,3 +615,6 @@ REGISTER_PLUGIN(scr0) = {
     .set_parameter  = scr_set_parameter,
     .msg_cb         = scr_message_callback,
 };
+
+
+#endif

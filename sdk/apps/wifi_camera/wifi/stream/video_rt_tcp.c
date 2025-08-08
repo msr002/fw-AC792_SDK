@@ -67,18 +67,6 @@ static int  path_analyze(struct rt_stream_info *info, const *path)
 }
 static int video_rt_tcp_callback(enum sock_api_msg_type type, void *p)
 {
-    //缓存大于2帧丢帧
-    struct video_rt_tcp_server_info *server_info = (struct video_rt_tcp_server_info *)p;
-#if 0//暂时关闭,TCP发不完整一包会引起APP花屏
-    int vcnt = net_video_rec_get_list_vframe();
-    int set_cnt = net_video_buff_set_frame_cnt();
-    if (vcnt > set_cnt && set_cnt > 0) {
-        if (server_info) {
-            server_info->cb_flag = 1;//server_info.cb_flag = 1;
-            return -1;
-        }
-    }
-#endif
     return 0;
 }
 
@@ -145,15 +133,6 @@ static u32 video_rt_tcp_send(void *hdr, u8 *data, u32 len, u8 type)
         return len;
     }
 
-
-    //缓存大于2帧丢帧
-#if 0
-    int vcnt = net_video_rec_get_list_vframe();
-    int set_cnt = net_video_buff_set_frame_cnt();
-    if (vcnt > set_cnt && set_cnt > 0) {
-        return len;
-    }
-#endif
 
     server_info.cb_flag = 0;
     memset(&frame_head, 0, sizeof(struct frm_head));

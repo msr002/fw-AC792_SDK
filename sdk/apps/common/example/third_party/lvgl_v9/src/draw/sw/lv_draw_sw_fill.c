@@ -1,4 +1,4 @@
-﻿/**
+/**
  * @file lv_draw_sw_fill.c
  *
  */
@@ -13,7 +13,7 @@
 #if LV_USE_DRAW_SW
 
 #include "blend/lv_draw_sw_blend_private.h"
-#include "lv_draw_sw_gradient_private.h"
+#include "lv_draw_sw_grad.h"
 #include "../../misc/lv_math.h"
 #include "../../misc/lv_text_ap.h"
 #include "../../core/lv_refr.h"
@@ -45,7 +45,7 @@
  *   GLOBAL FUNCTIONS
  **********************/
 
-void lv_draw_sw_fill(lv_draw_unit_t *draw_unit, lv_draw_fill_dsc_t *dsc, const lv_area_t *coords)
+void lv_draw_sw_fill(lv_draw_task_t *t, lv_draw_fill_dsc_t *dsc, const lv_area_t *coords)
 {
     if (dsc->opa <= LV_OPA_MIN) {
         return;
@@ -55,7 +55,7 @@ void lv_draw_sw_fill(lv_draw_unit_t *draw_unit, lv_draw_fill_dsc_t *dsc, const l
     lv_area_copy(&bg_coords, coords);
 
     lv_area_t clipped_coords;
-    if (!lv_area_intersect(&clipped_coords, &bg_coords, draw_unit->clip_area)) {
+    if (!lv_area_intersect(&clipped_coords, &bg_coords, &t->clip_area)) {
         return;
     }
 
@@ -69,7 +69,7 @@ void lv_draw_sw_fill(lv_draw_unit_t *draw_unit, lv_draw_fill_dsc_t *dsc, const l
     if (dsc->radius == 0 && (grad_dir == LV_GRAD_DIR_NONE)) {
         blend_dsc.blend_area = &bg_coords;
         blend_dsc.opa = dsc->opa;
-        lv_draw_sw_blend(draw_unit, &blend_dsc);
+        lv_draw_sw_blend(t, &blend_dsc);
         return;
     }
 
@@ -108,7 +108,7 @@ void lv_draw_sw_fill(lv_draw_unit_t *draw_unit, lv_draw_fill_dsc_t *dsc, const l
     blend_dsc.opa = LV_OPA_COVER;
 
     /*Get gradient if appropriate*/
-    lv_grad_t *grad = lv_gradient_get(&dsc->grad, coords_bg_w, coords_bg_h);
+    lv_draw_sw_grad_calc_t *grad = lv_draw_sw_grad_get(&dsc->grad, coords_bg_w, coords_bg_h);
     lv_opa_t *grad_opa_map = NULL;
     bool transp = false;
     if (grad && grad_dir >= LV_GRAD_DIR_HOR) {
@@ -133,15 +133,16 @@ void lv_draw_sw_fill(lv_draw_unit_t *draw_unit, lv_draw_fill_dsc_t *dsc, const l
 
     /*Prepare complex gradient*/
     if (grad_dir >= LV_GRAD_DIR_LINEAR) {
+        LV_ASSERT_NULL(grad);
         switch (grad_dir) {
         case LV_GRAD_DIR_LINEAR:
-            lv_gradient_linear_setup(&dsc->grad, coords);
+            lv_draw_sw_grad_linear_setup(&dsc->grad, coords);
             break;
         case LV_GRAD_DIR_RADIAL:
-            lv_gradient_radial_setup(&dsc->grad, coords);
+            lv_draw_sw_grad_radial_setup(&dsc->grad, coords);
             break;
         case LV_GRAD_DIR_CONICAL:
-            lv_gradient_conical_setup(&dsc->grad, coords);
+            lv_draw_sw_grad_conical_setup(&dsc->grad, coords);
             break;
         default:
             LV_LOG_WARN("Gradient type is not supported");
@@ -179,6 +180,7 @@ void lv_draw_sw_fill(lv_draw_unit_t *draw_unit, lv_draw_fill_dsc_t *dsc, const l
 
             switch (grad_dir) {
             case LV_GRAD_DIR_VER:
+                LV_ASSERT_NULL(grad);
                 blend_dsc.color = grad->color_map[top_y - bg_coords.y1];
                 blend_dsc.opa = grad->opa_map[top_y - bg_coords.y1];
                 break;
@@ -188,15 +190,15 @@ void lv_draw_sw_fill(lv_draw_unit_t *draw_unit, lv_draw_fill_dsc_t *dsc, const l
                 break;
 #if LV_USE_DRAW_SW_COMPLEX_GRADIENTS
             case LV_GRAD_DIR_LINEAR:
-                lv_gradient_linear_get_line(&dsc->grad, clipped_coords.x1 - bg_coords.x1, top_y - bg_coords.y1, coords_bg_w, grad);
+                lv_draw_sw_grad_linear_get_line(&dsc->grad, clipped_coords.x1 - bg_coords.x1, top_y - bg_coords.y1, coords_bg_w, grad);
                 preblend = true;
                 break;
             case LV_GRAD_DIR_RADIAL:
-                lv_gradient_radial_get_line(&dsc->grad, clipped_coords.x1 - bg_coords.x1, top_y - bg_coords.y1, coords_bg_w, grad);
+                lv_draw_sw_grad_radial_get_line(&dsc->grad, clipped_coords.x1 - bg_coords.x1, top_y - bg_coords.y1, coords_bg_w, grad);
                 preblend = true;
                 break;
             case LV_GRAD_DIR_CONICAL:
-                lv_gradient_conical_get_line(&dsc->grad, clipped_coords.x1 - bg_coords.x1, top_y - bg_coords.y1, coords_bg_w, grad);
+                lv_draw_sw_grad_conical_get_line(&dsc->grad, clipped_coords.x1 - bg_coords.x1, top_y - bg_coords.y1, coords_bg_w, grad);
                 preblend = true;
                 break;
 #endif
@@ -213,7 +215,7 @@ void lv_draw_sw_fill(lv_draw_unit_t *draw_unit, lv_draw_fill_dsc_t *dsc, const l
                 }
                 blend_dsc.mask_res = LV_DRAW_SW_MASK_RES_CHANGED;
             }
-            lv_draw_sw_blend(draw_unit, &blend_dsc);
+            lv_draw_sw_blend(t, &blend_dsc);
         }
 
         if (bottom_y <= clipped_coords.y2) {
@@ -222,6 +224,7 @@ void lv_draw_sw_fill(lv_draw_unit_t *draw_unit, lv_draw_fill_dsc_t *dsc, const l
 
             switch (grad_dir) {
             case LV_GRAD_DIR_VER:
+                LV_ASSERT_NULL(grad);
                 blend_dsc.color = grad->color_map[bottom_y - bg_coords.y1];
                 blend_dsc.opa = grad->opa_map[bottom_y - bg_coords.y1];
                 break;
@@ -230,15 +233,18 @@ void lv_draw_sw_fill(lv_draw_unit_t *draw_unit, lv_draw_fill_dsc_t *dsc, const l
                 break;
 #if LV_USE_DRAW_SW_COMPLEX_GRADIENTS
             case LV_GRAD_DIR_LINEAR:
-                lv_gradient_linear_get_line(&dsc->grad, clipped_coords.x1 - bg_coords.x1, bottom_y - bg_coords.y1, coords_bg_w, grad);
+                lv_draw_sw_grad_linear_get_line(&dsc->grad, clipped_coords.x1 - bg_coords.x1, bottom_y - bg_coords.y1, coords_bg_w,
+                                                grad);
                 preblend = true;
                 break;
             case LV_GRAD_DIR_RADIAL:
-                lv_gradient_radial_get_line(&dsc->grad, clipped_coords.x1 - bg_coords.x1, bottom_y - bg_coords.y1, coords_bg_w, grad);
+                lv_draw_sw_grad_radial_get_line(&dsc->grad, clipped_coords.x1 - bg_coords.x1, bottom_y - bg_coords.y1, coords_bg_w,
+                                                grad);
                 preblend = true;
                 break;
             case LV_GRAD_DIR_CONICAL:
-                lv_gradient_conical_get_line(&dsc->grad, clipped_coords.x1 - bg_coords.x1, bottom_y - bg_coords.y1, coords_bg_w, grad);
+                lv_draw_sw_grad_conical_get_line(&dsc->grad, clipped_coords.x1 - bg_coords.x1, bottom_y - bg_coords.y1, coords_bg_w,
+                                                 grad);
                 preblend = true;
                 break;
 #endif
@@ -263,7 +269,7 @@ void lv_draw_sw_fill(lv_draw_unit_t *draw_unit, lv_draw_fill_dsc_t *dsc, const l
                 }
                 blend_dsc.mask_res = LV_DRAW_SW_MASK_RES_CHANGED;
             }
-            lv_draw_sw_blend(draw_unit, &blend_dsc);
+            lv_draw_sw_blend(t, &blend_dsc);
         }
     }
 
@@ -275,7 +281,7 @@ void lv_draw_sw_fill(lv_draw_unit_t *draw_unit, lv_draw_fill_dsc_t *dsc, const l
         blend_area.y2 = bg_coords.y2 - rout;
         blend_dsc.opa = opa;
         blend_dsc.mask_buf = NULL;
-        lv_draw_sw_blend(draw_unit, &blend_dsc);
+        lv_draw_sw_blend(t, &blend_dsc);
     }
     /*With gradient draw line by line*/
     else {
@@ -293,6 +299,7 @@ void lv_draw_sw_fill(lv_draw_unit_t *draw_unit, lv_draw_fill_dsc_t *dsc, const l
         case LV_GRAD_DIR_CONICAL:
             blend_dsc.mask_res = transp ? LV_DRAW_SW_MASK_RES_CHANGED : LV_DRAW_SW_MASK_RES_FULL_COVER;
             blend_dsc.mask_buf = grad_opa_map;
+            break;
         default:
             break;
         }
@@ -305,6 +312,7 @@ void lv_draw_sw_fill(lv_draw_unit_t *draw_unit, lv_draw_fill_dsc_t *dsc, const l
 
             switch (grad_dir) {
             case LV_GRAD_DIR_VER:
+                LV_ASSERT_NULL(grad);
                 blend_dsc.color = grad->color_map[h - bg_coords.y1];
                 if (opa >= LV_OPA_MAX) {
                     blend_dsc.opa = grad->opa_map[h - bg_coords.y1];
@@ -314,19 +322,19 @@ void lv_draw_sw_fill(lv_draw_unit_t *draw_unit, lv_draw_fill_dsc_t *dsc, const l
                 break;
 #if LV_USE_DRAW_SW_COMPLEX_GRADIENTS
             case LV_GRAD_DIR_LINEAR:
-                lv_gradient_linear_get_line(&dsc->grad, clipped_coords.x1 - bg_coords.x1, h - bg_coords.y1, coords_bg_w, grad);
+                lv_draw_sw_grad_linear_get_line(&dsc->grad, clipped_coords.x1 - bg_coords.x1, h - bg_coords.y1, coords_bg_w, grad);
                 break;
             case LV_GRAD_DIR_RADIAL:
-                lv_gradient_radial_get_line(&dsc->grad, clipped_coords.x1 - bg_coords.x1, h - bg_coords.y1, coords_bg_w, grad);
+                lv_draw_sw_grad_radial_get_line(&dsc->grad, clipped_coords.x1 - bg_coords.x1, h - bg_coords.y1, coords_bg_w, grad);
                 break;
             case LV_GRAD_DIR_CONICAL:
-                lv_gradient_conical_get_line(&dsc->grad, clipped_coords.x1 - bg_coords.x1, h - bg_coords.y1, coords_bg_w, grad);
+                lv_draw_sw_grad_conical_get_line(&dsc->grad, clipped_coords.x1 - bg_coords.x1, h - bg_coords.y1, coords_bg_w, grad);
                 break;
 #endif
             default:
                 break;
             }
-            lv_draw_sw_blend(draw_unit, &blend_dsc);
+            lv_draw_sw_blend(t, &blend_dsc);
         }
     }
 
@@ -335,19 +343,19 @@ void lv_draw_sw_fill(lv_draw_unit_t *draw_unit, lv_draw_fill_dsc_t *dsc, const l
         lv_draw_sw_mask_free_param(&mask_rout_param);
     }
     if (grad) {
-        lv_gradient_cleanup(grad);
+        lv_draw_sw_grad_cleanup(grad);
     }
 #if LV_USE_DRAW_SW_COMPLEX_GRADIENTS
     if (grad_dir >= LV_GRAD_DIR_LINEAR) {
         switch (grad_dir) {
         case LV_GRAD_DIR_LINEAR:
-            lv_gradient_linear_cleanup(&dsc->grad);
+            lv_draw_sw_grad_linear_cleanup(&dsc->grad);
             break;
         case LV_GRAD_DIR_RADIAL:
-            lv_gradient_radial_cleanup(&dsc->grad);
+            lv_draw_sw_grad_radial_cleanup(&dsc->grad);
             break;
         case LV_GRAD_DIR_CONICAL:
-            lv_gradient_conical_cleanup(&dsc->grad);
+            lv_draw_sw_grad_conical_cleanup(&dsc->grad);
             break;
         default:
             break;

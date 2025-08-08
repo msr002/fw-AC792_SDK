@@ -173,8 +173,10 @@ static void fs_update_state_cbk(int type, u32 state, void *priv)
     case UPDATE_CH_EXIT:
         if ((0 == ret_code->stu) && (0 == ret_code->err_code)) {
             UPDATA_PARM *update_ram = UPDATA_FLAG_ADDR;
-            memset(update_ram, 0, 32);
-            if (support_dual_bank_update_en) {
+            if (support_dual_bank_less_en) {
+                printf(">>>>>>>>>>>>>>>>>>less update ok , cpu reset ...\n");
+            } else if (support_dual_bank_update_en) {
+                memset(update_ram, 0, 32);
                 memset(update_ram, 0, sizeof(UPDATA_PARM));
                 update_ram->magic = type;
                 update_result_set(UPDATA_SUCC);
@@ -182,6 +184,7 @@ static void fs_update_state_cbk(int type, u32 state, void *priv)
             } else {
 #ifndef CONFIG_DOUBLE_BANK_ENABLE
                 //单备份
+                memset(update_ram, 0, 32);
                 update_mode_api_v2(type, fs_update_param_private_handle, NULL);
 #endif
                 printf(">>>>>>>>>>>>>>>>>> cpu reset , uboot todo update ...\n");

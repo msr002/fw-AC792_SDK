@@ -606,21 +606,16 @@ void app_main()
     app_send_message(APP_MSG_REC_MAIN, 0);
     /* app_mode_change(APP_MODE_BT); */
 #endif
+
+#if defined CONFIG_ENABLE_VLIST
     /*生成文件列表*/
     if (dev_online(SDX_DEV)) {
         char buf[64];
-#if defined CONFIG_ENABLE_VLIST
         FILE_LIST_IN_MEM(1);
-#endif
         strcpy(buf, "online:1");
         CTP_CMD_COMBINED(NULL, CTP_NO_ERR, "SD_STATUS", "NOTIFY", buf);
-
     }
-
-}
-//TODO undefine
-void a2dp_energy_detect_handler(void)
-{
+#endif
 
 }
 

@@ -136,7 +136,7 @@ void lv_ll_remove(lv_ll_t *ll_p, void *node_p)
     }
 
     if (lv_ll_get_head(ll_p) == node_p) {
-        /*The new head will be the node after 'n_act'*/
+        /*The new head will be the node after 'node_p'*/
         ll_p->head = lv_ll_get_next(ll_p, node_p);
         if (ll_p->head == NULL) {
             ll_p->tail = NULL;
@@ -144,7 +144,7 @@ void lv_ll_remove(lv_ll_t *ll_p, void *node_p)
             node_set_prev(ll_p, ll_p->head, NULL);
         }
     } else if (lv_ll_get_tail(ll_p) == node_p) {
-        /*The new tail will be the node before 'n_act'*/
+        /*The new tail will be the node before 'node_p'*/
         ll_p->tail = lv_ll_get_prev(ll_p, node_p);
         if (ll_p->tail == NULL) {
             ll_p->head = NULL;

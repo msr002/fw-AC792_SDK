@@ -70,7 +70,6 @@ __attribute__((weak))u8 product_enter_user_def(void)
     return 0;
 }
 
-
 u8 product_enter_check(void)
 {
 #ifdef PRODUCT_NET_CLIENT_ENABLE
@@ -505,7 +504,7 @@ static void data_handle_task(void *priv)
 
         len = comm_ops()->read(__THIS->recv_buf, MAXP_SIZE_CDC_BULKOUT_HS);
         if (len < sizeof(struct comm_head)) {
-            printf("len :%d, sizeof(struct comm_head):%d", len, sizeof(struct comm_head));
+            /* printf("len :%d, sizeof(struct comm_head):%d", len, sizeof(struct comm_head)); */
             continue;
         }
 
@@ -624,12 +623,14 @@ void product_online_tips(void)
 
 u8 product_main(void)
 {
+#if !defined PRODUCT_NET_CLIENT_ENABLE
     if (!product_enter_check()) {
 #ifdef PRODUCT_NET_CLIENT_ENABLE
         product_net_client_init();
 #endif
         return 0;
     }
+#endif
 
     if (!__THIS) {
         __THIS = zalloc(sizeof(struct product_hdl_type));
@@ -677,5 +678,3 @@ u8 product_main(void)
 
 
 #endif
-
-

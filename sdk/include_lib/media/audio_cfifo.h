@@ -98,30 +98,14 @@ int audio_cfifo_read_update(struct audio_cfifo *fifo, int samples);
 
 /*************************************************************************
  * fifo子通道数据写入
- * INPUT    :  ch - fifo子通道, data - 数据指针, len - 数据长度
+ * INPUT    :  ch - fifo子通道, data - 数据指针, len - 数据长度,
+ *             fixed_data - 固定数据(直流数据，要求data为单一的值)
  * OUTPUT   :  写入fifo的长度.
  * WARNINGS :  强制写入模式无论是否可以写入都将返回预期写入长度.
- * HISTORY  :  2020/12/28 by Lichao.
+ * HISTORY  :  2020/12/28 by Lichao
+ *             2024/12/18 merge fixed data write.
  *=======================================================================*/
-int audio_cfifo_channel_write(struct audio_cfifo_channel *ch, void *data, int len);
-
-/*************************************************************************
- * fifo子通道写入直流数据
- * INPUT    :  ch - fifo子通道, data - 直流值, len - 长度
- * OUTPUT   :  写入fifo的长度.
- * WARNINGS :  强制写入模式无论是否可以写入都将返回预期写入长度.
- * HISTORY  :  2020/12/28 by Lichao.
- *=======================================================================*/
-int audio_cfifo_channel_write_fixed_data(struct audio_cfifo_channel *ch, s16 data, int len);
-
-/*************************************************************************
- * fifo子通道擦除
- * INPUT    :  ch - fifo子通道
- * OUTPUT   :  未知.
- * WARNINGS :  待开发.
- * HISTORY  :  2020/12/28 by Lichao.
- *=======================================================================*/
-int audio_cfifo_channel_clear(struct audio_cfifo_channel *ch);
+int audio_cfifo_channel_write(struct audio_cfifo_channel *ch, void *data, int len, u8 fixed_data);
 
 /*************************************************************************
  * 主fifo获取写偏移

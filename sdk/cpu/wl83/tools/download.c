@@ -55,6 +55,10 @@ echo "packres\packres.exe -n tone -o packres/AUPACKRES dvr_aud_res" >> ${PROJ_BU
 #if defined CONFIG_VOICE_PROMPT_FILE_SAVE_IN_RESERVED_EXPAND_ZONE
 echo "packres\packres.exe -n tone -o packres/AUPACKRES dvr_aud_res" >> ${PROJ_BUILD}
 #endif
+echo "copy ../../../../wifi_camera/output/stream.bin stream.bin"     >> ${PROJ_BUILD}
+echo "copy ../../../../wifi_camera/output/cfg_tool.bin cfg_tool.bin" >> ${PROJ_BUILD}
+echo "copy ../../../../wifi_camera/output/tone_en.cfg tone_en.cfg"   >> ${PROJ_BUILD}
+echo "copy ../../../../wifi_camera/output/tone_zh.cfg tone_en.cfg"   >> ${PROJ_BUILD}
 #elif defined CONFIG_DEMO_AUDIO_PROJECT_ENABLE
 #if defined CONFIG_VOICE_PROMPT_FILE_SAVE_IN_RESERVED_EXPAND_ZONE && defined CONFIG_VOICE_PROMPT_FILE_PATH
 echo "packres\packres.exe -n tone -o packres/AUPACKRES story_aud_res" >> ${PROJ_BUILD}
@@ -123,6 +127,11 @@ echo "uboot_lz4.exe app.bin app.lz4 %run_addr% %load_addr% rom.image %mask_addr%
 echo "isd_download.exe isd_config.ini -gen2 -tonorflash -dev wl83 -boot 0x103000 -div1 -wait 300 -uboot uboot.boot -app app.lz4 cfg_tool.bin -res %AUDIO_RES% %UI_RES% cfg %MEDIA_RES% -reboot 50 %UPDATE_FILES% -extend-bin %EXFLASH_FILES% -output-ufw jl_isd.ufw" >> ${PROJ_BUILD}
 #endif
 
+#if defined(CONFIG_DOUBLE_BANK_ENABLE) && defined(CONFIG_UPDATE_COMPRESS)
+echo "isd_download.exe -make-upgrade-bin -ufw jl_isd.ufw -output db_update.bin" >> ${PROJ_BUILD}
+#endif
+
+
 #if 0
 echo "if exist *.mp3 del *.mp3" >> ${PROJ_BUILD}
 echo "if exist *.PIX del *.PIX" >> ${PROJ_BUILD}
@@ -141,10 +150,18 @@ echo "copy jl_fat1.bin loader_tools\jl_fat1.bin" >> ${PROJ_BUILD}
 echo "fw_add.exe -noenc -fw jl_isd.fw -add ota.bin -type 100 -out jl_isd.fw" >> ${PROJ_BUILD}
 echo "fw_add.exe -noenc -fw jl_isd.fw -add version.ver -out jl_isd.fw" >> ${PROJ_BUILD}
 #endif
+
 echo "fw_add.exe -noenc -fw jl_isd.fw -add script.ver -out jl_isd.fw" >> ${PROJ_BUILD}
 
 echo "ufw_maker.exe -fw_to_ufw jl_isd.fw" >> ${PROJ_BUILD}
+
+#if defined(CONFIG_DOUBLE_BANK_ENABLE) && defined(CONFIG_UPDATE_COMPRESS)
+echo "fw_add.exe -noenc -fw jl_isd.fw -add db_update.bin -out update-com.fw" >> ${PROJ_BUILD}
+echo "ufw_maker.exe -fw_to_ufw update-com.fw" >> ${PROJ_BUILD}
 #endif
+
+#endif
+
 echo "ping /n 2 127.1>null" >> ${PROJ_BUILD}
 //echo "IF EXIST null del null" >> ${PROJ_BUILD}
 echo "del video_ram_data.bin" >> ${PROJ_BUILD}
@@ -227,6 +244,10 @@ set UI_RES_PREFIX=dvr_jl_
 #if defined CONFIG_VOICE_PROMPT_FILE_SAVE_IN_RESERVED_EXPAND_ZONE
 packres\packres.exe -n tone -o packres/AUPACKRES dvr_aud_res
 #endif
+copy ../../../../wifi_camera/output/stream.bin stream.bin
+copy ../../../../wifi_camera/output/cfg_tool.bin cfg_tool.bin
+copy ../../../../wifi_camera/output/tone_en.cfg tone_en.cfg
+copy ../../../../wifi_camera/output/tone_zh.cfg tone_en.cfg
 #elif defined CONFIG_DEMO_AUDIO_PROJECT_ENABLE
 #if defined CONFIG_VOICE_PROMPT_FILE_SAVE_IN_RESERVED_EXPAND_ZONE && defined CONFIG_VOICE_PROMPT_FILE_PATH
 packres\packres.exe -n tone -o packres/AUPACKRES story_aud_res

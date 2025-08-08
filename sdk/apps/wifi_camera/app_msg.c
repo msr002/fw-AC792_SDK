@@ -139,7 +139,9 @@ void app_mode_change_replace(app_mode_t mode)
     for (int i = 0; i < ARRAY_SIZE(app_mode_table); ++i) {
         if (mode == app_mode_table[i].app_mode) {
             it.name = app_mode_table[i].app_name;
-            it.action = ACTION_REPLACE;
+            if (curr_mode != APP_MODE_BT && curr_mode != APP_MODE_NET) {
+                it.action = ACTION_REPLACE;
+            }
             start_app(&it);
             return;
         }
@@ -179,6 +181,9 @@ void app_mode_go_back(void)
 {
     struct intent it;
     init_intent(&it);
-    it.action = ACTION_BACK;
+    app_mode_t curr_mode = get_current_app_mode();
+    if (curr_mode != APP_MODE_BT && curr_mode != APP_MODE_NET) {
+        it.action = ACTION_BACK;
+    }
     start_app(&it);
 }

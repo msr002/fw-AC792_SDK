@@ -113,8 +113,15 @@ SDP_RECORD_HANDLER_REGISTER(spp_sdp_record_item) = {
 #if (TCFG_BT_SUPPORT_PROFILE_HID==1)
 extern const u8 sdp_hid_service_data[];
 u8 hid_profile_support = 1;
+#if TCFG_BT_PROFILE_HID_CHANGE_DESCRIPTOR
+extern u8 sdp_user_hid_service_data[];
+#endif
 SDP_RECORD_HANDLER_REGISTER(hid_sdp_record_item) = {
+#if TCFG_BT_PROFILE_HID_CHANGE_DESCRIPTOR
+    .service_record = sdp_user_hid_service_data,
+#else
     .service_record = (u8 *)sdp_hid_service_data,
+#endif
     .service_record_handle = 0x00010006,
 };
 #endif
@@ -139,7 +146,11 @@ SDP_RECORD_HANDLER_REGISTER(map_sdp_record_item) = {
 
 /*注意hid_conn_depend_on_dev_company置1之后，安卓手机会默认断开HID连接 */
 /*注意hid_conn_depend_on_dev_company置2之后，默认不断开HID连接 */
+#if TCFG_BT_PROFILE_HID_CHANGE_DESCRIPTOR
+const u8 hid_conn_depend_on_dev_company = 0;
+#else
 const u8 hid_conn_depend_on_dev_company = 1;
+#endif
 const u8 more_hfp_cmd_support = 1;
 
 #if (TCFG_BLE_DEMO_SELECT == DEF_BLE_DEMO_ADV)

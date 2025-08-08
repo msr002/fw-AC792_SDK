@@ -394,14 +394,14 @@ c_SRC_FILES := \
 	../../../../apps/common/camera/gc1084_mipi/gc1084_mipi_ae.c \
 	../../../../apps/common/camera/gc1084_mipi/gc1084_mipi_awb.c \
 	../../../../apps/common/camera/gc1084_mipi/gc1084_mipi_iq.c \
-	../../../../apps/common/camera/h63_dvp/h63_dvp.c \
-	../../../../apps/common/camera/h63_dvp/h63_dvp_ae.c \
-	../../../../apps/common/camera/h63_dvp/h63_dvp_awb.c \
-	../../../../apps/common/camera/h63_dvp/h63_dvp_iq.c \
-	../../../../apps/common/camera/h63_mipi/h63_mipi.c \
-	../../../../apps/common/camera/h63_mipi/h63_mipi_ae.c \
-	../../../../apps/common/camera/h63_mipi/h63_mipi_awb.c \
-	../../../../apps/common/camera/h63_mipi/h63_mipi_iq.c \
+	../../../../apps/common/camera/h63p_dvp/h63p_dvp.c \
+	../../../../apps/common/camera/h63p_dvp/h63p_dvp_ae.c \
+	../../../../apps/common/camera/h63p_dvp/h63p_dvp_awb.c \
+	../../../../apps/common/camera/h63p_dvp/h63p_dvp_iq.c \
+	../../../../apps/common/camera/h63p_mipi/h63p_mipi.c \
+	../../../../apps/common/camera/h63p_mipi/h63p_mipi_ae.c \
+	../../../../apps/common/camera/h63p_mipi/h63p_mipi_awb.c \
+	../../../../apps/common/camera/h63p_mipi/h63p_mipi_iq.c \
 	../../../../apps/common/camera/isp_scenes.c \
 	../../../../apps/common/camera/isp_tools.c \
 	../../../../apps/common/camera/sc1245_dvp/sc1245.c \
@@ -980,6 +980,7 @@ c_SRC_FILES := \
 	../../../../apps/common/system/version.c \
 	../../../../apps/common/third_party_profile/alipay/le_alipay.c \
 	../../../../apps/common/third_party_profile/custom_protocol_demo/custom_protocol.c \
+	../../../../apps/common/third_party_profile/jieli/hid_user.c \
 	../../../../apps/common/third_party_profile/le_hogp/le_hogp.c \
 	../../../../apps/common/third_party_profile/mijia/mijia_api.c \
 	../../../../apps/common/third_party_profile/mijia/mijia_ble_api/mible_api.c \
@@ -1185,19 +1186,16 @@ c_SRC_FILES := \
 	../../../../apps/wifi_camera/mode/video_rec/video_rec.c \
 	../../../../apps/wifi_camera/mode/video_rec/video_rec_cfg.c \
 	../../../../apps/wifi_camera/show_h264.c \
-	../../../../apps/wifi_camera/wifi/ctp_cli_recv_stream.c \
 	../../../../apps/wifi_camera/wifi/ctp_cmd.c \
 	../../../../apps/wifi_camera/wifi/ftpd_vfs_reg.c \
 	../../../../apps/wifi_camera/wifi/media_file_list.c \
 	../../../../apps/wifi_camera/wifi/net_video_rec.c \
 	../../../../apps/wifi_camera/wifi/network_mssdp.c \
 	../../../../apps/wifi_camera/wifi/packet.c \
-	../../../../apps/wifi_camera/wifi/raw_video_stream.c \
 	../../../../apps/wifi_camera/wifi/stream/video_rt_tcp.c \
 	../../../../apps/wifi_camera/wifi/stream/video_rt_udp.c \
 	../../../../apps/wifi_camera/wifi/stream/video_rt_usr.c \
 	../../../../apps/wifi_camera/wifi/strm_video_rec.c \
-	../../../../apps/wifi_camera/wifi/tx_camera_cWF/tx_camera_cWF.c \
 	../../../../apps/wifi_camera/wifi/video_playback.c \
 	../../../../apps/wifi_camera/wifi/video_preview.c \
 	../../../../apps/wifi_camera/wifi/wifi_app_task.c \

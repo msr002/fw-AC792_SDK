@@ -118,7 +118,7 @@ DEFINES := \
 	-DRLOTTIE_COMMIT_HASH=\"492fbb753924ae7cad27072a2b6ddedde88dc4bd\" \
 	-DFREETYPE_COMMIT_HASH=\"45903920b984540bb629bc89f4c010159c23a89a\" \
 	-DFT2_BUILD_LIBRARY \
-	-DLVGL_COMMIT_HASH=\"release_v9.2_c903c1dc0fdfae20bce69d0a48894bdebae278ff\" \
+	-DLVGL_COMMIT_HASH=\"release_v9.3_c033a98afddd65aaafeebea625382a94020fe4a7\" \
 	-D_XOPEN_SOURCE=700 \
 	-D_GNU_SOURCE \
 	-D__ELF__ \
@@ -200,14 +200,14 @@ c_SRC_FILES := \
 	../../../../../apps/common/camera/gc1084_mipi/gc1084_mipi_ae.c \
 	../../../../../apps/common/camera/gc1084_mipi/gc1084_mipi_awb.c \
 	../../../../../apps/common/camera/gc1084_mipi/gc1084_mipi_iq.c \
-	../../../../../apps/common/camera/h63_dvp/h63_dvp.c \
-	../../../../../apps/common/camera/h63_dvp/h63_dvp_ae.c \
-	../../../../../apps/common/camera/h63_dvp/h63_dvp_awb.c \
-	../../../../../apps/common/camera/h63_dvp/h63_dvp_iq.c \
-	../../../../../apps/common/camera/h63_mipi/h63_mipi.c \
-	../../../../../apps/common/camera/h63_mipi/h63_mipi_ae.c \
-	../../../../../apps/common/camera/h63_mipi/h63_mipi_awb.c \
-	../../../../../apps/common/camera/h63_mipi/h63_mipi_iq.c \
+	../../../../../apps/common/camera/h63p_dvp/h63p_dvp.c \
+	../../../../../apps/common/camera/h63p_dvp/h63p_dvp_ae.c \
+	../../../../../apps/common/camera/h63p_dvp/h63p_dvp_awb.c \
+	../../../../../apps/common/camera/h63p_dvp/h63p_dvp_iq.c \
+	../../../../../apps/common/camera/h63p_mipi/h63p_mipi.c \
+	../../../../../apps/common/camera/h63p_mipi/h63p_mipi_ae.c \
+	../../../../../apps/common/camera/h63p_mipi/h63p_mipi_awb.c \
+	../../../../../apps/common/camera/h63p_mipi/h63p_mipi_iq.c \
 	../../../../../apps/common/camera/isp_scenes.c \
 	../../../../../apps/common/camera/isp_tools.c \
 	../../../../../apps/common/camera/sc1245_dvp/sc1245.c \
@@ -270,59 +270,18 @@ c_SRC_FILES := \
 	../../../../../apps/common/example/third_party/freetype/src/type42/type42.c \
 	../../../../../apps/common/example/third_party/freetype/src/winfonts/winfnt.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/demos/benchmark/assets/img_benchmark_avatar.c \
-	../../../../../apps/common/example/third_party/lvgl_v9/demos/benchmark/assets/img_benchmark_cogwheel_alpha256.c \
-	../../../../../apps/common/example/third_party/lvgl_v9/demos/benchmark/assets/img_benchmark_cogwheel_argb.c \
-	../../../../../apps/common/example/third_party/lvgl_v9/demos/benchmark/assets/img_benchmark_cogwheel_indexed16.c \
-	../../../../../apps/common/example/third_party/lvgl_v9/demos/benchmark/assets/img_benchmark_cogwheel_rgb.c \
-	../../../../../apps/common/example/third_party/lvgl_v9/demos/benchmark/assets/lv_font_benchmark_montserrat_12_compr_az.c.c \
-	../../../../../apps/common/example/third_party/lvgl_v9/demos/benchmark/assets/lv_font_benchmark_montserrat_16_compr_az.c.c \
-	../../../../../apps/common/example/third_party/lvgl_v9/demos/benchmark/assets/lv_font_benchmark_montserrat_28_compr_az.c.c \
+	../../../../../apps/common/example/third_party/lvgl_v9/demos/benchmark/assets/img_benchmark_lvgl_logo_argb.c \
+	../../../../../apps/common/example/third_party/lvgl_v9/demos/benchmark/assets/img_benchmark_lvgl_logo_rgb.c \
+	../../../../../apps/common/example/third_party/lvgl_v9/demos/benchmark/assets/lv_font_benchmark_montserrat_12_aligned.c \
+	../../../../../apps/common/example/third_party/lvgl_v9/demos/benchmark/assets/lv_font_benchmark_montserrat_14_aligned.c \
+	../../../../../apps/common/example/third_party/lvgl_v9/demos/benchmark/assets/lv_font_benchmark_montserrat_16_aligned.c \
+	../../../../../apps/common/example/third_party/lvgl_v9/demos/benchmark/assets/lv_font_benchmark_montserrat_18_aligned.c \
+	../../../../../apps/common/example/third_party/lvgl_v9/demos/benchmark/assets/lv_font_benchmark_montserrat_20_aligned.c \
+	../../../../../apps/common/example/third_party/lvgl_v9/demos/benchmark/assets/lv_font_benchmark_montserrat_24_aligned.c \
+	../../../../../apps/common/example/third_party/lvgl_v9/demos/benchmark/assets/lv_font_benchmark_montserrat_26_aligned.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/demos/benchmark/lv_demo_benchmark.c \
-	../../../../../apps/common/example/third_party/lvgl_v9/demos/flex_layout/lv_demo_flex_layout_ctrl_pad.c \
-	../../../../../apps/common/example/third_party/lvgl_v9/demos/flex_layout/lv_demo_flex_layout_flex_loader.c \
-	../../../../../apps/common/example/third_party/lvgl_v9/demos/flex_layout/lv_demo_flex_layout_main.c \
-	../../../../../apps/common/example/third_party/lvgl_v9/demos/flex_layout/lv_demo_flex_layout_view.c \
-	../../../../../apps/common/example/third_party/lvgl_v9/demos/flex_layout/lv_demo_flex_layout_view_child_node.c \
-	../../../../../apps/common/example/third_party/lvgl_v9/demos/flex_layout/lv_demo_flex_layout_view_ctrl_pad.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/demos/keypad_encoder/lv_demo_keypad_encoder.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/demos/lv_demos.c \
-	../../../../../apps/common/example/third_party/lvgl_v9/demos/multilang/assets/avatars/img_multilang_avatar_1.c \
-	../../../../../apps/common/example/third_party/lvgl_v9/demos/multilang/assets/avatars/img_multilang_avatar_10.c \
-	../../../../../apps/common/example/third_party/lvgl_v9/demos/multilang/assets/avatars/img_multilang_avatar_11.c \
-	../../../../../apps/common/example/third_party/lvgl_v9/demos/multilang/assets/avatars/img_multilang_avatar_12.c \
-	../../../../../apps/common/example/third_party/lvgl_v9/demos/multilang/assets/avatars/img_multilang_avatar_13.c \
-	../../../../../apps/common/example/third_party/lvgl_v9/demos/multilang/assets/avatars/img_multilang_avatar_14.c \
-	../../../../../apps/common/example/third_party/lvgl_v9/demos/multilang/assets/avatars/img_multilang_avatar_15.c \
-	../../../../../apps/common/example/third_party/lvgl_v9/demos/multilang/assets/avatars/img_multilang_avatar_16.c \
-	../../../../../apps/common/example/third_party/lvgl_v9/demos/multilang/assets/avatars/img_multilang_avatar_17.c \
-	../../../../../apps/common/example/third_party/lvgl_v9/demos/multilang/assets/avatars/img_multilang_avatar_18.c \
-	../../../../../apps/common/example/third_party/lvgl_v9/demos/multilang/assets/avatars/img_multilang_avatar_19.c \
-	../../../../../apps/common/example/third_party/lvgl_v9/demos/multilang/assets/avatars/img_multilang_avatar_2.c \
-	../../../../../apps/common/example/third_party/lvgl_v9/demos/multilang/assets/avatars/img_multilang_avatar_22.c \
-	../../../../../apps/common/example/third_party/lvgl_v9/demos/multilang/assets/avatars/img_multilang_avatar_25.c \
-	../../../../../apps/common/example/third_party/lvgl_v9/demos/multilang/assets/avatars/img_multilang_avatar_3.c \
-	../../../../../apps/common/example/third_party/lvgl_v9/demos/multilang/assets/avatars/img_multilang_avatar_4.c \
-	../../../../../apps/common/example/third_party/lvgl_v9/demos/multilang/assets/avatars/img_multilang_avatar_5.c \
-	../../../../../apps/common/example/third_party/lvgl_v9/demos/multilang/assets/avatars/img_multilang_avatar_6.c \
-	../../../../../apps/common/example/third_party/lvgl_v9/demos/multilang/assets/avatars/img_multilang_avatar_7.c \
-	../../../../../apps/common/example/third_party/lvgl_v9/demos/multilang/assets/avatars/img_multilang_avatar_8.c \
-	../../../../../apps/common/example/third_party/lvgl_v9/demos/multilang/assets/avatars/img_multilang_avatar_9.c \
-	../../../../../apps/common/example/third_party/lvgl_v9/demos/multilang/assets/emojis/img_emoji_artist_palette.c \
-	../../../../../apps/common/example/third_party/lvgl_v9/demos/multilang/assets/emojis/img_emoji_books.c \
-	../../../../../apps/common/example/third_party/lvgl_v9/demos/multilang/assets/emojis/img_emoji_camera_with_flash.c \
-	../../../../../apps/common/example/third_party/lvgl_v9/demos/multilang/assets/emojis/img_emoji_cat_face.c \
-	../../../../../apps/common/example/third_party/lvgl_v9/demos/multilang/assets/emojis/img_emoji_deciduous_tree.c \
-	../../../../../apps/common/example/third_party/lvgl_v9/demos/multilang/assets/emojis/img_emoji_dog_face.c \
-	../../../../../apps/common/example/third_party/lvgl_v9/demos/multilang/assets/emojis/img_emoji_earth_globe_europe_africa.c \
-	../../../../../apps/common/example/third_party/lvgl_v9/demos/multilang/assets/emojis/img_emoji_flexed_biceps.c \
-	../../../../../apps/common/example/third_party/lvgl_v9/demos/multilang/assets/emojis/img_emoji_movie_camera.c \
-	../../../../../apps/common/example/third_party/lvgl_v9/demos/multilang/assets/emojis/img_emoji_red_heart.c \
-	../../../../../apps/common/example/third_party/lvgl_v9/demos/multilang/assets/emojis/img_emoji_rocket.c \
-	../../../../../apps/common/example/third_party/lvgl_v9/demos/multilang/assets/emojis/img_emoji_soccer_ball.c \
-	../../../../../apps/common/example/third_party/lvgl_v9/demos/multilang/assets/fonts/font_multilang_large.c \
-	../../../../../apps/common/example/third_party/lvgl_v9/demos/multilang/assets/fonts/font_multilang_small.c \
-	../../../../../apps/common/example/third_party/lvgl_v9/demos/multilang/assets/img_multilang_like.c \
-	../../../../../apps/common/example/third_party/lvgl_v9/demos/multilang/lv_demo_multilang.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/demos/music/assets/img_lv_demo_music_btn_corner_large.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/demos/music/assets/img_lv_demo_music_btn_list_pause.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/demos/music/assets/img_lv_demo_music_btn_list_pause_large.c \
@@ -372,16 +331,16 @@ c_SRC_FILES := \
 	../../../../../apps/common/example/third_party/lvgl_v9/demos/music/lv_demo_music_main.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/demos/render/assets/img_render_arc_bg.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/demos/render/assets/img_render_lvgl_logo_argb8888.c \
+	../../../../../apps/common/example/third_party/lvgl_v9/demos/render/assets/img_render_lvgl_logo_argb8888_premultiplied.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/demos/render/assets/img_render_lvgl_logo_i1.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/demos/render/assets/img_render_lvgl_logo_l8.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/demos/render/assets/img_render_lvgl_logo_rgb565.c \
+	../../../../../apps/common/example/third_party/lvgl_v9/demos/render/assets/img_render_lvgl_logo_rgb565_swapped.c \
+	../../../../../apps/common/example/third_party/lvgl_v9/demos/render/assets/img_render_lvgl_logo_rgb565a8.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/demos/render/assets/img_render_lvgl_logo_rgb888.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/demos/render/assets/img_render_lvgl_logo_xrgb8888.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/demos/render/lv_demo_render.c \
-	../../../../../apps/common/example/third_party/lvgl_v9/demos/scroll/lv_demo_scroll.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/demos/stress/lv_demo_stress.c \
-	../../../../../apps/common/example/third_party/lvgl_v9/demos/transform/assets/img_transform_avatar_15.c \
-	../../../../../apps/common/example/third_party/lvgl_v9/demos/transform/lv_demo_transform.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/demos/vector_graphic/assets/img_demo_vector_avatar.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/demos/vector_graphic/lv_demo_vector_graphic.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/demos/widgets/assets/img_clothes.c \
@@ -392,6 +351,7 @@ c_SRC_FILES := \
 	../../../../../apps/common/example/third_party/lvgl_v9/examples/anim/lv_example_anim_1.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/examples/anim/lv_example_anim_2.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/examples/anim/lv_example_anim_3.c \
+	../../../../../apps/common/example/third_party/lvgl_v9/examples/anim/lv_example_anim_4.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/examples/anim/lv_example_anim_timeline_1.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/examples/assets/animimg001.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/examples/assets/animimg002.c \
@@ -404,17 +364,23 @@ c_SRC_FILES := \
 	../../../../../apps/common/example/third_party/lvgl_v9/examples/assets/img_hand.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/examples/assets/img_skew_strip.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/examples/assets/img_star.c \
+	../../../../../apps/common/example/third_party/lvgl_v9/examples/assets/img_svg_img.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/examples/assets/imgbtn_left.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/examples/assets/imgbtn_mid.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/examples/assets/imgbtn_right.c \
-	../../../../../apps/common/example/third_party/lvgl_v9/examples/event/lv_example_event_1.c \
-	../../../../../apps/common/example/third_party/lvgl_v9/examples/event/lv_example_event_2.c \
-	../../../../../apps/common/example/third_party/lvgl_v9/examples/event/lv_example_event_3.c \
-	../../../../../apps/common/example/third_party/lvgl_v9/examples/event/lv_example_event_4.c \
+	../../../../../apps/common/example/third_party/lvgl_v9/examples/event/lv_example_event_bubble.c \
+	../../../../../apps/common/example/third_party/lvgl_v9/examples/event/lv_example_event_button.c \
+	../../../../../apps/common/example/third_party/lvgl_v9/examples/event/lv_example_event_click.c \
+	../../../../../apps/common/example/third_party/lvgl_v9/examples/event/lv_example_event_draw.c \
+	../../../../../apps/common/example/third_party/lvgl_v9/examples/event/lv_example_event_streak.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/examples/get_started/lv_example_get_started_1.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/examples/get_started/lv_example_get_started_2.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/examples/get_started/lv_example_get_started_3.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/examples/get_started/lv_example_get_started_4.c \
+	../../../../../apps/common/example/third_party/lvgl_v9/examples/grad/lv_example_grad_1.c \
+	../../../../../apps/common/example/third_party/lvgl_v9/examples/grad/lv_example_grad_2.c \
+	../../../../../apps/common/example/third_party/lvgl_v9/examples/grad/lv_example_grad_3.c \
+	../../../../../apps/common/example/third_party/lvgl_v9/examples/grad/lv_example_grad_4.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/examples/layouts/flex/lv_example_flex_1.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/examples/layouts/flex/lv_example_flex_2.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/examples/layouts/flex/lv_example_flex_3.c \
@@ -433,6 +399,7 @@ c_SRC_FILES := \
 	../../../../../apps/common/example/third_party/lvgl_v9/examples/libs/ffmpeg/lv_example_ffmpeg_2.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/examples/libs/freetype/lv_example_freetype_1.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/examples/libs/freetype/lv_example_freetype_2.c \
+	../../../../../apps/common/example/third_party/lvgl_v9/examples/libs/freetype/lv_example_freetype_3.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/examples/libs/gif/img_bulb_gif.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/examples/libs/gif/lv_example_gif_1.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/examples/libs/libjpeg_turbo/lv_example_libjpeg_turbo_1.c \
@@ -444,6 +411,7 @@ c_SRC_FILES := \
 	../../../../../apps/common/example/third_party/lvgl_v9/examples/libs/rlottie/lv_example_rlottie_1.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/examples/libs/rlottie/lv_example_rlottie_2.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/examples/libs/rlottie/lv_example_rlottie_approve.c \
+	../../../../../apps/common/example/third_party/lvgl_v9/examples/libs/svg/lv_example_svg_1.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/examples/libs/tiny_ttf/lv_example_tiny_ttf_1.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/examples/libs/tiny_ttf/lv_example_tiny_ttf_2.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/examples/libs/tiny_ttf/lv_example_tiny_ttf_3.c \
@@ -452,8 +420,12 @@ c_SRC_FILES := \
 	../../../../../apps/common/example/third_party/lvgl_v9/examples/others/file_explorer/lv_example_file_explorer_1.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/examples/others/file_explorer/lv_example_file_explorer_2.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/examples/others/file_explorer/lv_example_file_explorer_3.c \
+	../../../../../apps/common/example/third_party/lvgl_v9/examples/others/font_manager/lv_example_font_manager_1.c \
+	../../../../../apps/common/example/third_party/lvgl_v9/examples/others/font_manager/lv_example_font_manager_2.c \
+	../../../../../apps/common/example/third_party/lvgl_v9/examples/others/font_manager/lv_example_font_manager_3.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/examples/others/fragment/lv_example_fragment_1.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/examples/others/fragment/lv_example_fragment_2.c \
+	../../../../../apps/common/example/third_party/lvgl_v9/examples/others/gestures/lv_example_gestures.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/examples/others/gridnav/lv_example_gridnav_1.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/examples/others/gridnav/lv_example_gridnav_2.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/examples/others/gridnav/lv_example_gridnav_3.c \
@@ -472,6 +444,8 @@ c_SRC_FILES := \
 	../../../../../apps/common/example/third_party/lvgl_v9/examples/others/observer/lv_example_observer_5.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/examples/others/observer/lv_example_observer_6.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/examples/others/snapshot/lv_example_snapshot_1.c \
+	../../../../../apps/common/example/third_party/lvgl_v9/examples/others/xml/lv_example_xml_1.c \
+	../../../../../apps/common/example/third_party/lvgl_v9/examples/others/xml/lv_example_xml_2.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/examples/porting/lv_port_disp.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/examples/porting/lv_port_fs.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/examples/porting/lv_port_indev.c \
@@ -482,6 +456,8 @@ c_SRC_FILES := \
 	../../../../../apps/common/example/third_party/lvgl_v9/examples/scroll/lv_example_scroll_4.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/examples/scroll/lv_example_scroll_5.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/examples/scroll/lv_example_scroll_6.c \
+	../../../../../apps/common/example/third_party/lvgl_v9/examples/scroll/lv_example_scroll_7.c \
+	../../../../../apps/common/example/third_party/lvgl_v9/examples/scroll/lv_example_scroll_8.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/examples/styles/lv_example_style_1.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/examples/styles/lv_example_style_10.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/examples/styles/lv_example_style_11.c \
@@ -492,6 +468,7 @@ c_SRC_FILES := \
 	../../../../../apps/common/example/third_party/lvgl_v9/examples/styles/lv_example_style_16.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/examples/styles/lv_example_style_17.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/examples/styles/lv_example_style_18.c \
+	../../../../../apps/common/example/third_party/lvgl_v9/examples/styles/lv_example_style_19.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/examples/styles/lv_example_style_2.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/examples/styles/lv_example_style_3.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/examples/styles/lv_example_style_4.c \
@@ -503,6 +480,7 @@ c_SRC_FILES := \
 	../../../../../apps/common/example/third_party/lvgl_v9/examples/widgets/animimg/lv_example_animimg_1.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/examples/widgets/arc/lv_example_arc_1.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/examples/widgets/arc/lv_example_arc_2.c \
+	../../../../../apps/common/example/third_party/lvgl_v9/examples/widgets/arc/lv_example_arc_3.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/examples/widgets/bar/lv_example_bar_1.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/examples/widgets/bar/lv_example_bar_2.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/examples/widgets/bar/lv_example_bar_3.c \
@@ -519,6 +497,8 @@ c_SRC_FILES := \
 	../../../../../apps/common/example/third_party/lvgl_v9/examples/widgets/calendar/lv_example_calendar_1.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/examples/widgets/calendar/lv_example_calendar_2.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/examples/widgets/canvas/lv_example_canvas_1.c \
+	../../../../../apps/common/example/third_party/lvgl_v9/examples/widgets/canvas/lv_example_canvas_10.c \
+	../../../../../apps/common/example/third_party/lvgl_v9/examples/widgets/canvas/lv_example_canvas_11.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/examples/widgets/canvas/lv_example_canvas_2.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/examples/widgets/canvas/lv_example_canvas_3.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/examples/widgets/canvas/lv_example_canvas_4.c \
@@ -526,6 +506,7 @@ c_SRC_FILES := \
 	../../../../../apps/common/example/third_party/lvgl_v9/examples/widgets/canvas/lv_example_canvas_6.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/examples/widgets/canvas/lv_example_canvas_7.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/examples/widgets/canvas/lv_example_canvas_8.c \
+	../../../../../apps/common/example/third_party/lvgl_v9/examples/widgets/canvas/lv_example_canvas_9.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/examples/widgets/chart/lv_example_chart_1.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/examples/widgets/chart/lv_example_chart_2.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/examples/widgets/chart/lv_example_chart_3.c \
@@ -543,14 +524,17 @@ c_SRC_FILES := \
 	../../../../../apps/common/example/third_party/lvgl_v9/examples/widgets/image/lv_example_image_2.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/examples/widgets/image/lv_example_image_3.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/examples/widgets/image/lv_example_image_4.c \
+	../../../../../apps/common/example/third_party/lvgl_v9/examples/widgets/image/lv_example_image_5.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/examples/widgets/imagebutton/lv_example_imagebutton_1.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/examples/widgets/keyboard/lv_example_keyboard_1.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/examples/widgets/keyboard/lv_example_keyboard_2.c \
+	../../../../../apps/common/example/third_party/lvgl_v9/examples/widgets/keyboard/lv_example_keyboard_3.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/examples/widgets/label/lv_example_label_1.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/examples/widgets/label/lv_example_label_2.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/examples/widgets/label/lv_example_label_3.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/examples/widgets/label/lv_example_label_4.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/examples/widgets/label/lv_example_label_5.c \
+	../../../../../apps/common/example/third_party/lvgl_v9/examples/widgets/label/lv_example_label_6.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/examples/widgets/led/lv_example_led_1.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/examples/widgets/line/lv_example_line_1.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/examples/widgets/list/lv_example_list_1.c \
@@ -567,16 +551,21 @@ c_SRC_FILES := \
 	../../../../../apps/common/example/third_party/lvgl_v9/examples/widgets/msgbox/lv_example_msgbox_2.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/examples/widgets/obj/lv_example_obj_1.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/examples/widgets/obj/lv_example_obj_2.c \
+	../../../../../apps/common/example/third_party/lvgl_v9/examples/widgets/obj/lv_example_obj_3.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/examples/widgets/roller/lv_example_roller_1.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/examples/widgets/roller/lv_example_roller_2.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/examples/widgets/roller/lv_example_roller_3.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/examples/widgets/scale/lv_example_scale_1.c \
+	../../../../../apps/common/example/third_party/lvgl_v9/examples/widgets/scale/lv_example_scale_10.c \
+	../../../../../apps/common/example/third_party/lvgl_v9/examples/widgets/scale/lv_example_scale_11.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/examples/widgets/scale/lv_example_scale_2.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/examples/widgets/scale/lv_example_scale_3.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/examples/widgets/scale/lv_example_scale_4.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/examples/widgets/scale/lv_example_scale_5.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/examples/widgets/scale/lv_example_scale_6.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/examples/widgets/scale/lv_example_scale_7.c \
+	../../../../../apps/common/example/third_party/lvgl_v9/examples/widgets/scale/lv_example_scale_8.c \
+	../../../../../apps/common/example/third_party/lvgl_v9/examples/widgets/scale/lv_example_scale_9.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/examples/widgets/slider/lv_example_slider_1.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/examples/widgets/slider/lv_example_slider_2.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/examples/widgets/slider/lv_example_slider_3.c \
@@ -585,6 +574,7 @@ c_SRC_FILES := \
 	../../../../../apps/common/example/third_party/lvgl_v9/examples/widgets/spinbox/lv_example_spinbox_1.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/examples/widgets/spinner/lv_example_spinner_1.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/examples/widgets/switch/lv_example_switch_1.c \
+	../../../../../apps/common/example/third_party/lvgl_v9/examples/widgets/switch/lv_example_switch_2.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/examples/widgets/table/lv_example_table_1.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/examples/widgets/table/lv_example_table_2.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/examples/widgets/tabview/lv_example_tabview_1.c \
@@ -592,6 +582,7 @@ c_SRC_FILES := \
 	../../../../../apps/common/example/third_party/lvgl_v9/examples/widgets/textarea/lv_example_textarea_1.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/examples/widgets/textarea/lv_example_textarea_2.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/examples/widgets/textarea/lv_example_textarea_3.c \
+	../../../../../apps/common/example/third_party/lvgl_v9/examples/widgets/textarea/lv_example_textarea_4.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/examples/widgets/tileview/lv_example_tileview_1.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/examples/widgets/win/lv_example_win_1.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/lvgl_main.c \
@@ -610,6 +601,9 @@ c_SRC_FILES := \
 	../../../../../apps/common/example/third_party/lvgl_v9/src/core/lv_obj_tree.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/src/core/lv_refr.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/src/display/lv_display.c \
+	../../../../../apps/common/example/third_party/lvgl_v9/src/draw/dma2d/lv_draw_dma2d.c \
+	../../../../../apps/common/example/third_party/lvgl_v9/src/draw/dma2d/lv_draw_dma2d_fill.c \
+	../../../../../apps/common/example/third_party/lvgl_v9/src/draw/dma2d/lv_draw_dma2d_img.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/src/draw/jl/jldma2d/lv_draw_jldma2d.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/src/draw/jl/jldma2d/lv_draw_jldma2d_fill.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/src/draw/jl/jldma2d/lv_draw_jldma2d_img.c \
@@ -619,6 +613,7 @@ c_SRC_FILES := \
 	../../../../../apps/common/example/third_party/lvgl_v9/src/draw/jl/jlvg/lv_draw_jlvg_img.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/src/draw/jl/jlvg/lv_draw_jlvg_letter.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/src/draw/lv_draw.c \
+	../../../../../apps/common/example/third_party/lvgl_v9/src/draw/lv_draw_3d.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/src/draw/lv_draw_arc.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/src/draw/lv_draw_buf.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/src/draw/lv_draw_image.c \
@@ -632,16 +627,18 @@ c_SRC_FILES := \
 	../../../../../apps/common/example/third_party/lvgl_v9/src/draw/sw/blend/lv_draw_sw_blend.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/src/draw/sw/blend/lv_draw_sw_blend_to_al88.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/src/draw/sw/blend/lv_draw_sw_blend_to_argb8888.c \
+	../../../../../apps/common/example/third_party/lvgl_v9/src/draw/sw/blend/lv_draw_sw_blend_to_argb8888_premultiplied.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/src/draw/sw/blend/lv_draw_sw_blend_to_i1.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/src/draw/sw/blend/lv_draw_sw_blend_to_l8.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/src/draw/sw/blend/lv_draw_sw_blend_to_rgb565.c \
+	../../../../../apps/common/example/third_party/lvgl_v9/src/draw/sw/blend/lv_draw_sw_blend_to_rgb565_swapped.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/src/draw/sw/blend/lv_draw_sw_blend_to_rgb888.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/src/draw/sw/lv_draw_sw.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/src/draw/sw/lv_draw_sw_arc.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/src/draw/sw/lv_draw_sw_border.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/src/draw/sw/lv_draw_sw_box_shadow.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/src/draw/sw/lv_draw_sw_fill.c \
-	../../../../../apps/common/example/third_party/lvgl_v9/src/draw/sw/lv_draw_sw_gradient.c \
+	../../../../../apps/common/example/third_party/lvgl_v9/src/draw/sw/lv_draw_sw_grad.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/src/draw/sw/lv_draw_sw_img.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/src/draw/sw/lv_draw_sw_letter.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/src/draw/sw/lv_draw_sw_line.c \
@@ -649,6 +646,7 @@ c_SRC_FILES := \
 	../../../../../apps/common/example/third_party/lvgl_v9/src/draw/sw/lv_draw_sw_mask_rect.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/src/draw/sw/lv_draw_sw_transform.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/src/draw/sw/lv_draw_sw_triangle.c \
+	../../../../../apps/common/example/third_party/lvgl_v9/src/draw/sw/lv_draw_sw_utils.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/src/draw/sw/lv_draw_sw_vector.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/src/draw/vg_lite/lv_draw_buf_vg_lite.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/src/draw/vg_lite/lv_draw_vg_lite.c \
@@ -678,6 +676,7 @@ c_SRC_FILES := \
 	../../../../../apps/common/example/third_party/lvgl_v9/src/font/lv_font_montserrat_10.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/src/font/lv_font_montserrat_12.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/src/font/lv_font_montserrat_14.c \
+	../../../../../apps/common/example/third_party/lvgl_v9/src/font/lv_font_montserrat_14_aligned.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/src/font/lv_font_montserrat_16.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/src/font/lv_font_montserrat_18.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/src/font/lv_font_montserrat_20.c \
@@ -699,9 +698,12 @@ c_SRC_FILES := \
 	../../../../../apps/common/example/third_party/lvgl_v9/src/font/lv_font_montserrat_8.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/src/font/lv_font_simsun_14_cjk.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/src/font/lv_font_simsun_16_cjk.c \
+	../../../../../apps/common/example/third_party/lvgl_v9/src/font/lv_font_source_han_sans_sc_14_cjk.c \
+	../../../../../apps/common/example/third_party/lvgl_v9/src/font/lv_font_source_han_sans_sc_16_cjk.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/src/font/lv_font_unscii_16.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/src/font/lv_font_unscii_8.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/src/indev/lv_indev.c \
+	../../../../../apps/common/example/third_party/lvgl_v9/src/indev/lv_indev_gesture.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/src/indev/lv_indev_scroll.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/src/layouts/flex/lv_flex.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/src/layouts/grid/lv_grid.c \
@@ -710,6 +712,11 @@ c_SRC_FILES := \
 	../../../../../apps/common/example/third_party/lvgl_v9/src/libs/barcode/lv_barcode.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/src/libs/bin_decoder/lv_bin_decoder.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/src/libs/bmp/lv_bmp.c \
+	../../../../../apps/common/example/third_party/lvgl_v9/src/libs/expat/xmlparse.c \
+	../../../../../apps/common/example/third_party/lvgl_v9/src/libs/expat/xmlrole.c \
+	../../../../../apps/common/example/third_party/lvgl_v9/src/libs/expat/xmltok.c \
+	../../../../../apps/common/example/third_party/lvgl_v9/src/libs/expat/xmltok_impl.c \
+	../../../../../apps/common/example/third_party/lvgl_v9/src/libs/expat/xmltok_ns.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/src/libs/ffmpeg/lv_ffmpeg.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/src/libs/freetype/lv_freetype.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/src/libs/freetype/lv_freetype_glyph.c \
@@ -723,6 +730,7 @@ c_SRC_FILES := \
 	../../../../../apps/common/example/third_party/lvgl_v9/src/libs/fsdrv/lv_fs_memfs.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/src/libs/fsdrv/lv_fs_posix.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/src/libs/fsdrv/lv_fs_stdio.c \
+	../../../../../apps/common/example/third_party/lvgl_v9/src/libs/fsdrv/lv_fs_uefi.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/src/libs/fsdrv/lv_fs_win32.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/src/libs/gif/gifdec.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/src/libs/gif/lv_gif.c \
@@ -736,25 +744,34 @@ c_SRC_FILES := \
 	../../../../../apps/common/example/third_party/lvgl_v9/src/libs/rle/lv_rle.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/src/libs/rlottie/lv_rlottie.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/src/libs/rlottie/lv_rlottie_example_fingerprint.c \
+	../../../../../apps/common/example/third_party/lvgl_v9/src/libs/svg/lv_svg.c \
+	../../../../../apps/common/example/third_party/lvgl_v9/src/libs/svg/lv_svg_decoder.c \
+	../../../../../apps/common/example/third_party/lvgl_v9/src/libs/svg/lv_svg_parser.c \
+	../../../../../apps/common/example/third_party/lvgl_v9/src/libs/svg/lv_svg_render.c \
+	../../../../../apps/common/example/third_party/lvgl_v9/src/libs/svg/lv_svg_token.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/src/libs/tiny_ttf/lv_tiny_ttf.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/src/libs/tjpgd/lv_tjpgd.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/src/libs/tjpgd/tjpgd.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/src/lv_init.c \
+	../../../../../apps/common/example/third_party/lvgl_v9/src/misc/cache/class/lv_cache_lru_ll.c \
+	../../../../../apps/common/example/third_party/lvgl_v9/src/misc/cache/class/lv_cache_lru_rb.c \
+	../../../../../apps/common/example/third_party/lvgl_v9/src/misc/cache/instance/lv_image_cache.c \
+	../../../../../apps/common/example/third_party/lvgl_v9/src/misc/cache/instance/lv_image_header_cache.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/src/misc/cache/lv_cache.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/src/misc/cache/lv_cache_entry.c \
-	../../../../../apps/common/example/third_party/lvgl_v9/src/misc/cache/lv_cache_lru_rb.c \
-	../../../../../apps/common/example/third_party/lvgl_v9/src/misc/cache/lv_image_cache.c \
-	../../../../../apps/common/example/third_party/lvgl_v9/src/misc/cache/lv_image_header_cache.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/src/misc/lv_anim.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/src/misc/lv_anim_timeline.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/src/misc/lv_area.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/src/misc/lv_array.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/src/misc/lv_async.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/src/misc/lv_bidi.c \
+	../../../../../apps/common/example/third_party/lvgl_v9/src/misc/lv_circle_buf.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/src/misc/lv_color.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/src/misc/lv_color_op.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/src/misc/lv_event.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/src/misc/lv_fs.c \
+	../../../../../apps/common/example/third_party/lvgl_v9/src/misc/lv_grad.c \
+	../../../../../apps/common/example/third_party/lvgl_v9/src/misc/lv_iter.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/src/misc/lv_ll.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/src/misc/lv_log.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/src/misc/lv_lru.c \
@@ -769,11 +786,14 @@ c_SRC_FILES := \
 	../../../../../apps/common/example/third_party/lvgl_v9/src/misc/lv_text.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/src/misc/lv_text_ap.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/src/misc/lv_timer.c \
+	../../../../../apps/common/example/third_party/lvgl_v9/src/misc/lv_tree.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/src/misc/lv_utils.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/src/osal/lv_os.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/src/osal/lv_os_jieli.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/src/osal/lv_os_none.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/src/others/file_explorer/lv_file_explorer.c \
+	../../../../../apps/common/example/third_party/lvgl_v9/src/others/font_manager/lv_font_manager.c \
+	../../../../../apps/common/example/third_party/lvgl_v9/src/others/font_manager/lv_font_manager_recycle.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/src/others/fragment/lv_fragment.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/src/others/fragment/lv_fragment_manager.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/src/others/gridnav/lv_gridnav.c \
@@ -783,7 +803,41 @@ c_SRC_FILES := \
 	../../../../../apps/common/example/third_party/lvgl_v9/src/others/observer/lv_observer.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/src/others/snapshot/lv_snapshot.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/src/others/sysmon/lv_sysmon.c \
+	../../../../../apps/common/example/third_party/lvgl_v9/src/others/test/lv_test_display.c \
+	../../../../../apps/common/example/third_party/lvgl_v9/src/others/test/lv_test_helpers.c \
+	../../../../../apps/common/example/third_party/lvgl_v9/src/others/test/lv_test_indev.c \
+	../../../../../apps/common/example/third_party/lvgl_v9/src/others/test/lv_test_indev_gesture.c \
+	../../../../../apps/common/example/third_party/lvgl_v9/src/others/test/lv_test_screenshot_compare.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/src/others/vg_lite_tvg/vg_lite_matrix.c \
+	../../../../../apps/common/example/third_party/lvgl_v9/src/others/xml/lv_xml.c \
+	../../../../../apps/common/example/third_party/lvgl_v9/src/others/xml/lv_xml_base_types.c \
+	../../../../../apps/common/example/third_party/lvgl_v9/src/others/xml/lv_xml_component.c \
+	../../../../../apps/common/example/third_party/lvgl_v9/src/others/xml/lv_xml_parser.c \
+	../../../../../apps/common/example/third_party/lvgl_v9/src/others/xml/lv_xml_style.c \
+	../../../../../apps/common/example/third_party/lvgl_v9/src/others/xml/lv_xml_update.c \
+	../../../../../apps/common/example/third_party/lvgl_v9/src/others/xml/lv_xml_utils.c \
+	../../../../../apps/common/example/third_party/lvgl_v9/src/others/xml/lv_xml_widget.c \
+	../../../../../apps/common/example/third_party/lvgl_v9/src/others/xml/parsers/lv_xml_arc_parser.c \
+	../../../../../apps/common/example/third_party/lvgl_v9/src/others/xml/parsers/lv_xml_bar_parser.c \
+	../../../../../apps/common/example/third_party/lvgl_v9/src/others/xml/parsers/lv_xml_button_parser.c \
+	../../../../../apps/common/example/third_party/lvgl_v9/src/others/xml/parsers/lv_xml_buttonmatrix_parser.c \
+	../../../../../apps/common/example/third_party/lvgl_v9/src/others/xml/parsers/lv_xml_calendar_parser.c \
+	../../../../../apps/common/example/third_party/lvgl_v9/src/others/xml/parsers/lv_xml_canvas_parser.c \
+	../../../../../apps/common/example/third_party/lvgl_v9/src/others/xml/parsers/lv_xml_chart_parser.c \
+	../../../../../apps/common/example/third_party/lvgl_v9/src/others/xml/parsers/lv_xml_checkbox_parser.c \
+	../../../../../apps/common/example/third_party/lvgl_v9/src/others/xml/parsers/lv_xml_dropdown_parser.c \
+	../../../../../apps/common/example/third_party/lvgl_v9/src/others/xml/parsers/lv_xml_event_parser.c \
+	../../../../../apps/common/example/third_party/lvgl_v9/src/others/xml/parsers/lv_xml_image_parser.c \
+	../../../../../apps/common/example/third_party/lvgl_v9/src/others/xml/parsers/lv_xml_keyboard_parser.c \
+	../../../../../apps/common/example/third_party/lvgl_v9/src/others/xml/parsers/lv_xml_label_parser.c \
+	../../../../../apps/common/example/third_party/lvgl_v9/src/others/xml/parsers/lv_xml_obj_parser.c \
+	../../../../../apps/common/example/third_party/lvgl_v9/src/others/xml/parsers/lv_xml_roller_parser.c \
+	../../../../../apps/common/example/third_party/lvgl_v9/src/others/xml/parsers/lv_xml_scale_parser.c \
+	../../../../../apps/common/example/third_party/lvgl_v9/src/others/xml/parsers/lv_xml_slider_parser.c \
+	../../../../../apps/common/example/third_party/lvgl_v9/src/others/xml/parsers/lv_xml_spangroup_parser.c \
+	../../../../../apps/common/example/third_party/lvgl_v9/src/others/xml/parsers/lv_xml_table_parser.c \
+	../../../../../apps/common/example/third_party/lvgl_v9/src/others/xml/parsers/lv_xml_tabview_parser.c \
+	../../../../../apps/common/example/third_party/lvgl_v9/src/others/xml/parsers/lv_xml_textarea_parser.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/src/stdlib/builtin/lv_mem_core_builtin.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/src/stdlib/builtin/lv_sprintf_builtin.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/src/stdlib/builtin/lv_string_builtin.c \
@@ -796,11 +850,13 @@ c_SRC_FILES := \
 	../../../../../apps/common/example/third_party/lvgl_v9/src/stdlib/rtthread/lv_mem_core_rtthread.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/src/stdlib/rtthread/lv_sprintf_rtthread.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/src/stdlib/rtthread/lv_string_rtthread.c \
+	../../../../../apps/common/example/third_party/lvgl_v9/src/stdlib/uefi/lv_mem_core_uefi.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/src/themes/default/lv_theme_default.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/src/themes/lv_theme.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/src/themes/mono/lv_theme_mono.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/src/themes/simple/lv_theme_simple.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/src/tick/lv_tick.c \
+	../../../../../apps/common/example/third_party/lvgl_v9/src/widgets/3dtexture/lv_3dtexture.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/src/widgets/animimage/lv_animimage.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/src/widgets/arc/lv_arc.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/src/widgets/bar/lv_bar.c \
@@ -825,12 +881,14 @@ c_SRC_FILES := \
 	../../../../../apps/common/example/third_party/lvgl_v9/src/widgets/menu/lv_menu.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/src/widgets/msgbox/lv_msgbox.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/src/widgets/objx_templ/lv_objx_templ.c \
+	../../../../../apps/common/example/third_party/lvgl_v9/src/widgets/property/lv_animimage_properties.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/src/widgets/property/lv_dropdown_properties.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/src/widgets/property/lv_image_properties.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/src/widgets/property/lv_keyboard_properties.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/src/widgets/property/lv_label_properties.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/src/widgets/property/lv_obj_properties.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/src/widgets/property/lv_roller_properties.c \
+	../../../../../apps/common/example/third_party/lvgl_v9/src/widgets/property/lv_slider_properties.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/src/widgets/property/lv_style_properties.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/src/widgets/property/lv_textarea_properties.c \
 	../../../../../apps/common/example/third_party/lvgl_v9/src/widgets/roller/lv_roller.c \

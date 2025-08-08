@@ -137,6 +137,13 @@ struct mic_open_param {
     u8 mic_mode : 4;      // MIC工作模式
     u8 mic_dcc : 4;       // DCC level
     u8 inside_bias_resistor; /*!< MIC BIAS是否使用内置电阻 */
+    u8 dmic_enable;       /*!< 数字麦通道使能，此时模拟麦通道会被替换 */
+    u8 dmic_ch0_mode;     /*!< 通道0输入模式选择 */
+    u8 dmic_ch1_mode;     /*!< 通道1输入模式选择 */
+    u32 dmic_sclk_fre;    /*!< 数字麦的sclk输出频率 */
+    int dmic_io_sclk;     /*!< 数字麦的sclk输出引脚 */
+    int dmic_io_idat0;    /*!< 数字麦的dat输入引脚0 */
+    int dmic_io_idat1;    /*!< 数字麦的dat输入引脚1 */
 };
 
 struct linein_open_param {

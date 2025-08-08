@@ -130,6 +130,8 @@ extern const int config_dec_support_channels;
 
 extern const int config_audio_cfg_online_enable;
 
+extern const int config_audio_cfg_debug_online;
+
 extern const int config_audio_dac_dma_buf_realloc_enable;
 
 extern const int config_dec_support_samplerate;
@@ -202,6 +204,7 @@ extern const int config_audio_dac_channel_right_enable;
 extern const int config_audio_dac_power_on_mode;
 extern const int config_audio_dac_power_off_lite;
 extern const int config_audio_dac_underrun_time_lea;
+extern const int config_audio_dac_ng_debug;
 
 void media_irq_disable(void);
 

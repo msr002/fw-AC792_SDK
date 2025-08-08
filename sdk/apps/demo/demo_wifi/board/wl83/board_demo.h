@@ -56,9 +56,9 @@
 #define TCFG_UART0_BAUDRATE                 1000000
 #define TCFG_UART0_PARITY                   UART_PARITY_DISABLE
 
-#define TCFG_UART1_ENABLE                   0
-#define TCFG_UART1_TX_IO                    IO_PORT_USB_DPA
-#define TCFG_UART1_RX_IO                    IO_PORT_USB_DMA
+#define TCFG_UART1_ENABLE                   1
+#define TCFG_UART1_TX_IO                    IO_PORTA_00
+#define TCFG_UART1_RX_IO                    IO_PORTA_01
 #define TCFG_UART1_BAUDRATE                 1000000
 #define TCFG_UART1_FLOW_CTL_ENABLE          0
 #define TCFG_UART1_RTS_HW_ENABLE            0

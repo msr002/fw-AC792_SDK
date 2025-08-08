@@ -18,8 +18,8 @@
  *      DEFINES
  *********************/
 
-#if LV_FS_DEFAULT_DRIVE_LETTER != '\0' && (LV_FS_DEFAULT_DRIVE_LETTER < 'A' || 'Z' < LV_FS_DEFAULT_DRIVE_LETTER)
-#error "When enabled, LV_FS_DEFAULT_DRIVE_LETTER needs to be a capital ASCII letter (A-Z)"
+#if LV_FS_DEFAULT_DRIVER_LETTER != '\0' && (LV_FS_DEFAULT_DRIVER_LETTER < 'A' || 'Z' < LV_FS_DEFAULT_DRIVER_LETTER)
+#error "When enabled, LV_FS_DEFAULT_DRIVER_LETTER needs to be a capital ASCII letter (A-Z)"
 #endif
 
 #define fsdrv_ll_p &(LV_GLOBAL_DEFAULT()->fsdrv_ll)
@@ -28,7 +28,7 @@
  *      TYPEDEFS
  **********************/
 typedef struct {
-    char drive_letter;
+    char driver_letter;
     const char *real_path;
 } resolved_path_t;
 
@@ -86,7 +86,7 @@ lv_fs_res_t lv_fs_open(lv_fs_file_t *file_p, const char *path, lv_fs_mode_t mode
 
     resolved_path_t resolved_path = lv_fs_resolve_path(path);
 
-    lv_fs_drv_t *drv = lv_fs_get_drv(resolved_path.drive_letter);
+    lv_fs_drv_t *drv = lv_fs_get_drv(resolved_path.driver_letter);
 
     if (drv == NULL) {
         LV_LOG_WARN("Can't open file (%s): unknown driver letter", path);
@@ -105,7 +105,7 @@ lv_fs_res_t lv_fs_open(lv_fs_file_t *file_p, const char *path, lv_fs_mode_t mode
         return LV_FS_RES_NOT_IMP;
     }
 
-    LV_PROFILER_BEGIN;
+    LV_PROFILER_FS_BEGIN;
 
     file_p->drv = drv;
 
@@ -115,7 +115,7 @@ lv_fs_res_t lv_fs_open(lv_fs_file_t *file_p, const char *path, lv_fs_mode_t mode
     } else {
         void *file_d = drv->open_cb(drv, resolved_path.real_path, mode);
         if (file_d == NULL || file_d == (void *)(-1)) {
-            LV_PROFILER_END;
+            LV_PROFILER_FS_END;
             return LV_FS_RES_UNKNOWN;
         }
         file_p->file_d = file_d;
@@ -140,7 +140,7 @@ lv_fs_res_t lv_fs_open(lv_fs_file_t *file_p, const char *path, lv_fs_mode_t mode
         }
     }
 
-    LV_PROFILER_END;
+    LV_PROFILER_FS_END;
 
     return LV_FS_RES_OK;
 }
@@ -164,7 +164,7 @@ lv_fs_res_t lv_fs_close(lv_fs_file_t *file_p)
         return LV_FS_RES_NOT_IMP;
     }
 
-    LV_PROFILER_BEGIN;
+    LV_PROFILER_FS_BEGIN;
 
     lv_fs_res_t res = file_p->drv->close_cb(file_p->drv, file_p->file_d);
 
@@ -181,7 +181,7 @@ lv_fs_res_t lv_fs_close(lv_fs_file_t *file_p)
     file_p->drv    = NULL;
     file_p->cache  = NULL;
 
-    LV_PROFILER_END;
+    LV_PROFILER_FS_END;
 
     return res;
 }
@@ -205,7 +205,7 @@ lv_fs_res_t lv_fs_read(lv_fs_file_t *file_p, void *buf, uint32_t btr, uint32_t *
         }
     }
 
-    LV_PROFILER_BEGIN;
+    LV_PROFILER_FS_BEGIN;
 
     uint32_t br_tmp = 0;
     lv_fs_res_t res;
@@ -220,7 +220,7 @@ lv_fs_res_t lv_fs_read(lv_fs_file_t *file_p, void *buf, uint32_t btr, uint32_t *
         *br = br_tmp;
     }
 
-    LV_PROFILER_END;
+    LV_PROFILER_FS_END;
 
     return res;
 }
@@ -245,7 +245,7 @@ lv_fs_res_t lv_fs_write(lv_fs_file_t *file_p, const void *buf, uint32_t btw, uin
         }
     }
 
-    LV_PROFILER_BEGIN;
+    LV_PROFILER_FS_BEGIN;
 
     lv_fs_res_t res;
     uint32_t bw_tmp = 0;
@@ -258,8 +258,7 @@ lv_fs_res_t lv_fs_write(lv_fs_file_t *file_p, const void *buf, uint32_t btw, uin
         *bw = bw_tmp;
     }
 
-    LV_PROFILER_END;
-
+    LV_PROFILER_FS_END;
     return res;
 }
 
@@ -279,7 +278,7 @@ lv_fs_res_t lv_fs_seek(lv_fs_file_t *file_p, uint32_t pos, lv_fs_whence_t whence
         }
     }
 
-    LV_PROFILER_BEGIN;
+    LV_PROFILER_FS_BEGIN;
 
     lv_fs_res_t res;
     if (file_p->drv->cache_size) {
@@ -288,7 +287,7 @@ lv_fs_res_t lv_fs_seek(lv_fs_file_t *file_p, uint32_t pos, lv_fs_whence_t whence
         res = file_p->drv->seek_cb(file_p->drv, file_p->file_d, pos, whence);
     }
 
-    LV_PROFILER_END;
+    LV_PROFILER_FS_END;
 
     return res;
 }
@@ -305,7 +304,7 @@ lv_fs_res_t lv_fs_tell(lv_fs_file_t *file_p, uint32_t *pos)
         return LV_FS_RES_NOT_IMP;
     }
 
-    LV_PROFILER_BEGIN;
+    LV_PROFILER_FS_BEGIN;
 
     lv_fs_res_t res;
     if (file_p->drv->cache_size) {
@@ -315,7 +314,7 @@ lv_fs_res_t lv_fs_tell(lv_fs_file_t *file_p, uint32_t *pos)
         res = file_p->drv->tell_cb(file_p->drv, file_p->file_d, pos);
     }
 
-    LV_PROFILER_END;
+    LV_PROFILER_FS_END;
 
     return res;
 }
@@ -328,7 +327,7 @@ lv_fs_res_t lv_fs_dir_open(lv_fs_dir_t *rddir_p, const char *path)
 
     resolved_path_t resolved_path = lv_fs_resolve_path(path);
 
-    lv_fs_drv_t *drv = lv_fs_get_drv(resolved_path.drive_letter);
+    lv_fs_drv_t *drv = lv_fs_get_drv(resolved_path.driver_letter);
 
     if (drv == NULL) {
         return LV_FS_RES_NOT_EX;
@@ -344,19 +343,19 @@ lv_fs_res_t lv_fs_dir_open(lv_fs_dir_t *rddir_p, const char *path)
         return LV_FS_RES_NOT_IMP;
     }
 
-    LV_PROFILER_BEGIN;
+    LV_PROFILER_FS_BEGIN;
 
     void *dir_d = drv->dir_open_cb(drv, resolved_path.real_path);
 
     if (dir_d == NULL || dir_d == (void *)(-1)) {
-        LV_PROFILER_END;
+        LV_PROFILER_FS_END;
         return LV_FS_RES_UNKNOWN;
     }
 
     rddir_p->drv = drv;
     rddir_p->dir_d = dir_d;
 
-    LV_PROFILER_END;
+    LV_PROFILER_FS_END;
 
     return LV_FS_RES_OK;
 }
@@ -377,11 +376,11 @@ lv_fs_res_t lv_fs_dir_read(lv_fs_dir_t *rddir_p, char *fn, uint32_t fn_len)
         return LV_FS_RES_NOT_IMP;
     }
 
-    LV_PROFILER_BEGIN;
+    LV_PROFILER_FS_BEGIN;
 
     lv_fs_res_t res = rddir_p->drv->dir_read_cb(rddir_p->drv, rddir_p->dir_d, fn, fn_len);
 
-    LV_PROFILER_END;
+    LV_PROFILER_FS_END;
 
     return res;
 }
@@ -396,14 +395,14 @@ lv_fs_res_t lv_fs_dir_close(lv_fs_dir_t *rddir_p)
         return LV_FS_RES_NOT_IMP;
     }
 
-    LV_PROFILER_BEGIN;
+    LV_PROFILER_FS_BEGIN;
 
     lv_fs_res_t res = rddir_p->drv->dir_close_cb(rddir_p->drv, rddir_p->dir_d);
 
     rddir_p->dir_d = NULL;
     rddir_p->drv   = NULL;
 
-    LV_PROFILER_END;
+    LV_PROFILER_FS_END;
 
     return res;
 }
@@ -545,18 +544,18 @@ static resolved_path_t lv_fs_resolve_path(const char *path)
 {
     resolved_path_t resolved;
 
-#if LV_FS_DEFAULT_DRIVE_LETTER != '\0' /*When using default drive letter, strict format (X:) is mandatory*/
+#if LV_FS_DEFAULT_DRIVER_LETTER != '\0' /* When using default driver-identifier letter, strict format (X:) is mandatory */
     bool has_drive_prefix = ('A' <= path[0]) && (path[0] <= 'Z') && (path[1] == ':');
 
     if (has_drive_prefix) {
-        resolved.drive_letter = path[0];
+        resolved.driver_letter = path[0];
         resolved.real_path = path + 2;
     } else {
-        resolved.drive_letter = LV_FS_DEFAULT_DRIVE_LETTER;
+        resolved.driver_letter = LV_FS_DEFAULT_DRIVER_LETTER;
         resolved.real_path = path;
     }
 # else /*Lean rules for backward compatibility*/
-    resolved.drive_letter = path[0];
+    resolved.driver_letter = path[0];
 
     if (*path != '\0') {
         path++; /*Ignore the driver letter*/

@@ -174,7 +174,7 @@ static void usb_msd_free(const usb_dev usbfd)
 #if TCFG_USB_SLAVE_CDC_ENABLE
 static void usb_cdc_wakeup(struct usb_device_t *usb_device)
 {
-#ifdef PRODUCT_TEST_ENABLE
+#if defined PRODUCT_TEST_ENABLE && !defined (PRODUCT_NET_CLIENT_ENABLE)
     //进入PRODUCT_MODE后，将占用CDC数据接收通道
     u8 product_tool_cdc_post(void);
     if (product_tool_cdc_post()) {

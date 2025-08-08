@@ -236,10 +236,10 @@ void lv_vector_path_get_bounding(const lv_vector_path_t *path, lv_area_t *area)
         }
     }
 
-    area->x1 = (int32_t)x1;
-    area->y1 = (int32_t)y1;
-    area->x2 = (int32_t)x2;
-    area->y2 = (int32_t)y2;
+    area->x1 = lroundf(x1);
+    area->y1 = lroundf(y1);
+    area->x2 = lroundf(x2);
+    area->y2 = lroundf(y2);
 }
 
 void lv_vector_path_append_rect(lv_vector_path_t *path, const lv_area_t *rect, float rx, float ry)
@@ -421,6 +421,10 @@ void lv_vector_path_append_arc(lv_vector_path_t *path, const lv_fpoint_t *c, flo
         lv_vector_path_line_to(path, &(lv_fpoint_t) {
             start.x + cx, start.y + cy
         });
+    } else {
+        lv_vector_path_move_to(path, &(lv_fpoint_t) {
+            start.x + cx, start.y + cy
+        });
     }
 
     for (int i = 0; i < n_curves; ++i) {
@@ -551,6 +555,11 @@ void lv_vector_dsc_set_fill_rule(lv_vector_dsc_t *dsc, lv_vector_fill_t rule)
     dsc->current_dsc.fill_dsc.fill_rule = rule;
 }
 
+void lv_vector_dsc_set_fill_units(lv_vector_dsc_t *dsc, const lv_vector_fill_units_t units)
+{
+    dsc->current_dsc.fill_dsc.fill_units = units;
+}
+
 void lv_vector_dsc_set_fill_image(lv_vector_dsc_t *dsc, const lv_draw_image_dsc_t *img_dsc)
 {
     dsc->current_dsc.fill_dsc.style = LV_VECTOR_DRAW_STYLE_PATTERN;
@@ -581,7 +590,7 @@ void lv_vector_dsc_set_fill_gradient_spread(lv_vector_dsc_t *dsc, lv_vector_grad
     dsc->current_dsc.fill_dsc.gradient.spread = spread;
 }
 
-void lv_vector_dsc_set_fill_gradient_color_stops(lv_vector_dsc_t *dsc, const lv_gradient_stop_t *stops,
+void lv_vector_dsc_set_fill_gradient_color_stops(lv_vector_dsc_t *dsc, const lv_grad_stop_t *stops,
         uint16_t count)
 {
     if (count > LV_GRADIENT_MAX_STOPS) {
@@ -589,7 +598,7 @@ void lv_vector_dsc_set_fill_gradient_color_stops(lv_vector_dsc_t *dsc, const lv_
         count = LV_GRADIENT_MAX_STOPS;
     }
 
-    lv_memcpy(&(dsc->current_dsc.fill_dsc.gradient.stops), stops, sizeof(lv_gradient_stop_t) * count);
+    lv_memcpy(&(dsc->current_dsc.fill_dsc.gradient.stops), stops, sizeof(lv_grad_stop_t) * count);
     dsc->current_dsc.fill_dsc.gradient.stops_count = count;
 }
 
@@ -682,7 +691,7 @@ void lv_vector_dsc_set_stroke_gradient_spread(lv_vector_dsc_t *dsc, lv_vector_gr
     dsc->current_dsc.stroke_dsc.gradient.spread = spread;
 }
 
-void lv_vector_dsc_set_stroke_gradient_color_stops(lv_vector_dsc_t *dsc, const lv_gradient_stop_t *stops,
+void lv_vector_dsc_set_stroke_gradient_color_stops(lv_vector_dsc_t *dsc, const lv_grad_stop_t *stops,
         uint16_t count)
 {
     if (count > LV_GRADIENT_MAX_STOPS) {
@@ -690,7 +699,7 @@ void lv_vector_dsc_set_stroke_gradient_color_stops(lv_vector_dsc_t *dsc, const l
         count = LV_GRADIENT_MAX_STOPS;
     }
 
-    lv_memcpy(&(dsc->current_dsc.stroke_dsc.gradient.stops), stops, sizeof(lv_gradient_stop_t) * count);
+    lv_memcpy(&(dsc->current_dsc.stroke_dsc.gradient.stops), stops, sizeof(lv_grad_stop_t) * count);
     dsc->current_dsc.stroke_dsc.gradient.stops_count = count;
 }
 
@@ -730,6 +739,11 @@ void lv_vector_clear_area(lv_vector_dsc_t *dsc, const lv_area_t *rect)
         return;
     }
 
+    lv_area_t final_rect;
+    if (!lv_area_intersect(&final_rect, &r, rect)) {
+        return;
+    }
+
     if (!dsc->tasks.task_list) {
         dsc->tasks.task_list = lv_malloc(sizeof(lv_ll_t));
         LV_ASSERT_MALLOC(dsc->tasks.task_list);
@@ -741,7 +755,7 @@ void lv_vector_clear_area(lv_vector_dsc_t *dsc, const lv_area_t *rect)
 
     new_task->dsc.fill_dsc.color = dsc->current_dsc.fill_dsc.color;
     new_task->dsc.fill_dsc.opa = dsc->current_dsc.fill_dsc.opa;
-    lv_area_copy(&(new_task->dsc.scissor_area), rect);
+    lv_area_copy(&(new_task->dsc.scissor_area), &final_rect);
 }
 
 void lv_draw_vector(lv_vector_dsc_t *dsc)
@@ -752,9 +766,7 @@ void lv_draw_vector(lv_vector_dsc_t *dsc)
 
     lv_layer_t *layer = dsc->layer;
 
-    lv_draw_task_t *t = lv_draw_add_task(layer, &(layer->_clip_area));
-    t->type = LV_DRAW_TASK_TYPE_VECTOR;
-    t->draw_dsc = lv_malloc(sizeof(lv_draw_vector_task_dsc_t));
+    lv_draw_task_t *t = lv_draw_add_task(layer, &(layer->_clip_area), LV_DRAW_TASK_TYPE_VECTOR);
     lv_memcpy(t->draw_dsc, &(dsc->tasks), sizeof(lv_draw_vector_task_dsc_t));
     lv_draw_finalize_task_creation(layer, t);
     dsc->tasks.task_list = NULL;
@@ -788,6 +800,10 @@ void lv_vector_dsc_skew(lv_vector_dsc_t *dsc, float skew_x, float skew_y)
 
 void lv_vector_for_each_destroy_tasks(lv_ll_t *task_list, vector_draw_task_cb cb, void *data)
 {
+    if (task_list == NULL) {
+        return;
+    }
+
     lv_vector_draw_task *task = lv_ll_get_head(task_list);
     lv_vector_draw_task *next_task = NULL;
 

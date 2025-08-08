@@ -311,6 +311,13 @@
 #define TCFG_ADC1_BIAS_RSEL 3 // MIC BIAS内置上拉电阻挡位
 #define TCFG_ADC1_DCC_LEVEL 14 // DCC 档位
 #define TCFG_ADC1_POWER_IO 0 // IO供电选择
+#define TCFG_DMIC_ENABLE 0 // 数字麦使能
+#define TCFG_DMIC_IO_SCLK -1 // 数字麦SCLK_IO
+#define TCFG_DMIC_SCLK_FREQUENCY 2000000 // 数字麦SCLK频率
+#define TCFG_DMIC_IO_IDAT0 -1 // 数字麦IDAT0_IO
+#define TCFG_DMIC_IO_IDAT1 -1 // 数字麦IDAT1_IO
+#define TCFG_DMIC_CH0_MODE 4 // 数字麦通道0模式
+#define TCFG_DMIC_CH1_MODE 5 // 数字麦通道1模式
 #endif // TCFG_AUDIO_ADC_ENABLE
 
 #define TCFG_AUDIO_GLOBAL_SAMPLE_RATE 48000 // 全局采样率

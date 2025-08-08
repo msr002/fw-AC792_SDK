@@ -25,6 +25,8 @@
 #include "syscfg/syscfg_id.h"
 #include "product_main.h"
 
+
+#ifdef CONFIG_NET_ENABLE
 #define WIFI_APP_TASK_NAME "wifi_app_task"
 
 static char save_ssid_flag;
@@ -234,7 +236,7 @@ static void wifi_set_lan_setting_info(void)
 
         .WIRELESS_IP_ADDR0  = 192,
         .WIRELESS_IP_ADDR1  = 168,
-        .WIRELESS_IP_ADDR2  = 4,
+        .WIRELESS_IP_ADDR2  = 1,
         .WIRELESS_IP_ADDR3  = 1,
 
         .WIRELESS_NETMASK0  = 255,
@@ -244,17 +246,17 @@ static void wifi_set_lan_setting_info(void)
 
         .WIRELESS_GATEWAY0  = 192,
         .WIRELESS_GATEWAY1  = 168,
-        .WIRELESS_GATEWAY2  = 4,
+        .WIRELESS_GATEWAY2  = 1,
         .WIRELESS_GATEWAY3  = 1,
 
         .SERVER_IPADDR1  = 192,
         .SERVER_IPADDR2  = 168,
-        .SERVER_IPADDR3  = 4,
+        .SERVER_IPADDR3  = 1,
         .SERVER_IPADDR4  = 1,
 
         .CLIENT_IPADDR1  = 192,
         .CLIENT_IPADDR2  = 168,
-        .CLIENT_IPADDR3  = 4,
+        .CLIENT_IPADDR3  = 1,
         .CLIENT_IPADDR4  = 2,
 
         .SUB_NET_MASK1   = 255,
@@ -709,6 +711,10 @@ static void wifi_app_task(void *priv)
 
     wifi_set_event_callback(wifi_event_callback);
     wifi_on();
+
+    wifi_set_long_retry(4);
+    wifi_set_short_retry(7);
+
     /* wifi_enter_p2p_mode(P2P_GO_MODE, "JLWiFi-P2P"); */
 
     //非量产模式下的AP和ST设置
@@ -803,4 +809,6 @@ const char *get_rec_emr_path_3()
     return NULL;
 #endif
 }
+#endif
+
 #endif

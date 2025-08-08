@@ -124,11 +124,11 @@ const int CONFIG_TEST_FCC_CODE                      = 1;
 const int CONFIG_TEST_DUT_ONLY_BOX_CODE             = 0;
 const int CONFIG_BREDR_AFH_USER                     = 0;
 #if TCFG_USER_EMITTER_ENABLE
-const int CONFIG_MASTER_QOS_POLL                    = 1;
+const int CONFIG_MASTER_QOS_POLL                    = BT_QOS_EMITTER;
 const int CONFIG_BREDR_INQUIRY                      = 1;
 const int CONFIG_INQUIRY_PAGE_OFFSET_ADJUST         = 1;
 #else
-const int CONFIG_MASTER_QOS_POLL                    = 0;
+const int CONFIG_MASTER_QOS_POLL                    = 0; //BT_QOS_TWS
 const int CONFIG_BREDR_INQUIRY                      = 0;
 const int CONFIG_INQUIRY_PAGE_OFFSET_ADJUST         = 0;
 #endif

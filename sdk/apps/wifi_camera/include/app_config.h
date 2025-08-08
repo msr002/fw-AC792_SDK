@@ -254,6 +254,78 @@
 #endif
 #endif
 
+
+// #define CONFIG_MASS_PRODUCTION_ENABLE //启用产测模式
+// #define CONFIG_AUTO_PRODUCTION_ENABLE	//启用自动化产测模式
+
+#define ACCESS_NUM 				1
+#define CONFIG_ENABLE_VLIST		//支持SD卡录像下的APP文件缩略图、文件列表检索
+
+//AP模式的热点名称和密码
+#define AP_WIFI_CAM_PREFIX    "wifi_camera_wl8x_"
+#define AP_WIFI_CAM_WIFI_PWD  "12345678"
+
+//默认网络视频为JPEG格式
+#define CONFIG_NET_JPEG
+
+// #define CONFIG_NET_TCP_ENABLE
+#define CONFIG_NET_UDP_ENABLE
+
+//默认间隔录影不允许连接实时流
+#define CONFIG_NET_VDIEO_GAP_ENABLE 0
+
+#define CONFIG_NET_SCR  /*网络投屏*/
+
+/*-------------网络端口----------------*/
+#define CTP_CTRL_PORT   	3333
+#define CDP_CTRL_PORT   	2228
+#define NET_SCR_PORT    	2230
+#define VIDEO_PREVIEW_PORT 	2226
+#define VIDEO_PLAYBACK_PORT 2223
+#define HTTP_PORT           8080
+#define RTSP_PORT           554
+
+/*--------视频库内使用----------------*/
+#define _DUMP_PORT          2229
+#define _FORWARD_PORT    	2224
+#define _BEHIND_PORT     	2225
+#define _THIRD_PORT     	3225
+
+
+#define CONFIG_NET_PKG_JPEG
+
+/*--------录像和实时流帧率配置--------*/
+//录卡和实时流的音频采样率,注意：硬件没有接咪头需要设置为0
+#define VIDEO_REC_AUDIO_SAMPLE_RATE		16000
+
+//录卡前后视帧率设置
+#define  LOCAL_VIDEO_REC_FPS 			25  //不使用0作为默认值，写具体数值
+
+#if (__SDRAM_SIZE__ <= (2 * 1024 * 1024))
+#undef LOCAL_VIDEO_REC_FPS
+#define  LOCAL_VIDEO_REC_FPS            20
+#endif
+
+//实时流BUFF允许缓存帧数(延时大则需要打开，例如录像中720P),写0无效,注意：该宏大于1时，会引起实时流实际帧率比配置低，但是实时性好
+#define  NET_VIDEO_BUFF_FRAME_CNT		2
+
+//实时流前后视帧率设置
+#define  NET_VIDEO_REC_FPS0   			20  //不使用0作为默认值，写具体数值
+#define  NET_VIDEO_REC_FPS1   			25   //不使用0作为默认值，写具体数值
+
+//录像模式实时流丢帧配置(单路720录像且实时流720或双路录像有效),只能配置以下3个宏数值>=1其中一个,配置必须小于等于摄像头输出帧率,全0则输出录像帧率
+#define  NET_VIDEO_REC_DROP_REAl_FP		15	//(实际输出帧率，单路720录像且实时流720或双路录像或SFC 2M版本录像有效,写0无效,不录像请用NET_VIDEO_REC_FPS0,NET_VIDEO_REC_FPS1)
+#define  NET_VIDEO_REC_LOSE_FRAME_CNT	0	//(每隔n帧丢一帧,单路720录像且实时流720或双路录像或SFC 2M版本录像有效,写0无效)30p摄像头,需求>=15p/s则配置>=1;25p摄像头,需求>=12p/s则配置>=1.
+#define  NET_VIDEO_REC_SEND_FRAME_CNT	0	//(每隔n帧发一帧,单路720录像且实时流720或双路录像或SFC 2M版本录像有效,写0无效)
+
+//RTSP实时流帧率设置
+#define  STRM_VIDEO_REC_FPS0   			20  //不使用0作为默认值，写具体数值
+#define  STRM_VIDEO_REC_DROP_REAl_FP 	15  //(实际输出帧率，单路720录像且实时流720或双路录像有效或SFC 2M版本录像,写0无效)
+
+//RTSP实时流BUFF允许缓存帧数(延时大则需要打开，例如录像中720P),写0无效,注意：该宏大于1时，会引起实时流实际帧率比配置低，但是实时性好
+#define  STRM_VIDEO_BUFF_FRAME_CNT		2
+/*--------------------------------------*/
+
 #endif
 
 
@@ -390,97 +462,8 @@
 
 
 //*********************************************************************************//
-//                                  网络配置                                       //
+//                                  网络视频配置                                   //
 //*********************************************************************************//
-// #define CONFIG_RTSP_TEST_ENABLE
-
-// #define CONFIG_MASS_PRODUCTION_ENABLE //启用产测模式
-// #define CONFIG_AUTO_PRODUCTION_ENABLE	//启用自动化产测模式
-
-#define ACCESS_NUM 				1
-#define CONFIG_ENABLE_VLIST		//支持SD卡录像下的APP文件缩略图、文件列表检索
-
-//AP模式的热点名称和密码
-#define AP_WIFI_CAM_PREFIX    "wifi_camera_wl8x_"
-#define AP_WIFI_CAM_WIFI_PWD  "12345678"
-
-//STA模式的路由器名称和密码
-//注意：STA模式需要换:wl_wifi_ap.a换wl_wifi_sta.a; 或wl_wifi_ap_sfc.a换wl_wifi_sta_sfc.a; 同时加上：wpasupplicant.a
-// #define STA_WIFI_SSID		"asd"	//也为量产模式的路由器名称
-// #define STA_WIFI_PWD		"123456789"    //也为量产模式的路由器密码
-// #define CONFIG_WIFI_STA_MODE				//打开:STA连接固定路由器
-
-// #ifdef CONFIG_WIFI_STA_MODE
-// #define CONFIG_STATIC_IPADDR_ENABLE         //使用静态IP实现STA快速连接
-// #endif
-
-// #ifdef CONFIG_MASS_PRODUCTION_ENABLE [>量产模式打开STA模式<]
-// #define CONFIG_WIFI_STA_MODE	[>打开:STA连接固定路由器,否则:默认AP模式<]
-// #define CONFIG_USR_VIDEO_ENABLE		//用户VIDEO使能
-// #endif
-
-//默认网络视频为JPEG格式
-#define CONFIG_NET_JPEG
-
-// #define CONFIG_NET_TCP_ENABLE
-#define CONFIG_NET_UDP_ENABLE
-
-//默认间隔录影不允许连接实时流
-#define CONFIG_NET_VDIEO_GAP_ENABLE 0
-
-#define CONFIG_NET_SCR  /*网络投屏*/
-
-/*-------------网络端口----------------*/
-#define CTP_CTRL_PORT   	3333
-#define CDP_CTRL_PORT   	2228
-#define NET_SCR_PORT    	2230
-#define VIDEO_PREVIEW_PORT 	2226
-#define VIDEO_PLAYBACK_PORT 2223
-#define HTTP_PORT           8080
-#define RTSP_PORT           554
-
-/*--------视频库内使用----------------*/
-#define _DUMP_PORT          2229
-#define _FORWARD_PORT    	2224
-#define _BEHIND_PORT     	2225
-#define _THIRD_PORT     	3225
-
-
-#define CONFIG_NET_PKG_JPEG
-
-/*--------录像和实时流帧率配置--------*/
-//录卡和实时流的音频采样率,注意：硬件没有接咪头需要设置为0
-#define VIDEO_REC_AUDIO_SAMPLE_RATE		16000
-
-//录卡前后视帧率设置
-#define  LOCAL_VIDEO_REC_FPS 			25  //不使用0作为默认值，写具体数值
-
-#if (__SDRAM_SIZE__ <= (2 * 1024 * 1024))
-#undef LOCAL_VIDEO_REC_FPS
-#define  LOCAL_VIDEO_REC_FPS            20
-#endif
-
-//实时流BUFF允许缓存帧数(延时大则需要打开，例如录像中720P),写0无效,注意：该宏大于1时，会引起实时流实际帧率比配置低，但是实时性好
-#define  NET_VIDEO_BUFF_FRAME_CNT		2
-
-//实时流前后视帧率设置
-#define  NET_VIDEO_REC_FPS0   			20  //不使用0作为默认值，写具体数值
-#define  NET_VIDEO_REC_FPS1   			25   //不使用0作为默认值，写具体数值
-
-//录像模式实时流丢帧配置(单路720录像且实时流720或双路录像有效),只能配置以下3个宏数值>=1其中一个,配置必须小于等于摄像头输出帧率,全0则输出录像帧率
-#define  NET_VIDEO_REC_DROP_REAl_FP		15	//(实际输出帧率，单路720录像且实时流720或双路录像或SFC 2M版本录像有效,写0无效,不录像请用NET_VIDEO_REC_FPS0,NET_VIDEO_REC_FPS1)
-#define  NET_VIDEO_REC_LOSE_FRAME_CNT	0	//(每隔n帧丢一帧,单路720录像且实时流720或双路录像或SFC 2M版本录像有效,写0无效)30p摄像头,需求>=15p/s则配置>=1;25p摄像头,需求>=12p/s则配置>=1.
-#define  NET_VIDEO_REC_SEND_FRAME_CNT	0	//(每隔n帧发一帧,单路720录像且实时流720或双路录像或SFC 2M版本录像有效,写0无效)
-
-//RTSP实时流帧率设置
-#define  STRM_VIDEO_REC_FPS0   			20  //不使用0作为默认值，写具体数值
-#define  STRM_VIDEO_REC_DROP_REAl_FP 	15  //(实际输出帧率，单路720录像且实时流720或双路录像有效或SFC 2M版本录像,写0无效)
-
-//RTSP实时流BUFF允许缓存帧数(延时大则需要打开，例如录像中720P),写0无效,注意：该宏大于1时，会引起实时流实际帧率比配置低，但是实时性好
-#define  STRM_VIDEO_BUFF_FRAME_CNT		2
-/*--------------------------------------*/
-
-
 
 
 
@@ -500,28 +483,6 @@
 #endif
 
 #define CONFIG_VE_MOTION_DETECT_MODE_ISP		/* 移动侦测使用MODE_ISP, 否则使用MODE_NORMAL */
-// #define CONFIG_LANE_DETECT_ENABLE
-
-//#define CONFIG_OSD_ENABLE			/* 视频OSD时间戳开关 */
-// #ifdef CONFIG_MASS_PRODUCTION_ENABLE
-// #define STA_WIFI_SSID     "GJ1"    //量产模式的路由器名称
-// #define STA_WIFI_PWD      "8888888899"  //量产模式的路由器密码
-//#define CONFIG_PRODUCTION_IO_PORT			IO_PORTB_01 //配置进入量产莫模式的IO
-//#define CONFIG_PRODUCTION_IO_STATE		0 			//配置进入量产莫模式的IO状态：0低电平，1高电平
-// #endif
-
-//*********************************************************************************//
-//                             编码图片分辨率                                      //
-//*********************************************************************************//
-#define CONFIG_VIDEO_720P
-#ifdef CONFIG_VIDEO_720P
-#define CONFIG_VIDEO_IMAGE_W    1280
-#define CONFIG_VIDEO_IMAGE_H    720
-#else
-#define CONFIG_VIDEO_IMAGE_W    640
-#define CONFIG_VIDEO_IMAGE_H    480
-#undef  CONFIG_WMA_DEC_ENABLE
-#endif
 
 //*********************************************************************************//
 //                             视频流相关配置                                      //
@@ -791,6 +752,12 @@
 
 #endif
 
+#ifndef TCFG_USER_BLE_ENABLE
+#define TCFG_USER_BLE_ENABLE                    0   //BLE功能使能
+#endif
+
+
+
 
 //*********************************************************************************//
 //                                     TWS配置                                     //
@@ -980,7 +947,12 @@
 #define CONFIG_LZ4_DATA_CODE_ENABLE             //使用LZ4压缩data段
 #endif
 
+// #define CONFIG_DOUBLE_BANK_ENABLE               //双备份方式升级
+// #define CONFIG_UPDATE_COMPRESS                  //双备份压缩升级
 
+#if defined (CONFIG_DOUBLE_BANK_ENABLE) && defined(CONFIG_UPDATE_COMPRESS)
+#define CONFIG_DOUBLE_BANK_LESS                 1 //双备份结构，但appcore1区域可以更小
+#endif
 
 #ifdef CONFIG_RELEASE_ENABLE
 #define LIB_DEBUG    1

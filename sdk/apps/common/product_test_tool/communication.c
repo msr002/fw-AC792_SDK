@@ -126,6 +126,31 @@ u8 get_product_id(void)
 #define WIFI_80211_FILL_SIZE  27 //保留一些字节不填充, 为了避开duration段和上层发送1个字节也支持
 
 
+static struct cli_info *product_info_ = NULL;
+extern int atoi(const char *__nptr);
+struct cli_info {
+    struct list_head entry;
+    void *fd;
+    struct sockaddr_in addr;
+};
+
+
+struct product_tcp_server_info {
+    struct list_head cli_head;
+    struct sockaddr_in local_addr;
+    void *fd;
+    OS_SEM sem;
+    u32 flag;
+    u8 cb_flag;
+};
+
+static struct product_tcp_server_info server_info = {
+    .cli_head = {
+        .next = &server_info.cli_head,
+        .prev = &server_info.cli_head,
+    },
+};
+
 static void *host_sock = NULL;
 static u8 online_flag = 0;
 static u8 conn_flag = 0, reset = 0;
@@ -551,11 +576,122 @@ void product_net_client_init(void)
     }
 }
 
+static void __do_sock_accpet(void *arg)
+{
+
+    socklen_t len = sizeof(server_info.local_addr);
+    struct list_head *pos = NULL;
+    struct list_head *n = NULL;
+    struct cli_info *cli = NULL;
+    while (1) {
+
+        struct cli_info *__cli = calloc(1, sizeof(sizeof(struct cli_info)));
+        if (__cli == NULL) {
+            printf("malloc fail\n");
+            while (1);
+        }
+
+        __cli->fd  = sock_accept(server_info.fd, (struct sockaddr *)&__cli->addr, &len, NULL, NULL);
+        if (server_info.flag) {
+            break;
+        }
+        if (__cli->fd == NULL) {
+            printf("some error in here\n\n");
+            continue;
+        }
+        printf("accept succ :%d", __cli->fd);
+        if (!list_empty(&server_info.cli_head)) {
+            list_for_each_safe(pos, n, &server_info.cli_head) {
+                cli = list_entry(pos, struct cli_info, entry);
+                printf("ip:%s   port:%d\n\n", inet_ntoa(cli->addr.sin_addr.s_addr), htons(cli->addr.sin_port));
+                list_del(&cli->entry);
+                sock_set_quit(cli->fd);
+                sock_unreg(cli->fd);
+                free(cli);
+                cli = NULL;
+            }
+        }
+
+
+        printf("__do_sock_accpet add client list\n\n");
+        list_add_tail(&__cli->entry, &server_info.cli_head);
+        sock_set_send_timeout(__cli->fd, 4000);
+        online_flag = 1;
+        os_sem_post(&server_info.sem);
+
+    }
+    server_info.flag = 0;
+    sock_unreg(server_info.fd);
+}
+
+int prouduct_tcp_server_init(int port)
+{
+    int ret = 0;
+    puts("prouduct_tcp_server_init\n");
+
+    memset(&server_info, 0x0, sizeof(server_info));
+    os_sem_create(&server_info.sem, 0);
+
+    server_info.local_addr.sin_family = AF_INET;
+    server_info.local_addr.sin_addr.s_addr = htonl(INADDR_ANY) ;
+    server_info.local_addr.sin_port = htons(port);
+
+
+    server_info.fd = sock_reg(AF_INET, SOCK_STREAM, 0, NULL, NULL);
+
+    if (server_info.fd == NULL) {
+        return -1;
+    }
+
+    u32 opt = 1;
+    if (sock_setsockopt(server_info.fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0) {
+        printf("%s sock_bind fail\n", __FILE__);
+        return -1;
+    }
+
+    if (sock_bind(server_info.fd, (struct sockaddr *)&server_info.local_addr, sizeof(struct sockaddr))) {
+        printf("%s sock_bind fail\n", __FILE__);
+        return -1;
+    }
+    sock_listen(server_info.fd, 0x5);
+
+    INIT_LIST_HEAD(&server_info.cli_head);
+    ret = thread_fork("__product_sock_accpet", 25, 1024, 0, 0, __do_sock_accpet, NULL);
+    printf("ret = %d\n", ret);
+    if (ret != OS_NO_ERR) {
+        printf("%s thread fork fail\n", __FILE__);
+        return -1;
+    }
+
+    return 0;
+
+}
+
+static struct cli_info *get_tcp_net_info()
+{
+    struct list_head *pos = NULL;
+    struct list_head *n = NULL;
+    struct cli_info *cli = NULL;
+    struct cli_info *old_cli = NULL;
+    int count = 0;
+    os_sem_pend(&server_info.sem, 50);
+
+    list_for_each_safe(pos, n, &server_info.cli_head) {
+        cli = list_entry(pos, struct cli_info, entry);
+        printf("ip:%s   port:%d\n\n", inet_ntoa(cli->addr.sin_addr.s_addr), htons(cli->addr.sin_port));
+        count++;
+    }
+    // printf("count = %d\n", count);
+
+    return cli;
+}
 
 static s8 comm_dev_init(void)
 {
-    wifi_set_event_callback(wifi_event_callback);
-    wifi_on();
+    /* wifi_set_event_callback(wifi_event_callback); */
+    /* wifi_on(); */
+    printf("------------------create tcp server 6666---------------------------\n");
+    prouduct_tcp_server_init(6666);
 }
 
 
@@ -570,7 +706,18 @@ static s32 comm_dev_read(u8 *data, u32 size)
     if (!online_flag) {
         return 0;
     }
-    return sock_recvfrom(host_sock, data, size, 0, NULL, NULL);
+    product_info_ = get_tcp_net_info();
+    if (product_info_ == NULL) {
+        return 0;
+    }
+    memset(data, 0, size);
+    int ret = sock_recvfrom(product_info_->fd, data, size, 0, NULL, NULL);
+    /* printf("comm_dev_read:%s size:%d\n", data, size); */
+    if (!strncmp(data, "QuitServer", 10)) {
+        online_flag = 0;
+    }
+    return ret;
+    /* return sock_recvfrom(host_sock, data, size, 0, NULL, NULL); */
 }
 
 
@@ -579,7 +726,15 @@ static s32 comm_dev_write(u8 *data, u32 size)
     if (!online_flag) {
         return 0;
     }
-    return sock_send(host_sock, data, size, 0);
+    product_info_ = get_tcp_net_info();
+    if (product_info_ == NULL) {
+        return 0;
+    }
+    return sock_send(product_info_->fd, data, size, 0);
+    /* if (!online_flag) { */
+    /* return 0; */
+    /* } */
+    /* return sock_send(host_sock, data, size, 0); */
 }
 
 

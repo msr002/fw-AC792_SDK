@@ -69,6 +69,11 @@ void update_result_set(u16 result)
     if (!UPDATE_SUPPORT_DEV_IS_NULL()) {
         UPDATA_PARM *p = UPDATA_FLAG_ADDR;
 
+        if (p->parm_type == UPDIFF_FLASH_UPDATA || p->parm_type == COMBAK_FLASH_UPDATA) {
+            log_info("update updiff/combak\n");
+            return;
+        }
+
         /* memset(p, 0x00, sizeof(UPDATA_PARM)); */
         p->parm_result = result;
         p->parm_crc = CRC16(((u8 *)p) + 2, sizeof(UPDATA_PARM) - 2);

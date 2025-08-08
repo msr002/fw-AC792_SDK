@@ -73,6 +73,7 @@ struct usb_host_device {
     struct usb_host_device *father;
 // #endif
     OS_SEM *sem;
+    OS_MUTEX *mutex;
     struct usb_private_data private_data;
     const struct usb_interface_info *interface_info[MAX_HOST_INTERFACE];
 };

@@ -202,8 +202,9 @@ REGISTER_LCD_SPI_DEVICE_BEGIN(lcd_spi_240x296_gc9307_dev) = {
     .info = {
         .target_xres 	 = __LCD_W,
         .target_yres 	 = __LCD_H,
-        .rotate          = ROTATE_90,
+        .rotate          = ROTATE_0,
         .in_fmt          = TCFG_LCD_INPUT_FORMAT,
+        .out_fmt         = LCD_OUT_RGB565,
     },
 
     .data_out_endian  = MODE_BE,///< 大端数据，lcd_driver内部会malloc一个buf专门用来转换。

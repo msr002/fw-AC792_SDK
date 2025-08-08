@@ -207,7 +207,7 @@ static int image_rotate(uint8_t *dst, int dst_w, int dst_h, int dst_stride, int 
 
     jlgpu_set_out_window((VGHWuint)dst, 0, dst_w, 0, dst_h, dst_stride);
 
-    jlgpu_set_out_format(dst_format, 1, 0, out_rbs, 1);
+    jlgpu_set_out_format(dst_format, 1, 1, out_rbs, 1);
 
     jlgpu_set_bg_mode(1, 0);
     jlgpu_set_max_bez_div(7);

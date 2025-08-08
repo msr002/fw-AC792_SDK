@@ -3,6 +3,7 @@
 #include "vrec_osd.h"
 #include "vrec_icon_osd.h"
 
+#ifdef CONFIG_NET_ENABLE
 static struct strm_video_hdl fv_rec_handler;
 #define sizeof_this     (sizeof(struct video_rec_hdl))
 #define __this_strm 	(&fv_rec_handler)
@@ -578,3 +579,4 @@ void strm_video_rec_init(void)
 }
 
 late_initcall(strm_video_rec_init);
+#endif

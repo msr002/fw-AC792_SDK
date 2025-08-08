@@ -35,9 +35,9 @@ struct usb_hid_info {
     u8 cust_rp_desc[512];
     u32 desc_len;
     //int timer;
-    int cfg_done : 1;
-    int trig : 1;
-    int dummy : 30;
+    u8 cfg_done;
+    u8 trig;
+    volatile u8 in_tx;
     u8 *hid_tx_buf;
     u8 *hid_rx_buf;
 };
@@ -227,10 +227,16 @@ u32 hid_tx_data(const usb_dev usb_id, const u8 *buffer, u32 len)
     }
     cfg_done = hid_info[usb_id]->cfg_done;
     hid_info[usb_id]->cfg_done = 0;
+    hid_info[usb_id]->in_tx = 1;
     if (cfg_done != 0 || usb_get_host_type(usb_id) == HOST_TYPE_IOS) {
         len = usb_g_intr_write(usb_id, HID_EP_IN, buffer, len);
     }
-    hid_info[usb_id]->cfg_done = cfg_done;
+    if (hid_info[usb_id]) {
+        hid_info[usb_id]->in_tx = 0;
+        if (cfg_done) {
+            hid_info[usb_id]->cfg_done = cfg_done;
+        }
+    }
     return len;
 }
 
@@ -582,6 +588,9 @@ __exit:
 void hid_release(const usb_dev usb_id)
 {
     if (hid_info[usb_id]) {
+        while (hid_info[usb_id]->in_tx) {
+            os_time_dly(1);
+        }
         //hid_set_output_handle(usb_id, NULL);
         //hid_set_report_desc(usb_id, NULL, 0);
         hid_info[usb_id]->cfg_done = 0;

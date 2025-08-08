@@ -37,8 +37,7 @@
  *   GLOBAL FUNCTIONS
  **********************/
 
-lv_result_t lv_thread_init(lv_thread_t *thread, lv_thread_prio_t prio, void (*callback)(void *), size_t stack_size,
-                           void *user_data)
+lv_result_t lv_thread_init(lv_thread_t *thread, const char *const name, lv_thread_prio_t prio, void (*callback)(void *), size_t stack_size, void *user_data)
 {
     size_t os_prio;
     switch (prio) {
@@ -62,7 +61,7 @@ lv_result_t lv_thread_init(lv_thread_t *thread, lv_thread_prio_t prio, void (*ca
         break;
     }
 
-    if (thread_fork(thread->task_name, os_prio, stack_size, 0, &thread->pid, callback, user_data)) {
+    if (thread_fork(name, os_prio, stack_size, 0, &thread->pid, callback, user_data)) {
         return LV_RESULT_INVALID;
     }
     return LV_RESULT_OK;

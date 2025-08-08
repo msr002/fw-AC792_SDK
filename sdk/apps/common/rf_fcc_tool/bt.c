@@ -56,6 +56,13 @@ static void bt_read_remote_name(u8 status, u8 *addr, u8 *name)
     }
 
     put_buf(addr, 6);
+
+#ifdef CONFIG_FCC_BT_ADJ_ENABLE
+    extern int CONFIG_DISTURB_SCAN_ENABLE;
+    if (CONFIG_DISTURB_SCAN_ENABLE && status) {
+        fcc_bt_adj_report(name, 0);
+    }
+#endif
 }
 
 static int bt_get_battery_value()

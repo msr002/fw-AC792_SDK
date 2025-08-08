@@ -145,6 +145,10 @@ static int usb_ctlXfer(struct usb_host_device *host_dev, struct ctlXfer *urb)
         if (ret) {
             if (ret == OS_TIMEOUT) {
                 log_error("usb_sem_pend %d ", ret);
+                /* if(urb->stage == USB_PID_OUT) {  */
+                //FIXME:OUT包NAK,会影响到下一个Setup包长度
+                /* usb_write_csr0(usb_id, CSR0H_StatusPkt | CSR0H_TxPktRdy); */
+                /* } */
             }
             ret = -DEV_ERR_OFFLINE;
             goto __exit;
@@ -202,7 +206,8 @@ __exit:
  */
 static int usb_control_transfers(struct usb_host_device *host_dev, struct ctlXfer *urb)
 {
-    int res;
+    usb_mutex_pend(host_dev, 0);
+    int res = DEV_ERR_NONE;
     /*SETUP*/
 
     urb->stage = USB_PID_SETUP;		//SETUP transaction
@@ -210,7 +215,7 @@ static int usb_control_transfers(struct usb_host_device *host_dev, struct ctlXfe
     res = usb_ctlXfer(host_dev, urb);
 
     if (res) {
-        return res;
+        goto __exit;
     }
 
     /*IN or OUT*/
@@ -224,7 +229,7 @@ static int usb_control_transfers(struct usb_host_device *host_dev, struct ctlXfe
             res = usb_ctlXfer(host_dev, urb);
 
             if (res) {
-                return res;
+                goto __exit;
             }
 
             urb->stage = USB_PID_OUT;
@@ -234,7 +239,7 @@ static int usb_control_transfers(struct usb_host_device *host_dev, struct ctlXfe
             res = usb_ctlXfer(host_dev, urb);
 
             if (res) {
-                return res;
+                goto __exit;
             }
 
             urb->stage = USB_PID_IN;
@@ -244,10 +249,12 @@ static int usb_control_transfers(struct usb_host_device *host_dev, struct ctlXfe
     res = usb_ctlXfer(host_dev, urb);
 
     if (res) {
-        return res;
+        goto __exit;
     }
 
-    return DEV_ERR_NONE;
+__exit:
+    usb_mutex_post(host_dev, 0);
+    return res;
 }
 
 /**

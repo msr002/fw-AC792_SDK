@@ -120,6 +120,7 @@ struct video_capability {
 #define VIDIOC_GET_SOURCE_CH            _IOW('V', 41, sizeof(int))
 #define VIDIOC_SAVE_FILE                _IOW('V', 42, sizeof(int))
 #define VIDIOC_SET_CYC_TIME             _IOW('V', 43, sizeof(int))
+#define VIDIOC_SET_FILE                 _IOW('V', 44, sizeof(int))
 
 
 

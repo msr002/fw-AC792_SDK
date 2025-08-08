@@ -102,6 +102,7 @@ struct jlstream;
 #define NODE_IOC_MIDI_CTRL_VEL_VIBR 0x00020039      //MIDI抖动幅度
 #define NODE_IOC_MIDI_CTRL_QUE_KEY  0x0002003a      //MIDI查询指定通道的key播放
 #define NODE_IOC_GET_PRIV_FMT       0x0002003b      //获取解码码率等信息
+#define NODE_IOC_SET_SYNC_NETWORK   0x0002003c
 
 #define NODE_IOC_START              (0x00040000 | NODE_STA_RUN)
 #define NODE_IOC_PAUSE              (0x00040000 | NODE_STA_PAUSE)
@@ -142,6 +143,8 @@ enum stream_event {
     STREAM_EVENT_GET_SWITCH_CALLBACK,
     STREAM_EVENT_GET_MERGER_CALLBACK,
     STREAM_EVENT_GET_SPATIAL_ADV_CALLBACK,
+    STREAM_EVENT_GET_NOISEGATE_CALLBACK,
+    STREAM_EVENT_GET_OUTPUT_NODE_DELAY,
 
     STREAM_EVENT_GLOBAL_PAUSE,
 };
@@ -492,6 +495,7 @@ struct jlstream {
     u8 thread_run;
     u8 thread_num;
     u8 thread_policy_step;
+    u8 continue_nego_flag;
     enum stream_state state;
     enum stream_state pp_state;
     enum stream_coexist coexist;

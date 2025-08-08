@@ -19,7 +19,6 @@ extern "C" {
 #include "../misc/lv_fs.h"
 #include "../misc/lv_types.h"
 #include "../misc/lv_area.h"
-#include "../misc/cache/lv_cache.h"
 
 /*********************
  *      DEFINES
@@ -38,7 +37,6 @@ typedef enum {
     LV_IMAGE_SRC_UNKNOWN, /** Unknown source*/
     LV_IMAGE_SRC_BIN, /** jl binary image source*/
 } lv_image_src_t;
-
 typedef enum {
     LV_COMPRESS_NONE = 1,
     LV_COMPRESS_ZIP,
@@ -93,6 +91,16 @@ typedef lv_result_t (*lv_image_decoder_get_area_cb_t)(lv_image_decoder_t *decode
  */
 typedef void (*lv_image_decoder_close_f_t)(lv_image_decoder_t *decoder, lv_image_decoder_dsc_t *dsc);
 
+/**
+ * Custom drawing functions for special image formats.
+ * @param layer pointer to a layer
+ * @param dsc pointer to decoder descriptor
+ * @param coords the coordinates of the image
+ * @param draw_dsc the draw image descriptor
+ * @param clip_area the clip area of the image
+ */
+typedef void (*lv_image_decoder_custom_draw_t)(lv_layer_t *layer, const lv_image_decoder_dsc_t *dsc,
+        const lv_area_t *coords, const lv_draw_image_dsc_t *draw_dsc, const lv_area_t *clip_area);
 /**********************
  * GLOBAL PROTOTYPES
  **********************/

@@ -83,7 +83,7 @@ static void byte_rtc_on_connection_lost(byte_rtc_engine_t engine, const char *ch
 };
 
 static void byte_rtc_on_audio_data(byte_rtc_engine_t engine, const char *channel, const char *user_name, uint16_t sent_ts,
-                                   audio_codec_type_e codec, const void *data_ptr, size_t data_len)
+                                   audio_data_type_e codec, const void *data_ptr, size_t data_len)
 {
     // printf("\n byte_rtc_on_audio_data\n");
 // #ifdef AUDIO_TYPE_G711A
@@ -148,7 +148,7 @@ static void byte_rtc_on_token_privilege_will_expire(byte_rtc_engine_t engine, co
 static void byte_rtc_on_fini_notify(byte_rtc_engine_t engine)
 {
     printf("byte_rtc_on_fini_notify");
-    // g_byte_rtc_data.fini_notifyed = true;
+    g_byte_rtc_data.fini_notifyed = true;
 }
 
 // remote message
@@ -187,7 +187,7 @@ static void byte_rtc_on_message_received(byte_rtc_engine_t engine, const char *r
         cJSON *root = cJSON_Parse(message_buffer + 8);
 
         char *json_string = cJSON_Print(root);
-        printf("recv message: %s", json_string);
+        /* printf("recv message: %s", json_string); */
         cJSON_free(json_string);
         if (root != NULL) {
             if (message[0] == 's' && message[1] == 'u' && message[2] == 'b' && message[3] == 'v') {
@@ -211,13 +211,15 @@ static void byte_rtc_on_message_received(byte_rtc_engine_t engine, const char *r
 int VolcEngineRTCDemo()
 {
     static u8 pcma[160];
+    memset(&g_byte_rtc_data, 0, sizeof(g_byte_rtc_data));
     rtc_room_info_t *room_info = malloc(sizeof(rtc_room_info_t));
-    /* int start_ret = start_voice_bot(room_info);  //开启智能体 */
     int start_ret = start_voice_chat(room_info);
+
     if (start_ret != 0) {
         printf("Bot start Failed, ret = %d", start_ret);
         return -1;
     }
+
     printf("roomid = %s, uid = %s, token = %s, appid = %s, task_id = %s", room_info->room_id, room_info->uid, room_info->token, room_info->app_id, room_info->task_id);
 // #ifdef AUDIO_TYPE_G711A
     audio_stream_init(8000, 16, 1); //初始化音频流收发
@@ -226,6 +228,7 @@ int VolcEngineRTCDemo()
 // #elif defined(AUDIO_TYPE_OPUS)
 //     audio_stream_init(16000, 16, 1); //初始化音频流收发
 // #endif
+
     start_audio_stream(); //开启音频流收发
     byte_rtc_event_handler_t eventHandle = {
         .on_global_error            =   byte_rtc_on_gloable_error,
@@ -268,7 +271,10 @@ int VolcEngineRTCDemo()
     options.auto_publish_audio = 1; // 是否自动发布音视频
     options.auto_publish_video = 0;
     byte_rtc_join_room(engine, room_info->room_id, room_info->uid, room_info->token, &options);  //加入房间
-    mdelay(20 * 1000); //等待房间连接成功
+    while (!g_byte_rtc_data.channel_joined) {
+        mdelay(100);
+    };
+
     const int DEFAULT_READ_SIZE = 320;
     uint8_t *audio_buffer = malloc(DEFAULT_READ_SIZE);
     if (!audio_buffer) {
@@ -297,10 +303,11 @@ err:
     free(audio_buffer);
 
     byte_rtc_leave_room(engine, room_info->room_id);
-    mdelay(1000);
     byte_rtc_fini(engine);
-    mdelay(1000);
-    byte_rtc_destory(engine);
+    while (!g_byte_rtc_data.fini_notifyed) {
+        mdelay(1000);
+    };
+    byte_rtc_destroy(engine);
     stop_voice_chat(room_info);
     free(room_info);
 }

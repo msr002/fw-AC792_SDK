@@ -76,7 +76,7 @@ const char wifi_ap_scan_support = 0; //ap扫描开关，0为关闭，1为开启
 
 const char wifi_ap_miss_owndevice_channel = 0; //自己设备信道错开功能，0为关闭，1为开启
 
-const char wifi_ap_rate_adapt_strategy = 0; //ap模式下的wifi速率控制策略，0为使用默认策略，1为用于图传的策略，2为用于iperf的策略
+const char wifi_rate_adapt_strategy = 0; //ap或sta模式下的wifi速率控制策略，0为使用默认策略，1为用于图传的策略，2为用于iperf的策略
 
 const u16 MAX_PACKETS_IN_QUEUE = 64; //配置WiFi驱动最大发送数据包队列
 const u16 MAX_PACKETS_IN_MCAST_PS_QUEUE = 16;  //配置WiFi驱动最大发送MCAST-power-save包队列 //modify by lyx 32
@@ -151,6 +151,36 @@ static void print_debug_ipv4(u32 daddr, u32 saddr)
     printf("saddr : %s\n", inet_ntoa(saddr));
 }
 #endif
+
+void wifi_password_wrong_notify(const u8 *ssid, const u8 *passphrase)
+{
+#if 0
+    if (ssid) {
+        printf("wrong password info, ssid[%s]\n", ssid);
+
+        u8 wifi_ssid_cnt = wifi_get_store_ssid_cnt();
+        if (wifi_ssid_cnt > 1) {
+            struct wifi_stored_sta_info sta_info_read[wifi_ssid_cnt];
+            memset(&sta_info_read, 0, sizeof(sta_info_read));
+
+            for (int k = 0; k < wifi_ssid_cnt; k++) {
+                if (syscfg_read(WIFI_STA_INFO_IDX_START + k, (char *)&sta_info_read[k], sizeof(struct wifi_stored_sta_info)) < 0) {
+                    break;
+                }
+
+                if (!strcmp((const char *)sta_info_read[k].ssid, ssid)) {
+                    printf("Incorrect password, [%d]%s delete!!", k, sta_info_read[k].ssid);
+                    sta_info_read[k].ssid[0] = 0; //密码错误就清除保存的SSID
+                    syscfg_write(WIFI_STA_INFO_IDX_START + k, (char *)&sta_info_read[k], sizeof(struct wifi_stored_sta_info));
+                }
+            }
+        }
+    }
+
+    //设置 best ssid flag, 让驱动连接保存的best ssid
+    wifi_set_sta_connect_best_ssid(1);
+#endif
+}
 
 //用于根据LWIP接收队列溢出情况下快速丢包减轻CPU负担,预留空间接收重要数据包
 int lwip_low_level_inputput_filter(u8 *pkg, u32 len)
@@ -897,6 +927,7 @@ void wifi_edca_adjust(u8 ac_type, u8 txop_limit, u8 cwmin, u8 cwmax, u8 aifsn)
 void wifi_tx_states_count_callback(unsigned long total_count, unsigned long retransmit_count,
                                    unsigned long fail_count, unsigned long err_ratio)
 {
+    return;
 #if 1 //根据错包率调整edca参数
     if (err_ratio <= TX_ERR_ADJUST_THRESHOLD) {
         if (tx_adjust_counters) {

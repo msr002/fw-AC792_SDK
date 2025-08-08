@@ -36,10 +36,13 @@ typedef struct {
      * If life == 0 the entry can be reused*/
     int32_t life;
 
+
+#if LV_IMG_CACHE_DEF_SIZE
     //存放压缩资源路径
     void *bin_src;
     const void *not_release_src;
     uint16_t not_release;
+#endif
 
 } _lv_img_cache_entry_t;
 

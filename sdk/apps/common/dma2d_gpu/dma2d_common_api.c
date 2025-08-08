@@ -207,6 +207,7 @@ int jldma2d_format(uint8_t *dest_buf, uint8_t *src_buf, uint32_t dest_stride, ui
     out_layer_param.h = h;
     out_layer_param.endian = endian;
     out_layer_param.rbs = out_rbs;
+    out_layer_param.dither_en = 1;
 
     dma2d_reset_all_regs();
     dma2d_create_task();

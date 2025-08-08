@@ -531,6 +531,9 @@ static u8 camera_control_handler(u8 id, cmd, json_object *args_obj)
         idx = json_object_get_int(json_object_object_get(args_obj, "idx"));
         rscorr = product_uvc_switch(idx);
         break;
+    case CTL_CAMERA_TCP_START:
+        rscorr = product_tcp_video_start();
+        break;
 
     default:
         rscorr = ERR_NO_SUPPORT_DEV_CMD;
@@ -925,6 +928,50 @@ static u8 wifi_control_handler(u8 id, cmd, json_object *args_obj)
 }
 #endif
 
+#if defined(CONFIG_WIFI_ENABLE) && defined(PRODUCT_NET_CLIENT_ENABLE)
+static u8 wifi_control_handler(u8 id, cmd, json_object *args_obj)
+{
+    printf("----------------------wifi_control_handler-------------");
+    char *rssi;
+    u8 *evm, *mac, mac_str[24], strength[8];;
+    u32 num = 0, entry_num = 0;
+    struct wifi_mode_info cur_info;
+    struct wifi_scan_ssid_info *info;
+    u8 rscorr = ERR_NULL, mode, *ssid, *pwd, *array_str;
+    json_object *mode_obj, *ssid_obj, *pwd_obj, *scan_obj, *array_obj, \
+    *sub_obj, *entry_obj, *ip_obj, *interval_obj, *count_obj;
+
+    while (!(wifi_is_on())) {
+        os_time_dly(1);
+    }
+
+    __THIS->args_str = NULL;
+
+    switch (cmd) {
+    case CTL_WIFI_GET_STA_CONN_INFO:
+        printf("CTL_WIFI_GET_STA_CONN_INFO");
+
+        cur_info.mode = STA_MODE;
+        wifi_get_mode_cur_info(&cur_info);
+
+        memset(strength, 0, sizeof(strength));
+        sprintf(strength, "%ddBm", wifi_get_rssi());
+        printf("strength = %s, ssid = %s\n", strength, cur_info.ssid);
+        sub_obj = json_object_new_object();
+        json_object_object_add(sub_obj, "ssid", json_object_new_string(cur_info.ssid));
+        json_object_object_add(sub_obj, "rssi", json_object_new_string(strength));
+        asprintf(&__THIS->args_str, "%s", json_object_to_json_string(sub_obj));
+        json_object_put(sub_obj);
+        break;
+
+    default:
+        rscorr = ERR_NO_SUPPORT_DEV_CMD;
+        break;
+    }
+
+    return rscorr;
+}
+#endif
 
 static u8 devices_list_check(u8 type)
 {
@@ -1008,11 +1055,11 @@ u8 devices_control_handler(json_object *params_obj)
         break;
 
     case DEV_TYPE_WIFI:
-#if(defined(CONFIG_WIFI_ENABLE) && !defined(PRODUCT_NET_CLIENT_ENABLE))
+        /* #if(defined(CONFIG_WIFI_ENABLE) && !defined(PRODUCT_NET_CLIENT_ENABLE)) */
         rscorr = wifi_control_handler(id, cmd, args_obj);
-#else
-        rscorr = ERR_NO_SUPPORT_DEV;
-#endif
+        /* #else */
+        /* rscorr = ERR_NO_SUPPORT_DEV; */
+        /* #endif */
         break;
 
     case DEV_TYPE_PIR:

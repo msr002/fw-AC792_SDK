@@ -56,10 +56,21 @@
 #endif
 
 
+//*********************************************************************************//
+//                             编码图片分辨率                                      //
+//*********************************************************************************//
+#if __SDRAM_SIZE__ > (8 * 1024 * 1024)
+#define CONFIG_VIDEO_IMAGE_W    1280
+#define CONFIG_VIDEO_IMAGE_H    720
+#else
+#define CONFIG_VIDEO_IMAGE_W    640
+#define CONFIG_VIDEO_IMAGE_H    480
+#endif
+
 
 
 #if ( LCD_W > 960 && LCD_H > 320) //显示大分辨率关闭裁剪功能
-#define VIDEO_LARGE_IMAGE 		VIDEO_LARGE_IMAGE_ENABNLE
+#define VIDEO_LARGE_IMAGE 		1
 #else
 #define VIDEO_LARGE_IMAGE		0
 #endif
@@ -143,7 +154,7 @@ extern int video_rec_err_notify(const char *method);
 extern int video_rec_state_notify(void);
 extern int video_rec_start_notify(void);
 extern int video_rec_all_stop_notify(void);
-#ifdef CONFIG_WIFI_ENABLE
+#ifdef CONFIG_NET_ENABLE
 /******************************用于网络实时流*************************************/
 extern int net_video_rec_event_notify(void);
 extern int net_video_rec_event_stop(void);
@@ -371,7 +382,7 @@ int video_rec_get_abr_from(u32 width)
 {
     return video_rec_get_abr(width);
 }
-#ifdef CONFIG_WIFI_ENABLE
+#ifdef CONFIG_NET_ENABLE
 /******************************用于网络实时流*************************************/
 
 int net_video_disp_stop(int id)
@@ -922,7 +933,7 @@ static void rec_dev_server_event_handler(void *priv, int argc, int *argv)
     case VIDEO_SERVER_PKG_ERR:
         log_e("video_server_pkg_err\n");
         if (__this->state == VIDREC_STA_START) {
-#ifdef CONFIG_WIFI_ENABLE
+#ifdef CONFIG_NET_ENABLE
             video_rec_err_notify("VIDEO_REC_ERR");
 #endif
             video_rec_stop(0);
@@ -935,14 +946,16 @@ static void rec_dev_server_event_handler(void *priv, int argc, int *argv)
             video_rec_stop(0);
         }
         break;
+
+#ifdef CONFIG_NET_ENABLE
     case VIDEO_SERVER_NET_ERR:
         log_e("\nVIDEO_SERVER_NET_ERR\n");
         init_intent(&it);
         it.data = &mark;
         net_video_rec_stop(0);
         set_net_video_rec_state(0);
-        /* __this_net->is_open = FALSE; */
         break;
+#endif
 
     default :
         log_e("unknow rec server cmd %x , %x!\n", argv[0], (int)priv);
@@ -1025,7 +1038,7 @@ static void ve_server_event_handler(void *priv, int argc, int *argv)
     default :
         break;
     }
-#ifdef CONFIG_WIFI_ENABLE
+#ifdef CONFIG_NET_ENABLE
     net_video_rec_status_notify();
 #endif
 
@@ -1526,7 +1539,7 @@ static FILE *video_rec_get_first_file(int id)
                 video_rec_fscan_release(lock_dir);
             }
         }
-#ifdef CONFIG_WIFI_ENABLE
+#ifdef CONFIG_NET_ENABLE
         video_rec_delect_notify(f, -1);
 #endif
         return f;
@@ -1548,7 +1561,7 @@ static void video_rec_rename_file(int id, FILE *file, int fsize, int format)
     int err = fcheck(file);
     if (err) {
         puts("fcheck fail\n");
-#ifdef CONFIG_WIFI_ENABLE
+#ifdef CONFIG_NET_ENABLE
         video_rec_delect_notify(file, -1);
 #endif
         fdelete(file);
@@ -1566,7 +1579,7 @@ static void video_rec_rename_file(int id, FILE *file, int fsize, int format)
 
         printf("fmove: %d, %d, %s\n", id, format, file_name);
 
-#ifdef CONFIG_WIFI_ENABLE
+#ifdef CONFIG_NET_ENABLE
         video_rec_delect_notify(file, -1);
 #endif
 
@@ -1578,7 +1591,7 @@ static void video_rec_rename_file(int id, FILE *file, int fsize, int format)
         }
         puts("fmove_file_faild\n");
     }
-#ifdef CONFIG_WIFI_ENABLE
+#ifdef CONFIG_NET_ENABLE
     video_rec_delect_notify(file, -1);
 #endif
 
@@ -1835,7 +1848,7 @@ static void video_rec_close_file(int dev_id)
     if (!__this->file[dev_id]) {
         return;
     }
-#ifdef CONFIG_WIFI_ENABLE
+#ifdef CONFIG_NET_ENABLE
     char is_emf = 0;
 
     char *path = video_rec_finish_get_name(__this->file[dev_id], dev_id, is_emf);
@@ -1847,7 +1860,7 @@ static void video_rec_close_file(int dev_id)
         video_rec_lock_file(__this->file[dev_id], 1);
         video_rec_post_msg("unlockREC");
 
-#ifdef CONFIG_WIFI_ENABLE
+#ifdef CONFIG_NET_ENABLE
 #ifdef CONFIG_EMR_DIR_ENABLE
         is_emf = TRUE;
 #endif
@@ -1864,7 +1877,7 @@ static void video_rec_close_file(int dev_id)
     }
     __this->file[dev_id] = NULL;
 
-#ifdef CONFIG_WIFI_ENABLE
+#ifdef CONFIG_NET_ENABLE
     if (path) { //必须关闭文件之后才能调用，否则在读取文件信息不全！！！
         video_rec_finish_notify(path);
     }
@@ -1909,7 +1922,7 @@ static int video0_rec_start()
     req.rec.format 	    = VIDEO0_REC_FORMAT;
     req.rec.state 	    = VIDEO_STATE_START;
     req.rec.file        = __this->file[0];
-#ifdef CONFIG_WIFI_ENABLE
+#ifdef CONFIG_NET_ENABLE
     req.rec.fsize = __this->new_file_size[0];
 #endif
 
@@ -1918,7 +1931,7 @@ static int video0_rec_start()
      *帧率为0表示使用摄像头的帧率
      */
     req.rec.quality     = VIDEO_MID_Q;
-#ifdef CONFIG_WIFI_ENABLE
+#ifdef CONFIG_NET_ENABLE
     req.rec.fps 	    = 0;
     req.rec.real_fps 	= video_rec_get_fps();
 #else
@@ -1929,7 +1942,7 @@ static int video0_rec_start()
     /*
      *采样率，通道数，录像音量，音频使用的循环BUF,录不录声音
      */
-#ifdef CONFIG_WIFI_ENABLE
+#ifdef CONFIG_NET_ENABLE
     req.rec.audio.sample_rate = video_rec_get_audio_sampel_rate();
 #else
     req.rec.audio.sample_rate = 8000;
@@ -2175,7 +2188,7 @@ static int video0_rec_savefile()
     req.rec.state 	= VIDEO_STATE_SAVE_FILE;
     req.rec.file    = __this->file[0];
 
-#ifdef CONFIG_WIFI_ENABLE
+#ifdef CONFIG_NET_ENABLE
     req.rec.fps 	    = 0;
     req.rec.real_fps 	= video_rec_get_fps();
 #else
@@ -2207,7 +2220,7 @@ static int video0_rec_savefile()
     /*
      *采样率，通道数，录像音量，音频使用的循环BUF,录不录声音
      */
-#ifdef CONFIG_WIFI_ENABLE
+#ifdef CONFIG_NET_ENABLE
     req.rec.audio.sample_rate = video_rec_get_audio_sampel_rate();
 #else
     req.rec.audio.sample_rate = 8000;
@@ -2359,7 +2372,7 @@ static int video1_rec_start()
     req.rec.state 	= VIDEO_STATE_START;
     req.rec.file    = __this->file[1];
     req.rec.quality = VIDEO_LOW_Q;
-#ifdef CONFIG_WIFI_ENABLE
+#ifdef CONFIG_NET_ENABLE
     req.rec.fps 	    = 0;
     req.rec.real_fps 	= video_rec_get_fps();
 #else
@@ -2601,7 +2614,7 @@ static int video1_rec_savefile()
     req.rec.state 	= VIDEO_STATE_SAVE_FILE;
     req.rec.file    = __this->file[1];
 
-#ifdef CONFIG_WIFI_ENABLE
+#ifdef CONFIG_NET_ENABLE
     req.rec.fps 	    = 0;
     req.rec.real_fps 	= video_rec_get_fps();
 #else
@@ -2633,7 +2646,7 @@ static int video1_rec_savefile()
     /*
      *采样率，通道数，录像音量，音频使用的循环BUF,录不录声音
      */
-#ifdef CONFIG_WIFI_ENABLE
+#ifdef CONFIG_NET_ENABLE
     req.rec.audio.sample_rate = video_rec_get_audio_sampel_rate();
 #else
     req.rec.audio.sample_rate = 8000;
@@ -2798,13 +2811,13 @@ static int video2_rec_start()
     printf("\n\nuvc size %d, %d\n\n", req.rec.width, req.rec.height);
     req.rec.state 	= VIDEO_STATE_START;
     req.rec.file    = __this->file[2];
-#ifdef CONFIG_WIFI_ENABLE
+#ifdef CONFIG_NET_ENABLE
     req.rec.fsize = __this->new_file_size[2];
 #endif
     req.rec.uvc_id = __this->uvc_id;
     req.rec.quality = VIDEO_LOW_Q;
 
-#ifdef CONFIG_WIFI_ENABLE
+#ifdef CONFIG_NET_ENABLE
     req.rec.fps 	    = 0;
     req.rec.real_fps 	= video_rec_get_fps();
     req.rec.audio.sample_rate = video_rec_get_audio_sampel_rate();
@@ -3029,7 +3042,7 @@ static int video2_rec_savefile()
         req.rec.state 	= VIDEO_STATE_SAVE_FILE;
         req.rec.file    = __this->file[2];
 
-#ifdef CONFIG_WIFI_ENABLE
+#ifdef CONFIG_NET_ENABLE
         req.rec.fps 	    = 0;
         req.rec.real_fps 	= video_rec_get_fps();
 #else
@@ -3070,7 +3083,7 @@ static int video2_rec_savefile()
 
 
 
-#ifdef CONFIG_WIFI_ENABLE
+#ifdef CONFIG_NET_ENABLE
         req.rec.audio.sample_rate = video_rec_get_audio_sampel_rate();
 #else
         req.rec.audio.sample_rate = 8000;
@@ -3203,7 +3216,7 @@ static int video3_rec_start()
     req.rec.state 	= VIDEO_STATE_START;
     req.rec.file    = __this->file[3];
     req.rec.quality = VIDEO_LOW_Q;
-#ifdef CONFIG_WIFI_ENABLE
+#ifdef CONFIG_NET_ENABLE
     req.rec.fps 	    = 0;
     req.rec.real_fps 	= video_rec_get_fps();
 #else
@@ -3429,7 +3442,7 @@ static int video3_rec_savefile()
     req.rec.state 	= VIDEO_STATE_SAVE_FILE;
     req.rec.file    = __this->file[3];
 
-#ifdef CONFIG_WIFI_ENABLE
+#ifdef CONFIG_NET_ENABLE
     req.rec.fps 	    = 0;
     req.rec.real_fps 	= video_rec_get_fps();
 #else
@@ -3460,7 +3473,7 @@ static int video3_rec_savefile()
     /*
      *采样率，通道数，录像音量，音频使用的循环BUF,录不录声音
      */
-#ifdef CONFIG_WIFI_ENABLE
+#ifdef CONFIG_NET_ENABLE
     req.rec.audio.sample_rate = video_rec_get_audio_sampel_rate();
 #else
     req.rec.audio.sample_rate = 8000;
@@ -3599,7 +3612,7 @@ static int video4_rec_start()
     req.rec.state 	= VIDEO_STATE_START;
     req.rec.file    = __this->file[4];
     req.rec.quality = VIDEO_LOW_Q;
-#ifdef CONFIG_WIFI_ENABLE
+#ifdef CONFIG_NET_ENABLE
     req.rec.fps 	    = 0;
     req.rec.real_fps 	= video_rec_get_fps();
 #else
@@ -3827,7 +3840,7 @@ static int video4_rec_savefile()
     req.rec.state 	= VIDEO_STATE_SAVE_FILE;
     req.rec.file    = __this->file[4];
 
-#ifdef CONFIG_WIFI_ENABLE
+#ifdef CONFIG_NET_ENABLE
     req.rec.fps 	    = 0;
     req.rec.real_fps 	= video_rec_get_fps();
 #else
@@ -3858,7 +3871,7 @@ static int video4_rec_savefile()
     /*
      *采样率，通道数，录像音量，音频使用的循环BUF,录不录声音
      */
-#ifdef CONFIG_WIFI_ENABLE
+#ifdef CONFIG_NET_ENABLE
     req.rec.audio.sample_rate = video_rec_get_audio_sampel_rate();
 #else
     req.rec.audio.sample_rate = 8000;
@@ -3999,7 +4012,7 @@ static int video5_rec_start()
     req.rec.state 	= VIDEO_STATE_START;
     req.rec.file    = __this->file[5];
     req.rec.quality = VIDEO_LOW_Q;
-#ifdef CONFIG_WIFI_ENABLE
+#ifdef CONFIG_NET_ENABLE
     req.rec.fps 	    = 0;
     req.rec.real_fps 	= video_rec_get_fps();
 #else
@@ -4227,7 +4240,7 @@ static int video5_rec_savefile()
     req.rec.state 	= VIDEO_STATE_SAVE_FILE;
     req.rec.file    = __this->file[5];
 
-#ifdef CONFIG_WIFI_ENABLE
+#ifdef CONFIG_NET_ENABLE
     req.rec.fps 	    = 0;
     req.rec.real_fps 	= video_rec_get_fps();
 #else
@@ -4258,7 +4271,7 @@ static int video5_rec_savefile()
     /*
      *采样率，通道数，录像音量，音频使用的循环BUF,录不录声音
      */
-#ifdef CONFIG_WIFI_ENABLE
+#ifdef CONFIG_NET_ENABLE
     req.rec.audio.sample_rate = video_rec_get_audio_sampel_rate();
 #else
     req.rec.audio.sample_rate = 8000;
@@ -4847,7 +4860,7 @@ static int video_rec_savefile(int dev_id)
 
     __this->state = VIDREC_STA_START;
 
-#ifdef CONFIG_WIFI_ENABLE
+#ifdef CONFIG_NET_ENABLE
     video_rec_state_notify();
 #endif
 
@@ -5279,7 +5292,7 @@ static int video_rec_storage_device_ready(void *p)
     video_rec_scan_lock_file();
 
     if ((int)p == 1) {
-#ifdef CONFIG_WIFI_ENABLE
+#ifdef CONFIG_NET_ENABLE
         video_rec_start_notify();//先停止网络实时流再录像,录像完毕再通知APP
 #else
         video_rec_start();
@@ -5292,7 +5305,7 @@ static int video_rec_storage_device_ready(void *p)
 
 static int video_rec_sd_in()
 {
-#ifdef CONFIG_WIFI_ENABLE
+#ifdef CONFIG_NET_ENABLE
     video_rec_sd_event_ctp_notify(1);
 #endif
 
@@ -5307,7 +5320,7 @@ static int video_rec_sd_in()
         ve_lane_det_start(0);
     }
 
-#ifdef CONFIG_WIFI_ENABLE
+#ifdef CONFIG_NET_ENABLE
     net_video_rec_status_notify();
 #endif
 
@@ -5328,7 +5341,7 @@ static int video_rec_sd_out()
         __this->sd_wait = wait_completion(storage_device_ready,
                                           video_rec_storage_device_ready, (void *)1, NULL);
     }
-#ifdef CONFIG_WIFI_ENABLE
+#ifdef CONFIG_NET_ENABLE
     video_rec_sd_event_ctp_notify(0);
 #endif
     return 0;
@@ -5721,7 +5734,7 @@ static int video_rec_state_machine(struct application *app, enum app_state state
             ve_mdet_stop();
             ve_lane_det_stop(0);
         }
-#ifdef CONFIG_WIFI_ENABLE
+#ifdef CONFIG_NET_ENABLE
         video_rec_all_stop_notify();
 #endif
         if (video_rec_uninit()) {
@@ -6061,7 +6074,7 @@ static int video_rec_msg_handler(struct application *app, int *msg)
     case APP_MSG_REC_CONTROL:
         if (__this->state == VIDREC_STA_START) {
 
-#ifdef CONFIG_WIFI_ENABLE
+#ifdef CONFIG_NET_ENABLE
             net_video_rec_event_stop();
 #endif
 
@@ -6070,18 +6083,18 @@ static int video_rec_msg_handler(struct application *app, int *msg)
             ve_lane_det_reset();
         } else {
 
-#ifdef CONFIG_WIFI_ENABLE
+#ifdef CONFIG_NET_ENABLE
             net_video_rec_event_stop();
 #endif
 
             video_rec_stop(0);
             video_rec_start();
-#ifdef CONFIG_WIFI_ENABLE
+#ifdef CONFIG_NET_ENABLE
             net_video_rec_event_start();
 #endif
 
         }
-#ifdef CONFIG_WIFI_ENABLE
+#ifdef CONFIG_NET_ENABLE
         net_video_rec_status_notify();
 #endif
         break;

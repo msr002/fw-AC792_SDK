@@ -175,7 +175,9 @@ c_SRC_FILES := \
 	../../../../../apps/common/update/update.c \
 	../../../../../apps/demo/demo_wifi/app_main.c \
 	../../../../../apps/demo/demo_wifi/board/wl83/board.c \
+	../../../../../apps/demo/demo_wifi/examples/scan_list.c \
 	../../../../../apps/demo/demo_wifi/examples/wifi_raw_test.c \
+	../../../../../apps/demo/demo_wifi/uart_cmd.c \
 	../../../../../apps/demo/demo_wifi/wifi_demo_task.c \
 	../../../../../cpu/wl83/adc_api.c \
 	../../../../../cpu/wl83/debug.c \

@@ -91,4 +91,14 @@ void system_reset(rst_flag_t flag);
 */
 void latch_reset(void);
 
+/**
+* @brief  使能MCLR
+*/
+void mclr_reset_enable(void);
+
+/**
+* @brief  关闭MCLR
+*/
+void mclr_reset_disable(void);
+
 #endif

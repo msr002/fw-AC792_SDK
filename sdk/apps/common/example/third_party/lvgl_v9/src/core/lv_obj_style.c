@@ -289,6 +289,8 @@ void lv_obj_refresh_style(lv_obj_t *obj, lv_style_selector_t selector, lv_style_
         return;
     }
 
+    LV_PROFILER_STYLE_BEGIN;
+
     lv_obj_invalidate(obj);
 
     lv_part_t part = lv_obj_style_get_selector_part(selector);
@@ -329,6 +331,8 @@ void lv_obj_refresh_style(lv_obj_t *obj, lv_style_selector_t selector, lv_style_
             refresh_children_style(obj);
         }
     }
+
+    LV_PROFILER_STYLE_END;
 }
 
 void lv_obj_enable_style_refresh(bool en)
@@ -370,7 +374,9 @@ bool lv_obj_has_style_prop(const lv_obj_t *obj, lv_style_selector_t selector, lv
 void lv_obj_set_local_style_prop(lv_obj_t *obj, lv_style_prop_t prop, lv_style_value_t value,
                                  lv_style_selector_t selector)
 {
-    /*Stop running transitions wit this property */
+    LV_PROFILER_STYLE_BEGIN;
+
+    /*Stop running transitions with this property */
     trans_delete(obj, lv_obj_style_get_selector_part(selector), prop, NULL);
 
     lv_style_t *style = get_local_style(obj, selector);
@@ -390,6 +396,7 @@ void lv_obj_set_local_style_prop(lv_obj_t *obj, lv_style_prop_t prop, lv_style_v
 #endif
 
     lv_obj_refresh_style(obj, selector, prop);
+    LV_PROFILER_STYLE_END;
 }
 
 lv_style_res_t lv_obj_get_local_style_prop(lv_obj_t *obj, lv_style_prop_t prop, lv_style_value_t *value,
@@ -498,6 +505,7 @@ void lv_obj_style_create_transition(lv_obj_t *obj, lv_part_t part, lv_state_t pr
 
 lv_style_value_t lv_obj_style_apply_color_filter(const lv_obj_t *obj, lv_part_t part, lv_style_value_t v)
 {
+#if LV_USE_COLOR_FILTER
     if (obj == NULL) {
         return v;
     }
@@ -508,6 +516,11 @@ lv_style_value_t lv_obj_style_apply_color_filter(const lv_obj_t *obj, lv_part_t 
             v.color = f->filter_cb(f, v.color, f_opa);
         }
     }
+#else
+    LV_UNUSED(obj);
+    LV_UNUSED(part);
+    LV_UNUSED(v);
+#endif
     return v;
 }
 
@@ -642,9 +655,10 @@ lv_text_align_t lv_obj_calculate_style_text_align(const lv_obj_t *obj, lv_part_t
 
 lv_opa_t lv_obj_get_style_opa_recursive(const lv_obj_t *obj, lv_part_t part)
 {
-
+    LV_PROFILER_STYLE_BEGIN;
     lv_opa_t opa_obj = lv_obj_get_style_opa(obj, part);
     if (opa_obj <= LV_OPA_MIN) {
+        LV_PROFILER_STYLE_END;
         return LV_OPA_TRANSP;
     }
 
@@ -662,6 +676,7 @@ lv_opa_t lv_obj_get_style_opa_recursive(const lv_obj_t *obj, lv_part_t part)
     while (obj) {
         opa_obj = lv_obj_get_style_opa(obj, part);
         if (opa_obj <= LV_OPA_MIN) {
+            LV_PROFILER_STYLE_END;
             return LV_OPA_TRANSP;
         }
         if (opa_obj < LV_OPA_MAX) {
@@ -672,11 +687,16 @@ lv_opa_t lv_obj_get_style_opa_recursive(const lv_obj_t *obj, lv_part_t part)
     }
 
     if (opa_final <= LV_OPA_MIN) {
+        LV_PROFILER_STYLE_END;
         return LV_OPA_TRANSP;
     }
+
     if (opa_final >= LV_OPA_MAX) {
+        LV_PROFILER_STYLE_END;
         return LV_OPA_COVER;
     }
+
+    LV_PROFILER_STYLE_END;
     return opa_final;
 }
 
@@ -689,6 +709,40 @@ void lv_obj_update_layer_type(lv_obj_t *obj)
         lv_obj_allocate_spec_attr(obj);
         obj->spec_attr->layer_type = layer_type;
     }
+}
+
+lv_color32_t lv_obj_style_apply_recolor(const lv_obj_t *obj, lv_part_t part, lv_color32_t color)
+{
+    lv_opa_t opa = lv_obj_get_style_recolor_opa(obj, part);
+    if (opa > LV_OPA_TRANSP) {
+        lv_color_t recolor = lv_obj_get_style_recolor(obj, part);
+        color = lv_color_over32(color, lv_color_to_32(recolor, opa));
+    }
+
+    return color;
+}
+
+lv_color32_t lv_obj_get_style_recolor_recursive(const lv_obj_t *obj, lv_part_t part)
+{
+    lv_color32_t result;
+
+    lv_color_t color = lv_obj_get_style_recolor(obj, part);
+    lv_opa_t opa = lv_obj_get_style_recolor_opa(obj, part);
+
+    result = lv_color_to_32(color, opa);
+
+    if (part != LV_PART_MAIN) {
+        part = LV_PART_MAIN;
+    } else {
+        obj = lv_obj_get_parent(obj);
+    }
+
+    while (obj) {
+        result = lv_obj_style_apply_recolor(obj, part, result);
+        obj = lv_obj_get_parent(obj);
+    }
+
+    return result;
 }
 
 /**********************
@@ -727,7 +781,7 @@ static lv_style_t *get_local_style(lv_obj_t *obj, lv_style_selector_t selector)
     }
 
     lv_memzero(&obj->styles[i], sizeof(lv_obj_style_t));
-    obj->styles[i].style = lv_malloc(sizeof(lv_style_t));
+    obj->styles[i].style = lv_malloc_zeroed(sizeof(lv_style_t));
     lv_style_init((lv_style_t *)obj->styles[i].style);
 
     obj->styles[i].is_local = 1;
@@ -974,6 +1028,7 @@ static void trans_anim_cb(void *_tr, int32_t v)
                 value_final.ptr = tr->end_value.ptr;
             }
             break;
+        case LV_STYLE_RECOLOR:
         case LV_STYLE_BG_COLOR:
         case LV_STYLE_BG_GRAD_COLOR:
         case LV_STYLE_BORDER_COLOR:
@@ -1082,6 +1137,11 @@ static void trans_anim_completed_cb(lv_anim_t *a)
 
 static lv_layer_type_t calculate_layer_type(lv_obj_t *obj)
 {
+#if LV_DRAW_TRANSFORM_USE_MATRIX
+    if (lv_obj_get_transform(obj) != NULL) {
+        return LV_LAYER_TYPE_TRANSFORM;
+    }
+#endif
     if (lv_obj_get_style_transform_rotation(obj, 0) != 0) {
         return LV_LAYER_TYPE_TRANSFORM;
     }

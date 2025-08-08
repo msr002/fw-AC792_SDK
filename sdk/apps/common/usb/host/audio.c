@@ -1169,6 +1169,7 @@ void usb_audio_stop_recorder(const usb_dev usb_id)
     struct audio_device_t *audio = __find_headphone_interface(host_dev);
     struct audio_streaming_t *as_t = &audio->as[__this->host_mic.Cur_AlternateSetting - 1];
     __this->host_mic.mic_state = AUDIO_MIC_STOP;
+    usb_set_interface(host_dev, audio->interface_num, 0); // close
     usb_h_set_ep_isr(NULL, 0, NULL, NULL);
     usb_free_ep_num(usb_id, as_t->host_ep);
     if (__this->host_mic.get_buf) {
@@ -1795,6 +1796,7 @@ void usb_audio_stop_player(const usb_dev usb_id)
     struct audio_device_t *audio = __find_microphone_interface(host_dev);
     struct audio_streaming_t *as_t = &audio->as[__this->host_spk.Cur_AlternateSetting - 1];
     __this->host_spk.spk_state = AUDIO_SPK_STOP;
+    usb_set_interface(host_dev, audio->interface_num, 0); // close
     usb_h_set_ep_isr(NULL, 0, NULL, NULL);
     usb_free_ep_num(usb_id, as_t->host_ep | USB_DIR_IN);
     if (usb_id == 0) {

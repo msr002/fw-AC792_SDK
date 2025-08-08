@@ -27,6 +27,8 @@
 #include "usb_stack.h"
 #endif
 
+
+#ifdef CONFIG_NET_ENABLE
 #define CTP_CMD_HEADER "{\"errno\":%d,\"op\":\"%s\",\"param\":{"
 #define CTP_CMD_HEADER_WITHOUT_ERR "{\"op\":\"%s\",\"param\":{"
 #define CTP_CMD_END "}}"
@@ -38,15 +40,9 @@
 static char file_name[64];
 static int app_online_timer;
 static char is_ios = 0;
-extern void net_video_rec_post_msg(const char *msg, ...);//更新UI
-/************************************/
-/*tiny code*/
-extern int db_select(const char *name);
-extern int db_update(const char *name, u32 value);
 /************************************/
 
-/* struct ctp_arg ctp_info; */
-struct ctp_arg ctp_info SEC_USED(.bss);
+struct ctp_arg ctp_info;
 
 int app_rtsp_use_ffmpeg(void)
 {
@@ -4188,13 +4184,7 @@ int cmd_put_video_size(void *priv,  char *content)
     } else {
         db_update("res", VIDEO_RES_720P);
     }
-//    db_flush();
 
-    /* u32 res = db_select("res"); */
-#if 0//def CONFIG_UI_ENABLE
-    net_video_rec_post_msg("changeRES:r=%1", db_select("res"));
-#endif
-//    video_rec_post_msg("reshow:a=%1",APP_RESOLUTION);
     snprintf(buf, sizeof(buf), "str:%s,val:%d", str, res);
 
     printf("buf -> %s\n", buf);
@@ -4444,5 +4434,5 @@ int user_close_rt2_stream(void)
 
     return 0;
 }
-
+#endif
 

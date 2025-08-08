@@ -57,6 +57,7 @@ enum DEV_CTL_GROUP {
     CTL_LED_ON,
     CTL_LED_OFF,
     CTL_CAMERA_SWITCH,
+    CTL_CAMERA_TCP_START,
 };
 
 

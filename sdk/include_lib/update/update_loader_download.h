@@ -6,6 +6,7 @@
 
 extern const int config_update_mode;
 extern const int support_dual_bank_update_en;
+extern const int support_dual_bank_less_en;
 
 extern const int CONFIG_UPDATE_ENABLE;
 extern const int CONFIG_UPDATE_STORAGE_DEV_EN;

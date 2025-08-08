@@ -373,6 +373,8 @@ static int wifi_event_callback(void *network_ctx, enum WIFI_EVENT event)
         extern void airkiss_ssid_check(void);
         airkiss_ssid_check();
 #endif
+        void scan_list_sem_post(void);
+        scan_list_sem_post();
         break;
     case WIFI_EVENT_STA_CONNECT_SUCC:
         log_info("network_user_callback->WIFI_STA_CONNECT_SUCC,CH=%d", wifi_get_channel());
@@ -622,51 +624,6 @@ char *get_wifi_auth_mode(WIFI_802_11_AUTH_MODE mode)
     }
 }
 
-static void wifi_scan_test(void)
-{
-    struct wifi_scan_ssid_info *sta_ssid_info;
-    u32 sta_ssid_num;
-
-    wifi_clear_scan_result();// 测试之前清掉之前连接路由器的扫描缓存,也可以放在STA连上后调用
-
-    wifi_scan_req();
-
-#if 0//若用户为了实时显示，每扫描到1个通道及时获取扫描到的结果, 甚至可以每扫描到一个SSID就马上获取结果
-
-    for (char ch = 1; ch < 14; ch++) { //扫描13个信道
-        os_time_dly(22); //根据MAX_CHANNEL_TIME_BSS_INFRA简单等待一些时间, 或者通过信号量/标志位 等待事件 WIFI_EVENT_STA_SCANNED_SSID 扫描到SSID之后才去获取结果
-        sta_ssid_num = 0;
-        sta_ssid_info = wifi_get_scan_result(&sta_ssid_num);
-        log_info("wifi_sta_scan_channel_test channel %d, ssid_num =%d", ch, sta_ssid_num);
-        for (int i = 0; i < sta_ssid_num; i++) {
-            log_info("wifi_sta_scan_channel_test ssid = [%s],rssi = %d,snr = %d, auth_mode = %s",
-                     sta_ssid_info[i].ssid, sta_ssid_info[i].rssi, sta_ssid_info[i].snr, get_wifi_auth_mode(sta_ssid_info[i].auth_mode));
-        }
-        free(sta_ssid_info);
-    }
-
-#else//等待所有信道扫描完成再获取结果, 对CPU性能更友好
-
-    os_time_dly(4 * 100); //根据MAX_CHANNEL_TIME_BSS_INFRA简单等待一些时间, 或者通过信号量/标志位 等待事件 WIFI_EVENT_STA_SCAN_COMPLETED 扫描完成之后才去获取结果
-    sta_ssid_num = 0;
-    sta_ssid_info = wifi_get_scan_result(&sta_ssid_num);
-    log_info("wifi_sta_scan_test ssid_num =%d", sta_ssid_num);
-
-    for (int i = 0; i < sta_ssid_num; i++) {
-        log_info("wifi_sta_scan_test ssid = [%s],rssi = %d,snr = %d, auth_mode = %s",
-                 sta_ssid_info[i].ssid, sta_ssid_info[i].rssi, sta_ssid_info[i].snr, get_wifi_auth_mode(sta_ssid_info[i].auth_mode));
-    }
-
-    free(sta_ssid_info);
-#endif
-
-    static u8 scan_cnt;
-    if (++scan_cnt > 4) { //累积多几次扫描结果再去清空列表, 有利于显示出更多ssid,长期不清空有可能会导致ssid已下线都不知道
-        scan_cnt = 0;
-        wifi_clear_scan_result();//若使用连接最优WIFI(connect_best_network)的情况下,如果不使用等待WIFI_EVENT_STA_SCAN_COMPLETED事件的方式, 在WIFI还未连接成功的情况下,有概率会造成wifi内部获取的结果被这里清空导致当次获取不到空中准备WIFI列表,需要等到下次扫描结果,因此如果使用connect_best_network的情况下,推荐使用等待事件 WIFI_EVENT_STA_SCAN_COMPLETED 扫描完成之后才去获取结果
-    }
-}
-
 static void wifi_demo_task(void *priv)
 {
 #if 1
@@ -751,7 +708,6 @@ static void wifi_demo_task(void *priv)
         os_time_dly(5 * 100);
 //        wifi_on();
 
-//wifi_scan_test();
 #endif // WIFI_MODE_CYCLE_TEST
     }
 #else

@@ -14,7 +14,7 @@
 #include "lwip/inet.h"
 #include "volc_type.h"
 #include "volc_errno.h"
-#include "lwip/errno.h"
+// #include "lwip/errno.h"
 #include "volc_network.h"
 
 #ifdef __cplusplus
@@ -58,7 +58,6 @@ typedef enum {
 } volc_socket_type_e;
 
 
-//typedef void* volc_poll_t;
 struct volc_pollfd {
     int   fd;         /* file descriptor */
     short events;     /* requested events */
@@ -188,7 +187,6 @@ int volc_make_pipe(int sockfds[2]);
 int volc_write(int sockfd, void *data, size_t size);
 int volc_read(int sockfd, void *data, size_t size);
 
-
 int volc_sockopt_set_buffer_size(int __fd, bool _is_send_buffer, int buffer_size) ;
 
 int volc_sockopt_get_buffer_size(int __fd, bool _is_send_buffer) ;
@@ -196,8 +194,8 @@ int volc_sockopt_get_buffer_size(int __fd, bool _is_send_buffer) ;
 int volc_getaddrinfo(const char *host, uint16_t port, volc_ip_addr_t **addrs, int *count);
 
 int volc_poll(struct volc_pollfd *fds, int nfds, int timeout);
-int volc_freeaddrinfo(volc_ip_addr_t *addrs);
 
+int volc_freeaddrinfo(volc_ip_addr_t *addrs);
 #ifdef __cplusplus
 }
 #endif

@@ -1508,11 +1508,8 @@ static int audio_iis_channel_fifo_write(struct audio_iis_channel *ch, void *data
 
     hdl->unread_samples[ch->attr.ch_idx] = unread_samples;
 
-    if (is_fixed_data) {
-        w_len = audio_cfifo_channel_write_fixed_data(&ch->fifo, (s16)data, len);
-    } else {
-        w_len = audio_cfifo_channel_write(&ch->fifo, data, len);
-    }
+    w_len = audio_cfifo_channel_write(&ch->fifo, data, len, is_fixed_data);
+
     int fifo_frames = (w_len >> point_offset) / hdl->channel;
     int samples = audio_cfifo_get_unread_samples(&hdl->cfifo[ch->attr.ch_idx]) - hdl->unread_samples[ch->attr.ch_idx];
 
@@ -1572,11 +1569,8 @@ static int audio_iis_multi_channel_fifo_write_base(struct audio_iis_channel *ch,
     audio_cfifo_read_update(&hdl->cfifo[ch->attr.ch_idx], hdl->unread_samples[ch->attr.ch_idx] - unread_samples);
 
     hdl->unread_samples[ch->attr.ch_idx] = unread_samples;
-    if (is_fixed_data) {
-        w_len = audio_cfifo_channel_write_fixed_data(&ch->fifo, (s16)data, len);
-    } else {
-        w_len = audio_cfifo_channel_write(&ch->fifo, data, len);
-    }
+
+    w_len = audio_cfifo_channel_write(&ch->fifo, data, len, is_fixed_data);
 
     *fifo_frames = (w_len >> point_offset) / hdl->channel;
     int samples = audio_cfifo_get_unread_samples(&hdl->cfifo[ch->attr.ch_idx]) - hdl->unread_samples[ch->attr.ch_idx];

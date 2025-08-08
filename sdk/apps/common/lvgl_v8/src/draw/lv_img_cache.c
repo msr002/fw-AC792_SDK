@@ -176,12 +176,16 @@ _lv_img_cache_entry_t *_lv_img_cache_open(const void *src, lv_color_t color, int
         cached_src->life = INT32_MIN; /*Make the empty entry very "weak" to force its us*/
         return NULL;
     }
+
+#if LV_IMG_CACHE_DEF_SIZE
     if (src_type == LV_IMG_SRC_BIN) {
         size_t src_save_len = strlen(src);
         uint8_t *src_save = lv_mem_alloc(src_save_len + 1);
         strcpy((char *)src_save, src);
         cached_src->bin_src  = src_save;
     }
+#endif
+
     cached_src->life = 0;
 
     /*If `time_to_open` was not set in the open function set it here*/

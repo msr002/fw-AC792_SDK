@@ -17,9 +17,7 @@
 #include "server/net_server.h"
 #include "strm_video_rec.h"
 
-
-static int net_rt_video1_open(struct intent *it);
-static int net_rt_video0_open(struct intent *it);
+#ifdef CONFIG_NET_ENABLE
 static int net_video_rec_start(u8 mark);
 int net_video_rec_stop(u8 close);
 static int net_video_rec1_stop(u8 close);
@@ -38,18 +36,10 @@ static int net_video_rec_control(void *_run_cmd);
 
 static char file_str[64];
 static int net_vd_msg[2];
-
-#ifdef __CPU_AC521x__
-static const u16 net_rec_pix_w[] = {1280, 640};
-static const u16 net_rec_pix_h[] = {720,  480};
-#else
 static const u16 net_rec_pix_w[] = {1920, 1280, 640};
 static const u16 net_rec_pix_h[] = {1088, 720,  480};
-#endif
-
 static const u16 net_pic_pix_w[] = {320, 640, 1280};
 static const u16 net_pic_pix_h[] = {240, 480, 720 };
-
 static struct net_video_hdl net_rec_handler = {0};
 static struct strm_video_hdl *fv_rec_handler = NULL;
 static struct video_rec_hdl *rec_handler = NULL;
@@ -234,6 +224,8 @@ int net_pkg_get_video_size(int *width, int *height)
     u8 id = __this_net->video_id ? 1 : 0;
 #elif (defined CONFIG_VIDEO4_ENABLE)
     u8 id = __this_net->video_id == 4 ? 5 : 4;
+#else
+    u8 id = 0;
 #endif
     *width = __this_net->net_videoreq[id].rec.width;
     *height = __this_net->net_videoreq[id].rec.height;
@@ -480,18 +472,6 @@ int net_video2_rec_event_notify(void)
     return 0;
 }
 #endif // CONFIG_VIDEO2_ENABLE
-int net_video_rec_event_stop(void)
-{
-    strm_video_rec_close();
-    net_video_rec_stop(0);
-    return 0;
-}
-int net_video_rec_event_start(void)
-{
-    strm_video_rec_open();
-    net_video_rec_start(1);
-    return 0;
-}
 int video_rec_sd_event_ctp_notify(char state)
 {
     char buf[128];
@@ -2768,6 +2748,21 @@ void net_rec_close(void)
     __this_net->fbuf_ffil = 0;
 #endif
 }
+
+int net_video_rec_event_stop(void)
+{
+    strm_video_rec_close();
+    net_video_rec_stop(0);
+    return 0;
+}
+int net_video_rec_event_start(void)
+{
+    strm_video_rec_open();
+    net_video_rec_start(1);
+    return 0;
+}
+
+
 /*
  * 录像app的录像控制入口, 根据当前状态调用相应的函数
  */
@@ -3313,5 +3308,5 @@ REGISTER_APPLICATION(app_video_rec) = {
     .state  = APP_STA_DESTROY,
 };
 
-
+#endif
 

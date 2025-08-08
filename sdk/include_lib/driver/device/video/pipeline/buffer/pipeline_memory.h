@@ -6,6 +6,7 @@
 typedef enum {
     DDR_MEMORY = 0,    ///< Surface
     RAM_MEMORY,   ///< Share Memory fd
+    RAM_CACHE_MEMORY,
     UNKNOW_MEMORY,
 } memory_type_t;
 
@@ -25,7 +26,8 @@ uint8_t *get_mem_addr(memory *mem);
 u32 get_mem_size(memory *mem);
 
 u8 *video_ram_malloc(u32 size);
-
+u8 *video_ram_cache_malloc(u32 size, u8 align);
+void video_ram_cache_free(u8 *buf);
 void video_ram_free(u8 *buf);
 
 #endif

@@ -205,6 +205,14 @@ static void user_get_bt_music_info(u8 type, u32 time, u8 *info, u16 len)
             log_info("artist: %s", info);
         } else if (type == 3) {
             log_info("album: %s", info);
+#if TCFG_BT_SUPPORT_PROFILE_BIP == 1
+            static u8 music_id_3[255] = {0};
+            if (memcmp(music_id_3, info, len) != 0) {
+                log_info("get image");
+                bt_cmd_prepare(USER_CTRL_BIP_GET_IMAGE, 0, NULL);
+            }
+            memcpy(music_id_3, info, len);
+#endif
         }
     }
 
@@ -405,6 +413,16 @@ void map_get_time_data(char *time, int status)
 
 static void bredr_handle_register(void)
 {
+#if TCFG_BT_SUPPORT_PROFILE_HID
+#if TCFG_BT_PROFILE_HID_CHANGE_DESCRIPTOR
+    void user_hid_descriptor_init(void);
+    user_hid_descriptor_init();
+#else
+    void user_hid_init(void (*user_hid_output_handler)(u8 * packet, u16 size, u16 channel));
+    user_hid_init(NULL);
+#endif
+#endif
+
 #if TCFG_BT_SUPPORT_PROFILE_SPP
 #if APP_ONLINE_DEBUG
     online_spp_init();
@@ -418,7 +436,7 @@ static void bredr_handle_register(void)
     bt_music_vol_change_handle_register(bt_set_music_device_volume, bt_get_phone_device_vol);
 #endif
 #if TCFG_BT_DISPLAY_BAT_ENABLE
-    bt_get_battery_value_handle_register(bt_get_battery_value);   /*电量显示获取电量的接口*/
+    bt_get_battery_percent_handle_register(bt_get_battery_value);   /*电量显示获取电量的接口*/
 #endif
 
     //样机进入dut被测试仪器链接上回调
@@ -484,7 +502,11 @@ static void bt_function_select_init(void)
      * 0: Display only 1: Display YesNo 2: KeyboardOnly 3: NoInputNoOutput
      *  authentication_requirements: 0:not protect  1 :protect
     */
+#if TCFG_BT_BQB_PROFILE_TEST_ENABLE
+    bt_set_simple_pair_param(1, 0, 2);
+#else
     bt_set_simple_pair_param(3, 0, 2);
+#endif
 
 #if 0
     /*测试盒连接获取参数需要的一些接口注册*/
@@ -516,6 +538,115 @@ static void bt_function_select_init(void)
 #if (TCFG_BT_SUPPORT_PROFILE_PBAP==1)
     ////设置蓝牙设备类型
     bt_change_hci_class_type(BD_CLASS_CAR_AUDIO);
+#else
+    bt_change_hci_class_type(BD_CLASS_LOUDSPEAKER);
 #endif
 }
 
+
+#if TCFG_BT_SUPPORT_PROFILE_BIP == 1
+
+/*************************************************************************/
+//			avrcp传输音乐图片
+/*************************************************************************/
+//配置
+#define BIP_FILE_NAME               "album.jpg"
+#define BIP_FILE_PATH               CONFIG_ROOT_PATH\
+                                    BIP_FILE_NAME
+
+enum {
+    BIP_DATA_STATUS_START = 0X01,   //开始包
+    BIP_DATA_STATUS_CONTINUE,       //继续包(中间包)
+    BIP_DATA_STATUS_STOP,           //结束包
+    BIP_DATA_STATUS_ERR,            //错误包，可能是不支持，或者音乐软件未打开
+    BIP_DATA_STATUS_ERR_GET,        //重复获取
+    BIP_DATA_STATUS_GET_NULL,       //上一个获取中，获取无图片歌曲
+};
+
+enum {
+    BIP_FILE_STATUS_ERR,            //文件不存在
+    BIP_FILE_STATUS_OK,             //文件存在
+    BIP_FILE_STATUS_UPDATE,         //文件更新中
+};
+
+struct bip_file_info {
+    FILE *fp;                       //文件句柄
+    volatile u8 file_status;        //文件状态
+};
+
+static struct bip_file_info bip_file;
+#define __bip_info (&bip_file)
+
+const char *bip_file_path_get(void)
+{
+    return BIP_FILE_PATH;
+}
+
+const char *bip_file_name_get(void)
+{
+    return BIP_FILE_NAME;
+}
+
+u8 bip_file_status_get(void)
+{
+    return __bip_info->file_status;
+}
+
+/* ------------------------------------------------------------------------------------*/
+/**
+ * @brief bip_rx_data_handle	音乐图片数据回调
+ *
+ * @param packet	数据包内容
+ * @param body_len	数据包长度
+ * @param length	整个图片大小,只有ios支持在第一包返回
+ * @param bip_data_status	数据状态
+ */
+/* ------------------------------------------------------------------------------------*/
+void bip_rx_data_handle(u8 *packet, u16 body_len, u32 length, u8 bip_data_status)
+{
+    /* log_info("<%s>status:%d", __func__, bip_data_status); */
+
+    switch (bip_data_status) {
+    case BIP_DATA_STATUS_START: //收到第一包数据
+        log_info("BIP_DATA_STATUS_START");
+        const char *bit_file_path = bip_file_path_get();
+        log_info("bip_file_path: %s", bit_file_path);
+        //删除旧文件
+        __bip_info->fp = fopen(bit_file_path, "r");
+        if (__bip_info->fp) {
+            /* __bip_info->file_status = BIP_FILE_STATUS_ERR; */
+            fdelete(__bip_info->fp);
+            __bip_info->fp = NULL;
+        }
+        //新增文件
+        __bip_info->fp = fopen(bit_file_path, "w+");
+        if (__bip_info->fp) {
+            __bip_info->file_status = BIP_FILE_STATUS_UPDATE;
+            fwrite(packet, body_len, 1, __bip_info->fp);
+        } else {
+            log_error("bip file open err");
+        }
+        break;
+    case BIP_DATA_STATUS_CONTINUE: //收到文件数据
+        if (__bip_info->fp) {
+            fwrite(packet, body_len, 1, __bip_info->fp);
+        }
+        break;
+    case BIP_DATA_STATUS_STOP: //收到结束命令
+        log_info("BIP_DATA_STATUS_STOP");
+        if (__bip_info->fp) {
+            fwrite(packet, body_len, 1, __bip_info->fp);
+            fclose(__bip_info->fp);
+            __bip_info->fp = NULL;
+            __bip_info->file_status = BIP_FILE_STATUS_OK;
+        }
+        break;
+    case BIP_DATA_STATUS_ERR:
+        log_info("BIP_DATA_STATUS_ERR");
+        break;
+    default:
+        break;
+    }
+}
+
+#endif

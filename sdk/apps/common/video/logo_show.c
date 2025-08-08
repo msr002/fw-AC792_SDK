@@ -81,11 +81,6 @@ static void dec_server_event_handler(void *priv, int argc, int *argv)
         break;
     case VIDEO_DEC_EVENT_LAST_FRAME:
         printf("VIDEO_DEC_EVENT_LAST_FRAME\n");
-        if (__this->dec_cyc) {
-            if (__this->video_dec) {
-                server_request(__this->video_dec, VIDEO_REQ_DEC_SET_SEEK, &__this->video_req);
-            }
-        }
         break;
     case VIDEO_DEC_EVENT_END:
         printf("VIDEO_DEC_EVENT_END\n");
@@ -94,6 +89,7 @@ static void dec_server_event_handler(void *priv, int argc, int *argv)
          */
         break;
     case VIDEO_DEC_EVENT_ERR:
+        printf("VIDEO_DEC_EVENT_ERR\n");
         /*
          *解码出错，如果存储设备没有被拔出则播放前一个文件
          */
@@ -163,7 +159,7 @@ int logo_show(char *logo_path, char *audio_path, int time_out, void (*func)())
         __this->video_req.dec.pctl    = NULL;
 
         if (time_out == 0xffff) {
-            __this->dec_cyc = 1;
+            __this->video_req.dec.dec_cyc  = 1;
         } else {
 
             logo_play_stop_ui(); //暂停当时UI显示
@@ -178,7 +174,7 @@ int logo_show(char *logo_path, char *audio_path, int time_out, void (*func)())
             return 0;
         }
         server_register_event_handler(__this->video_dec, NULL, dec_server_event_handler);
-        if (__this->dec_cyc == 0) {
+        if (__this->video_req.dec.dec_cyc == 0) {
             sys_timeout_add_to_task("sys_timer", func, logo_stop, time_out * 1000);
         }
     } else { /* 非视频文件 */

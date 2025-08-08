@@ -4,6 +4,7 @@
 #include "asm/sfc_norflash_api.h"
 #include "app_config.h"
 #include "fs/fs.h"
+#include "init.h"
 
 #define LOG_TAG_CONST       DEBUG
 #define LOG_TAG             "[DEBUG]"
@@ -390,12 +391,16 @@ u32 get_debug_dev_id(const char *name)
     return -1;
 }
 
+
+
 #ifdef CONFIG_SAVE_EXCEPTION_LOG_IN_FLASH
 
-static u32 exception_log_flash_addr sec(.volatile_ram);
-static char exception_log_buf[1024];
-
 #define LOG_PATH "mnt/sdfile/EXT_RESERVED/log"
+#define EXCEPTION_LOG_BUF_SIZE 1500
+
+static u32 exception_log_flash_addr sec(.volatile_ram);
+static char exception_log_buf[EXCEPTION_LOG_BUF_SIZE];
+static u32 exception_log_cnt sec(.volatile_ram);
 
 static int get_exception_log_flash_addr(void)
 {
@@ -430,19 +435,44 @@ static void write_exception_log_to_flash(void *data, u32 len)
 }
 #endif
 
-static void trace_call_stack(int *len)
+
+#ifdef CONFIG_SAVE_EXCEPTION_LOG_IN_FLASH
+static int exception_printf(const char *format, ...)
+{
+    int ret;
+    va_list args;
+
+    va_start(args, format);
+    ret = vprintf(format, args);
+    va_end(args);
+
+    if (ret < 0) {
+        return ret;
+    }
+
+    va_start(args, format);
+    exception_log_cnt += vsnprintf(\
+                                   exception_log_buf + exception_log_cnt, \
+                                   sizeof(exception_log_buf) - exception_log_cnt, \
+                                   format,
+                                   args);
+    va_end(args);
+
+    return exception_log_cnt;
+}
+
+#define EXCEPTION_PRINTF(fmt, ...) exception_printf(fmt"\r\n", ##__VA_ARGS__)
+#else
+#define EXCEPTION_PRINTF(fmt, ...) printf(fmt"\r\n", ##__VA_ARGS__)
+#endif
+
+static void trace_call_stack(void)
 {
     for (int c = 0; c < CPU_CORE_NUM; c++) {
-        printf("CPU%d %x-->%x-->%x-->%x-->%x-->%x", c,
-               q32DSP(c)->ETM_PC5, q32DSP(c)->ETM_PC4,
-               q32DSP(c)->ETM_PC3, q32DSP(c)->ETM_PC2,
-               q32DSP(c)->ETM_PC1, q32DSP(c)->ETM_PC0);
-#ifdef CONFIG_SAVE_EXCEPTION_LOG_IN_FLASH
-        *len += snprintf(exception_log_buf + *len, sizeof(exception_log_buf) - *len, "CPU%d %x-->%x-->%x-->%x-->%x-->%x\r\n", c,
+        EXCEPTION_PRINTF("CPU%d %x-->%x-->%x-->%x-->%x-->%x", c,
                          q32DSP(c)->ETM_PC5, q32DSP(c)->ETM_PC4,
                          q32DSP(c)->ETM_PC3, q32DSP(c)->ETM_PC2,
                          q32DSP(c)->ETM_PC1, q32DSP(c)->ETM_PC0);
-#endif
     }
 }
 
@@ -657,8 +687,6 @@ static void exception_analyze_sram(void)
 
 void exception_analyze(int *sp)
 {
-    int len = 0;
-
     log_output_release_deadlock();
 
     u32 cpu_id = current_cpu_id();
@@ -666,23 +694,18 @@ void exception_analyze(int *sp)
     q32DSP(!cpu_id)->PMU_CON0 &= ~BIT(0);
     __asm_csync();
 
-    printf("\n\n---------------------exception error ------------------------\n\n");
-    printf("CPU%d %s, EMU_MSG = 0x%x", cpu_id, __func__, q32DSP(cpu_id)->EMU_MSG);
-    printf("CPU%d run addr = 0x%x", !cpu_id, q32DSP(!cpu_id)->PCRS);
+    EXCEPTION_PRINTF("\r\n\r\n---------------------exception error ------------------------\r\n\r\n");
+    EXCEPTION_PRINTF("CPU%d %s, EMU_MSG = 0x%x", cpu_id, __func__, q32DSP(cpu_id)->EMU_MSG);
+    EXCEPTION_PRINTF("CPU%d run addr = 0x%x", !cpu_id, q32DSP(!cpu_id)->PCRS);
 
-    printf("JL_CEMU->MSG0:0x%x, MSG1:0x%x, MSG2:0x%x, ID:0x%x, 0x%x, 0x%x, 0x%x", JL_CEMU->MSG0, JL_CEMU->MSG1, JL_CEMU->MSG2, JL_CEMU->LOG0, JL_CEMU->LOG1, JL_CEMU->LOG2, JL_CEMU->LOG3);
-    printf("JL_HEMU->MSG0:0x%x, MSG1:0x%x, MSG2:0x%x, ID:0x%x, 0x%x, 0x%x, 0x%x", JL_HEMU->MSG0, JL_HEMU->MSG1, JL_HEMU->MSG2, JL_HEMU->LOG0, JL_HEMU->LOG1, JL_HEMU->LOG2, JL_HEMU->LOG3);
-    printf("JL_LEMU->MSG0:0x%x, MSG1:0x%x, MSG2:0x%x, ID:0x%x, 0x%x, 0x%x, 0x%x", JL_LEMU->MSG0, JL_LEMU->MSG1, JL_LEMU->MSG2, JL_LEMU->LOG0, JL_LEMU->LOG1, JL_LEMU->LOG2, JL_LEMU->LOG3);
-    printf("JL_AEMU->MSG0:0x%x, MSG1:0x%x, MSG2:0x%x, ID:0x%x, 0x%x, 0x%x, 0x%x", JL_AEMU->MSG0, JL_AEMU->MSG1, JL_AEMU->MSG2, JL_AEMU->LOG0, JL_AEMU->LOG1, JL_AEMU->LOG2, JL_AEMU->LOG3);
-    printf("JL_VEMU->MSG0:0x%x, MSG1:0x%x, MSG2:0x%x, ID:0x%x, 0x%x, 0x%x, 0x%x", JL_VEMU->MSG0, JL_VEMU->MSG1, JL_VEMU->MSG2, JL_VEMU->LOG0, JL_VEMU->LOG1, JL_VEMU->LOG2, JL_VEMU->LOG3);
-    printf("JL_WEMU->MSG0:0x%x, MSG1:0x%x, MSG2:0x%x, ID:0x%x, 0x%x, 0x%x, 0x%x", JL_WEMU->MSG0, JL_WEMU->MSG1, JL_WEMU->MSG2, JL_WEMU->LOG0, JL_WEMU->LOG1, JL_WEMU->LOG2, JL_WEMU->LOG3);
+    EXCEPTION_PRINTF("JL_CEMU->MSG0:0x%x, MSG1:0x%x, MSG2:0x%x, ID:0x%x, 0x%x, 0x%x, 0x%x", JL_CEMU->MSG0, JL_CEMU->MSG1, JL_CEMU->MSG2, JL_CEMU->LOG0, JL_CEMU->LOG1, JL_CEMU->LOG2, JL_CEMU->LOG3);
+    EXCEPTION_PRINTF("JL_HEMU->MSG0:0x%x, MSG1:0x%x, MSG2:0x%x, ID:0x%x, 0x%x, 0x%x, 0x%x", JL_HEMU->MSG0, JL_HEMU->MSG1, JL_HEMU->MSG2, JL_HEMU->LOG0, JL_HEMU->LOG1, JL_HEMU->LOG2, JL_HEMU->LOG3);
+    EXCEPTION_PRINTF("JL_LEMU->MSG0:0x%x, MSG1:0x%x, MSG2:0x%x, ID:0x%x, 0x%x, 0x%x, 0x%x", JL_LEMU->MSG0, JL_LEMU->MSG1, JL_LEMU->MSG2, JL_LEMU->LOG0, JL_LEMU->LOG1, JL_LEMU->LOG2, JL_LEMU->LOG3);
+    EXCEPTION_PRINTF("JL_AEMU->MSG0:0x%x, MSG1:0x%x, MSG2:0x%x, ID:0x%x, 0x%x, 0x%x, 0x%x", JL_AEMU->MSG0, JL_AEMU->MSG1, JL_AEMU->MSG2, JL_AEMU->LOG0, JL_AEMU->LOG1, JL_AEMU->LOG2, JL_AEMU->LOG3);
+    EXCEPTION_PRINTF("JL_VEMU->MSG0:0x%x, MSG1:0x%x, MSG2:0x%x, ID:0x%x, 0x%x, 0x%x, 0x%x", JL_VEMU->MSG0, JL_VEMU->MSG1, JL_VEMU->MSG2, JL_VEMU->LOG0, JL_VEMU->LOG1, JL_VEMU->LOG2, JL_VEMU->LOG3);
+    EXCEPTION_PRINTF("JL_WEMU->MSG0:0x%x, MSG1:0x%x, MSG2:0x%x, ID:0x%x, 0x%x, 0x%x, 0x%x", JL_WEMU->MSG0, JL_WEMU->MSG1, JL_WEMU->MSG2, JL_WEMU->LOG0, JL_WEMU->LOG1, JL_WEMU->LOG2, JL_WEMU->LOG3);
 
-#ifdef CONFIG_SAVE_EXCEPTION_LOG_IN_FLASH
-    len += snprintf(exception_log_buf + len, sizeof(exception_log_buf) - len, "CPU%d run addr = 0x%x\r\ncpu%d EMU_MSG = 0x%x\r\n",
-                    !cpu_id, q32DSP(!cpu_id)->PCRS, cpu_id, q32DSP(cpu_id)->EMU_MSG);
-#endif
-
-    trace_call_stack(&len);
+    trace_call_stack();
 
     unsigned int reti = sp[16];
     unsigned int rete = sp[17];
@@ -694,38 +717,30 @@ void exception_analyze(int *sp)
     unsigned int ssp  = sp[23];
     unsigned int _sp  = sp[24];
 
-    printf("exception cpu %d info : ", cpu_id);
+    EXCEPTION_PRINTF("exception cpu %d info : ", cpu_id);
 
     for (int r = 0; r < 16; r++) {
-        printf("R%d: %x\n", r, sp[r]);
+        EXCEPTION_PRINTF("R%d: %x", r, sp[r]);
     }
 
-    printf("icfg: %x", icfg);
-    printf("psr:  %x", psr);
-    printf("rets: 0x%x", rets);
-    printf("reti: 0x%x", reti);
-    printf("usp : %x, ssp : %x sp: %x\n\n", usp, ssp, _sp);
+    EXCEPTION_PRINTF("icfg: %x", icfg);
+    EXCEPTION_PRINTF("psr:  %x", psr);
+    EXCEPTION_PRINTF("rets: 0x%x", rets);
+    EXCEPTION_PRINTF("reti: 0x%x", reti);
+    EXCEPTION_PRINTF("usp : %x, ssp : %x sp: %x", usp, ssp, _sp);
 
     const volatile u32 *rm = &(q32DSP(!cpu_id)->DR00);
-    printf("other cpu %d info : ", !cpu_id);
+    EXCEPTION_PRINTF("other cpu %d info : ", !cpu_id);
 
     for (int r = 0; r < 16; r++) {
-        printf("R%d: %x\n", r, rm[r]);
+        EXCEPTION_PRINTF("R%d: %x", r, rm[r]);
     }
 
-    printf("icfg: %x", q32DSP(!cpu_id)->ICFG);
-    printf("psr:  %x", q32DSP(!cpu_id)->PSR);
-    printf("rets: 0x%x", q32DSP(!cpu_id)->RETS);
-    printf("reti: 0x%x", q32DSP(!cpu_id)->RETI);
-    printf("usp : %x, ssp : %x sp: %x\n\n", q32DSP(!cpu_id)->USP, q32DSP(!cpu_id)->SSP, q32DSP(!cpu_id)->SP);
-
-#ifdef CONFIG_SAVE_EXCEPTION_LOG_IN_FLASH
-    len += snprintf(exception_log_buf + len, sizeof(exception_log_buf) - len, "icfg: %x\r\n", icfg);
-    len += snprintf(exception_log_buf + len, sizeof(exception_log_buf) - len, "psr : %x\r\n", psr);
-    len += snprintf(exception_log_buf + len, sizeof(exception_log_buf) - len, "rets: 0x%x\r\n", rets);
-    len += snprintf(exception_log_buf + len, sizeof(exception_log_buf) - len, "reti: 0x%x\r\n", reti);
-    len += snprintf(exception_log_buf + len, sizeof(exception_log_buf) - len, "usp : %x, ssp : %x sp: %x\r\n", usp, ssp, _sp);
-#endif
+    EXCEPTION_PRINTF("icfg: %x", q32DSP(!cpu_id)->ICFG);
+    EXCEPTION_PRINTF("psr:  %x", q32DSP(!cpu_id)->PSR);
+    EXCEPTION_PRINTF("rets: 0x%x", q32DSP(!cpu_id)->RETS);
+    EXCEPTION_PRINTF("reti: 0x%x", q32DSP(!cpu_id)->RETI);
+    EXCEPTION_PRINTF("usp : %x, ssp : %x sp: %x", q32DSP(!cpu_id)->USP, q32DSP(!cpu_id)->SSP, q32DSP(!cpu_id)->SP);
 
     // CPU -> HCORE -> HSB -> LSB ASS VIDEO WL
 
@@ -734,31 +749,31 @@ void exception_analyze(int *sp)
       ------------------------------------*/
     for (int i = 0; i < 32; ++i) {
         if (q32DSP(cpu_id)->EMU_MSG & BIT(i)) {
-            printf("[0-CPU] cpu%d emu err msg : %s", cpu_id, emu_msg[i]);
+            EXCEPTION_PRINTF("[0-CPU] cpu%d emu err msg : %s", cpu_id, emu_msg[i]);
 
             if (i == 3) {
                 if (os_current_task_rom()) {
-                    printf("current_task : %s", os_current_task_rom());
+                    EXCEPTION_PRINTF("current_task : %s", os_current_task_rom());
                 }
-                printf("usp limit %x %x, ssp limit %x %x",
-                       q32DSP(cpu_id)->EMU_USP_L, q32DSP(cpu_id)->EMU_USP_H, q32DSP(cpu_id)->EMU_SSP_L, q32DSP(cpu_id)->EMU_SSP_H);
+                EXCEPTION_PRINTF("usp limit %x %x, ssp limit %x %x",
+                                 q32DSP(cpu_id)->EMU_USP_L, q32DSP(cpu_id)->EMU_USP_H, q32DSP(cpu_id)->EMU_SSP_L, q32DSP(cpu_id)->EMU_SSP_H);
             } else if (i == 4) {
-                printf("PC_LIMIT0_L:0x%x, PC_LIMIT0_H:0x%x, PC_LIMIT1_L:0x%x, PC_LIMIT1_H:0x%x, PC_LIMIT2_L:0x%x, PC_LIMIT2_H:0x%x",
-                       q32DSP(cpu_id)->LIM_PC0_L, q32DSP(cpu_id)->LIM_PC0_H,
-                       q32DSP(cpu_id)->LIM_PC1_L, q32DSP(cpu_id)->LIM_PC1_H,
-                       q32DSP(cpu_id)->LIM_PC2_L, q32DSP(cpu_id)->LIM_PC2_H);
+                EXCEPTION_PRINTF("PC_LIMIT0_L:0x%x, PC_LIMIT0_H:0x%x, PC_LIMIT1_L:0x%x, PC_LIMIT1_H:0x%x, PC_LIMIT2_L:0x%x, PC_LIMIT2_H:0x%x",
+                                 q32DSP(cpu_id)->LIM_PC0_L, q32DSP(cpu_id)->LIM_PC0_H,
+                                 q32DSP(cpu_id)->LIM_PC1_L, q32DSP(cpu_id)->LIM_PC1_H,
+                                 q32DSP(cpu_id)->LIM_PC2_L, q32DSP(cpu_id)->LIM_PC2_H);
             } else if (i == 8) {
-                printf("ETM limit exception datl:0x%x, dath:0x%x, addrl:0x%x, addrh:0x%x",
-                       q32DSP(cpu_id)->WP0_DATL, q32DSP(cpu_id)->WP0_DATH, q32DSP(cpu_id)->WP0_ADRL, q32DSP(cpu_id)->WP0_ADRH);
+                EXCEPTION_PRINTF("ETM limit exception datl:0x%x, dath:0x%x, addrl:0x%x, addrh:0x%x",
+                                 q32DSP(cpu_id)->WP0_DATL, q32DSP(cpu_id)->WP0_DATH, q32DSP(cpu_id)->WP0_ADRL, q32DSP(cpu_id)->WP0_ADRH);
             } else if (i == 29) {
                 DcuEmuMessage();
-                printf("except at dev : %s %s", get_debug_dev_name(JL_L1P->EMU_ID & 0xff), (JL_L1P->EMU_ID & BIT(31)) ? "not safe" : "safe");
+                EXCEPTION_PRINTF("except at dev : %s %s", get_debug_dev_name(JL_L1P->EMU_ID & 0xff), (JL_L1P->EMU_ID & BIT(31)) ? "not safe" : "safe");
             } else if (i == 30) {
                 for (int j = 0; j < ARRAY_SIZE(icache_emu_msg); ++j) {
                     if (q32DSP_icu(cpu_id)->EMU_MSG & BIT(j)) {
-                        printf("[X-ICACHE] emu err msg : %s", icache_emu_msg[j]);
+                        EXCEPTION_PRINTF("[X-ICACHE] emu err msg : %s", icache_emu_msg[j]);
                         if (j == 3) {
-                            printf("except at dev : %s %s", get_debug_dev_name(q32DSP_icu(cpu_id)->EMU_ID & 0xff), (q32DSP_icu(cpu_id)->EMU_ID & BIT(31)) ? "not safe" : "safe");
+                            EXCEPTION_PRINTF("except at dev : %s %s", get_debug_dev_name(q32DSP_icu(cpu_id)->EMU_ID & 0xff), (q32DSP_icu(cpu_id)->EMU_ID & BIT(31)) ? "not safe" : "safe");
                         }
                     }
                 }
@@ -768,29 +783,29 @@ void exception_analyze(int *sp)
                   ------------------------------------*/
                 for (int j = 0; j < ARRAY_SIZE(hcore_emu_msg0); ++j) {
                     if (JL_CEMU->MSG0 & BIT(j)) {
-                        printf("[1-HCORE] emu err msg : %s", hcore_emu_msg0[j]);
+                        EXCEPTION_PRINTF("[1-HCORE] emu err msg : %s", hcore_emu_msg0[j]);
                         if (j == 14) {
                             DcuEmuMessage();
-                            printf("except at dev : %s %s", get_debug_dev_name(JL_L1P->EMU_ID & 0xff), (JL_L1P->EMU_ID & BIT(31)) ? "not safe" : "safe");
+                            EXCEPTION_PRINTF("except at dev : %s %s", get_debug_dev_name(JL_L1P->EMU_ID & 0xff), (JL_L1P->EMU_ID & BIT(31)) ? "not safe" : "safe");
                         }
                         if (j < 8 || j == 13 || j == 19) {
-                            printf("except at dev : %s", get_debug_dev_name(JL_CEMU->LOG0 & 0xff));
+                            EXCEPTION_PRINTF("except at dev : %s", get_debug_dev_name(JL_CEMU->LOG0 & 0xff));
                         }
                         if (j < 4) {
                             if (JL_CEMU->LOG1 && (j == 0 || j == 2)) {
-                                printf("%s virtual memory err, addr : 0x%x", (JL_CEMU->LOG0 & BIT(30)) ? "write" : "read", JL_CEMU->LOG1);
+                                EXCEPTION_PRINTF("%s virtual memory err, addr : 0x%x", (JL_CEMU->LOG0 & BIT(30)) ? "write" : "read", JL_CEMU->LOG1);
                             }
                             if (JL_CEMU->LOG2 && (j == 1 || j == 3)) {
-                                printf("%s physical memory err, addr : 0x%x", (JL_CEMU->LOG0 & BIT(29)) ? "write" : "read", JL_CEMU->LOG2);
+                                EXCEPTION_PRINTF("%s physical memory err, addr : 0x%x", (JL_CEMU->LOG0 & BIT(29)) ? "write" : "read", JL_CEMU->LOG2);
                             }
                         } else if (j < 6 || j == 19) {
-                            printf("except memory addr : 0x%x, %s", JL_CEMU->LOG1, (JL_CEMU->LOG0 & BIT(31)) ? "not safe" : "safe");
+                            EXCEPTION_PRINTF("except memory addr : 0x%x, %s", JL_CEMU->LOG1, (JL_CEMU->LOG0 & BIT(31)) ? "not safe" : "safe");
                         }
                         if (j < 2) {
                             int k = 0;
                             int id = JL_CEMU->LOG3 & 0xff;
                             while (!(id & BIT(k)) && ++k < 8);
-                            printf("tzmpu limit range index : %d", k);
+                            EXCEPTION_PRINTF("tzmpu limit range index : %d", k);
                         }
                     }
                 }
@@ -800,24 +815,24 @@ void exception_analyze(int *sp)
                 if (JL_CEMU->MSG0 & BIT(10)) {
                     for (int j = 0; j < ARRAY_SIZE(hsb_emu_msg0); ++j) {
                         if (JL_HEMU->MSG0 & BIT(j)) {
-                            printf("[2-HSB] emu err msg : %s", hsb_emu_msg0[j]);
+                            EXCEPTION_PRINTF("[2-HSB] emu err msg : %s", hsb_emu_msg0[j]);
                             if (j < 4) {
-                                printf("except at dev : %s, sfr addr : 0x%x", get_debug_dev_name(JL_HEMU->LOG0 & 0xff), hs_base | (JL_HEMU->LOG1 & 0xffff));
+                                EXCEPTION_PRINTF("except at dev : %s, sfr addr : 0x%x", get_debug_dev_name(JL_HEMU->LOG0 & 0xff), hs_base | (JL_HEMU->LOG1 & 0xffff));
                             } else if (j == 4) {
-                                printf("except at dev : %s, %s, %s, if over 4KB %s, err len %d, err each size %d, mem addr : 0x%x(align 32 bytes)",
-                                       get_debug_tzasc_dev_name((JL_HEMU->LOG0 & 0x7fff) >> 8),
-                                       (JL_HEMU->LOG0 & BIT(30)) ? "write" : "read",
-                                       (JL_HEMU->LOG0 & BIT(31)) ? "not safe" : "safe",
-                                       (JL_HEMU->LOG0 & BIT(15)) ? "true" : "flase",
-                                       (JL_HEMU->LOG0 >> 16) & 0x7f,
-                                       (JL_HEMU->LOG0 >> 24) & 0x7,
-                                       JL_HEMU->LOG1);
+                                EXCEPTION_PRINTF("except at dev : %s, %s, %s, if over 4KB %s, err len %d, err each size %d, mem addr : 0x%x(align 32 bytes)",
+                                                 get_debug_tzasc_dev_name((JL_HEMU->LOG0 & 0x7fff) >> 8),
+                                                 (JL_HEMU->LOG0 & BIT(30)) ? "write" : "read",
+                                                 (JL_HEMU->LOG0 & BIT(31)) ? "not safe" : "safe",
+                                                 (JL_HEMU->LOG0 & BIT(15)) ? "true" : "flase",
+                                                 (JL_HEMU->LOG0 >> 16) & 0x7f,
+                                                 (JL_HEMU->LOG0 >> 24) & 0x7,
+                                                 JL_HEMU->LOG1);
                                 int k = 0;
                                 int id = JL_HEMU->LOG2 & 0x1f;
                                 while (!(id & BIT(k)) && ++k < 4);
-                                printf("tzasc limit range index : %d", k);
+                                EXCEPTION_PRINTF("tzasc limit range index : %d", k);
                             } else if (j < 7) {
-                                printf("sfc mmu err msg : %s", sfc_mmu_err_msg[j == 5 ? (JL_SFC0_MMU->CON0 >> 30) : (JL_SFC1_MMU->CON0 >> 30)]);
+                                EXCEPTION_PRINTF("sfc mmu err msg : %s", sfc_mmu_err_msg[j == 5 ? (JL_SFC0_MMU->CON0 >> 30) : (JL_SFC1_MMU->CON0 >> 30)]);
                             }
                         }
                     }
@@ -828,8 +843,8 @@ void exception_analyze(int *sp)
                 if (JL_CEMU->MSG0 & BIT(9)) {
                     for (int j = 0; j < ARRAY_SIZE(lsb_emu_msg0); ++j) {
                         if (JL_LEMU->MSG0 & BIT(j)) {
-                            printf("[3-LSB] emu err msg : %s", lsb_emu_msg0[j]);
-                            printf("except at dev : %s, sfr addr : 0x%x", get_debug_dev_name(JL_LEMU->LOG0 & 0xff), ls_base | (JL_LEMU->LOG1 & 0xffff));
+                            EXCEPTION_PRINTF("[3-LSB] emu err msg : %s", lsb_emu_msg0[j]);
+                            EXCEPTION_PRINTF("except at dev : %s, sfr addr : 0x%x", get_debug_dev_name(JL_LEMU->LOG0 & 0xff), ls_base | (JL_LEMU->LOG1 & 0xffff));
                         }
                     }
                 }
@@ -839,8 +854,8 @@ void exception_analyze(int *sp)
                 if (JL_CEMU->MSG0 & BIT(11)) {
                     for (int j = 0; j < ARRAY_SIZE(ass_emu_msg0); ++j) {
                         if (JL_AEMU->MSG0 & BIT(j)) {
-                            printf("[4-ASS] emu err msg : %s", ass_emu_msg0[j]);
-                            printf("except at dev : %s, sfr addr : 0x%x", get_debug_dev_name(JL_AEMU->LOG0 & 0xff), as_base | (JL_AEMU->LOG1 & 0xffff));
+                            EXCEPTION_PRINTF("[4-ASS] emu err msg : %s", ass_emu_msg0[j]);
+                            EXCEPTION_PRINTF("except at dev : %s, sfr addr : 0x%x", get_debug_dev_name(JL_AEMU->LOG0 & 0xff), as_base | (JL_AEMU->LOG1 & 0xffff));
                         }
                     }
                 }
@@ -850,8 +865,8 @@ void exception_analyze(int *sp)
                 if (JL_CEMU->MSG0 & BIT(12)) {
                     for (int j = 0; j < ARRAY_SIZE(video_emu_msg0); ++j) {
                         if (JL_VEMU->MSG0 & BIT(j)) {
-                            printf("[5-VIDEO] emu err msg : %s", video_emu_msg0[j]);
-                            printf("except at dev : %s, sfr addr : 0x%x", get_debug_dev_name(JL_VEMU->LOG0 & 0xff), JL_VEMU->LOG1 & 0xffff);
+                            EXCEPTION_PRINTF("[5-VIDEO] emu err msg : %s", video_emu_msg0[j]);
+                            EXCEPTION_PRINTF("except at dev : %s, sfr addr : 0x%x", get_debug_dev_name(JL_VEMU->LOG0 & 0xff), JL_VEMU->LOG1 & 0xffff);
                         }
                     }
                 }
@@ -861,8 +876,8 @@ void exception_analyze(int *sp)
                 if (JL_CEMU->MSG0 & BIT(13)) {
                     for (int j = 0; j < ARRAY_SIZE(wl_emu_msg0); ++j) {
                         if (JL_WEMU->MSG0 & BIT(j)) {
-                            printf("[6-WL] emu err msg : %s", wl_emu_msg0[j]);
-                            printf("except at dev : %s, sfr addr : 0x%x", get_debug_dev_name(JL_WEMU->LOG0 & 0xff), wl_base | (JL_WEMU->LOG1 & 0x1ffff));
+                            EXCEPTION_PRINTF("[6-WL] emu err msg : %s", wl_emu_msg0[j]);
+                            EXCEPTION_PRINTF("except at dev : %s, sfr addr : 0x%x", get_debug_dev_name(JL_WEMU->LOG0 & 0xff), wl_base | (JL_WEMU->LOG1 & 0x1ffff));
                         }
                     }
                 }
@@ -871,8 +886,8 @@ void exception_analyze(int *sp)
     }
 
 #ifdef CONFIG_SAVE_EXCEPTION_LOG_IN_FLASH
-    printf("exception log buf len : %d\n", len);
-    write_exception_log_to_flash(exception_log_buf, len + 1);
+    printf("exception log buf len : %d", exception_log_cnt);
+    write_exception_log_to_flash(exception_log_buf, exception_log_cnt + 1);
 #endif
 
     printf("system_reset...\r\n\r\n\r\n");

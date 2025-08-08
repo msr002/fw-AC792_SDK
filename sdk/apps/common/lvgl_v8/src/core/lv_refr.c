@@ -767,6 +767,22 @@ static void refr_area_part(lv_draw_ctx_t *draw_ctx)
                 lv_memset_00(disp_refr->driver->draw_buf->buf_act, disp_refr->driver->draw_buf->size * LV_IMG_PX_SIZE_ALPHA_BYTE);
             }
         }
+#if LV_COLOR_DEPTH_EXTEN == 24
+        else {
+            uint8_t *_buf_area = (uint8_t *)draw_ctx->buf + (lv_area_get_width(draw_ctx->buf_area) * draw_ctx->clip_area->y1 + draw_ctx->clip_area->x1) * 3;
+#if LV_USE_GPU_JL_DMA2D
+            int jldma2d_fill(uint8_t *dest_buf, uint32_t dest_stride, uint8_t a, uint8_t r, uint8_t g, uint8_t b, uint32_t out_format, uint32_t endian, uint32_t w, uint32_t h);
+            jldma2d_fill(_buf_area, lv_area_get_width(draw_ctx->buf_area) * 3, 0, 0, 0, 0, 0x01, 0, lv_area_get_width(draw_ctx->clip_area), lv_area_get_height(draw_ctx->clip_area));
+#else
+            uint32_t area_buf_size = lv_area_get_width(draw_ctx->clip_area) * 3;
+            uint32_t area_offset = lv_area_get_width(draw_ctx->buf_area) * 3;
+            for (int i = 0; i < lv_area_get_height(draw_ctx->clip_area); i++) {
+                lv_memset_00(_buf_area, area_buf_size);
+                _buf_area += area_offset;
+            }
+#endif
+        }
+#endif
 #endif
     }
 

@@ -142,6 +142,48 @@ int usb_sem_del(struct usb_host_device *host_dev)
     return 0;
 }
 
+int usb_mutex_init(struct usb_host_device *host_dev)
+{
+    OS_MUTEX *mutex = zalloc(sizeof(OS_MUTEX));
+    ASSERT(mutex, "usb alloc mutex error");
+    host_dev->mutex = mutex;
+    os_mutex_create(host_dev->mutex);
+    return 0;
+}
+
+int usb_mutex_pend(struct usb_host_device *host_dev, u32 timeout)
+{
+    if (host_dev->mutex == NULL) {
+        return 1;
+    }
+    int ret = os_mutex_pend(host_dev->mutex, timeout);
+    if (ret) {
+        r_printf("%s %d ", __func__, ret);
+    }
+    return ret;
+}
+int usb_mutex_post(struct usb_host_device *host_dev)
+{
+    if (host_dev->mutex == NULL) {
+        return 1;
+    }
+    int ret = os_mutex_post(host_dev->mutex);
+    if (ret) {
+        r_printf("%s %d ", __func__, ret);
+    }
+    return 0;
+}
+int usb_mutex_del(struct usb_host_device *host_dev)
+{
+    if (host_dev->mutex == NULL) {
+        return 0;
+    }
+    os_mutex_del(host_dev->mutex, 1);
+    free(host_dev->mutex);
+    host_dev->mutex = NULL;
+    return 0;
+}
+
 static int _usb_msd_parser(struct usb_host_device *host_dev, u8 interface_num, const u8 *pBuf)
 {
     log_info("find udisk @ interface %d", interface_num);
@@ -1117,6 +1159,7 @@ u32 usb_host_mount(const usb_dev id, u32 port, u32 retry, u32 reset_delay, u32 m
     host_dev->private_data.usb_id = id;
 
     usb_sem_init(host_dev);
+    usb_mutex_init(host_dev);
     usb_h_isr_reg(usb_id, 5, 1);
 
     ret = _usb_host_mount(usb_id, port, retry, reset_delay, mount_timeout);
@@ -1135,6 +1178,7 @@ u32 usb_host_mount(const usb_dev id, u32 port, u32 retry, u32 reset_delay, u32 m
 __exit_fail:
     usb_sie_disable(usb_id);
     usb_sem_del(host_dev);
+    usb_mutex_del(host_dev);
     os_mutex_post(&usb_host_mutex);
 
     return ret;
@@ -1232,6 +1276,7 @@ u32 usb_host_unmount(const usb_dev id, u32 port)
         goto __exit_fail;
     }
     usb_sem_del(host_dev);
+    usb_mutex_del(host_dev);
 
     usb_event_notify(host_dev, 2);
 

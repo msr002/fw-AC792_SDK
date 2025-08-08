@@ -647,6 +647,8 @@ extern void bt_set_support_ldac_flag(bool flag);
 //蓝牙库注册接口的函数
 /*音乐的ID3信息返回接口注册函数*/
 extern void bt_music_info_handle_register(void (*handler)(u8 type, u32 time, u8 *info, u16 len));
+/*1T2音乐的ID3信息返回接口注册函数*/
+extern void bt_music_info_handle_register_for_addr(void (*handler)(u8 *addr, u8 type, u32 time, u32 total_time, u8 play_status, u8 *info, u16 len));
 /*手机更样机音乐模式的音量同步*/
 extern void bt_music_vol_change_handle_register(void (*handle)(int vol), int (*handle2)(void));
 /*获取到名字后的回调函数接口注册函数*/

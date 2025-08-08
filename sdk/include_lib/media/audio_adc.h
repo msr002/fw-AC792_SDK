@@ -7,6 +7,14 @@
 #include "audio_def.h"
 #include "asm/cpu_adc.h"
 
+//数字麦采样通道选择
+typedef enum {
+    DMIC_DATA0_SCLK_RISING_EDGE = 4,
+    DMIC_DATA0_SCLK_FALLING_EDGE,
+    DMIC_DATA1_SCLK_RISING_EDGE,
+    DMIC_DATA1_SCLK_FALLING_EDGE,
+} DMIC_CH_MD;
+
 /*
 *********************************************************************
 *                  Audio ADC Initialize
