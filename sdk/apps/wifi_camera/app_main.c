@@ -99,6 +99,7 @@ const struct task_info task_info_table[] = {
     {"sys_event",           29,     SYS_EVENT_STK_SIZE,	   0, 					 sys_event_tcb_stk_q },
     {"systimer",            14,     SYSTIMER_STK_SIZE, 	   0,					 systimer_tcb_stk_q },
     {"sys_timer",            9,     SYS_TIMER_STK_SIZE,	  SYS_TIMER_Q_SIZE,		 sys_timer_tcb_stk_q },
+    {"dlog",                 1,      256,   128   },
     {"audio_server",        16,      512,   64    },
     {"audio_mix",           28,      512,   0     },
     {"audio_encoder",       12,      384,   64    },
@@ -215,7 +216,6 @@ const struct task_info task_info_table[] = {
     { "cvp_ref",             24,     256,    128 },
     { "CVP_RefTask",         14,     256,    128 },
 #endif
-
 
     {0, 0},
 };

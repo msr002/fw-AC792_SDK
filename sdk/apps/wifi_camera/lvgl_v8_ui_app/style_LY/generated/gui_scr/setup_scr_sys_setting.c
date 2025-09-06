@@ -19,6 +19,9 @@ lv_obj_t *setup_scr_sys_setting(lv_ui *ui)
     lv_ui_sys_setting *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_SYS_SETTING);
     if (ui_scr == NULL) {
         ui_scr = lv_mem_alloc(sizeof(lv_ui_sys_setting));
+        if (ui_scr == NULL) {
+            return NULL;
+        }
         memset(ui_scr, 0, sizeof(lv_ui_sys_setting));
         ui->sys_setting = ui_scr;
     }
@@ -62,8 +65,7 @@ lv_obj_t *setup_scr_sys_setting(lv_ui *ui)
     lv_obj_set_pos(ui_scr->sys_setting_view_pro, 0, 0);
     lv_obj_set_size(ui_scr->sys_setting_view_pro, 800, 43);
     lv_obj_set_scrollbar_mode(ui_scr->sys_setting_view_pro, LV_SCROLLBAR_MODE_OFF);
-    lv_obj_add_flag(ui_scr->sys_setting_view_pro, LV_OBJ_FLAG_EVENT_BUBBLE);
-    lv_obj_add_flag(ui_scr->sys_setting_view_pro, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
+    lv_obj_add_flag(ui_scr->sys_setting_view_pro, LV_OBJ_FLAG_EVENT_BUBBLE | LV_OBJ_FLAG_SCROLL_ON_FOCUS);
     lv_group_add_obj(def_group, ui_scr->sys_setting_view_pro);
     ui_style_set(ui_scr->sys_setting_view_pro, GUI_CTRL_CONT);
 
@@ -94,8 +96,7 @@ lv_obj_t *setup_scr_sys_setting(lv_ui *ui)
     lv_obj_set_pos(ui_scr->sys_setting_view_autof, 0, 45);
     lv_obj_set_size(ui_scr->sys_setting_view_autof, 800, 43);
     lv_obj_set_scrollbar_mode(ui_scr->sys_setting_view_autof, LV_SCROLLBAR_MODE_OFF);
-    lv_obj_add_flag(ui_scr->sys_setting_view_autof, LV_OBJ_FLAG_EVENT_BUBBLE);
-    lv_obj_add_flag(ui_scr->sys_setting_view_autof, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
+    lv_obj_add_flag(ui_scr->sys_setting_view_autof, LV_OBJ_FLAG_EVENT_BUBBLE | LV_OBJ_FLAG_SCROLL_ON_FOCUS);
     lv_group_add_obj(def_group, ui_scr->sys_setting_view_autof);
     ui_style_set(ui_scr->sys_setting_view_autof, GUI_CTRL_CONT);
 
@@ -126,8 +127,7 @@ lv_obj_t *setup_scr_sys_setting(lv_ui *ui)
     lv_obj_set_pos(ui_scr->sys_setting_view_hz, 0, 90);
     lv_obj_set_size(ui_scr->sys_setting_view_hz, 800, 43);
     lv_obj_set_scrollbar_mode(ui_scr->sys_setting_view_hz, LV_SCROLLBAR_MODE_OFF);
-    lv_obj_add_flag(ui_scr->sys_setting_view_hz, LV_OBJ_FLAG_EVENT_BUBBLE);
-    lv_obj_add_flag(ui_scr->sys_setting_view_hz, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
+    lv_obj_add_flag(ui_scr->sys_setting_view_hz, LV_OBJ_FLAG_EVENT_BUBBLE | LV_OBJ_FLAG_SCROLL_ON_FOCUS);
     lv_group_add_obj(def_group, ui_scr->sys_setting_view_hz);
     ui_style_set(ui_scr->sys_setting_view_hz, GUI_CTRL_CONT);
 
@@ -158,8 +158,7 @@ lv_obj_t *setup_scr_sys_setting(lv_ui *ui)
     lv_obj_set_pos(ui_scr->sys_setting_view_kvo, 0, 135);
     lv_obj_set_size(ui_scr->sys_setting_view_kvo, 800, 43);
     lv_obj_set_scrollbar_mode(ui_scr->sys_setting_view_kvo, LV_SCROLLBAR_MODE_OFF);
-    lv_obj_add_flag(ui_scr->sys_setting_view_kvo, LV_OBJ_FLAG_EVENT_BUBBLE);
-    lv_obj_add_flag(ui_scr->sys_setting_view_kvo, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
+    lv_obj_add_flag(ui_scr->sys_setting_view_kvo, LV_OBJ_FLAG_EVENT_BUBBLE | LV_OBJ_FLAG_SCROLL_ON_FOCUS);
     lv_group_add_obj(def_group, ui_scr->sys_setting_view_kvo);
     ui_style_set(ui_scr->sys_setting_view_kvo, GUI_CTRL_CONT);
 
@@ -190,8 +189,7 @@ lv_obj_t *setup_scr_sys_setting(lv_ui *ui)
     lv_obj_set_pos(ui_scr->sys_setting_view_lag, 0, 180);
     lv_obj_set_size(ui_scr->sys_setting_view_lag, 800, 43);
     lv_obj_set_scrollbar_mode(ui_scr->sys_setting_view_lag, LV_SCROLLBAR_MODE_OFF);
-    lv_obj_add_flag(ui_scr->sys_setting_view_lag, LV_OBJ_FLAG_EVENT_BUBBLE);
-    lv_obj_add_flag(ui_scr->sys_setting_view_lag, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
+    lv_obj_add_flag(ui_scr->sys_setting_view_lag, LV_OBJ_FLAG_EVENT_BUBBLE | LV_OBJ_FLAG_SCROLL_ON_FOCUS);
     lv_group_add_obj(def_group, ui_scr->sys_setting_view_lag);
     ui_style_set(ui_scr->sys_setting_view_lag, GUI_CTRL_CONT);
 
@@ -222,8 +220,7 @@ lv_obj_t *setup_scr_sys_setting(lv_ui *ui)
     lv_obj_set_pos(ui_scr->sys_setting_view_time, 0, 225);
     lv_obj_set_size(ui_scr->sys_setting_view_time, 800, 43);
     lv_obj_set_scrollbar_mode(ui_scr->sys_setting_view_time, LV_SCROLLBAR_MODE_OFF);
-    lv_obj_add_flag(ui_scr->sys_setting_view_time, LV_OBJ_FLAG_EVENT_BUBBLE);
-    lv_obj_add_flag(ui_scr->sys_setting_view_time, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
+    lv_obj_add_flag(ui_scr->sys_setting_view_time, LV_OBJ_FLAG_EVENT_BUBBLE | LV_OBJ_FLAG_SCROLL_ON_FOCUS);
     lv_group_add_obj(def_group, ui_scr->sys_setting_view_time);
     ui_style_set(ui_scr->sys_setting_view_time, GUI_CTRL_CONT);
 
@@ -254,8 +251,7 @@ lv_obj_t *setup_scr_sys_setting(lv_ui *ui)
     lv_obj_set_pos(ui_scr->sys_setting_view_tv, 0, 270);
     lv_obj_set_size(ui_scr->sys_setting_view_tv, 800, 43);
     lv_obj_set_scrollbar_mode(ui_scr->sys_setting_view_tv, LV_SCROLLBAR_MODE_OFF);
-    lv_obj_add_flag(ui_scr->sys_setting_view_tv, LV_OBJ_FLAG_EVENT_BUBBLE);
-    lv_obj_add_flag(ui_scr->sys_setting_view_tv, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
+    lv_obj_add_flag(ui_scr->sys_setting_view_tv, LV_OBJ_FLAG_EVENT_BUBBLE | LV_OBJ_FLAG_SCROLL_ON_FOCUS);
     lv_group_add_obj(def_group, ui_scr->sys_setting_view_tv);
     ui_style_set(ui_scr->sys_setting_view_tv, GUI_CTRL_CONT);
 
@@ -286,8 +282,7 @@ lv_obj_t *setup_scr_sys_setting(lv_ui *ui)
     lv_obj_set_pos(ui_scr->sys_setting_view_format, 0, 315);
     lv_obj_set_size(ui_scr->sys_setting_view_format, 800, 43);
     lv_obj_set_scrollbar_mode(ui_scr->sys_setting_view_format, LV_SCROLLBAR_MODE_OFF);
-    lv_obj_add_flag(ui_scr->sys_setting_view_format, LV_OBJ_FLAG_EVENT_BUBBLE);
-    lv_obj_add_flag(ui_scr->sys_setting_view_format, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
+    lv_obj_add_flag(ui_scr->sys_setting_view_format, LV_OBJ_FLAG_EVENT_BUBBLE | LV_OBJ_FLAG_SCROLL_ON_FOCUS);
     lv_group_add_obj(def_group, ui_scr->sys_setting_view_format);
     ui_style_set(ui_scr->sys_setting_view_format, GUI_CTRL_CONT);
 
@@ -318,8 +313,7 @@ lv_obj_t *setup_scr_sys_setting(lv_ui *ui)
     lv_obj_set_pos(ui_scr->sys_setting_view_reset, 0, 360);
     lv_obj_set_size(ui_scr->sys_setting_view_reset, 800, 43);
     lv_obj_set_scrollbar_mode(ui_scr->sys_setting_view_reset, LV_SCROLLBAR_MODE_OFF);
-    lv_obj_add_flag(ui_scr->sys_setting_view_reset, LV_OBJ_FLAG_EVENT_BUBBLE);
-    lv_obj_add_flag(ui_scr->sys_setting_view_reset, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
+    lv_obj_add_flag(ui_scr->sys_setting_view_reset, LV_OBJ_FLAG_EVENT_BUBBLE | LV_OBJ_FLAG_SCROLL_ON_FOCUS);
     lv_group_add_obj(def_group, ui_scr->sys_setting_view_reset);
     ui_style_set(ui_scr->sys_setting_view_reset, GUI_CTRL_CONT);
 
@@ -350,8 +344,7 @@ lv_obj_t *setup_scr_sys_setting(lv_ui *ui)
     lv_obj_set_pos(ui_scr->sys_setting_view_ver, 0, 405);
     lv_obj_set_size(ui_scr->sys_setting_view_ver, 800, 43);
     lv_obj_set_scrollbar_mode(ui_scr->sys_setting_view_ver, LV_SCROLLBAR_MODE_OFF);
-    lv_obj_add_flag(ui_scr->sys_setting_view_ver, LV_OBJ_FLAG_EVENT_BUBBLE);
-    lv_obj_add_flag(ui_scr->sys_setting_view_ver, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
+    lv_obj_add_flag(ui_scr->sys_setting_view_ver, LV_OBJ_FLAG_EVENT_BUBBLE | LV_OBJ_FLAG_SCROLL_ON_FOCUS);
     lv_group_add_obj(def_group, ui_scr->sys_setting_view_ver);
     ui_style_set(ui_scr->sys_setting_view_ver, GUI_CTRL_CONT);
 
@@ -506,7 +499,7 @@ lv_obj_t *setup_scr_sys_setting(lv_ui *ui)
     lv_obj_set_style_bg_opa(ui_scr->sys_setting_submenu_btn_1, 203, LV_PART_MAIN | LV_STATE_DEFAULT);
     ui_scr->sys_setting_submenu_btn_1_label = lv_label_create(ui_scr->sys_setting_submenu_btn_1);
     lv_label_set_text(ui_scr->sys_setting_submenu_btn_1_label, "button1");
-    lv_obj_set_style_pad_all(ui_scr->sys_setting_submenu_btn_1, 0, LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_all(ui_scr->sys_setting_submenu_btn_1, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_align(ui_scr->sys_setting_submenu_btn_1_label, LV_ALIGN_CENTER, 0, 0);
 
     //Write codes sys_setting_submenu_btn_2
@@ -521,7 +514,7 @@ lv_obj_t *setup_scr_sys_setting(lv_ui *ui)
     lv_obj_set_style_bg_opa(ui_scr->sys_setting_submenu_btn_2, 215, LV_PART_MAIN | LV_STATE_DEFAULT);
     ui_scr->sys_setting_submenu_btn_2_label = lv_label_create(ui_scr->sys_setting_submenu_btn_2);
     lv_label_set_text(ui_scr->sys_setting_submenu_btn_2_label, "button2");
-    lv_obj_set_style_pad_all(ui_scr->sys_setting_submenu_btn_2, 0, LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_all(ui_scr->sys_setting_submenu_btn_2, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_align(ui_scr->sys_setting_submenu_btn_2_label, LV_ALIGN_CENTER, 0, 0);
 
     //Write codes sys_setting_submenu_btn_3
@@ -536,7 +529,7 @@ lv_obj_t *setup_scr_sys_setting(lv_ui *ui)
     lv_obj_set_style_bg_opa(ui_scr->sys_setting_submenu_btn_3, 205, LV_PART_MAIN | LV_STATE_DEFAULT);
     ui_scr->sys_setting_submenu_btn_3_label = lv_label_create(ui_scr->sys_setting_submenu_btn_3);
     lv_label_set_text(ui_scr->sys_setting_submenu_btn_3_label, "button3");
-    lv_obj_set_style_pad_all(ui_scr->sys_setting_submenu_btn_3, 0, LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_all(ui_scr->sys_setting_submenu_btn_3, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_align(ui_scr->sys_setting_submenu_btn_3_label, LV_ALIGN_CENTER, 0, 0);
 
     //Write codes sys_setting_submenu_btn_4
@@ -551,7 +544,7 @@ lv_obj_t *setup_scr_sys_setting(lv_ui *ui)
     lv_obj_set_style_bg_opa(ui_scr->sys_setting_submenu_btn_4, 205, LV_PART_MAIN | LV_STATE_DEFAULT);
     ui_scr->sys_setting_submenu_btn_4_label = lv_label_create(ui_scr->sys_setting_submenu_btn_4);
     lv_label_set_text(ui_scr->sys_setting_submenu_btn_4_label, "button4");
-    lv_obj_set_style_pad_all(ui_scr->sys_setting_submenu_btn_4, 0, LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_all(ui_scr->sys_setting_submenu_btn_4, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_align(ui_scr->sys_setting_submenu_btn_4_label, LV_ALIGN_CENTER, 0, 0);
 
     //Write codes sys_setting_roller_mutifunc
@@ -851,7 +844,7 @@ lv_obj_t *setup_scr_sys_setting(lv_ui *ui)
 
     lv_obj_update_layout(ui_scr->sys_setting);
     ui_scr->sys_setting_del = false;
-    i18n_refresh_texts("sys_setting");
+    i18n_refresh_texts(GUI_SCREEN_SYS_SETTING);
 
     //Init events for screen
     events_init_sys_setting(ui);

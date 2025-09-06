@@ -41,9 +41,11 @@ typedef struct {
     lv_coord_t angle_step; // 菜单项之间的角度差
     lv_coord_t radius; // 菜单半径
     lv_coord_t px_per_angle; // 每度对应的像素
+    lv_coord_t bounce_anim_time; // 回弹动画时间，单位ms
     lv_point_t last_point; // 上次滚动位置
     lv_point_t center; // 菜单中心坐标
     bool is_clockwise; // 顺时针
+    bool is_loop_mode; // 循环模式
     bool _is_init; // 是否初始化
 } lv_gearmenu_t;
 
@@ -73,6 +75,14 @@ lv_obj_t *lv_gearmenu_create(lv_obj_t *parent);
  * @return lv_obj_t* pointer to the created button object
  */
 lv_obj_t *lv_gearmenu_add_btn(lv_obj_t *gear_menu, const void *icon, const char *txt);
+
+
+/**
+ * change the current angle to the closest angle in integral multiple of the closet angle step
+ * @param gear_menu pointer to the gear menu object
+ */
+void lv_gearmenu_rotate_to_the_closest_angle(lv_obj_t *obj);
+
 
 /*=====================
  * Setter functions
@@ -185,6 +195,29 @@ void lv_gearmenu_btn_set_img_zoom(lv_obj_t *btn, uint16_t zoom);
  */
 void lv_gearmenu_btn_set_hide(lv_obj_t *btn, bool is_hide);
 
+
+/**
+ * Set the current angle of the gear menu
+ * @param obj pointer to the gear menu object
+ * @param angle angle of the gear menu
+ */
+void lv_gearmenu_set_angle(lv_obj_t *obj, lv_coord_t angle);
+
+
+/**
+ * Set the bounce animation time of the gear menu
+ * @param obj pointer to the gear menu object
+ * @param bounce_anim_time the bounce animation time of the gear menu
+ */
+void lv_gearmenu_set_bounce_anim_time(lv_obj_t *obj, lv_coord_t bounce_anim_time);
+
+/**
+ * Set the loop mode of the gear menu
+ * @param obj pointer to the gear menu object
+ * @param is_loop_mode true to enable the loop mode
+ */
+void lv_gearmenu_set_loop_mode(lv_obj_t *obj, bool is_loop_mode);
+
 /*=====================
  * Getter functions
  *====================*/
@@ -232,6 +265,29 @@ lv_coord_t lv_gearmenu_get_px_per_angle(lv_obj_t *obj);
  */
 bool lv_gearmenu_btn_get_hide(lv_obj_t *btn);
 
+
+/**
+ * Get the current angle of the gear menu
+ * @param obj pointer to the gear menu object
+ * @return lv_coord_t angle of the gear menu
+ */
+lv_coord_t lv_gearmenu_get_angle(lv_obj_t *obj);
+
+
+/**
+ * Get the bounce animation time of the gear menu
+ * @param obj pointer to the gear menu object
+ * @return lv_coord_t bounce animation time of the gear menu
+ */
+lv_coord_t lv_gearmenu_get_bounce_anim_time(lv_obj_t *obj);
+
+/**
+ * Get the loop mode of the gear menu
+ * @param obj pointer to the gear menu object
+ * @return whether the loop mode is enabled
+ */
+bool lv_gearmenu_get_loop_mode(lv_obj_t *obj);
+
 /*=====================
  * Other functions
  *====================*/
@@ -247,3 +303,4 @@ bool lv_gearmenu_btn_get_hide(lv_obj_t *btn);
 #endif
 
 #endif /*LV_GEARMENU_H*/
+

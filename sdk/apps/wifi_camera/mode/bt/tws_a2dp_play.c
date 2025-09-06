@@ -327,8 +327,8 @@ static void tws_a2dp_sync_play(u8 *bt_addr, bool tx_do_action)
     /* } */
 
     if (current_app_in_mode(APP_MODE_BT) == FALSE) {
-        app_msg_handler(NULL, APP_MSG_STOP);
-        app_mode_change_replace(APP_MODE_BT);
+        //app_msg_handler(NULL, APP_MSG_STOP);
+        //app_mode_change_replace(APP_MODE_BT);
     }
 
     ai_app_local_event_notify(FILE_PLAYER_START);

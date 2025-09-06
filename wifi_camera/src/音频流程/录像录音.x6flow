@@ -62,7 +62,7 @@
        {
         "modeId": "id_1753338947965_1",
         "name": "ADC2",
-        "current": 0,
+        "current": "arg0",
         "bypass": false,
         "list": [
          {
@@ -308,11 +308,10 @@
        "strokeWidth": 2,
        "fill": "#A4A5A9",
        "stroke": "#A4A5A9"
-      },
-      "distance": 40
+      }
      }
     },
-    "id": "39dceff5-3ec1-469a-82a6-cbc272bc299a",
+    "id": "72d3716b-34b9-4e82-ac84-555d94b87483",
     "data": {
      "itemId": 1753338260516
     },
@@ -327,7 +326,7 @@
    },
    {
     "position": {
-     "x": 120,
+     "x": 200,
      "y": -40
     },
     "size": {

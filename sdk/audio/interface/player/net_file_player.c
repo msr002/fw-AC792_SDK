@@ -680,6 +680,14 @@ static int __net_completion_callback(void *priv, int timeout)
         return 0;
     }
 
+#if TCFG_USER_EMITTER_ENABLE
+    extern u8 *get_cur_connect_emitter_mac_addr(void);
+    u8 *bt_addr = get_cur_connect_emitter_mac_addr();
+    if (bt_addr) {
+        jlstream_node_ioctl(player->stream, NODE_UUID_A2DP_TX, NODE_IOC_SET_BTADDR, (int)bt_addr);
+    }
+#endif
+
     jlstream_node_ioctl(player->stream, NODE_UUID_DECODER,
                         NODE_IOC_SET_FILE_LEN, net_file_flen(player));
 
@@ -779,6 +787,14 @@ int net_file_player_start(struct net_file_player *player)
             goto __exit1;
         }
     } else {
+#if TCFG_USER_EMITTER_ENABLE
+        extern u8 *get_cur_connect_emitter_mac_addr(void);
+        u8 *bt_addr = get_cur_connect_emitter_mac_addr();
+        if (bt_addr) {
+            jlstream_node_ioctl(player->stream, NODE_UUID_A2DP_TX, NODE_IOC_SET_BTADDR, (int)bt_addr);
+        }
+#endif
+
         jlstream_node_ioctl(player->stream, NODE_UUID_DECODER, NODE_IOC_SET_FILE_LEN, net_file_flen(player));
 
         if (player->break_point->fptr == 0) {

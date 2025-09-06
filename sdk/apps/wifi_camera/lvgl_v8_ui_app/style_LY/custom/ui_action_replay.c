@@ -181,8 +181,6 @@ void enter_video_dir_callback(void *priv, int err)
 int gui_scr_action_video_dir_cb(int action)
 {
     printf("--->%s()----->%d, action: %d\n", __func__, __LINE__, action);
-    struct intent it;
-    init_intent(&it);
     switch (action) {
     case GUI_SCREEN_ACTION_LOAD:
         lv_ui_video_dir *ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_VIDEO_DIR);
@@ -196,16 +194,8 @@ int gui_scr_action_video_dir_cb(int action)
         lv_obj_set_style_bg_opa(ui_scr->video_dir, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
 #endif
         key_event_disable();
-        struct application *app;
-        app = get_current_app();
-        if (app) {
-            printf("[chili] %s %d   \n", app->name, __LINE__);
-            it.action = ACTION_BACK;
-            start_app(&it);
-        }
-        it.name	= "video_dec";
-        it.action = ACTION_VIDEO_DEC_MAIN;
-        start_app(&it);
+        app_mode_change_replace(APP_MODE_DEC);
+        app_send_message(APP_MSG_DEC_MAIN, 0);
         key_event_enable();
         break;
     }
@@ -213,8 +203,6 @@ int gui_scr_action_video_dir_cb(int action)
 
 int gui_scr_action_video_file_cb(int action)
 {
-    struct intent it;
-    init_intent(&it);
     switch (action) {
     case GUI_SCREEN_ACTION_LOAD:
         lv_ui_video_file *ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_VIDEO_FILE);
@@ -229,15 +217,9 @@ int gui_scr_action_video_file_cb(int action)
         if ((__this->file_fd != NULL) && (__this->err_file == 0) && (__this->type == 1)) {
             __this->file_fd = NULL;
         }
-        struct application *app;
-        app = get_current_app();
-        if (app) {
-            it.action = ACTION_BACK;
-            start_app(&it);
-        }
-        it.name	= "video_dec";
-        it.action = ACTION_VIDEO_DEC_MAIN;
-        start_app(&it);
+        app_msg_handler(NULL, APP_MSG_STOP);
+        app_mode_change_replace(APP_MODE_DEC);
+        app_send_message(APP_MSG_DEC_MAIN, 0);
         break;
     }
 }
@@ -246,8 +228,6 @@ int gui_scr_action_video_file_cb(int action)
 
 int gui_scr_action_video_play_cb(int action)
 {
-    struct intent it;
-    init_intent(&it);
 
     switch (action) {
     case GUI_SCREEN_ACTION_LOAD:
@@ -300,27 +280,20 @@ void set_file_idx(int idx)
 
 int gui_get_video_frame(void)
 {
-    struct intent it;
-    init_intent(&it);
-    it.name = "video_dec";
-    it.action = ACTION_VIDEO_DEC_GET_FRAME;
-    start_app(&it);
+    app_send_message(APP_MSG_DEC_GET_FRAME, 0);
     return 0;
 }
 
 int gui_set_video_volume(void)
 {
-    struct intent it;
-    init_intent(&it);
-    it.name = "video_dec";
-    it.action = ACTION_VIDEO_DEC_SET_AUDIO_VOLUME;
-    start_app(&it);
+    app_send_message(APP_MSG_DEC_SET_AUDIO_VOLUME, 0);
     return 0;
 }
 
 int browser_open_file(void *p, char *path, char *name)
 {
-    struct intent it;
+    struct intent *it = NULL;
+    it = malloc(sizeof(struct intent));
     if (strcmp(lv_fs_get_ext(name), "jpg") == 0 || strcmp(lv_fs_get_ext(name), "JPG") == 0) {
         __this->type = 0;   //文件为jpg
     } else {
@@ -329,12 +302,10 @@ int browser_open_file(void *p, char *path, char *name)
     __this->err_file = 0;
     __this->file_fd = (FILE *)p;
     if (__this->file_fd != NULL) {
-        init_intent(&it);
-        it.name = "video_dec";
-        it.action = ACTION_VIDEO_DEC_OPEN_FILE;
-        it.data = (const char *)__this->file_fd;
-        it.exdata = (u32)path;
-        start_app(&it);
+        init_intent(it);
+        it->data = (const char *)__this->file_fd;
+        it->exdata = (u32)path;
+        app_send_message(APP_MSG_DEC_OPEN_FILE, 1, it);
     }
 
     ui_video_dir(path);
@@ -350,30 +321,22 @@ void dec_video_prev_next(u32 mode)
         mode = FSEL_NEXT_FILE;
     }
 #endif
-    struct intent it;
-    init_intent(&it);
-    it.name = "video_dec";
-    it.action = ACTION_VIDEO_PREV_NEXT_CONTROL;
-    it.exdata = mode;
-    start_app(&it);
+    struct intent *it = NULL;
+    it = malloc(sizeof(struct intent));
+    printf("it:%p", it);
+    init_intent(it);
+    it->exdata = mode;
+    app_send_message(APP_MSG_DEC_PREV_NEXT_CONTROL, 1, it);
 }
 
 void cfun_dec_ok(void)
 {
-    struct intent it;
-    init_intent(&it);
-    it.name = "video_dec";
-    it.action = ACTION_VIDEO_DEC_CONTROL;
-    start_app(&it);
+    app_send_message(APP_MSG_DEC_CONTROL, 0);
 }
 
 void cfun_dec_return(void)
 {
-    struct intent it;
-    init_intent(&it);
-    it.name = "video_dec";
-    it.action = ACTION_VIDEO_DEC_CUR_PAGE;
-    start_app(&it);
+    app_send_message(APP_MSG_DEC_CUR_PAGE, 0);
 }
 
 void del_file_callback(void *priv, int err)
@@ -398,41 +361,37 @@ void lock_file_callback(void *priv, int err)
 
 static void cfun_dec_lock_all(u8 lock_flag)
 {
-    struct intent it;
-    init_intent(&it);
-    it.name = "video_dec";
+    struct intent *it = NULL;
+    it = malloc(sizeof(struct intent));
+    init_intent(it);
     if (lock_flag) {
-        it.data = "lock:all";
+        it->data = "lock:all";
         lock_all_flag = 0;
     } else {
-        it.data = "unlock:all";
+        it->data = "unlock:all";
         lock_all_flag = 1;
     }
-    it.exdata = (u32)__this->cur_path;
-    it.action = ACTION_VIDEO_DEC_SET_CONFIG;
-    start_app(&it);
+    it->exdata = (u32)__this->cur_path;
+    app_send_message(APP_MSG_DEC_SET_CONFIG, 1, it);
 }
 
 static void cfun_dec_lock()
 {
-    struct intent it;
+    struct intent *it = NULL;
+    it = malloc(sizeof(struct intent));
     if (__this->is_lock) {
-        init_intent(&it);
-        it.name = "video_dec";
-        it.data = "unlock:cur";
-        it.action = ACTION_VIDEO_DEC_SET_CONFIG;
-        it.exdata = (const char *)__this->edit_fd;
+        init_intent(it);
+        it->data = "unlock:cur";
+        it->exdata = (const char *)__this->edit_fd;
         __this->is_lock = 0;
-        start_app(&it);
+        app_send_message(APP_MSG_DEC_SET_CONFIG, 1, it);
         __this->edit_fd = NULL;
     } else {
-        init_intent(&it);
-        it.name = "video_dec";
-        it.data = "lock:cur";
-        it.exdata = (const char *)__this->edit_fd;
-        it.action = ACTION_VIDEO_DEC_SET_CONFIG;
+        init_intent(it);
+        it->data = "lock:cur";
+        it->exdata = (const char *)__this->edit_fd;
+        app_send_message(APP_MSG_DEC_SET_CONFIG, 1, it);
         __this->is_lock = 1;
-        start_app(&it);
         __this->edit_fd = NULL;
     }
 }
@@ -447,25 +406,25 @@ static void cfun_dec_delete(void)
     }
     deleting_flag = 1;
     __this->refresh_flag = 1;
-    struct intent it;
-    it.name = "video_dec";
-    it.action = ACTION_VIDEO_DEC_SET_CONFIG;
-    it.data = "del:cur";
-    it.exdata = (const char *)__this->edit_fd;
-    start_app(&it);
+    struct intent *it = NULL;
+    it = malloc(sizeof(struct intent));
+    init_intent(it);
+    it->data = "del:cur";
+    it->exdata = (const char *)__this->edit_fd;
+    app_send_message(APP_MSG_DEC_SET_CONFIG, 1, it);
     __this->edit_fd = NULL;
 }
 
 static void cfun_dec_delete_all(void)
 {
-    struct intent it;
+    struct intent *it;
+    it = malloc(sizeof(struct intent));
+    init_intent(it);
     deleting_flag = 1;
     __this->refresh_flag = 1;
-    it.name = "video_dec";
-    it.action = ACTION_VIDEO_DEC_SET_CONFIG;
-    it.data = "del:all";
-    it.exdata = (u32)__this->cur_path;
-    start_app(&it);
+    it->data = "del:all";
+    it->exdata = (u32)__this->cur_path;
+    app_send_message(APP_MSG_DEC_SET_CONFIG, 1, it);
 }
 
 void edit_lock_file(lv_obj_t *dest, int dir)  //对所有录像文件的复选框进行显示或者隐藏
@@ -685,10 +644,9 @@ void lock_flie(uint8_t file_num, uint8_t lock)
     lv_obj_t *video_file_obj = NULL;
     lv_obj_t *lock_icon_obj = NULL;
     uint32_t video_file_num = 0;
-    struct intent it;
-    init_intent(&it);
-    it.name = "video_dec";
-    it.action = ACTION_VIDEO_DEC_SET_CONFIG;
+    struct intent *it = NULL;
+    it = malloc(sizeof(struct intent));
+    init_intent(it);
     lv_ui_video_file *ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_VIDEO_FILE);
     if (!ui_scr) {
         return;
@@ -698,21 +656,21 @@ void lock_flie(uint8_t file_num, uint8_t lock)
     if (file_num) {
         video_file_num = lv_obj_get_child_cnt(ui_scr->video_file_view_3);
         if (lock) {
-            it.data = "lock:all";
+            it->data = "lock:all";
         } else {
-            it.data = "unlock:all";
+            it->data = "unlock:all";
         }
-        it.exdata = (u32)__this->cur_path;
-        start_app(&it);
+        it->exdata = (u32)__this->cur_path;
+        app_send_message(APP_MSG_DEC_SET_CONFIG, 1, it);
     } else {
         video_file_num = 1;
         if (lock) {
-            it.data = "lock:cur";
+            it->data = "lock:cur";
         } else {
-            it.data = "unlock:cur";
+            it->data = "unlock:cur";
         }
-        it.exdata = (const char *)__this->edit_fd;
-        start_app(&it);
+        it->exdata = (const char *)__this->edit_fd;
+        app_send_message(APP_MSG_DEC_SET_CONFIG, 1, it);
         __this->edit_fd = NULL;
     }
 
@@ -745,7 +703,9 @@ void lock_flie(uint8_t file_num, uint8_t lock)
 
 void speed_change(int index)
 {
-    struct intent it;
+    struct intent *it = NULL;
+    it = malloc(sizeof(struct intent));
+    init_intent(it);
     float speed;
 
     switch (index) {
@@ -766,10 +726,8 @@ void speed_change(int index)
         break;
     }
 
-    it.name = "video_dec";
-    it.action = ACTION_VIDEO_DEC_SET_PLAY_SPEED;
-    it.exdata = &speed;
-    start_app(&it);
+    it->exdata = &speed;
+    app_send_message(APP_MSG_DEC_SET_PLAY_SPEED, 1, it);
 }
 
 /* 各个控件模型的消息处理回调 */

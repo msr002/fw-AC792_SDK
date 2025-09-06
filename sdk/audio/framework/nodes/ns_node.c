@@ -14,7 +14,7 @@
 #include "frame_length_adaptive.h"
 #include "app_config.h"
 
-#if TCFG_NS_NODE_ENABLE
+#if TCFG_NS_NODE_ENABLE || TCFG_NS_NODE_LITE_ENABLE
 
 #define LOG_TAG             "[NS-NODE]"
 #define LOG_ERROR_ENABLE
@@ -37,6 +37,8 @@ struct ns_cfg_t {
     float aggressfactor;   //降噪强度(越大越强:1~2)
     float minsuppress;     //降噪最小压制(越小越强:0~1)
     float noiselevel;      //初始噪声水平(评估初始噪声，加快收敛)
+    float eng_gain;        //设置线性值
+    float output16;        //算法内部是否使用16转24保留精度,使用节点后需要24BIT
 } __attribute__((packed));
 
 struct ns_node_hdl {
@@ -45,9 +47,12 @@ struct ns_node_hdl {
     u8 trigger;
     u32 sample_rate;
     void *ns;
+    u8 lite;
     struct stream_frame *out_frame;
     struct ns_cfg_t cfg;
     struct fixed_frame_len_handle *fixed_hdl;
+    struct node_port_data_wide data_wide;
+
 };
 
 /* extern int db2mag(int db, int dbQ, int magDQ);//10^db/20 */
@@ -64,10 +69,11 @@ int ns_param_cfg_read(struct stream_node *node)
      * */
     int ret = jlstream_read_node_data_new(NODE_UUID_NOISE_SUPPRESSOR, node->subid, (void *)&config, hdl->name);
     if (ret != sizeof(config)) {
-        log_error("%s, read node data err %d = %d", __FUNCTION__, ret, (int)sizeof(config));
-        return -1;
+        ret = jlstream_read_node_data_new(NODE_UUID_NOISE_SUPPRESSOR_LITE, node->subid, (void *)&config, hdl->name);
+        if (ret != sizeof(config)) {
+            log_error("%s: read node data failed, ret = %d", __func__, ret);
+        }
     }
-
     /*
      *获取在线调试的临时参数
      * */
@@ -86,6 +92,8 @@ int ns_param_cfg_read(struct stream_node *node)
     log_debug("aggressfactor  %d/1000", (int)(hdl->cfg.aggressfactor * 1000.f));
     log_debug("minsuppress    %d/1000", (int)(hdl->cfg.minsuppress * 1000.f));
     log_debug("noiselevel     %d/1000", (int)(hdl->cfg.noiselevel * 1000.f));
+    log_debug("eng_gain       %d", (int)(hdl->cfg.eng_gain));
+    log_debug("output16 %d", (int)(hdl->cfg.output16));
 
     return ret;
 }
@@ -103,7 +111,7 @@ static int ns_node_fixed_frame_run(void *priv, u8 *in, u8 *out, int len)
         return len;
     } else {
         if (!hdl->ns) {
-            hdl->ns = audio_ns_open(hdl->sample_rate, hdl->cfg.mode, hdl->cfg.noiselevel, hdl->cfg.aggressfactor, hdl->cfg.minsuppress);
+            hdl->ns = audio_ns_open(hdl->sample_rate, hdl->cfg.mode, hdl->cfg.noiselevel, hdl->cfg.aggressfactor, hdl->cfg.minsuppress, hdl->lite, hdl->cfg.eng_gain, hdl->cfg.output16);
         }
         if (hdl->ns) {
             wlen = audio_ns_run(hdl->ns, (s16 *)in, (s16 *)out, len);
@@ -127,8 +135,8 @@ static void ns_handle_frame(struct stream_iport *iport, struct stream_note *note
             break;
         }
 
-        if (hdl->cfg.ns_type == AUDIO_NS_TYPE_ESCO_DL) {
-            if (hdl->cfg.call_active_trigger && (!hdl->trigger)) {
+        if ((hdl->cfg.ns_type == AUDIO_NS_TYPE_ESCO_DL) && hdl->cfg.call_active_trigger) {
+            if (!hdl->trigger) {
 #if TCFG_BT_SUPPORT_PROFILE_HFP
                 if (bt_get_call_status_for_addr(hdl->bt_addr) == BT_CALL_ACTIVE) {
                     hdl->trigger = 1;
@@ -144,19 +152,30 @@ static void ns_handle_frame(struct stream_iport *iport, struct stream_note *note
             /*没有接通，降降噪效果设置成0*/
             minsuppress = 1.0f;
         }
-        if (hdl->ns) {
+        /*精简版需要屏蔽掉完整版的config指令*/
+        if (hdl->ns && (!hdl->lite)) {
             audio_ns_config(hdl->ns, NS_CMD_MINSUPPRESS, 0, &minsuppress);
         }
-
-        out_frame_len = get_fixed_frame_len_output_len(hdl->fixed_hdl, in_frame->len);
+        if (!hdl->cfg.output16) { // 使用16转24算法后，输出buffer需要扩大2倍
+            out_frame_len = get_fixed_frame_len_output_len(hdl->fixed_hdl, in_frame->len) * 2;
+        } else {
+            out_frame_len = get_fixed_frame_len_output_len(hdl->fixed_hdl, in_frame->len);
+        }
         if (out_frame_len) {
             hdl->out_frame = jlstream_get_frame(node->oport, out_frame_len);
             if (!hdl->out_frame) {
+                jlstream_return_frame(iport, in_frame);
                 return;
             }
         }
-        wlen = audio_fixed_frame_len_run(hdl->fixed_hdl, in_frame->data, hdl->out_frame->data, in_frame->len);
-
+        if (!hdl->cfg.output16) { // 使用16转24算法后，输出流长度需要扩大2倍
+            //putchar('o');
+            wlen = audio_fixed_frame_len_run(hdl->fixed_hdl, in_frame->data, hdl->out_frame->data, in_frame->len);
+            wlen *= 2;
+        } else {
+            //putchar('e');
+            wlen = audio_fixed_frame_len_run(hdl->fixed_hdl, in_frame->data, hdl->out_frame->data, in_frame->len);
+        }
         if (wlen && hdl->out_frame) {
             hdl->out_frame->len = wlen;
             jlstream_push_frame(node->oport, hdl->out_frame);	//将数据推到oport
@@ -229,9 +248,15 @@ static void ns_ioc_start(struct ns_node_hdl *hdl)
 {
     log_info("ans node start");
 
+    if (hdl_node(hdl)->uuid == NODE_UUID_NOISE_SUPPRESSOR_LITE) {
+        hdl->lite = 1;	// lite = 0 完整降噪    lite = 1 精简版降噪
+    } else {
+        hdl->lite = 0;	// lite = 0 完整降噪    lite = 1 精简版降噪
+    }
+
     /*打开算法*/
-    if (hdl->cfg.bypass) {
-        hdl->ns = audio_ns_open(hdl->sample_rate, hdl->cfg.mode, hdl->cfg.noiselevel, hdl->cfg.aggressfactor, hdl->cfg.minsuppress);
+    if (!hdl->cfg.bypass) {
+        hdl->ns = audio_ns_open(hdl->sample_rate, hdl->cfg.mode, hdl->cfg.noiselevel, hdl->cfg.aggressfactor, hdl->cfg.minsuppress, hdl->lite, hdl->cfg.eng_gain, hdl->cfg.output16);
     }
 
     hdl->trigger = 0;
@@ -265,7 +290,8 @@ static int ans_ioc_update_parm(struct ns_node_hdl *hdl, int parm)
     }
 
     memcpy(&hdl->cfg, (u8 *)parm, sizeof(hdl->cfg));
-    if (hdl->ns) {
+    /*精简版需要屏蔽掉完整版的config指令*/
+    if (hdl->ns && (!hdl->lite)) {
         /*设置工具配置的降噪效果*/
         float aggressfactor = hdl->cfg.aggressfactor;
         audio_ns_config(hdl->ns, NS_CMD_AGGRESSFACTOR, 0, &aggressfactor);
@@ -327,11 +353,27 @@ REGISTER_STREAM_NODE_ADAPTER(ns_node_adapter) = {
     .ioctl      = ns_adapter_ioctl,
     .release    = ns_adapter_release,
     .hdl_size   = sizeof(struct ns_node_hdl),
+    .ability_bit_wide = 1,
+};
+
+REGISTER_STREAM_NODE_ADAPTER(ns_node_lite_adapter) = {
+    .name       = "ns_lite",
+    .uuid       = NODE_UUID_NOISE_SUPPRESSOR_LITE,
+    .bind       = ns_adapter_bind,
+    .ioctl      = ns_adapter_ioctl,
+    .release    = ns_adapter_release,
+    .hdl_size   = sizeof(struct ns_node_hdl),
+    .ability_bit_wide = 1,
 };
 
 //注册工具在线调试
 REGISTER_ONLINE_ADJUST_TARGET(noise_suppressor) = {
     .uuid = NODE_UUID_NOISE_SUPPRESSOR,
+};
+
+//注册工具在线调试
+REGISTER_ONLINE_ADJUST_TARGET(noise_suppressor_lite) = {
+    .uuid = NODE_UUID_NOISE_SUPPRESSOR_LITE,
 };
 
 #endif/* TCFG_NS_NODE_ENABLE*/

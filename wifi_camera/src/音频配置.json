@@ -3478,7 +3478,7 @@
        "label": "离线语音识别",
        "tag": "el-switch",
        "tagIcon": "switch",
-       "defaultValue": 1,
+       "defaultValue": 0,
        "span": 24,
        "showLabel": true,
        "labelWidth": 120,

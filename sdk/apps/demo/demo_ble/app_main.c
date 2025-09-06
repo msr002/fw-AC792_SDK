@@ -31,10 +31,6 @@ const struct task_info task_info_table[] = {
 
 static int main_key_event_handler(struct key_event *key)
 {
-#if CONFIG_BLE_MESH_ENABLE
-    extern void input_key_handler(u8 key_status, u8 key_number);
-    input_key_handler(key->action, key->value);
-#endif
     return false;
 }
 

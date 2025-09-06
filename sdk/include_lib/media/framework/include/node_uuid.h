@@ -46,13 +46,17 @@
 #define NODE_UUID_CVP_DMS_AWN_DNS               0XF0C3
 #define NODE_UUID_CVP_DEVELOP		0X76EF
 #define NODE_UUID_AI_TX		      	0xDFDA
+#define NODE_UUID_AI_RX		      	0xDF98
 #define NODE_UUID_NOISE_SUPPRESSOR 	0x3BC9
+#define NODE_UUID_NOISE_SUPPRESSOR_LITE 0XFFF7
 #define NODE_UUID_SURROUND_DEMO		0x3F20
 #define NODE_UUID_AUTOMUTE          0X86B9
 #define NODE_UUID_LINEIN            0X0624
 #define NODE_UUID_SPDIF             0XFB3B
 #define NODE_UUID_PC_SPK            0XD186
+#define NODE_UUID_USB_HOST_SPK      0X3CB9
 #define NODE_UUID_PC_MIC            0XB711
+#define NODE_UUID_USB_HOST_MIC      0X2244
 #define NODE_UUID_MUSIC             0x6FEC
 #define NODE_UUID_NET_FILE          0xC795
 #define NODE_UUID_PDM_MIC	        0XA09F
@@ -149,6 +153,7 @@
 #define NODE_UUID_PINGPONG_PCM_DELAY       0xF936//pingpong延时
 #define NODE_UUID_THREE_D                  0x8c21 //three d
 #define NODE_UUID_LLNS                     0x9FE //低延时降噪
+#define NODE_UUID_LLNS_DNS                 0x1CA2 //低延时降噪(神经网络)
 #define NODE_UUID_FADE                     0x1BF5//淡入
 
 #define NODE_UUID_SOURCE_DEV0              0x8FC4//自定义源节点0
@@ -205,5 +210,7 @@
 #define NODE_UUID_LHDC_X                   0x65C5//LHDC-X空间音效
 #define NODE_UUID_VIRTUAL_BASS_PRO         0x02E6//虚拟低音pro算法内部集成，封装节点换成普通节点
 #define NODE_UUID_VOCAL_TRACK_SEPARATION_6TO2  0xB816//声道拆分6转2
+#define NODE_UUID_VOCAL_TRACK_SEPARATION_8TO2  0x3198//声道拆分8转2
+#define NODE_UUID_NF_SUPPRESSOR            0x9F3F
 
 #endif

@@ -64,7 +64,7 @@ void lv_jl_extra_init(void)
 #if TCFG_SD1_ENABLE && (TCFG_SD1_DAT_WIDTH < 4 || TCFG_SD1_CLK < 48000000)
     LV_LOG_WARN("SD1 card performance is not configured to the optimal level!!!");
 #endif
-    lv_ffmpeg_init(LV_USE_JLFFMPEG_BUF_NUM);
+    lv_ffmpeg_init(LV_USE_JLFFMPEG_BUF_NUM, LVGL_Q_USER_TYPE_FFMPEG, UI_MSG_RPC_FUNC);
 #endif
 
 #endif

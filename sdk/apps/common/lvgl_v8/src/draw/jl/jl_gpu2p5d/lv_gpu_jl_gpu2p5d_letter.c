@@ -191,7 +191,11 @@ void LV_ATTRIBUTE_FAST_MEM lv_draw_jl_gpu2p5d_letter(lv_draw_ctx_t *draw_ctx, co
     if (!is_frame_buf) {
         //针对canvas的处理,判断canvas的buf是否带透明度
         if (lv_jl_gpu2p5d_check_canvas_buf_format(draw_ctx) == LV_IMG_CF_TRUE_COLOR) {
+#if LV_COLOR_DEPTH_EXTEN == 24
+            jlvg_dest_cf = VGHW_FORMAT_RGB565;
+#else
             jlvg_dest_cf = LV_GPU_COLOR_FORMAT;
+#endif
             bytes_per_pixel = sizeof(lv_color_t);
 
             if (gpos.x < rel_clip_area.x1) {

@@ -54,6 +54,13 @@ static void bt_check_enter_sniff(void *p)
 {
 #if TCFG_BT_SNIFF_ENABLE
 
+#if TCFG_USER_EMITTER_ENABLE
+    u8 get_a2dp_source_open_flag(void);
+    if (get_a2dp_source_open_flag()) {       // 如果蓝牙发射a2dp_tx模块开启则不进入SNIFF
+        return;
+    }
+#endif
+
 #if (RCSP_ADV_EN)
     if (get_ble_adv_modify() || get_ble_adv_notify()) {
         return;

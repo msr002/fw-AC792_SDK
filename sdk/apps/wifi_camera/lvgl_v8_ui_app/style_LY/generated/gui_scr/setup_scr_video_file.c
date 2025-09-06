@@ -19,6 +19,9 @@ lv_obj_t *setup_scr_video_file(lv_ui *ui)
     lv_ui_video_file *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_FILE);
     if (ui_scr == NULL) {
         ui_scr = lv_mem_alloc(sizeof(lv_ui_video_file));
+        if (ui_scr == NULL) {
+            return NULL;
+        }
         memset(ui_scr, 0, sizeof(lv_ui_video_file));
         ui->video_file = ui_scr;
     }
@@ -176,8 +179,7 @@ lv_obj_t *setup_scr_video_file(lv_ui *ui)
     lv_obj_set_pos(ui_scr->video_file_view_del, 0, 0);
     lv_obj_set_size(ui_scr->video_file_view_del, 800, 43);
     lv_obj_set_scrollbar_mode(ui_scr->video_file_view_del, LV_SCROLLBAR_MODE_OFF);
-    lv_obj_add_flag(ui_scr->video_file_view_del, LV_OBJ_FLAG_EVENT_BUBBLE);
-    lv_obj_add_flag(ui_scr->video_file_view_del, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
+    lv_obj_add_flag(ui_scr->video_file_view_del, LV_OBJ_FLAG_EVENT_BUBBLE | LV_OBJ_FLAG_SCROLL_ON_FOCUS);
     lv_group_add_obj(def_group, ui_scr->video_file_view_del);
     ui_style_set(ui_scr->video_file_view_del, GUI_CTRL_CONT);
 
@@ -208,8 +210,7 @@ lv_obj_t *setup_scr_video_file(lv_ui *ui)
     lv_obj_set_pos(ui_scr->video_file_view_pro, 0, 45);
     lv_obj_set_size(ui_scr->video_file_view_pro, 800, 43);
     lv_obj_set_scrollbar_mode(ui_scr->video_file_view_pro, LV_SCROLLBAR_MODE_OFF);
-    lv_obj_add_flag(ui_scr->video_file_view_pro, LV_OBJ_FLAG_EVENT_BUBBLE);
-    lv_obj_add_flag(ui_scr->video_file_view_pro, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
+    lv_obj_add_flag(ui_scr->video_file_view_pro, LV_OBJ_FLAG_EVENT_BUBBLE | LV_OBJ_FLAG_SCROLL_ON_FOCUS);
     lv_group_add_obj(def_group, ui_scr->video_file_view_pro);
     ui_style_set(ui_scr->video_file_view_pro, GUI_CTRL_CONT);
 
@@ -360,15 +361,14 @@ lv_obj_t *setup_scr_video_file(lv_ui *ui)
     lv_obj_set_pos(ui_scr->video_file_submenu_btn_1, 83, 44);
     lv_obj_set_size(ui_scr->video_file_submenu_btn_1, 438, 37);
     lv_obj_set_scrollbar_mode(ui_scr->video_file_submenu_btn_1, LV_SCROLLBAR_MODE_OFF);
-    lv_obj_add_flag(ui_scr->video_file_submenu_btn_1, LV_OBJ_FLAG_EVENT_BUBBLE);
-    lv_obj_add_flag(ui_scr->video_file_submenu_btn_1, LV_OBJ_FLAG_CLICKABLE);
+    lv_obj_add_flag(ui_scr->video_file_submenu_btn_1, LV_OBJ_FLAG_EVENT_BUBBLE | LV_OBJ_FLAG_CLICKABLE);
     ui_style_set(ui_scr->video_file_submenu_btn_1, GUI_CTRL_BUTTON);
 
     //Set style for video_file_submenu_btn_1. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
     lv_obj_set_style_bg_opa(ui_scr->video_file_submenu_btn_1, 203, LV_PART_MAIN | LV_STATE_DEFAULT);
     ui_scr->video_file_submenu_btn_1_label = lv_label_create(ui_scr->video_file_submenu_btn_1);
     lv_label_set_text(ui_scr->video_file_submenu_btn_1_label, "button1");
-    lv_obj_set_style_pad_all(ui_scr->video_file_submenu_btn_1, 0, LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_all(ui_scr->video_file_submenu_btn_1, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_align(ui_scr->video_file_submenu_btn_1_label, LV_ALIGN_CENTER, 0, 0);
 
     //Write codes video_file_submenu_btn_2
@@ -376,15 +376,14 @@ lv_obj_t *setup_scr_video_file(lv_ui *ui)
     lv_obj_set_pos(ui_scr->video_file_submenu_btn_2, 83, 111);
     lv_obj_set_size(ui_scr->video_file_submenu_btn_2, 438, 37);
     lv_obj_set_scrollbar_mode(ui_scr->video_file_submenu_btn_2, LV_SCROLLBAR_MODE_OFF);
-    lv_obj_add_flag(ui_scr->video_file_submenu_btn_2, LV_OBJ_FLAG_EVENT_BUBBLE);
-    lv_obj_add_flag(ui_scr->video_file_submenu_btn_2, LV_OBJ_FLAG_CLICKABLE);
+    lv_obj_add_flag(ui_scr->video_file_submenu_btn_2, LV_OBJ_FLAG_EVENT_BUBBLE | LV_OBJ_FLAG_CLICKABLE);
     ui_style_set(ui_scr->video_file_submenu_btn_2, GUI_CTRL_BUTTON);
 
     //Set style for video_file_submenu_btn_2. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
     lv_obj_set_style_bg_opa(ui_scr->video_file_submenu_btn_2, 215, LV_PART_MAIN | LV_STATE_DEFAULT);
     ui_scr->video_file_submenu_btn_2_label = lv_label_create(ui_scr->video_file_submenu_btn_2);
     lv_label_set_text(ui_scr->video_file_submenu_btn_2_label, "button2");
-    lv_obj_set_style_pad_all(ui_scr->video_file_submenu_btn_2, 0, LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_all(ui_scr->video_file_submenu_btn_2, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_align(ui_scr->video_file_submenu_btn_2_label, LV_ALIGN_CENTER, 0, 0);
 
     //Write codes video_file_submenu_btn_3
@@ -392,15 +391,14 @@ lv_obj_t *setup_scr_video_file(lv_ui *ui)
     lv_obj_set_pos(ui_scr->video_file_submenu_btn_3, 83, 171);
     lv_obj_set_size(ui_scr->video_file_submenu_btn_3, 438, 37);
     lv_obj_set_scrollbar_mode(ui_scr->video_file_submenu_btn_3, LV_SCROLLBAR_MODE_OFF);
-    lv_obj_add_flag(ui_scr->video_file_submenu_btn_3, LV_OBJ_FLAG_EVENT_BUBBLE);
-    lv_obj_add_flag(ui_scr->video_file_submenu_btn_3, LV_OBJ_FLAG_CLICKABLE);
+    lv_obj_add_flag(ui_scr->video_file_submenu_btn_3, LV_OBJ_FLAG_EVENT_BUBBLE | LV_OBJ_FLAG_CLICKABLE);
     ui_style_set(ui_scr->video_file_submenu_btn_3, GUI_CTRL_BUTTON);
 
     //Set style for video_file_submenu_btn_3. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
     lv_obj_set_style_bg_opa(ui_scr->video_file_submenu_btn_3, 205, LV_PART_MAIN | LV_STATE_DEFAULT);
     ui_scr->video_file_submenu_btn_3_label = lv_label_create(ui_scr->video_file_submenu_btn_3);
     lv_label_set_text(ui_scr->video_file_submenu_btn_3_label, "button3");
-    lv_obj_set_style_pad_all(ui_scr->video_file_submenu_btn_3, 0, LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_all(ui_scr->video_file_submenu_btn_3, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_align(ui_scr->video_file_submenu_btn_3_label, LV_ALIGN_CENTER, 0, 0);
 
     //Write codes video_file_submenu_btn_4
@@ -408,15 +406,14 @@ lv_obj_t *setup_scr_video_file(lv_ui *ui)
     lv_obj_set_pos(ui_scr->video_file_submenu_btn_4, 83, 233);
     lv_obj_set_size(ui_scr->video_file_submenu_btn_4, 438, 37);
     lv_obj_set_scrollbar_mode(ui_scr->video_file_submenu_btn_4, LV_SCROLLBAR_MODE_OFF);
-    lv_obj_add_flag(ui_scr->video_file_submenu_btn_4, LV_OBJ_FLAG_EVENT_BUBBLE);
-    lv_obj_add_flag(ui_scr->video_file_submenu_btn_4, LV_OBJ_FLAG_CLICKABLE);
+    lv_obj_add_flag(ui_scr->video_file_submenu_btn_4, LV_OBJ_FLAG_EVENT_BUBBLE | LV_OBJ_FLAG_CLICKABLE);
     ui_style_set(ui_scr->video_file_submenu_btn_4, GUI_CTRL_BUTTON);
 
     //Set style for video_file_submenu_btn_4. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
     lv_obj_set_style_bg_opa(ui_scr->video_file_submenu_btn_4, 205, LV_PART_MAIN | LV_STATE_DEFAULT);
     ui_scr->video_file_submenu_btn_4_label = lv_label_create(ui_scr->video_file_submenu_btn_4);
     lv_label_set_text(ui_scr->video_file_submenu_btn_4_label, "button4");
-    lv_obj_set_style_pad_all(ui_scr->video_file_submenu_btn_4, 0, LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_all(ui_scr->video_file_submenu_btn_4, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_align(ui_scr->video_file_submenu_btn_4_label, LV_ALIGN_CENTER, 0, 0);
 
     //Write codes video_file_lbl_submenu_warning
@@ -435,7 +432,7 @@ lv_obj_t *setup_scr_video_file(lv_ui *ui)
 
     lv_obj_update_layout(ui_scr->video_file);
     ui_scr->video_file_del = false;
-    i18n_refresh_texts("video_file");
+    i18n_refresh_texts(GUI_SCREEN_VIDEO_FILE);
 
     //Init events for screen
     events_init_video_file(ui);

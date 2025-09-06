@@ -53,18 +53,6 @@ Notes:以下为芯片规格定义，不可修改，仅供引用
 //#define DAC_OUTPUT_DUAL_LR_DIFF            (6)   // 未使用
 
 
-// TCFG_AUDIO_DAC_MODE
-#define DAC_MODE_SINGLE                    (0)
-#define DAC_MODE_DIFF                      (1)
-#define DAC_MODE_VCMO                      (3)
-
-/************************************
-             dac性能模式
-************************************/
-// TCFG_DAC_PERFORMANCE_MODE
-#define	DAC_MODE_HIGH_PERFORMANCE          (0)
-#define	DAC_MODE_LOW_POWER		           (1)
-
 /************************************
              dac 供电模式
 ************************************/
@@ -109,11 +97,6 @@ Notes:以下为芯片规格定义，不可修改，仅供引用
 #define DACR32_DEFAULT		                8192
 #define DA_SYNC_INPUT_BITS                  20
 #define DA_SYNC_MAX_NUM                     (1 << DA_SYNC_INPUT_BITS)
-
-#define DAC_ANALOG_OPEN_PREPARE             (1)
-#define DAC_ANALOG_OPEN_FINISH              (2)
-#define DAC_ANALOG_CLOSE_PREPARE            (3)
-#define DAC_ANALOG_CLOSE_FINISH             (4)
 
 #define DAC_TRIM_SEL_FL_P                   0
 #define DAC_TRIM_SEL_FL_N                   0
@@ -162,6 +145,7 @@ struct dac_platform_data {
     u8 power_level;				// 电源挡位
     u8 pa_mute_en;              /*!< 功放MUTE开关 */
     u8 pa_mute_value;           /*!< MUTE电平值 0:低电平 1:高电平 */
+    u16 pa_unmute_delay_ms;     /*!< 功放解MUTE延迟 */
     u16 pa_mute_delay_ms;       /*!< 功放MUTE延迟 */
     int pa_mute_port;           /*!< 功放MUTE IO */
 };

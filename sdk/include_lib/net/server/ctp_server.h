@@ -113,6 +113,7 @@ struct ctp_map_entry {
     const char *ctp_command;
     int (*get)(void *, char *);
     int (*put)(void *, char *);
+    int (*notify)(void *, char *);
     u8 sync; //防止APP瞬发多个CTP命令
 };
 

@@ -8,6 +8,9 @@
  *********************/
 #include "lv_math.h"
 #include "asm/cpu.h"
+#if LV_MATH_USE_HW
+#include "math_fast_function.h"
+#endif
 
 /*********************
  *      DEFINES
@@ -24,6 +27,7 @@
 /**********************
  *  STATIC VARIABLES
  **********************/
+#if !LV_MATH_USE_HW_SIN
 static const int16_t sin0_90_table[] = {
     0,     572,   1144,  1715,  2286,  2856,  3425,  3993,  4560,  5126,  5690,  6252,  6813,  7371,  7927,  8481,
     9032,  9580,  10126, 10668, 11207, 11743, 12275, 12803, 13328, 13848, 14364, 14876, 15383, 15886, 16383, 16876,
@@ -32,6 +36,7 @@ static const int16_t sin0_90_table[] = {
     29451, 29697, 29934, 30162, 30381, 30591, 30791, 30982, 31163, 31335, 31498, 31650, 31794, 31927, 32051, 32165,
     32269, 32364, 32448, 32523, 32587, 32642, 32687, 32722, 32747, 32762, 32767
 };
+#endif
 
 /**********************
  *      MACROS
@@ -48,6 +53,7 @@ static const int16_t sin0_90_table[] = {
  */
 int16_t LV_ATTRIBUTE_FAST_MEM lv_trigo_sin(int16_t angle)
 {
+#if !LV_MATH_USE_HW_SIN
     int16_t ret = 0;
     angle       = angle % 360;
 
@@ -67,8 +73,47 @@ int16_t LV_ATTRIBUTE_FAST_MEM lv_trigo_sin(int16_t angle)
         angle = 360 - angle;
         ret   = -sin0_90_table[angle];
     }
-
     return ret;
+#else
+    // 规范化角度
+    angle = angle % 360;
+    if (angle < 0) {
+        angle += 360;
+    }
+
+    // 特殊角度优化
+    if (angle == 0) {
+        return 0;
+    }
+    if (angle == 90) {
+        return 32767;
+    }
+    if (angle == 180) {
+        return 0;
+    }
+    if (angle == 270) {
+        return -32767;
+    }
+
+    // 转换为弧度（定点数）
+    long angle_rad_fixed = (long)(angle * DEG_TO_RAD_FACTOR);
+
+    // 调用硬件加速
+    long sin_fixed = sin_fix(angle_rad_fixed);
+
+    // 转换为 LVGL 格式
+    int32_t result = ((int64_t)sin_fixed * 32767) >> 29;
+
+    // 确保在范围内
+    if (result > 32767) {
+        return 32767;
+    }
+    if (result < -32767) {
+        return -32767;
+    }
+
+    return (int16_t)result;
+#endif
 }
 
 /**
@@ -108,6 +153,8 @@ uint32_t lv_bezier3(uint32_t t, uint32_t u0, uint32_t u1, uint32_t u2, uint32_t 
  */
 void LV_ATTRIBUTE_FAST_MEM lv_sqrt(uint32_t x, lv_sqrt_res_t *q, uint32_t mask)
 {
+#if !LV_MATH_USE_HW_SQRT
+
     x = x << 8; /*To get 4 bit precision. (sqrt(256) = 16 = 4 bit)*/
 
     uint32_t root = 0;
@@ -123,6 +170,38 @@ void LV_ATTRIBUTE_FAST_MEM lv_sqrt(uint32_t x, lv_sqrt_res_t *q, uint32_t mask)
 
     q->i = root >> 4;
     q->f = (root & 0xf) << 4;
+#else
+    if (x == 0) {
+        q->i = 0;
+        q->f = 0;
+        return;
+    }
+
+    struct data_q_struct input = {
+        .data = (long)x,  // 输入值
+        .q = 0            // 输入为整数（Q0格式）
+    };
+
+    struct data_q_struct result = root_fix(input);
+
+    const int RESULT_Q = 16;
+    long fixed_result = result.data;
+
+    q->i = (uint32_t)(fixed_result >> RESULT_Q);          // 整数部分
+    q->f = (uint32_t)(fixed_result & 0xFFFF); // 小数部分
+
+    if (mask != 0) {
+        // 应用 mask 到结果
+        q->f &= mask;
+    }
+    // 精度补偿
+    if (q->f > 0 && (uint32_t)q->i * q->i > x) {
+        q->f = 0;
+        if (q->i > 0) {
+            q->i--;
+        }
+    }
+#endif
 }
 
 /**
@@ -143,6 +222,7 @@ uint16_t lv_atan2(int x, int y)
     // Any values of X and Y are usable including negative values provided
     // they are between -1456 and 1456 so the 16bit multiply does not overflow.
 
+#if !LV_MATH_USE_HW_ARCTAN
     unsigned char negflag;
     unsigned char tempdegree;
     unsigned char comp;
@@ -222,6 +302,35 @@ uint16_t lv_atan2(int x, int y)
         }
     }
     return degree;
+#else
+    // 处理特殊点
+    if (x == 0 && y == 0) {
+        return 0;
+    }
+    if (x == 0) {
+        return (y > 0) ? 90 : 270;
+    }
+    if (y == 0) {
+        return (x > 0) ? 0 : 180;
+    }
+
+    // 调用硬件加速函数
+    struct data_q_struct result = angle_fix((long)x, (long)y);
+
+    // 提取角度值
+    const int RESULT_Q = 16;
+    long fixed_result = result.data;
+
+    // 转换为整数角度 (0-360)
+    uint32_t full_angle = (uint32_t)(fixed_result >> RESULT_Q);
+
+    // 规范化到 0-360 范围
+    if (full_angle >= 360) {
+        full_angle %= 360;
+    }
+
+    return (uint16_t)full_angle;
+#endif
 }
 
 /**

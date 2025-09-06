@@ -190,17 +190,40 @@ static void ms_to_time(u8 *info, u16 len)
     log_info("music_time: %02d : %02d", time / 1000 / 60, (time % 60000) / 1000);
 }
 
+static void lv_example_lyrics_input_dynamic(char *buf)
+{
+    if (buf == NULL) {
+        return;
+    }
+    extern void lv_example_lyrics_text_input(char *new_text);
+    lv_example_lyrics_text_input(buf);
+
+    free(buf);
+}
+
 static void user_get_bt_music_info(u8 type, u32 time, u8 *info, u16 len)
 {
     //profile define type:
     //1-title 2-artist name 3-album names 4-track number
     //5-total number of tracks 6-genre  7-playing time
     //JL define 0x10-total time , 0x11 current play position
-    u8 min, sec;
+    u8 min, sec, ret;
     //printf("type %d\n", type );
     if ((info != NULL) && (len != 0) && (type != 7)) {
         if (type == 1) {
-            log_info("title: %s", info);
+            char *title_buf = (char *)malloc(len + 1);
+            if (!title_buf) {
+                log_error("malloc failed for music info buffer");
+                return;
+            }
+            memcpy(title_buf, info, len);
+            title_buf[len] = '\0';
+            log_info("title: %s", title_buf);
+            ret = lvgl_rpc_post_func(lv_example_lyrics_input_dynamic, 1, title_buf);
+            if (ret == -1) {
+                log_info("lyrics post fail");
+                free(title_buf);
+            }
         } else if (type == 2) {
             log_info("artist: %s", info);
         } else if (type == 3) {

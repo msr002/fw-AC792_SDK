@@ -32,6 +32,18 @@ typedef enum {
     VDDIO_KEEP_TYPE_PG,             //保持vddiom不关闭
 } vddio_keep_t;
 
+//request_lowpower_process
+typedef enum {
+    LP_REQUEST_SUCC,             //
+    LP_WAIT_OS_RESPOND_TIMEOUT,  //
+    LP_CHECK_API,                //
+    LP_CHECK_CONFIG,             //
+    LP_CLOCK_INIT,               //
+    LP_START,                    //
+    LP_PROCESS_FINISH,           //
+    LP_REQUEST_FAIL = 0xFF,      //
+} lp_req_proc_t;
+
 //power_control_cmd
 typedef enum {
     PCONTROL_POWER_DRIVER_RESERVE = 0,
@@ -144,7 +156,7 @@ void low_power_enable(void);
 
 void low_power_disable(void);
 
-void low_power_request_customize(u32 sleep_time_ms);
+void low_power_request_customize(void);
 
 s32 low_power_trace_drift(u32 usec);
 
@@ -153,6 +165,23 @@ void low_power_reset_osc_type(u8 type);
 u8 low_power_get_default_osc_type(void);
 
 u8 low_power_get_osc_type(void);
+
+/**
+ * @brief low_power_user_request_ext 主动请求pdown接口
+ *
+ * @Params time_ms    请求time_ms时间的低功耗. 为-1时无定时唤醒.
+ * @Params need_block 是否需要阻塞等待OS响应请求 0-不阻塞 1-阻塞
+ * @Params timeout    等待OS响应的timeout时间. 实际等待时间约timeout * 100ms.
+ *
+ * @return LP_REQUEST_FAIL             - 输入参数错误
+ *         LP_REQUEST_SUCC             - 请求完成
+ *         LP_WAIT_OS_RESPOND_TIMEOUT  - 条件不符，OS无法响应请求
+ *         LP_***                      - 低功耗流程中的步骤
+ */
+lp_req_proc_t low_power_user_request_ext(u32 time_ms, u8 need_block, u8 timeout);
+
+
+
 
 //
 //

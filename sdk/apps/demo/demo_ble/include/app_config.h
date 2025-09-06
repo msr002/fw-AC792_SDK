@@ -14,32 +14,44 @@
 //*********************************************************************************//
 #ifdef CONFIG_BT_ENABLE
 
-#define TCFG_BT_MODE                                BT_NORMAL   //BT_BQB
+#define TCFG_BT_MODE                            BT_NORMAL   //BT_BQB
 
-#define TCFG_USER_BLE_ENABLE                        1   //BLE功能使能
-#define TCFG_USER_BT_CLASSIC_ENABLE                 0   //经典蓝牙功能
+#define TCFG_USER_BLE_ENABLE                    1   //BLE功能使能
+#define TCFG_USER_BT_CLASSIC_ENABLE             0   //经典蓝牙功能
+#define TCFG_POWER_ON_ENABLE_BLE                0   //开机自动打开BLE
 
-#if TCFG_USER_BLE_ENABLE
-//BLE DEMO选择
-#define TCFG_BLE_HID_EN                             0   //从机 hid
-#define TCFG_TRANS_DATA_EN                          1   //从机 传输数据
-#define TCFG_BLE_MASTER_CENTRAL_EN                  0   //主机 client角色
-#define TCFG_TRANS_MULTI_BLE_EN                     0   //多机通讯
-#define TCFG_BLE_MESH_ENABLE                        0   //mesh测试demo
-#define TCFG_NONCONN_24G_EN                         0   //2.4g加密通讯
+#define TCFG_TRANS_MULTI_BLE_SLAVE_NUMS         1
+#define TCFG_TRANS_MULTI_BLE_MASTER_NUMS        2
 
-#if (TCFG_TRANS_MULTI_BLE_EN + TCFG_BLE_HID_EN + TCFG_BLE_MASTER_CENTRAL_EN + TCFG_TRANS_DATA_EN + TCFG_BLE_MESH_ENABLE + TCFG_NONCONN_24G_EN > 1)
-#error "they can not enable at the same time,just select one!!!"
-#endif
+#define RCSP_MODE_EN                            (1 << 0)
+#define TRANS_DATA_EN                           (1 << 1)
+#define LL_SYNC_EN                              (1 << 2)
+#define TUYA_DEMO_EN                            (1 << 3)
+#define ANCS_CLIENT_EN                          (1 << 4)
+#define GFPS_EN                                 (1 << 5)
+#define REALME_EN                               (1 << 6)
+#define TME_EN                                  (1 << 7)
+#define DMA_EN                                  (1 << 8)
+#define GMA_EN                                  (1 << 9)
+#define MMA_EN                                  (1 << 10)
+#define FMNA_EN                                 (1 << 11)
+#define SWIFT_PAIR_EN                           (1 << 12)
+#define LE_AUDIO_CIS_RX_EN                      (1 << 13)
+#define LE_AUDIO_CIS_TX_EN                      (1 << 14)
+#define LE_AUDIO_BIS_RX_EN                      (1 << 15)
+#define LE_AUDIO_BIS_TX_EN                      (1 << 16)
+#define HONOR_EN                                (1 << 17)
+#define ONLINE_DEBUG_EN                         (1 << 18)
+#define CUSTOM_DEMO_EN                          (1 << 19)   // 第三方协议的demo，用于示例客户开发自定义协议
+#define MULTI_BOX_ADV_EN                        (1 << 20)
+#define MIJIA_EN                                (1 << 21)
+#define CLIENT_EN                               (1 << 27)
+#define DUEROS_EN                               (1 << 28)
+#define NET_CFG_EN                              (1 << 29)
+#define LE_HOGP_EN                              (1 << 30)
+#define ALIPAY_EN                               (1 << 31)
 
-#define TCFG_BLE_SECURITY_EN                        1   //配对加密使能
-
-#if TCFG_TRANS_MULTI_BLE_EN
-#define TCFG_TRANS_MULTI_BLE_SLAVE_NUMS             1
-#define TCFG_TRANS_MULTI_BLE_MASTER_NUMS            2
-#endif
-
-#endif
+#define THIRD_PARTY_PROTOCOLS_SEL               CUSTOM_DEMO_EN
 
 #endif
 

@@ -19,31 +19,22 @@ lv_obj_t *setup_scr_sys_popwin(lv_ui *ui)
     lv_ui_sys_popwin *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_SYS_POPWIN);
     if (ui_scr == NULL) {
         ui_scr = lv_mem_alloc(sizeof(lv_ui_sys_popwin));
+        if (ui_scr == NULL) {
+            return NULL;
+        }
         memset(ui_scr, 0, sizeof(lv_ui_sys_popwin));
         ui->sys_popwin = ui_scr;
     }
-    if (lv_obj_is_valid(ui_scr->sys_popwin)) {
-        lv_obj_del(ui_scr->sys_popwin);
-    }
 
     //Write codes sys_popwin
-    ui_scr->sys_popwin = lv_obj_create(lv_layer_top());
-    lv_group_t *def_group = lv_group_get_default();
-    lv_obj_set_size(ui_scr->sys_popwin, 800, 480);
+    ui_scr->sys_popwin = lv_obj_create(NULL);
     lv_obj_set_scrollbar_mode(ui_scr->sys_popwin, LV_SCROLLBAR_MODE_OFF);
     lv_obj_clear_flag(ui_scr->sys_popwin, LV_OBJ_FLAG_CLICKABLE);
     ui_style_set(ui_scr->sys_popwin, GUI_CTRL_SCR);
 
     //Set style for sys_popwin. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
     lv_obj_set_style_bg_color(ui_scr->sys_popwin, lv_color_make(0xff, 0xff, 0xff), LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_border_width(ui_scr->sys_popwin, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_border_opa(ui_scr->sys_popwin, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_pad_left(ui_scr->sys_popwin, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_pad_right(ui_scr->sys_popwin, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_pad_top(ui_scr->sys_popwin, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_pad_bottom(ui_scr->sys_popwin, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_pad_row(ui_scr->sys_popwin, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_pad_column(ui_scr->sys_popwin, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     //Write codes sys_popwin_view_1
     ui_scr->sys_popwin_view_1 = lv_obj_create(ui_scr->sys_popwin);
@@ -97,7 +88,7 @@ lv_obj_t *setup_scr_sys_popwin(lv_ui *ui)
     //Delete extra default style for sys_popwin_btn_1
     lv_obj_remove_style(ui_scr->sys_popwin_btn_1, &gui_btn_main_focus_key_style, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
     ui_scr->sys_popwin_btn_1_label = lv_label_create(ui_scr->sys_popwin_btn_1);
-    lv_obj_set_style_pad_all(ui_scr->sys_popwin_btn_1, 0, LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_all(ui_scr->sys_popwin_btn_1, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_align(ui_scr->sys_popwin_btn_1_label, LV_ALIGN_CENTER, 0, 0);
 
     //Write codes sys_popwin_btn_2
@@ -120,12 +111,12 @@ lv_obj_t *setup_scr_sys_popwin(lv_ui *ui)
     //Delete extra default style for sys_popwin_btn_2
     lv_obj_remove_style(ui_scr->sys_popwin_btn_2, &gui_btn_main_focus_key_style, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
     ui_scr->sys_popwin_btn_2_label = lv_label_create(ui_scr->sys_popwin_btn_2);
-    lv_obj_set_style_pad_all(ui_scr->sys_popwin_btn_2, 0, LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_all(ui_scr->sys_popwin_btn_2, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_align(ui_scr->sys_popwin_btn_2_label, LV_ALIGN_CENTER, 0, 0);
 
     lv_obj_update_layout(ui_scr->sys_popwin);
     ui_scr->sys_popwin_del = false;
-    i18n_refresh_texts("sys_popwin");
+    i18n_refresh_texts(GUI_SCREEN_SYS_POPWIN);
 
     //Init events for screen
     events_init_sys_popwin(ui);

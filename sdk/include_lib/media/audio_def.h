@@ -15,10 +15,13 @@
  *						Audio Common Definitions
  *******************************************************************
  */
-#define INT16MAX_P                      (32767)     //16bit正最大值
-#define INT16MAX_N                      (-32768)    //16bit负最大值
-#define INT24MAX_P                      (8388607)   //24bit正最大值
-#define INT24MAX_N                      (-8388608)  //24bit负最大值
+//不同位宽数据类型对应的最大最小值定义
+#define DATA_INT16_MAX                      (32767)         //16bit正最大值
+#define DATA_INT16_MIN                      (-32768)        //16bit负最大值
+#define DATA_INT24_MAX                      (8388607)       //24bit正最大值
+#define DATA_INT24_MIN                      (-8388608)      //24bit负最大值
+#define DATA_INT32_MAX                      (2147483647)    //32bit正最大值
+#define DATA_INT32_MIN                      (-2147483648)   //32bit负最大值
 
 
 /*
@@ -34,7 +37,6 @@
 #define APP_AUDIO_STATE_TWS_TONE            7
 #define APP_AUDIO_STATE_FLOW                8
 #define APP_AUDIO_CURRENT_STATE             9
-
 
 /*
  *******************************************************************
@@ -61,12 +63,28 @@
 #define DAC_CH_RL                          (1UL << 2)
 #define DAC_CH_RR                          (1UL << 3)
 
-#define DAC_UNMUTE                         (0)
-#define DAC_MUTE                           (1)
+#define DAC_UNMUTE                          (0)
+#define DAC_MUTE                            (1)
 
-#define DAC_NG_THRESHOLD_CLEAR             (1)  //BIT(0)：信号小于等于噪声门阈值，清0
-#define DAC_NG_THRESHOLD_MUTE              (5)  //BIT(0)|BIT(2)：信号小于等于噪声门阈值，清0并mute
-#define DAC_NG_SILENCE_MUTE                (2)  //BIT(1)：信号静音(全0)时候mute
+#define DAC_NG_THRESHOLD_CLEAR              (1) //BIT(0)：信号小于等于噪声门阈值，清0
+#define DAC_NG_THRESHOLD_MUTE               (5) //BIT(0)|BIT(2)：信号小于等于噪声门阈值，清0并mute
+#define DAC_NG_SILENCE_MUTE                 (2) //BIT(1)：信号静音(全0)时候mute
+#define DAC_NG_POST_ENABLE                  (1UL << 15) //BIT(15)：NoiseGate后处理使能
+
+//DAC输出模式定义
+#define DAC_MODE_SINGLE                     (0) //单端
+#define DAC_MODE_DIFF                       (1) //差分
+#define DAC_MODE_VCMO                       (3) //共模VCOMO
+
+//DAC性能模式定义
+#define DAC_MODE_HIGH_PERFORMANCE           (0)
+#define DAC_MODE_LOW_POWER                  (1)
+
+//DAC开关状态定义
+#define DAC_ANALOG_OPEN_PREPARE             (1) //DAC打开前，即准备打开
+#define DAC_ANALOG_OPEN_FINISH              (2) //DAC打开后，即打开完成
+#define DAC_ANALOG_CLOSE_PREPARE            (3) //DAC关闭前，即准备关闭
+#define DAC_ANALOG_CLOSE_FINISH             (4) //DAC关闭后，即关闭完成
 /*
  *******************************************************************
  *						Class-D Driver Definitions
@@ -195,6 +213,10 @@
 #define AUDIO_CODING_OGG          0x40000000
 #define AUDIO_CODING_LHDC         0x80000000
 #define AUDIO_CODING_LHDC_V5      0xA0000000
+#define AUDIO_CODING_MIDI_CTRL    0xB0000000
+#define AUDIO_CODING_ENGINE       0xC0000000
+#define AUDIO_CODING_STENC_OPUS   0xD0000000
+#define AUDIO_CODING_STENC_OGG    0xE0000000
 
 //#define AUDIO_CODING_STU_PICK     0x10000000
 //#define AUDIO_CODING_STU_APP      0x20000000

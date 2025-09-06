@@ -13,7 +13,7 @@
 #if (THIRD_PARTY_PROTOCOLS_SEL & SWIFT_PAIR_EN)
 #include "swift_pair_api.h"
 #endif
-#if (THIRD_PARTY_PROTOCOLS_SEL & MULTI_BOX_ADV_EN)
+#if (THIRD_PARTY_PROTOCOLS_SEL & MULTI_BOX_ADV_EN) || (THIRD_PARTY_PROTOCOLS_SEL & CLIENT_EN)
 #include "multi_box_adv/multi_box_adv.h"
 #endif
 
@@ -294,7 +294,7 @@ static void multi_protocol_loop_process(void *parm)
 
 static void multi_protocol_profile_init(void)
 {
-    log_info("multi_protocol_profile_init 0x%x %d %d", THIRD_PARTY_PROTOCOLS_SEL, TCFG_BT_SUPPORT_PROFILE_SPP, TCFG_USER_BLE_ENABLE);
+    log_info("multi_protocol_profile_init 0x%x %d", THIRD_PARTY_PROTOCOLS_SEL, TCFG_USER_BLE_ENABLE);
 
     // BLE/SPP 公共的状态回调
 
@@ -445,15 +445,8 @@ void multi_protocol_bt_init(void)
     mijia_all_init();
 #endif
 
-#if (THIRD_PARTY_PROTOCOLS_SEL & MULTI_BOX_ADV_EN)
-#ifndef MULTI_BOX_ADV_FILTER_ENABLE
+#if (THIRD_PARTY_PROTOCOLS_SEL & CLIENT_EN)
     multi_box_scan_all_init();
-#if (THIRD_PARTY_PROTOCOLS_SEL & ~MULTI_BOX_ADV_EN)
-    extern const int config_le_gatt_client_num;
-    extern const int config_le_hci_connection_num;
-    ASSERT(config_le_gatt_client_num >= 2 && config_le_hci_connection_num >= 2);
-#endif
-#endif
 #endif
 }
 

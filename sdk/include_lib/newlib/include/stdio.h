@@ -181,8 +181,8 @@ int	_EXFUN(fprintf, (FILE *__restrict, const char *__restrict, ...)
            _ATTRIBUTE((__format__(__printf__, 2, 3))));
 int	_EXFUN(fscanf, (FILE *__restrict, const char *__restrict, ...)
            _ATTRIBUTE((__format__(__scanf__, 2, 3))));
-int	_EXFUN(printf, (const char *__restrict, ...)
-           _ATTRIBUTE((__format__(__printf__, 1, 2))));
+// int	_EXFUN(printf, (const char *__restrict, ...)
+// _ATTRIBUTE((__format__(__printf__, 1, 2))));
 int	_EXFUN(scanf, (const char *__restrict, ...)
            _ATTRIBUTE((__format__(__scanf__, 1, 2))));
 int	_EXFUN(sscanf, (const char *__restrict, const char *__restrict, ...)
@@ -201,8 +201,8 @@ int	_EXFUN(getc, (FILE *));
 int	_EXFUN(getchar, (void));
 char   *_EXFUN(gets, (char *));
 int	_EXFUN(putc, (int, FILE *));
-int	_EXFUN(putchar, (int));
-int	_EXFUN(puts, (const char *));
+// int	_EXFUN(putchar, (int));
+// int	_EXFUN(puts, (const char *));
 int	_EXFUN(ungetc, (int, FILE *));
 size_t	_EXFUN(fread, (_PTR __restrict, size_t _size, size_t _n, FILE *__restrict));
 size_t	_EXFUN(fwrite, (const _PTR __restrict, size_t _size, size_t _n, FILE *));

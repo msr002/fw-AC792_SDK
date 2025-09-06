@@ -6,45 +6,40 @@
 
 static lv_ll_t subs_ll;
 
+#if LV_USE_GUIBUILDER_SIMULATOR
+_gui_msg_entry_t gui_model_update_msg_entry_table[] = {
+    { GUI_MODEL_UPDATE_MSG_ID_UPDATE_TIPS, gui_model_update_msg_update_tips_cb, VALUE_STRING },
+    { GUI_MODEL_UPDATE_MSG_ID_UPDATE_PROCE, gui_model_update_msg_update_proce_cb, VALUE_INT },
+};
+#endif
+
 
 GUI_WEAK int gui_model_update_msg_update_tips_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type)
 {
     char update_tips_init_var[] = "update_tips";
     static bool update_tips_is_init = false;
     static char *update_tips_var = NULL;
-    if (update_tips_is_init == false) {
-        update_tips_var = lv_mem_alloc(strlen(update_tips_init_var) + 1);
-        strcpy(update_tips_var, update_tips_init_var);
-        update_tips_is_init = true;
-    }
-    if (access == GUI_MSG_ACCESS_SET) {
-        lv_mem_free(update_tips_var);
-        update_tips_var = lv_mem_alloc(strlen(data->value_string) + 1);
-        strcpy(update_tips_var, data->value_string);
-    }
-    data->value_string = update_tips_var;
+    _gui_msg_char_array_cb(&update_tips_var, update_tips_init_var, &update_tips_is_init, access, data);
     return 0;
 }
 GUI_WEAK int gui_model_update_msg_update_proce_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type)
 {
     static int32_t update_proce_var = 1;
-    if (access == GUI_MSG_ACCESS_SET) {
-        update_proce_var = data->value_int;
-    }
-    data->value_int = update_proce_var;
+    _gui_msg_int32_cb(&update_proce_var, access, data);
     return 0;
 }
 
 void gui_model_update_msg_init(lv_ui *ui)
 {
-    gui_msg_sub_t *sub;
-    sub = gui_msg_create_sub(GUI_MODEL_UPDATE_MSG_ID_UPDATE_TIPS);
-    if (sub != NULL) {
-        lv_subject_init_pointer(sub->subject, &guider_msg_data);
-    }
-    sub = gui_msg_create_sub(GUI_MODEL_UPDATE_MSG_ID_UPDATE_PROCE);
-    if (sub != NULL) {
-        lv_subject_init_pointer(sub->subject, &guider_msg_data);
+    int32_t ids[2] = {
+        GUI_MODEL_UPDATE_MSG_ID_UPDATE_TIPS,
+        GUI_MODEL_UPDATE_MSG_ID_UPDATE_PROCE,
+    };
+    for (int i = 0; i < 2; i++) {
+        gui_msg_sub_t *sub = gui_msg_create_sub(ids[i]);
+        if (sub != NULL) {
+            lv_subject_init_pointer(sub->subject, &guider_msg_data);
+        }
     }
 }
 
@@ -72,8 +67,6 @@ void gui_model_update_msg_init_events()
         }
     }
 
-    lv_subject_t *subject_update_tips = gui_msg_get_subject(GUI_MODEL_UPDATE_MSG_ID_UPDATE_TIPS);
-    lv_subject_t *subject_update_proce = gui_msg_get_subject(GUI_MODEL_UPDATE_MSG_ID_UPDATE_PROCE);
 
     for (int i = 0; i < 2; i++) {
         if (status[i].is_subscribe == 0 && status[i].is_unsubscribe == 1) {
@@ -116,40 +109,6 @@ void gui_model_update_msg_unsubscribe()
     }
 }
 
-gui_msg_data_t *gui_model_update_msg_get(int32_t msg_id)
-{
-    switch (msg_id) {
-    case GUI_MODEL_UPDATE_MSG_ID_UPDATE_TIPS: {
-        gui_model_update_msg_update_tips_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_STRING);
-        break;
-    }
-    case GUI_MODEL_UPDATE_MSG_ID_UPDATE_PROCE: {
-        gui_model_update_msg_update_proce_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
-        break;
-    }
-    default:
-        return NULL;
-    }
-    return &guider_msg_data;
-}
-
-void gui_model_update_msg_action_change(int32_t msg_id, gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type)
-{
-    switch (msg_id) {
-    case GUI_MODEL_UPDATE_MSG_ID_UPDATE_TIPS: {
-        gui_model_update_msg_update_tips_cb(access, data, type);
-        break;
-    }
-    case GUI_MODEL_UPDATE_MSG_ID_UPDATE_PROCE: {
-        gui_model_update_msg_update_proce_cb(access, data, type);
-        break;
-    }
-    default: {
-        break;
-    }
-    }
-}
-
 gui_msg_status_t gui_model_update_msg_send(int32_t msg_id, void *value, int32_t len)
 {
     if (msg_id == GUI_MODEL_UPDATE_MSG_ID) {
@@ -160,14 +119,14 @@ gui_msg_status_t gui_model_update_msg_send(int32_t msg_id, void *value, int32_t 
             data_type = VALUE_STRING;
             guider_msg_data.value_array.ptr = value;
             guider_msg_data.value_array.len = len;
-            break;
         }
+        break;
         case GUI_MODEL_UPDATE_MSG_ID_UPDATE_PROCE: {
             data_type = VALUE_INT;
             guider_msg_data.value_array.ptr = value;
             guider_msg_data.value_array.len = len;
-            break;
         }
+        break;
         default:
             break;
         }

@@ -165,6 +165,11 @@ static void bt_read_remote_name(u8 status, u8 *addr, u8 *name)
         log_info("remote_name : %s", name);
     }
     put_buf(addr, 6);
+
+#if TCFG_USER_EMITTER_ENABLE
+    void emitter_search_noname(u8 status, u8 * addr, char *name);
+    emitter_search_noname(status, addr, (char *)name);
+#endif
 }
 
 /*----------------------------------------------------------------------------*/
@@ -343,12 +348,7 @@ static int bt_get_battery_value(void)
 /*----------------------------------------------------------------------------*/
 static void bt_hci_event_inquiry(struct bt_event *bt)
 {
-#if TCFG_USER_EMITTER_ENABLE
-    if (__this->emitter_or_receiver == BT_EMITTER_EN) {
-        //以后扩展，暂时注释
-        //emitter_search_stop();
-    }
-#endif
+
 }
 
 /*----------------------------------------------------------------------------*/

@@ -177,7 +177,7 @@ static void on_function_calling_message_received(byte_rtc_engine_t engine, const
 
 static void byte_rtc_on_message_received(byte_rtc_engine_t engine, const char *room, const char *src, const uint8_t *message, int size, bool binary)
 {
-    printf("byte_rtc_on_message_received, len=%d, strlen=%d\n", size, strlen((char *)message));
+    /* printf("byte_rtc_on_message_received, len=%d, strlen=%d\n", size, strlen((char *)message)); */
     static char message_buffer[4096];
     if (size > 8) {
 

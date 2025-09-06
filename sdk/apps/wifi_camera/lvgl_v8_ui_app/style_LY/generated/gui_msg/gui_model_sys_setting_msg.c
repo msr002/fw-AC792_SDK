@@ -6,23 +6,44 @@
 
 static lv_ll_t subs_ll;
 
+#if LV_USE_GUIBUILDER_SIMULATOR
+_gui_msg_entry_t gui_model_sys_setting_msg_entry_table[] = {
+    { GUI_MODEL_SYS_SETTING_MSG_ID_FUNKEY4, gui_model_sys_setting_msg_funkey4_cb, VALUE_STRING },
+    { GUI_MODEL_SYS_SETTING_MSG_ID_FUNKEY5, gui_model_sys_setting_msg_funkey5_cb, VALUE_STRING },
+    { GUI_MODEL_SYS_SETTING_MSG_ID_FUNKEY6, gui_model_sys_setting_msg_funkey6_cb, VALUE_STRING },
+    { GUI_MODEL_SYS_SETTING_MSG_ID_FUNKEY7, gui_model_sys_setting_msg_funkey7_cb, VALUE_STRING },
+    { GUI_MODEL_SYS_SETTING_MSG_ID_SUBPAGE_WARNING, gui_model_sys_setting_msg_subpage_warning_cb, VALUE_STRING },
+    { GUI_MODEL_SYS_SETTING_MSG_ID_HIDE_VIEWDATE, gui_model_sys_setting_msg_hide_viewdate_cb, VALUE_INT },
+    { GUI_MODEL_SYS_SETTING_MSG_ID_HIDE_VIEWCARNUM, gui_model_sys_setting_msg_hide_viewcarnum_cb, VALUE_INT },
+    { GUI_MODEL_SYS_SETTING_MSG_ID_HIDE_VIEWLIST, gui_model_sys_setting_msg_hide_viewlist_cb, VALUE_INT },
+    { GUI_MODEL_SYS_SETTING_MSG_ID_HIDE_SUBPAGEWARNING, gui_model_sys_setting_msg_hide_subpagewarning_cb, VALUE_INT },
+    { GUI_MODEL_SYS_SETTING_MSG_ID_SHOW_VIEWDATE, gui_model_sys_setting_msg_show_viewdate_cb, VALUE_INT },
+    { GUI_MODEL_SYS_SETTING_MSG_ID_SHOW_VIEWCARNUM, gui_model_sys_setting_msg_show_viewcarnum_cb, VALUE_INT },
+    { GUI_MODEL_SYS_SETTING_MSG_ID_SHOW_VIEWLIST, gui_model_sys_setting_msg_show_viewlist_cb, VALUE_INT },
+    { GUI_MODEL_SYS_SETTING_MSG_ID_SHOW_SUBPAGEWARNING, gui_model_sys_setting_msg_show_subpagewarning_cb, VALUE_INT },
+    { GUI_MODEL_SYS_SETTING_MSG_ID_HIDE_FUNKEY5, gui_model_sys_setting_msg_hide_funkey5_cb, VALUE_INT },
+    { GUI_MODEL_SYS_SETTING_MSG_ID_HIDE_FUNKEY6, gui_model_sys_setting_msg_hide_funkey6_cb, VALUE_INT },
+    { GUI_MODEL_SYS_SETTING_MSG_ID_HIDE_FUNKEY7, gui_model_sys_setting_msg_hide_funkey7_cb, VALUE_INT },
+    { GUI_MODEL_SYS_SETTING_MSG_ID_SHOW_FUNKEY4, gui_model_sys_setting_msg_show_funkey4_cb, VALUE_INT },
+    { GUI_MODEL_SYS_SETTING_MSG_ID_SHOW_FUNKEY5, gui_model_sys_setting_msg_show_funkey5_cb, VALUE_INT },
+    { GUI_MODEL_SYS_SETTING_MSG_ID_SHOW_FUNKEY6, gui_model_sys_setting_msg_show_funkey6_cb, VALUE_INT },
+    { GUI_MODEL_SYS_SETTING_MSG_ID_SHOW_FUNKEY7, gui_model_sys_setting_msg_show_funkey7_cb, VALUE_INT },
+    { GUI_MODEL_SYS_SETTING_MSG_ID_STATE_FUNKEY4, gui_model_sys_setting_msg_state_funkey4_cb, VALUE_INT },
+    { GUI_MODEL_SYS_SETTING_MSG_ID_STATE_FUNKEY5, gui_model_sys_setting_msg_state_funkey5_cb, VALUE_INT },
+    { GUI_MODEL_SYS_SETTING_MSG_ID_STATE_FUNKEY6, gui_model_sys_setting_msg_state_funkey6_cb, VALUE_INT },
+    { GUI_MODEL_SYS_SETTING_MSG_ID_STATE_FUNKEY7, gui_model_sys_setting_msg_state_funkey7_cb, VALUE_INT },
+    { GUI_MODEL_SYS_SETTING_MSG_ID_HIDE_FUNKEY4, gui_model_sys_setting_msg_hide_funkey4_cb, VALUE_INT },
+    { GUI_MODEL_SYS_SETTING_MSG_ID_SUBPAGE_WARNING_STATE, gui_model_sys_setting_msg_subpage_warning_state_cb, VALUE_BOOL },
+};
+#endif
+
 
 GUI_WEAK int gui_model_sys_setting_msg_funkey4_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type)
 {
     char funkey4_init_var[] = "关闭";
     static bool funkey4_is_init = false;
     static char *funkey4_var = NULL;
-    if (funkey4_is_init == false) {
-        funkey4_var = lv_mem_alloc(strlen(funkey4_init_var) + 1);
-        strcpy(funkey4_var, funkey4_init_var);
-        funkey4_is_init = true;
-    }
-    if (access == GUI_MSG_ACCESS_SET) {
-        lv_mem_free(funkey4_var);
-        funkey4_var = lv_mem_alloc(strlen(data->value_string) + 1);
-        strcpy(funkey4_var, data->value_string);
-    }
-    data->value_string = funkey4_var;
+    _gui_msg_char_array_cb(&funkey4_var, funkey4_init_var, &funkey4_is_init, access, data);
     return 0;
 }
 GUI_WEAK int gui_model_sys_setting_msg_funkey5_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type)
@@ -30,17 +51,7 @@ GUI_WEAK int gui_model_sys_setting_msg_funkey5_cb(gui_msg_action_t access, gui_m
     char funkey5_init_var[] = "30s";
     static bool funkey5_is_init = false;
     static char *funkey5_var = NULL;
-    if (funkey5_is_init == false) {
-        funkey5_var = lv_mem_alloc(strlen(funkey5_init_var) + 1);
-        strcpy(funkey5_var, funkey5_init_var);
-        funkey5_is_init = true;
-    }
-    if (access == GUI_MSG_ACCESS_SET) {
-        lv_mem_free(funkey5_var);
-        funkey5_var = lv_mem_alloc(strlen(data->value_string) + 1);
-        strcpy(funkey5_var, data->value_string);
-    }
-    data->value_string = funkey5_var;
+    _gui_msg_char_array_cb(&funkey5_var, funkey5_init_var, &funkey5_is_init, access, data);
     return 0;
 }
 GUI_WEAK int gui_model_sys_setting_msg_funkey6_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type)
@@ -48,17 +59,7 @@ GUI_WEAK int gui_model_sys_setting_msg_funkey6_cb(gui_msg_action_t access, gui_m
     char funkey6_init_var[] = "60s";
     static bool funkey6_is_init = false;
     static char *funkey6_var = NULL;
-    if (funkey6_is_init == false) {
-        funkey6_var = lv_mem_alloc(strlen(funkey6_init_var) + 1);
-        strcpy(funkey6_var, funkey6_init_var);
-        funkey6_is_init = true;
-    }
-    if (access == GUI_MSG_ACCESS_SET) {
-        lv_mem_free(funkey6_var);
-        funkey6_var = lv_mem_alloc(strlen(data->value_string) + 1);
-        strcpy(funkey6_var, data->value_string);
-    }
-    data->value_string = funkey6_var;
+    _gui_msg_char_array_cb(&funkey6_var, funkey6_init_var, &funkey6_is_init, access, data);
     return 0;
 }
 GUI_WEAK int gui_model_sys_setting_msg_funkey7_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type)
@@ -66,17 +67,7 @@ GUI_WEAK int gui_model_sys_setting_msg_funkey7_cb(gui_msg_action_t access, gui_m
     char funkey7_init_var[] = "120s";
     static bool funkey7_is_init = false;
     static char *funkey7_var = NULL;
-    if (funkey7_is_init == false) {
-        funkey7_var = lv_mem_alloc(strlen(funkey7_init_var) + 1);
-        strcpy(funkey7_var, funkey7_init_var);
-        funkey7_is_init = true;
-    }
-    if (access == GUI_MSG_ACCESS_SET) {
-        lv_mem_free(funkey7_var);
-        funkey7_var = lv_mem_alloc(strlen(data->value_string) + 1);
-        strcpy(funkey7_var, data->value_string);
-    }
-    data->value_string = funkey7_var;
+    _gui_msg_char_array_cb(&funkey7_var, funkey7_init_var, &funkey7_is_init, access, data);
     return 0;
 }
 GUI_WEAK int gui_model_sys_setting_msg_subpage_warning_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type)
@@ -84,315 +75,171 @@ GUI_WEAK int gui_model_sys_setting_msg_subpage_warning_cb(gui_msg_action_t acces
     char subpage_warning_init_var[] = "warning";
     static bool subpage_warning_is_init = false;
     static char *subpage_warning_var = NULL;
-    if (subpage_warning_is_init == false) {
-        subpage_warning_var = lv_mem_alloc(strlen(subpage_warning_init_var) + 1);
-        strcpy(subpage_warning_var, subpage_warning_init_var);
-        subpage_warning_is_init = true;
-    }
-    if (access == GUI_MSG_ACCESS_SET) {
-        lv_mem_free(subpage_warning_var);
-        subpage_warning_var = lv_mem_alloc(strlen(data->value_string) + 1);
-        strcpy(subpage_warning_var, data->value_string);
-    }
-    data->value_string = subpage_warning_var;
+    _gui_msg_char_array_cb(&subpage_warning_var, subpage_warning_init_var, &subpage_warning_is_init, access, data);
     return 0;
 }
 GUI_WEAK int gui_model_sys_setting_msg_hide_viewdate_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type)
 {
     static lv_obj_flag_t hide_viewdate_var = LV_OBJ_FLAG_HIDDEN;
-    if (access == GUI_MSG_ACCESS_SET) {
-        hide_viewdate_var = data->value_int;
-    }
-    data->value_int = hide_viewdate_var;
+    _gui_msg_obj_flag_cb((int32_t *)&hide_viewdate_var, access, data);
     return 0;
 }
 GUI_WEAK int gui_model_sys_setting_msg_hide_viewcarnum_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type)
 {
     static lv_obj_flag_t hide_viewcarnum_var = LV_OBJ_FLAG_HIDDEN;
-    if (access == GUI_MSG_ACCESS_SET) {
-        hide_viewcarnum_var = data->value_int;
-    }
-    data->value_int = hide_viewcarnum_var;
+    _gui_msg_obj_flag_cb((int32_t *)&hide_viewcarnum_var, access, data);
     return 0;
 }
 GUI_WEAK int gui_model_sys_setting_msg_hide_viewlist_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type)
 {
     static lv_obj_flag_t hide_viewlist_var = LV_OBJ_FLAG_HIDDEN;
-    if (access == GUI_MSG_ACCESS_SET) {
-        hide_viewlist_var = data->value_int;
-    }
-    data->value_int = hide_viewlist_var;
+    _gui_msg_obj_flag_cb((int32_t *)&hide_viewlist_var, access, data);
     return 0;
 }
 GUI_WEAK int gui_model_sys_setting_msg_hide_subpagewarning_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type)
 {
     static lv_obj_flag_t hide_subpagewarning_var = LV_OBJ_FLAG_HIDDEN;
-    if (access == GUI_MSG_ACCESS_SET) {
-        hide_subpagewarning_var = data->value_int;
-    }
-    data->value_int = hide_subpagewarning_var;
+    _gui_msg_obj_flag_cb((int32_t *)&hide_subpagewarning_var, access, data);
     return 0;
 }
 GUI_WEAK int gui_model_sys_setting_msg_show_viewdate_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type)
 {
     static lv_obj_flag_t show_viewdate_var = 0;
-    if (access == GUI_MSG_ACCESS_SET) {
-        show_viewdate_var = data->value_int;
-    }
-    data->value_int = show_viewdate_var;
+    _gui_msg_obj_flag_cb((int32_t *)&show_viewdate_var, access, data);
     return 0;
 }
 GUI_WEAK int gui_model_sys_setting_msg_show_viewcarnum_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type)
 {
     static lv_obj_flag_t show_viewcarnum_var = 0;
-    if (access == GUI_MSG_ACCESS_SET) {
-        show_viewcarnum_var = data->value_int;
-    }
-    data->value_int = show_viewcarnum_var;
+    _gui_msg_obj_flag_cb((int32_t *)&show_viewcarnum_var, access, data);
     return 0;
 }
 GUI_WEAK int gui_model_sys_setting_msg_show_viewlist_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type)
 {
     static lv_obj_flag_t show_viewlist_var = 0;
-    if (access == GUI_MSG_ACCESS_SET) {
-        show_viewlist_var = data->value_int;
-    }
-    data->value_int = show_viewlist_var;
+    _gui_msg_obj_flag_cb((int32_t *)&show_viewlist_var, access, data);
     return 0;
 }
 GUI_WEAK int gui_model_sys_setting_msg_show_subpagewarning_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type)
 {
     static lv_obj_flag_t show_subpagewarning_var = 0;
-    if (access == GUI_MSG_ACCESS_SET) {
-        show_subpagewarning_var = data->value_int;
-    }
-    data->value_int = show_subpagewarning_var;
+    _gui_msg_obj_flag_cb((int32_t *)&show_subpagewarning_var, access, data);
     return 0;
 }
 GUI_WEAK int gui_model_sys_setting_msg_hide_funkey5_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type)
 {
     static lv_obj_flag_t hide_funkey5_var = LV_OBJ_FLAG_HIDDEN;
-    if (access == GUI_MSG_ACCESS_SET) {
-        hide_funkey5_var = data->value_int;
-    }
-    data->value_int = hide_funkey5_var;
+    _gui_msg_obj_flag_cb((int32_t *)&hide_funkey5_var, access, data);
     return 0;
 }
 GUI_WEAK int gui_model_sys_setting_msg_hide_funkey6_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type)
 {
     static lv_obj_flag_t hide_funkey6_var = LV_OBJ_FLAG_HIDDEN;
-    if (access == GUI_MSG_ACCESS_SET) {
-        hide_funkey6_var = data->value_int;
-    }
-    data->value_int = hide_funkey6_var;
+    _gui_msg_obj_flag_cb((int32_t *)&hide_funkey6_var, access, data);
     return 0;
 }
 GUI_WEAK int gui_model_sys_setting_msg_hide_funkey7_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type)
 {
     static lv_obj_flag_t hide_funkey7_var = LV_OBJ_FLAG_HIDDEN;
-    if (access == GUI_MSG_ACCESS_SET) {
-        hide_funkey7_var = data->value_int;
-    }
-    data->value_int = hide_funkey7_var;
+    _gui_msg_obj_flag_cb((int32_t *)&hide_funkey7_var, access, data);
     return 0;
 }
 GUI_WEAK int gui_model_sys_setting_msg_show_funkey4_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type)
 {
     static lv_obj_flag_t show_funkey4_var = 0;
-    if (access == GUI_MSG_ACCESS_SET) {
-        show_funkey4_var = data->value_int;
-    }
-    data->value_int = show_funkey4_var;
+    _gui_msg_obj_flag_cb((int32_t *)&show_funkey4_var, access, data);
     return 0;
 }
 GUI_WEAK int gui_model_sys_setting_msg_show_funkey5_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type)
 {
     static lv_obj_flag_t show_funkey5_var = 0;
-    if (access == GUI_MSG_ACCESS_SET) {
-        show_funkey5_var = data->value_int;
-    }
-    data->value_int = show_funkey5_var;
+    _gui_msg_obj_flag_cb((int32_t *)&show_funkey5_var, access, data);
     return 0;
 }
 GUI_WEAK int gui_model_sys_setting_msg_show_funkey6_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type)
 {
     static lv_obj_flag_t show_funkey6_var = 0;
-    if (access == GUI_MSG_ACCESS_SET) {
-        show_funkey6_var = data->value_int;
-    }
-    data->value_int = show_funkey6_var;
+    _gui_msg_obj_flag_cb((int32_t *)&show_funkey6_var, access, data);
     return 0;
 }
 GUI_WEAK int gui_model_sys_setting_msg_show_funkey7_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type)
 {
     static lv_obj_flag_t show_funkey7_var = 0;
-    if (access == GUI_MSG_ACCESS_SET) {
-        show_funkey7_var = data->value_int;
-    }
-    data->value_int = show_funkey7_var;
+    _gui_msg_obj_flag_cb((int32_t *)&show_funkey7_var, access, data);
     return 0;
 }
 GUI_WEAK int gui_model_sys_setting_msg_state_funkey4_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type)
 {
     static lv_state_t state_funkey4_var = LV_STATE_DEFAULT;
-    if (access == GUI_MSG_ACCESS_SET) {
-        state_funkey4_var = data->value_int;
-    }
-    data->value_int = state_funkey4_var;
+    _gui_msg_state_cb((int32_t *)&state_funkey4_var, access, data);
     return 0;
 }
 GUI_WEAK int gui_model_sys_setting_msg_state_funkey5_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type)
 {
     static lv_state_t state_funkey5_var = LV_STATE_DEFAULT;
-    if (access == GUI_MSG_ACCESS_SET) {
-        state_funkey5_var = data->value_int;
-    }
-    data->value_int = state_funkey5_var;
+    _gui_msg_state_cb((int32_t *)&state_funkey5_var, access, data);
     return 0;
 }
 GUI_WEAK int gui_model_sys_setting_msg_state_funkey6_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type)
 {
     static lv_state_t state_funkey6_var = LV_STATE_DEFAULT;
-    if (access == GUI_MSG_ACCESS_SET) {
-        state_funkey6_var = data->value_int;
-    }
-    data->value_int = state_funkey6_var;
+    _gui_msg_state_cb((int32_t *)&state_funkey6_var, access, data);
     return 0;
 }
 GUI_WEAK int gui_model_sys_setting_msg_state_funkey7_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type)
 {
     static lv_state_t state_funkey7_var = LV_STATE_DEFAULT;
-    if (access == GUI_MSG_ACCESS_SET) {
-        state_funkey7_var = data->value_int;
-    }
-    data->value_int = state_funkey7_var;
+    _gui_msg_state_cb((int32_t *)&state_funkey7_var, access, data);
     return 0;
 }
 GUI_WEAK int gui_model_sys_setting_msg_hide_funkey4_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type)
 {
     static lv_obj_flag_t hide_funkey4_var = LV_OBJ_FLAG_HIDDEN;
-    if (access == GUI_MSG_ACCESS_SET) {
-        hide_funkey4_var = data->value_int;
-    }
-    data->value_int = hide_funkey4_var;
+    _gui_msg_obj_flag_cb((int32_t *)&hide_funkey4_var, access, data);
     return 0;
 }
 GUI_WEAK int gui_model_sys_setting_msg_subpage_warning_state_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type)
 {
     static bool subpage_warning_state_var = false;
-    if (access == GUI_MSG_ACCESS_SET) {
-        subpage_warning_state_var = data->value_int;
-    }
-    data->value_int = subpage_warning_state_var;
+    _gui_msg_bool_cb(&subpage_warning_state_var, access, data);
     return 0;
 }
 
 void gui_model_sys_setting_msg_init(lv_ui *ui)
 {
-    gui_msg_sub_t *sub;
-    sub = gui_msg_create_sub(GUI_MODEL_SYS_SETTING_MSG_ID_FUNKEY4);
-    if (sub != NULL) {
-        lv_subject_init_pointer(sub->subject, &guider_msg_data);
-    }
-    sub = gui_msg_create_sub(GUI_MODEL_SYS_SETTING_MSG_ID_FUNKEY5);
-    if (sub != NULL) {
-        lv_subject_init_pointer(sub->subject, &guider_msg_data);
-    }
-    sub = gui_msg_create_sub(GUI_MODEL_SYS_SETTING_MSG_ID_FUNKEY6);
-    if (sub != NULL) {
-        lv_subject_init_pointer(sub->subject, &guider_msg_data);
-    }
-    sub = gui_msg_create_sub(GUI_MODEL_SYS_SETTING_MSG_ID_FUNKEY7);
-    if (sub != NULL) {
-        lv_subject_init_pointer(sub->subject, &guider_msg_data);
-    }
-    sub = gui_msg_create_sub(GUI_MODEL_SYS_SETTING_MSG_ID_SUBPAGE_WARNING);
-    if (sub != NULL) {
-        lv_subject_init_pointer(sub->subject, &guider_msg_data);
-    }
-    sub = gui_msg_create_sub(GUI_MODEL_SYS_SETTING_MSG_ID_HIDE_VIEWDATE);
-    if (sub != NULL) {
-        lv_subject_init_pointer(sub->subject, &guider_msg_data);
-    }
-    sub = gui_msg_create_sub(GUI_MODEL_SYS_SETTING_MSG_ID_HIDE_VIEWCARNUM);
-    if (sub != NULL) {
-        lv_subject_init_pointer(sub->subject, &guider_msg_data);
-    }
-    sub = gui_msg_create_sub(GUI_MODEL_SYS_SETTING_MSG_ID_HIDE_VIEWLIST);
-    if (sub != NULL) {
-        lv_subject_init_pointer(sub->subject, &guider_msg_data);
-    }
-    sub = gui_msg_create_sub(GUI_MODEL_SYS_SETTING_MSG_ID_HIDE_SUBPAGEWARNING);
-    if (sub != NULL) {
-        lv_subject_init_pointer(sub->subject, &guider_msg_data);
-    }
-    sub = gui_msg_create_sub(GUI_MODEL_SYS_SETTING_MSG_ID_SHOW_VIEWDATE);
-    if (sub != NULL) {
-        lv_subject_init_pointer(sub->subject, &guider_msg_data);
-    }
-    sub = gui_msg_create_sub(GUI_MODEL_SYS_SETTING_MSG_ID_SHOW_VIEWCARNUM);
-    if (sub != NULL) {
-        lv_subject_init_pointer(sub->subject, &guider_msg_data);
-    }
-    sub = gui_msg_create_sub(GUI_MODEL_SYS_SETTING_MSG_ID_SHOW_VIEWLIST);
-    if (sub != NULL) {
-        lv_subject_init_pointer(sub->subject, &guider_msg_data);
-    }
-    sub = gui_msg_create_sub(GUI_MODEL_SYS_SETTING_MSG_ID_SHOW_SUBPAGEWARNING);
-    if (sub != NULL) {
-        lv_subject_init_pointer(sub->subject, &guider_msg_data);
-    }
-    sub = gui_msg_create_sub(GUI_MODEL_SYS_SETTING_MSG_ID_HIDE_FUNKEY5);
-    if (sub != NULL) {
-        lv_subject_init_pointer(sub->subject, &guider_msg_data);
-    }
-    sub = gui_msg_create_sub(GUI_MODEL_SYS_SETTING_MSG_ID_HIDE_FUNKEY6);
-    if (sub != NULL) {
-        lv_subject_init_pointer(sub->subject, &guider_msg_data);
-    }
-    sub = gui_msg_create_sub(GUI_MODEL_SYS_SETTING_MSG_ID_HIDE_FUNKEY7);
-    if (sub != NULL) {
-        lv_subject_init_pointer(sub->subject, &guider_msg_data);
-    }
-    sub = gui_msg_create_sub(GUI_MODEL_SYS_SETTING_MSG_ID_SHOW_FUNKEY4);
-    if (sub != NULL) {
-        lv_subject_init_pointer(sub->subject, &guider_msg_data);
-    }
-    sub = gui_msg_create_sub(GUI_MODEL_SYS_SETTING_MSG_ID_SHOW_FUNKEY5);
-    if (sub != NULL) {
-        lv_subject_init_pointer(sub->subject, &guider_msg_data);
-    }
-    sub = gui_msg_create_sub(GUI_MODEL_SYS_SETTING_MSG_ID_SHOW_FUNKEY6);
-    if (sub != NULL) {
-        lv_subject_init_pointer(sub->subject, &guider_msg_data);
-    }
-    sub = gui_msg_create_sub(GUI_MODEL_SYS_SETTING_MSG_ID_SHOW_FUNKEY7);
-    if (sub != NULL) {
-        lv_subject_init_pointer(sub->subject, &guider_msg_data);
-    }
-    sub = gui_msg_create_sub(GUI_MODEL_SYS_SETTING_MSG_ID_STATE_FUNKEY4);
-    if (sub != NULL) {
-        lv_subject_init_pointer(sub->subject, &guider_msg_data);
-    }
-    sub = gui_msg_create_sub(GUI_MODEL_SYS_SETTING_MSG_ID_STATE_FUNKEY5);
-    if (sub != NULL) {
-        lv_subject_init_pointer(sub->subject, &guider_msg_data);
-    }
-    sub = gui_msg_create_sub(GUI_MODEL_SYS_SETTING_MSG_ID_STATE_FUNKEY6);
-    if (sub != NULL) {
-        lv_subject_init_pointer(sub->subject, &guider_msg_data);
-    }
-    sub = gui_msg_create_sub(GUI_MODEL_SYS_SETTING_MSG_ID_STATE_FUNKEY7);
-    if (sub != NULL) {
-        lv_subject_init_pointer(sub->subject, &guider_msg_data);
-    }
-    sub = gui_msg_create_sub(GUI_MODEL_SYS_SETTING_MSG_ID_HIDE_FUNKEY4);
-    if (sub != NULL) {
-        lv_subject_init_pointer(sub->subject, &guider_msg_data);
-    }
-    sub = gui_msg_create_sub(GUI_MODEL_SYS_SETTING_MSG_ID_SUBPAGE_WARNING_STATE);
-    if (sub != NULL) {
-        lv_subject_init_pointer(sub->subject, &guider_msg_data);
+    int32_t ids[26] = {
+        GUI_MODEL_SYS_SETTING_MSG_ID_FUNKEY4,
+        GUI_MODEL_SYS_SETTING_MSG_ID_FUNKEY5,
+        GUI_MODEL_SYS_SETTING_MSG_ID_FUNKEY6,
+        GUI_MODEL_SYS_SETTING_MSG_ID_FUNKEY7,
+        GUI_MODEL_SYS_SETTING_MSG_ID_SUBPAGE_WARNING,
+        GUI_MODEL_SYS_SETTING_MSG_ID_HIDE_VIEWDATE,
+        GUI_MODEL_SYS_SETTING_MSG_ID_HIDE_VIEWCARNUM,
+        GUI_MODEL_SYS_SETTING_MSG_ID_HIDE_VIEWLIST,
+        GUI_MODEL_SYS_SETTING_MSG_ID_HIDE_SUBPAGEWARNING,
+        GUI_MODEL_SYS_SETTING_MSG_ID_SHOW_VIEWDATE,
+        GUI_MODEL_SYS_SETTING_MSG_ID_SHOW_VIEWCARNUM,
+        GUI_MODEL_SYS_SETTING_MSG_ID_SHOW_VIEWLIST,
+        GUI_MODEL_SYS_SETTING_MSG_ID_SHOW_SUBPAGEWARNING,
+        GUI_MODEL_SYS_SETTING_MSG_ID_HIDE_FUNKEY5,
+        GUI_MODEL_SYS_SETTING_MSG_ID_HIDE_FUNKEY6,
+        GUI_MODEL_SYS_SETTING_MSG_ID_HIDE_FUNKEY7,
+        GUI_MODEL_SYS_SETTING_MSG_ID_SHOW_FUNKEY4,
+        GUI_MODEL_SYS_SETTING_MSG_ID_SHOW_FUNKEY5,
+        GUI_MODEL_SYS_SETTING_MSG_ID_SHOW_FUNKEY6,
+        GUI_MODEL_SYS_SETTING_MSG_ID_SHOW_FUNKEY7,
+        GUI_MODEL_SYS_SETTING_MSG_ID_STATE_FUNKEY4,
+        GUI_MODEL_SYS_SETTING_MSG_ID_STATE_FUNKEY5,
+        GUI_MODEL_SYS_SETTING_MSG_ID_STATE_FUNKEY6,
+        GUI_MODEL_SYS_SETTING_MSG_ID_STATE_FUNKEY7,
+        GUI_MODEL_SYS_SETTING_MSG_ID_HIDE_FUNKEY4,
+        GUI_MODEL_SYS_SETTING_MSG_ID_SUBPAGE_WARNING_STATE,
+    };
+    for (int i = 0; i < 26; i++) {
+        gui_msg_sub_t *sub = gui_msg_create_sub(ids[i]);
+        if (sub != NULL) {
+            lv_subject_init_pointer(sub->subject, &guider_msg_data);
+        }
     }
 }
 
@@ -444,32 +291,6 @@ void gui_model_sys_setting_msg_init_events()
         }
     }
 
-    lv_subject_t *subject_funkey4 = gui_msg_get_subject(GUI_MODEL_SYS_SETTING_MSG_ID_FUNKEY4);
-    lv_subject_t *subject_funkey5 = gui_msg_get_subject(GUI_MODEL_SYS_SETTING_MSG_ID_FUNKEY5);
-    lv_subject_t *subject_funkey6 = gui_msg_get_subject(GUI_MODEL_SYS_SETTING_MSG_ID_FUNKEY6);
-    lv_subject_t *subject_funkey7 = gui_msg_get_subject(GUI_MODEL_SYS_SETTING_MSG_ID_FUNKEY7);
-    lv_subject_t *subject_subpage_warning = gui_msg_get_subject(GUI_MODEL_SYS_SETTING_MSG_ID_SUBPAGE_WARNING);
-    lv_subject_t *subject_hide_viewdate = gui_msg_get_subject(GUI_MODEL_SYS_SETTING_MSG_ID_HIDE_VIEWDATE);
-    lv_subject_t *subject_hide_viewcarnum = gui_msg_get_subject(GUI_MODEL_SYS_SETTING_MSG_ID_HIDE_VIEWCARNUM);
-    lv_subject_t *subject_hide_viewlist = gui_msg_get_subject(GUI_MODEL_SYS_SETTING_MSG_ID_HIDE_VIEWLIST);
-    lv_subject_t *subject_hide_subpagewarning = gui_msg_get_subject(GUI_MODEL_SYS_SETTING_MSG_ID_HIDE_SUBPAGEWARNING);
-    lv_subject_t *subject_show_viewdate = gui_msg_get_subject(GUI_MODEL_SYS_SETTING_MSG_ID_SHOW_VIEWDATE);
-    lv_subject_t *subject_show_viewcarnum = gui_msg_get_subject(GUI_MODEL_SYS_SETTING_MSG_ID_SHOW_VIEWCARNUM);
-    lv_subject_t *subject_show_viewlist = gui_msg_get_subject(GUI_MODEL_SYS_SETTING_MSG_ID_SHOW_VIEWLIST);
-    lv_subject_t *subject_show_subpagewarning = gui_msg_get_subject(GUI_MODEL_SYS_SETTING_MSG_ID_SHOW_SUBPAGEWARNING);
-    lv_subject_t *subject_hide_funkey5 = gui_msg_get_subject(GUI_MODEL_SYS_SETTING_MSG_ID_HIDE_FUNKEY5);
-    lv_subject_t *subject_hide_funkey6 = gui_msg_get_subject(GUI_MODEL_SYS_SETTING_MSG_ID_HIDE_FUNKEY6);
-    lv_subject_t *subject_hide_funkey7 = gui_msg_get_subject(GUI_MODEL_SYS_SETTING_MSG_ID_HIDE_FUNKEY7);
-    lv_subject_t *subject_show_funkey4 = gui_msg_get_subject(GUI_MODEL_SYS_SETTING_MSG_ID_SHOW_FUNKEY4);
-    lv_subject_t *subject_show_funkey5 = gui_msg_get_subject(GUI_MODEL_SYS_SETTING_MSG_ID_SHOW_FUNKEY5);
-    lv_subject_t *subject_show_funkey6 = gui_msg_get_subject(GUI_MODEL_SYS_SETTING_MSG_ID_SHOW_FUNKEY6);
-    lv_subject_t *subject_show_funkey7 = gui_msg_get_subject(GUI_MODEL_SYS_SETTING_MSG_ID_SHOW_FUNKEY7);
-    lv_subject_t *subject_state_funkey4 = gui_msg_get_subject(GUI_MODEL_SYS_SETTING_MSG_ID_STATE_FUNKEY4);
-    lv_subject_t *subject_state_funkey5 = gui_msg_get_subject(GUI_MODEL_SYS_SETTING_MSG_ID_STATE_FUNKEY5);
-    lv_subject_t *subject_state_funkey6 = gui_msg_get_subject(GUI_MODEL_SYS_SETTING_MSG_ID_STATE_FUNKEY6);
-    lv_subject_t *subject_state_funkey7 = gui_msg_get_subject(GUI_MODEL_SYS_SETTING_MSG_ID_STATE_FUNKEY7);
-    lv_subject_t *subject_hide_funkey4 = gui_msg_get_subject(GUI_MODEL_SYS_SETTING_MSG_ID_HIDE_FUNKEY4);
-    lv_subject_t *subject_subpage_warning_state = gui_msg_get_subject(GUI_MODEL_SYS_SETTING_MSG_ID_SUBPAGE_WARNING_STATE);
 
     for (int i = 0; i < 26; i++) {
         if (status[i].is_subscribe == 0 && status[i].is_unsubscribe == 1) {
@@ -536,394 +357,58 @@ void gui_model_sys_setting_msg_unsubscribe()
     }
 }
 
-gui_msg_data_t *gui_model_sys_setting_msg_get(int32_t msg_id)
-{
-    switch (msg_id) {
-    case GUI_MODEL_SYS_SETTING_MSG_ID_FUNKEY4: {
-        gui_model_sys_setting_msg_funkey4_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_STRING);
-        break;
-    }
-    case GUI_MODEL_SYS_SETTING_MSG_ID_FUNKEY5: {
-        gui_model_sys_setting_msg_funkey5_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_STRING);
-        break;
-    }
-    case GUI_MODEL_SYS_SETTING_MSG_ID_FUNKEY6: {
-        gui_model_sys_setting_msg_funkey6_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_STRING);
-        break;
-    }
-    case GUI_MODEL_SYS_SETTING_MSG_ID_FUNKEY7: {
-        gui_model_sys_setting_msg_funkey7_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_STRING);
-        break;
-    }
-    case GUI_MODEL_SYS_SETTING_MSG_ID_SUBPAGE_WARNING: {
-        gui_model_sys_setting_msg_subpage_warning_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_STRING);
-        break;
-    }
-    case GUI_MODEL_SYS_SETTING_MSG_ID_HIDE_VIEWDATE: {
-        gui_model_sys_setting_msg_hide_viewdate_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
-        break;
-    }
-    case GUI_MODEL_SYS_SETTING_MSG_ID_HIDE_VIEWCARNUM: {
-        gui_model_sys_setting_msg_hide_viewcarnum_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
-        break;
-    }
-    case GUI_MODEL_SYS_SETTING_MSG_ID_HIDE_VIEWLIST: {
-        gui_model_sys_setting_msg_hide_viewlist_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
-        break;
-    }
-    case GUI_MODEL_SYS_SETTING_MSG_ID_HIDE_SUBPAGEWARNING: {
-        gui_model_sys_setting_msg_hide_subpagewarning_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
-        break;
-    }
-    case GUI_MODEL_SYS_SETTING_MSG_ID_SHOW_VIEWDATE: {
-        gui_model_sys_setting_msg_show_viewdate_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
-        break;
-    }
-    case GUI_MODEL_SYS_SETTING_MSG_ID_SHOW_VIEWCARNUM: {
-        gui_model_sys_setting_msg_show_viewcarnum_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
-        break;
-    }
-    case GUI_MODEL_SYS_SETTING_MSG_ID_SHOW_VIEWLIST: {
-        gui_model_sys_setting_msg_show_viewlist_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
-        break;
-    }
-    case GUI_MODEL_SYS_SETTING_MSG_ID_SHOW_SUBPAGEWARNING: {
-        gui_model_sys_setting_msg_show_subpagewarning_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
-        break;
-    }
-    case GUI_MODEL_SYS_SETTING_MSG_ID_HIDE_FUNKEY5: {
-        gui_model_sys_setting_msg_hide_funkey5_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
-        break;
-    }
-    case GUI_MODEL_SYS_SETTING_MSG_ID_HIDE_FUNKEY6: {
-        gui_model_sys_setting_msg_hide_funkey6_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
-        break;
-    }
-    case GUI_MODEL_SYS_SETTING_MSG_ID_HIDE_FUNKEY7: {
-        gui_model_sys_setting_msg_hide_funkey7_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
-        break;
-    }
-    case GUI_MODEL_SYS_SETTING_MSG_ID_SHOW_FUNKEY4: {
-        gui_model_sys_setting_msg_show_funkey4_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
-        break;
-    }
-    case GUI_MODEL_SYS_SETTING_MSG_ID_SHOW_FUNKEY5: {
-        gui_model_sys_setting_msg_show_funkey5_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
-        break;
-    }
-    case GUI_MODEL_SYS_SETTING_MSG_ID_SHOW_FUNKEY6: {
-        gui_model_sys_setting_msg_show_funkey6_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
-        break;
-    }
-    case GUI_MODEL_SYS_SETTING_MSG_ID_SHOW_FUNKEY7: {
-        gui_model_sys_setting_msg_show_funkey7_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
-        break;
-    }
-    case GUI_MODEL_SYS_SETTING_MSG_ID_STATE_FUNKEY4: {
-        gui_model_sys_setting_msg_state_funkey4_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
-        break;
-    }
-    case GUI_MODEL_SYS_SETTING_MSG_ID_STATE_FUNKEY5: {
-        gui_model_sys_setting_msg_state_funkey5_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
-        break;
-    }
-    case GUI_MODEL_SYS_SETTING_MSG_ID_STATE_FUNKEY6: {
-        gui_model_sys_setting_msg_state_funkey6_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
-        break;
-    }
-    case GUI_MODEL_SYS_SETTING_MSG_ID_STATE_FUNKEY7: {
-        gui_model_sys_setting_msg_state_funkey7_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
-        break;
-    }
-    case GUI_MODEL_SYS_SETTING_MSG_ID_HIDE_FUNKEY4: {
-        gui_model_sys_setting_msg_hide_funkey4_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
-        break;
-    }
-    case GUI_MODEL_SYS_SETTING_MSG_ID_SUBPAGE_WARNING_STATE: {
-        gui_model_sys_setting_msg_subpage_warning_state_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_BOOL);
-        break;
-    }
-    default:
-        return NULL;
-    }
-    return &guider_msg_data;
-}
-
-void gui_model_sys_setting_msg_action_change(int32_t msg_id, gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type)
-{
-    switch (msg_id) {
-    case GUI_MODEL_SYS_SETTING_MSG_ID_FUNKEY4: {
-        gui_model_sys_setting_msg_funkey4_cb(access, data, type);
-        break;
-    }
-    case GUI_MODEL_SYS_SETTING_MSG_ID_FUNKEY5: {
-        gui_model_sys_setting_msg_funkey5_cb(access, data, type);
-        break;
-    }
-    case GUI_MODEL_SYS_SETTING_MSG_ID_FUNKEY6: {
-        gui_model_sys_setting_msg_funkey6_cb(access, data, type);
-        break;
-    }
-    case GUI_MODEL_SYS_SETTING_MSG_ID_FUNKEY7: {
-        gui_model_sys_setting_msg_funkey7_cb(access, data, type);
-        break;
-    }
-    case GUI_MODEL_SYS_SETTING_MSG_ID_SUBPAGE_WARNING: {
-        gui_model_sys_setting_msg_subpage_warning_cb(access, data, type);
-        break;
-    }
-    case GUI_MODEL_SYS_SETTING_MSG_ID_HIDE_VIEWDATE: {
-        gui_model_sys_setting_msg_hide_viewdate_cb(access, data, type);
-        break;
-    }
-    case GUI_MODEL_SYS_SETTING_MSG_ID_HIDE_VIEWCARNUM: {
-        gui_model_sys_setting_msg_hide_viewcarnum_cb(access, data, type);
-        break;
-    }
-    case GUI_MODEL_SYS_SETTING_MSG_ID_HIDE_VIEWLIST: {
-        gui_model_sys_setting_msg_hide_viewlist_cb(access, data, type);
-        break;
-    }
-    case GUI_MODEL_SYS_SETTING_MSG_ID_HIDE_SUBPAGEWARNING: {
-        gui_model_sys_setting_msg_hide_subpagewarning_cb(access, data, type);
-        break;
-    }
-    case GUI_MODEL_SYS_SETTING_MSG_ID_SHOW_VIEWDATE: {
-        gui_model_sys_setting_msg_show_viewdate_cb(access, data, type);
-        break;
-    }
-    case GUI_MODEL_SYS_SETTING_MSG_ID_SHOW_VIEWCARNUM: {
-        gui_model_sys_setting_msg_show_viewcarnum_cb(access, data, type);
-        break;
-    }
-    case GUI_MODEL_SYS_SETTING_MSG_ID_SHOW_VIEWLIST: {
-        gui_model_sys_setting_msg_show_viewlist_cb(access, data, type);
-        break;
-    }
-    case GUI_MODEL_SYS_SETTING_MSG_ID_SHOW_SUBPAGEWARNING: {
-        gui_model_sys_setting_msg_show_subpagewarning_cb(access, data, type);
-        break;
-    }
-    case GUI_MODEL_SYS_SETTING_MSG_ID_HIDE_FUNKEY5: {
-        gui_model_sys_setting_msg_hide_funkey5_cb(access, data, type);
-        break;
-    }
-    case GUI_MODEL_SYS_SETTING_MSG_ID_HIDE_FUNKEY6: {
-        gui_model_sys_setting_msg_hide_funkey6_cb(access, data, type);
-        break;
-    }
-    case GUI_MODEL_SYS_SETTING_MSG_ID_HIDE_FUNKEY7: {
-        gui_model_sys_setting_msg_hide_funkey7_cb(access, data, type);
-        break;
-    }
-    case GUI_MODEL_SYS_SETTING_MSG_ID_SHOW_FUNKEY4: {
-        gui_model_sys_setting_msg_show_funkey4_cb(access, data, type);
-        break;
-    }
-    case GUI_MODEL_SYS_SETTING_MSG_ID_SHOW_FUNKEY5: {
-        gui_model_sys_setting_msg_show_funkey5_cb(access, data, type);
-        break;
-    }
-    case GUI_MODEL_SYS_SETTING_MSG_ID_SHOW_FUNKEY6: {
-        gui_model_sys_setting_msg_show_funkey6_cb(access, data, type);
-        break;
-    }
-    case GUI_MODEL_SYS_SETTING_MSG_ID_SHOW_FUNKEY7: {
-        gui_model_sys_setting_msg_show_funkey7_cb(access, data, type);
-        break;
-    }
-    case GUI_MODEL_SYS_SETTING_MSG_ID_STATE_FUNKEY4: {
-        gui_model_sys_setting_msg_state_funkey4_cb(access, data, type);
-        break;
-    }
-    case GUI_MODEL_SYS_SETTING_MSG_ID_STATE_FUNKEY5: {
-        gui_model_sys_setting_msg_state_funkey5_cb(access, data, type);
-        break;
-    }
-    case GUI_MODEL_SYS_SETTING_MSG_ID_STATE_FUNKEY6: {
-        gui_model_sys_setting_msg_state_funkey6_cb(access, data, type);
-        break;
-    }
-    case GUI_MODEL_SYS_SETTING_MSG_ID_STATE_FUNKEY7: {
-        gui_model_sys_setting_msg_state_funkey7_cb(access, data, type);
-        break;
-    }
-    case GUI_MODEL_SYS_SETTING_MSG_ID_HIDE_FUNKEY4: {
-        gui_model_sys_setting_msg_hide_funkey4_cb(access, data, type);
-        break;
-    }
-    case GUI_MODEL_SYS_SETTING_MSG_ID_SUBPAGE_WARNING_STATE: {
-        gui_model_sys_setting_msg_subpage_warning_state_cb(access, data, type);
-        break;
-    }
-    default: {
-        break;
-    }
-    }
-}
-
 gui_msg_status_t gui_model_sys_setting_msg_send(int32_t msg_id, void *value, int32_t len)
 {
     if (msg_id == GUI_MODEL_SYS_SETTING_MSG_ID) {
     } else {
         gui_msg_data_type_t data_type = VALUE_INT;
         switch (msg_id) {
-        case GUI_MODEL_SYS_SETTING_MSG_ID_FUNKEY4: {
-            data_type = VALUE_STRING;
-            guider_msg_data.value_array.ptr = value;
-            guider_msg_data.value_array.len = len;
-            break;
-        }
-        case GUI_MODEL_SYS_SETTING_MSG_ID_FUNKEY5: {
-            data_type = VALUE_STRING;
-            guider_msg_data.value_array.ptr = value;
-            guider_msg_data.value_array.len = len;
-            break;
-        }
-        case GUI_MODEL_SYS_SETTING_MSG_ID_FUNKEY6: {
-            data_type = VALUE_STRING;
-            guider_msg_data.value_array.ptr = value;
-            guider_msg_data.value_array.len = len;
-            break;
-        }
-        case GUI_MODEL_SYS_SETTING_MSG_ID_FUNKEY7: {
-            data_type = VALUE_STRING;
-            guider_msg_data.value_array.ptr = value;
-            guider_msg_data.value_array.len = len;
-            break;
-        }
-        case GUI_MODEL_SYS_SETTING_MSG_ID_SUBPAGE_WARNING: {
-            data_type = VALUE_STRING;
-            guider_msg_data.value_array.ptr = value;
-            guider_msg_data.value_array.len = len;
-            break;
-        }
-        case GUI_MODEL_SYS_SETTING_MSG_ID_HIDE_VIEWDATE: {
-            data_type = VALUE_INT;
-            guider_msg_data.value_array.ptr = value;
-            guider_msg_data.value_array.len = len;
-            break;
-        }
-        case GUI_MODEL_SYS_SETTING_MSG_ID_HIDE_VIEWCARNUM: {
-            data_type = VALUE_INT;
-            guider_msg_data.value_array.ptr = value;
-            guider_msg_data.value_array.len = len;
-            break;
-        }
-        case GUI_MODEL_SYS_SETTING_MSG_ID_HIDE_VIEWLIST: {
-            data_type = VALUE_INT;
-            guider_msg_data.value_array.ptr = value;
-            guider_msg_data.value_array.len = len;
-            break;
-        }
-        case GUI_MODEL_SYS_SETTING_MSG_ID_HIDE_SUBPAGEWARNING: {
-            data_type = VALUE_INT;
-            guider_msg_data.value_array.ptr = value;
-            guider_msg_data.value_array.len = len;
-            break;
-        }
-        case GUI_MODEL_SYS_SETTING_MSG_ID_SHOW_VIEWDATE: {
-            data_type = VALUE_INT;
-            guider_msg_data.value_array.ptr = value;
-            guider_msg_data.value_array.len = len;
-            break;
-        }
-        case GUI_MODEL_SYS_SETTING_MSG_ID_SHOW_VIEWCARNUM: {
-            data_type = VALUE_INT;
-            guider_msg_data.value_array.ptr = value;
-            guider_msg_data.value_array.len = len;
-            break;
-        }
-        case GUI_MODEL_SYS_SETTING_MSG_ID_SHOW_VIEWLIST: {
-            data_type = VALUE_INT;
-            guider_msg_data.value_array.ptr = value;
-            guider_msg_data.value_array.len = len;
-            break;
-        }
-        case GUI_MODEL_SYS_SETTING_MSG_ID_SHOW_SUBPAGEWARNING: {
-            data_type = VALUE_INT;
-            guider_msg_data.value_array.ptr = value;
-            guider_msg_data.value_array.len = len;
-            break;
-        }
-        case GUI_MODEL_SYS_SETTING_MSG_ID_HIDE_FUNKEY5: {
-            data_type = VALUE_INT;
-            guider_msg_data.value_array.ptr = value;
-            guider_msg_data.value_array.len = len;
-            break;
-        }
-        case GUI_MODEL_SYS_SETTING_MSG_ID_HIDE_FUNKEY6: {
-            data_type = VALUE_INT;
-            guider_msg_data.value_array.ptr = value;
-            guider_msg_data.value_array.len = len;
-            break;
-        }
-        case GUI_MODEL_SYS_SETTING_MSG_ID_HIDE_FUNKEY7: {
-            data_type = VALUE_INT;
-            guider_msg_data.value_array.ptr = value;
-            guider_msg_data.value_array.len = len;
-            break;
-        }
-        case GUI_MODEL_SYS_SETTING_MSG_ID_SHOW_FUNKEY4: {
-            data_type = VALUE_INT;
-            guider_msg_data.value_array.ptr = value;
-            guider_msg_data.value_array.len = len;
-            break;
-        }
-        case GUI_MODEL_SYS_SETTING_MSG_ID_SHOW_FUNKEY5: {
-            data_type = VALUE_INT;
-            guider_msg_data.value_array.ptr = value;
-            guider_msg_data.value_array.len = len;
-            break;
-        }
-        case GUI_MODEL_SYS_SETTING_MSG_ID_SHOW_FUNKEY6: {
-            data_type = VALUE_INT;
-            guider_msg_data.value_array.ptr = value;
-            guider_msg_data.value_array.len = len;
-            break;
-        }
-        case GUI_MODEL_SYS_SETTING_MSG_ID_SHOW_FUNKEY7: {
-            data_type = VALUE_INT;
-            guider_msg_data.value_array.ptr = value;
-            guider_msg_data.value_array.len = len;
-            break;
-        }
-        case GUI_MODEL_SYS_SETTING_MSG_ID_STATE_FUNKEY4: {
-            data_type = VALUE_INT;
-            guider_msg_data.value_array.ptr = value;
-            guider_msg_data.value_array.len = len;
-            break;
-        }
-        case GUI_MODEL_SYS_SETTING_MSG_ID_STATE_FUNKEY5: {
-            data_type = VALUE_INT;
-            guider_msg_data.value_array.ptr = value;
-            guider_msg_data.value_array.len = len;
-            break;
-        }
-        case GUI_MODEL_SYS_SETTING_MSG_ID_STATE_FUNKEY6: {
-            data_type = VALUE_INT;
-            guider_msg_data.value_array.ptr = value;
-            guider_msg_data.value_array.len = len;
-            break;
-        }
-        case GUI_MODEL_SYS_SETTING_MSG_ID_STATE_FUNKEY7: {
-            data_type = VALUE_INT;
-            guider_msg_data.value_array.ptr = value;
-            guider_msg_data.value_array.len = len;
-            break;
-        }
+        case GUI_MODEL_SYS_SETTING_MSG_ID_HIDE_VIEWDATE:
+        case GUI_MODEL_SYS_SETTING_MSG_ID_HIDE_VIEWCARNUM:
+        case GUI_MODEL_SYS_SETTING_MSG_ID_HIDE_VIEWLIST:
+        case GUI_MODEL_SYS_SETTING_MSG_ID_HIDE_SUBPAGEWARNING:
+        case GUI_MODEL_SYS_SETTING_MSG_ID_SHOW_VIEWDATE:
+        case GUI_MODEL_SYS_SETTING_MSG_ID_SHOW_VIEWCARNUM:
+        case GUI_MODEL_SYS_SETTING_MSG_ID_SHOW_VIEWLIST:
+        case GUI_MODEL_SYS_SETTING_MSG_ID_SHOW_SUBPAGEWARNING:
+        case GUI_MODEL_SYS_SETTING_MSG_ID_HIDE_FUNKEY5:
+        case GUI_MODEL_SYS_SETTING_MSG_ID_HIDE_FUNKEY6:
+        case GUI_MODEL_SYS_SETTING_MSG_ID_HIDE_FUNKEY7:
+        case GUI_MODEL_SYS_SETTING_MSG_ID_SHOW_FUNKEY4:
+        case GUI_MODEL_SYS_SETTING_MSG_ID_SHOW_FUNKEY5:
+        case GUI_MODEL_SYS_SETTING_MSG_ID_SHOW_FUNKEY6:
+        case GUI_MODEL_SYS_SETTING_MSG_ID_SHOW_FUNKEY7:
         case GUI_MODEL_SYS_SETTING_MSG_ID_HIDE_FUNKEY4: {
             data_type = VALUE_INT;
             guider_msg_data.value_array.ptr = value;
             guider_msg_data.value_array.len = len;
-            break;
         }
+        break;
+        case GUI_MODEL_SYS_SETTING_MSG_ID_STATE_FUNKEY4:
+        case GUI_MODEL_SYS_SETTING_MSG_ID_STATE_FUNKEY5:
+        case GUI_MODEL_SYS_SETTING_MSG_ID_STATE_FUNKEY6:
+        case GUI_MODEL_SYS_SETTING_MSG_ID_STATE_FUNKEY7: {
+            data_type = VALUE_INT;
+            guider_msg_data.value_array.ptr = value;
+            guider_msg_data.value_array.len = len;
+        }
+        break;
         case GUI_MODEL_SYS_SETTING_MSG_ID_SUBPAGE_WARNING_STATE: {
             data_type = VALUE_BOOL;
             guider_msg_data.value_array.ptr = value;
             guider_msg_data.value_array.len = len;
-            break;
         }
+        break;
+        case GUI_MODEL_SYS_SETTING_MSG_ID_FUNKEY4:
+        case GUI_MODEL_SYS_SETTING_MSG_ID_FUNKEY5:
+        case GUI_MODEL_SYS_SETTING_MSG_ID_FUNKEY6:
+        case GUI_MODEL_SYS_SETTING_MSG_ID_FUNKEY7:
+        case GUI_MODEL_SYS_SETTING_MSG_ID_SUBPAGE_WARNING: {
+            data_type = VALUE_STRING;
+            guider_msg_data.value_array.ptr = value;
+            guider_msg_data.value_array.len = len;
+        }
+        break;
         default:
             break;
         }

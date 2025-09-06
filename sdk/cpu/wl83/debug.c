@@ -426,6 +426,9 @@ platform_initcall(get_exception_log_flash_addr);
 
 static void write_exception_log_to_flash(void *data, u32 len)
 {
+    if (exception_log_flash_addr == 0) {
+        return;
+    }
     extern void set_os_init_flag(u8 value);
     set_os_init_flag(0);
     extern void norflash_set_write_cpu_hold(u8 hold_en);

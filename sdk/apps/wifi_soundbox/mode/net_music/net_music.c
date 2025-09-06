@@ -315,7 +315,13 @@ static int net_music_init(void)
         }
     }
 
-    /* app_send_message(APP_MSG_ENTER_MODE, APP_MODE_NET_MUSIC); */
+#if TCFG_USER_EMITTER_ENABLE
+    extern u8 *get_cur_connect_emitter_mac_addr(void);
+    extern void emitter_open(void);
+    if (get_cur_connect_emitter_mac_addr()) {
+        emitter_open();
+    }
+#endif
 
     return 0;
 }
@@ -333,7 +339,13 @@ static int net_music_exit(void)
     }
 #endif
 
-    /* app_send_message(APP_MSG_EXIT_MODE, APP_MODE_NET_MUSIC); */
+#if TCFG_USER_EMITTER_ENABLE
+    extern u8 *get_cur_connect_emitter_mac_addr(void);
+    extern void emitter_close(void);
+    if (get_cur_connect_emitter_mac_addr()) {
+        emitter_close();
+    }
+#endif
 
     return 0;
 }

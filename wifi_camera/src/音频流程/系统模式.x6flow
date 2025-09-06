@@ -26,7 +26,10 @@
     {
      "uuid": 48452,
      "title": "标准",
-     "id": "id_1745198624460_0"
+     "id": "id_1745198624460_0",
+     "disable": false,
+     "selected": "A",
+     "preset": ""
     }
    ],
    "curTab": "id_1745198624460_0"
@@ -3153,7 +3156,7 @@
        {
         "modeId": "id_1745198624460_0",
         "name": "Vol_SysTone",
-        "current": "",
+        "current": "arg1",
         "originSize": 0,
         "list": [
          {
@@ -3185,11 +3188,11 @@
              },
              {
               "id": "id_1690535811640_0",
-              "value": 16
+              "value": 14
              },
              {
               "id": "id_1676801188975_0",
-              "value": 10
+              "value": 14
              }
             ]
            },
@@ -3197,10 +3200,12 @@
             "id": "id_1677751149521_1",
             "list": []
            }
-          ]
+          ],
+          "bypass": false
          }
         ],
-        "originCount": 1
+        "originCount": 1,
+        "bypass": false
        }
       ]
      },
@@ -4015,7 +4020,7 @@
        {
         "modeId": "id_1745198624460_0",
         "name": "Vol_SysRing",
-        "current": "",
+        "current": "arg0",
         "originSize": 0,
         "list": [
          {
@@ -4047,11 +4052,11 @@
              },
              {
               "id": "id_1690535811640_0",
-              "value": 16
+              "value": 13
              },
              {
               "id": "id_1676801188975_0",
-              "value": 10
+              "value": 13
              }
             ]
            },
@@ -4059,10 +4064,12 @@
             "id": "id_1677751149521_1",
             "list": []
            }
-          ]
+          ],
+          "bypass": false
          }
         ],
-        "originCount": 1
+        "originCount": 1,
+        "bypass": false
        }
       ]
      },
@@ -4492,7 +4499,7 @@
        {
         "modeId": "id_1745198624460_0",
         "name": "Vol_SysKTone",
-        "current": "",
+        "current": "arg0",
         "originSize": 0,
         "list": [
          {
@@ -4524,11 +4531,11 @@
              },
              {
               "id": "id_1690535811640_0",
-              "value": 16
+              "value": 13
              },
              {
               "id": "id_1676801188975_0",
-              "value": 10
+              "value": 13
              }
             ]
            },
@@ -4536,10 +4543,12 @@
             "id": "id_1677751149521_1",
             "list": []
            }
-          ]
+          ],
+          "bypass": false
          }
         ],
-        "originCount": 1
+        "originCount": 1,
+        "bypass": false
        }
       ]
      },
@@ -4970,7 +4979,7 @@
        {
         "modeId": "id_1745198624460_0",
         "name": "Vol_SysTTS",
-        "current": "",
+        "current": "arg0",
         "originSize": 0,
         "list": [
          {
@@ -5002,11 +5011,11 @@
              },
              {
               "id": "id_1690535811640_0",
-              "value": 16
+              "value": 13
              },
              {
               "id": "id_1676801188975_0",
-              "value": 10
+              "value": 13
              }
             ]
            },
@@ -5014,10 +5023,12 @@
             "id": "id_1677751149521_1",
             "list": []
            }
-          ]
+          ],
+          "bypass": false
          }
         ],
-        "originCount": 1
+        "originCount": 1,
+        "bypass": false
        }
       ]
      },
@@ -5483,7 +5494,7 @@
        {
         "modeId": "id_1745198624460_0",
         "name": "Vol_SysTWSTone",
-        "current": "",
+        "current": "arg0",
         "originSize": 0,
         "list": [
          {
@@ -5515,11 +5526,11 @@
              },
              {
               "id": "id_1690535811640_0",
-              "value": 16
+              "value": 13
              },
              {
               "id": "id_1676801188975_0",
-              "value": 10
+              "value": 13
              }
             ]
            },
@@ -5527,10 +5538,12 @@
             "id": "id_1677751149521_1",
             "list": []
            }
-          ]
+          ],
+          "bypass": false
          }
         ],
-        "originCount": 1
+        "originCount": 1,
+        "bypass": false
        }
       ]
      },
@@ -14539,5 +14552,6 @@
  "version": {
   "code": 1,
   "tool": "4.4.0"
- }
+ },
+ "abFlow": false
 }

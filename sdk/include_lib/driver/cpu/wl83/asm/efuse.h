@@ -23,7 +23,8 @@ u8 efuse_get_pin_reset_en(void);
 
 u16 efuse_get_vtemp(void);
 
-u8 efuse_get_boot_decrypt(void);
+// u8 efuse_get_boot_decrypt(void);
+u8 efuse_get_adc_trim(void);
 
 u8 efuse_get_avdd18_en(void);
 

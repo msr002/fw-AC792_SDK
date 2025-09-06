@@ -23,11 +23,7 @@
 //注册页面加载卸载回调
 int gui_src_action_lane(int action)
 {
-    struct intent it;
-    struct application *app;
 
-    init_intent(&it);
-    app = get_current_app();
 
     printf("[chili] %s %d   \n", __func__, __LINE__);
     lv_ui_line_drift *ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_LINE_DRIFT);
@@ -41,23 +37,14 @@ int gui_src_action_lane(int action)
 #else
         lv_obj_set_style_bg_opa(ui_scr->line_drift, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
 #endif
-        if (app) {
-            printf("[chili] %s %d   \n", app->name, __LINE__);
-            it.name = app->name;//APP状态机在：video_rec.c
-            it.action = ACTION_BACK;
-            start_app(&it);
+        if (FALSE == current_app_in_mode(APP_MODE_REC)) {
+            app_msg_handler(NULL, APP_MSG_STOP);
+            app_mode_change_replace(APP_MODE_REC);
         }
-        it.name = "video_rec";//APP状态机在：video_rec.c
-        it.action = ACTION_VIDEO_REC_MAIN;
-        start_app(&it);
+        app_send_message(APP_MSG_REC_MAIN, 0);
         break;
     case GUI_SCREEN_ACTION_UNLOAD:
-        if (app) {
-            printf("[chili] %s %d   \n", app->name, __LINE__);
-            it.name = app->name;//APP状态机在：video_rec.c
-            it.action = ACTION_BACK;
-            start_app(&it);
-        }
+        app_mode_go_back();
         break;
     }
 }
@@ -101,5 +88,4 @@ void line_drift_page_hide(int arg)
     ui_load_scr_anim(&guider_ui, screen, LV_SCR_LOAD_ANIM_NONE, 100, 100, true, true, false);
 
 }
-
 #endif

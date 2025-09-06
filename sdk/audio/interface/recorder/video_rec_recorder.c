@@ -70,7 +70,11 @@ void *video_mic_recorder_open(u16 sample_rate, u8 code_type, void *priv, void (*
     enc_fmt.sample_rate = sample_rate;
     enc_fmt.frame_dms = 1024;
     fmt.sample_rate = sample_rate;
-    fmt.coding_type = AUDIO_CODING_PCM;
+    if (!code_type) {
+        fmt.coding_type = AUDIO_CODING_PCM;
+    } else {
+        fmt.coding_type = code_type;
+    }
 
 
     err = jlstream_node_ioctl(recorder->stream, NODE_UUID_ENCODER, NODE_IOC_SET_FMT, (int)(&enc_fmt));

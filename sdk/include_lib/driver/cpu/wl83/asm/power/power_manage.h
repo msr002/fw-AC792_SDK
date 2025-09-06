@@ -92,5 +92,25 @@ extern const struct deepsleep_target deepsleep_target_end[];
 #define list_for_each_deepsleep_target(p) \
     for (p = deepsleep_target_begin; p < deepsleep_target_end; p++)
 
+//******************************************************************************************
+/*
+ *  soff device close handler. 软关机关闭外设流程，处理
+ *  需要等待空闲后才能关闭的外设
+ */
+struct soff_busy_dev_close_hdl {
+    const char *name;        // 设备名
+    u32 timeout;             // 单位:cpu时间，400000大概130ms(sysclk = 360M)
+    u8(*dev_is_busy)(void);  // 设备是否busy
+    void (*dev_close)(void); // 关闭设备
+};
+
+#define REGISTER_SOFF_BUSY_DEV_CLOSE_HDL(hdl) \
+    const struct soff_busy_dev_close_hdl hdl SEC_USED(.soff_busy_dev_close_hdl)
+
+extern const struct soff_busy_dev_close_hdl soff_busy_dev_close_hdl_begin[];
+extern const struct soff_busy_dev_close_hdl soff_busy_dev_close_hdl_end[];
+
+#define list_for_each_soff_busy_dev_close_hdl(p) \
+    for (p = soff_busy_dev_close_hdl_begin; p < soff_busy_dev_close_hdl_end; p++)
 
 #endif

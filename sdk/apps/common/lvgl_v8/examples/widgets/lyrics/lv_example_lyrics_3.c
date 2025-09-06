@@ -70,7 +70,7 @@ static void lv_example_lyrics_3_letter(const char *text, uint16_t font_size, con
 
     uint16_t lyrics_0_len = (letter_num / 2);
 
-    curr_obj_0 = lv_lyrics_create(lv_scr_act(), font_file, font_size, letter_buf, lyrics_0_len);
+    curr_obj_0 = lv_lyrics_create(lv_scr_act(), font_file, font_size, 0, letter_buf, lyrics_0_len);
     if (curr_obj_0 == NULL) {
         printf("lv_lyrics_create is fail!!");
         goto example_error0;
@@ -79,7 +79,7 @@ static void lv_example_lyrics_3_letter(const char *text, uint16_t font_size, con
     lv_lyrics_set_pos(curr_obj_0, 100, 100);
     lv_lyrics_set_rotation(curr_obj_0, -450, 0, 0);
 
-    curr_obj_1 = lv_lyrics_create(lv_scr_act(), font_file, font_size, letter_buf + lyrics_0_len, (letter_num - lyrics_0_len));
+    curr_obj_1 = lv_lyrics_create(lv_scr_act(), font_file, font_size, 0, letter_buf + lyrics_0_len, (letter_num - lyrics_0_len));
     if (curr_obj_1 == NULL) {
         printf("lv_lyrics_create is fail!!");
         goto example_error1;

@@ -325,6 +325,7 @@
 <Unit filename="../../../../../include_lib/system/generic/circular_buf.h" />
 <Unit filename="../../../../../include_lib/system/generic/cpu.h" />
 <Unit filename="../../../../../include_lib/system/generic/debug_lite.h" />
+<Unit filename="../../../../../include_lib/system/generic/dlog.h" />
 <Unit filename="../../../../../include_lib/system/generic/errno-base.h" />
 <Unit filename="../../../../../include_lib/system/generic/includes.h" />
 <Unit filename="../../../../../include_lib/system/generic/ioctl.h" />

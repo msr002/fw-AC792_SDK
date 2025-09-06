@@ -19,13 +19,15 @@ lv_obj_t *setup_scr_line_drift(lv_ui *ui)
     lv_ui_line_drift *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_LINE_DRIFT);
     if (ui_scr == NULL) {
         ui_scr = lv_mem_alloc(sizeof(lv_ui_line_drift));
+        if (ui_scr == NULL) {
+            return NULL;
+        }
         memset(ui_scr, 0, sizeof(lv_ui_line_drift));
         ui->line_drift = ui_scr;
     }
 
     //Write codes line_drift
     ui_scr->line_drift = lv_obj_create(NULL);
-    lv_group_t *def_group = lv_group_get_default();
     lv_obj_set_scrollbar_mode(ui_scr->line_drift, LV_SCROLLBAR_MODE_OFF);
     ui_style_set(ui_scr->line_drift, GUI_CTRL_SCR);
 
@@ -72,7 +74,7 @@ lv_obj_t *setup_scr_line_drift(lv_ui *ui)
     //Delete extra default style for line_drift_btn_horizon
     lv_obj_remove_style(ui_scr->line_drift_btn_horizon, &gui_btn_main_focus_key_style, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
     ui_scr->line_drift_btn_horizon_label = lv_label_create(ui_scr->line_drift_btn_horizon);
-    lv_obj_set_style_pad_all(ui_scr->line_drift_btn_horizon, 0, LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_all(ui_scr->line_drift_btn_horizon, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_align(ui_scr->line_drift_btn_horizon_label, LV_ALIGN_CENTER, 0, 0);
 
     //Write codes line_drift_btn_carhead
@@ -89,7 +91,7 @@ lv_obj_t *setup_scr_line_drift(lv_ui *ui)
     //Delete extra default style for line_drift_btn_carhead
     lv_obj_remove_style(ui_scr->line_drift_btn_carhead, &gui_btn_main_focus_key_style, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
     ui_scr->line_drift_btn_carhead_label = lv_label_create(ui_scr->line_drift_btn_carhead);
-    lv_obj_set_style_pad_all(ui_scr->line_drift_btn_carhead, 0, LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_all(ui_scr->line_drift_btn_carhead, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_align(ui_scr->line_drift_btn_carhead_label, LV_ALIGN_CENTER, 0, 0);
 
     //Write codes line_drift_lbl_7
@@ -130,7 +132,7 @@ lv_obj_t *setup_scr_line_drift(lv_ui *ui)
 
     lv_obj_update_layout(ui_scr->line_drift);
     ui_scr->line_drift_del = false;
-    i18n_refresh_texts("line_drift");
+    i18n_refresh_texts(GUI_SCREEN_LINE_DRIFT);
 
     //Init events for screen
     events_init_line_drift(ui);

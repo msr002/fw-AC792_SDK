@@ -60,6 +60,7 @@ void lv_font_free_bin(lv_font_t *font);
 /**********************
  *      MACROS
  **********************/
+extern const uint8_t flash_src_use_malloc;
 
 #ifdef __cplusplus
 } /*extern "C"*/

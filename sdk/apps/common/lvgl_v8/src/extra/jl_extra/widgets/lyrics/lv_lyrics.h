@@ -97,13 +97,14 @@ typedef struct {
  * @Params parent
  * @Params font_file
  * @Params font_size
+ * @Params font_spacing 单位是1/64 像素点,0表示默认间距
  * @Params letter
  * @Params len
  *
  * @return
  */
 /* ------------------------------------------------------------------------------------*/
-lv_obj_t *lv_lyrics_create(lv_obj_t *parent, const char *font_file, uint16_t font_size, uint32_t *letter, uint8_t len);
+lv_obj_t *lv_lyrics_create(lv_obj_t *parent, const char *font_file, uint16_t font_size, int font_spacing, uint32_t *letter, uint8_t len);
 
 /* ------------------------------------------------------------------------------------*/
 /**
@@ -198,6 +199,15 @@ void lv_lyrics_set_rotation(lv_obj_t *obj, int16_t x_angle, int16_t y_angle, int
  */
 /* ------------------------------------------------------------------------------------*/
 void lv_lyrics_set_color(lv_obj_t *obj, jlvg_color_t color);
+
+/* ------------------------------------------------------------------------------------*/
+/**
+ * @brief lv_lyrics_set_tc_point
+ *
+ * @Params tc_point
+ */
+/* ------------------------------------------------------------------------------------*/
+void lv_lyrics_set_tc_point(lv_obj_t *obj, jlvg_point2_t tc_point);
 /**********************
  *      MACROS
  **********************/

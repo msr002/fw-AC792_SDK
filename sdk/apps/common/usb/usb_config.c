@@ -168,7 +168,7 @@ void *usb_alloc_ep_dmabuffer(const usb_dev usb_id, u32 ep, u32 dma_size)
 #endif
     ASSERT(ep_buffer, "%s() ep_buffer = NULL!!!, usb_id = %d, ep = %x, dma_size = %d\n", __func__, usb_id, ep, dma_size);
 
-    log_info("usb%d slave, ep = %x, dma_size = %d, ep_buffer = %x", usb_id, ep, dma_size, ep_buffer);
+    log_info("usb%d slave, ep = %x, dma_size = %d, ep_buffer = %x", usb_id, ep, dma_size, (unsigned int)ep_buffer);
 
     return ep_buffer;
 }

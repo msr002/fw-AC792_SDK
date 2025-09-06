@@ -893,7 +893,7 @@
      }
     ],
     "eventField": [],
-    "disable": false
+    "disable": true
    },
    "type": "default",
    "justify": "start",

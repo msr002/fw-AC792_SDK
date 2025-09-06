@@ -3,6 +3,7 @@
 
 #include "asm/cpu.h"
 #include "generic/typedef.h"
+#include "generic/dlog.h"
 
 // -- output terminal color
 #define RedBold             "\033[31;1m" // 红色加粗
@@ -125,36 +126,86 @@ LOG_TAG_CONST_DECLARE(LOG_CHAR,     LOG_TAG_CONST);
 #elif (LOG_MODE == LOG_BY_CONST)
 
 #define log_verb(format, ...)       \
-    if (LOG_IS_ENABLE(LOG_VERBOSE)) \
-        log_print(__LOG_INFO,NULL,"[Verb]: " _LOG_TAG format "\r\n", ## __VA_ARGS__)
+{ \
+    if(config_ulog_enable){ \
+        if (LOG_IS_ENABLE(LOG_VERBOSE)){ \
+            log_print(__LOG_VERB,NULL,"[Verb]: " _LOG_TAG format "\r\n", ## __VA_ARGS__); \
+        } \
+    } \
+    if(config_dlog_enable) { \
+        if (LOG_IS_ENABLE(LOG_VERBOSE)){ \
+            dlog_printf(__LOG_VERB, _LOG_TAG format, ##__VA_ARGS__) \
+        } \
+    } \
+} \
 
 #define log_info(format, ...)       \
-    if (LOG_IS_ENABLE(LOG_INFO)) \
-        log_print(__LOG_INFO,NULL,"[Info]: " _LOG_TAG format "\r\n", ## __VA_ARGS__)
+{ \
+    if(config_ulog_enable){ \
+        if (LOG_IS_ENABLE(LOG_INFO)){ \
+            log_print(__LOG_INFO,NULL,"[Info]: " _LOG_TAG format "\r\n", ## __VA_ARGS__); \
+        } \
+    } \
+    if(config_dlog_enable) { \
+        if (LOG_IS_ENABLE(LOG_INFO)){ \
+            dlog_printf(__LOG_INFO, _LOG_TAG format, ##__VA_ARGS__) \
+        } \
+    } \
+} \
 
 #define log_info_hexdump(x, y)     \
     if (LOG_IS_ENABLE(LOG_INFO)) \
         printf_buf(x, y)
 
 #define log_debug(format, ...)       \
-    if (LOG_IS_ENABLE(LOG_DEBUG)) \
-        log_print(__LOG_DEBUG,NULL,"[Debug]: " _LOG_TAG format "\r\n", ## __VA_ARGS__)
+{ \
+    if(config_ulog_enable){ \
+        if (LOG_IS_ENABLE(LOG_DEBUG)) { \
+            log_print(__LOG_DEBUG,NULL,"[Debug]: " _LOG_TAG format "\r\n", ## __VA_ARGS__); \
+        } \
+    } \
+    if(config_dlog_enable) { \
+        if (LOG_IS_ENABLE(LOG_DEBUG)){ \
+            dlog_printf(__LOG_DEBUG, _LOG_TAG format, ##__VA_ARGS__) \
+        } \
+    } \
+} \
 
 #define log_debug_hexdump(x, y)     \
     if (LOG_IS_ENABLE(LOG_DEBUG)) \
         printf_buf(x, y)
 
 #define log_error(format, ...)       \
-    if (LOG_IS_ENABLE(LOG_ERROR)) \
-        log_print(__LOG_ERROR,NULL,"<Error>: " _LOG_TAG format "\r\n", ## __VA_ARGS__)
+{ \
+    if(config_ulog_enable) { \
+        if (LOG_IS_ENABLE(LOG_ERROR)) { \
+            log_print(__LOG_ERROR,NULL,"<Error>: " _LOG_TAG format "\r\n", ## __VA_ARGS__); \
+        } \
+    } \
+    if(config_dlog_enable) { \
+        if (LOG_IS_ENABLE(LOG_ERROR)){ \
+            dlog_printf(__LOG_ERROR, _LOG_TAG format, ##__VA_ARGS__) \
+        } \
+    } \
+} \
 
 #define log_error_hexdump(x, y)     \
     if (LOG_IS_ENABLE(LOG_ERROR)) \
         printf_buf(x, y)
 
 #define log_warn(format, ...)       \
-    if (LOG_IS_ENABLE(LOG_WARN)) \
-        log_print(__LOG_WARN,NULL,"<Warn>: " _LOG_TAG format "\r\n", ## __VA_ARGS__)
+{ \
+    if(config_ulog_enable) { \
+        if (LOG_IS_ENABLE(LOG_WARN)) { \
+            log_print(__LOG_WARN,NULL,"<Warn>: " _LOG_TAG format "\r\n", ## __VA_ARGS__); \
+        } \
+    } \
+    if(config_dlog_enable) { \
+        if (LOG_IS_ENABLE(LOG_WARN)){ \
+            dlog_printf(__LOG_WARN, _LOG_TAG format, ##__VA_ARGS__) \
+        } \
+    } \
+} \
 
 #define log_char(x)       \
     if (LOG_IS_ENABLE(LOG_CHAR)) \

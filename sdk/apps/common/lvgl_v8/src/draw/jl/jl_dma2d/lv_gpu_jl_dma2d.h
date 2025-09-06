@@ -48,6 +48,9 @@ void lv_draw_jl_dma2d_blend(lv_draw_ctx_t *draw_ctx, const lv_draw_sw_blend_dsc_
 
 void lv_gpu_jl_dma2d_wait_cb(lv_draw_ctx_t *draw_ctx);
 
+void lv_draw_jl_dma2d_buffer_copy(lv_draw_ctx_t *draw_ctx, void *dest_buf, lv_coord_t dest_stride, const lv_area_t *dest_area, void *src_buf, lv_coord_t src_stride, const lv_area_t *src_area);
+void lv_draw_jl_dma2d_blend_fill(lv_color_t *dest_buf, lv_coord_t dest_stride, const lv_area_t *fill_area, lv_color_t color);
+
 /**********************
  *      MACROS
  **********************/

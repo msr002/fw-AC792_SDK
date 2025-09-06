@@ -16,13 +16,6 @@
 #define DNS_FRAME_SIZE	    (DNS_FRAME_POINTS << 1)
 #define DNS_OUT_POINTS_MAX	(DNS_FRAME_POINTS << 1)
 
-typedef struct {
-    //s16 in[512];
-    //cbuffer_t cbuf;
-    noise_suppress_param ns_para;
-    void *ns;
-} audio_ans_t;
-
 /*
 *********************************************************************
 *                  	Noise Suppress Open
@@ -36,7 +29,7 @@ typedef struct {
 * Note(s)    : 采样率只支持8k、16k
 *********************************************************************
 */
-void *audio_ns_open(u16 sr, u8 mode, float NoiseLevel, float AggressFactor, float MinSuppress);
+void *audio_ns_open(u16 sr, u8 mode, float NoiseLevel, float AggressFactor, float MinSuppress, u8 lite, float eng_gain, float output16);
 
 /*
 *********************************************************************
@@ -64,6 +57,6 @@ int audio_ns_run(void *ns, short *in, short *out, u16 len);
 */
 int audio_ns_close(void *ns);
 
-int audio_ns_config(void *hdl, u32 cmd, int arg, void *priv);
+int audio_ns_config(void *ns, u32 cmd, int arg, void *priv);
 
 #endif/*_AUDIO_NOISE_SUPPRESS_H_*/

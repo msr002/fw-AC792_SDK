@@ -108,7 +108,6 @@ static unsigned int audio_test_recorder_first_play_next = 0;
 static unsigned int audio_test_recorder_first_play_times = 0;
 
 
-FILE *fp = NULL;
 /***************************************audio*********************************************/
 
 static int _send_audio_msg(IN CONST unsigned int msgid, IN CONST VOID *data, IN CONST unsigned int len)
@@ -252,7 +251,6 @@ static const struct stream_file_ops virtual_dev_ops = {
     .get_fmt    = virtual_dev_get_fmt,
 };
 
-
 //编码器输出PCM数据
 static void recorder_vfs_fwrite(void *file, u8 *data, u32 len)
 {
@@ -267,241 +265,11 @@ static void recorder_vfs_fwrite(void *file, u8 *data, u32 len)
     } else {
         /* audio_debug("cbuf write %d data", len); */
     }
-
     /* return len; */
 }
 
-static CONST struct audio_vfs_ops recorder_vfs_ops = {
-    .fwrite = recorder_vfs_fwrite,
-    .fopen = 0,
-    .fread = 0,
-    .fseek = 0,
-    .ftell = 0,
-    .flen = 0,
-    .fclose = 0,
-};
-
-
-/**
- * @berief: 初始化录音功能,录取PCM的数据,存储到PCM buff中
- * @param   int
- * @return: none
- * @retval: none
- */
-
-static VOID audio_recoder_init()
-{
-    audio_debug("audio recoder init ");
-    int err;
-    static BOOL_T flag = FALSE;
-    union audio_req req = {0};
-
-    flag = TRUE;
-    req.enc.frame_size = SAMPLE_RATE / 100 * 4 * CHANNEL;        //收集够多少字节PCM数据就回调一次fwrite
-    req.enc.output_buf_len = req.enc.frame_size * 3; //底层缓冲buf至少设成3倍frame_size
-    req.enc.cmd = AUDIO_ENC_OPEN;
-    req.enc.channel = CHANNEL;
-    req.enc.volume = AUDIO_RECORD_VOICE_VOLUME;
-    req.enc.sample_rate = SAMPLE_RATE;
-
-#ifdef AUDIO_TYPE_G711A
-    req.enc.format = "pcm";
-#elif defined(AUDIO_TYPE_AACLC)
-    req.enc.format = "aac";
-    req.enc.bitrate = SAMPLE_RATE * 4;
-    req.enc.no_header = 0;
-#elif defined(AUDIO_TYPE_OPUS)
-    req.enc.format = "opus";
-#endif
-
-    req.enc.sample_source = "mic";
-    req.enc.vfs_ops = &recorder_vfs_ops;
-    req.enc.file = (FILE *)&g_audio_hdl.pcm_cbuff_w;
-
-    req.enc.use_vad = 1; //打开VAD断句功能
-    req.enc.dns_enable = 1; //打开降噪功能
-    req.enc.vad_auto_refresh = 1; //VAD自动刷
-
-    if (req.enc.use_vad == 1) {
-        req.enc.vad_start_threshold = 0;    //ms
-        req.enc.vad_stop_threshold  = 1000;    //ms
-    }
-#ifdef CONFIG_AEC_ENC_ENABLE
-    struct aec_s_attr aec_param = {0};
-    aec_param.EnableBit = AEC_MODE_ADVANCE;
-    req.enc.aec_attr = &aec_param;
-    req.enc.aec_enable = 1;
-
-    extern void get_cfg_file_aec_config(struct aec_s_attr * aec_param);
-    get_cfg_file_aec_config(&aec_param);
-
-    if (aec_param.EnableBit == 0) {
-        req.enc.aec_enable = 0;
-        req.enc.aec_attr = NULL;
-    }
-    if (aec_param.EnableBit != AEC_MODE_ADVANCE) {
-        aec_param.output_way = 0;
-    }
-
-    if (req.enc.sample_rate == 16000) {
-        aec_param.wideband = 1;
-#ifdef CONFIG_AEC_USE_PLAY_MUSIC_ENABLE
-        aec_param.hw_delay_offset = 640;
-#else
-        aec_param.hw_delay_offset = 30;
-#endif
-    } else {
-        aec_param.wideband = 0;
-        aec_param.hw_delay_offset = 75;
-    }
-#ifdef CONFIG_AEC_USE_PLAY_MUSIC_ENABLE
-    if (aec_param.output_way == 0) {
-        aec_param.dac_ref_sr = 48000; //aec软件回采dac参考采样率
-    }
-#endif
-#endif
-
-    err = server_request(g_audio_hdl.enc_server, AUDIO_REQ_ENC, &req);
-}
-
-
-static int _audio_recoder_stop()
-{
-    int err;
-    union audio_req req = {0};
-    req.enc.cmd             = AUDIO_ENC_STOP;
-    err = server_request(g_audio_hdl.enc_server, AUDIO_REQ_ENC, &req);
-    audio_debug("_audio_recoder_stop err=%d", err);
-    return err;
-}
-
-
-//解码器读取PCM数据
-static int audio_play_net_vfs_fread(VOID *file, VOID *data, unsigned int len)
-{
-
-    cbuffer_t *cbuf = NULL;
-    unsigned int cbuf_len = 0;
-    unsigned int rlen = 0;
-    unsigned int c_rlen = 0;
-    cbuf = (cbuffer_t *)file;
-    do {
-        cbuf_len = cbuf_get_data_size(cbuf);
-
-        rlen = cbuf_len > len ? len : cbuf_len;
-        c_rlen = cbuf_read(cbuf, data, rlen);
-        if (c_rlen > 0) {
-            //audio_debug("c_rlen=%d rlen=%d cbuf_len=%d len=%d",c_rlen,rlen,cbuf_len,len);
-            break;
-        }
-
-        //此处等待信号量是为了防止解码器因为读不到数而一直空转
-        if (FALSE == g_audio_hdl.is_audio_play_open) {
-            rlen = 0;
-            break;
-        }
-        g_audio_ctrl.pcm_wait_sem = 1;
-        os_sem_pend(&g_audio_ctrl.r_sem, _AUDIO_WAIT_TIMEOUT);
-        g_audio_ctrl.pcm_wait_sem = 0;
-
-    } while (1);
-
-    //返回成功读取的字节数
-    return rlen;
-}
-
-static int audio_vfs_fseek(void *file, u32 offset, int orig)
-{
-    printf("audio_vfs_fseek %d", offset);
-    // __this->audio_data_offset = offset;
-    return 0;
-}
-
-static CONST struct audio_vfs_ops audio_play_net_vfs_ops = {
-    .fread  = audio_play_net_vfs_fread,
-    .fwrite = 0,
-    .fopen = 0,
-    .fseek = 0, //audio_vfs_fseek,
-    .ftell = 0,
-    .flen = 0,
-    .fclose = 0,
-};
-
-/**
- * @berief: 初始化播放功能,播放PCM的数据,从pcm_buff中读取数据播放
- * @param   int
- * @return: none
- * @retval: none
- */
-static VOID audio_player_net_init()
-{
-    static BOOL_T flag = FALSE;
-    int err;
-    union audio_req req = {0};
-    if (flag) {
-        return;
-    }
-    flag = TRUE;
-
-    req.dec.cmd             = AUDIO_DEC_OPEN;
-    req.dec.volume          = AUDIO_PLAY_VOICE_VOLUME;
-    req.dec.output_buf_len  = 8 * 1024;
-    req.dec.priority        = 1;
-    req.dec.channel         = CHANNEL;  /*dac 差分输出 单路*/
-    req.dec.sample_rate     = SAMPLE_RATE;
-    req.dec.vfs_ops         = &audio_play_net_vfs_ops;
-#ifdef AUDIO_TYPE_G711A
-    req.dec.dec_type 		= "pcm";
-#elif defined(AUDIO_TYPE_AACLC)
-    req.dec.dec_type 		= "aac";
-#elif defined(AUDIO_TYPE_OPUS)
-    req.dec.dec_type 		= "opus";
-#endif
-    req.dec.sample_source   = "dac";
-    req.dec.file            = (FILE *)&g_audio_hdl.pcm_cbuff_r;
-    audio_debug("audio_player_net_init ");
-    err = server_request(g_audio_hdl.dec_server, AUDIO_REQ_DEC, &req);
-    if (err) {
-        audio_debug("server_request dec_server AUDIO_DEC_OPEN err %d", err);
-        goto __err;
-    }
-    req.dec.cmd = AUDIO_DEC_START;
-    server_request(g_audio_hdl.dec_server, AUDIO_REQ_DEC, &req);
-    return;
-__err :
-
-    return;
-
-}
-
-static int _audio_player_stop()
-{
-    int err;
-    union audio_req req = {0};
-    req.dec.cmd             = AUDIO_DEC_STOP;
-    err = server_request(g_audio_hdl.dec_server, AUDIO_REQ_DEC, &req);
-    audio_debug("_audio_player_stop err=%d", err);
-
-}
 int recoder_state = 0;
-static VOID enc_server_event_handler(VOID *priv, int argc, int *argv)
-{
-    switch (argv[0]) {
-    case AUDIO_SERVER_EVENT_ERR:
-    case AUDIO_SERVER_EVENT_END:
-        break;
-    case AUDIO_SERVER_EVENT_SPEAK_START:
-        printf("speak start\n");
-        recoder_state = 1;
-        break;
-    case AUDIO_SERVER_EVENT_SPEAK_STOP:
-        printf("speak stop\n");
-        recoder_state = 0;
-        break;
-    default:
-        break;
-    }
-}
+
 
 //*****************************收音和播放************************
 VOID _device_net_audio(BOOL_T flag)
@@ -568,11 +336,6 @@ static VOID __audio_task(void *pArg)
             cbuf_clear(&g_audio_hdl.pcm_cbuff_r);
             if (g_audio_hdl.is_audio_play_open) {
                 vir_source_player_close(g_audio_hdl.dec_server);
-                err = _audio_recoder_stop();
-                if (err == 0) {
-                    audio_recoder_init();
-                    break;
-                }
                 g_audio_hdl.dec_server = NULL;
             }
             if (!g_audio_hdl.dec_server) {
@@ -581,7 +344,6 @@ static VOID __audio_task(void *pArg)
                     printf("dev flow open err");
                 } else  {
                     audio_debug("dec server_open succ!");
-                    /* mdelay(1*1000); */
                     vir_source_player_start(g_audio_hdl.dec_server);
                 }
             }
@@ -592,10 +354,7 @@ static VOID __audio_task(void *pArg)
         case MSG_STOP_NET_AUDIO_PLAY: {
             cbuf_clear(&g_audio_hdl.pcm_cbuff_r);
             g_audio_hdl.is_audio_play_open = FALSE;
-            err = _audio_player_stop();
-            if (err != 0) {
-                vir_source_player_close(g_audio_hdl.dec_server);
-            }
+            vir_source_player_close(g_audio_hdl.dec_server);
             g_audio_hdl.dec_server = NULL;
         }
         break;
@@ -604,16 +363,10 @@ static VOID __audio_task(void *pArg)
             cbuf_clear(&g_audio_hdl.pcm_cbuff_w);
             if (g_audio_hdl.is_audio_record_open) {
                 err = video_mic_recorder_close(g_audio_hdl.enc_server);
-                if (err == -1) {
-                    _audio_recoder_stop();
-                } else {
-                    g_audio_hdl.enc_server = NULL;
-                }
+                g_audio_hdl.enc_server = NULL;
             }
             if (!g_audio_hdl.enc_server) {
                 g_audio_hdl.enc_server = video_mic_recorder_open(SAMPLE_RATE, 0, NULL, recorder_vfs_fwrite);
-            } else {
-                audio_recoder_init();
             }
             g_audio_hdl.is_audio_record_open = true;
         }
@@ -622,10 +375,7 @@ static VOID __audio_task(void *pArg)
         case MSG_STOP_AUDIO_RECORDER: {
             cbuf_clear(&g_audio_hdl.pcm_cbuff_w);
             g_audio_hdl.is_audio_record_open = FALSE;
-            err = _audio_recoder_stop();
-            if (err != 0) {
-                video_mic_recorder_close(g_audio_hdl.enc_server);
-            }
+            video_mic_recorder_close(g_audio_hdl.enc_server);
             g_audio_hdl.enc_server = NULL;
         }
         break;
@@ -682,20 +432,6 @@ static int _audio_soft_init(VOID)
     } else {
     }
 
-#if 1
-    if (!g_audio_hdl.enc_server) {
-        g_audio_hdl.enc_server = server_open("audio_server", "enc");
-        if (!g_audio_hdl.enc_server) {
-            op_ret = -1;
-            audio_debug("server_open err:%d", op_ret);
-            /* return op_ret; */
-            goto play_;
-        }
-        audio_debug("enc server_open succ!");
-        server_register_event_handler_to_task(g_audio_hdl.enc_server, NULL, enc_server_event_handler, "app_core");
-    }
-#endif
-
 play_:
     g_audio_hdl.dec_server = vir_source_player_open(&g_audio_hdl.pcm_cbuff_r,  &virtual_dev_ops);
     if (!g_audio_hdl.dec_server) {
@@ -708,19 +444,6 @@ play_:
         goto task_;
     }
 
-#if 1
-    if (!g_audio_hdl.dec_server) {
-        g_audio_hdl.dec_server = server_open("audio_server", "dec");
-        if (!g_audio_hdl.dec_server) {
-            op_ret = -1;
-            audio_debug("server_open err:%d", op_ret);
-            return op_ret;
-        }
-        audio_debug("dec server_open succ!");
-        audio_debug("enc_server 0x%x dec_server 0x%x", g_audio_hdl.enc_server, g_audio_hdl.dec_server);
-    }
-#endif
-
 task_:
 
     QS queue_size = (sizeof(_AUDIO_CTRL_MSG *) * 20 + sizeof(WORD) - 1) / sizeof(WORD);
@@ -728,7 +451,7 @@ task_:
 
     printf("msg que:%x, r_sem:%x", g_audio_ctrl.msg_que, g_audio_ctrl.r_sem);
 
-    thread_fork(_AUDIO_TASK_NAME, 5, 3 * 1024, 1 * 1024, g_audio_ctrl.task_handle, __audio_task, NULL);
+    thread_fork(_AUDIO_TASK_NAME, 5, 512, 512, g_audio_ctrl.task_handle, __audio_task, NULL);
 
     audio_debug("_audio_task create");
     /* vir_source_player_start(g_audio_hdl.dec_server); */

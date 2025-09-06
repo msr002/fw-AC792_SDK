@@ -579,7 +579,7 @@ int audio_iis_start(void *_hdl)
         if (hdl->start == IIS_MODULE_STATE_OPEN) {
             hdl->start = IIS_MODULE_STATE_START;
             alink_start(hdl->hw_alink);
-            udelay(100);
+            /* udelay(100); */
             for (int i = 0; i < 4; i++) {//将 tx的io挪到alink_start之后初始化
                 if (hdl->cfg.hwcfg[i].en) {
                     if (hdl->ch_cfg[i].dir == ALINK_DIR_TX) {

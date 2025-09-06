@@ -98,6 +98,7 @@
 <Add directory="../../../../apps/common/example/third_party/rlottie_impl/src/vector/freetype" />
 <Add directory="../../../../apps/common/example/third_party/freetype/include" />
 <Add directory="../../../../include_lib/system/ui" />
+<Add directory="../../../../include_lib/driver/cpu/wl83/asm" />
 <Add directory="../../../../apps/common/lvgl_v8" />
 <Add directory="../../../../apps/common/lvgl_v8/src" />
 <Add directory="../../../../apps/common/lvgl_v8/src/extra" />
@@ -110,6 +111,10 @@
 <Add directory="../../../../apps/common/lvgl_v8/demos/music" />
 <Add directory="../../../../apps/common/lvgl_v8/demos/stress" />
 <Add directory="../../../../apps/common/lvgl_v8/demos/widgets" />
+<Add directory="../../../../apps/common/lvgl_v8/demos/amap/gps/map" />
+<Add directory="../../../../apps/common/lvgl_v8/demos/amap/gps" />
+<Add directory="../../../../apps/common/lvgl_v8/demos/amap" />
+<Add directory="../../../../apps/common/lvgl_v8/src/draw/jl/jl_dma2d" />
 <Add directory="../../../../apps/wifi_soundbox/lvgl_v8_ui_app/style_JL/generated" />
 <Add directory="../../../../apps/wifi_soundbox/lvgl_v8_ui_app/style_JL/generated/gui_events" />
 <Add directory="../../../../apps/wifi_soundbox/lvgl_v8_ui_app/style_JL/generated/gui_fonts" />
@@ -282,6 +287,7 @@
 <Add option="../../../../cpu/wl83/liba/media/lib_amr_wb_enc.a" />
 <Add option="../../../../cpu/wl83/liba/media/lib_mp3_enc.a" />
 <Add option="../../../../cpu/wl83/liba/media/lib_opus_enc.a" />
+<Add option="../../../../cpu/wl83/liba/media/lib_opus_stenc.a" />
 <Add option="../../../../cpu/wl83/liba/media/lib_sbc_eng.a" />
 <Add option="../../../../cpu/wl83/liba/media/lib_bt_hash_enc.a" />
 <Add option="../../../../cpu/wl83/liba/media/lib_advaudio_plc.a" />
@@ -440,6 +446,7 @@
 <Unit filename="../../../../apps/common/camera/SP140A_dvp/sp140a_dvp_awb.h" />
 <Unit filename="../../../../apps/common/camera/SP140A_dvp/sp140a_dvp_iq.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/common/camera/SP140A_dvp/sp140a_dvp_iq.h" />
+<Unit filename="../../../../apps/common/camera/TVP5150A_DVP.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/common/camera/gc0308/gc0308.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/common/camera/gc1084_mipi/gc1084_mipi.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/common/camera/gc1084_mipi/gc1084_mipi.h" />
@@ -512,6 +519,8 @@
 <Unit filename="../../../../apps/common/config/user_cfg.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/common/debug/debug.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/common/debug/debug_user.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="../../../../apps/common/debug/dlog_config.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="../../../../apps/common/debug/dlog_output_config.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/common/debug/online_db/online_db_deal.h" />
 <Unit filename="../../../../apps/common/dev_manager/dev_manager.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/common/dev_manager/dev_manager.h" />
@@ -1030,6 +1039,10 @@
 <Unit filename="../../../../apps/common/lcd/touch_driver/gt911.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/common/lcd/touch_driver/gt9271.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/common/lcd/touch_driver/tp_driver.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="../../../../apps/common/lvgl_v8/demos/amap/amap_canvas.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="../../../../apps/common/lvgl_v8/demos/amap/amap_canvas.h" />
+<Unit filename="../../../../apps/common/lvgl_v8/demos/amap/amap_non_canvas.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="../../../../apps/common/lvgl_v8/demos/amap/amap_non_canvas.h" />
 <Unit filename="../../../../apps/common/lvgl_v8/demos/benchmark/assets/img_benchmark_cogwheel_alpha16.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/common/lvgl_v8/demos/benchmark/assets/img_benchmark_cogwheel_argb.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/common/lvgl_v8/demos/benchmark/assets/img_benchmark_cogwheel_chroma_keyed.c"><Option compilerVer="CC"/></Unit>
@@ -1282,6 +1295,7 @@
 <Unit filename="../../../../apps/common/lvgl_v8/examples/widgets/lyrics/lv_example_lyrics_1.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/common/lvgl_v8/examples/widgets/lyrics/lv_example_lyrics_2.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/common/lvgl_v8/examples/widgets/lyrics/lv_example_lyrics_3.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="../../../../apps/common/lvgl_v8/examples/widgets/lyrics/lv_example_lyrics_4.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/common/lvgl_v8/examples/widgets/menu/lv_example_menu_1.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/common/lvgl_v8/examples/widgets/menu/lv_example_menu_2.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/common/lvgl_v8/examples/widgets/menu/lv_example_menu_3.c"><Option compilerVer="CC"/></Unit>
@@ -1913,6 +1927,7 @@
 <Unit filename="../../../../apps/wifi_soundbox/lvgl_v8_ui_app/style_JL/generated/i18n/lv_i18n.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/wifi_soundbox/lvgl_v8_ui_app/style_JL/generated/i18n/lv_i18n.h" />
 <Unit filename="../../../../apps/wifi_soundbox/mode/bt/bt.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="../../../../apps/wifi_soundbox/mode/bt/bt_emitter.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/wifi_soundbox/mode/bt/bt_slience_detect.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/wifi_soundbox/mode/bt/bt_slience_detect.h" />
 <Unit filename="../../../../apps/wifi_soundbox/mode/bt/dual_conn.c"><Option compilerVer="CC"/></Unit>
@@ -1945,6 +1960,7 @@
 <Unit filename="../../../../apps/wifi_soundbox/mode/net_music/wifi_app_task.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/wifi_soundbox/mode/pc/pc.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/wifi_soundbox/mode/recorder/recorder.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="../../../../apps/wifi_soundbox/mode/usb_host_audio/usb_host_audio.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/wifi_soundbox/ui_action.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../audio/CVP/audio_cvp.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../audio/CVP/audio_cvp.h" />
@@ -2066,6 +2082,7 @@
 <Unit filename="../../../../audio/framework/include/fm_file.h" />
 <Unit filename="../../../../audio/framework/include/linein_file.h" />
 <Unit filename="../../../../audio/framework/include/volume_node.h" />
+<Unit filename="../../../../audio/framework/nodes/a2dp_tx_node.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../audio/framework/nodes/agc_node.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../audio/framework/nodes/channle_swap_node.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../audio/framework/nodes/cvp_3mic_node.c"><Option compilerVer="CC"/></Unit>
@@ -2099,6 +2116,7 @@
 <Unit filename="../../../../audio/framework/nodes/spdif_node.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../audio/framework/nodes/surround_demo_node.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../audio/framework/nodes/uart_node.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="../../../../audio/framework/nodes/usb_host_mic_node.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../audio/framework/nodes/vad_node.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../audio/framework/nodes/vir_data_rx_node.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../audio/framework/nodes/vir_data_tx_node.c"><Option compilerVer="CC"/></Unit>
@@ -2125,6 +2143,7 @@
 <Unit filename="../../../../audio/framework/plugs/source/source_dev4_file.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../audio/framework/plugs/source/spdif_file.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../audio/framework/plugs/source/spdif_file.h" />
+<Unit filename="../../../../audio/framework/plugs/source/usb_host_spk_file.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../audio/interface/includes/a2dp_player.h" />
 <Unit filename="../../../../audio/interface/includes/adda_loop_player.h" />
 <Unit filename="../../../../audio/interface/includes/cvp_node.h" />
@@ -2148,6 +2167,8 @@
 <Unit filename="../../../../audio/interface/includes/tone_player.h" />
 <Unit filename="../../../../audio/interface/includes/tts_player.h" />
 <Unit filename="../../../../audio/interface/includes/tws_tone_player.h" />
+<Unit filename="../../../../audio/interface/includes/usb_host_mic_recorder.h" />
+<Unit filename="../../../../audio/interface/includes/usb_host_spk_player.h" />
 <Unit filename="../../../../audio/interface/includes/vad_node.h" />
 <Unit filename="../../../../audio/interface/includes/vir_dev_player.h" />
 <Unit filename="../../../../audio/interface/includes/vir_source_player.h" />
@@ -2169,6 +2190,7 @@
 <Unit filename="../../../../audio/interface/player/tone_player.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../audio/interface/player/tts_player.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../audio/interface/player/tws_tone_player.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="../../../../audio/interface/player/usb_host_spk_player.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../audio/interface/player/video_dec_player.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../audio/interface/player/vir_dev_player.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../audio/interface/player/vir_source_player.c"><Option compilerVer="CC"/></Unit>
@@ -2178,6 +2200,7 @@
 <Unit filename="../../../../audio/interface/recorder/file_recorder.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../audio/interface/recorder/le_audio_recorder.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../audio/interface/recorder/pc_mic_recorder.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="../../../../audio/interface/recorder/usb_host_mic_recorder.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../audio/interface/recorder/video_rec_recorder.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../audio/interface/recorder/voiceprint_cfg_recorder.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../audio/jl_kws/jl_kws_algo.c"><Option compilerVer="CC"/></Unit>
@@ -2720,6 +2743,7 @@
 <Unit filename="../../../../include_lib/system/generic/circular_buf.h" />
 <Unit filename="../../../../include_lib/system/generic/cpu.h" />
 <Unit filename="../../../../include_lib/system/generic/debug_lite.h" />
+<Unit filename="../../../../include_lib/system/generic/dlog.h" />
 <Unit filename="../../../../include_lib/system/generic/errno-base.h" />
 <Unit filename="../../../../include_lib/system/generic/includes.h" />
 <Unit filename="../../../../include_lib/system/generic/ioctl.h" />

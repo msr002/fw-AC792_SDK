@@ -517,14 +517,27 @@ static int wifi_event_callback(void *network_ctx, enum WIFI_EVENT event)
     case WIFI_EVENT_P2P_STOP:
         puts("|network_user_callback->WIFI_EVENT_P2P_STOP\n");
         break;
+    case WIFI_EVENT_P2P_GC_CONNECTED:
+        puts("network_user_callback->WIFI_EVENT_P2P_GC_CONNECTED");
+        break;
     case WIFI_EVENT_P2P_GC_DISCONNECTED:
         puts("|network_user_callback->WIFI_EVENT_P2P_GC_DISCONNECTED\n");
+        wifi_enter_p2p_mode(P2P_GC_MODE, WIFI_P2P_DEVICE_NAME);
         break;
     case WIFI_EVENT_P2P_GC_NETWORK_STACK_DHCP_SUCC:
         puts("|network_user_callback->WIFI_EVENT_P2P_GC_NETWORK_STACK_DHCP_SUCC\n");
+        void connect_to_server_port_8888(void);
+        connect_to_server_port_8888();
         break;
     case WIFI_EVENT_P2P_GC_NETWORK_STACK_DHCP_TIMEOUT:
         puts("|network_user_callback->WIFI_EVENT_P2P_GC_NETWORK_STACK_DHCP_TIMEOUT\n");
+        break;
+    case WIFI_EVENT_P2P_GO_STA_CONNECTED:
+        puts("network_user_callback->WIFI_EVENT_P2P_GO_STA_CONNECTED");
+        break;
+    case WIFI_EVENT_P2P_GO_STA_DISCONNECTED:
+        puts("network_user_callback->WIFI_EVENT_P2P_GO_STA_DISCONNECTED");
+        wifi_enter_p2p_mode(P2P_GO_MODE, WIFI_P2P_DEVICE_NAME);
         break;
 
     case WIFI_EVENT_SMP_CFG_START:
@@ -708,14 +721,15 @@ static void wifi_app_task(void *priv)
         return;
     }
 #endif
-
+    wifi_set_store_ssid_cnt(NETWORK_SSID_INFO_CNT);
     wifi_set_event_callback(wifi_event_callback);
     wifi_on();
-
     wifi_set_long_retry(4);
     wifi_set_short_retry(7);
 
-    /* wifi_enter_p2p_mode(P2P_GO_MODE, "JLWiFi-P2P"); */
+#if 0
+    wifi_enter_p2p_mode(P2P_GO_MODE, WIFI_P2P_DEVICE_NAME);
+#endif
 
     //非量产模式下的AP和ST设置
 #ifndef CONFIG_MASS_PRODUCTION_ENABLE

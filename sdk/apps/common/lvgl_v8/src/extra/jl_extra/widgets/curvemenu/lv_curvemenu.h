@@ -54,7 +54,6 @@ typedef struct {
 } lv_curvemenu_t;
 
 typedef struct {
-    lv_obj_t obj;
     lv_obj_t *img;
     uint16_t zoom;
     bool is_hide;

@@ -26,6 +26,7 @@ extern const uint8_t lv_jlffmpeg_debug_time;
 extern const uint8_t lv_jlffmpeg_use_frame_ctl;
 extern const uint8_t frame_control_sens;
 extern const uint8_t jlffmpeg_use_media_interface;
+extern const uint32_t lv_jlffmpeg_msg;
 
 struct ffmpeg_context_s;
 
@@ -112,8 +113,11 @@ typedef enum {
 
 /**
  * Register FFMPEG image decoder
+ * @param doublebuf_en 配置方法见lv_conf.h
+ * @param msg_value Q_USER_TYPE
+ * @param msg_event_value  与UI_MSG_RPC_FUNC同值
  */
-void lv_ffmpeg_init(uint8_t doublebuf_en);
+void lv_ffmpeg_init(uint8_t doublebuf_en, int msg_value, uint8_t msg_event_value);
 /**
  * Get the number of frames contained in the file
  * @param path image or video file name

@@ -27,8 +27,8 @@
 #define AUDIO_ATTR_OPUS_RAWDTF_TYPE     BIT(1)  /*!< opus为raw数据，带8字节packet头(4字节大端包长+4字节range校验值) */
 #define AUDIO_ATTR_OPUS_CBR_PKTLEN_TYPE BIT(2)  /*!< opus为百度无头封装格式，需要设置cbr包长,数据为raw数据+CBR_OPUS包长 */
 
-#define CONFIG_OPUS_DEC_FILE_TYPE       AUDIO_ATTR_OPUS_CBR_PKTLEN_TYPE
-#define CONFIG_OPUS_DEC_PACKET_LEN      40      //16/32/64kbps - 40/80/160
+#define CONFIG_OPUS_DEC_FILE_TYPE       AUDIO_ATTR_OPUS_RAWDTF_TYPE
+#define CONFIG_OPUS_DEC_PACKET_LEN      160     //16/32/64kbps - 40/80/160
 
 #define CONFIG_SPEEX_DEC_FILE_QUALITY   5
 #define CONFIG_SPEEX_DEC_FILE_SAMPLERATE 16000  //不带头部的解码数据需要设置采样率

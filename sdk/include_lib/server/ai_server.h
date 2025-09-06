@@ -112,6 +112,9 @@ struct ai_event {
 struct ai_voice_param {
     u8 ai_type;
     u8 quality;
+    u8 complexity;
+    u8 format_mode;
+    u32 frame_ms;
     int sample_rate;
     void *priv;
     int code_type;

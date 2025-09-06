@@ -75,3 +75,16 @@
         PROVIDE(__rtatcmdtab_end = .);
 #endif
 
+        . = ALIGN(4);
+        _dlog_ops_begin = .;
+        PROVIDE(dlog_ops_begin = .);
+        KEEP(*(.dlog.0.ops))
+        KEEP(*(.dlog.1.ops))
+        _dlog_ops_end = .;
+        PROVIDE(dlog_ops_end = .);
+
+        _dlog_out_channel_begin = .;
+        PROVIDE(dlog_out_channel_begin = .);
+        KEEP(*(.dlog_out_channel))
+        _dlog_out_channel_end = .;
+        PROVIDE(dlog_out_channel_end = .);

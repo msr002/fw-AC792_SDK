@@ -19,6 +19,9 @@ lv_obj_t *setup_scr_video_play(lv_ui *ui)
     lv_ui_video_play *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_PLAY);
     if (ui_scr == NULL) {
         ui_scr = lv_mem_alloc(sizeof(lv_ui_video_play));
+        if (ui_scr == NULL) {
+            return NULL;
+        }
         memset(ui_scr, 0, sizeof(lv_ui_video_play));
         ui->video_play = ui_scr;
     }
@@ -74,7 +77,7 @@ lv_obj_t *setup_scr_video_play(lv_ui *ui)
     lv_obj_add_flag(ui_scr->video_play_imgbtn_pause, LV_OBJ_FLAG_CHECKABLE);
     ui_scr->video_play_imgbtn_pause_label = lv_label_create(ui_scr->video_play_imgbtn_pause);
     lv_label_set_text(ui_scr->video_play_imgbtn_pause_label, "");
-    lv_obj_set_style_pad_all(ui_scr->video_play_imgbtn_pause, 0, LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_all(ui_scr->video_play_imgbtn_pause, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_align(ui_scr->video_play_imgbtn_pause_label, LV_ALIGN_CENTER, 0, 0);
 
     //Write codes video_play_img_prev_file
@@ -119,7 +122,7 @@ lv_obj_t *setup_scr_video_play(lv_ui *ui)
     lv_obj_add_flag(ui_scr->video_play_imgbtn_loud, LV_OBJ_FLAG_CHECKABLE);
     ui_scr->video_play_imgbtn_loud_label = lv_label_create(ui_scr->video_play_imgbtn_loud);
     lv_label_set_text(ui_scr->video_play_imgbtn_loud_label, "");
-    lv_obj_set_style_pad_all(ui_scr->video_play_imgbtn_loud, 0, LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_all(ui_scr->video_play_imgbtn_loud, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_align(ui_scr->video_play_imgbtn_loud_label, LV_ALIGN_CENTER, 0, 0);
 
     //Write codes video_play_lbl_total_time
@@ -232,7 +235,7 @@ lv_obj_t *setup_scr_video_play(lv_ui *ui)
     lv_obj_add_flag(ui_scr->video_play_imgbtn_1, LV_OBJ_FLAG_CHECKABLE);
     ui_scr->video_play_imgbtn_1_label = lv_label_create(ui_scr->video_play_imgbtn_1);
     lv_label_set_text(ui_scr->video_play_imgbtn_1_label, "");
-    lv_obj_set_style_pad_all(ui_scr->video_play_imgbtn_1, 0, LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_all(ui_scr->video_play_imgbtn_1, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_align(ui_scr->video_play_imgbtn_1_label, LV_ALIGN_CENTER, 0, 0);
 
     //Write codes video_play_lbl_msg
@@ -252,7 +255,7 @@ lv_obj_t *setup_scr_video_play(lv_ui *ui)
 
     lv_obj_update_layout(ui_scr->video_play);
     ui_scr->video_play_del = false;
-    i18n_refresh_texts("video_play");
+    i18n_refresh_texts(GUI_SCREEN_VIDEO_PLAY);
 
     //Init events for screen
     events_init_video_play(ui);

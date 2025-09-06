@@ -14,17 +14,14 @@ extern "C" {
 extern lv_style_t gui_digitclock_main_default_style;
 extern lv_style_t gui_digitclock_main_disabled_style;
 
-// digital_clock
-extern lv_style_t gui_digitclock_main_default_style;
-extern lv_style_t gui_digitclock_main_disabled_style;
+// slider
+extern lv_style_t gui_slider_main_default_style;
+extern lv_style_t gui_slider_indicator_default_style;
+extern lv_style_t gui_slider_knob_default_style;
 
 // img
 extern lv_style_t gui_img_main_default_style;
 extern lv_style_t gui_img_main_focus_key_style;
-
-// bar
-extern lv_style_t gui_bar_main_default_style;
-extern lv_style_t gui_bar_indicator_default_style;
 
 // scr
 extern lv_style_t gui_scr_main_default_style;
@@ -42,16 +39,20 @@ extern lv_style_t gui_ddlist_selected_checked_style;
 extern lv_style_t gui_ddlist_dropdown_list_default_style;
 extern lv_style_t gui_ddlist_scrollbar_default_style;
 
-// dropdown
-extern lv_style_t gui_ddlist_main_default_style;
-extern lv_style_t gui_ddlist_main_focus_key_style;
-extern lv_style_t gui_ddlist_selected_checked_style;
-extern lv_style_t gui_ddlist_dropdown_list_default_style;
-extern lv_style_t gui_ddlist_scrollbar_default_style;
-
 // label
 extern lv_style_t gui_label_main_default_style;
 extern lv_style_t gui_label_main_focused_style;
+
+// imglist
+extern lv_style_t gui_imglist_main_default_style;
+
+// ta
+extern lv_style_t gui_ta_main_default_style;
+extern lv_style_t gui_ta_scrollbar_default_style;
+
+// bar
+extern lv_style_t gui_bar_main_default_style;
+extern lv_style_t gui_bar_indicator_default_style;
 
 // cont
 extern lv_style_t gui_cont_main_default_style;
@@ -67,30 +68,20 @@ extern lv_style_t gui_roller_main_default_style;
 extern lv_style_t gui_roller_main_focus_key_style;
 extern lv_style_t gui_roller_selected_default_style;
 
-// imglist
-extern lv_style_t gui_imglist_main_default_style;
-
-// ta
-extern lv_style_t gui_ta_main_default_style;
-extern lv_style_t gui_ta_scrollbar_default_style;
-
-// textarea
-extern lv_style_t gui_ta_main_default_style;
-extern lv_style_t gui_ta_scrollbar_default_style;
-
 enum {
     GUI_CTRL_DIGITALCLOCK,
+    GUI_CTRL_SLIDER,
     GUI_CTRL_IMG,
-    GUI_CTRL_BAR,
     GUI_CTRL_SCR,
     GUI_CTRL_IMGBTN,
     GUI_CTRL_DROPDOWN,
     GUI_CTRL_LABEL,
+    GUI_CTRL_IMGLIST,
+    GUI_CTRL_TEXTAREA,
+    GUI_CTRL_BAR,
     GUI_CTRL_CONT,
     GUI_CTRL_BUTTON,
     GUI_CTRL_ROLLER,
-    GUI_CTRL_IMGLIST,
-    GUI_CTRL_TEXTAREA,
 };
 typedef uint8_t gui_ctrl_type_t;
 

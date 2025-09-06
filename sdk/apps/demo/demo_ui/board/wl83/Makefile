@@ -165,6 +165,7 @@ INCLUDES := \
 	-I../../../../../apps/common/example/third_party/rlottie_impl/src/vector \
 	-I../../../../../apps/common/example/third_party/rlottie_impl/src/vector/freetype \
 	-I../../../../../apps/common/example/third_party/freetype/include \
+	-I../../../../../include_lib/driver/cpu/wl83/asm \
 	-I../../../../../apps/common/example/third_party/lvgl_v9 \
 	-I../../../../../apps/common/example/third_party/lvgl_v9/examples/porting \
 	-I../../../../../apps/common/example/third_party/lvgl_v9/examples/libs/freetype \
@@ -195,6 +196,7 @@ c_SRC_FILES := \
 	../../../../../apps/common/camera/SP140A_dvp/sp140a_dvp_ae.c \
 	../../../../../apps/common/camera/SP140A_dvp/sp140a_dvp_awb.c \
 	../../../../../apps/common/camera/SP140A_dvp/sp140a_dvp_iq.c \
+	../../../../../apps/common/camera/TVP5150A_DVP.c \
 	../../../../../apps/common/camera/gc0308/gc0308.c \
 	../../../../../apps/common/camera/gc1084_mipi/gc1084_mipi.c \
 	../../../../../apps/common/camera/gc1084_mipi/gc1084_mipi_ae.c \
@@ -948,6 +950,7 @@ c_SRC_FILES := \
 	../../../../../apps/common/system/perf_counter/perf_counter.c \
 	../../../../../apps/common/system/version.c \
 	../../../../../apps/common/update/update.c \
+	../../../../../apps/common/video/simple_avi_unpkg.c \
 	../../../../../apps/demo/demo_ui/app_main.c \
 	../../../../../apps/demo/demo_ui/board/wl83/board_develop.c \
 	../../../../../cpu/wl83/adc_api.c \

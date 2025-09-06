@@ -6,7 +6,9 @@
 #include "WL83.h"
 
 #if ((!defined __cplusplus) && (!defined BOOL_DEFINE_CONFLICT))
+#ifndef bool
 typedef unsigned char   		bool;
+#endif
 #endif
 typedef unsigned char   		u8, BOOL, uint8_t;
 typedef char            		s8;

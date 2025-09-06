@@ -931,6 +931,12 @@ int audio_digital_vol_node_name_get(u8 dvol_idx, char *node_name)
                 log_info("vol_name:%d,%s", __LINE__, node_name);
             }
 #endif
+#if TCFG_APP_USB_HOST_EN
+            if (!strcmp(mode->name, "usb_host_music")) {
+                sprintf(node_name, "%s%s", "Vol_Hspk", dvol_type[i]);
+                log_info("vol_name:%d,%s", __LINE__, node_name);
+            }
+#endif
             if (!strcmp(mode->name, "idle")) {
                 sprintf(node_name, "%s%s", "Vol_Sys", dvol_type[i]);
                 log_info("vol_name:%d,%s", __LINE__, node_name);

@@ -422,6 +422,22 @@ void usb_host_event_handler(struct device_event *event)
 {
     int usb_id;
 
+#if TCFG_HOST_AUDIO_ENABLE
+    if (event->event == DEVICE_EVENT_ONLINE) {
+        usb_id = ((const char *)event->arg)[8] - '0';
+        log_info("APP usb host%d audio start", usb_id);
+        if (!strncmp((const char *)event->value, "audio", 5)) {
+            usb_audio_start_process(usb_id);
+        }
+    } else if (event->event == DEVICE_EVENT_OFFLINE) {
+        usb_id = ((const char *)event->arg)[8] - '0';
+        log_info("APP usb host%d audio stop", usb_id);
+        if (!strncmp((const char *)event->value, "audio", 5)) {
+            usb_audio_stop_process(usb_id);
+        }
+    }
+#endif
+
     if (event->event == DEVICE_EVENT_IN) {
         usb_id = ((const char *)event->arg)[8] - '0';
         log_info("usb host%d mount succ", usb_id);
@@ -457,9 +473,11 @@ void usb_host_event_handler(struct device_event *event)
         }
 #endif
 #if TCFG_HOST_AUDIO_ENABLE
+#if USB_HOST_NO_APP_MODE
         if (!strncmp((const char *)event->value, "audio", 5)) {
             usb_audio_start_process(usb_id);
         }
+#endif
 #endif
 #if TCFG_HID_HOST_ENABLE
         if (!strncmp((const char *)event->value, "hid", 3)) {
@@ -497,9 +515,11 @@ void usb_host_event_handler(struct device_event *event)
         }
 #endif
 #if TCFG_HOST_AUDIO_ENABLE
+#if USB_HOST_NO_APP_MODE
         if (!strncmp((const char *)event->value, "audio", 5)) {
             usb_audio_stop_process(usb_id);
         }
+#endif
 #endif
 #if TCFG_HID_HOST_ENABLE
         if (!strncmp((const char *)event->value, "hid", 3)) {

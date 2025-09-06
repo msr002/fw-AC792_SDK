@@ -8,6 +8,7 @@
 #include "jiffies.h"
 #include "system/timer.h"
 #include "perf_counter.h"
+#include "generic/dlog.h"
 
 
 #include <unistd.h>
@@ -219,6 +220,17 @@ static void app_task_handler(void *p)
 #endif
     __do_initcall(platform_initcall);
     board_init();
+
+
+#if (defined(TCFG_DEBUG_DLOG_ENABLE) && TCFG_DEBUG_DLOG_ENABLE)
+    dlog_init();
+    dlog_enable(1);
+    extern int dlog_uart_output_set(enum DLOG_OUTPUT_TYPE type);
+    dlog_uart_output_set(DLOG_OUTPUT_2_FLASH | DLOG_OUTPUT_2_UART);
+    // 设置log的等级
+    /* dlog_level_set(__LOG_INFO); */
+#endif
+
 
 #if TCFG_RF_FCC_TEST_ENABLE || TCFG_RF_PRODUCT_TEST_ENABLE
     u8 rf_fcc_test_init(void);

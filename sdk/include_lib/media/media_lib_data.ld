@@ -130,8 +130,10 @@
     *(.ape_dec_data)
     *(.ape_data)
     
+    *(.llns_dns.data)
     *(.audio_track_data)
     *(.audio_eq_data)
+
     *(.audio_drc_data)
     *(.audio_vbass_data)
     *(.audio_surround_data)

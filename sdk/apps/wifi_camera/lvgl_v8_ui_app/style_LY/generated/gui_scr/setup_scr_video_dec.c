@@ -15,29 +15,29 @@
 
 static const char *video_dec_imglist_1_imgs[2] = {
 #if LV_USE_GUIBUILDER_SIMULATOR
-    "A:\\1111\\ac792\\ui_prj\\Application12\\import\\image\\LY_UI\\dec\\video.png",
-    "A:\\1111\\ac792\\ui_prj\\Application12\\import\\image\\LY_UI\\dec\\photo.png"
+    "A:\\project\\meter_ui_demo\\WL83_gitlab\\ac792\\ui_prj\\new_ui\\import\\image\\LY_UI\\dec\\video.png",
+    "A:\\project\\meter_ui_demo\\WL83_gitlab\\ac792\\ui_prj\\new_ui\\import\\image\\LY_UI\\dec\\photo.png"
 #else
-    "mnt/sdfile/EXT_RESERVED/uipackres/ui/4b00005d.zip",
-    "mnt/sdfile/EXT_RESERVED/uipackres/ui/4b00005e.zip"
+    "mnt/sdfile/EXT_RESERVED/uipackres/ui/4b00006d.zip",
+    "mnt/sdfile/EXT_RESERVED/uipackres/ui/4b00006e.zip"
 #endif
 };
 static const char *video_dec_imglist_2_imgs[2] = {
 #if LV_USE_GUIBUILDER_SIMULATOR
-    "A:\\1111\\ac792\\ui_prj\\Application12\\import\\image\\LY_UI\\rec\\rec_scan\\card_offline.png",
-    "A:\\1111\\ac792\\ui_prj\\Application12\\import\\image\\LY_UI\\rec\\rec_scan\\card_online.png"
+    "A:\\project\\meter_ui_demo\\WL83_gitlab\\ac792\\ui_prj\\new_ui\\import\\image\\LY_UI\\rec\\rec_scan\\card_offline.png",
+    "A:\\project\\meter_ui_demo\\WL83_gitlab\\ac792\\ui_prj\\new_ui\\import\\image\\LY_UI\\rec\\rec_scan\\card_online.png"
 #else
-    "mnt/sdfile/EXT_RESERVED/uipackres/ui/4b00005f.zip",
-    "mnt/sdfile/EXT_RESERVED/uipackres/ui/4b000018.zip"
+    "mnt/sdfile/EXT_RESERVED/uipackres/ui/4b00006f.zip",
+    "mnt/sdfile/EXT_RESERVED/uipackres/ui/4b000028.zip"
 #endif
 };
 static const char *video_dec_imglist_3_imgs[2] = {
 #if LV_USE_GUIBUILDER_SIMULATOR
-    "A:\\1111\\ac792\\ui_prj\\Application12\\import\\image\\LY_UI\\dec\\play.png",
-    "A:\\1111\\ac792\\ui_prj\\Application12\\import\\image\\LY_UI\\dec\\pause.png"
+    "A:\\project\\meter_ui_demo\\WL83_gitlab\\ac792\\ui_prj\\new_ui\\import\\image\\LY_UI\\dec\\play.png",
+    "A:\\project\\meter_ui_demo\\WL83_gitlab\\ac792\\ui_prj\\new_ui\\import\\image\\LY_UI\\dec\\pause.png"
 #else
-    "mnt/sdfile/EXT_RESERVED/uipackres/ui/4b000060.zip",
-    "mnt/sdfile/EXT_RESERVED/uipackres/ui/4b000061.zip"
+    "mnt/sdfile/EXT_RESERVED/uipackres/ui/4b000070.zip",
+    "mnt/sdfile/EXT_RESERVED/uipackres/ui/4b000071.zip"
 #endif
 };
 
@@ -46,6 +46,9 @@ lv_obj_t *setup_scr_video_dec(lv_ui *ui)
     lv_ui_video_dec *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_DEC);
     if (ui_scr == NULL) {
         ui_scr = lv_mem_alloc(sizeof(lv_ui_video_dec));
+        if (ui_scr == NULL) {
+            return NULL;
+        }
         memset(ui_scr, 0, sizeof(lv_ui_video_dec));
         ui->video_dec = ui_scr;
     }
@@ -82,6 +85,9 @@ lv_obj_t *setup_scr_video_dec(lv_ui *ui)
     lv_obj_set_size(ui_scr->video_dec_imglist_1, 30, 29);
     lv_obj_set_scrollbar_mode(ui_scr->video_dec_imglist_1, LV_SCROLLBAR_MODE_OFF);
     ui_style_set(ui_scr->video_dec_imglist_1, GUI_CTRL_IMGLIST);
+
+    //Set style for video_dec_imglist_1. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
+    lv_obj_set_style_outline_opa(ui_scr->video_dec_imglist_1, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_imglist_set_src(ui_scr->video_dec_imglist_1, (const void **) video_dec_imglist_1_imgs, 2);
     lv_imglist_set_act(ui_scr->video_dec_imglist_1, 0);
 
@@ -90,9 +96,7 @@ lv_obj_t *setup_scr_video_dec(lv_ui *ui)
     lv_obj_set_pos(ui_scr->video_dec_edit_2, 545, 24);
     lv_obj_set_size(ui_scr->video_dec_edit_2, 282, 37);
     lv_obj_set_scrollbar_mode(ui_scr->video_dec_edit_2, LV_SCROLLBAR_MODE_OFF);
-    lv_obj_add_flag(ui_scr->video_dec_edit_2, LV_OBJ_FLAG_CLICKABLE);
-    lv_obj_add_flag(ui_scr->video_dec_edit_2, LV_OBJ_FLAG_CHECKABLE);
-    lv_obj_add_flag(ui_scr->video_dec_edit_2, LV_OBJ_FLAG_CLICK_FOCUSABLE);
+    lv_obj_add_flag(ui_scr->video_dec_edit_2, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_CHECKABLE | LV_OBJ_FLAG_CLICK_FOCUSABLE);
     lv_group_remove_obj(ui_scr->video_dec_edit_2);
     ui_style_set(ui_scr->video_dec_edit_2, GUI_CTRL_TEXTAREA);
     lv_textarea_set_text(ui_scr->video_dec_edit_2, "VID_0001.AVI");
@@ -102,9 +106,7 @@ lv_obj_t *setup_scr_video_dec(lv_ui *ui)
     lv_obj_set_pos(ui_scr->video_dec_edit_3, 545, 62);
     lv_obj_set_size(ui_scr->video_dec_edit_3, 282, 36);
     lv_obj_set_scrollbar_mode(ui_scr->video_dec_edit_3, LV_SCROLLBAR_MODE_OFF);
-    lv_obj_add_flag(ui_scr->video_dec_edit_3, LV_OBJ_FLAG_CHECKABLE);
-    lv_obj_add_flag(ui_scr->video_dec_edit_3, LV_OBJ_FLAG_CLICKABLE);
-    lv_obj_add_flag(ui_scr->video_dec_edit_3, LV_OBJ_FLAG_CLICK_FOCUSABLE);
+    lv_obj_add_flag(ui_scr->video_dec_edit_3, LV_OBJ_FLAG_CHECKABLE | LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_CLICK_FOCUSABLE);
     lv_group_remove_obj(ui_scr->video_dec_edit_3);
     ui_style_set(ui_scr->video_dec_edit_3, GUI_CTRL_TEXTAREA);
     lv_textarea_set_text(ui_scr->video_dec_edit_3, "720P");
@@ -115,6 +117,9 @@ lv_obj_t *setup_scr_video_dec(lv_ui *ui)
     lv_obj_set_size(ui_scr->video_dec_imglist_2, 29, 29);
     lv_obj_set_scrollbar_mode(ui_scr->video_dec_imglist_2, LV_SCROLLBAR_MODE_OFF);
     ui_style_set(ui_scr->video_dec_imglist_2, GUI_CTRL_IMGLIST);
+
+    //Set style for video_dec_imglist_2. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
+    lv_obj_set_style_outline_opa(ui_scr->video_dec_imglist_2, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_imglist_set_src(ui_scr->video_dec_imglist_2, (const void **) video_dec_imglist_2_imgs, 2);
     lv_imglist_set_act(ui_scr->video_dec_imglist_2, 0);
 
@@ -143,6 +148,9 @@ lv_obj_t *setup_scr_video_dec(lv_ui *ui)
     lv_obj_set_size(ui_scr->video_dec_imglist_3, 24, 24);
     lv_obj_set_scrollbar_mode(ui_scr->video_dec_imglist_3, LV_SCROLLBAR_MODE_OFF);
     ui_style_set(ui_scr->video_dec_imglist_3, GUI_CTRL_IMGLIST);
+
+    //Set style for video_dec_imglist_3. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
+    lv_obj_set_style_outline_opa(ui_scr->video_dec_imglist_3, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_imglist_set_src(ui_scr->video_dec_imglist_3, (const void **) video_dec_imglist_3_imgs, 2);
     lv_imglist_set_act(ui_scr->video_dec_imglist_3, 0);
 
@@ -151,9 +159,7 @@ lv_obj_t *setup_scr_video_dec(lv_ui *ui)
     lv_obj_set_pos(ui_scr->video_dec_edit_1, 124, 7);
     lv_obj_set_size(ui_scr->video_dec_edit_1, 204, 40);
     lv_obj_set_scrollbar_mode(ui_scr->video_dec_edit_1, LV_SCROLLBAR_MODE_OFF);
-    lv_obj_add_flag(ui_scr->video_dec_edit_1, LV_OBJ_FLAG_CHECKABLE);
-    lv_obj_add_flag(ui_scr->video_dec_edit_1, LV_OBJ_FLAG_CLICKABLE);
-    lv_obj_add_flag(ui_scr->video_dec_edit_1, LV_OBJ_FLAG_CLICK_FOCUSABLE);
+    lv_obj_add_flag(ui_scr->video_dec_edit_1, LV_OBJ_FLAG_CHECKABLE | LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_CLICK_FOCUSABLE);
     lv_group_remove_obj(ui_scr->video_dec_edit_1);
     ui_style_set(ui_scr->video_dec_edit_1, GUI_CTRL_TEXTAREA);
 
@@ -214,8 +220,7 @@ lv_obj_t *setup_scr_video_dec(lv_ui *ui)
     lv_obj_set_pos(ui_scr->video_dec_view_2, 0, 0);
     lv_obj_set_size(ui_scr->video_dec_view_2, 800, 43);
     lv_obj_set_scrollbar_mode(ui_scr->video_dec_view_2, LV_SCROLLBAR_MODE_OFF);
-    lv_obj_add_flag(ui_scr->video_dec_view_2, LV_OBJ_FLAG_EVENT_BUBBLE);
-    lv_obj_add_flag(ui_scr->video_dec_view_2, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
+    lv_obj_add_flag(ui_scr->video_dec_view_2, LV_OBJ_FLAG_EVENT_BUBBLE | LV_OBJ_FLAG_SCROLL_ON_FOCUS);
     lv_group_add_obj(def_group, ui_scr->video_dec_view_2);
     ui_style_set(ui_scr->video_dec_view_2, GUI_CTRL_CONT);
 
@@ -246,8 +251,7 @@ lv_obj_t *setup_scr_video_dec(lv_ui *ui)
     lv_obj_set_pos(ui_scr->video_dec_view_3, 0, 45);
     lv_obj_set_size(ui_scr->video_dec_view_3, 800, 43);
     lv_obj_set_scrollbar_mode(ui_scr->video_dec_view_3, LV_SCROLLBAR_MODE_OFF);
-    lv_obj_add_flag(ui_scr->video_dec_view_3, LV_OBJ_FLAG_EVENT_BUBBLE);
-    lv_obj_add_flag(ui_scr->video_dec_view_3, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
+    lv_obj_add_flag(ui_scr->video_dec_view_3, LV_OBJ_FLAG_EVENT_BUBBLE | LV_OBJ_FLAG_SCROLL_ON_FOCUS);
     lv_group_add_obj(def_group, ui_scr->video_dec_view_3);
     ui_style_set(ui_scr->video_dec_view_3, GUI_CTRL_CONT);
 
@@ -379,7 +383,7 @@ lv_obj_t *setup_scr_video_dec(lv_ui *ui)
 
     lv_obj_update_layout(ui_scr->video_dec);
     ui_scr->video_dec_del = false;
-    i18n_refresh_texts("video_dec");
+    i18n_refresh_texts(GUI_SCREEN_VIDEO_DEC);
 
     //Init events for screen
     events_init_video_dec(ui);

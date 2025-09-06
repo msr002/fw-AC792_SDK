@@ -29,6 +29,7 @@ echo "%OBJCOPY% -O binary -j .data %ELFFILE% data.bin" >> ${PROJ_BUILD}
 echo "%OBJCOPY% -O binary -j .ram0_data  %ELFFILE% ram0_data.bin" >> ${PROJ_BUILD}
 echo "%OBJCOPY% -O binary -j .dcache_ram_data  %ELFFILE% dcache_ram_data.bin" >> ${PROJ_BUILD}
 echo "%OBJCOPY% -O binary -j .video_ram_data  %ELFFILE% video_ram_data.bin" >> ${PROJ_BUILD}
+echo "%OBJCOPY% -O binary -j .dlog_data  %ELFFILE% dlog.bin" >> ${PROJ_BUILD}
 echo "%OBJDUMP% -section-headers %ELFFILE%" >> ${PROJ_BUILD}
 echo "%OBJDUMP% -t %ELFFILE% > symbol_tbl.txt" >> ${PROJ_BUILD}
 #ifdef CONFIG_LZ4_DATA_CODE_ENABLE
@@ -219,6 +220,7 @@ REM %OBJDUMP% -D -address-mask=0x1ffffff -print-dbg %ELFFILE% > sdk.lst
 %OBJCOPY% -O binary -j .ram0_data  %ELFFILE% ram0_data.bin
 %OBJCOPY% -O binary -j .dcache_ram_data  %ELFFILE% dcache_ram_data.bin
 %OBJCOPY% -O binary -j .video_ram_data  %ELFFILE% video_ram_data.bin
+%OBJCOPY% -O binary -j .dlog_data %ELFFILE% dlog.bin
 
 %OBJDUMP% -section-headers -address-mask=0x1ffffff %ELFFILE%
 %OBJDUMP% -t %ELFFILE% > symbol_tbl.txt

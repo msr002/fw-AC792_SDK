@@ -137,6 +137,7 @@ typedef struct {
 
 enum {
     LV_SRC_IN_FLASH,
+    LV_SRC_IN_FLASH_USE_MALLOC,
     LV_SRC_IN_SD,
     LV_SRC_IN_UNKNOWN,
 };

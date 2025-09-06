@@ -865,7 +865,7 @@ static void ui_set_flush_mode_timer_cb(void *p)
     if (__this->ui_timer_id) {
         sys_timer_modify(__this->ui_timer_id, 0xffffff);
     }
-    log_info("image not change! ui set self flush mode%d now buf0=%x buf1=%x\n", mode, buf0, buf1);
+    log_info("image not change! ui set self flush mode%d now buf0=%x buf1=%x\n", mode, (unsigned int)buf0, (unsigned int)buf1);
     if (buf0 && buf1) {
         //判断是否和lcd推屏buf冲突
         u32 dmm_addr = 0;
@@ -1355,6 +1355,14 @@ void fb_combine_list_add(struct fb_out_t *ep)
 {
     struct fb_out_t *p0 = NULL;
     u8 id = ep->out_id;
+    //约定fb3作为次顶层
+    if (ep->fb_name[2] - '0' == 3) {
+        ep->z_order = 254;
+    }
+    //约定fb4作为最顶层
+    if (ep->fb_name[2] - '0' == 4) {
+        ep->z_order = 255;
+    }
     spin_lock(&fb_lock[id]);
     __this->fb_frame_cnt[ep->fb_name[2] - '0'] = 0;
     list_for_each_entry(p0, &head[id], entry) {

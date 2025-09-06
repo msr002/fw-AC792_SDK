@@ -657,7 +657,7 @@ typedef struct {
      * @param room 房间名
      * @param uid 远端用户名
      * @param sent_ts 发送时间 （暂不支持）
-     * @param codec 音频编码类型，参看 audio_codec_type_e{@link #audio_codec_type_e}
+     * @param data 音频数据类型，参看 audio_data_type_e{@link #audio_data_type_e}
      * @param data_ptr 音频数据
      * @param data_len 音频数据长度，单位字节
      */
@@ -1102,4 +1102,5 @@ extern __byte_rtc_api__ int byte_rtc_set_params(byte_rtc_engine_t engine, const 
 }
 #endif
 #endif /* __BYTE_RTC_API_H__ */
+
 

@@ -57,6 +57,8 @@
 #define TCFG_UDISK_ENABLE 1 // U盘主机使能
 #define TCFG_HOST_CDC_ENABLE 1 // CDC主机使能
 #define TCFG_HID_HOST_ENABLE 1 // HID主机使能
+#define TCFG_HOST_AUDIO_ENABLE 0 // USB AUDIO主机使能
+#define USB_HOST_NO_APP_MODE 0 // 关闭USB HOST APP模式使能
 #define USB_MALLOC_ENABLE 1 // 从机使用malloc
 #define USB_PC_NO_APP_MODE 0 // 关闭USB PC APP模式使能
 #define TCFG_MSD_CDROM_ENABLE 0 // MSD光盘
@@ -108,6 +110,7 @@
 #define TCFG_APP_NET_MUSIC_EN 1 // 网络播放模式
 #define TCFG_APP_PC_EN 1 // PC模式
 #define TCFG_APP_RECORD_EN 1 // 录音模式
+#define TCFG_APP_USB_HOST_EN 0 // USB_HOST_AUDIO模式
 #define TCFG_MIC_EFFECT_ENABLE 1 // 混响使能
 #define TCFG_MIX_RECORD_ENABLE 0 // 混合录音使能
 #define TCFG_RECORD_AUDIO_REPLAY_EN 0 // 录音回播使能
@@ -163,6 +166,8 @@
 #define TCFG_BT_SUPPORT_PROFILE_MAP 0 // MAP
 #define TCFG_BT_SUPPORT_PROFILE_HFP_AG 0 // HFP_AG
 #define TCFG_BT_SUPPORT_PROFILE_BIP 0
+
+#define TCFG_USER_EMITTER_ENABLE 0 // 发射器开关
 
 #define TCFG_USER_TWS_ENABLE 1 // TWS
 #if TCFG_USER_TWS_ENABLE

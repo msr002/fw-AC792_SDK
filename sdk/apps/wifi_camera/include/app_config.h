@@ -36,6 +36,7 @@
 #define EXT_WIFI_AP_PWD    "12345678"          //配置外挂wifi的AP模式的密码
 #define EXT_WIFI_STA_SSID  "zpc23"              //配置外挂wifi的STA模式的SSID前缀
 #define EXT_WIFI_STA_PWD   "abc12345"          //配置外挂wifi的STA模式的密码
+#define WIFI_P2P_DEVICE_NAME "JLWiFi-P2P"
 
 //*********************************************************************************//
 //                                 资源分配相关配置                                //
@@ -125,23 +126,39 @@
 #endif
 
 #if defined CONFIG_AUDIO_ENABLE && !defined CONFIG_SDFILE_EXT_ENABLE
-//#define CONFIG_VOICE_PROMPT_FILE_SAVE_IN_RESERVED_EXPAND_ZONE //AUDIO资源打包后放在扩展预留区
+#define CONFIG_VOICE_PROMPT_FILE_SAVE_IN_RESERVED_EXPAND_ZONE //AUDIO资源打包后放在扩展预留区
+#endif
+
+#if (defined CONFIG_AUDIO_ENABLE || defined CONFIG_UI_ENABLE) && !defined CONFIG_SDFILE_EXT_ENABLE
+#define CONFIG_LOGO_FILE_SAVE_IN_RESERVED_EXPAND_ZONE //开关机logo资源打包后放在扩展预留区
 #endif
 
 #if defined CONFIG_UI_FILE_SAVE_IN_RESERVED_EXPAND_ZONE
-#define CONFIG_UI_PACKRES_LEN 0x200000
+#define CONFIG_UI_PACKRES_LEN 0x300000
 #define CONFIG_UI_PACKRES_ADR ((__FLASH_SIZE__) - (CONFIG_UI_PACKRES_LEN) - 0x1000)
+#else
+#define CONFIG_UI_PACKRES_LEN 0
+#define CONFIG_UI_PACKRES_ADR 0
 #endif
 
 #if defined CONFIG_VOICE_PROMPT_FILE_SAVE_IN_RESERVED_EXPAND_ZONE
 #if defined CONFIG_UI_FILE_SAVE_IN_RESERVED_EXPAND_ZONE
 #define CONFIG_AUDIO_PACKRES_LEN 0x180000
-#define CONFIG_AUDIO_PACKRES_ADR (CONFIG_UI_PACKRES_ADR - CONFIG_AUDIO_PACKRES_LEN)
+#define CONFIG_AUDIO_PACKRES_ADR ((__FLASH_SIZE__) - (CONFIG_UI_PACKRES_LEN) - 0x1000 - CONFIG_AUDIO_PACKRES_LEN)
 #else
 #define CONFIG_AUDIO_PACKRES_LEN 0x180000
 #define CONFIG_AUDIO_PACKRES_ADR ((__FLASH_SIZE__) - CONFIG_AUDIO_PACKRES_LEN - 0x1000)
 #endif
+#else
+#define CONFIG_AUDIO_PACKRES_LEN 0
+#define CONFIG_AUDIO_PACKRES_ADR 0
 #endif
+
+#if defined CONFIG_LOGO_FILE_SAVE_IN_RESERVED_EXPAND_ZONE
+#define CONFIG_LOGO_PACKRES_LEN 0x32000
+#define CONFIG_LOGO_PACKRES_ADR ((__FLASH_SIZE__) - (CONFIG_UI_PACKRES_LEN) - 0x1000 - CONFIG_AUDIO_PACKRES_LEN - CONFIG_LOGO_PACKRES_LEN)
+#endif
+
 
 
 //*********************************************************************************//
@@ -164,6 +181,34 @@
 // #define CONFIG_AUTO_SHUTDOWN_ENABLE          //自动倒数关机
 // #define CONFIG_SYS_VDD_CLOCK_ENABLE          //系统可使用动态电源、时钟配置
 // #define CONFIG_IPMASK_ENABLE                 //系统使用不可屏蔽中断
+
+
+//*********************************************************************************//
+//                    异常记录/离线log配置                                      //
+//*********************************************************************************//
+#if !TCFG_DEBUG_UART_ENABLE
+#define TCFG_DEBUG_DLOG_ENABLE             0      // 离线log功能
+#define TCFG_DEBUG_DLOG_FLASH_SEL          0      // 选择log保存到内置flash还是外置flash; 0:内置flash; 1:外置flash
+#define TCFG_DLOG_FLASH_START_ADDR         (0x00)         // 配置外置flash用于存储dlog和异常数据的区域起始地址
+#define TCFG_DLOG_FLASH_REGION_SIZE        (512 * 1024)   // 配置外置flash用于存储dlog和异常数据的区域大小
+#if (TCFG_DEBUG_DLOG_ENABLE && TCFG_DEBUG_DLOG_FLASH_SEL)
+#if (!defined(TCFG_NORFLASH_DEV_ENABLE) || (TCFG_NORFLASH_DEV_ENABLE == 0))
+#undef TCFG_NORFLASH_DEV_ENABLE
+#define TCFG_NORFLASH_DEV_ENABLE           1              // 使能外置flash驱动
+#define TCFG_NORFLASH_START_ADDR           (0x00)         // 配置外置flash起始地址
+#define TCFG_NORFLASH_SIZE                 (512 * 1024)   // 配置外置flash大小
+#endif
+#endif
+#define TCFG_DEBUG_DLOG_RESET_ERASE        0      // 开机擦除flash的log数据
+#define TCFG_DEBUG_DLOG_AUTO_FLUSH_TIMEOUT (30)   // 主动刷新的超时时间(当指定时间没有刷新过缓存数据到flash, 则主动刷新)(单位秒)
+#define TCFG_DEBUG_DLOG_UART_TX_PIN        TCFG_DEBUG_PORT  // dlog串口打印的引脚
+#if (defined(LIB_DEBUG) && TCFG_DEBUG_DLOG_ENABLE)
+#undef LIB_DEBUG
+#define LIB_DEBUG    1
+#undef CONFIG_DEBUG_LIB
+#define CONFIG_DEBUG_LIB(x)         (x & LIB_DEBUG)
+#endif
+#endif
 
 //*********************************************************************************//
 //                                  FCC测试相关配置                                //
@@ -228,6 +273,7 @@
 // #define CONFIG_FTP_SERVER_ENABLE             //FTP服务器
 // #define CONFIG_VOLC_RTC_ENABLE               //火山RTC大模型
 // #define CONFIG_VOLC_ONESDK_ENABLE            //火山ONESDK
+// #define CONFIG_DUER_LC_DEMO_ENABLE           //小度澜川AI对话demo
 
 /*************电信云平台配网方式选择*************/
 #ifdef CONFIG_TELECOM_SDK_ENABLE
@@ -871,6 +917,7 @@
 #define CUSTOM_DEMO_EN                          (1 << 19)   // 第三方协议的demo，用于示例客户开发自定义协议
 #define MULTI_BOX_ADV_EN                        (1 << 20)
 #define MIJIA_EN                                (1 << 21)
+#define CLIENT_EN                               (1 << 27)
 #define DUEROS_EN                               (1 << 28)
 #define NET_CFG_EN                              (1 << 29)
 #define LE_HOGP_EN                              (1 << 30)
@@ -932,13 +979,12 @@
 
 
 #ifdef CONFIG_UI_ENABLE
-#define CONFIG_UI_STYLE_JL_ENABLE   //JL风格UI，使用触摸UI工程时要打开，按键UI工程注释掉
-// #define CONFIG_UI_STYLE_LY_ENABLE   //LY风格UI，使用按键UI工程时要打开，触摸UI工程注释掉
+#define CONFIG_UI_STYLE_LY_ENABLE   //LY风格UI，使用按键UI工程时要打开
 #define CONFIG_FILE_PREVIEW_ENABLE
 #endif
 
 
-// #define CONFIG_CXX_SUPPORT //使能C++支持
+#define CONFIG_CXX_SUPPORT //使能C++支持
 
 
 // #define CONFIG_LZ4_COMPRESS_APP_CODE_ENABLE     //使用LZ4压缩代码
@@ -954,12 +1000,36 @@
 #define CONFIG_DOUBLE_BANK_LESS                 1 //双备份结构，但appcore1区域可以更小
 #endif
 
-#ifdef CONFIG_RELEASE_ENABLE
+
+//*********************************************************************************//
+//                          异常记录/离线log配置                                      //
+//*********************************************************************************//
+#if !TCFG_DEBUG_UART_ENABLE
+#define TCFG_DEBUG_DLOG_ENABLE                  0    // 离线log功能
+#define TCFG_DEBUG_DLOG_FLASH_SEL               0    // 选择log保存到内置flash还是外置flash; 0:内置flash; 1:外置flash
+#define TCFG_DLOG_FLASH_START_ADDR              0    // 配置外置flash用于存储dlog和异常数据的区域起始地址
+#define TCFG_DLOG_FLASH_REGION_SIZE             (512 * 1024)    // 配置外置flash用于存储dlog和异常数据的区域大小
+#if (TCFG_DEBUG_DLOG_ENABLE && TCFG_DEBUG_DLOG_FLASH_SEL)
+#if (!defined(TCFG_NORFLASH_DEV_ENABLE) || (TCFG_NORFLASH_DEV_ENABLE == 0))
+#undef TCFG_NORFLASH_DEV_ENABLE
+#define TCFG_NORFLASH_DEV_ENABLE                1    // 使能外置flash驱动
+#define TCFG_NORFLASH_START_ADDR                0    // 配置外置flash起始地址
+#define TCFG_NORFLASH_SIZE                      (512 * 1024)   // 配置外置flash大小
+#endif
+#endif
+#define TCFG_DEBUG_DLOG_RESET_ERASE             0    // 开机擦除flash的log数据
+#define TCFG_DEBUG_DLOG_AUTO_FLUSH_TIMEOUT     30    // 主动刷新的超时时间(当指定时间没有刷新过缓存数据到flash, 则主动刷新)(单位秒)
+#define TCFG_DEBUG_DLOG_UART_TX_PIN            TCFG_DEBUG_PORT   // dlog串口打印的引脚
+#endif
+
+
+#if defined CONFIG_RELEASE_ENABLE || TCFG_DEBUG_DLOG_ENABLE
 #define LIB_DEBUG    1
 #else
 #define LIB_DEBUG    1
 #endif
 #define CONFIG_DEBUG_LIB(x)         (x & LIB_DEBUG)
+
 
 #include "video_buf_config.h"
 

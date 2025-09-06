@@ -325,6 +325,13 @@ LOG_LEN=0x1000;
 LOG_OPT=0;
 #endif
 
+// 离线log功能
+#if (defined TCFG_DEBUG_DLOG_ENABLE  && TCFG_DEBUG_DLOG_FLASH_SEL == 0)
+DLOG_ADR=AUTO; [离线log 内置flash区域配置]
+DLOG_LEN=TCFG_DLOG_FLASH_REGION_SIZE
+DLOG_OPT=0;
+#endif
+
 #if defined CONFIG_DUER_SDK_ENABLE
 DUEROS_ADR=AUTO; [小度profile]
 DUEROS_LEN=0x1000;

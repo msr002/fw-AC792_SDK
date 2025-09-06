@@ -19,13 +19,15 @@ lv_obj_t *setup_scr_usb_slave(lv_ui *ui)
     lv_ui_usb_slave *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_USB_SLAVE);
     if (ui_scr == NULL) {
         ui_scr = lv_mem_alloc(sizeof(lv_ui_usb_slave));
+        if (ui_scr == NULL) {
+            return NULL;
+        }
         memset(ui_scr, 0, sizeof(lv_ui_usb_slave));
         ui->usb_slave = ui_scr;
     }
 
     //Write codes usb_slave
     ui_scr->usb_slave = lv_obj_create(NULL);
-    lv_group_t *def_group = lv_group_get_default();
     lv_obj_set_scrollbar_mode(ui_scr->usb_slave, LV_SCROLLBAR_MODE_OFF);
     ui_style_set(ui_scr->usb_slave, GUI_CTRL_SCR);
 
@@ -59,8 +61,8 @@ lv_obj_t *setup_scr_usb_slave(lv_ui *ui)
 
     //Write codes usb_slave_view_btnlist
     ui_scr->usb_slave_view_btnlist = lv_obj_create(ui_scr->usb_slave);
-    lv_obj_set_pos(ui_scr->usb_slave_view_btnlist, 253, 99);
-    lv_obj_set_size(ui_scr->usb_slave_view_btnlist, 289, 234);
+    lv_obj_set_pos(ui_scr->usb_slave_view_btnlist, 253, 70);
+    lv_obj_set_size(ui_scr->usb_slave_view_btnlist, 289, 330);
     lv_obj_set_scrollbar_mode(ui_scr->usb_slave_view_btnlist, LV_SCROLLBAR_MODE_OFF);
     ui_style_set(ui_scr->usb_slave_view_btnlist, GUI_CTRL_CONT);
 
@@ -80,7 +82,7 @@ lv_obj_t *setup_scr_usb_slave(lv_ui *ui)
     //Set style for usb_slave_btn_usb_msd. Part: LV_PART_MAIN, State: LV_STATE_FOCUS_KEY
     lv_obj_set_style_text_color(ui_scr->usb_slave_btn_usb_msd, lv_color_make(0x00, 0x00, 0x00), LV_PART_MAIN | LV_STATE_FOCUS_KEY);
     ui_scr->usb_slave_btn_usb_msd_label = lv_label_create(ui_scr->usb_slave_btn_usb_msd);
-    lv_obj_set_style_pad_all(ui_scr->usb_slave_btn_usb_msd, 0, LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_all(ui_scr->usb_slave_btn_usb_msd, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_align(ui_scr->usb_slave_btn_usb_msd_label, LV_ALIGN_CENTER, 0, 0);
 
     //Write codes usb_slave_btn_pc_cam
@@ -96,7 +98,7 @@ lv_obj_t *setup_scr_usb_slave(lv_ui *ui)
     //Set style for usb_slave_btn_pc_cam. Part: LV_PART_MAIN, State: LV_STATE_FOCUS_KEY
     lv_obj_set_style_text_color(ui_scr->usb_slave_btn_pc_cam, lv_color_make(0x00, 0x00, 0x00), LV_PART_MAIN | LV_STATE_FOCUS_KEY);
     ui_scr->usb_slave_btn_pc_cam_label = lv_label_create(ui_scr->usb_slave_btn_pc_cam);
-    lv_obj_set_style_pad_all(ui_scr->usb_slave_btn_pc_cam, 0, LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_all(ui_scr->usb_slave_btn_pc_cam, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_align(ui_scr->usb_slave_btn_pc_cam_label, LV_ALIGN_CENTER, 0, 0);
 
     //Write codes usb_slave_btn_video_rec
@@ -112,12 +114,28 @@ lv_obj_t *setup_scr_usb_slave(lv_ui *ui)
     //Set style for usb_slave_btn_video_rec. Part: LV_PART_MAIN, State: LV_STATE_FOCUS_KEY
     lv_obj_set_style_text_color(ui_scr->usb_slave_btn_video_rec, lv_color_make(0x00, 0x00, 0x00), LV_PART_MAIN | LV_STATE_FOCUS_KEY);
     ui_scr->usb_slave_btn_video_rec_label = lv_label_create(ui_scr->usb_slave_btn_video_rec);
-    lv_obj_set_style_pad_all(ui_scr->usb_slave_btn_video_rec, 0, LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_all(ui_scr->usb_slave_btn_video_rec, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_align(ui_scr->usb_slave_btn_video_rec_label, LV_ALIGN_CENTER, 0, 0);
+
+    //Write codes usb_slave_btn_1
+    ui_scr->usb_slave_btn_1 = lv_btn_create(ui_scr->usb_slave_view_btnlist);
+    lv_obj_set_pos(ui_scr->usb_slave_btn_1, 26, 263);
+    lv_obj_set_size(ui_scr->usb_slave_btn_1, 236, 42);
+    lv_obj_set_scrollbar_mode(ui_scr->usb_slave_btn_1, LV_SCROLLBAR_MODE_OFF);
+    ui_style_set(ui_scr->usb_slave_btn_1, GUI_CTRL_BUTTON);
+
+    //Set style for usb_slave_btn_1. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
+    lv_obj_set_style_text_color(ui_scr->usb_slave_btn_1, lv_color_make(0x00, 0x00, 0x00), LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    //Set style for usb_slave_btn_1. Part: LV_PART_MAIN, State: LV_STATE_FOCUS_KEY
+    lv_obj_set_style_text_color(ui_scr->usb_slave_btn_1, lv_color_make(0x00, 0x00, 0x00), LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+    ui_scr->usb_slave_btn_1_label = lv_label_create(ui_scr->usb_slave_btn_1);
+    lv_obj_set_style_pad_all(ui_scr->usb_slave_btn_1, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_align(ui_scr->usb_slave_btn_1_label, LV_ALIGN_CENTER, 0, 0);
 
     lv_obj_update_layout(ui_scr->usb_slave);
     ui_scr->usb_slave_del = false;
-    i18n_refresh_texts("usb_slave");
+    i18n_refresh_texts(GUI_SCREEN_USB_SLAVE);
 
     //Init events for screen
     events_init_usb_slave(ui);

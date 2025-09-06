@@ -193,7 +193,16 @@ const int config_btctler_le_afh_en                  = 0;
 const int config_btctler_le_tws                     = 0;
 
 // Master multi-link
-const int config_btctler_le_master_multilink        = 0;
+const int config_btctler_le_master_multilink        = 1;
+// Slave multi-link
+const int config_btctler_le_slave_multilink         = 1;
+
+#ifndef TCFG_TRANS_MULTI_BLE_SLAVE_NUMS
+#define TCFG_TRANS_MULTI_BLE_SLAVE_NUMS             1
+#endif
+#ifndef TCFG_TRANS_MULTI_BLE_MASTER_NUMS
+#define TCFG_TRANS_MULTI_BLE_MASTER_NUMS            0
+#endif
 
 #if (TCFG_LEA_BIG_CTRLER_TX_EN || TCFG_LEA_BIG_CTRLER_RX_EN)
 const int config_btctler_le_hw_nums                 = 6;
@@ -201,15 +210,15 @@ const int config_btctler_le_hw_nums                 = 6;
 const int config_btctler_le_hw_nums                 = 5;
 #elif (TCFG_LE_AUDIO_APP_CONFIG & (LE_AUDIO_AURACAST_SOURCE_EN | LE_AUDIO_AURACAST_SINK_EN))
 const int config_btctler_le_hw_nums                 = 8;
-#elif TCFG_TRANS_MULTI_BLE_EN
-const int config_btctler_le_hw_nums                 = TCFG_TRANS_MULTI_BLE_SLAVE_NUMS + TCFG_TRANS_MULTI_BLE_MASTER_NUMS;
-#elif TCFG_BLE_MESH_ENABLE
-const int config_btctler_le_hw_nums                 = 3;
-#elif TCFG_BLE_MASTER_CENTRAL_EN || TCFG_NONCONN_24G_EN
-const int config_btctler_le_hw_nums                 = 2;
 #else
-const int config_btctler_le_hw_nums                 = 2;
+const int config_btctler_le_hw_nums                 = TCFG_TRANS_MULTI_BLE_SLAVE_NUMS + TCFG_TRANS_MULTI_BLE_MASTER_NUMS;
 #endif
+
+//le 配置,可以优化代码和RAM
+const int config_le_sm_support_enable               = 1; //是否支持加密配对
+const int config_le_hci_connection_num              = TCFG_TRANS_MULTI_BLE_SLAVE_NUMS + TCFG_TRANS_MULTI_BLE_MASTER_NUMS; //支持同时连接个数
+const int config_le_gatt_server_num                 = TCFG_TRANS_MULTI_BLE_SLAVE_NUMS + TCFG_TRANS_MULTI_BLE_MASTER_NUMS; //支持server角色个数
+const int config_le_gatt_client_num                 = TCFG_TRANS_MULTI_BLE_MASTER_NUMS; //支持client角色个数
 
 /* const uint64_t config_btctler_le_features = (LE_ENCRYPTION | LE_FEATURES_ISO | LE_EXTENDED_ADVERTISING | LE_PERIODIC_ADVERTISING | LL_FEAT_ISO_SYNC | LL_FEAT_ISO_BROADCASTER | LL_FEAT_CIS_MASTER_ROLE | LL_FEAT_CIS_SLAVE_ROLE | LL_FEAT_LE_2M_PHY | LL_FEAT_LE_CODED_PHY); */
 
@@ -280,17 +289,6 @@ const int config_btctler_le_acl_total_nums          = 5 * config_btctler_le_hw_n
 const int config_bb_optimized_ctrl                  = VENDOR_BB_ISO_DIRECT_PUSH;//BIT(7);//|BIT(8);
 
 #endif//end TCFG_USER_BLE_ENABLE
-
-
-//le 配置,可以优化代码和RAM
-#if TCFG_BLE_MESH_ENABLE
-const int config_le_sm_support_enable               = 0; //是否支持加密配对
-#else
-const int config_le_sm_support_enable               = 1; //是否支持加密配对
-#endif
-const int config_le_hci_connection_num              = 1; //支持同时连接个数
-const int config_le_gatt_server_num                 = 1; //支持server角色个数
-const int config_le_gatt_client_num                 = 1; //支持client角色个数
 
 #endif
 

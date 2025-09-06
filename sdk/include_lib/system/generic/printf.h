@@ -2,12 +2,18 @@
 #define _PRINTF_H_
 #define line_inf printf("%s %s %d \r\n" ,__FILE__, __func__ , __LINE__) ;
 #include <stdarg.h>
+#include "generic/typedef.h"
+#include "generic/dlog.h"
 
 extern void putbyte(char a);
 
 extern int putchar(int a);
+#define putchar(a)  {if(config_ulog_enable){putchar(a);}if(config_dlog_enable){dlog_putchar(a);}}
 
 extern int puts(const char *out);
+// puts 目前无法提取字符串常量
+// #define puts(format)  {if(config_ulog_enable){puts(format);}if(config_dlog_enable){dlog_printf(7, "%s", (const char *)format);}}
+#define puts(format)  {if(config_ulog_enable){puts(format);}if(config_dlog_enable){dlog_printf(7, format);}}
 
 extern void put_u4hex(unsigned char dat);
 
@@ -18,8 +24,10 @@ extern void put_u16hex(unsigned short dat);
 extern void put_u32hex(unsigned int dat);
 
 extern void put_buf(const unsigned char *buf, int len);
+#define put_buf(buf, len)  {if(config_ulog_enable){put_buf(buf, len);}if(config_dlog_enable){dlog_put_buf(buf, len);}}
 
 extern int printf(const char *format, ...);
+#define printf(format, ...)  {if(config_ulog_enable){printf(format, ##__VA_ARGS__);}if(config_dlog_enable){dlog_printf(6, format, ##__VA_ARGS__);}}
 
 extern int assert_printf(const char *format, ...);
 

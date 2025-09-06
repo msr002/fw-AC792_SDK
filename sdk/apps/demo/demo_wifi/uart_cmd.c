@@ -8,9 +8,13 @@
 #include "lwip/sockets.h"
 #include "lwip/netdb.h"
 
+
 static char ssid[33];
 static char pwd[65];
+static char P2P_Device_Name[30];
+static u8   mac_addr[6];
 void wifi_sta_connect(char *ssid, char *pwd, char save);
+
 
 void cmd_do(char *buf)
 {
@@ -21,18 +25,64 @@ void cmd_do(char *buf)
 
     printf("cmd rec:%s\n", cmd);
 
-    if (0 == memcmp(buf, "sta", strlen("sta"))) {
+    if (0 == memcmp(buf, "sta", strlen("sta"))) {  //串口输入 sta <ssid> <pwd> 进入STA模式。uart1 Rx为PA1
         if (sscanf(buf, "sta %s %s", ssid, pwd) == 2) {
-            printf("ssid : %s, pwd: %s\n", ssid, pwd);
+            printf("Enter sta mode, ssid : %s, pwd: %s\n", ssid, pwd);
             wifi_sta_connect(ssid, pwd, 1);
         } else if (sscanf(buf, "sta %s", ssid) == 1) {
             wifi_sta_connect(ssid, "", 1);
         }
-    } else if (0 == memcmp(buf, "go_start", strlen("go_start"))) {
-    } else if (0 == memcmp(buf, "gc_start", strlen("gc_start"))) {
-    } else if (0 == memcmp(buf, "scan", strlen("scan"))) {
+    } else if (0 == memcmp(buf, "ap", strlen("ap"))) {	//ap <ssid> <pwd> 进入AP模式
+        if (sscanf(buf, "ap  %s %s", ssid, pwd) == 2) {
+            printf("Enter ap mode, ssid : %s, pwd: %s\n", ssid, pwd);
+            wifi_enter_ap_mode(ssid, pwd);
+        } else if (sscanf(buf, "ap %s", ssid) == 1) {
+            wifi_enter_ap_mode(ssid, "");
+        }
+    } else if (0 == memcmp(buf, "go", strlen("go"))) {	//go <name>  进入GO模式
+        if (sscanf(buf, "go %s", P2P_Device_Name) == 1) {
+            printf("Enter GO Mode, Device name: %s\n", P2P_Device_Name);
+            wifi_enter_p2p_mode(P2P_GO_MODE, P2P_Device_Name);
+        } else {
+            printf("Enter GO Mode, Default device name");
+            wifi_enter_p2p_mode(P2P_GO_MODE, "JL_GO_TEST");
+        }
+    } else if (0 == memcmp(buf, "gc", strlen("gc"))) {	//gc <name>  进入GC模式
+        if (sscanf(buf, "gc %s", P2P_Device_Name) == 1) {
+            printf("Enter GC Mode, Device name: %s\n", P2P_Device_Name);
+            wifi_enter_p2p_mode(P2P_GC_MODE, P2P_Device_Name);
+        } else {
+            printf("Enter GC Mode, Default device name");
+            wifi_enter_p2p_mode(P2P_GC_MODE, "JL_GC_TEST");
+        }
+    } else if (0 == memcmp(buf, "scan", strlen("scan"))) {	//scan
         void wifi_get_list_example(void);
         wifi_get_list_example();
+    } else if (0 == memcmp(buf, "get_mac", strlen("get_mac"))) {	//get_mac 获取mac地址
+        wifi_get_mac(mac_addr);
+        printf("Mac addr: %02X:%02X:%02X:%02X:%02X:%02X", mac_addr[0], mac_addr[1], mac_addr[2], mac_addr[3], mac_addr[4], mac_addr[5]);
+    } else if (0 == memcmp(buf, "smp_cfg", strlen("smp_cfg"))) {	//smp_cfg 进入smp_cfg模式
+        wifi_enter_smp_cfg_mode();
+    } else if (0 == memcmp(buf, "ssid_store_test", strlen("ssid_store_test"))) {	//ssid_store_test 测试ssid存储
+        u8 ssid_stored_cnt;
+        struct wifi_stored_sta_info wifi_stored_sta_info[32];
+
+        os_time_dly(5 * 100); //假设等待已经连接上路由器
+        wifi_store_mode_info(STA_MODE, "GJ12", "123456789");
+        wifi_store_mode_info(STA_MODE, "WL83", "12345678");
+        wifi_store_mode_info(STA_MODE, "WIFI_PS_TEST", "12345678");
+
+        ssid_stored_cnt = wifi_get_stored_sta_info(wifi_stored_sta_info);
+        for (int i = 0; i < ssid_stored_cnt; i++) {
+            printf("1:wifi_get_stored_sta_info[%d]= %s \r\n", i, wifi_stored_sta_info[i].ssid);
+        }
+
+        wifi_del_stored_sta_info("WIFI_PS_TEST"); //中途删除掉其中一个存储过的SSID
+
+        ssid_stored_cnt = wifi_get_stored_sta_info(wifi_stored_sta_info);
+        for (int i = 0; i < ssid_stored_cnt; i++) {
+            printf("2:wifi_get_stored_sta_info[%d]= %s \r\n", i, wifi_stored_sta_info[i].ssid);
+        }
     }
 }
 
@@ -91,8 +141,6 @@ static int c_main(void)
 }
 
 late_initcall(c_main);
-
-
 
 
 

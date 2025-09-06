@@ -6,14 +6,25 @@
 
 static lv_ll_t subs_ll;
 
+#if LV_USE_GUIBUILDER_SIMULATOR
+_gui_msg_entry_t gui_model_video_dec_msg_entry_table[] = {
+    { GUI_MODEL_VIDEO_DEC_MSG_ID_FILE_TYPE_IMG, gui_model_video_dec_msg_file_type_img_cb, VALUE_INT },
+    { GUI_MODEL_VIDEO_DEC_MSG_ID_VIDEO_TIME_LAB, gui_model_video_dec_msg_video_time_lab_cb, VALUE_STRING },
+    { GUI_MODEL_VIDEO_DEC_MSG_ID_FILE_NAME_LAB, gui_model_video_dec_msg_file_name_lab_cb, VALUE_STRING },
+    { GUI_MODEL_VIDEO_DEC_MSG_ID_MEDIA_INFO_LAB, gui_model_video_dec_msg_media_info_lab_cb, VALUE_STRING },
+    { GUI_MODEL_VIDEO_DEC_MSG_ID_SD_STATUS_IMG, gui_model_video_dec_msg_sd_status_img_cb, VALUE_INT },
+    { GUI_MODEL_VIDEO_DEC_MSG_ID_PLAY_STATUS_IMG, gui_model_video_dec_msg_play_status_img_cb, VALUE_INT },
+    { GUI_MODEL_VIDEO_DEC_MSG_ID_VIDEO_CONT_SHOW, gui_model_video_dec_msg_video_cont_show_cb, VALUE_BOOL },
+    { GUI_MODEL_VIDEO_DEC_MSG_ID_FILE_LOCK_SHOW, gui_model_video_dec_msg_file_lock_show_cb, VALUE_BOOL },
+    { GUI_MODEL_VIDEO_DEC_MSG_ID_VIDEO_DEC_OPTIONS_LAB, gui_model_video_dec_msg_video_dec_options_lab_cb, VALUE_STRING },
+};
+#endif
+
 
 GUI_WEAK int gui_model_video_dec_msg_file_type_img_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type)
 {
     static int32_t file_type_img_var = 0;
-    if (access == GUI_MSG_ACCESS_SET) {
-        file_type_img_var = data->value_int;
-    }
-    data->value_int = file_type_img_var;
+    _gui_msg_int32_cb(&file_type_img_var, access, data);
     return 0;
 }
 GUI_WEAK int gui_model_video_dec_msg_video_time_lab_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type)
@@ -21,17 +32,7 @@ GUI_WEAK int gui_model_video_dec_msg_video_time_lab_cb(gui_msg_action_t access, 
     char video_time_lab_init_var[] = "";
     static bool video_time_lab_is_init = false;
     static char *video_time_lab_var = NULL;
-    if (video_time_lab_is_init == false) {
-        video_time_lab_var = lv_mem_alloc(strlen(video_time_lab_init_var) + 1);
-        strcpy(video_time_lab_var, video_time_lab_init_var);
-        video_time_lab_is_init = true;
-    }
-    if (access == GUI_MSG_ACCESS_SET) {
-        lv_mem_free(video_time_lab_var);
-        video_time_lab_var = lv_mem_alloc(strlen(data->value_string) + 1);
-        strcpy(video_time_lab_var, data->value_string);
-    }
-    data->value_string = video_time_lab_var;
+    _gui_msg_char_array_cb(&video_time_lab_var, video_time_lab_init_var, &video_time_lab_is_init, access, data);
     return 0;
 }
 GUI_WEAK int gui_model_video_dec_msg_file_name_lab_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type)
@@ -39,17 +40,7 @@ GUI_WEAK int gui_model_video_dec_msg_file_name_lab_cb(gui_msg_action_t access, g
     char file_name_lab_init_var[] = "";
     static bool file_name_lab_is_init = false;
     static char *file_name_lab_var = NULL;
-    if (file_name_lab_is_init == false) {
-        file_name_lab_var = lv_mem_alloc(strlen(file_name_lab_init_var) + 1);
-        strcpy(file_name_lab_var, file_name_lab_init_var);
-        file_name_lab_is_init = true;
-    }
-    if (access == GUI_MSG_ACCESS_SET) {
-        lv_mem_free(file_name_lab_var);
-        file_name_lab_var = lv_mem_alloc(strlen(data->value_string) + 1);
-        strcpy(file_name_lab_var, data->value_string);
-    }
-    data->value_string = file_name_lab_var;
+    _gui_msg_char_array_cb(&file_name_lab_var, file_name_lab_init_var, &file_name_lab_is_init, access, data);
     return 0;
 }
 GUI_WEAK int gui_model_video_dec_msg_media_info_lab_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type)
@@ -57,53 +48,31 @@ GUI_WEAK int gui_model_video_dec_msg_media_info_lab_cb(gui_msg_action_t access, 
     char media_info_lab_init_var[] = "";
     static bool media_info_lab_is_init = false;
     static char *media_info_lab_var = NULL;
-    if (media_info_lab_is_init == false) {
-        media_info_lab_var = lv_mem_alloc(strlen(media_info_lab_init_var) + 1);
-        strcpy(media_info_lab_var, media_info_lab_init_var);
-        media_info_lab_is_init = true;
-    }
-    if (access == GUI_MSG_ACCESS_SET) {
-        lv_mem_free(media_info_lab_var);
-        media_info_lab_var = lv_mem_alloc(strlen(data->value_string) + 1);
-        strcpy(media_info_lab_var, data->value_string);
-    }
-    data->value_string = media_info_lab_var;
+    _gui_msg_char_array_cb(&media_info_lab_var, media_info_lab_init_var, &media_info_lab_is_init, access, data);
     return 0;
 }
 GUI_WEAK int gui_model_video_dec_msg_sd_status_img_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type)
 {
     static int32_t sd_status_img_var = 0;
-    if (access == GUI_MSG_ACCESS_SET) {
-        sd_status_img_var = data->value_int;
-    }
-    data->value_int = sd_status_img_var;
+    _gui_msg_int32_cb(&sd_status_img_var, access, data);
     return 0;
 }
 GUI_WEAK int gui_model_video_dec_msg_play_status_img_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type)
 {
     static int32_t play_status_img_var = 0;
-    if (access == GUI_MSG_ACCESS_SET) {
-        play_status_img_var = data->value_int;
-    }
-    data->value_int = play_status_img_var;
+    _gui_msg_int32_cb(&play_status_img_var, access, data);
     return 0;
 }
 GUI_WEAK int gui_model_video_dec_msg_video_cont_show_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type)
 {
     static bool video_cont_show_var = false;
-    if (access == GUI_MSG_ACCESS_SET) {
-        video_cont_show_var = data->value_int;
-    }
-    data->value_int = video_cont_show_var;
+    _gui_msg_bool_cb(&video_cont_show_var, access, data);
     return 0;
 }
 GUI_WEAK int gui_model_video_dec_msg_file_lock_show_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type)
 {
     static bool file_lock_show_var = false;
-    if (access == GUI_MSG_ACCESS_SET) {
-        file_lock_show_var = data->value_int;
-    }
-    data->value_int = file_lock_show_var;
+    _gui_msg_bool_cb(&file_lock_show_var, access, data);
     return 0;
 }
 GUI_WEAK int gui_model_video_dec_msg_video_dec_options_lab_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type)
@@ -111,58 +80,28 @@ GUI_WEAK int gui_model_video_dec_msg_video_dec_options_lab_cb(gui_msg_action_t a
     char video_dec_options_lab_init_var[] = "";
     static bool video_dec_options_lab_is_init = false;
     static char *video_dec_options_lab_var = NULL;
-    if (video_dec_options_lab_is_init == false) {
-        video_dec_options_lab_var = lv_mem_alloc(strlen(video_dec_options_lab_init_var) + 1);
-        strcpy(video_dec_options_lab_var, video_dec_options_lab_init_var);
-        video_dec_options_lab_is_init = true;
-    }
-    if (access == GUI_MSG_ACCESS_SET) {
-        lv_mem_free(video_dec_options_lab_var);
-        video_dec_options_lab_var = lv_mem_alloc(strlen(data->value_string) + 1);
-        strcpy(video_dec_options_lab_var, data->value_string);
-    }
-    data->value_string = video_dec_options_lab_var;
+    _gui_msg_char_array_cb(&video_dec_options_lab_var, video_dec_options_lab_init_var, &video_dec_options_lab_is_init, access, data);
     return 0;
 }
 
 void gui_model_video_dec_msg_init(lv_ui *ui)
 {
-    gui_msg_sub_t *sub;
-    sub = gui_msg_create_sub(GUI_MODEL_VIDEO_DEC_MSG_ID_FILE_TYPE_IMG);
-    if (sub != NULL) {
-        lv_subject_init_pointer(sub->subject, &guider_msg_data);
-    }
-    sub = gui_msg_create_sub(GUI_MODEL_VIDEO_DEC_MSG_ID_VIDEO_TIME_LAB);
-    if (sub != NULL) {
-        lv_subject_init_pointer(sub->subject, &guider_msg_data);
-    }
-    sub = gui_msg_create_sub(GUI_MODEL_VIDEO_DEC_MSG_ID_FILE_NAME_LAB);
-    if (sub != NULL) {
-        lv_subject_init_pointer(sub->subject, &guider_msg_data);
-    }
-    sub = gui_msg_create_sub(GUI_MODEL_VIDEO_DEC_MSG_ID_MEDIA_INFO_LAB);
-    if (sub != NULL) {
-        lv_subject_init_pointer(sub->subject, &guider_msg_data);
-    }
-    sub = gui_msg_create_sub(GUI_MODEL_VIDEO_DEC_MSG_ID_SD_STATUS_IMG);
-    if (sub != NULL) {
-        lv_subject_init_pointer(sub->subject, &guider_msg_data);
-    }
-    sub = gui_msg_create_sub(GUI_MODEL_VIDEO_DEC_MSG_ID_PLAY_STATUS_IMG);
-    if (sub != NULL) {
-        lv_subject_init_pointer(sub->subject, &guider_msg_data);
-    }
-    sub = gui_msg_create_sub(GUI_MODEL_VIDEO_DEC_MSG_ID_VIDEO_CONT_SHOW);
-    if (sub != NULL) {
-        lv_subject_init_pointer(sub->subject, &guider_msg_data);
-    }
-    sub = gui_msg_create_sub(GUI_MODEL_VIDEO_DEC_MSG_ID_FILE_LOCK_SHOW);
-    if (sub != NULL) {
-        lv_subject_init_pointer(sub->subject, &guider_msg_data);
-    }
-    sub = gui_msg_create_sub(GUI_MODEL_VIDEO_DEC_MSG_ID_VIDEO_DEC_OPTIONS_LAB);
-    if (sub != NULL) {
-        lv_subject_init_pointer(sub->subject, &guider_msg_data);
+    int32_t ids[9] = {
+        GUI_MODEL_VIDEO_DEC_MSG_ID_FILE_TYPE_IMG,
+        GUI_MODEL_VIDEO_DEC_MSG_ID_VIDEO_TIME_LAB,
+        GUI_MODEL_VIDEO_DEC_MSG_ID_FILE_NAME_LAB,
+        GUI_MODEL_VIDEO_DEC_MSG_ID_MEDIA_INFO_LAB,
+        GUI_MODEL_VIDEO_DEC_MSG_ID_SD_STATUS_IMG,
+        GUI_MODEL_VIDEO_DEC_MSG_ID_PLAY_STATUS_IMG,
+        GUI_MODEL_VIDEO_DEC_MSG_ID_VIDEO_CONT_SHOW,
+        GUI_MODEL_VIDEO_DEC_MSG_ID_FILE_LOCK_SHOW,
+        GUI_MODEL_VIDEO_DEC_MSG_ID_VIDEO_DEC_OPTIONS_LAB,
+    };
+    for (int i = 0; i < 9; i++) {
+        gui_msg_sub_t *sub = gui_msg_create_sub(ids[i]);
+        if (sub != NULL) {
+            lv_subject_init_pointer(sub->subject, &guider_msg_data);
+        }
     }
 }
 
@@ -198,11 +137,11 @@ void gui_model_video_dec_msg_init_events()
     }
 
     lv_subject_t *subject_file_type_img = gui_msg_get_subject(GUI_MODEL_VIDEO_DEC_MSG_ID_FILE_TYPE_IMG);
-    lv_subject_t *subject_video_time_lab = gui_msg_get_subject(GUI_MODEL_VIDEO_DEC_MSG_ID_VIDEO_TIME_LAB);
     lv_subject_t *subject_file_name_lab = gui_msg_get_subject(GUI_MODEL_VIDEO_DEC_MSG_ID_FILE_NAME_LAB);
     lv_subject_t *subject_media_info_lab = gui_msg_get_subject(GUI_MODEL_VIDEO_DEC_MSG_ID_MEDIA_INFO_LAB);
     lv_subject_t *subject_sd_status_img = gui_msg_get_subject(GUI_MODEL_VIDEO_DEC_MSG_ID_SD_STATUS_IMG);
     lv_subject_t *subject_play_status_img = gui_msg_get_subject(GUI_MODEL_VIDEO_DEC_MSG_ID_PLAY_STATUS_IMG);
+    lv_subject_t *subject_video_time_lab = gui_msg_get_subject(GUI_MODEL_VIDEO_DEC_MSG_ID_VIDEO_TIME_LAB);
     lv_subject_t *subject_video_cont_show = gui_msg_get_subject(GUI_MODEL_VIDEO_DEC_MSG_ID_VIDEO_CONT_SHOW);
     lv_subject_t *subject_file_lock_show = gui_msg_get_subject(GUI_MODEL_VIDEO_DEC_MSG_ID_FILE_LOCK_SHOW);
     lv_subject_t *subject_video_dec_options_lab = gui_msg_get_subject(GUI_MODEL_VIDEO_DEC_MSG_ID_VIDEO_DEC_OPTIONS_LAB);
@@ -312,156 +251,36 @@ void gui_model_video_dec_msg_unsubscribe()
     }
 }
 
-gui_msg_data_t *gui_model_video_dec_msg_get(int32_t msg_id)
-{
-    switch (msg_id) {
-    case GUI_MODEL_VIDEO_DEC_MSG_ID_FILE_TYPE_IMG: {
-        gui_model_video_dec_msg_file_type_img_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
-        break;
-    }
-    case GUI_MODEL_VIDEO_DEC_MSG_ID_VIDEO_TIME_LAB: {
-        gui_model_video_dec_msg_video_time_lab_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_STRING);
-        break;
-    }
-    case GUI_MODEL_VIDEO_DEC_MSG_ID_FILE_NAME_LAB: {
-        gui_model_video_dec_msg_file_name_lab_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_STRING);
-        break;
-    }
-    case GUI_MODEL_VIDEO_DEC_MSG_ID_MEDIA_INFO_LAB: {
-        gui_model_video_dec_msg_media_info_lab_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_STRING);
-        break;
-    }
-    case GUI_MODEL_VIDEO_DEC_MSG_ID_SD_STATUS_IMG: {
-        gui_model_video_dec_msg_sd_status_img_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
-        break;
-    }
-    case GUI_MODEL_VIDEO_DEC_MSG_ID_PLAY_STATUS_IMG: {
-        gui_model_video_dec_msg_play_status_img_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
-        break;
-    }
-    case GUI_MODEL_VIDEO_DEC_MSG_ID_VIDEO_CONT_SHOW: {
-        gui_model_video_dec_msg_video_cont_show_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_BOOL);
-        break;
-    }
-    case GUI_MODEL_VIDEO_DEC_MSG_ID_FILE_LOCK_SHOW: {
-        gui_model_video_dec_msg_file_lock_show_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_BOOL);
-        break;
-    }
-    case GUI_MODEL_VIDEO_DEC_MSG_ID_VIDEO_DEC_OPTIONS_LAB: {
-        gui_model_video_dec_msg_video_dec_options_lab_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_STRING);
-        break;
-    }
-    default:
-        return NULL;
-    }
-    return &guider_msg_data;
-}
-
-void gui_model_video_dec_msg_action_change(int32_t msg_id, gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type)
-{
-    switch (msg_id) {
-    case GUI_MODEL_VIDEO_DEC_MSG_ID_FILE_TYPE_IMG: {
-        gui_model_video_dec_msg_file_type_img_cb(access, data, type);
-        break;
-    }
-    case GUI_MODEL_VIDEO_DEC_MSG_ID_VIDEO_TIME_LAB: {
-        gui_model_video_dec_msg_video_time_lab_cb(access, data, type);
-        break;
-    }
-    case GUI_MODEL_VIDEO_DEC_MSG_ID_FILE_NAME_LAB: {
-        gui_model_video_dec_msg_file_name_lab_cb(access, data, type);
-        break;
-    }
-    case GUI_MODEL_VIDEO_DEC_MSG_ID_MEDIA_INFO_LAB: {
-        gui_model_video_dec_msg_media_info_lab_cb(access, data, type);
-        break;
-    }
-    case GUI_MODEL_VIDEO_DEC_MSG_ID_SD_STATUS_IMG: {
-        gui_model_video_dec_msg_sd_status_img_cb(access, data, type);
-        break;
-    }
-    case GUI_MODEL_VIDEO_DEC_MSG_ID_PLAY_STATUS_IMG: {
-        gui_model_video_dec_msg_play_status_img_cb(access, data, type);
-        break;
-    }
-    case GUI_MODEL_VIDEO_DEC_MSG_ID_VIDEO_CONT_SHOW: {
-        gui_model_video_dec_msg_video_cont_show_cb(access, data, type);
-        break;
-    }
-    case GUI_MODEL_VIDEO_DEC_MSG_ID_FILE_LOCK_SHOW: {
-        gui_model_video_dec_msg_file_lock_show_cb(access, data, type);
-        break;
-    }
-    case GUI_MODEL_VIDEO_DEC_MSG_ID_VIDEO_DEC_OPTIONS_LAB: {
-        gui_model_video_dec_msg_video_dec_options_lab_cb(access, data, type);
-        break;
-    }
-    default: {
-        break;
-    }
-    }
-}
-
 gui_msg_status_t gui_model_video_dec_msg_send(int32_t msg_id, void *value, int32_t len)
 {
     if (msg_id == GUI_MODEL_VIDEO_DEC_MSG_ID) {
     } else {
         gui_msg_data_type_t data_type = VALUE_INT;
         switch (msg_id) {
-        case GUI_MODEL_VIDEO_DEC_MSG_ID_FILE_TYPE_IMG: {
-            data_type = VALUE_INT;
-            guider_msg_data.value_array.ptr = value;
-            guider_msg_data.value_array.len = len;
-            break;
-        }
-        case GUI_MODEL_VIDEO_DEC_MSG_ID_VIDEO_TIME_LAB: {
-            data_type = VALUE_STRING;
-            guider_msg_data.value_array.ptr = value;
-            guider_msg_data.value_array.len = len;
-            break;
-        }
-        case GUI_MODEL_VIDEO_DEC_MSG_ID_FILE_NAME_LAB: {
-            data_type = VALUE_STRING;
-            guider_msg_data.value_array.ptr = value;
-            guider_msg_data.value_array.len = len;
-            break;
-        }
-        case GUI_MODEL_VIDEO_DEC_MSG_ID_MEDIA_INFO_LAB: {
-            data_type = VALUE_STRING;
-            guider_msg_data.value_array.ptr = value;
-            guider_msg_data.value_array.len = len;
-            break;
-        }
-        case GUI_MODEL_VIDEO_DEC_MSG_ID_SD_STATUS_IMG: {
-            data_type = VALUE_INT;
-            guider_msg_data.value_array.ptr = value;
-            guider_msg_data.value_array.len = len;
-            break;
-        }
-        case GUI_MODEL_VIDEO_DEC_MSG_ID_PLAY_STATUS_IMG: {
-            data_type = VALUE_INT;
-            guider_msg_data.value_array.ptr = value;
-            guider_msg_data.value_array.len = len;
-            break;
-        }
-        case GUI_MODEL_VIDEO_DEC_MSG_ID_VIDEO_CONT_SHOW: {
-            data_type = VALUE_BOOL;
-            guider_msg_data.value_array.ptr = value;
-            guider_msg_data.value_array.len = len;
-            break;
-        }
+        case GUI_MODEL_VIDEO_DEC_MSG_ID_VIDEO_CONT_SHOW:
         case GUI_MODEL_VIDEO_DEC_MSG_ID_FILE_LOCK_SHOW: {
             data_type = VALUE_BOOL;
             guider_msg_data.value_array.ptr = value;
             guider_msg_data.value_array.len = len;
-            break;
         }
+        break;
+        case GUI_MODEL_VIDEO_DEC_MSG_ID_VIDEO_TIME_LAB:
+        case GUI_MODEL_VIDEO_DEC_MSG_ID_FILE_NAME_LAB:
+        case GUI_MODEL_VIDEO_DEC_MSG_ID_MEDIA_INFO_LAB:
         case GUI_MODEL_VIDEO_DEC_MSG_ID_VIDEO_DEC_OPTIONS_LAB: {
             data_type = VALUE_STRING;
             guider_msg_data.value_array.ptr = value;
             guider_msg_data.value_array.len = len;
-            break;
         }
+        break;
+        case GUI_MODEL_VIDEO_DEC_MSG_ID_FILE_TYPE_IMG:
+        case GUI_MODEL_VIDEO_DEC_MSG_ID_SD_STATUS_IMG:
+        case GUI_MODEL_VIDEO_DEC_MSG_ID_PLAY_STATUS_IMG: {
+            data_type = VALUE_INT;
+            guider_msg_data.value_array.ptr = value;
+            guider_msg_data.value_array.len = len;
+        }
+        break;
         default:
             break;
         }

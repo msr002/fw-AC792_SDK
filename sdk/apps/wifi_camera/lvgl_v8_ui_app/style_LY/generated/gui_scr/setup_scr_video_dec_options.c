@@ -19,31 +19,22 @@ lv_obj_t *setup_scr_video_dec_options(lv_ui *ui)
     lv_ui_video_dec_options *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_DEC_OPTIONS);
     if (ui_scr == NULL) {
         ui_scr = lv_mem_alloc(sizeof(lv_ui_video_dec_options));
+        if (ui_scr == NULL) {
+            return NULL;
+        }
         memset(ui_scr, 0, sizeof(lv_ui_video_dec_options));
         ui->video_dec_options = ui_scr;
     }
-    if (lv_obj_is_valid(ui_scr->video_dec_options)) {
-        lv_obj_del(ui_scr->video_dec_options);
-    }
 
     //Write codes video_dec_options
-    ui_scr->video_dec_options = lv_obj_create(lv_layer_top());
-    lv_group_t *def_group = lv_group_get_default();
-    lv_obj_set_size(ui_scr->video_dec_options, 800, 480);
+    ui_scr->video_dec_options = lv_obj_create(NULL);
     lv_obj_set_scrollbar_mode(ui_scr->video_dec_options, LV_SCROLLBAR_MODE_OFF);
     lv_obj_clear_flag(ui_scr->video_dec_options, LV_OBJ_FLAG_CLICKABLE);
     ui_style_set(ui_scr->video_dec_options, GUI_CTRL_SCR);
 
     //Set style for video_dec_options. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
     lv_obj_set_style_bg_color(ui_scr->video_dec_options, lv_color_make(0xff, 0xff, 0xff), LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_border_width(ui_scr->video_dec_options, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_border_opa(ui_scr->video_dec_options, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_pad_left(ui_scr->video_dec_options, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_pad_right(ui_scr->video_dec_options, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_pad_top(ui_scr->video_dec_options, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_pad_bottom(ui_scr->video_dec_options, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_pad_row(ui_scr->video_dec_options, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_pad_column(ui_scr->video_dec_options, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     //Write codes video_dec_options_view_1
     ui_scr->video_dec_options_view_1 = lv_obj_create(ui_scr->video_dec_options);
@@ -97,7 +88,7 @@ lv_obj_t *setup_scr_video_dec_options(lv_ui *ui)
     //Delete extra default style for video_dec_options_btn_1
     lv_obj_remove_style(ui_scr->video_dec_options_btn_1, &gui_btn_main_focus_key_style, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
     ui_scr->video_dec_options_btn_1_label = lv_label_create(ui_scr->video_dec_options_btn_1);
-    lv_obj_set_style_pad_all(ui_scr->video_dec_options_btn_1, 0, LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_all(ui_scr->video_dec_options_btn_1, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_align(ui_scr->video_dec_options_btn_1_label, LV_ALIGN_CENTER, 0, 0);
 
     //Write codes video_dec_options_btn_2
@@ -120,12 +111,12 @@ lv_obj_t *setup_scr_video_dec_options(lv_ui *ui)
     //Delete extra default style for video_dec_options_btn_2
     lv_obj_remove_style(ui_scr->video_dec_options_btn_2, &gui_btn_main_focus_key_style, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
     ui_scr->video_dec_options_btn_2_label = lv_label_create(ui_scr->video_dec_options_btn_2);
-    lv_obj_set_style_pad_all(ui_scr->video_dec_options_btn_2, 0, LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_all(ui_scr->video_dec_options_btn_2, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_align(ui_scr->video_dec_options_btn_2_label, LV_ALIGN_CENTER, 0, 0);
 
     lv_obj_update_layout(ui_scr->video_dec_options);
     ui_scr->video_dec_options_del = false;
-    i18n_refresh_texts("video_dec_options");
+    i18n_refresh_texts(GUI_SCREEN_VIDEO_DEC_OPTIONS);
 
     //Init events for screen
     events_init_video_dec_options(ui);

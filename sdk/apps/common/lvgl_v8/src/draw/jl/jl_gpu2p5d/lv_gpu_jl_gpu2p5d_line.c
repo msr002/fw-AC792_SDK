@@ -106,8 +106,12 @@ jlvg_begin:
     if (!is_frame_buf) {
         //针对canvas的处理,判断canvas的buf是否带透明度
         if (lv_jl_gpu2p5d_check_canvas_buf_format(draw_ctx) == LV_IMG_CF_TRUE_COLOR) {
+#if LV_COLOR_DEPTH_EXTEN == 24
+            jlvg_dest_cf = VGHW_FORMAT_RGB565;
+#else
             jlvg_dest_cf = LV_GPU_COLOR_FORMAT;
-            bytes_per_pixel = jlvg_get_image_format_bpp(LV_GPU_COLOR_FORMAT) >> 3;
+#endif
+            bytes_per_pixel = jlvg_get_image_format_bpp(jlvg_dest_cf) >> 3;
         } else {
             jlvg_dest_cf = LV_GPU_COLOR_ALPHA_FORMAT;
             bytes_per_pixel = LV_IMG_PX_SIZE_ALPHA_BYTE;

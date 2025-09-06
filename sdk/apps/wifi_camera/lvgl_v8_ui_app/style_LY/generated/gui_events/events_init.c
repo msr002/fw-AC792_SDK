@@ -28,6 +28,40 @@ extern uint8_t lock_all_flag;
 extern void delete_file(uint8_t data);
 extern void lock_flie(uint8_t file_num, uint8_t lock);
 extern void exit_dec_setting_menu(void);
+#if !LV_USE_GUIBUILDER_SIMULATOR
+extern int map_jpeg_disp_frame_uninit(void);
+#endif
+#if !LV_USE_GUIBUILDER_SIMULATOR
+//#include "fs/fs.h"
+extern int map_jpeg_disp_one_frame(u16 width, u16 height, u8 *buf, int len);
+extern int map_jpeg_disp_frame_init(void);
+extern void lv_example_lyrics_text_input(char *new_text);
+static int init_flag = 1;
+#endif
+static int page_map_img_2_init_flag = 1;
+int in_ui_navi_flag = 0; //只有ui在导航界面允许更新导航信息
+
+int get_in_ui_navi_flag(void)
+{
+    return in_ui_navi_flag;
+}
+
+void set_in_ui_navi_flag(int val)
+{
+    in_ui_navi_flag = val;
+}
+#if !LV_USE_GUIBUILDER_SIMULATOR
+extern void logo_stop(void (*func)());
+#endif
+#if !LV_USE_GUIBUILDER_SIMULATOR
+extern int logo_show(char *logo_path, char *audio_path, int time_out, void (*func)());
+
+char *lyrics_test = "222222222222222223";
+#endif
+#if !LV_USE_GUIBUILDER_SIMULATOR
+extern void logo_stop(void (*func)());
+extern void lyrics_example_clean(void);
+#endif
 void scr_loaded_handler(lv_event_t *e)
 {
     lv_obj_t *src = lv_event_get_target(e);
@@ -42,21 +76,20 @@ void events_init(lv_ui *ui)
 static void usb_slave_btn_usb_msd_event_handler(lv_event_t *e)
 {
     lv_event_code_t code = lv_event_get_code(e);
-    lv_ui *ui = (lv_ui *) lv_event_get_user_data(e);
-    lv_ui_usb_slave *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_USB_SLAVE);
-    lv_obj_t *src = lv_event_get_target(e);
     switch (code) {
     case LV_EVENT_CLICKED: {
-        lv_obj_add_flag(ui_scr->usb_slave_view_btnlist, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_add_flag(guider_ui.usb_slave->usb_slave_view_btnlist, LV_OBJ_FLAG_HIDDEN);
         //custom code usb_slave_view_btnlist
         {
+            lv_obj_t *src = lv_event_get_target(e);
+            lv_ui *ui = lv_event_get_user_data(e);
             lv_ui_usb_slave *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_USB_SLAVE);
             lv_obj_t *dest = ui_scr->usb_slave_view_btnlist;
 #if !LV_USE_GUIBUILDER_SIMULATOR
             usb_start(TCFG_USB_DEBUG_ID, MASSSTORAGE_CLASS);
 #endif
         }
-        lv_obj_clear_flag(ui_scr->usb_slave_img_icon_masstorage, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_clear_flag(guider_ui.usb_slave->usb_slave_img_icon_masstorage, LV_OBJ_FLAG_HIDDEN);
     }
     break;
     default:
@@ -67,21 +100,20 @@ static void usb_slave_btn_usb_msd_event_handler(lv_event_t *e)
 static void usb_slave_btn_pc_cam_event_handler(lv_event_t *e)
 {
     lv_event_code_t code = lv_event_get_code(e);
-    lv_ui *ui = (lv_ui *) lv_event_get_user_data(e);
-    lv_ui_usb_slave *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_USB_SLAVE);
-    lv_obj_t *src = lv_event_get_target(e);
     switch (code) {
     case LV_EVENT_CLICKED: {
-        lv_obj_add_flag(ui_scr->usb_slave_view_btnlist, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_add_flag(guider_ui.usb_slave->usb_slave_view_btnlist, LV_OBJ_FLAG_HIDDEN);
         //custom code usb_slave_view_btnlist
         {
+            lv_obj_t *src = lv_event_get_target(e);
+            lv_ui *ui = lv_event_get_user_data(e);
             lv_ui_usb_slave *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_USB_SLAVE);
             lv_obj_t *dest = ui_scr->usb_slave_view_btnlist;
 #if !LV_USE_GUIBUILDER_SIMULATOR
             usb_start(TCFG_USB_DEBUG_ID, UVC_CLASS);
 #endif
         }
-        lv_obj_clear_flag(ui_scr->usb_slave_img_icon_pccam, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_clear_flag(guider_ui.usb_slave->usb_slave_img_icon_pccam, LV_OBJ_FLAG_HIDDEN);
     }
     break;
     default:
@@ -92,14 +124,27 @@ static void usb_slave_btn_pc_cam_event_handler(lv_event_t *e)
 static void usb_slave_btn_video_rec_event_handler(lv_event_t *e)
 {
     lv_event_code_t code = lv_event_get_code(e);
-    lv_ui *ui = (lv_ui *) lv_event_get_user_data(e);
-    lv_ui_usb_slave *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_USB_SLAVE);
-    lv_obj_t *src = lv_event_get_target(e);
     switch (code) {
     case LV_EVENT_CLICKED: {
         gui_scr_t *screen = ui_get_scr(GUI_SCREEN_VIDEO_REC);
         if (screen != NULL) {
-            ui_load_scr_anim(ui, screen, LV_SCR_LOAD_ANIM_NONE, 0, 3, true, true, false);
+            ui_load_scr_anim(&guider_ui, screen, LV_SCR_LOAD_ANIM_NONE, 0, 3, true, true, false);
+        }
+    }
+    break;
+    default:
+        break;
+    }
+}
+
+static void usb_slave_btn_1_event_handler(lv_event_t *e)
+{
+    lv_event_code_t code = lv_event_get_code(e);
+    switch (code) {
+    case LV_EVENT_CLICKED: {
+        gui_scr_t *screen = ui_get_scr(GUI_SCREEN_PAGE_MAP);
+        if (screen != NULL) {
+            ui_load_scr_anim(&guider_ui, screen, LV_SCR_LOAD_ANIM_NONE, 0, 0, true, true, false);
         }
     }
     break;
@@ -129,20 +174,20 @@ void events_init_usb_slave(lv_ui *ui)
     lv_obj_add_event_cb(ui_scr->usb_slave_btn_usb_msd, usb_slave_btn_usb_msd_event_handler, LV_EVENT_ALL, ui);
     lv_obj_add_event_cb(ui_scr->usb_slave_btn_pc_cam, usb_slave_btn_pc_cam_event_handler, LV_EVENT_ALL, ui);
     lv_obj_add_event_cb(ui_scr->usb_slave_btn_video_rec, usb_slave_btn_video_rec_event_handler, LV_EVENT_ALL, ui);
+    lv_obj_add_event_cb(ui_scr->usb_slave_btn_1, usb_slave_btn_1_event_handler, LV_EVENT_ALL, ui);
     lv_obj_add_event_cb(ui_scr->usb_slave, usb_slave_screen_event_handler, LV_EVENT_ALL, ui);
 }
 
 static void video_rec_event_handler(lv_event_t *e)
 {
     lv_event_code_t code = lv_event_get_code(e);
-    lv_ui *ui = (lv_ui *) lv_event_get_user_data(e);
-    lv_ui_video_rec *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_REC);
-    lv_obj_t *src = lv_event_get_target(e);
     switch (code) {
     case LV_EVENT_SCREEN_LOADED: {
         //custom code
         {
-            lv_obj_t *dest = src;
+            lv_obj_t *src = lv_event_get_target(e);
+            lv_ui *ui = lv_event_get_user_data(e);
+            lv_ui_video_rec *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_REC);
             printf("[chili] %s %d   \n",  __func__, __LINE__);
 
         }
@@ -156,18 +201,17 @@ static void video_rec_event_handler(lv_event_t *e)
 static void video_rec_view_scan_event_handler(lv_event_t *e)
 {
     lv_event_code_t code = lv_event_get_code(e);
-    lv_ui *ui = (lv_ui *) lv_event_get_user_data(e);
-    lv_ui_video_rec *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_REC);
-    lv_obj_t *src = lv_event_get_target(e);
     switch (code) {
     case LV_EVENT_KEY: {
         uint32_t *key = lv_event_get_param(e);
         if (*key == LV_KEY_HOME || *key == LV_KEY_LEFT) {
-            lv_obj_add_flag(ui_scr->video_rec_view_scan, LV_OBJ_FLAG_HIDDEN);
+            lv_obj_add_flag(guider_ui.video_rec->video_rec_view_scan, LV_OBJ_FLAG_HIDDEN);
         }
         if (*key == LV_KEY_HOME || *key == LV_KEY_LEFT) {
             //custom code video_rec_view_scan
             {
+                lv_obj_t *src = lv_event_get_target(e);
+                lv_ui *ui = lv_event_get_user_data(e);
                 lv_ui_video_rec *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_REC);
                 lv_obj_t *dest = ui_scr->video_rec_view_scan;
                 printf(">>>>enter rec setting menu\n");
@@ -182,7 +226,7 @@ static void video_rec_view_scan_event_handler(lv_event_t *e)
         if (*key == LV_KEY_RIGHT) {
             gui_scr_t *screen = ui_get_scr(GUI_SCREEN_VIDEO_PHOTO);
             if (screen != NULL) {
-                ui_load_scr_anim(ui, screen, LV_SCR_LOAD_ANIM_NONE, 0, 0, true, true, false);
+                ui_load_scr_anim(&guider_ui, screen, LV_SCR_LOAD_ANIM_NONE, 0, 0, true, true, false);
             }
         }
     }
@@ -195,14 +239,13 @@ static void video_rec_view_scan_event_handler(lv_event_t *e)
 static void video_rec_view_menu_event_handler(lv_event_t *e)
 {
     lv_event_code_t code = lv_event_get_code(e);
-    lv_ui *ui = (lv_ui *) lv_event_get_user_data(e);
-    lv_ui_video_rec *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_REC);
-    lv_obj_t *src = lv_event_get_target(e);
     switch (code) {
     case LV_EVENT_CLICKED: {
         //custom code
         {
-            lv_obj_t *dest = src;
+            lv_obj_t *src = lv_event_get_target(e);
+            lv_ui *ui = lv_event_get_user_data(e);
+            lv_ui_video_rec *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_REC);
 
             //更新菜单子页面内容
             rec_subpage_data.funkey1 = 0;
@@ -449,14 +492,15 @@ static void video_rec_view_menu_event_handler(lv_event_t *e)
         if (*key == LV_KEY_HOME || *key == LV_KEY_LEFT) {
             gui_scr_t *screen = ui_get_scr(GUI_SCREEN_SYS_SETTING);
             if (screen != NULL) {
-                ui_load_scr_anim(ui, screen, LV_SCR_LOAD_ANIM_NONE, 0, 0, true, true, false);
+                ui_load_scr_anim(&guider_ui, screen, LV_SCR_LOAD_ANIM_NONE, 0, 0, true, true, false);
             }
         }
         if (*key == LV_KEY_HOME || *key == LV_KEY_LEFT) {
             //custom code sys_setting
             {
-                lv_ui_sys_setting *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_SYS_SETTING);
-                lv_obj_t *dest = ui_scr->sys_setting;
+                lv_obj_t *src = lv_event_get_target(e);
+                lv_ui *ui = lv_event_get_user_data(e);
+                lv_ui_video_rec *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_REC);
 #if LV_USE_GUIBUILDER_SIMULATOR
                 cur_mode = 0; //video_rec
 #endif
@@ -472,14 +516,13 @@ static void video_rec_view_menu_event_handler(lv_event_t *e)
 static void video_rec_view_reso_event_handler(lv_event_t *e)
 {
     lv_event_code_t code = lv_event_get_code(e);
-    lv_ui *ui = (lv_ui *) lv_event_get_user_data(e);
-    lv_ui_video_rec *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_REC);
-    lv_obj_t *src = lv_event_get_target(e);
     switch (code) {
     case LV_EVENT_CLICKED: {
-        lv_obj_clear_flag(ui_scr->video_rec_view_submenu, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_clear_flag(guider_ui.video_rec->video_rec_view_submenu, LV_OBJ_FLAG_HIDDEN);
         //custom code video_rec_view_submenu
         {
+            lv_obj_t *src = lv_event_get_target(e);
+            lv_ui *ui = lv_event_get_user_data(e);
             lv_ui_video_rec *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_REC);
             lv_obj_t *dest = ui_scr->video_rec_view_submenu;
             rec_subpage_data.now_subpage = SUBPAGE_RESOLUTION;
@@ -495,14 +538,13 @@ static void video_rec_view_reso_event_handler(lv_event_t *e)
 static void video_rec_view_two_rec_event_handler(lv_event_t *e)
 {
     lv_event_code_t code = lv_event_get_code(e);
-    lv_ui *ui = (lv_ui *) lv_event_get_user_data(e);
-    lv_ui_video_rec *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_REC);
-    lv_obj_t *src = lv_event_get_target(e);
     switch (code) {
     case LV_EVENT_CLICKED: {
-        lv_obj_clear_flag(ui_scr->video_rec_view_submenu, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_clear_flag(guider_ui.video_rec->video_rec_view_submenu, LV_OBJ_FLAG_HIDDEN);
         //custom code video_rec_view_submenu
         {
+            lv_obj_t *src = lv_event_get_target(e);
+            lv_ui *ui = lv_event_get_user_data(e);
             lv_ui_video_rec *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_REC);
             lv_obj_t *dest = ui_scr->video_rec_view_submenu;
             rec_subpage_data.now_subpage = SUBPAGE_DOUBLE_REC;
@@ -519,14 +561,13 @@ static void video_rec_view_two_rec_event_handler(lv_event_t *e)
 static void video_rec_view_cyc_rec_event_handler(lv_event_t *e)
 {
     lv_event_code_t code = lv_event_get_code(e);
-    lv_ui *ui = (lv_ui *) lv_event_get_user_data(e);
-    lv_ui_video_rec *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_REC);
-    lv_obj_t *src = lv_event_get_target(e);
     switch (code) {
     case LV_EVENT_CLICKED: {
-        lv_obj_clear_flag(ui_scr->video_rec_view_submenu, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_clear_flag(guider_ui.video_rec->video_rec_view_submenu, LV_OBJ_FLAG_HIDDEN);
         //custom code video_rec_view_submenu
         {
+            lv_obj_t *src = lv_event_get_target(e);
+            lv_ui *ui = lv_event_get_user_data(e);
             lv_ui_video_rec *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_REC);
             lv_obj_t *dest = ui_scr->video_rec_view_submenu;
             rec_subpage_data.now_subpage = SUBPAGE_CYC_REC;
@@ -543,14 +584,13 @@ static void video_rec_view_cyc_rec_event_handler(lv_event_t *e)
 static void video_rec_view_gap_event_handler(lv_event_t *e)
 {
     lv_event_code_t code = lv_event_get_code(e);
-    lv_ui *ui = (lv_ui *) lv_event_get_user_data(e);
-    lv_ui_video_rec *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_REC);
-    lv_obj_t *src = lv_event_get_target(e);
     switch (code) {
     case LV_EVENT_CLICKED: {
-        lv_obj_clear_flag(ui_scr->video_rec_view_submenu, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_clear_flag(guider_ui.video_rec->video_rec_view_submenu, LV_OBJ_FLAG_HIDDEN);
         //custom code video_rec_view_submenu
         {
+            lv_obj_t *src = lv_event_get_target(e);
+            lv_ui *ui = lv_event_get_user_data(e);
             lv_ui_video_rec *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_REC);
             lv_obj_t *dest = ui_scr->video_rec_view_submenu;
             rec_subpage_data.now_subpage = SUBPAGE_GAP;
@@ -567,14 +607,13 @@ static void video_rec_view_gap_event_handler(lv_event_t *e)
 static void video_rec_view_hdr_event_handler(lv_event_t *e)
 {
     lv_event_code_t code = lv_event_get_code(e);
-    lv_ui *ui = (lv_ui *) lv_event_get_user_data(e);
-    lv_ui_video_rec *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_REC);
-    lv_obj_t *src = lv_event_get_target(e);
     switch (code) {
     case LV_EVENT_CLICKED: {
-        lv_obj_clear_flag(ui_scr->video_rec_view_submenu, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_clear_flag(guider_ui.video_rec->video_rec_view_submenu, LV_OBJ_FLAG_HIDDEN);
         //custom code video_rec_view_submenu
         {
+            lv_obj_t *src = lv_event_get_target(e);
+            lv_ui *ui = lv_event_get_user_data(e);
             lv_ui_video_rec *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_REC);
             lv_obj_t *dest = ui_scr->video_rec_view_submenu;
             rec_subpage_data.now_subpage = SUBPAGE_HDR;
@@ -591,14 +630,13 @@ static void video_rec_view_hdr_event_handler(lv_event_t *e)
 static void video_rec_view_exp_event_handler(lv_event_t *e)
 {
     lv_event_code_t code = lv_event_get_code(e);
-    lv_ui *ui = (lv_ui *) lv_event_get_user_data(e);
-    lv_ui_video_rec *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_REC);
-    lv_obj_t *src = lv_event_get_target(e);
     switch (code) {
     case LV_EVENT_CLICKED: {
-        lv_obj_clear_flag(ui_scr->video_rec_view_submenu, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_clear_flag(guider_ui.video_rec->video_rec_view_submenu, LV_OBJ_FLAG_HIDDEN);
         //custom code video_rec_view_submenu
         {
+            lv_obj_t *src = lv_event_get_target(e);
+            lv_ui *ui = lv_event_get_user_data(e);
             lv_ui_video_rec *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_REC);
             lv_obj_t *dest = ui_scr->video_rec_view_submenu;
             rec_subpage_data.now_subpage = SUBPAGE_EXPOSURE;
@@ -615,14 +653,13 @@ static void video_rec_view_exp_event_handler(lv_event_t *e)
 static void video_rec_view_motd_event_handler(lv_event_t *e)
 {
     lv_event_code_t code = lv_event_get_code(e);
-    lv_ui *ui = (lv_ui *) lv_event_get_user_data(e);
-    lv_ui_video_rec *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_REC);
-    lv_obj_t *src = lv_event_get_target(e);
     switch (code) {
     case LV_EVENT_CLICKED: {
-        lv_obj_clear_flag(ui_scr->video_rec_view_submenu, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_clear_flag(guider_ui.video_rec->video_rec_view_submenu, LV_OBJ_FLAG_HIDDEN);
         //custom code video_rec_view_submenu
         {
+            lv_obj_t *src = lv_event_get_target(e);
+            lv_ui *ui = lv_event_get_user_data(e);
             lv_ui_video_rec *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_REC);
             lv_obj_t *dest = ui_scr->video_rec_view_submenu;
             rec_subpage_data.now_subpage = SUBPAGE_MOTION;
@@ -639,14 +676,13 @@ static void video_rec_view_motd_event_handler(lv_event_t *e)
 static void video_rec_view_mic_event_handler(lv_event_t *e)
 {
     lv_event_code_t code = lv_event_get_code(e);
-    lv_ui *ui = (lv_ui *) lv_event_get_user_data(e);
-    lv_ui_video_rec *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_REC);
-    lv_obj_t *src = lv_event_get_target(e);
     switch (code) {
     case LV_EVENT_CLICKED: {
-        lv_obj_clear_flag(ui_scr->video_rec_view_submenu, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_clear_flag(guider_ui.video_rec->video_rec_view_submenu, LV_OBJ_FLAG_HIDDEN);
         //custom code video_rec_view_submenu
         {
+            lv_obj_t *src = lv_event_get_target(e);
+            lv_ui *ui = lv_event_get_user_data(e);
             lv_ui_video_rec *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_REC);
             lv_obj_t *dest = ui_scr->video_rec_view_submenu;
             rec_subpage_data.now_subpage = SUBPAGE_RECORD;
@@ -663,14 +699,13 @@ static void video_rec_view_mic_event_handler(lv_event_t *e)
 static void video_rec_view_date_event_handler(lv_event_t *e)
 {
     lv_event_code_t code = lv_event_get_code(e);
-    lv_ui *ui = (lv_ui *) lv_event_get_user_data(e);
-    lv_ui_video_rec *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_REC);
-    lv_obj_t *src = lv_event_get_target(e);
     switch (code) {
     case LV_EVENT_CLICKED: {
-        lv_obj_clear_flag(ui_scr->video_rec_view_submenu, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_clear_flag(guider_ui.video_rec->video_rec_view_submenu, LV_OBJ_FLAG_HIDDEN);
         //custom code video_rec_view_submenu
         {
+            lv_obj_t *src = lv_event_get_target(e);
+            lv_ui *ui = lv_event_get_user_data(e);
             lv_ui_video_rec *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_REC);
             lv_obj_t *dest = ui_scr->video_rec_view_submenu;
             rec_subpage_data.now_subpage = SUBPAGE_DATE;
@@ -687,14 +722,13 @@ static void video_rec_view_date_event_handler(lv_event_t *e)
 static void video_rec_view_gra_event_handler(lv_event_t *e)
 {
     lv_event_code_t code = lv_event_get_code(e);
-    lv_ui *ui = (lv_ui *) lv_event_get_user_data(e);
-    lv_ui_video_rec *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_REC);
-    lv_obj_t *src = lv_event_get_target(e);
     switch (code) {
     case LV_EVENT_CLICKED: {
-        lv_obj_clear_flag(ui_scr->video_rec_view_submenu, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_clear_flag(guider_ui.video_rec->video_rec_view_submenu, LV_OBJ_FLAG_HIDDEN);
         //custom code video_rec_view_submenu
         {
+            lv_obj_t *src = lv_event_get_target(e);
+            lv_ui *ui = lv_event_get_user_data(e);
             lv_ui_video_rec *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_REC);
             lv_obj_t *dest = ui_scr->video_rec_view_submenu;
             rec_subpage_data.now_subpage = SUBPAGE_GSENSOR;
@@ -711,14 +745,13 @@ static void video_rec_view_gra_event_handler(lv_event_t *e)
 static void video_rec_view_par_event_handler(lv_event_t *e)
 {
     lv_event_code_t code = lv_event_get_code(e);
-    lv_ui *ui = (lv_ui *) lv_event_get_user_data(e);
-    lv_ui_video_rec *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_REC);
-    lv_obj_t *src = lv_event_get_target(e);
     switch (code) {
     case LV_EVENT_CLICKED: {
-        lv_obj_clear_flag(ui_scr->video_rec_view_submenu, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_clear_flag(guider_ui.video_rec->video_rec_view_submenu, LV_OBJ_FLAG_HIDDEN);
         //custom code video_rec_view_submenu
         {
+            lv_obj_t *src = lv_event_get_target(e);
+            lv_ui *ui = lv_event_get_user_data(e);
             lv_ui_video_rec *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_REC);
             lv_obj_t *dest = ui_scr->video_rec_view_submenu;
             rec_subpage_data.now_subpage = SUBPAGE_GUARD;
@@ -735,14 +768,13 @@ static void video_rec_view_par_event_handler(lv_event_t *e)
 static void video_rec_view_num_event_handler(lv_event_t *e)
 {
     lv_event_code_t code = lv_event_get_code(e);
-    lv_ui *ui = (lv_ui *) lv_event_get_user_data(e);
-    lv_ui_video_rec *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_REC);
-    lv_obj_t *src = lv_event_get_target(e);
     switch (code) {
     case LV_EVENT_CLICKED: {
-        lv_obj_clear_flag(ui_scr->video_rec_view_submenu, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_clear_flag(guider_ui.video_rec->video_rec_view_submenu, LV_OBJ_FLAG_HIDDEN);
         //custom code video_rec_view_submenu
         {
+            lv_obj_t *src = lv_event_get_target(e);
+            lv_ui *ui = lv_event_get_user_data(e);
             lv_ui_video_rec *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_REC);
             lv_obj_t *dest = ui_scr->video_rec_view_submenu;
             rec_subpage_data.now_subpage = SUBPAGE_CARNUM;
@@ -759,14 +791,13 @@ static void video_rec_view_num_event_handler(lv_event_t *e)
 static void video_rec_view_hlw_event_handler(lv_event_t *e)
 {
     lv_event_code_t code = lv_event_get_code(e);
-    lv_ui *ui = (lv_ui *) lv_event_get_user_data(e);
-    lv_ui_video_rec *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_REC);
-    lv_obj_t *src = lv_event_get_target(e);
     switch (code) {
     case LV_EVENT_CLICKED: {
-        lv_obj_clear_flag(ui_scr->video_rec_view_submenu, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_clear_flag(guider_ui.video_rec->video_rec_view_submenu, LV_OBJ_FLAG_HIDDEN);
         //custom code video_rec_view_submenu
         {
+            lv_obj_t *src = lv_event_get_target(e);
+            lv_ui *ui = lv_event_get_user_data(e);
             lv_ui_video_rec *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_REC);
             lv_obj_t *dest = ui_scr->video_rec_view_submenu;
             rec_subpage_data.now_subpage = SUBPAGE_HAEDLAMP;
@@ -783,14 +814,13 @@ static void video_rec_view_hlw_event_handler(lv_event_t *e)
 static void video_rec_view_submenu_event_handler(lv_event_t *e)
 {
     lv_event_code_t code = lv_event_get_code(e);
-    lv_ui *ui = (lv_ui *) lv_event_get_user_data(e);
-    lv_ui_video_rec *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_REC);
-    lv_obj_t *src = lv_event_get_target(e);
     switch (code) {
     case LV_EVENT_CLICKED: {
-        lv_obj_add_flag(ui_scr->video_rec_view_submenu, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_add_flag(guider_ui.video_rec->video_rec_view_submenu, LV_OBJ_FLAG_HIDDEN);
         //custom code video_rec_view_submenu
         {
+            lv_obj_t *src = lv_event_get_target(e);
+            lv_ui *ui = lv_event_get_user_data(e);
             lv_ui_video_rec *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_REC);
             lv_obj_t *dest = ui_scr->video_rec_view_submenu;
             printf(">>>>return rec menu\n");
@@ -1081,11 +1111,13 @@ static void video_rec_view_submenu_event_handler(lv_event_t *e)
     case LV_EVENT_KEY: {
         uint32_t *key = lv_event_get_param(e);
         if (*key == LV_KEY_LEFT || *key == LV_KEY_HOME) {
-            lv_obj_add_flag(ui_scr->video_rec_view_submenu, LV_OBJ_FLAG_HIDDEN);
+            lv_obj_add_flag(guider_ui.video_rec->video_rec_view_submenu, LV_OBJ_FLAG_HIDDEN);
         }
         if (*key == LV_KEY_LEFT || *key == LV_KEY_HOME) {
             //custom code video_rec_view_submenu
             {
+                lv_obj_t *src = lv_event_get_target(e);
+                lv_ui *ui = lv_event_get_user_data(e);
                 lv_ui_video_rec *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_REC);
                 lv_obj_t *dest = ui_scr->video_rec_view_submenu;
                 //添加菜单设置项到组内，因为在进入子菜单时从组内移出了
@@ -1117,14 +1149,13 @@ static void video_rec_view_submenu_event_handler(lv_event_t *e)
 static void video_rec_rec_submenu_btn_1_event_handler(lv_event_t *e)
 {
     lv_event_code_t code = lv_event_get_code(e);
-    lv_ui *ui = (lv_ui *) lv_event_get_user_data(e);
-    lv_ui_video_rec *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_REC);
-    lv_obj_t *src = lv_event_get_target(e);
     switch (code) {
     case LV_EVENT_CLICKED: {
         //custom code
         {
-            lv_obj_t *dest = src;
+            lv_obj_t *src = lv_event_get_target(e);
+            lv_ui *ui = lv_event_get_user_data(e);
+            lv_ui_video_rec *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_REC);
             printf("enter rec submenu btn1\n");
             subpage_cur_btn = SUBPAGE_FUNKEY1;//记录下被按下的keyfun键值
         }
@@ -1138,14 +1169,13 @@ static void video_rec_rec_submenu_btn_1_event_handler(lv_event_t *e)
 static void video_rec_rec_submenu_btn_2_event_handler(lv_event_t *e)
 {
     lv_event_code_t code = lv_event_get_code(e);
-    lv_ui *ui = (lv_ui *) lv_event_get_user_data(e);
-    lv_ui_video_rec *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_REC);
-    lv_obj_t *src = lv_event_get_target(e);
     switch (code) {
     case LV_EVENT_CLICKED: {
         //custom code
         {
-            lv_obj_t *dest = src;
+            lv_obj_t *src = lv_event_get_target(e);
+            lv_ui *ui = lv_event_get_user_data(e);
+            lv_ui_video_rec *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_REC);
             printf("enter rec submenu btn2\n");
             subpage_cur_btn = SUBPAGE_FUNKEY2;//记录下被按下的keyfun键值
         }
@@ -1159,14 +1189,13 @@ static void video_rec_rec_submenu_btn_2_event_handler(lv_event_t *e)
 static void video_rec_rec_submenu_btn_3_event_handler(lv_event_t *e)
 {
     lv_event_code_t code = lv_event_get_code(e);
-    lv_ui *ui = (lv_ui *) lv_event_get_user_data(e);
-    lv_ui_video_rec *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_REC);
-    lv_obj_t *src = lv_event_get_target(e);
     switch (code) {
     case LV_EVENT_CLICKED: {
         //custom code
         {
-            lv_obj_t *dest = src;
+            lv_obj_t *src = lv_event_get_target(e);
+            lv_ui *ui = lv_event_get_user_data(e);
+            lv_ui_video_rec *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_REC);
             printf("enter rec submenu btn3\n");
             subpage_cur_btn = SUBPAGE_FUNKEY3;//记录下被按下的keyfun键值
         }
@@ -1180,14 +1209,13 @@ static void video_rec_rec_submenu_btn_3_event_handler(lv_event_t *e)
 static void video_rec_rec_submenu_btn_4_event_handler(lv_event_t *e)
 {
     lv_event_code_t code = lv_event_get_code(e);
-    lv_ui *ui = (lv_ui *) lv_event_get_user_data(e);
-    lv_ui_video_rec *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_REC);
-    lv_obj_t *src = lv_event_get_target(e);
     switch (code) {
     case LV_EVENT_CLICKED: {
         //custom code
         {
-            lv_obj_t *dest = src;
+            lv_obj_t *src = lv_event_get_target(e);
+            lv_ui *ui = lv_event_get_user_data(e);
+            lv_ui_video_rec *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_REC);
             printf("enter rec submenu btn4\n");
             subpage_cur_btn = SUBPAGE_FUNKEY4;//记录下被按下的keyfun键值
         }
@@ -1201,14 +1229,13 @@ static void video_rec_rec_submenu_btn_4_event_handler(lv_event_t *e)
 static void video_rec_view_carnum_event_handler(lv_event_t *e)
 {
     lv_event_code_t code = lv_event_get_code(e);
-    lv_ui *ui = (lv_ui *) lv_event_get_user_data(e);
-    lv_ui_video_rec *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_REC);
-    lv_obj_t *src = lv_event_get_target(e);
     switch (code) {
     case LV_EVENT_CLICKED: {
         //custom code
         {
-            lv_obj_t *dest = src;
+            lv_obj_t *src = lv_event_get_target(e);
+            lv_ui *ui = lv_event_get_user_data(e);
+            lv_ui_video_rec *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_REC);
             lv_group_focus_next(lv_group_get_default());
         }
     }
@@ -1216,11 +1243,13 @@ static void video_rec_view_carnum_event_handler(lv_event_t *e)
     case LV_EVENT_KEY: {
         uint32_t *key = lv_event_get_param(e);
         if (*key == LV_KEY_HOME || *key == LV_KEY_LEFT || *key == LV_KEY_RIGHT) {
-            lv_obj_add_flag(ui_scr->video_rec_view_submenu, LV_OBJ_FLAG_HIDDEN);
+            lv_obj_add_flag(guider_ui.video_rec->video_rec_view_submenu, LV_OBJ_FLAG_HIDDEN);
         }
         if (*key == LV_KEY_HOME || *key == LV_KEY_LEFT || *key == LV_KEY_RIGHT) {
             //custom code video_rec_view_submenu
             {
+                lv_obj_t *src = lv_event_get_target(e);
+                lv_ui *ui = lv_event_get_user_data(e);
                 lv_ui_video_rec *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_REC);
                 lv_obj_t *dest = ui_scr->video_rec_view_submenu;
                 //添加菜单设置项到组内，因为在进入子菜单时从组内移出了
@@ -1295,13 +1324,12 @@ void events_init_video_rec(lv_ui *ui)
 static void sys_prompt_img_warn_event_handler(lv_event_t *e)
 {
     lv_event_code_t code = lv_event_get_code(e);
-    lv_ui *ui = (lv_ui *) lv_event_get_user_data(e);
-    lv_ui_sys_prompt *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_SYS_PROMPT);
-    lv_obj_t *src = lv_event_get_target(e);
     switch (code) {
     case LV_EVENT_CLICKED: {
         //custom code sys_prompt
         {
+            lv_obj_t *src = lv_event_get_target(e);
+            lv_ui *ui = lv_event_get_user_data(e);
             lv_ui_sys_prompt *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_SYS_PROMPT);
             lv_obj_t *dest = ui_scr->sys_prompt;
             extern lv_timer_t *prompt_timer;
@@ -1332,14 +1360,13 @@ void events_init_sys_prompt(lv_ui *ui)
 static void sys_setting_view_menu_event_handler(lv_event_t *e)
 {
     lv_event_code_t code = lv_event_get_code(e);
-    lv_ui *ui = (lv_ui *) lv_event_get_user_data(e);
-    lv_ui_sys_setting *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_SYS_SETTING);
-    lv_obj_t *src = lv_event_get_target(e);
     switch (code) {
     case LV_EVENT_CLICKED: {
         //custom code
         {
-            lv_obj_t *dest = src;
+            lv_obj_t *src = lv_event_get_target(e);
+            lv_ui *ui = lv_event_get_user_data(e);
+            lv_ui_sys_setting *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_SYS_SETTING);
             //更新菜单子页面内容
             my_sysmenu_subpage.funkey1 = 0;
             my_sysmenu_subpage.funkey2 = 0;
@@ -1505,7 +1532,9 @@ static void sys_setting_view_menu_event_handler(lv_event_t *e)
         if (*key == LV_KEY_HOME || *key == LV_KEY_LEFT) {
             //custom code
             {
-                lv_obj_t *dest = src;
+                lv_obj_t *src = lv_event_get_target(e);
+                lv_ui *ui = lv_event_get_user_data(e);
+                lv_ui_sys_setting *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_SYS_SETTING);
                 printf(">>>exit sysmenu\n");
 #ifndef LV_USE_GUIBUILDER_SIMULATOR
                 exit_sys_setting_menu();
@@ -1539,14 +1568,13 @@ static void sys_setting_view_menu_event_handler(lv_event_t *e)
 static void sys_setting_view_pro_event_handler(lv_event_t *e)
 {
     lv_event_code_t code = lv_event_get_code(e);
-    lv_ui *ui = (lv_ui *) lv_event_get_user_data(e);
-    lv_ui_sys_setting *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_SYS_SETTING);
-    lv_obj_t *src = lv_event_get_target(e);
     switch (code) {
     case LV_EVENT_CLICKED: {
-        lv_obj_clear_flag(ui_scr->sys_setting_view_submenu, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_clear_flag(guider_ui.sys_setting->sys_setting_view_submenu, LV_OBJ_FLAG_HIDDEN);
         //custom code sys_setting_view_submenu
         {
+            lv_obj_t *src = lv_event_get_target(e);
+            lv_ui *ui = lv_event_get_user_data(e);
             lv_ui_sys_setting *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_SYS_SETTING);
             lv_obj_t *dest = ui_scr->sys_setting_view_submenu;
             my_sysmenu_subpage.now_subpage = SUBPAGE_SAVER;
@@ -1562,14 +1590,13 @@ static void sys_setting_view_pro_event_handler(lv_event_t *e)
 static void sys_setting_view_autof_event_handler(lv_event_t *e)
 {
     lv_event_code_t code = lv_event_get_code(e);
-    lv_ui *ui = (lv_ui *) lv_event_get_user_data(e);
-    lv_ui_sys_setting *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_SYS_SETTING);
-    lv_obj_t *src = lv_event_get_target(e);
     switch (code) {
     case LV_EVENT_CLICKED: {
-        lv_obj_clear_flag(ui_scr->sys_setting_view_submenu, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_clear_flag(guider_ui.sys_setting->sys_setting_view_submenu, LV_OBJ_FLAG_HIDDEN);
         //custom code sys_setting_view_submenu
         {
+            lv_obj_t *src = lv_event_get_target(e);
+            lv_ui *ui = lv_event_get_user_data(e);
             lv_ui_sys_setting *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_SYS_SETTING);
             lv_obj_t *dest = ui_scr->sys_setting_view_submenu;
             my_sysmenu_subpage.now_subpage = SUBPAGE_POWEROFF;
@@ -1585,14 +1612,13 @@ static void sys_setting_view_autof_event_handler(lv_event_t *e)
 static void sys_setting_view_hz_event_handler(lv_event_t *e)
 {
     lv_event_code_t code = lv_event_get_code(e);
-    lv_ui *ui = (lv_ui *) lv_event_get_user_data(e);
-    lv_ui_sys_setting *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_SYS_SETTING);
-    lv_obj_t *src = lv_event_get_target(e);
     switch (code) {
     case LV_EVENT_CLICKED: {
-        lv_obj_clear_flag(ui_scr->sys_setting_view_submenu, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_clear_flag(guider_ui.sys_setting->sys_setting_view_submenu, LV_OBJ_FLAG_HIDDEN);
         //custom code sys_setting_view_submenu
         {
+            lv_obj_t *src = lv_event_get_target(e);
+            lv_ui *ui = lv_event_get_user_data(e);
             lv_ui_sys_setting *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_SYS_SETTING);
             lv_obj_t *dest = ui_scr->sys_setting_view_submenu;
             my_sysmenu_subpage.now_subpage = SUBPAGE_FREQ;
@@ -1608,14 +1634,13 @@ static void sys_setting_view_hz_event_handler(lv_event_t *e)
 static void sys_setting_view_kvo_event_handler(lv_event_t *e)
 {
     lv_event_code_t code = lv_event_get_code(e);
-    lv_ui *ui = (lv_ui *) lv_event_get_user_data(e);
-    lv_ui_sys_setting *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_SYS_SETTING);
-    lv_obj_t *src = lv_event_get_target(e);
     switch (code) {
     case LV_EVENT_CLICKED: {
-        lv_obj_clear_flag(ui_scr->sys_setting_view_submenu, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_clear_flag(guider_ui.sys_setting->sys_setting_view_submenu, LV_OBJ_FLAG_HIDDEN);
         //custom code sys_setting_view_submenu
         {
+            lv_obj_t *src = lv_event_get_target(e);
+            lv_ui *ui = lv_event_get_user_data(e);
             lv_ui_sys_setting *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_SYS_SETTING);
             lv_obj_t *dest = ui_scr->sys_setting_view_submenu;
             my_sysmenu_subpage.now_subpage = SUBPAGE_VOLUME;
@@ -1631,14 +1656,13 @@ static void sys_setting_view_kvo_event_handler(lv_event_t *e)
 static void sys_setting_view_lag_event_handler(lv_event_t *e)
 {
     lv_event_code_t code = lv_event_get_code(e);
-    lv_ui *ui = (lv_ui *) lv_event_get_user_data(e);
-    lv_ui_sys_setting *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_SYS_SETTING);
-    lv_obj_t *src = lv_event_get_target(e);
     switch (code) {
     case LV_EVENT_CLICKED: {
-        lv_obj_clear_flag(ui_scr->sys_setting_view_submenu, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_clear_flag(guider_ui.sys_setting->sys_setting_view_submenu, LV_OBJ_FLAG_HIDDEN);
         //custom code sys_setting_view_submenu
         {
+            lv_obj_t *src = lv_event_get_target(e);
+            lv_ui *ui = lv_event_get_user_data(e);
             lv_ui_sys_setting *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_SYS_SETTING);
             lv_obj_t *dest = ui_scr->sys_setting_view_submenu;
             my_sysmenu_subpage.now_subpage = SUBPAGE_LANGUAGE;
@@ -1654,14 +1678,13 @@ static void sys_setting_view_lag_event_handler(lv_event_t *e)
 static void sys_setting_view_time_event_handler(lv_event_t *e)
 {
     lv_event_code_t code = lv_event_get_code(e);
-    lv_ui *ui = (lv_ui *) lv_event_get_user_data(e);
-    lv_ui_sys_setting *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_SYS_SETTING);
-    lv_obj_t *src = lv_event_get_target(e);
     switch (code) {
     case LV_EVENT_CLICKED: {
-        lv_obj_clear_flag(ui_scr->sys_setting_view_submenu, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_clear_flag(guider_ui.sys_setting->sys_setting_view_submenu, LV_OBJ_FLAG_HIDDEN);
         //custom code sys_setting_view_submenu
         {
+            lv_obj_t *src = lv_event_get_target(e);
+            lv_ui *ui = lv_event_get_user_data(e);
             lv_ui_sys_setting *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_SYS_SETTING);
             lv_obj_t *dest = ui_scr->sys_setting_view_submenu;
             my_sysmenu_subpage.now_subpage = SUBPAGE_DATA;
@@ -1677,14 +1700,13 @@ static void sys_setting_view_time_event_handler(lv_event_t *e)
 static void sys_setting_view_tv_event_handler(lv_event_t *e)
 {
     lv_event_code_t code = lv_event_get_code(e);
-    lv_ui *ui = (lv_ui *) lv_event_get_user_data(e);
-    lv_ui_sys_setting *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_SYS_SETTING);
-    lv_obj_t *src = lv_event_get_target(e);
     switch (code) {
     case LV_EVENT_CLICKED: {
-        lv_obj_clear_flag(ui_scr->sys_setting_view_submenu, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_clear_flag(guider_ui.sys_setting->sys_setting_view_submenu, LV_OBJ_FLAG_HIDDEN);
         //custom code sys_setting_view_submenu
         {
+            lv_obj_t *src = lv_event_get_target(e);
+            lv_ui *ui = lv_event_get_user_data(e);
             lv_ui_sys_setting *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_SYS_SETTING);
             lv_obj_t *dest = ui_scr->sys_setting_view_submenu;
             my_sysmenu_subpage.now_subpage = SUBPAGE_TVSYSTEM;
@@ -1700,14 +1722,13 @@ static void sys_setting_view_tv_event_handler(lv_event_t *e)
 static void sys_setting_view_format_event_handler(lv_event_t *e)
 {
     lv_event_code_t code = lv_event_get_code(e);
-    lv_ui *ui = (lv_ui *) lv_event_get_user_data(e);
-    lv_ui_sys_setting *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_SYS_SETTING);
-    lv_obj_t *src = lv_event_get_target(e);
     switch (code) {
     case LV_EVENT_CLICKED: {
-        lv_obj_clear_flag(ui_scr->sys_setting_view_submenu, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_clear_flag(guider_ui.sys_setting->sys_setting_view_submenu, LV_OBJ_FLAG_HIDDEN);
         //custom code sys_setting_view_submenu
         {
+            lv_obj_t *src = lv_event_get_target(e);
+            lv_ui *ui = lv_event_get_user_data(e);
             lv_ui_sys_setting *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_SYS_SETTING);
             lv_obj_t *dest = ui_scr->sys_setting_view_submenu;
             my_sysmenu_subpage.now_subpage = SUBPAGE_FORMATTING;
@@ -1723,14 +1744,13 @@ static void sys_setting_view_format_event_handler(lv_event_t *e)
 static void sys_setting_view_reset_event_handler(lv_event_t *e)
 {
     lv_event_code_t code = lv_event_get_code(e);
-    lv_ui *ui = (lv_ui *) lv_event_get_user_data(e);
-    lv_ui_sys_setting *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_SYS_SETTING);
-    lv_obj_t *src = lv_event_get_target(e);
     switch (code) {
     case LV_EVENT_CLICKED: {
-        lv_obj_clear_flag(ui_scr->sys_setting_view_submenu, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_clear_flag(guider_ui.sys_setting->sys_setting_view_submenu, LV_OBJ_FLAG_HIDDEN);
         //custom code sys_setting_view_submenu
         {
+            lv_obj_t *src = lv_event_get_target(e);
+            lv_ui *ui = lv_event_get_user_data(e);
             lv_ui_sys_setting *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_SYS_SETTING);
             lv_obj_t *dest = ui_scr->sys_setting_view_submenu;
             my_sysmenu_subpage.now_subpage = SUBPAGE_RESET;
@@ -1746,14 +1766,13 @@ static void sys_setting_view_reset_event_handler(lv_event_t *e)
 static void sys_setting_view_ver_event_handler(lv_event_t *e)
 {
     lv_event_code_t code = lv_event_get_code(e);
-    lv_ui *ui = (lv_ui *) lv_event_get_user_data(e);
-    lv_ui_sys_setting *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_SYS_SETTING);
-    lv_obj_t *src = lv_event_get_target(e);
     switch (code) {
     case LV_EVENT_CLICKED: {
-        lv_obj_clear_flag(ui_scr->sys_setting_view_submenu, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_clear_flag(guider_ui.sys_setting->sys_setting_view_submenu, LV_OBJ_FLAG_HIDDEN);
         //custom code sys_setting_view_submenu
         {
+            lv_obj_t *src = lv_event_get_target(e);
+            lv_ui *ui = lv_event_get_user_data(e);
             lv_ui_sys_setting *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_SYS_SETTING);
             lv_obj_t *dest = ui_scr->sys_setting_view_submenu;
             my_sysmenu_subpage.now_subpage = SUBPAGE_VERSION;
@@ -1769,14 +1788,13 @@ static void sys_setting_view_ver_event_handler(lv_event_t *e)
 static void sys_setting_view_submenu_event_handler(lv_event_t *e)
 {
     lv_event_code_t code = lv_event_get_code(e);
-    lv_ui *ui = (lv_ui *) lv_event_get_user_data(e);
-    lv_ui_sys_setting *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_SYS_SETTING);
-    lv_obj_t *src = lv_event_get_target(e);
     switch (code) {
     case LV_EVENT_CLICKED: {
-        lv_obj_add_flag(ui_scr->sys_setting_view_submenu, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_add_flag(guider_ui.sys_setting->sys_setting_view_submenu, LV_OBJ_FLAG_HIDDEN);
         //custom code sys_setting_view_submenu
         {
+            lv_obj_t *src = lv_event_get_target(e);
+            lv_ui *ui = lv_event_get_user_data(e);
             lv_ui_sys_setting *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_SYS_SETTING);
             lv_obj_t *dest = ui_scr->sys_setting_view_submenu;
 
@@ -1956,11 +1974,13 @@ static void sys_setting_view_submenu_event_handler(lv_event_t *e)
     case LV_EVENT_KEY: {
         uint32_t *key = lv_event_get_param(e);
         if (*key == LV_KEY_LEFT || *key == LV_KEY_HOME) {
-            lv_obj_add_flag(ui_scr->sys_setting_view_submenu, LV_OBJ_FLAG_HIDDEN);
+            lv_obj_add_flag(guider_ui.sys_setting->sys_setting_view_submenu, LV_OBJ_FLAG_HIDDEN);
         }
         if (*key == LV_KEY_LEFT || *key == LV_KEY_HOME) {
             //custom code sys_setting_view_submenu
             {
+                lv_obj_t *src = lv_event_get_target(e);
+                lv_ui *ui = lv_event_get_user_data(e);
                 lv_ui_sys_setting *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_SYS_SETTING);
                 lv_obj_t *dest = ui_scr->sys_setting_view_submenu;
                 //添加菜单设置项到组内，因为在进入子菜单时从组内移出了
@@ -1994,14 +2014,13 @@ static void sys_setting_view_submenu_event_handler(lv_event_t *e)
 static void sys_setting_submenu_btn_1_event_handler(lv_event_t *e)
 {
     lv_event_code_t code = lv_event_get_code(e);
-    lv_ui *ui = (lv_ui *) lv_event_get_user_data(e);
-    lv_ui_sys_setting *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_SYS_SETTING);
-    lv_obj_t *src = lv_event_get_target(e);
     switch (code) {
     case LV_EVENT_CLICKED: {
         //custom code
         {
-            lv_obj_t *dest = src;
+            lv_obj_t *src = lv_event_get_target(e);
+            lv_ui *ui = lv_event_get_user_data(e);
+            lv_ui_sys_setting *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_SYS_SETTING);
             subpage_cur_btn = SUBPAGE_FUNKEY1;//记录下被按下的keyfun键值
         }
     }
@@ -2014,14 +2033,13 @@ static void sys_setting_submenu_btn_1_event_handler(lv_event_t *e)
 static void sys_setting_submenu_btn_2_event_handler(lv_event_t *e)
 {
     lv_event_code_t code = lv_event_get_code(e);
-    lv_ui *ui = (lv_ui *) lv_event_get_user_data(e);
-    lv_ui_sys_setting *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_SYS_SETTING);
-    lv_obj_t *src = lv_event_get_target(e);
     switch (code) {
     case LV_EVENT_CLICKED: {
         //custom code
         {
-            lv_obj_t *dest = src;
+            lv_obj_t *src = lv_event_get_target(e);
+            lv_ui *ui = lv_event_get_user_data(e);
+            lv_ui_sys_setting *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_SYS_SETTING);
             subpage_cur_btn = SUBPAGE_FUNKEY2;
         }
     }
@@ -2034,14 +2052,13 @@ static void sys_setting_submenu_btn_2_event_handler(lv_event_t *e)
 static void sys_setting_submenu_btn_3_event_handler(lv_event_t *e)
 {
     lv_event_code_t code = lv_event_get_code(e);
-    lv_ui *ui = (lv_ui *) lv_event_get_user_data(e);
-    lv_ui_sys_setting *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_SYS_SETTING);
-    lv_obj_t *src = lv_event_get_target(e);
     switch (code) {
     case LV_EVENT_CLICKED: {
         //custom code
         {
-            lv_obj_t *dest = src;
+            lv_obj_t *src = lv_event_get_target(e);
+            lv_ui *ui = lv_event_get_user_data(e);
+            lv_ui_sys_setting *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_SYS_SETTING);
             subpage_cur_btn = SUBPAGE_FUNKEY3;
         }
     }
@@ -2054,14 +2071,13 @@ static void sys_setting_submenu_btn_3_event_handler(lv_event_t *e)
 static void sys_setting_submenu_btn_4_event_handler(lv_event_t *e)
 {
     lv_event_code_t code = lv_event_get_code(e);
-    lv_ui *ui = (lv_ui *) lv_event_get_user_data(e);
-    lv_ui_sys_setting *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_SYS_SETTING);
-    lv_obj_t *src = lv_event_get_target(e);
     switch (code) {
     case LV_EVENT_CLICKED: {
         //custom code
         {
-            lv_obj_t *dest = src;
+            lv_obj_t *src = lv_event_get_target(e);
+            lv_ui *ui = lv_event_get_user_data(e);
+            lv_ui_sys_setting *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_SYS_SETTING);
             subpage_cur_btn = SUBPAGE_FUNKEY4;
         }
     }
@@ -2074,14 +2090,13 @@ static void sys_setting_submenu_btn_4_event_handler(lv_event_t *e)
 static void sys_setting_view_time_mun_event_handler(lv_event_t *e)
 {
     lv_event_code_t code = lv_event_get_code(e);
-    lv_ui *ui = (lv_ui *) lv_event_get_user_data(e);
-    lv_ui_sys_setting *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_SYS_SETTING);
-    lv_obj_t *src = lv_event_get_target(e);
     switch (code) {
     case LV_EVENT_CLICKED: {
         //custom code
         {
-            lv_obj_t *dest = src;
+            lv_obj_t *src = lv_event_get_target(e);
+            lv_ui *ui = lv_event_get_user_data(e);
+            lv_ui_sys_setting *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_SYS_SETTING);
             lv_group_focus_next(lv_group_get_default());
         }
     }
@@ -2089,11 +2104,13 @@ static void sys_setting_view_time_mun_event_handler(lv_event_t *e)
     case LV_EVENT_KEY: {
         uint32_t *key = lv_event_get_param(e);
         if (*key == LV_KEY_LEFT || *key == LV_KEY_HOME || *key == LV_KEY_RIGHT) {
-            lv_obj_add_flag(ui_scr->sys_setting_view_submenu, LV_OBJ_FLAG_HIDDEN);
+            lv_obj_add_flag(guider_ui.sys_setting->sys_setting_view_submenu, LV_OBJ_FLAG_HIDDEN);
         }
         if (*key == LV_KEY_LEFT || *key == LV_KEY_HOME || *key == LV_KEY_RIGHT) {
             //custom code sys_setting_view_submenu
             {
+                lv_obj_t *src = lv_event_get_target(e);
+                lv_ui *ui = lv_event_get_user_data(e);
                 lv_ui_sys_setting *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_SYS_SETTING);
                 lv_obj_t *dest = ui_scr->sys_setting_view_submenu;
                 //添加菜单设置项到组内，因为在进入子菜单时从组内移出了
@@ -2164,16 +2181,15 @@ void events_init_sys_setting(lv_ui *ui)
 static void video_photo_view_scan_event_handler(lv_event_t *e)
 {
     lv_event_code_t code = lv_event_get_code(e);
-    lv_ui *ui = (lv_ui *) lv_event_get_user_data(e);
-    lv_ui_video_photo *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_PHOTO);
-    lv_obj_t *src = lv_event_get_target(e);
     switch (code) {
     case LV_EVENT_KEY: {
         uint32_t *key = lv_event_get_param(e);
         if (*key == LV_KEY_RIGHT) {
             //custom code
             {
-                lv_obj_t *dest = src;
+                lv_obj_t *src = lv_event_get_target(e);
+                lv_ui *ui = lv_event_get_user_data(e);
+                lv_ui_video_photo *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_PHOTO);
 #if !LV_USE_GUIBUILDER_SIMULATOR
                 extern void gui_switch_video_dec_page(void);
                 gui_switch_video_dec_page();
@@ -2182,11 +2198,13 @@ static void video_photo_view_scan_event_handler(lv_event_t *e)
             }
         }
         if (*key == LV_KEY_HOME || *key == LV_KEY_LEFT) {
-            lv_obj_add_flag(ui_scr->video_photo_view_scan, LV_OBJ_FLAG_HIDDEN);
+            lv_obj_add_flag(guider_ui.video_photo->video_photo_view_scan, LV_OBJ_FLAG_HIDDEN);
         }
         if (*key == LV_KEY_HOME || *key == LV_KEY_LEFT) {
             //custom code video_photo_view_scan
             {
+                lv_obj_t *src = lv_event_get_target(e);
+                lv_ui *ui = lv_event_get_user_data(e);
                 lv_ui_video_photo *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_PHOTO);
                 lv_obj_t *dest = ui_scr->video_photo_view_scan;
                 lv_obj_clear_flag(ui_scr->video_photo_view_menu_b, LV_OBJ_FLAG_HIDDEN);  //显示录像设置菜单
@@ -2207,14 +2225,13 @@ static void video_photo_view_scan_event_handler(lv_event_t *e)
 static void video_photo_view_menu_event_handler(lv_event_t *e)
 {
     lv_event_code_t code = lv_event_get_code(e);
-    lv_ui *ui = (lv_ui *) lv_event_get_user_data(e);
-    lv_ui_video_photo *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_PHOTO);
-    lv_obj_t *src = lv_event_get_target(e);
     switch (code) {
     case LV_EVENT_CLICKED: {
         //custom code
         {
-            lv_obj_t *dest = src;
+            lv_obj_t *src = lv_event_get_target(e);
+            lv_ui *ui = lv_event_get_user_data(e);
+            lv_ui_video_photo *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_PHOTO);
             photo_subpage_data.funkey1 = 0;
             photo_subpage_data.funkey2 = 0;
             photo_subpage_data.funkey3 = 0;
@@ -2461,14 +2478,15 @@ static void video_photo_view_menu_event_handler(lv_event_t *e)
         if (*key == LV_KEY_HOME || *key == LV_KEY_LEFT) {
             gui_scr_t *screen = ui_get_scr(GUI_SCREEN_SYS_SETTING);
             if (screen != NULL) {
-                ui_load_scr_anim(ui, screen, LV_SCR_LOAD_ANIM_NONE, 0, 0, true, true, false);
+                ui_load_scr_anim(&guider_ui, screen, LV_SCR_LOAD_ANIM_NONE, 0, 0, true, true, false);
             }
         }
         if (*key == LV_KEY_HOME || *key == LV_KEY_LEFT) {
             //custom code sys_setting
             {
-                lv_ui_sys_setting *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_SYS_SETTING);
-                lv_obj_t *dest = ui_scr->sys_setting;
+                lv_obj_t *src = lv_event_get_target(e);
+                lv_ui *ui = lv_event_get_user_data(e);
+                lv_ui_video_photo *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_PHOTO);
 #if LV_USE_GUIBUILDER_SIMULATOR
                 cur_mode = 1; //video_photo
 #endif
@@ -2484,14 +2502,13 @@ static void video_photo_view_menu_event_handler(lv_event_t *e)
 static void video_photo_view_phm_event_handler(lv_event_t *e)
 {
     lv_event_code_t code = lv_event_get_code(e);
-    lv_ui *ui = (lv_ui *) lv_event_get_user_data(e);
-    lv_ui_video_photo *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_PHOTO);
-    lv_obj_t *src = lv_event_get_target(e);
     switch (code) {
     case LV_EVENT_CLICKED: {
-        lv_obj_clear_flag(ui_scr->video_photo_view_submenu, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_clear_flag(guider_ui.video_photo->video_photo_view_submenu, LV_OBJ_FLAG_HIDDEN);
         //custom code video_photo_view_submenu
         {
+            lv_obj_t *src = lv_event_get_target(e);
+            lv_ui *ui = lv_event_get_user_data(e);
             lv_ui_video_photo *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_PHOTO);
             lv_obj_t *dest = ui_scr->video_photo_view_submenu;
             photo_subpage_data.now_subpage = SUBPAGE_SHOOT;
@@ -2507,14 +2524,13 @@ static void video_photo_view_phm_event_handler(lv_event_t *e)
 static void video_photo_view_reso_event_handler(lv_event_t *e)
 {
     lv_event_code_t code = lv_event_get_code(e);
-    lv_ui *ui = (lv_ui *) lv_event_get_user_data(e);
-    lv_ui_video_photo *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_PHOTO);
-    lv_obj_t *src = lv_event_get_target(e);
     switch (code) {
     case LV_EVENT_CLICKED: {
-        lv_obj_clear_flag(ui_scr->video_photo_view_submenu, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_clear_flag(guider_ui.video_photo->video_photo_view_submenu, LV_OBJ_FLAG_HIDDEN);
         //custom code video_photo_view_submenu
         {
+            lv_obj_t *src = lv_event_get_target(e);
+            lv_ui *ui = lv_event_get_user_data(e);
             lv_ui_video_photo *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_PHOTO);
             lv_obj_t *dest = ui_scr->video_photo_view_submenu;
             photo_subpage_data.now_subpage = SUBPAGE_RESOLUTION;
@@ -2530,14 +2546,13 @@ static void video_photo_view_reso_event_handler(lv_event_t *e)
 static void video_photo_view_cyt_event_handler(lv_event_t *e)
 {
     lv_event_code_t code = lv_event_get_code(e);
-    lv_ui *ui = (lv_ui *) lv_event_get_user_data(e);
-    lv_ui_video_photo *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_PHOTO);
-    lv_obj_t *src = lv_event_get_target(e);
     switch (code) {
     case LV_EVENT_CLICKED: {
-        lv_obj_clear_flag(ui_scr->video_photo_view_submenu, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_clear_flag(guider_ui.video_photo->video_photo_view_submenu, LV_OBJ_FLAG_HIDDEN);
         //custom code video_photo_view_submenu
         {
+            lv_obj_t *src = lv_event_get_target(e);
+            lv_ui *ui = lv_event_get_user_data(e);
             lv_ui_video_photo *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_PHOTO);
             lv_obj_t *dest = ui_scr->video_photo_view_submenu;
             photo_subpage_data.now_subpage = SUBPAGE_SHOTS;
@@ -2553,14 +2568,13 @@ static void video_photo_view_cyt_event_handler(lv_event_t *e)
 static void video_photo_view_qua_event_handler(lv_event_t *e)
 {
     lv_event_code_t code = lv_event_get_code(e);
-    lv_ui *ui = (lv_ui *) lv_event_get_user_data(e);
-    lv_ui_video_photo *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_PHOTO);
-    lv_obj_t *src = lv_event_get_target(e);
     switch (code) {
     case LV_EVENT_CLICKED: {
-        lv_obj_clear_flag(ui_scr->video_photo_view_submenu, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_clear_flag(guider_ui.video_photo->video_photo_view_submenu, LV_OBJ_FLAG_HIDDEN);
         //custom code video_photo_view_submenu
         {
+            lv_obj_t *src = lv_event_get_target(e);
+            lv_ui *ui = lv_event_get_user_data(e);
             lv_ui_video_photo *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_PHOTO);
             lv_obj_t *dest = ui_scr->video_photo_view_submenu;
             photo_subpage_data.now_subpage = SUBPAGE_QUALITY;
@@ -2576,14 +2590,13 @@ static void video_photo_view_qua_event_handler(lv_event_t *e)
 static void video_photo_view_acu_event_handler(lv_event_t *e)
 {
     lv_event_code_t code = lv_event_get_code(e);
-    lv_ui *ui = (lv_ui *) lv_event_get_user_data(e);
-    lv_ui_video_photo *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_PHOTO);
-    lv_obj_t *src = lv_event_get_target(e);
     switch (code) {
     case LV_EVENT_CLICKED: {
-        lv_obj_clear_flag(ui_scr->video_photo_view_submenu, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_clear_flag(guider_ui.video_photo->video_photo_view_submenu, LV_OBJ_FLAG_HIDDEN);
         //custom code video_photo_view_submenu
         {
+            lv_obj_t *src = lv_event_get_target(e);
+            lv_ui *ui = lv_event_get_user_data(e);
             lv_ui_video_photo *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_PHOTO);
             lv_obj_t *dest = ui_scr->video_photo_view_submenu;
             photo_subpage_data.now_subpage = SUBPAGE_SHARPNESS;
@@ -2599,14 +2612,13 @@ static void video_photo_view_acu_event_handler(lv_event_t *e)
 static void video_photo_view_wbl_event_handler(lv_event_t *e)
 {
     lv_event_code_t code = lv_event_get_code(e);
-    lv_ui *ui = (lv_ui *) lv_event_get_user_data(e);
-    lv_ui_video_photo *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_PHOTO);
-    lv_obj_t *src = lv_event_get_target(e);
     switch (code) {
     case LV_EVENT_CLICKED: {
-        lv_obj_clear_flag(ui_scr->video_photo_view_submenu, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_clear_flag(guider_ui.video_photo->video_photo_view_submenu, LV_OBJ_FLAG_HIDDEN);
         //custom code video_photo_view_submenu
         {
+            lv_obj_t *src = lv_event_get_target(e);
+            lv_ui *ui = lv_event_get_user_data(e);
             lv_ui_video_photo *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_PHOTO);
             lv_obj_t *dest = ui_scr->video_photo_view_submenu;
             photo_subpage_data.now_subpage = SUBPAGE_AWB;
@@ -2622,14 +2634,13 @@ static void video_photo_view_wbl_event_handler(lv_event_t *e)
 static void video_photo_view_col_event_handler(lv_event_t *e)
 {
     lv_event_code_t code = lv_event_get_code(e);
-    lv_ui *ui = (lv_ui *) lv_event_get_user_data(e);
-    lv_ui_video_photo *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_PHOTO);
-    lv_obj_t *src = lv_event_get_target(e);
     switch (code) {
     case LV_EVENT_CLICKED: {
-        lv_obj_clear_flag(ui_scr->video_photo_view_submenu, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_clear_flag(guider_ui.video_photo->video_photo_view_submenu, LV_OBJ_FLAG_HIDDEN);
         //custom code video_photo_view_submenu
         {
+            lv_obj_t *src = lv_event_get_target(e);
+            lv_ui *ui = lv_event_get_user_data(e);
             lv_ui_video_photo *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_PHOTO);
             lv_obj_t *dest = ui_scr->video_photo_view_submenu;
             photo_subpage_data.now_subpage = SUBPAGE_COLOR;
@@ -2645,14 +2656,13 @@ static void video_photo_view_col_event_handler(lv_event_t *e)
 static void video_photo_view_iso_event_handler(lv_event_t *e)
 {
     lv_event_code_t code = lv_event_get_code(e);
-    lv_ui *ui = (lv_ui *) lv_event_get_user_data(e);
-    lv_ui_video_photo *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_PHOTO);
-    lv_obj_t *src = lv_event_get_target(e);
     switch (code) {
     case LV_EVENT_CLICKED: {
-        lv_obj_clear_flag(ui_scr->video_photo_view_submenu, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_clear_flag(guider_ui.video_photo->video_photo_view_submenu, LV_OBJ_FLAG_HIDDEN);
         //custom code video_photo_view_submenu
         {
+            lv_obj_t *src = lv_event_get_target(e);
+            lv_ui *ui = lv_event_get_user_data(e);
             lv_ui_video_photo *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_PHOTO);
             lv_obj_t *dest = ui_scr->video_photo_view_submenu;
             photo_subpage_data.now_subpage = SUBPAGE_ISO;
@@ -2668,14 +2678,13 @@ static void video_photo_view_iso_event_handler(lv_event_t *e)
 static void video_photo_view_pexp_event_handler(lv_event_t *e)
 {
     lv_event_code_t code = lv_event_get_code(e);
-    lv_ui *ui = (lv_ui *) lv_event_get_user_data(e);
-    lv_ui_video_photo *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_PHOTO);
-    lv_obj_t *src = lv_event_get_target(e);
     switch (code) {
     case LV_EVENT_CLICKED: {
-        lv_obj_clear_flag(ui_scr->video_photo_view_submenu, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_clear_flag(guider_ui.video_photo->video_photo_view_submenu, LV_OBJ_FLAG_HIDDEN);
         //custom code video_photo_view_submenu
         {
+            lv_obj_t *src = lv_event_get_target(e);
+            lv_ui *ui = lv_event_get_user_data(e);
             lv_ui_video_photo *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_PHOTO);
             lv_obj_t *dest = ui_scr->video_photo_view_submenu;
             photo_subpage_data.now_subpage = SUBPAGE_EXPOSURE;
@@ -2691,14 +2700,13 @@ static void video_photo_view_pexp_event_handler(lv_event_t *e)
 static void video_photo_view_sok_event_handler(lv_event_t *e)
 {
     lv_event_code_t code = lv_event_get_code(e);
-    lv_ui *ui = (lv_ui *) lv_event_get_user_data(e);
-    lv_ui_video_photo *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_PHOTO);
-    lv_obj_t *src = lv_event_get_target(e);
     switch (code) {
     case LV_EVENT_CLICKED: {
-        lv_obj_clear_flag(ui_scr->video_photo_view_submenu, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_clear_flag(guider_ui.video_photo->video_photo_view_submenu, LV_OBJ_FLAG_HIDDEN);
         //custom code video_photo_view_submenu
         {
+            lv_obj_t *src = lv_event_get_target(e);
+            lv_ui *ui = lv_event_get_user_data(e);
             lv_ui_video_photo *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_PHOTO);
             lv_obj_t *dest = ui_scr->video_photo_view_submenu;
             photo_subpage_data.now_subpage = SUBPAGE_HANDSHAKE;
@@ -2714,14 +2722,13 @@ static void video_photo_view_sok_event_handler(lv_event_t *e)
 static void video_photo_view_sca_event_handler(lv_event_t *e)
 {
     lv_event_code_t code = lv_event_get_code(e);
-    lv_ui *ui = (lv_ui *) lv_event_get_user_data(e);
-    lv_ui_video_photo *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_PHOTO);
-    lv_obj_t *src = lv_event_get_target(e);
     switch (code) {
     case LV_EVENT_CLICKED: {
-        lv_obj_clear_flag(ui_scr->video_photo_view_submenu, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_clear_flag(guider_ui.video_photo->video_photo_view_submenu, LV_OBJ_FLAG_HIDDEN);
         //custom code video_photo_view_submenu
         {
+            lv_obj_t *src = lv_event_get_target(e);
+            lv_ui *ui = lv_event_get_user_data(e);
             lv_ui_video_photo *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_PHOTO);
             lv_obj_t *dest = ui_scr->video_photo_view_submenu;
             photo_subpage_data.now_subpage = SUBPAGE_PREVIEW;
@@ -2737,14 +2744,13 @@ static void video_photo_view_sca_event_handler(lv_event_t *e)
 static void video_photo_view_pdat_event_handler(lv_event_t *e)
 {
     lv_event_code_t code = lv_event_get_code(e);
-    lv_ui *ui = (lv_ui *) lv_event_get_user_data(e);
-    lv_ui_video_photo *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_PHOTO);
-    lv_obj_t *src = lv_event_get_target(e);
     switch (code) {
     case LV_EVENT_CLICKED: {
-        lv_obj_clear_flag(ui_scr->video_photo_view_submenu, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_clear_flag(guider_ui.video_photo->video_photo_view_submenu, LV_OBJ_FLAG_HIDDEN);
         //custom code video_photo_view_submenu
         {
+            lv_obj_t *src = lv_event_get_target(e);
+            lv_ui *ui = lv_event_get_user_data(e);
             lv_ui_video_photo *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_PHOTO);
             lv_obj_t *dest = ui_scr->video_photo_view_submenu;
             photo_subpage_data.now_subpage = SUBPAGE_DATE;
@@ -2760,14 +2766,13 @@ static void video_photo_view_pdat_event_handler(lv_event_t *e)
 static void video_photo_view_submenu_event_handler(lv_event_t *e)
 {
     lv_event_code_t code = lv_event_get_code(e);
-    lv_ui *ui = (lv_ui *) lv_event_get_user_data(e);
-    lv_ui_video_photo *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_PHOTO);
-    lv_obj_t *src = lv_event_get_target(e);
     switch (code) {
     case LV_EVENT_CLICKED: {
-        lv_obj_add_flag(ui_scr->video_photo_view_submenu, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_add_flag(guider_ui.video_photo->video_photo_view_submenu, LV_OBJ_FLAG_HIDDEN);
         //custom code video_photo_view_submenu
         {
+            lv_obj_t *src = lv_event_get_target(e);
+            lv_ui *ui = lv_event_get_user_data(e);
             lv_ui_video_photo *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_PHOTO);
             lv_obj_t *dest = ui_scr->video_photo_view_submenu;
             switch (photo_subpage_data.now_subpage) {
@@ -2991,11 +2996,13 @@ static void video_photo_view_submenu_event_handler(lv_event_t *e)
     case LV_EVENT_KEY: {
         uint32_t *key = lv_event_get_param(e);
         if (*key == LV_KEY_LEFT || *key == LV_KEY_HOME) {
-            lv_obj_add_flag(ui_scr->video_photo_view_submenu, LV_OBJ_FLAG_HIDDEN);
+            lv_obj_add_flag(guider_ui.video_photo->video_photo_view_submenu, LV_OBJ_FLAG_HIDDEN);
         }
         if (*key == LV_KEY_LEFT || *key == LV_KEY_HOME) {
             //custom code video_photo_view_submenu
             {
+                lv_obj_t *src = lv_event_get_target(e);
+                lv_ui *ui = lv_event_get_user_data(e);
                 lv_ui_video_photo *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_PHOTO);
                 lv_obj_t *dest = ui_scr->video_photo_view_submenu;
                 lv_obj_t *menu_obj = NULL;
@@ -3025,14 +3032,13 @@ static void video_photo_view_submenu_event_handler(lv_event_t *e)
 static void video_photo_submenu_btn_1_event_handler(lv_event_t *e)
 {
     lv_event_code_t code = lv_event_get_code(e);
-    lv_ui *ui = (lv_ui *) lv_event_get_user_data(e);
-    lv_ui_video_photo *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_PHOTO);
-    lv_obj_t *src = lv_event_get_target(e);
     switch (code) {
     case LV_EVENT_CLICKED: {
         //custom code
         {
-            lv_obj_t *dest = src;
+            lv_obj_t *src = lv_event_get_target(e);
+            lv_ui *ui = lv_event_get_user_data(e);
+            lv_ui_video_photo *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_PHOTO);
             subpage_cur_btn = SUBPAGE_FUNKEY1;
         }
     }
@@ -3045,14 +3051,13 @@ static void video_photo_submenu_btn_1_event_handler(lv_event_t *e)
 static void video_photo_submenu_btn_2_event_handler(lv_event_t *e)
 {
     lv_event_code_t code = lv_event_get_code(e);
-    lv_ui *ui = (lv_ui *) lv_event_get_user_data(e);
-    lv_ui_video_photo *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_PHOTO);
-    lv_obj_t *src = lv_event_get_target(e);
     switch (code) {
     case LV_EVENT_CLICKED: {
         //custom code
         {
-            lv_obj_t *dest = src;
+            lv_obj_t *src = lv_event_get_target(e);
+            lv_ui *ui = lv_event_get_user_data(e);
+            lv_ui_video_photo *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_PHOTO);
             subpage_cur_btn = SUBPAGE_FUNKEY2;
         }
     }
@@ -3065,14 +3070,13 @@ static void video_photo_submenu_btn_2_event_handler(lv_event_t *e)
 static void video_photo_submenu_btn_3_event_handler(lv_event_t *e)
 {
     lv_event_code_t code = lv_event_get_code(e);
-    lv_ui *ui = (lv_ui *) lv_event_get_user_data(e);
-    lv_ui_video_photo *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_PHOTO);
-    lv_obj_t *src = lv_event_get_target(e);
     switch (code) {
     case LV_EVENT_CLICKED: {
         //custom code
         {
-            lv_obj_t *dest = src;
+            lv_obj_t *src = lv_event_get_target(e);
+            lv_ui *ui = lv_event_get_user_data(e);
+            lv_ui_video_photo *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_PHOTO);
             subpage_cur_btn = SUBPAGE_FUNKEY3;
         }
     }
@@ -3085,14 +3089,13 @@ static void video_photo_submenu_btn_3_event_handler(lv_event_t *e)
 static void video_photo_submenu_btn_4_event_handler(lv_event_t *e)
 {
     lv_event_code_t code = lv_event_get_code(e);
-    lv_ui *ui = (lv_ui *) lv_event_get_user_data(e);
-    lv_ui_video_photo *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_PHOTO);
-    lv_obj_t *src = lv_event_get_target(e);
     switch (code) {
     case LV_EVENT_CLICKED: {
         //custom code
         {
-            lv_obj_t *dest = src;
+            lv_obj_t *src = lv_event_get_target(e);
+            lv_ui *ui = lv_event_get_user_data(e);
+            lv_ui_video_photo *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_PHOTO);
             subpage_cur_btn = SUBPAGE_FUNKEY4;
         }
     }
@@ -3145,14 +3148,13 @@ void events_init_video_photo(lv_ui *ui)
 static void video_play_event_handler(lv_event_t *e)
 {
     lv_event_code_t code = lv_event_get_code(e);
-    lv_ui *ui = (lv_ui *) lv_event_get_user_data(e);
-    lv_ui_video_play *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_PLAY);
-    lv_obj_t *src = lv_event_get_target(e);
     switch (code) {
     case LV_EVENT_SCREEN_LOADED: {
         //custom code
         {
-            lv_obj_t *dest = src;
+            lv_obj_t *src = lv_event_get_target(e);
+            lv_ui *ui = lv_event_get_user_data(e);
+            lv_ui_video_play *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_PLAY);
             lv_group_focus_obj(ui_scr->video_play_imgbtn_pause);
         }
     }
@@ -3165,13 +3167,12 @@ static void video_play_event_handler(lv_event_t *e)
 static void video_play_imgbtn_pause_event_handler(lv_event_t *e)
 {
     lv_event_code_t code = lv_event_get_code(e);
-    lv_ui *ui = (lv_ui *) lv_event_get_user_data(e);
-    lv_ui_video_play *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_PLAY);
-    lv_obj_t *src = lv_event_get_target(e);
     switch (code) {
     case LV_EVENT_CLICKED: {
         //custom code video_play_imgbtn_pause
         {
+            lv_obj_t *src = lv_event_get_target(e);
+            lv_ui *ui = lv_event_get_user_data(e);
             lv_ui_video_play *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_PLAY);
             lv_obj_t *dest = ui_scr->video_play_imgbtn_pause;
 #if LV_USE_GUIBUILDER_SIMULATOR
@@ -3190,13 +3191,12 @@ static void video_play_imgbtn_pause_event_handler(lv_event_t *e)
 static void video_play_img_prev_file_event_handler(lv_event_t *e)
 {
     lv_event_code_t code = lv_event_get_code(e);
-    lv_ui *ui = (lv_ui *) lv_event_get_user_data(e);
-    lv_ui_video_play *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_PLAY);
-    lv_obj_t *src = lv_event_get_target(e);
     switch (code) {
     case LV_EVENT_CLICKED: {
         //custom code video_play_lbl_msg
         {
+            lv_obj_t *src = lv_event_get_target(e);
+            lv_ui *ui = lv_event_get_user_data(e);
             lv_ui_video_play *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_PLAY);
             lv_obj_t *dest = ui_scr->video_play_lbl_msg;
 #if LV_USE_GUIBUILDER_SIMULATOR
@@ -3223,13 +3223,12 @@ static void video_play_img_prev_file_event_handler(lv_event_t *e)
 static void video_play_img_next_file_event_handler(lv_event_t *e)
 {
     lv_event_code_t code = lv_event_get_code(e);
-    lv_ui *ui = (lv_ui *) lv_event_get_user_data(e);
-    lv_ui_video_play *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_PLAY);
-    lv_obj_t *src = lv_event_get_target(e);
     switch (code) {
     case LV_EVENT_CLICKED: {
         //custom code video_play_lbl_msg
         {
+            lv_obj_t *src = lv_event_get_target(e);
+            lv_ui *ui = lv_event_get_user_data(e);
             lv_ui_video_play *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_PLAY);
             lv_obj_t *dest = ui_scr->video_play_lbl_msg;
 #if LV_USE_GUIBUILDER_SIMULATOR
@@ -3257,14 +3256,13 @@ static void video_play_img_next_file_event_handler(lv_event_t *e)
 static void video_play_imgbtn_loud_event_handler(lv_event_t *e)
 {
     lv_event_code_t code = lv_event_get_code(e);
-    lv_ui *ui = (lv_ui *) lv_event_get_user_data(e);
-    lv_ui_video_play *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_PLAY);
-    lv_obj_t *src = lv_event_get_target(e);
     switch (code) {
     case LV_EVENT_CLICKED: {
         //custom code
         {
-            lv_obj_t *dest = src;
+            lv_obj_t *src = lv_event_get_target(e);
+            lv_ui *ui = lv_event_get_user_data(e);
+            lv_ui_video_play *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_PLAY);
 #if !LV_USE_GUIBUILDER_SIMULATOR
             gui_set_video_volume();
 #endif
@@ -3279,14 +3277,13 @@ static void video_play_imgbtn_loud_event_handler(lv_event_t *e)
 static void video_play_ddlist_multi_spped_event_handler(lv_event_t *e)
 {
     lv_event_code_t code = lv_event_get_code(e);
-    lv_ui *ui = (lv_ui *) lv_event_get_user_data(e);
-    lv_ui_video_play *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_PLAY);
-    lv_obj_t *src = lv_event_get_target(e);
     switch (code) {
     case LV_EVENT_CLICKED: {
         //custom code
         {
-            lv_obj_t *dest = src;
+            lv_obj_t *src = lv_event_get_target(e);
+            lv_ui *ui = lv_event_get_user_data(e);
+            lv_ui_video_play *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_PLAY);
             lv_group_focus_obj(ui_scr->video_play_imgbtn_pause);
         }
     }
@@ -3294,6 +3291,8 @@ static void video_play_ddlist_multi_spped_event_handler(lv_event_t *e)
     case LV_EVENT_VALUE_CHANGED: {
         //custom code video_play_ddlist_multi_spped
         {
+            lv_obj_t *src = lv_event_get_target(e);
+            lv_ui *ui = lv_event_get_user_data(e);
             lv_ui_video_play *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_PLAY);
             lv_obj_t *dest = ui_scr->video_play_ddlist_multi_spped;
             int selected_index = lv_dropdown_get_selected(dest);
@@ -3317,14 +3316,13 @@ static void video_play_ddlist_multi_spped_event_handler(lv_event_t *e)
 static void video_play_imgbtn_1_event_handler(lv_event_t *e)
 {
     lv_event_code_t code = lv_event_get_code(e);
-    lv_ui *ui = (lv_ui *) lv_event_get_user_data(e);
-    lv_ui_video_play *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_PLAY);
-    lv_obj_t *src = lv_event_get_target(e);
     switch (code) {
     case LV_EVENT_CLICKED: {
         //custom code
         {
-            lv_obj_t *dest = src;
+            lv_obj_t *src = lv_event_get_target(e);
+            lv_ui *ui = lv_event_get_user_data(e);
+            lv_ui_video_play *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_PLAY);
 #if !LV_USE_GUIBUILDER_SIMULATOR
             gui_get_video_frame();
 #endif
@@ -3367,14 +3365,13 @@ void events_init_video_play(lv_ui *ui)
 static void video_file_event_handler(lv_event_t *e)
 {
     lv_event_code_t code = lv_event_get_code(e);
-    lv_ui *ui = (lv_ui *) lv_event_get_user_data(e);
-    lv_ui_video_file *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_FILE);
-    lv_obj_t *src = lv_event_get_target(e);
     switch (code) {
     case LV_EVENT_SCREEN_LOADED: {
         //custom code
         {
-            lv_obj_t *dest = src;
+            lv_obj_t *src = lv_event_get_target(e);
+            lv_ui *ui = lv_event_get_user_data(e);
+            lv_ui_video_file *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_FILE);
 #if LV_USE_GUIBUILDER_SIMULATOR
 #else
             printf("------>%s()----->%d\n", __func__, __LINE__);
@@ -3387,7 +3384,9 @@ static void video_file_event_handler(lv_event_t *e)
     case LV_EVENT_SCREEN_UNLOADED: {
         //custom code
         {
-            lv_obj_t *dest = src;
+            lv_obj_t *src = lv_event_get_target(e);
+            lv_ui *ui = lv_event_get_user_data(e);
+            lv_ui_video_file *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_FILE);
 #if LV_USE_GUIBUILDER_SIMULATOR
 #else
             extern void video_file_screen_unload(void);
@@ -3404,14 +3403,13 @@ static void video_file_event_handler(lv_event_t *e)
 static void video_file_img_1_event_handler(lv_event_t *e)
 {
     lv_event_code_t code = lv_event_get_code(e);
-    lv_ui *ui = (lv_ui *) lv_event_get_user_data(e);
-    lv_ui_video_file *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_FILE);
-    lv_obj_t *src = lv_event_get_target(e);
     switch (code) {
     case LV_EVENT_CLICKED: {
         //custom code
         {
-            lv_obj_t *dest = src;
+            lv_obj_t *src = lv_event_get_target(e);
+            lv_ui *ui = lv_event_get_user_data(e);
+            lv_ui_video_file *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_FILE);
 #if LV_USE_GUIBUILDER_SIMULATOR
 #else
             file_list_up();
@@ -3427,14 +3425,13 @@ static void video_file_img_1_event_handler(lv_event_t *e)
 static void video_file_img_2_event_handler(lv_event_t *e)
 {
     lv_event_code_t code = lv_event_get_code(e);
-    lv_ui *ui = (lv_ui *) lv_event_get_user_data(e);
-    lv_ui_video_file *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_FILE);
-    lv_obj_t *src = lv_event_get_target(e);
     switch (code) {
     case LV_EVENT_CLICKED: {
         //custom code
         {
-            lv_obj_t *dest = src;
+            lv_obj_t *src = lv_event_get_target(e);
+            lv_ui *ui = lv_event_get_user_data(e);
+            lv_ui_video_file *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_FILE);
 #if LV_USE_GUIBUILDER_SIMULATOR
 #else
             file_list_down();
@@ -3450,13 +3447,12 @@ static void video_file_img_2_event_handler(lv_event_t *e)
 static void video_file_view_3_event_handler(lv_event_t *e)
 {
     lv_event_code_t code = lv_event_get_code(e);
-    lv_ui *ui = (lv_ui *) lv_event_get_user_data(e);
-    lv_ui_video_file *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_FILE);
-    lv_obj_t *src = lv_event_get_target(e);
     switch (code) {
     case LV_EVENT_SCROLL: {
         //custom code video_file_view_3
         {
+            lv_obj_t *src = lv_event_get_target(e);
+            lv_ui *ui = lv_event_get_user_data(e);
             lv_ui_video_file *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_FILE);
             lv_obj_t *dest = ui_scr->video_file_view_3;
             int scroll_value = lv_obj_get_scroll_top(src);
@@ -3475,14 +3471,13 @@ static void video_file_view_3_event_handler(lv_event_t *e)
 static void video_file_view_menu_event_handler(lv_event_t *e)
 {
     lv_event_code_t code = lv_event_get_code(e);
-    lv_ui *ui = (lv_ui *) lv_event_get_user_data(e);
-    lv_ui_video_file *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_FILE);
-    lv_obj_t *src = lv_event_get_target(e);
     switch (code) {
     case LV_EVENT_CLICKED: {
         //custom code
         {
-            lv_obj_t *dest = src;
+            lv_obj_t *src = lv_event_get_target(e);
+            lv_ui *ui = lv_event_get_user_data(e);
+            lv_ui_video_file *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_FILE);
             dec_subpage_data.funkey1 = 0;
             dec_subpage_data.funkey2 = 0;
             dec_subpage_data.funkey3 = 0;
@@ -3536,14 +3531,13 @@ static void video_file_view_menu_event_handler(lv_event_t *e)
 static void video_file_view_del_event_handler(lv_event_t *e)
 {
     lv_event_code_t code = lv_event_get_code(e);
-    lv_ui *ui = (lv_ui *) lv_event_get_user_data(e);
-    lv_ui_video_file *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_FILE);
-    lv_obj_t *src = lv_event_get_target(e);
     switch (code) {
     case LV_EVENT_CLICKED: {
-        lv_obj_clear_flag(ui_scr->video_file_view_submenu, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_clear_flag(guider_ui.video_file->video_file_view_submenu, LV_OBJ_FLAG_HIDDEN);
         //custom code video_file_view_submenu
         {
+            lv_obj_t *src = lv_event_get_target(e);
+            lv_ui *ui = lv_event_get_user_data(e);
             lv_ui_video_file *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_FILE);
             lv_obj_t *dest = ui_scr->video_file_view_submenu;
             dec_subpage_data.now_subpage = SUBPAGE_DELETE;
@@ -3559,14 +3553,13 @@ static void video_file_view_del_event_handler(lv_event_t *e)
 static void video_file_view_pro_event_handler(lv_event_t *e)
 {
     lv_event_code_t code = lv_event_get_code(e);
-    lv_ui *ui = (lv_ui *) lv_event_get_user_data(e);
-    lv_ui_video_file *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_FILE);
-    lv_obj_t *src = lv_event_get_target(e);
     switch (code) {
     case LV_EVENT_CLICKED: {
-        lv_obj_clear_flag(ui_scr->video_file_view_submenu, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_clear_flag(guider_ui.video_file->video_file_view_submenu, LV_OBJ_FLAG_HIDDEN);
         //custom code video_file_view_submenu
         {
+            lv_obj_t *src = lv_event_get_target(e);
+            lv_ui *ui = lv_event_get_user_data(e);
             lv_ui_video_file *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_FILE);
             lv_obj_t *dest = ui_scr->video_file_view_submenu;
             dec_subpage_data.now_subpage = SUBPAGE_PROTECTION;
@@ -3582,14 +3575,13 @@ static void video_file_view_pro_event_handler(lv_event_t *e)
 static void video_file_view_submenu_event_handler(lv_event_t *e)
 {
     lv_event_code_t code = lv_event_get_code(e);
-    lv_ui *ui = (lv_ui *) lv_event_get_user_data(e);
-    lv_ui_video_file *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_FILE);
-    lv_obj_t *src = lv_event_get_target(e);
     switch (code) {
     case LV_EVENT_CLICKED: {
-        lv_obj_add_flag(ui_scr->video_file_view_submenu, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_add_flag(guider_ui.video_file->video_file_view_submenu, LV_OBJ_FLAG_HIDDEN);
         //custom code video_file_view_submenu
         {
+            lv_obj_t *src = lv_event_get_target(e);
+            lv_ui *ui = lv_event_get_user_data(e);
             lv_ui_video_file *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_FILE);
             lv_obj_t *dest = ui_scr->video_file_view_submenu;
             uint8_t back_dec = 0;
@@ -3730,11 +3722,13 @@ static void video_file_view_submenu_event_handler(lv_event_t *e)
     case LV_EVENT_KEY: {
         uint32_t *key = lv_event_get_param(e);
         if (*key == LV_KEY_HOME) {
-            lv_obj_add_flag(ui_scr->video_file_view_submenu, LV_OBJ_FLAG_HIDDEN);
+            lv_obj_add_flag(guider_ui.video_file->video_file_view_submenu, LV_OBJ_FLAG_HIDDEN);
         }
         if (*key == LV_KEY_HOME) {
             //custom code video_file_view_submenu
             {
+                lv_obj_t *src = lv_event_get_target(e);
+                lv_ui *ui = lv_event_get_user_data(e);
                 lv_ui_video_file *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_FILE);
                 lv_obj_t *dest = ui_scr->video_file_view_submenu;
 
@@ -3764,14 +3758,13 @@ static void video_file_view_submenu_event_handler(lv_event_t *e)
 static void video_file_submenu_btn_1_event_handler(lv_event_t *e)
 {
     lv_event_code_t code = lv_event_get_code(e);
-    lv_ui *ui = (lv_ui *) lv_event_get_user_data(e);
-    lv_ui_video_file *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_FILE);
-    lv_obj_t *src = lv_event_get_target(e);
     switch (code) {
     case LV_EVENT_CLICKED: {
         //custom code
         {
-            lv_obj_t *dest = src;
+            lv_obj_t *src = lv_event_get_target(e);
+            lv_ui *ui = lv_event_get_user_data(e);
+            lv_ui_video_file *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_FILE);
             subpage_cur_btn = SUBPAGE_FUNKEY1;
         }
     }
@@ -3784,14 +3777,13 @@ static void video_file_submenu_btn_1_event_handler(lv_event_t *e)
 static void video_file_submenu_btn_2_event_handler(lv_event_t *e)
 {
     lv_event_code_t code = lv_event_get_code(e);
-    lv_ui *ui = (lv_ui *) lv_event_get_user_data(e);
-    lv_ui_video_file *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_FILE);
-    lv_obj_t *src = lv_event_get_target(e);
     switch (code) {
     case LV_EVENT_CLICKED: {
         //custom code
         {
-            lv_obj_t *dest = src;
+            lv_obj_t *src = lv_event_get_target(e);
+            lv_ui *ui = lv_event_get_user_data(e);
+            lv_ui_video_file *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_FILE);
             subpage_cur_btn = SUBPAGE_FUNKEY2;
         }
     }
@@ -3804,14 +3796,13 @@ static void video_file_submenu_btn_2_event_handler(lv_event_t *e)
 static void video_file_submenu_btn_3_event_handler(lv_event_t *e)
 {
     lv_event_code_t code = lv_event_get_code(e);
-    lv_ui *ui = (lv_ui *) lv_event_get_user_data(e);
-    lv_ui_video_file *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_FILE);
-    lv_obj_t *src = lv_event_get_target(e);
     switch (code) {
     case LV_EVENT_CLICKED: {
         //custom code
         {
-            lv_obj_t *dest = src;
+            lv_obj_t *src = lv_event_get_target(e);
+            lv_ui *ui = lv_event_get_user_data(e);
+            lv_ui_video_file *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_FILE);
             subpage_cur_btn = SUBPAGE_FUNKEY3;
         }
     }
@@ -3824,14 +3815,13 @@ static void video_file_submenu_btn_3_event_handler(lv_event_t *e)
 static void video_file_submenu_btn_4_event_handler(lv_event_t *e)
 {
     lv_event_code_t code = lv_event_get_code(e);
-    lv_ui *ui = (lv_ui *) lv_event_get_user_data(e);
-    lv_ui_video_file *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_FILE);
-    lv_obj_t *src = lv_event_get_target(e);
     switch (code) {
     case LV_EVENT_CLICKED: {
         //custom code
         {
-            lv_obj_t *dest = src;
+            lv_obj_t *src = lv_event_get_target(e);
+            lv_ui *ui = lv_event_get_user_data(e);
+            lv_ui_video_file *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_FILE);
             subpage_cur_btn = SUBPAGE_FUNKEY4;
         }
     }
@@ -3873,13 +3863,12 @@ void events_init_video_file(lv_ui *ui)
 static void video_dir_event_handler(lv_event_t *e)
 {
     lv_event_code_t code = lv_event_get_code(e);
-    lv_ui *ui = (lv_ui *) lv_event_get_user_data(e);
-    lv_ui_video_dir *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_DIR);
-    lv_obj_t *src = lv_event_get_target(e);
     switch (code) {
     case LV_EVENT_SCREEN_LOADED: {
         //custom code video_dir
         {
+            lv_obj_t *src = lv_event_get_target(e);
+            lv_ui *ui = lv_event_get_user_data(e);
             lv_ui_video_dir *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_DIR);
             lv_obj_t *dest = ui_scr->video_dir;
 #if LV_USE_GUIBUILDER_SIMULATOR
@@ -3897,7 +3886,7 @@ static void video_dir_event_handler(lv_event_t *e)
         if (*key == LV_KEY_RIGHT) {
             gui_scr_t *screen = ui_get_scr(GUI_SCREEN_VIDEO_REC);
             if (screen != NULL) {
-                ui_load_scr_anim(ui, screen, LV_SCR_LOAD_ANIM_NONE, 0, 0, true, true, false);
+                ui_load_scr_anim(&guider_ui, screen, LV_SCR_LOAD_ANIM_NONE, 0, 0, true, true, false);
             }
         }
     }
@@ -3928,13 +3917,12 @@ void events_init_video_dir(lv_ui *ui)
 static void line_drift_btn_horizon_event_handler(lv_event_t *e)
 {
     lv_event_code_t code = lv_event_get_code(e);
-    lv_ui *ui = (lv_ui *) lv_event_get_user_data(e);
-    lv_ui_line_drift *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_LINE_DRIFT);
-    lv_obj_t *src = lv_event_get_target(e);
     switch (code) {
     case LV_EVENT_PRESSING: {
         //custom code line_drift_btn_horizon
         {
+            lv_obj_t *src = lv_event_get_target(e);
+            lv_ui *ui = lv_event_get_user_data(e);
             lv_ui_line_drift *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_LINE_DRIFT);
             lv_obj_t *dest = ui_scr->line_drift_btn_horizon;
 
@@ -3958,6 +3946,8 @@ static void line_drift_btn_horizon_event_handler(lv_event_t *e)
         if (*key == LV_KEY_DOWN) {
             //custom code line_drift_btn_horizon
             {
+                lv_obj_t *src = lv_event_get_target(e);
+                lv_ui *ui = lv_event_get_user_data(e);
                 lv_ui_line_drift *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_LINE_DRIFT);
                 lv_obj_t *dest = ui_scr->line_drift_btn_horizon;
 
@@ -3977,6 +3967,8 @@ static void line_drift_btn_horizon_event_handler(lv_event_t *e)
         if (*key == LV_KEY_UP) {
             //custom code line_drift_btn_horizon
             {
+                lv_obj_t *src = lv_event_get_target(e);
+                lv_ui *ui = lv_event_get_user_data(e);
                 lv_ui_line_drift *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_LINE_DRIFT);
                 lv_obj_t *dest = ui_scr->line_drift_btn_horizon;
 
@@ -4002,13 +3994,12 @@ static void line_drift_btn_horizon_event_handler(lv_event_t *e)
 static void line_drift_btn_carhead_event_handler(lv_event_t *e)
 {
     lv_event_code_t code = lv_event_get_code(e);
-    lv_ui *ui = (lv_ui *) lv_event_get_user_data(e);
-    lv_ui_line_drift *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_LINE_DRIFT);
-    lv_obj_t *src = lv_event_get_target(e);
     switch (code) {
     case LV_EVENT_PRESSING: {
         //custom code line_drift_btn_carhead
         {
+            lv_obj_t *src = lv_event_get_target(e);
+            lv_ui *ui = lv_event_get_user_data(e);
             lv_ui_line_drift *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_LINE_DRIFT);
             lv_obj_t *dest = ui_scr->line_drift_btn_carhead;
 
@@ -4034,6 +4025,8 @@ static void line_drift_btn_carhead_event_handler(lv_event_t *e)
         if (*key == LV_KEY_DOWN) {
             //custom code line_drift_btn_carhead
             {
+                lv_obj_t *src = lv_event_get_target(e);
+                lv_ui *ui = lv_event_get_user_data(e);
                 lv_ui_line_drift *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_LINE_DRIFT);
                 lv_obj_t *dest = ui_scr->line_drift_btn_carhead;
 
@@ -4052,6 +4045,8 @@ static void line_drift_btn_carhead_event_handler(lv_event_t *e)
         if (*key == LV_KEY_UP) {
             //custom code line_drift_btn_carhead
             {
+                lv_obj_t *src = lv_event_get_target(e);
+                lv_ui *ui = lv_event_get_user_data(e);
                 lv_ui_line_drift *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_LINE_DRIFT);
                 lv_obj_t *dest = ui_scr->line_drift_btn_carhead;
 
@@ -4082,14 +4077,13 @@ static void line_drift_btn_carhead_event_handler(lv_event_t *e)
 static void line_drift_lbl_7_event_handler(lv_event_t *e)
 {
     lv_event_code_t code = lv_event_get_code(e);
-    lv_ui *ui = (lv_ui *) lv_event_get_user_data(e);
-    lv_ui_line_drift *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_LINE_DRIFT);
-    lv_obj_t *src = lv_event_get_target(e);
     switch (code) {
     case LV_EVENT_CLICKED: {
         //custom code
         {
-            lv_obj_t *dest = src;
+            lv_obj_t *src = lv_event_get_target(e);
+            lv_ui *ui = lv_event_get_user_data(e);
+            lv_ui_line_drift *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_LINE_DRIFT);
 
             db_update("lan", lv_obj_get_y(ui_scr->line_drift_btn_horizon) || (lv_obj_get_y(ui_scr->line_drift_btn_carhead) << 16));
             printf("[chili]: %s line_drift_btn_horizon %d %d\n", __func__, lv_obj_get_y(ui_scr->line_drift_btn_horizon), lv_obj_get_y(ui_scr->line_drift_btn_carhead));
@@ -4106,14 +4100,13 @@ static void line_drift_lbl_7_event_handler(lv_event_t *e)
 static void line_drift_lbl_6_event_handler(lv_event_t *e)
 {
     lv_event_code_t code = lv_event_get_code(e);
-    lv_ui *ui = (lv_ui *) lv_event_get_user_data(e);
-    lv_ui_line_drift *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_LINE_DRIFT);
-    lv_obj_t *src = lv_event_get_target(e);
     switch (code) {
     case LV_EVENT_CLICKED: {
         //custom code
         {
-            lv_obj_t *dest = src;
+            lv_obj_t *src = lv_event_get_target(e);
+            lv_ui *ui = lv_event_get_user_data(e);
+            lv_ui_line_drift *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_LINE_DRIFT);
             line_drift_page_hide(0);
         }
     }
@@ -4151,13 +4144,12 @@ void events_init_line_drift(lv_ui *ui)
 static void sys_popwin_btn_1_event_handler(lv_event_t *e)
 {
     lv_event_code_t code = lv_event_get_code(e);
-    lv_ui *ui = (lv_ui *) lv_event_get_user_data(e);
-    lv_ui_sys_popwin *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_SYS_POPWIN);
-    lv_obj_t *src = lv_event_get_target(e);
     switch (code) {
     case LV_EVENT_CLICKED: {
         //custom code sys_popwin
         {
+            lv_obj_t *src = lv_event_get_target(e);
+            lv_ui *ui = lv_event_get_user_data(e);
             lv_ui_sys_popwin *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_SYS_POPWIN);
             lv_obj_t *dest = ui_scr->sys_popwin;
             if (ui_scr->sys_popwin_del == false && lv_obj_is_valid(ui_scr->sys_popwin)) {
@@ -4179,13 +4171,12 @@ static void sys_popwin_btn_1_event_handler(lv_event_t *e)
 static void sys_popwin_btn_2_event_handler(lv_event_t *e)
 {
     lv_event_code_t code = lv_event_get_code(e);
-    lv_ui *ui = (lv_ui *) lv_event_get_user_data(e);
-    lv_ui_sys_popwin *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_SYS_POPWIN);
-    lv_obj_t *src = lv_event_get_target(e);
     switch (code) {
     case LV_EVENT_CLICKED: {
         //custom code sys_popwin
         {
+            lv_obj_t *src = lv_event_get_target(e);
+            lv_ui *ui = lv_event_get_user_data(e);
             lv_ui_sys_popwin *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_SYS_POPWIN);
             lv_obj_t *dest = ui_scr->sys_popwin;
             video_dec_edit_files(del);
@@ -4216,24 +4207,23 @@ void events_init_sys_popwin(lv_ui *ui)
 static void video_dec_view_scan_event_handler(lv_event_t *e)
 {
     lv_event_code_t code = lv_event_get_code(e);
-    lv_ui *ui = (lv_ui *) lv_event_get_user_data(e);
-    lv_ui_video_dec *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_DEC);
-    lv_obj_t *src = lv_event_get_target(e);
     switch (code) {
     case LV_EVENT_KEY: {
         uint32_t *key = lv_event_get_param(e);
         if (*key == LV_KEY_RIGHT) {
             gui_scr_t *screen = ui_get_scr(GUI_SCREEN_VIDEO_REC);
             if (screen != NULL) {
-                ui_load_scr_anim(ui, screen, LV_SCR_LOAD_ANIM_NONE, 0, 0, true, true, false);
+                ui_load_scr_anim(&guider_ui, screen, LV_SCR_LOAD_ANIM_NONE, 0, 0, true, true, false);
             }
         }
         if (*key == LV_KEY_LEFT || *key == LV_KEY_HOME) {
-            lv_obj_add_flag(ui_scr->video_dec_view_scan, LV_OBJ_FLAG_HIDDEN);
+            lv_obj_add_flag(guider_ui.video_dec->video_dec_view_scan, LV_OBJ_FLAG_HIDDEN);
         }
         if (*key == LV_KEY_LEFT || *key == LV_KEY_HOME) {
             //custom code video_dec_view_scan
             {
+                lv_obj_t *src = lv_event_get_target(e);
+                lv_ui *ui = lv_event_get_user_data(e);
                 lv_ui_video_dec *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_DEC);
                 lv_obj_t *dest = ui_scr->video_dec_view_scan;
                 printf(">>>>enter dec setting menu\n");
@@ -4256,23 +4246,21 @@ static void video_dec_view_scan_event_handler(lv_event_t *e)
 static void video_dec_view_4_event_handler(lv_event_t *e)
 {
     lv_event_code_t code = lv_event_get_code(e);
-    lv_ui *ui = (lv_ui *) lv_event_get_user_data(e);
-    lv_ui_video_dec *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_DEC);
-    lv_obj_t *src = lv_event_get_target(e);
     switch (code) {
     case LV_EVENT_KEY: {
         uint32_t *key = lv_event_get_param(e);
         if (*key == LV_KEY_LEFT || *key == LV_KEY_HOME) {
             gui_scr_t *screen = ui_get_scr(GUI_SCREEN_SYS_SETTING);
             if (screen != NULL) {
-                ui_load_scr_anim(ui, screen, LV_SCR_LOAD_ANIM_NONE, 0, 0, true, true, false);
+                ui_load_scr_anim(&guider_ui, screen, LV_SCR_LOAD_ANIM_NONE, 0, 0, true, true, false);
             }
         }
         if (*key == LV_KEY_LEFT || *key == LV_KEY_HOME) {
             //custom code sys_setting
             {
-                lv_ui_sys_setting *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_SYS_SETTING);
-                lv_obj_t *dest = ui_scr->sys_setting;
+                lv_obj_t *src = lv_event_get_target(e);
+                lv_ui *ui = lv_event_get_user_data(e);
+                lv_ui_video_dec *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_DEC);
 #if !LV_USE_GUIBUILDER_SIMULATOR
                 extern void gui_video_dec_set_menu_hide(void);
                 gui_video_dec_set_menu_hide();
@@ -4289,14 +4277,13 @@ static void video_dec_view_4_event_handler(lv_event_t *e)
 static void video_dec_view_2_event_handler(lv_event_t *e)
 {
     lv_event_code_t code = lv_event_get_code(e);
-    lv_ui *ui = (lv_ui *) lv_event_get_user_data(e);
-    lv_ui_video_dec *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_DEC);
-    lv_obj_t *src = lv_event_get_target(e);
     switch (code) {
     case LV_EVENT_CLICKED: {
         //custom code
         {
-            lv_obj_t *dest = src;
+            lv_obj_t *src = lv_event_get_target(e);
+            lv_ui *ui = lv_event_get_user_data(e);
+            lv_ui_video_dec *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_DEC);
 #if !LV_USE_GUIBUILDER_SIMULATOR
             extern void gui_video_dec_del_file(void);
             gui_video_dec_del_file();
@@ -4312,14 +4299,13 @@ static void video_dec_view_2_event_handler(lv_event_t *e)
 static void video_dec_view_3_event_handler(lv_event_t *e)
 {
     lv_event_code_t code = lv_event_get_code(e);
-    lv_ui *ui = (lv_ui *) lv_event_get_user_data(e);
-    lv_ui_video_dec *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_DEC);
-    lv_obj_t *src = lv_event_get_target(e);
     switch (code) {
     case LV_EVENT_CLICKED: {
         //custom code
         {
-            lv_obj_t *dest = src;
+            lv_obj_t *src = lv_event_get_target(e);
+            lv_ui *ui = lv_event_get_user_data(e);
+            lv_ui_video_dec *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_DEC);
 #if !LV_USE_GUIBUILDER_SIMULATOR
             extern void gui_video_dec_prot_file(void);
             gui_video_dec_prot_file();
@@ -4360,17 +4346,12 @@ void events_init_video_dec(lv_ui *ui)
 static void video_dec_options_btn_1_event_handler(lv_event_t *e)
 {
     lv_event_code_t code = lv_event_get_code(e);
-    lv_ui *ui = (lv_ui *) lv_event_get_user_data(e);
-    lv_ui_video_dec_options *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_DEC_OPTIONS);
-    lv_obj_t *src = lv_event_get_target(e);
     switch (code) {
     case LV_EVENT_CLICKED: {
-        lv_ui_video_dec_options *_ui_video_dec_options = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_DEC_OPTIONS);
-        if (_ui_video_dec_options && _ui_video_dec_options->video_dec_options_del == false && lv_obj_is_valid(_ui_video_dec_options->video_dec_options)) {
-            lv_obj_add_flag(_ui_video_dec_options->video_dec_options, LV_OBJ_FLAG_HIDDEN);
-        }
         //custom code video_dec_options
         {
+            lv_obj_t *src = lv_event_get_target(e);
+            lv_ui *ui = lv_event_get_user_data(e);
             lv_ui_video_dec_options *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_DEC_OPTIONS);
             lv_obj_t *dest = ui_scr->video_dec_options;
 #if !LV_USE_GUIBUILDER_SIMULATOR
@@ -4388,17 +4369,12 @@ static void video_dec_options_btn_1_event_handler(lv_event_t *e)
 static void video_dec_options_btn_2_event_handler(lv_event_t *e)
 {
     lv_event_code_t code = lv_event_get_code(e);
-    lv_ui *ui = (lv_ui *) lv_event_get_user_data(e);
-    lv_ui_video_dec_options *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_DEC_OPTIONS);
-    lv_obj_t *src = lv_event_get_target(e);
     switch (code) {
     case LV_EVENT_CLICKED: {
-        lv_ui_video_dec_options *_ui_video_dec_options = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_DEC_OPTIONS);
-        if (_ui_video_dec_options && _ui_video_dec_options->video_dec_options_del == false && lv_obj_is_valid(_ui_video_dec_options->video_dec_options)) {
-            lv_obj_add_flag(_ui_video_dec_options->video_dec_options, LV_OBJ_FLAG_HIDDEN);
-        }
         //custom code video_dec_options
         {
+            lv_obj_t *src = lv_event_get_target(e);
+            lv_ui *ui = lv_event_get_user_data(e);
             lv_ui_video_dec_options *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_DEC_OPTIONS);
             lv_obj_t *dest = ui_scr->video_dec_options;
 #if !LV_USE_GUIBUILDER_SIMULATOR
@@ -4419,6 +4395,285 @@ void events_init_video_dec_options(lv_ui *ui)
     lv_obj_add_event_cb(ui_scr->video_dec_options, scr_loaded_handler, LV_EVENT_SCREEN_LOADED, ui);
     lv_obj_add_event_cb(ui_scr->video_dec_options_btn_1, video_dec_options_btn_1_event_handler, LV_EVENT_ALL, ui);
     lv_obj_add_event_cb(ui_scr->video_dec_options_btn_2, video_dec_options_btn_2_event_handler, LV_EVENT_ALL, ui);
+}
+
+static void page_map_event_handler(lv_event_t *e)
+{
+    lv_event_code_t code = lv_event_get_code(e);
+    switch (code) {
+    case LV_EVENT_SCREEN_LOADED: {
+        //custom code
+        {
+            set_in_ui_navi_flag(1);
+            if (page_map_img_2_init_flag) {
+                lv_ui_page_map *ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_PAGE_MAP);
+                lv_obj_clear_flag(ui_scr->page_map_img_2, LV_OBJ_FLAG_HIDDEN);
+                page_map_img_2_init_flag = 0;
+            }
+
+#if !LV_USE_GUIBUILDER_SIMULATOR
+
+            if (init_flag) {
+                lv_example_lyrics_text_input(lyrics_test);
+                init_flag = 0;
+            }
+
+
+#if 0
+            map_jpeg_disp_frame_init();
+
+            FILE *profile_fp = fopen("mnt/sdfile/EXT_RESERVED/uipackres/ui/poweron.jpg", "r");
+            //FILE *profile_fp = fopen(CONFIG_FONT_TTF_PATH, "r");
+
+            if (profile_fp == NULL) {
+                return;
+            }
+            u16 disp_width = 800;
+            u16 disp_height = 480;
+            u32 jpg_len = flen(profile_fp);
+            struct vfs_attr file_attr;
+            fget_attrs(profile_fp, &file_attr);
+            u8 *jpg_buffer = file_attr.sclust;
+            fclose(profile_fp);
+
+            map_jpeg_disp_one_frame(disp_width, disp_height, jpg_buffer, jpg_len);
+#endif
+
+#endif
+        }
+    }
+    break;
+    case LV_EVENT_SCREEN_UNLOADED: {
+        //custom code
+        {
+#if !LV_USE_GUIBUILDER_SIMULATOR
+            //map_jpeg_disp_frame_uninit();
+#endif
+        }
+    }
+    break;
+    case LV_EVENT_GESTURE: {
+        lv_dir_t dir = lv_indev_get_gesture_dir(lv_indev_get_act());
+        if (dir & LV_DIR_LEFT) {
+            gui_scr_t *screen = ui_get_scr(GUI_SCREEN_PAGE_METER);
+            if (screen != NULL) {
+                ui_load_scr_anim(&guider_ui, screen, LV_SCR_LOAD_ANIM_NONE, 0, 0, true, true, false);
+            }
+        }
+        if (dir & LV_DIR_LEFT) {
+            //custom code page_meter
+            {
+#if !LV_USE_GUIBUILDER_SIMULATOR
+                set_in_ui_navi_flag(0);
+                //map_jpeg_disp_frame_uninit();
+#endif
+            }
+        }
+        if (dir & LV_DIR_RIGHT) {
+            gui_scr_t *screen = ui_get_scr(GUI_SCREEN_USB_SLAVE);
+            if (screen != NULL) {
+                ui_load_scr_anim(&guider_ui, screen, LV_SCR_LOAD_ANIM_NONE, 0, 0, true, true, false);
+            }
+        }
+    }
+    break;
+    default:
+        break;
+    }
+}
+
+static void page_map_btn_1_event_handler(lv_event_t *e)
+{
+    lv_event_code_t code = lv_event_get_code(e);
+    switch (code) {
+    case LV_EVENT_CLICKED: {
+        gui_scr_t *screen = ui_get_scr(GUI_SCREEN_USB_SLAVE);
+        if (screen != NULL) {
+            ui_load_scr_anim(&guider_ui, screen, LV_SCR_LOAD_ANIM_NONE, 0, 0, false, true, false);
+        }
+    }
+    break;
+    default:
+        break;
+    }
+}
+
+static void page_map_btn_2_event_handler(lv_event_t *e)
+{
+    lv_event_code_t code = lv_event_get_code(e);
+    switch (code) {
+    case LV_EVENT_CLICKED: {
+        gui_scr_t *screen = ui_get_scr(GUI_SCREEN_PAGE_METER);
+        if (screen != NULL) {
+            ui_load_scr_anim(&guider_ui, screen, LV_SCR_LOAD_ANIM_NONE, 0, 0, true, true, false);
+        }
+    }
+    break;
+    default:
+        break;
+    }
+}
+static void page_map_screen_event_handler(lv_event_t *e)
+{
+    lv_event_code_t code = lv_event_get_code(e);
+    switch (code) {
+    case LV_EVENT_SCREEN_LOAD_START: {
+        gui_scr_action_cb(GUI_SCREEN_PAGE_MAP, GUI_SCREEN_ACTION_LOAD);
+        break;
+    }
+    case LV_EVENT_SCREEN_UNLOADED: {
+        gui_scr_action_cb(GUI_SCREEN_PAGE_MAP, GUI_SCREEN_ACTION_UNLOAD);
+        break;
+    }
+    }
+}
+
+void events_init_page_map(lv_ui *ui)
+{
+    lv_ui_page_map *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_PAGE_MAP);
+    lv_obj_add_event_cb(ui_scr->page_map, scr_loaded_handler, LV_EVENT_SCREEN_LOADED, ui);
+    lv_obj_add_event_cb(ui_scr->page_map, page_map_event_handler, LV_EVENT_ALL, ui);
+    lv_obj_add_event_cb(ui_scr->page_map_btn_1, page_map_btn_1_event_handler, LV_EVENT_ALL, ui);
+    lv_obj_add_event_cb(ui_scr->page_map_btn_2, page_map_btn_2_event_handler, LV_EVENT_ALL, ui);
+    lv_obj_add_event_cb(ui_scr->page_map, page_map_screen_event_handler, LV_EVENT_ALL, ui);
+}
+
+static void page_meter_event_handler(lv_event_t *e)
+{
+    lv_event_code_t code = lv_event_get_code(e);
+    switch (code) {
+    case LV_EVENT_SCREEN_LOADED: {
+        //custom code
+        {
+#if !LV_USE_GUIBUILDER_SIMULATOR
+            //logo_show("storage/sd0/C/avi/moto.avi", NULL, 0Xffff, NULL);
+            //logo_show(CONFIG_AVI_PATH, NULL, 0Xffff, NULL);
+#endif
+
+        }
+    }
+    break;
+    case LV_EVENT_SCREEN_UNLOADED: {
+        //custom code
+        {
+#if !LV_USE_GUIBUILDER_SIMULATOR
+            //logo_stop(NULL);
+            //lyrics_example_clean();
+#endif
+        }
+    }
+    break;
+    case LV_EVENT_GESTURE: {
+        lv_dir_t dir = lv_indev_get_gesture_dir(lv_indev_get_act());
+        if (dir & LV_DIR_RIGHT) {
+            gui_scr_t *screen = ui_get_scr(GUI_SCREEN_PAGE_MAP);
+            if (screen != NULL) {
+                ui_load_scr_anim(&guider_ui, screen, LV_SCR_LOAD_ANIM_NONE, 0, 0, false, true, false);
+            }
+        }
+        if (dir & LV_DIR_RIGHT) {
+            //custom code page_map
+            {
+#if !LV_USE_GUIBUILDER_SIMULATOR
+                //logo_stop();
+#endif
+            }
+        }
+        if (dir & LV_DIR_LEFT) {
+            gui_scr_t *screen = ui_get_scr(GUI_SCREEN_PAGE_MUSIC);
+            if (screen != NULL) {
+                ui_load_scr_anim(&guider_ui, screen, LV_SCR_LOAD_ANIM_NONE, 0, 0, true, true, false);
+            }
+        }
+    }
+    break;
+    default:
+        break;
+    }
+}
+
+static void page_meter_btn_1_event_handler(lv_event_t *e)
+{
+    lv_event_code_t code = lv_event_get_code(e);
+    switch (code) {
+    case LV_EVENT_CLICKED: {
+        gui_scr_t *screen = ui_get_scr(GUI_SCREEN_PAGE_MAP);
+        if (screen != NULL) {
+            ui_load_scr_anim(&guider_ui, screen, LV_SCR_LOAD_ANIM_NONE, 0, 0, true, true, false);
+        }
+    }
+    break;
+    default:
+        break;
+    }
+}
+
+static void page_meter_btn_2_event_handler(lv_event_t *e)
+{
+    lv_event_code_t code = lv_event_get_code(e);
+    switch (code) {
+    case LV_EVENT_CLICKED: {
+        gui_scr_t *screen = ui_get_scr(GUI_SCREEN_PAGE_MUSIC);
+        if (screen != NULL) {
+            ui_load_scr_anim(&guider_ui, screen, LV_SCR_LOAD_ANIM_NONE, 0, 0, true, true, false);
+        }
+    }
+    break;
+    default:
+        break;
+    }
+}
+
+void events_init_page_meter(lv_ui *ui)
+{
+    lv_ui_page_meter *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_PAGE_METER);
+    lv_obj_add_event_cb(ui_scr->page_meter, scr_loaded_handler, LV_EVENT_SCREEN_LOADED, ui);
+    lv_obj_add_event_cb(ui_scr->page_meter, page_meter_event_handler, LV_EVENT_ALL, ui);
+    lv_obj_add_event_cb(ui_scr->page_meter_btn_1, page_meter_btn_1_event_handler, LV_EVENT_ALL, ui);
+    lv_obj_add_event_cb(ui_scr->page_meter_btn_2, page_meter_btn_2_event_handler, LV_EVENT_ALL, ui);
+}
+
+static void page_music_event_handler(lv_event_t *e)
+{
+    lv_event_code_t code = lv_event_get_code(e);
+    switch (code) {
+    case LV_EVENT_GESTURE: {
+        lv_dir_t dir = lv_indev_get_gesture_dir(lv_indev_get_act());
+        if (dir & LV_DIR_RIGHT) {
+            gui_scr_t *screen = ui_get_scr(GUI_SCREEN_PAGE_METER);
+            if (screen != NULL) {
+                ui_load_scr_anim(&guider_ui, screen, LV_SCR_LOAD_ANIM_NONE, 0, 0, true, true, false);
+            }
+        }
+    }
+    break;
+    default:
+        break;
+    }
+}
+
+static void page_music_btn_1_event_handler(lv_event_t *e)
+{
+    lv_event_code_t code = lv_event_get_code(e);
+    switch (code) {
+    case LV_EVENT_CLICKED: {
+        gui_scr_t *screen = ui_get_scr(GUI_SCREEN_PAGE_METER);
+        if (screen != NULL) {
+            ui_load_scr_anim(&guider_ui, screen, LV_SCR_LOAD_ANIM_NONE, 0, 0, true, true, false);
+        }
+    }
+    break;
+    default:
+        break;
+    }
+}
+
+void events_init_page_music(lv_ui *ui)
+{
+    lv_ui_page_music *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_PAGE_MUSIC);
+    lv_obj_add_event_cb(ui_scr->page_music, scr_loaded_handler, LV_EVENT_SCREEN_LOADED, ui);
+    lv_obj_add_event_cb(ui_scr->page_music, page_music_event_handler, LV_EVENT_ALL, ui);
+    lv_obj_add_event_cb(ui_scr->page_music_btn_1, page_music_btn_1_event_handler, LV_EVENT_ALL, ui);
 }
 static void car_parking_screen_event_handler(lv_event_t *e)
 {

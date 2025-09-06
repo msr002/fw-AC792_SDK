@@ -331,6 +331,21 @@
 #endif /*LV_ENABLE_GC*/
 
 /*=====================
+ *  MATH HW SETTINGS
+ *====================*/
+#define LV_MATH_USE_HW  1 //是否开启硬件加速运算
+#if LV_MATH_USE_HW
+#define LV_MATH_USE_HW_SIN       0      //sin,cos函数是否启用硬件接口。启用后，运算速度会降低，代码量减小。注：开启该宏后，在绘制小角度的圆弧时，会因为精度问题被绘制成圆形，尽量不开启
+
+#if LV_MATH_USE_HW_SIN
+#define DEG_TO_RAD_FACTOR (16777216.0f / 360.0f) // 角度转弧度因子 (2^24 / 360)
+#endif
+
+#define LV_MATH_USE_HW_SQRT      1      //sqrt函数是否启用硬件接口。启用后，运算速度加快
+#define LV_MATH_USE_HW_ARCTAN    1      //arctan函数是否启用硬件接口。启用后，运算速度加快
+#endif
+
+/*=====================
  *  COMPILER SETTINGS
  *====================*/
 
@@ -889,6 +904,12 @@
 #define LV_FS_WIN32_CACHE_SIZE 0    /*>0 to cache this number of bytes in lv_fs_read()*/
 #endif
 #endif
+
+/*Amap demo*/
+#define LV_USE_DEMO_AMAP 0
+#define AMAP_USE_CANVAS 0
+#define AMAP_OPEN_INFO 0
+#define MAP_BORDER_GIRD_FIX 1   //无canvas版本地图边界时的网格和残留问题（1是解决（帧率会变低），0是不解决（帧率会变高））
 
 /*--END OF LV_CONF_H--*/
 

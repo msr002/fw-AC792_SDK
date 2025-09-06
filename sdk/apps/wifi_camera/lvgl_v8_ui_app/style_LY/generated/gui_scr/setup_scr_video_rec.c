@@ -19,6 +19,9 @@ lv_obj_t *setup_scr_video_rec(lv_ui *ui)
     lv_ui_video_rec *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_REC);
     if (ui_scr == NULL) {
         ui_scr = lv_mem_alloc(sizeof(lv_ui_video_rec));
+        if (ui_scr == NULL) {
+            return NULL;
+        }
         memset(ui_scr, 0, sizeof(lv_ui_video_rec));
         ui->video_rec = ui_scr;
     }
@@ -160,11 +163,10 @@ lv_obj_t *setup_scr_video_rec(lv_ui *ui)
     lv_obj_set_style_text_font(ui_scr->video_rec_lbl_reso, &lv_font_FangZhengKaiTiJianTi_1_26, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_align(ui_scr->video_rec_lbl_reso, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN | LV_STATE_DEFAULT);
 
-    static bool timer_video_rec_digitclock_1_enabled = false;
     //Write codes video_rec_digitclock_1
     ui_scr->video_rec_digitclock_1 = lv_label_create(ui_scr->video_rec_view_scan);
     lv_label_set_text_fmt(ui_scr->video_rec_digitclock_1, "%04d-%02d-%02d %02d:%02d:%02d", 2022, 07, 28, 21 % 12, 25, 50);
-    lv_obj_set_style_text_align(ui_scr->video_rec_digitclock_1, LV_TEXT_ALIGN_CENTER, 0);
+    lv_obj_set_style_text_align(ui_scr->video_rec_digitclock_1, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_pos(ui_scr->video_rec_digitclock_1, 50, 438);
     lv_obj_set_size(ui_scr->video_rec_digitclock_1, 300, 35);
     ui_style_set(ui_scr->video_rec_digitclock_1, GUI_CTRL_DIGITALCLOCK);
@@ -194,11 +196,10 @@ lv_obj_t *setup_scr_video_rec(lv_ui *ui)
     lv_obj_add_flag(ui_scr->video_rec_img_sd, LV_OBJ_FLAG_CLICKABLE);
     ui_style_set(ui_scr->video_rec_img_sd, GUI_CTRL_IMG);
 
-    static bool timer_video_rec_digitclock_2_enabled = false;
     //Write codes video_rec_digitclock_2
     ui_scr->video_rec_digitclock_2 = lv_label_create(ui_scr->video_rec_view_scan);
     lv_label_set_text_fmt(ui_scr->video_rec_digitclock_2, "%02d:%02d:%02d", 21 % 12, 25, 50);
-    lv_obj_set_style_text_align(ui_scr->video_rec_digitclock_2, LV_TEXT_ALIGN_CENTER, 0);
+    lv_obj_set_style_text_align(ui_scr->video_rec_digitclock_2, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_pos(ui_scr->video_rec_digitclock_2, 666, 10);
     lv_obj_set_size(ui_scr->video_rec_digitclock_2, 120, 32);
     ui_style_set(ui_scr->video_rec_digitclock_2, GUI_CTRL_DIGITALCLOCK);
@@ -298,8 +299,7 @@ lv_obj_t *setup_scr_video_rec(lv_ui *ui)
     lv_obj_set_pos(ui_scr->video_rec_view_reso, 0, 0);
     lv_obj_set_size(ui_scr->video_rec_view_reso, 800, 43);
     lv_obj_set_scrollbar_mode(ui_scr->video_rec_view_reso, LV_SCROLLBAR_MODE_OFF);
-    lv_obj_add_flag(ui_scr->video_rec_view_reso, LV_OBJ_FLAG_EVENT_BUBBLE);
-    lv_obj_add_flag(ui_scr->video_rec_view_reso, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
+    lv_obj_add_flag(ui_scr->video_rec_view_reso, LV_OBJ_FLAG_EVENT_BUBBLE | LV_OBJ_FLAG_SCROLL_ON_FOCUS);
     lv_group_add_obj(def_group, ui_scr->video_rec_view_reso);
     ui_style_set(ui_scr->video_rec_view_reso, GUI_CTRL_CONT);
 
@@ -330,8 +330,7 @@ lv_obj_t *setup_scr_video_rec(lv_ui *ui)
     lv_obj_set_pos(ui_scr->video_rec_view_two_rec, 0, 45);
     lv_obj_set_size(ui_scr->video_rec_view_two_rec, 800, 43);
     lv_obj_set_scrollbar_mode(ui_scr->video_rec_view_two_rec, LV_SCROLLBAR_MODE_OFF);
-    lv_obj_add_flag(ui_scr->video_rec_view_two_rec, LV_OBJ_FLAG_EVENT_BUBBLE);
-    lv_obj_add_flag(ui_scr->video_rec_view_two_rec, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
+    lv_obj_add_flag(ui_scr->video_rec_view_two_rec, LV_OBJ_FLAG_EVENT_BUBBLE | LV_OBJ_FLAG_SCROLL_ON_FOCUS);
     lv_group_add_obj(def_group, ui_scr->video_rec_view_two_rec);
     ui_style_set(ui_scr->video_rec_view_two_rec, GUI_CTRL_CONT);
 
@@ -362,8 +361,7 @@ lv_obj_t *setup_scr_video_rec(lv_ui *ui)
     lv_obj_set_pos(ui_scr->video_rec_view_cyc_rec, 0, 90);
     lv_obj_set_size(ui_scr->video_rec_view_cyc_rec, 800, 43);
     lv_obj_set_scrollbar_mode(ui_scr->video_rec_view_cyc_rec, LV_SCROLLBAR_MODE_OFF);
-    lv_obj_add_flag(ui_scr->video_rec_view_cyc_rec, LV_OBJ_FLAG_EVENT_BUBBLE);
-    lv_obj_add_flag(ui_scr->video_rec_view_cyc_rec, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
+    lv_obj_add_flag(ui_scr->video_rec_view_cyc_rec, LV_OBJ_FLAG_EVENT_BUBBLE | LV_OBJ_FLAG_SCROLL_ON_FOCUS);
     lv_group_add_obj(def_group, ui_scr->video_rec_view_cyc_rec);
     ui_style_set(ui_scr->video_rec_view_cyc_rec, GUI_CTRL_CONT);
 
@@ -394,8 +392,7 @@ lv_obj_t *setup_scr_video_rec(lv_ui *ui)
     lv_obj_set_pos(ui_scr->video_rec_view_gap, 0, 135);
     lv_obj_set_size(ui_scr->video_rec_view_gap, 800, 43);
     lv_obj_set_scrollbar_mode(ui_scr->video_rec_view_gap, LV_SCROLLBAR_MODE_OFF);
-    lv_obj_add_flag(ui_scr->video_rec_view_gap, LV_OBJ_FLAG_EVENT_BUBBLE);
-    lv_obj_add_flag(ui_scr->video_rec_view_gap, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
+    lv_obj_add_flag(ui_scr->video_rec_view_gap, LV_OBJ_FLAG_EVENT_BUBBLE | LV_OBJ_FLAG_SCROLL_ON_FOCUS);
     lv_group_add_obj(def_group, ui_scr->video_rec_view_gap);
     ui_style_set(ui_scr->video_rec_view_gap, GUI_CTRL_CONT);
 
@@ -426,8 +423,7 @@ lv_obj_t *setup_scr_video_rec(lv_ui *ui)
     lv_obj_set_pos(ui_scr->video_rec_view_hdr, 0, 180);
     lv_obj_set_size(ui_scr->video_rec_view_hdr, 800, 43);
     lv_obj_set_scrollbar_mode(ui_scr->video_rec_view_hdr, LV_SCROLLBAR_MODE_OFF);
-    lv_obj_add_flag(ui_scr->video_rec_view_hdr, LV_OBJ_FLAG_EVENT_BUBBLE);
-    lv_obj_add_flag(ui_scr->video_rec_view_hdr, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
+    lv_obj_add_flag(ui_scr->video_rec_view_hdr, LV_OBJ_FLAG_EVENT_BUBBLE | LV_OBJ_FLAG_SCROLL_ON_FOCUS);
     lv_group_add_obj(def_group, ui_scr->video_rec_view_hdr);
     ui_style_set(ui_scr->video_rec_view_hdr, GUI_CTRL_CONT);
 
@@ -458,8 +454,7 @@ lv_obj_t *setup_scr_video_rec(lv_ui *ui)
     lv_obj_set_pos(ui_scr->video_rec_view_exp, 0, 225);
     lv_obj_set_size(ui_scr->video_rec_view_exp, 800, 43);
     lv_obj_set_scrollbar_mode(ui_scr->video_rec_view_exp, LV_SCROLLBAR_MODE_OFF);
-    lv_obj_add_flag(ui_scr->video_rec_view_exp, LV_OBJ_FLAG_EVENT_BUBBLE);
-    lv_obj_add_flag(ui_scr->video_rec_view_exp, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
+    lv_obj_add_flag(ui_scr->video_rec_view_exp, LV_OBJ_FLAG_EVENT_BUBBLE | LV_OBJ_FLAG_SCROLL_ON_FOCUS);
     lv_group_add_obj(def_group, ui_scr->video_rec_view_exp);
     ui_style_set(ui_scr->video_rec_view_exp, GUI_CTRL_CONT);
 
@@ -490,8 +485,7 @@ lv_obj_t *setup_scr_video_rec(lv_ui *ui)
     lv_obj_set_pos(ui_scr->video_rec_view_motd, 0, 270);
     lv_obj_set_size(ui_scr->video_rec_view_motd, 800, 43);
     lv_obj_set_scrollbar_mode(ui_scr->video_rec_view_motd, LV_SCROLLBAR_MODE_OFF);
-    lv_obj_add_flag(ui_scr->video_rec_view_motd, LV_OBJ_FLAG_EVENT_BUBBLE);
-    lv_obj_add_flag(ui_scr->video_rec_view_motd, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
+    lv_obj_add_flag(ui_scr->video_rec_view_motd, LV_OBJ_FLAG_EVENT_BUBBLE | LV_OBJ_FLAG_SCROLL_ON_FOCUS);
     lv_group_add_obj(def_group, ui_scr->video_rec_view_motd);
     ui_style_set(ui_scr->video_rec_view_motd, GUI_CTRL_CONT);
 
@@ -522,8 +516,7 @@ lv_obj_t *setup_scr_video_rec(lv_ui *ui)
     lv_obj_set_pos(ui_scr->video_rec_view_mic, 0, 315);
     lv_obj_set_size(ui_scr->video_rec_view_mic, 800, 43);
     lv_obj_set_scrollbar_mode(ui_scr->video_rec_view_mic, LV_SCROLLBAR_MODE_OFF);
-    lv_obj_add_flag(ui_scr->video_rec_view_mic, LV_OBJ_FLAG_EVENT_BUBBLE);
-    lv_obj_add_flag(ui_scr->video_rec_view_mic, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
+    lv_obj_add_flag(ui_scr->video_rec_view_mic, LV_OBJ_FLAG_EVENT_BUBBLE | LV_OBJ_FLAG_SCROLL_ON_FOCUS);
     lv_group_add_obj(def_group, ui_scr->video_rec_view_mic);
     ui_style_set(ui_scr->video_rec_view_mic, GUI_CTRL_CONT);
 
@@ -554,8 +547,7 @@ lv_obj_t *setup_scr_video_rec(lv_ui *ui)
     lv_obj_set_pos(ui_scr->video_rec_view_date, 0, 360);
     lv_obj_set_size(ui_scr->video_rec_view_date, 800, 43);
     lv_obj_set_scrollbar_mode(ui_scr->video_rec_view_date, LV_SCROLLBAR_MODE_OFF);
-    lv_obj_add_flag(ui_scr->video_rec_view_date, LV_OBJ_FLAG_EVENT_BUBBLE);
-    lv_obj_add_flag(ui_scr->video_rec_view_date, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
+    lv_obj_add_flag(ui_scr->video_rec_view_date, LV_OBJ_FLAG_EVENT_BUBBLE | LV_OBJ_FLAG_SCROLL_ON_FOCUS);
     lv_group_add_obj(def_group, ui_scr->video_rec_view_date);
     ui_style_set(ui_scr->video_rec_view_date, GUI_CTRL_CONT);
 
@@ -586,8 +578,7 @@ lv_obj_t *setup_scr_video_rec(lv_ui *ui)
     lv_obj_set_pos(ui_scr->video_rec_view_gra, 0, 405);
     lv_obj_set_size(ui_scr->video_rec_view_gra, 800, 43);
     lv_obj_set_scrollbar_mode(ui_scr->video_rec_view_gra, LV_SCROLLBAR_MODE_OFF);
-    lv_obj_add_flag(ui_scr->video_rec_view_gra, LV_OBJ_FLAG_EVENT_BUBBLE);
-    lv_obj_add_flag(ui_scr->video_rec_view_gra, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
+    lv_obj_add_flag(ui_scr->video_rec_view_gra, LV_OBJ_FLAG_EVENT_BUBBLE | LV_OBJ_FLAG_SCROLL_ON_FOCUS);
     lv_group_add_obj(def_group, ui_scr->video_rec_view_gra);
     ui_style_set(ui_scr->video_rec_view_gra, GUI_CTRL_CONT);
 
@@ -618,8 +609,7 @@ lv_obj_t *setup_scr_video_rec(lv_ui *ui)
     lv_obj_set_pos(ui_scr->video_rec_view_par, 0, 450);
     lv_obj_set_size(ui_scr->video_rec_view_par, 800, 43);
     lv_obj_set_scrollbar_mode(ui_scr->video_rec_view_par, LV_SCROLLBAR_MODE_OFF);
-    lv_obj_add_flag(ui_scr->video_rec_view_par, LV_OBJ_FLAG_EVENT_BUBBLE);
-    lv_obj_add_flag(ui_scr->video_rec_view_par, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
+    lv_obj_add_flag(ui_scr->video_rec_view_par, LV_OBJ_FLAG_EVENT_BUBBLE | LV_OBJ_FLAG_SCROLL_ON_FOCUS);
     lv_group_add_obj(def_group, ui_scr->video_rec_view_par);
     ui_style_set(ui_scr->video_rec_view_par, GUI_CTRL_CONT);
 
@@ -650,8 +640,7 @@ lv_obj_t *setup_scr_video_rec(lv_ui *ui)
     lv_obj_set_pos(ui_scr->video_rec_view_num, 0, 495);
     lv_obj_set_size(ui_scr->video_rec_view_num, 800, 43);
     lv_obj_set_scrollbar_mode(ui_scr->video_rec_view_num, LV_SCROLLBAR_MODE_OFF);
-    lv_obj_add_flag(ui_scr->video_rec_view_num, LV_OBJ_FLAG_EVENT_BUBBLE);
-    lv_obj_add_flag(ui_scr->video_rec_view_num, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
+    lv_obj_add_flag(ui_scr->video_rec_view_num, LV_OBJ_FLAG_EVENT_BUBBLE | LV_OBJ_FLAG_SCROLL_ON_FOCUS);
     lv_group_add_obj(def_group, ui_scr->video_rec_view_num);
     ui_style_set(ui_scr->video_rec_view_num, GUI_CTRL_CONT);
 
@@ -682,8 +671,7 @@ lv_obj_t *setup_scr_video_rec(lv_ui *ui)
     lv_obj_set_pos(ui_scr->video_rec_view_hlw, 0, 540);
     lv_obj_set_size(ui_scr->video_rec_view_hlw, 800, 43);
     lv_obj_set_scrollbar_mode(ui_scr->video_rec_view_hlw, LV_SCROLLBAR_MODE_OFF);
-    lv_obj_add_flag(ui_scr->video_rec_view_hlw, LV_OBJ_FLAG_EVENT_BUBBLE);
-    lv_obj_add_flag(ui_scr->video_rec_view_hlw, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
+    lv_obj_add_flag(ui_scr->video_rec_view_hlw, LV_OBJ_FLAG_EVENT_BUBBLE | LV_OBJ_FLAG_SCROLL_ON_FOCUS);
     lv_group_add_obj(def_group, ui_scr->video_rec_view_hlw);
     ui_style_set(ui_scr->video_rec_view_hlw, GUI_CTRL_CONT);
 
@@ -836,7 +824,7 @@ lv_obj_t *setup_scr_video_rec(lv_ui *ui)
     lv_obj_set_style_bg_opa(ui_scr->video_rec_rec_submenu_btn_1, 203, LV_PART_MAIN | LV_STATE_DEFAULT);
     ui_scr->video_rec_rec_submenu_btn_1_label = lv_label_create(ui_scr->video_rec_rec_submenu_btn_1);
     lv_label_set_text(ui_scr->video_rec_rec_submenu_btn_1_label, "button1");
-    lv_obj_set_style_pad_all(ui_scr->video_rec_rec_submenu_btn_1, 0, LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_all(ui_scr->video_rec_rec_submenu_btn_1, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_align(ui_scr->video_rec_rec_submenu_btn_1_label, LV_ALIGN_CENTER, 0, 0);
 
     //Write codes video_rec_rec_submenu_btn_2
@@ -851,7 +839,7 @@ lv_obj_t *setup_scr_video_rec(lv_ui *ui)
     lv_obj_set_style_bg_opa(ui_scr->video_rec_rec_submenu_btn_2, 215, LV_PART_MAIN | LV_STATE_DEFAULT);
     ui_scr->video_rec_rec_submenu_btn_2_label = lv_label_create(ui_scr->video_rec_rec_submenu_btn_2);
     lv_label_set_text(ui_scr->video_rec_rec_submenu_btn_2_label, "button2");
-    lv_obj_set_style_pad_all(ui_scr->video_rec_rec_submenu_btn_2, 0, LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_all(ui_scr->video_rec_rec_submenu_btn_2, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_align(ui_scr->video_rec_rec_submenu_btn_2_label, LV_ALIGN_CENTER, 0, 0);
 
     //Write codes video_rec_rec_submenu_btn_3
@@ -866,7 +854,7 @@ lv_obj_t *setup_scr_video_rec(lv_ui *ui)
     lv_obj_set_style_bg_opa(ui_scr->video_rec_rec_submenu_btn_3, 205, LV_PART_MAIN | LV_STATE_DEFAULT);
     ui_scr->video_rec_rec_submenu_btn_3_label = lv_label_create(ui_scr->video_rec_rec_submenu_btn_3);
     lv_label_set_text(ui_scr->video_rec_rec_submenu_btn_3_label, "button3");
-    lv_obj_set_style_pad_all(ui_scr->video_rec_rec_submenu_btn_3, 0, LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_all(ui_scr->video_rec_rec_submenu_btn_3, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_align(ui_scr->video_rec_rec_submenu_btn_3_label, LV_ALIGN_CENTER, 0, 0);
 
     //Write codes video_rec_rec_submenu_btn_4
@@ -881,7 +869,7 @@ lv_obj_t *setup_scr_video_rec(lv_ui *ui)
     lv_obj_set_style_bg_opa(ui_scr->video_rec_rec_submenu_btn_4, 205, LV_PART_MAIN | LV_STATE_DEFAULT);
     ui_scr->video_rec_rec_submenu_btn_4_label = lv_label_create(ui_scr->video_rec_rec_submenu_btn_4);
     lv_label_set_text(ui_scr->video_rec_rec_submenu_btn_4_label, "button4");
-    lv_obj_set_style_pad_all(ui_scr->video_rec_rec_submenu_btn_4, 0, LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_all(ui_scr->video_rec_rec_submenu_btn_4, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_align(ui_scr->video_rec_rec_submenu_btn_4_label, LV_ALIGN_CENTER, 0, 0);
 
     //Write codes video_rec_roller_mutifunc
@@ -1166,7 +1154,7 @@ lv_obj_t *setup_scr_video_rec(lv_ui *ui)
 
     lv_obj_update_layout(ui_scr->video_rec);
     ui_scr->video_rec_del = false;
-    i18n_refresh_texts("video_rec");
+    i18n_refresh_texts(GUI_SCREEN_VIDEO_REC);
 
     //Init events for screen
     events_init_video_rec(ui);

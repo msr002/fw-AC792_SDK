@@ -215,7 +215,7 @@
       "distance": 40
      }
     },
-    "id": "f30af204-7711-4e9f-b572-eebc5bebd0a6",
+    "id": "8a1cdf7c-0750-45b6-af47-d16dd90d2f5b",
     "data": {
      "itemId": 1753338260516
     },
@@ -224,13 +224,176 @@
      "port": "c3184336-f5f8-4399-acb7-61531732c642"
     },
     "target": {
+     "cell": "931cb036-686f-4c4b-bfba-f1938c3fc078",
+     "port": "fb076936-fb8e-408a-9e5a-1462ed222bb6"
+    }
+   },
+   {
+    "position": {
+     "x": -120,
+     "y": -40
+    },
+    "size": {
+     "width": 120,
+     "height": 80
+    },
+    "view": "vue-shape-view",
+    "shape": "vue-shape",
+    "id": "931cb036-686f-4c4b-bfba-f1938c3fc078",
+    "component": "node-cust",
+    "group": "hardware",
+    "data": {
+     "name": "音量控制器",
+     "group": "控制",
+     "uuid": "0X74E3",
+     "type": 1,
+     "fun": 1,
+     "formFile": "../../.音量配置.json",
+     "itemId": 1753338260516,
+     "inBit": 2,
+     "bitConsistency": true,
+     "outBit": 2,
+     "sAlias": "",
+     "dynamicPort": {
+      "iMax": 0,
+      "iMin": 0,
+      "oMax": 0,
+      "oMin": 0
+     },
+     "nodeDoc": "\\docs\\html\\SDK\\audio_effects\\Volume_manual.html",
+     "subId": 18,
+     "configs": {
+      "name": "74E318",
+      "list": [
+       {
+        "modeId": "id_1753338937977_0",
+        "name": "74E318",
+        "current": "arg0",
+        "bypass": false,
+        "list": [
+         {
+          "name": "arg0",
+          "data": [
+           {
+            "id": "id_1725438750946_613",
+            "list": [
+             {
+              "id": "id_1681280938229_0",
+              "value": 0
+             },
+             {
+              "id": "id_1676447481291_4",
+              "value": 100
+             },
+             {
+              "id": "id_1676447941026_6",
+              "value": -45
+             },
+             {
+              "id": "id_1678088452701_0",
+              "value": 1
+             },
+             {
+              "id": "id_1677290960342_0",
+              "value": 0
+             },
+             {
+              "id": "id_1690535811640_0",
+              "value": 100
+             },
+             {
+              "id": "id_1676801188975_0",
+              "value": 100
+             }
+            ]
+           },
+           {
+            "id": "id_1677751149521_1",
+            "list": []
+           }
+          ],
+          "enable": true,
+          "bypass": false
+         }
+        ]
+       }
+      ]
+     }
+    },
+    "ports": {
+     "groups": {
+      "in": {
+       "position": "left"
+      },
+      "out": {
+       "position": "right",
+       "attrs": {
+        "text": {
+         "fill": "#2b3f57",
+         "font-size": "12",
+         "visibility": "visible",
+         "text": ""
+        },
+        "circle": {
+         "r": 6,
+         "magnet": true,
+         "stroke": "#7DC06E",
+         "strokeWidth": 2,
+         "fill": "#f2f2f2",
+         "event": "port:click",
+         "style": {
+          "visibility": "visible"
+         }
+        }
+       }
+      }
+     },
+     "items": [
+      {
+       "group": "in",
+       "index": 0,
+       "id": "fb076936-fb8e-408a-9e5a-1462ed222bb6"
+      },
+      {
+       "group": "out",
+       "index": 0,
+       "id": "4decb197-2782-4173-a600-958942b8109d"
+      }
+     ]
+    }
+   },
+   {
+    "shape": "edge",
+    "attrs": {
+     "line": {
+      "stroke": "#A4A5A9",
+      "strokeWidth": "2px",
+      "targetMarker": {
+       "tagName": "path",
+       "d": "M 12 -5 0 0 12 5 Z",
+       "strokeWidth": 2,
+       "fill": "#A4A5A9",
+       "stroke": "#A4A5A9"
+      },
+      "distance": 40
+     }
+    },
+    "id": "8ab19b6f-8b7b-4e39-a539-fc5a67876a63",
+    "data": {
+     "itemId": 1753338260516
+    },
+    "source": {
+     "cell": "931cb036-686f-4c4b-bfba-f1938c3fc078",
+     "port": "4decb197-2782-4173-a600-958942b8109d"
+    },
+    "target": {
      "cell": "e0df55db-27d4-4017-8bad-b7e654d6e240",
      "port": "affc17ac-7fd4-4f15-8df2-083e80e03886"
     }
    },
    {
     "position": {
-     "x": -80,
+     "x": 40,
      "y": -40
     },
     "size": {

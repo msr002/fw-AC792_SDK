@@ -216,6 +216,8 @@ int ctp_cmd_analysis(const char *topic, char *content, void *priv)
                     printf("Warnning CTP<%s> is doing now\n", map->ctp_command);
                     ret = 0;
                 }
+            } else if (strstr(content, "NOTIFY") && map->notify != NULL) {
+                ret = map->notify(priv, content);
             } else {
                 puts("content is error \n\n");
             }
@@ -335,8 +337,8 @@ int cmd_put_app_access(void *priv, char *content)
     //分解content字段
     puts("\n\n APP_ACCESS \n");
     printf("app_accept_num : %d \n", ctp_info.num);
-    key_event_disable();
-    touch_event_disable();
+    //key_event_disable();
+    //touch_event_disable();
     /*app_online_timer = sys_timer_add(NULL, sys_key_touch_disable_scan, 2 * 1000);//添加检查按键和触屏使能*/
 
     new_obj = json_tokener_parse(content);
@@ -359,12 +361,13 @@ int cmd_put_app_access(void *priv, char *content)
 
     bool usb_app_flag = 0;
 #ifdef CONFIG_UI_ENABLE
-    extern bool get_usb_app_flag(void);
-    usb_app_flag = get_usb_app_flag();
+    //extern bool get_usb_app_flag(void);
+    //usb_app_flag = get_usb_app_flag();
 #else
     usb_app_flag = 1;
 #endif
 
+#if 0  //投屏导航功能不启用video_rec
     int gap = db_select("gap");
 
     if ((!app || !app->name || !strstr(app->name, "video_rec")) && !usb_app_flag && !gap) {
@@ -388,6 +391,7 @@ int cmd_put_app_access(void *priv, char *content)
 
     }
     in_app_stop_display(0);
+#endif
 
     printf("access_num : ctp %d , cdp %d \n\n", ctp_srv_get_cli_cnt(), cdp_srv_get_cli_cnt());
     if ((ctp_srv_get_cli_cnt() > ACCESS_NUM || cdp_srv_get_cli_cnt() > ACCESS_NUM) ||
@@ -753,6 +757,74 @@ static int cmd_put_net_scr(void *priv, char *content)
     json_object_put(new_obj);
     return 0;
 }
+
+void extract_number_str(const char *src, char *dest, unsigned int dest_size)
+{
+    if (!src || !dest || dest_size == 0) {
+        return;
+    }
+
+    size_t i = 0, j = 0;
+    int dot_found = 0;
+    const size_t MAX_SCAN_LEN = 16;
+
+    while (i < MAX_SCAN_LEN && j < dest_size - 1) {
+        unsigned char c = src[i++];
+        if (isdigit(c)) {
+            dest[j++] = c;
+        } else if (c == '.' && !dot_found) {
+            dest[j++] = c;
+            dot_found = 1;
+        } else {
+            break;
+        }
+    }
+
+    dest[j] = '\0';
+}
+
+int get_in_ui_navi_flag();
+/* 接收导航数据信息 */
+static int cmd_notify_simple_navi_info(void *priv, void *content)
+{
+    json_object *new_obj = NULL;
+    json_object *parm = NULL;
+    json_object *temp = NULL;
+    const char remain_time_data[16],  remain_mileage_data[16];
+
+    //printf("navi info change, content: %s\n", content);
+    new_obj = json_tokener_parse(content);
+    parm = json_object_object_get(new_obj, "param");
+
+    temp = json_object_object_get(parm, "remain_mileage");
+    const char *remain_mileage = json_object_get_string(temp);
+    extract_number_str(remain_mileage, remain_mileage_data, sizeof(remain_mileage_data));
+    extern void update_remain_mileage_label(const char *str);
+
+
+    temp = json_object_object_get(parm, "remain_time");
+    const char *remain_time = json_object_get_string(temp);
+    extract_number_str(remain_time, remain_time_data, sizeof(remain_time_data));
+    extern void update_remain_time_label(const char *str);
+    if (get_in_ui_navi_flag()) {
+        update_text_lbl_2(remain_mileage_data);
+        update_text_lbl_3(remain_time_data);
+    }
+
+
+    temp = json_object_object_get(parm, "arrival_time");
+    const char *arrival_time = json_object_get_string(temp);
+
+    temp = json_object_object_get(parm, "direction");
+    const char *direction = json_object_get_string(temp);
+
+    temp = json_object_object_get(parm, "guide_info");
+    const char *guide_info = json_object_get_string(temp);
+
+//	printf("remain_mileage: %s, remain_time: %s, arrival_time: %s, direction: %s, guide_info: %s, remain_mileage_data: %s, remain_time_data: %s", remain_mileage, remain_time, arrival_time, direction, guide_info, remain_mileage_data, remain_time_data);
+    json_object_put(new_obj);
+}
+
 #endif
 
 
@@ -3676,24 +3748,18 @@ static int cmd_get_generic_cmd(void *priv, char *content)
     printf("GENERIC_CMD  GET\n");
     CTP_CMD_COMBINED(priv, CTP_NO_ERR, "GENERIC_CMD", "NOTIFY", buf);
     return 0;
-
-
 }
 
 
-
-u8 wifi_app_state = 0;      //wifi连接标志位
 static int cmd_put_ctp_cli_connected(void *priv, char *content)
 {
-    wifi_app_state = 1;
 //    key_event_disable();
-    touch_event_disable();
+//    touch_event_disable();
     extern void goto_res_page_func(int arg);
 //   lvgl_rpc_post_func(goto_res_page_func, 1, 0);
-    video_rec_post_msg("reshow:a=%1", 12);
-    video_rec_post_msg("msg_win:a=%1", 4);
+//    video_rec_post_msg("reshow:a=%1", 12);
+//    video_rec_post_msg("msg_win:a=%1", 4);
     sys_power_auto_shutdown_stop();
-    delay_us(200 * 1000);
     return 0;
 }
 
@@ -3775,8 +3841,8 @@ static int cmd_put_ctp_cli_disconnect(void *priv, char *content)
     ctp_srv_free_cli(priv);
     cdp_srv_free_cli(priv);
     /* sys_key_event_enable(); */
-    key_event_enable();
-    touch_event_enable();
+    //key_event_enable();
+    //touch_event_enable();
 
     struct intent it;
     struct application *app = NULL;
@@ -3787,7 +3853,6 @@ static int cmd_put_ctp_cli_disconnect(void *priv, char *content)
         it.action = ACTION_VIDEO_DEC_MAIN;
         start_app(&it);
     }
-    wifi_app_state = 0;
     video_rec_post_msg("reshow:a=%1", 12);
     video_rec_post_msg("msg_win:a=%1", 5);
     puts("|CLI_DISCONNECT OVER...\n\n\n\n");
@@ -3808,7 +3873,6 @@ static int cmd_enter_backstage(void *priv, char *content)
 {
     char buf[32] = {0};
     printf("=============== %s\n", __func__);
-    wifi_app_state = 1;
     video_rec_post_msg("reshow:a=%1", 12);
     video_rec_post_msg("msg_win:a=%1", 4);
     strcpy(buf, "status:1");
@@ -3822,7 +3886,6 @@ static int cmd_exit_backstage(void *priv, char *content)
 {
     char buf[32] = {0};
     printf("=============== %s\n", __func__);
-    wifi_app_state = 0;
     key_event_enable();
     touch_event_enable();
     video_rec_post_msg("reshow:a=%1", 12);
@@ -4262,6 +4325,7 @@ const struct ctp_map_entry ctp_video_cmd_tab[] SEC_USED(.ctp_video_cmd) = {
     {NULL, "VIDEO_CYC_SAVEFILE", NULL, cmd_put_video_cyc_savefile},
 #ifdef CONFIG_NET_SCR
     {NULL, "NET_SCR", cmd_get_net_scr, cmd_put_net_scr},
+    {NULL, "SIMPLE_NAVI_INFO", NULL, NULL, cmd_notify_simple_navi_info}, //新增投屏导航信息下发
 #endif
 };
 

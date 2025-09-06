@@ -5,6 +5,8 @@ extern const int AUDIO_EQ_MAX_SECTION;
 
 extern const int config_stream_frame_debug;
 
+extern const int config_jlstream_scene_debug;
+
 /*
  *******************************************************************
  *						Effect Configs
@@ -21,6 +23,12 @@ extern const int config_audio_eq_hp_adv_enable;	//High Pass Advance
 extern const int config_audio_eq_lp_adv_enable;	//Low Pass Advance
 
 extern const int config_audio_eq_xfade_enable;
+
+extern const float config_audio_eq_xfade_time;//0：一帧fade完成 非0：连续多帧fade，过度更加平滑，fade过程算力会相应增加(fade时间 范围(0~1)单位:秒)
+
+extern const int config_audio_limiter_xfade_enable;
+
+extern const int config_audio_mblimiter_xfade_enable;
 
 extern const int config_audio_gain_enable;
 

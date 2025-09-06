@@ -665,7 +665,7 @@ static int virtual_player_init(struct vir_player *player, void *file, struct aud
     return 0;
 }
 
-static struct vir_player *virtual_player_create(void *file, struct audio_dec_breakpoint *dbp)
+static struct vir_player *virtual_player_create(void *file, struct audio_dec_breakpoint *dbp, u32 coding_type)
 {
     struct vir_player *player;
 
@@ -679,6 +679,8 @@ static struct vir_player *virtual_player_create(void *file, struct audio_dec_bre
     }
 
     virtual_player_init(player, file, dbp);
+
+    player->coding_type = coding_type;
 
     return player;
 }
@@ -703,18 +705,18 @@ struct vir_player *virtual_player_add(struct vir_player *player, struct stream_f
     return player;
 }
 
-struct vir_player *virtual_dev_play(FILE *file, struct stream_file_ops *ops, struct audio_dec_breakpoint *dbp)
+struct vir_player *virtual_dev_play(FILE *file, struct stream_file_ops *ops, struct audio_dec_breakpoint *dbp, u32 coding_type)
 {
-    struct vir_player *player = virtual_player_create(file, dbp);
+    struct vir_player *player = virtual_player_create(file, dbp, coding_type);
     if (!player) {
         return NULL;
     }
     return virtual_player_add(player, ops);
 }
 
-struct vir_player *virtual_dev_play_callback(FILE *file, struct stream_file_ops *ops, void *priv, music_player_cb_t callback, struct audio_dec_breakpoint *dbp)
+struct vir_player *virtual_dev_play_callback(FILE *file, struct stream_file_ops *ops, void *priv, music_player_cb_t callback, struct audio_dec_breakpoint *dbp, u32 coding_type)
 {
-    struct vir_player *player = virtual_player_create(file, dbp);
+    struct vir_player *player = virtual_player_create(file, dbp, coding_type);
     if (!player) {
         return NULL;
     }
@@ -877,10 +879,7 @@ static int virtual_dev_get_fmt(void *file, struct stream_fmt *fmt)
     u8 buf[80];
 
     //需要手动填写解码类型
-    /* fmt->coding_type = AUDIO_CODING_PCM;  */
-    fmt->coding_type = AUDIO_CODING_MP3;
-    /* fmt->coding_type = AUDIO_CODING_UNKNOW;  */
-    /* fmt->coding_type = AUDIO_CODING_OPUS;  */
+    fmt->coding_type = player->coding_type;
 
     if (fmt->coding_type == AUDIO_CODING_SPEEX) {
         virtual_dev_ops.seek(player, 0, SEEK_SET);
@@ -901,10 +900,10 @@ static int virtual_dev_get_fmt(void *file, struct stream_fmt *fmt)
         return 0;
     }
 
-    if (fmt->coding_type == AUDIO_CODING_OPUS) {
+    if (fmt->coding_type == AUDIO_CODING_OPUS || fmt->coding_type == AUDIO_CODING_STENC_OPUS) {
         fmt->quality = CONFIG_OPUS_DEC_FILE_TYPE;
         if (fmt->quality == AUDIO_ATTR_OPUS_CBR_PKTLEN_TYPE) {
-            fmt->opus_pkt_len = 160;//CONFIG_OPUS_DEC_PACKET_LEN;
+            fmt->opus_pkt_len = CONFIG_OPUS_DEC_PACKET_LEN;
         }
         return -EINVAL;
     }

@@ -32,6 +32,7 @@ const int config_ch_adapter_32bit_enable = 1;
 const int config_mixer_32bit_enable = 1;
 const int config_jlstream_fade_32bit_enable = 1;
 const int config_audio_eq_xfade_enable = 1;
+const float config_audio_eq_xfade_time = 0;//0.4f;//0：一帧fade完成 非0：连续多帧fade，过度更加平滑，fade过程算力会相应增加(fade时间 范围(0~1)单位:秒)
 const int config_peak_rms_32bit_enable = 1;
 const int config_audio_vocal_track_synthesis_32bit_enable = 1;
 
@@ -123,17 +124,35 @@ const int echo_run_mode                 = TCFG_AUDIO_EFX_98A4_RUN_MODE;
 const int echo_run_mode                 = EFx_BW_16t16 | EFx_BW_32t32;//只有 16进16出， 或者 32进32出
 #endif
 
-#ifdef TCFG_AUDIO_EFX_7293_RUN_MODE
-const int voicechanger_run_mode         = TCFG_AUDIO_EFX_7293_RUN_MODE;
+const int voicechanger_run_mode         = 0
+#if defined(TCFG_AUDIO_EFX_7293_RUN_MODE)
+        | TCFG_AUDIO_EFX_7293_RUN_MODE
+#endif
+#if defined(TCFG_AUDIO_EFX_AE43_RUN_MODE)//harmony
+        | TCFG_AUDIO_EFX_AE43_RUN_MODE
+#endif
+#if !defined(TCFG_AUDIO_EFX_7293_RUN_MODE) && !defined(TCFG_AUDIO_EFX_AE43_RUN_MODE)
+        | EFx_BW_16t16 | EFx_BW_32t32//变声位宽控制
+#endif
+        ;
+
+#if TCFG_HARMONY_NODE_ENABLE
+const int pitchshift_have_modeHarmony   = 1;//1:harmony节点spectrum的模式支持度的配置，不过会增加它做为变声模式的一些运算, 0:反之
 #else
-const int voicechanger_run_mode         = EFx_BW_16t16 | EFx_BW_32t32;//变声位宽控制
+const int pitchshift_have_modeHarmony   = 0;
 #endif
 
-#ifdef TCFG_AUDIO_EFX_C07A_RUN_MODE
-const int autotune_run_mode             = TCFG_AUDIO_EFX_C07A_RUN_MODE;
-#else
-const int autotune_run_mode             = EFx_BW_16t16 | EFx_BW_32t32;//autoTune位宽控制
+const int autotune_run_mode             = 0
+#if defined(TCFG_AUDIO_EFX_C07A_RUN_MODE)
+        | TCFG_AUDIO_EFX_C07A_RUN_MODE
 #endif
+#if defined(TCFG_AUDIO_EFX_AE43_RUN_MODE)//harmony
+        | TCFG_AUDIO_EFX_AE43_RUN_MODE
+#endif
+#if !defined(TCFG_AUDIO_EFX_7293_RUN_MODE) && !defined(TCFG_AUDIO_EFX_AE43_RUN_MODE)
+        | EFx_BW_16t16 | EFx_BW_32t32//autoTune位宽控制
+#endif
+        ;
 
 #ifdef TCFG_AUDIO_EFX_24AB_RUN_MODE
 const int reverb_run_mode               = TCFG_AUDIO_EFX_24AB_RUN_MODE;
@@ -306,6 +325,8 @@ const int config_voicechanger_effect_v_config   = (0
 
 /*mb drc/limiter 3带使能(1.2k) */
 const int config_audio_crossover_3band_enable   = 1;
+const int config_audio_limiter_xfade_enable = 0;
+const int config_audio_mblimiter_xfade_enable = 0;
 
 /*Vocal Remover Configs*/
 const int config_audio_vocal_remover_low_cut_enable = 1;

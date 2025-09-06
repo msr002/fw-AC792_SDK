@@ -143,44 +143,16 @@ INCLUDES := \
 	-I../../../../../apps/common/system/perf_counter \
 	-I../../../../../include_lib/btstack \
 	-I../../../../../include_lib/net \
-	-I../../../../../include_lib/net/lwip/src/include \
-	-I../../../../../include_lib/net/lwip/src/include/lwip \
-	-I../../../../../include_lib/net/lwip/port \
-	-I../../../../../include_lib/net/lwip/app \
+	-I../../../../../apps/common/third_party_profile/mijia \
+	-I../../../../../apps/common/third_party_profile/mijia/mijia_ble_api \
+	-I../../../../../apps/common/third_party_profile/mijia/mijia_ble_libs \
+	-I../../../../../apps/common/third_party_profile/alipay \
+	-I../../../../../apps/common/third_party_profile \
 	-I../../../../../apps/common/ble/include \
-	-I../../../../../include_lib/utils/btmesh \
-	-I../../../../../include_lib/utils/btmesh/adaptation \
 
 
 # 需要编译的 .c 文件
 c_SRC_FILES := \
-	../../../../../apps/common/ble/le_24g_deal.c \
-	../../../../../apps/common/ble/le_hogp.c \
-	../../../../../apps/common/ble/le_net_central.c \
-	../../../../../apps/common/ble/le_net_cfg.c \
-	../../../../../apps/common/ble/le_net_cfg_dueros.c \
-	../../../../../apps/common/ble/le_net_cfg_dui.c \
-	../../../../../apps/common/ble/le_net_cfg_tencent.c \
-	../../../../../apps/common/ble/le_net_cfg_turing.c \
-	../../../../../apps/common/ble/le_net_cfg_tuya.c \
-	../../../../../apps/common/ble/le_net_cfg_xc.c \
-	../../../../../apps/common/ble/le_trans_data.c \
-	../../../../../apps/common/ble/mesh/examples/AliGenie_fan.c \
-	../../../../../apps/common/ble/mesh/examples/AliGenie_light.c \
-	../../../../../apps/common/ble/mesh/examples/AliGenie_socket.c \
-	../../../../../apps/common/ble/mesh/examples/TUYA_light.c \
-	../../../../../apps/common/ble/mesh/examples/generic_onoff_client.c \
-	../../../../../apps/common/ble/mesh/examples/generic_onoff_server.c \
-	../../../../../apps/common/ble/mesh/examples/onoff_tobe_provision.c \
-	../../../../../apps/common/ble/mesh/examples/provisioner.c \
-	../../../../../apps/common/ble/mesh/examples/vendor_client.c \
-	../../../../../apps/common/ble/mesh/examples/vendor_server.c \
-	../../../../../apps/common/ble/mesh/mesh_config_common.c \
-	../../../../../apps/common/ble/mesh/model_api.c \
-	../../../../../apps/common/ble/mesh/unix_timestamp.c \
-	../../../../../apps/common/ble/multi_demo/le_multi_client.c \
-	../../../../../apps/common/ble/multi_demo/le_multi_common.c \
-	../../../../../apps/common/ble/multi_demo/le_multi_trans.c \
 	../../../../../apps/common/config/bt_profile_config.c \
 	../../../../../apps/common/config/log_config/app_config.c \
 	../../../../../apps/common/config/log_config/lib_btctrler_config.c \
@@ -201,6 +173,28 @@ c_SRC_FILES := \
 	../../../../../apps/common/system/perf_counter/example/main.c \
 	../../../../../apps/common/system/perf_counter/perf_counter.c \
 	../../../../../apps/common/system/version.c \
+	../../../../../apps/common/third_party_profile/alipay/le_alipay.c \
+	../../../../../apps/common/third_party_profile/custom_protocol_demo/custom_protocol.c \
+	../../../../../apps/common/third_party_profile/jieli/hid_user.c \
+	../../../../../apps/common/third_party_profile/le_hogp/le_hogp.c \
+	../../../../../apps/common/third_party_profile/mijia/mijia_api.c \
+	../../../../../apps/common/third_party_profile/mijia/mijia_ble_api/mible_api.c \
+	../../../../../apps/common/third_party_profile/mijia/mijia_ble_api/mible_mcu.c \
+	../../../../../apps/common/third_party_profile/mijia/mijia_ble_libs/mi_config.c \
+	../../../../../apps/common/third_party_profile/mijia/mijia_ble_libs/third_party/SEGGER_RTT/SEGGER_RTT.c \
+	../../../../../apps/common/third_party_profile/mijia/mijia_ble_libs/third_party/SEGGER_RTT/SEGGER_RTT_printf.c \
+	../../../../../apps/common/third_party_profile/mijia/mijia_ble_libs/third_party/mbedtls/ccm.c \
+	../../../../../apps/common/third_party_profile/mijia/mijia_ble_libs/third_party/mbedtls/sha256_hkdf.c \
+	../../../../../apps/common/third_party_profile/mijia/mijia_ble_libs/third_party/micro-ecc/uECC.c \
+	../../../../../apps/common/third_party_profile/mijia/mijia_ble_libs/third_party/pt/pt_misc.c \
+	../../../../../apps/common/third_party_profile/mijia/mijia_main.c \
+	../../../../../apps/common/third_party_profile/multi_box_adv/multi_box_adv.c \
+	../../../../../apps/common/third_party_profile/multi_box_adv/multi_box_role.c \
+	../../../../../apps/common/third_party_profile/multi_box_adv/multi_box_scan.c \
+	../../../../../apps/common/third_party_profile/multi_protocol_common.c \
+	../../../../../apps/common/third_party_profile/multi_protocol_event.c \
+	../../../../../apps/common/third_party_profile/multi_protocol_main.c \
+	../../../../../apps/common/third_party_profile/net_cfg/le_net_cfg.c \
 	../../../../../apps/common/update/update.c \
 	../../../../../apps/demo/demo_ble/app_main.c \
 	../../../../../apps/demo/demo_ble/board/wl83/board.c \

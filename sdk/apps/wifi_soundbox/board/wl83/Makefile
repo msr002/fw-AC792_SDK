@@ -177,6 +177,7 @@ INCLUDES := \
 	-I../../../../apps/common/example/third_party/rlottie_impl/src/vector/freetype \
 	-I../../../../apps/common/example/third_party/freetype/include \
 	-I../../../../include_lib/system/ui \
+	-I../../../../include_lib/driver/cpu/wl83/asm \
 	-I../../../../apps/common/lvgl_v8 \
 	-I../../../../apps/common/lvgl_v8/src \
 	-I../../../../apps/common/lvgl_v8/src/extra \
@@ -189,6 +190,10 @@ INCLUDES := \
 	-I../../../../apps/common/lvgl_v8/demos/music \
 	-I../../../../apps/common/lvgl_v8/demos/stress \
 	-I../../../../apps/common/lvgl_v8/demos/widgets \
+	-I../../../../apps/common/lvgl_v8/demos/amap/gps/map \
+	-I../../../../apps/common/lvgl_v8/demos/amap/gps \
+	-I../../../../apps/common/lvgl_v8/demos/amap \
+	-I../../../../apps/common/lvgl_v8/src/draw/jl/jl_dma2d \
 	-I../../../../apps/wifi_soundbox/lvgl_v8_ui_app/style_JL/generated \
 	-I../../../../apps/wifi_soundbox/lvgl_v8_ui_app/style_JL/generated/gui_events \
 	-I../../../../apps/wifi_soundbox/lvgl_v8_ui_app/style_JL/generated/gui_fonts \
@@ -271,6 +276,7 @@ c_SRC_FILES := \
 	../../../../apps/common/camera/SP140A_dvp/sp140a_dvp_ae.c \
 	../../../../apps/common/camera/SP140A_dvp/sp140a_dvp_awb.c \
 	../../../../apps/common/camera/SP140A_dvp/sp140a_dvp_iq.c \
+	../../../../apps/common/camera/TVP5150A_DVP.c \
 	../../../../apps/common/camera/gc0308/gc0308.c \
 	../../../../apps/common/camera/gc1084_mipi/gc1084_mipi.c \
 	../../../../apps/common/camera/gc1084_mipi/gc1084_mipi_ae.c \
@@ -314,6 +320,8 @@ c_SRC_FILES := \
 	../../../../apps/common/config/user_cfg.c \
 	../../../../apps/common/debug/debug.c \
 	../../../../apps/common/debug/debug_user.c \
+	../../../../apps/common/debug/dlog_config.c \
+	../../../../apps/common/debug/dlog_output_config.c \
 	../../../../apps/common/dev_manager/dev_manager.c \
 	../../../../apps/common/dma2d_gpu/dma2d_common_api.c \
 	../../../../apps/common/dma2d_gpu/gpu_common_api.c \
@@ -407,6 +415,8 @@ c_SRC_FILES := \
 	../../../../apps/common/lcd/touch_driver/gt911.c \
 	../../../../apps/common/lcd/touch_driver/gt9271.c \
 	../../../../apps/common/lcd/touch_driver/tp_driver.c \
+	../../../../apps/common/lvgl_v8/demos/amap/amap_canvas.c \
+	../../../../apps/common/lvgl_v8/demos/amap/amap_non_canvas.c \
 	../../../../apps/common/lvgl_v8/demos/benchmark/assets/img_benchmark_cogwheel_alpha16.c \
 	../../../../apps/common/lvgl_v8/demos/benchmark/assets/img_benchmark_cogwheel_argb.c \
 	../../../../apps/common/lvgl_v8/demos/benchmark/assets/img_benchmark_cogwheel_chroma_keyed.c \
@@ -620,6 +630,7 @@ c_SRC_FILES := \
 	../../../../apps/common/lvgl_v8/examples/widgets/lyrics/lv_example_lyrics_1.c \
 	../../../../apps/common/lvgl_v8/examples/widgets/lyrics/lv_example_lyrics_2.c \
 	../../../../apps/common/lvgl_v8/examples/widgets/lyrics/lv_example_lyrics_3.c \
+	../../../../apps/common/lvgl_v8/examples/widgets/lyrics/lv_example_lyrics_4.c \
 	../../../../apps/common/lvgl_v8/examples/widgets/menu/lv_example_menu_1.c \
 	../../../../apps/common/lvgl_v8/examples/widgets/menu/lv_example_menu_2.c \
 	../../../../apps/common/lvgl_v8/examples/widgets/menu/lv_example_menu_3.c \
@@ -958,6 +969,7 @@ c_SRC_FILES := \
 	../../../../apps/wifi_soundbox/lvgl_v8_ui_app/style_JL/generated/gui_timelines/gui_timelines.c \
 	../../../../apps/wifi_soundbox/lvgl_v8_ui_app/style_JL/generated/i18n/lv_i18n.c \
 	../../../../apps/wifi_soundbox/mode/bt/bt.c \
+	../../../../apps/wifi_soundbox/mode/bt/bt_emitter.c \
 	../../../../apps/wifi_soundbox/mode/bt/bt_slience_detect.c \
 	../../../../apps/wifi_soundbox/mode/bt/dual_conn.c \
 	../../../../apps/wifi_soundbox/mode/bt/le_audio/auracast/app_le_auracast.c \
@@ -979,6 +991,7 @@ c_SRC_FILES := \
 	../../../../apps/wifi_soundbox/mode/net_music/wifi_app_task.c \
 	../../../../apps/wifi_soundbox/mode/pc/pc.c \
 	../../../../apps/wifi_soundbox/mode/recorder/recorder.c \
+	../../../../apps/wifi_soundbox/mode/usb_host_audio/usb_host_audio.c \
 	../../../../apps/wifi_soundbox/ui_action.c \
 	../../../../audio/CVP/audio_cvp.c \
 	../../../../audio/CVP/audio_cvp_3mic.c \
@@ -1059,6 +1072,7 @@ c_SRC_FILES := \
 	../../../../audio/effect/spatial_effect/spatial_effects_process.c \
 	../../../../audio/effect/spatial_effect/spatial_imu_trim.c \
 	../../../../audio/effect/spk_eq.c \
+	../../../../audio/framework/nodes/a2dp_tx_node.c \
 	../../../../audio/framework/nodes/agc_node.c \
 	../../../../audio/framework/nodes/channle_swap_node.c \
 	../../../../audio/framework/nodes/cvp_3mic_node.c \
@@ -1090,6 +1104,7 @@ c_SRC_FILES := \
 	../../../../audio/framework/nodes/spdif_node.c \
 	../../../../audio/framework/nodes/surround_demo_node.c \
 	../../../../audio/framework/nodes/uart_node.c \
+	../../../../audio/framework/nodes/usb_host_mic_node.c \
 	../../../../audio/framework/nodes/vad_node.c \
 	../../../../audio/framework/nodes/vir_data_rx_node.c \
 	../../../../audio/framework/nodes/vir_data_tx_node.c \
@@ -1113,6 +1128,7 @@ c_SRC_FILES := \
 	../../../../audio/framework/plugs/source/source_dev3_file.c \
 	../../../../audio/framework/plugs/source/source_dev4_file.c \
 	../../../../audio/framework/plugs/source/spdif_file.c \
+	../../../../audio/framework/plugs/source/usb_host_spk_file.c \
 	../../../../audio/interface/player/a2dp_player.c \
 	../../../../audio/interface/player/adda_loop_player.c \
 	../../../../audio/interface/player/dev_flow_player.c \
@@ -1131,6 +1147,7 @@ c_SRC_FILES := \
 	../../../../audio/interface/player/tone_player.c \
 	../../../../audio/interface/player/tts_player.c \
 	../../../../audio/interface/player/tws_tone_player.c \
+	../../../../audio/interface/player/usb_host_spk_player.c \
 	../../../../audio/interface/player/video_dec_player.c \
 	../../../../audio/interface/player/vir_dev_player.c \
 	../../../../audio/interface/player/vir_source_player.c \
@@ -1140,6 +1157,7 @@ c_SRC_FILES := \
 	../../../../audio/interface/recorder/file_recorder.c \
 	../../../../audio/interface/recorder/le_audio_recorder.c \
 	../../../../audio/interface/recorder/pc_mic_recorder.c \
+	../../../../audio/interface/recorder/usb_host_mic_recorder.c \
 	../../../../audio/interface/recorder/video_rec_recorder.c \
 	../../../../audio/interface/recorder/voiceprint_cfg_recorder.c \
 	../../../../audio/jl_kws/jl_kws_algo.c \
@@ -1338,6 +1356,7 @@ LFLAGS := \
 	../../../../cpu/wl83/liba/media/lib_amr_wb_enc.a \
 	../../../../cpu/wl83/liba/media/lib_mp3_enc.a \
 	../../../../cpu/wl83/liba/media/lib_opus_enc.a \
+	../../../../cpu/wl83/liba/media/lib_opus_stenc.a \
 	../../../../cpu/wl83/liba/media/lib_sbc_eng.a \
 	../../../../cpu/wl83/liba/media/lib_bt_hash_enc.a \
 	../../../../cpu/wl83/liba/media/lib_advaudio_plc.a \

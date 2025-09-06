@@ -43,7 +43,7 @@ int spk_eq_read_seg_l(u8 **buf);
 int spk_eq_read_seg_r(u8 **buf);
 
 #define UPDATE_SPK_EQ_SEG         0
-#define UPDATE_SPK_EQ_GLOBAL_GIAN 1
+#define UPDATE_SPK_EQ_GLOBAL_GAIN 1
 #define GET_SPK_EQ_SEG_TAB        2
 #define GET_SPK_EQ_GLOBAL_GAIN    3
 #define GET_SPK_EQ_VM_DATA        4

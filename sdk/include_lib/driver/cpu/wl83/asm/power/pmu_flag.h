@@ -10,8 +10,9 @@ struct efuse_page0_config_t {
     /* 10   */  u32 fast_up: 1;
     /* 11   */  u32 pinr_io_enable: 1;
     /* 18-12*/  u32 vtemp: 7;
-    /* 19   */  u32 boot_decrypt : 1;
-    /* 23-20*/  u32 res: 4;
+    /* 19   */  //u32 boot_decrypt : 1;
+    /* 23-20*/  //u32 res: 4;
+    /* 23-19*/  u32 adc_trim: 5;
     /* 24   */  u32 avdd18_dis: 1;
     /* 25   */  u32 avdd28_dis: 1;
     /* 16   */  u32 res_sfc_fast_boot_dis: 1;

@@ -67,7 +67,8 @@ extern "C" {
 #endif
 
 #if !defined(MBEDTLS_PLATFORM_NO_STD_FUNCTIONS)
-#include <stdio.h>
+#include "generic/printf.h"
+/* #include <stdio.h> */
 #include <stdlib.h>
 #if defined(MBEDTLS_HAVE_TIME)
 #include <time.h>

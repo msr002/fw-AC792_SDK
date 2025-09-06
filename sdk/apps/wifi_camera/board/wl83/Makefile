@@ -199,6 +199,7 @@ INCLUDES := \
 	-I../../../../include_lib/driver/device/video/pipeline/buffer \
 	-I../../../../include_lib/driver/device/video/pipeline/core \
 	-I../../../../include_lib/system/ui \
+	-I../../../../include_lib/driver/cpu/wl83/asm \
 	-I../../../../apps/common/lvgl_v8 \
 	-I../../../../apps/common/lvgl_v8/src \
 	-I../../../../apps/common/lvgl_v8/src/extra \
@@ -212,6 +213,10 @@ INCLUDES := \
 	-I../../../../apps/common/lvgl_v8/demos/music \
 	-I../../../../apps/common/lvgl_v8/demos/stress \
 	-I../../../../apps/common/lvgl_v8/demos/widgets \
+	-I../../../../apps/common/lvgl_v8/demos/amap/gps/map \
+	-I../../../../apps/common/lvgl_v8/demos/amap/gps \
+	-I../../../../apps/common/lvgl_v8/demos/amap \
+	-I../../../../apps/common/lvgl_v8/src/draw/jl/jl_dma2d \
 	-I../../../../apps/wifi_camera/lvgl_v8_ui_app/style_JL/generated \
 	-I../../../../apps/wifi_camera/lvgl_v8_ui_app/style_JL/generated/gui_events \
 	-I../../../../apps/wifi_camera/lvgl_v8_ui_app/style_JL/generated/gui_fonts \
@@ -286,11 +291,27 @@ INCLUDES := \
 	-I../../../../apps/common/LLM/onesdk/include/platform/plat \
 	-I../../../../apps/common/LLM/onesdk/platform \
 	-I../../../../apps/common/LLM/onesdk \
+	-I../../../../apps/common/LLM/duer/intelligent_duer \
+	-I../../../../apps/common/LLM/duer/my_platform \
+	-I../../../../include_lib/net/web_socket \
+	-I../../../../include_lib/net/network_download \
 
 
 # 需要编译的 .c 文件
 c_SRC_FILES := \
 	../../../../apps/common/LLM/audio/audio_input.c \
+	../../../../apps/common/LLM/duer/intelligent_duer/duer_auth_algorithm.c \
+	../../../../apps/common/LLM/duer/intelligent_duer/duer_http_req.c \
+	../../../../apps/common/LLM/duer/intelligent_duer/duer_json_parse.c \
+	../../../../apps/common/LLM/duer/intelligent_duer/duer_json_request.c \
+	../../../../apps/common/LLM/duer/intelligent_duer/duer_record.c \
+	../../../../apps/common/LLM/duer/intelligent_duer/duer_socket.c \
+	../../../../apps/common/LLM/duer/intelligent_duer/test_demo.c \
+	../../../../apps/common/LLM/duer/my_platform/my_platform_http.c \
+	../../../../apps/common/LLM/duer/my_platform/my_platform_http_api.c \
+	../../../../apps/common/LLM/duer/my_platform/my_platform_list_download.c \
+	../../../../apps/common/LLM/duer/my_platform/my_platform_record.c \
+	../../../../apps/common/LLM/duer/my_platform/my_platform_url_list.c \
 	../../../../apps/common/LLM/extra/g711.c \
 	../../../../apps/common/LLM/onesdk/examples/onesdk_realtime/chat_agent/realtime_demo.c \
 	../../../../apps/common/LLM/onesdk/platform/plat/alloc.c \
@@ -389,6 +410,7 @@ c_SRC_FILES := \
 	../../../../apps/common/camera/SP140A_dvp/sp140a_dvp_ae.c \
 	../../../../apps/common/camera/SP140A_dvp/sp140a_dvp_awb.c \
 	../../../../apps/common/camera/SP140A_dvp/sp140a_dvp_iq.c \
+	../../../../apps/common/camera/TVP5150A_DVP.c \
 	../../../../apps/common/camera/gc0308/gc0308.c \
 	../../../../apps/common/camera/gc1084_mipi/gc1084_mipi.c \
 	../../../../apps/common/camera/gc1084_mipi/gc1084_mipi_ae.c \
@@ -432,6 +454,8 @@ c_SRC_FILES := \
 	../../../../apps/common/config/user_cfg.c \
 	../../../../apps/common/debug/debug.c \
 	../../../../apps/common/debug/debug_user.c \
+	../../../../apps/common/debug/dlog_config.c \
+	../../../../apps/common/debug/dlog_output_config.c \
 	../../../../apps/common/dev_manager/dev_manager.c \
 	../../../../apps/common/dma2d_gpu/dma2d_common_api.c \
 	../../../../apps/common/dma2d_gpu/filter/dma2d_adapter.c \
@@ -528,6 +552,8 @@ c_SRC_FILES := \
 	../../../../apps/common/lcd/touch_driver/gt911.c \
 	../../../../apps/common/lcd/touch_driver/gt9271.c \
 	../../../../apps/common/lcd/touch_driver/tp_driver.c \
+	../../../../apps/common/lvgl_v8/demos/amap/amap_canvas.c \
+	../../../../apps/common/lvgl_v8/demos/amap/amap_non_canvas.c \
 	../../../../apps/common/lvgl_v8/demos/benchmark/assets/img_benchmark_cogwheel_alpha16.c \
 	../../../../apps/common/lvgl_v8/demos/benchmark/assets/img_benchmark_cogwheel_argb.c \
 	../../../../apps/common/lvgl_v8/demos/benchmark/assets/img_benchmark_cogwheel_chroma_keyed.c \
@@ -741,6 +767,7 @@ c_SRC_FILES := \
 	../../../../apps/common/lvgl_v8/examples/widgets/lyrics/lv_example_lyrics_1.c \
 	../../../../apps/common/lvgl_v8/examples/widgets/lyrics/lv_example_lyrics_2.c \
 	../../../../apps/common/lvgl_v8/examples/widgets/lyrics/lv_example_lyrics_3.c \
+	../../../../apps/common/lvgl_v8/examples/widgets/lyrics/lv_example_lyrics_4.c \
 	../../../../apps/common/lvgl_v8/examples/widgets/menu/lv_example_menu_1.c \
 	../../../../apps/common/lvgl_v8/examples/widgets/menu/lv_example_menu_2.c \
 	../../../../apps/common/lvgl_v8/examples/widgets/menu/lv_example_menu_3.c \
@@ -1057,52 +1084,6 @@ c_SRC_FILES := \
 	../../../../apps/wifi_camera/audio/vol_sync.c \
 	../../../../apps/wifi_camera/board/wl83/board_develop.c \
 	../../../../apps/wifi_camera/board/wl83/sdk_config.c \
-	../../../../apps/wifi_camera/lvgl_v8_ui_app/style_JL/custom/custom.c \
-	../../../../apps/wifi_camera/lvgl_v8_ui_app/style_JL/custom/multi_language.c \
-	../../../../apps/wifi_camera/lvgl_v8_ui_app/style_JL/custom/sim_database.c \
-	../../../../apps/wifi_camera/lvgl_v8_ui_app/style_JL/custom/ui_action_linedrift.c \
-	../../../../apps/wifi_camera/lvgl_v8_ui_app/style_JL/custom/ui_action_list.c \
-	../../../../apps/wifi_camera/lvgl_v8_ui_app/style_JL/custom/ui_action_main.c \
-	../../../../apps/wifi_camera/lvgl_v8_ui_app/style_JL/custom/ui_action_parking.c \
-	../../../../apps/wifi_camera/lvgl_v8_ui_app/style_JL/custom/ui_action_replay.c \
-	../../../../apps/wifi_camera/lvgl_v8_ui_app/style_JL/custom/ui_action_sys_setting.c \
-	../../../../apps/wifi_camera/lvgl_v8_ui_app/style_JL/custom/ui_action_usb.c \
-	../../../../apps/wifi_camera/lvgl_v8_ui_app/style_JL/custom/ui_action_video_photo.c \
-	../../../../apps/wifi_camera/lvgl_v8_ui_app/style_JL/custom/ui_action_video_rec.c \
-	../../../../apps/wifi_camera/lvgl_v8_ui_app/style_JL/generated/gui_events/callback_handler.c \
-	../../../../apps/wifi_camera/lvgl_v8_ui_app/style_JL/generated/gui_events/events_init.c \
-	../../../../apps/wifi_camera/lvgl_v8_ui_app/style_JL/generated/gui_events/i18n_handler.c \
-	../../../../apps/wifi_camera/lvgl_v8_ui_app/style_JL/generated/gui_events/screen_handler.c \
-	../../../../apps/wifi_camera/lvgl_v8_ui_app/style_JL/generated/gui_fonts/gui_fonts.c \
-	../../../../apps/wifi_camera/lvgl_v8_ui_app/style_JL/generated/gui_group/gui_group.c \
-	../../../../apps/wifi_camera/lvgl_v8_ui_app/style_JL/generated/gui_guider.c \
-	../../../../apps/wifi_camera/lvgl_v8_ui_app/style_JL/generated/gui_msg/gui_model_global_subpage_msg.c \
-	../../../../apps/wifi_camera/lvgl_v8_ui_app/style_JL/generated/gui_msg/gui_model_main_msg.c \
-	../../../../apps/wifi_camera/lvgl_v8_ui_app/style_JL/generated/gui_msg/gui_model_msg.c \
-	../../../../apps/wifi_camera/lvgl_v8_ui_app/style_JL/generated/gui_msg/gui_model_sys_setting_msg.c \
-	../../../../apps/wifi_camera/lvgl_v8_ui_app/style_JL/generated/gui_msg/gui_model_update_msg.c \
-	../../../../apps/wifi_camera/lvgl_v8_ui_app/style_JL/generated/gui_msg/gui_model_video_photo_msg.c \
-	../../../../apps/wifi_camera/lvgl_v8_ui_app/style_JL/generated/gui_msg/gui_model_video_play_msg.c \
-	../../../../apps/wifi_camera/lvgl_v8_ui_app/style_JL/generated/gui_msg/gui_model_video_rec_msg.c \
-	../../../../apps/wifi_camera/lvgl_v8_ui_app/style_JL/generated/gui_msg/gui_msg.c \
-	../../../../apps/wifi_camera/lvgl_v8_ui_app/style_JL/generated/gui_msg/gui_sys_model_msg.c \
-	../../../../apps/wifi_camera/lvgl_v8_ui_app/style_JL/generated/gui_res/res_common.c \
-	../../../../apps/wifi_camera/lvgl_v8_ui_app/style_JL/generated/gui_scr/setup_scr_car_parking.c \
-	../../../../apps/wifi_camera/lvgl_v8_ui_app/style_JL/generated/gui_scr/setup_scr_home_page.c \
-	../../../../apps/wifi_camera/lvgl_v8_ui_app/style_JL/generated/gui_scr/setup_scr_line_drift.c \
-	../../../../apps/wifi_camera/lvgl_v8_ui_app/style_JL/generated/gui_scr/setup_scr_sys_popwin.c \
-	../../../../apps/wifi_camera/lvgl_v8_ui_app/style_JL/generated/gui_scr/setup_scr_sys_prompt.c \
-	../../../../apps/wifi_camera/lvgl_v8_ui_app/style_JL/generated/gui_scr/setup_scr_sys_setting.c \
-	../../../../apps/wifi_camera/lvgl_v8_ui_app/style_JL/generated/gui_scr/setup_scr_usb_slave.c \
-	../../../../apps/wifi_camera/lvgl_v8_ui_app/style_JL/generated/gui_scr/setup_scr_video_dir.c \
-	../../../../apps/wifi_camera/lvgl_v8_ui_app/style_JL/generated/gui_scr/setup_scr_video_file.c \
-	../../../../apps/wifi_camera/lvgl_v8_ui_app/style_JL/generated/gui_scr/setup_scr_video_photo.c \
-	../../../../apps/wifi_camera/lvgl_v8_ui_app/style_JL/generated/gui_scr/setup_scr_video_play.c \
-	../../../../apps/wifi_camera/lvgl_v8_ui_app/style_JL/generated/gui_scr/setup_scr_video_rec.c \
-	../../../../apps/wifi_camera/lvgl_v8_ui_app/style_JL/generated/gui_scr/ui_scr_manager.c \
-	../../../../apps/wifi_camera/lvgl_v8_ui_app/style_JL/generated/gui_scr/ui_style.c \
-	../../../../apps/wifi_camera/lvgl_v8_ui_app/style_JL/generated/gui_timelines/gui_timelines.c \
-	../../../../apps/wifi_camera/lvgl_v8_ui_app/style_JL/generated/i18n/lv_i18n.c \
 	../../../../apps/wifi_camera/lvgl_v8_ui_app/style_LY/custom/custom.c \
 	../../../../apps/wifi_camera/lvgl_v8_ui_app/style_LY/custom/sim_database.c \
 	../../../../apps/wifi_camera/lvgl_v8_ui_app/style_LY/custom/ui_action_animation.c \
@@ -1110,6 +1091,8 @@ c_SRC_FILES := \
 	../../../../apps/wifi_camera/lvgl_v8_ui_app/style_LY/custom/ui_action_linedrift.c \
 	../../../../apps/wifi_camera/lvgl_v8_ui_app/style_LY/custom/ui_action_list.c \
 	../../../../apps/wifi_camera/lvgl_v8_ui_app/style_LY/custom/ui_action_main.c \
+	../../../../apps/wifi_camera/lvgl_v8_ui_app/style_LY/custom/ui_action_page_lyrics.c \
+	../../../../apps/wifi_camera/lvgl_v8_ui_app/style_LY/custom/ui_action_page_map.c \
 	../../../../apps/wifi_camera/lvgl_v8_ui_app/style_LY/custom/ui_action_parking.c \
 	../../../../apps/wifi_camera/lvgl_v8_ui_app/style_LY/custom/ui_action_replay.c \
 	../../../../apps/wifi_camera/lvgl_v8_ui_app/style_LY/custom/ui_action_sys_setting.c \
@@ -1132,10 +1115,15 @@ c_SRC_FILES := \
 	../../../../apps/wifi_camera/lvgl_v8_ui_app/style_LY/generated/gui_msg/gui_model_video_photo_msg.c \
 	../../../../apps/wifi_camera/lvgl_v8_ui_app/style_LY/generated/gui_msg/gui_model_video_rec_msg.c \
 	../../../../apps/wifi_camera/lvgl_v8_ui_app/style_LY/generated/gui_msg/gui_msg.c \
+	../../../../apps/wifi_camera/lvgl_v8_ui_app/style_LY/generated/gui_msg/gui_speed_num_msg.c \
 	../../../../apps/wifi_camera/lvgl_v8_ui_app/style_LY/generated/gui_msg/gui_sys_model_msg.c \
+	../../../../apps/wifi_camera/lvgl_v8_ui_app/style_LY/generated/gui_msg/gui_tyw_system_msg.c \
 	../../../../apps/wifi_camera/lvgl_v8_ui_app/style_LY/generated/gui_res/res_common.c \
 	../../../../apps/wifi_camera/lvgl_v8_ui_app/style_LY/generated/gui_scr/setup_scr_car_parking.c \
 	../../../../apps/wifi_camera/lvgl_v8_ui_app/style_LY/generated/gui_scr/setup_scr_line_drift.c \
+	../../../../apps/wifi_camera/lvgl_v8_ui_app/style_LY/generated/gui_scr/setup_scr_page_map.c \
+	../../../../apps/wifi_camera/lvgl_v8_ui_app/style_LY/generated/gui_scr/setup_scr_page_meter.c \
+	../../../../apps/wifi_camera/lvgl_v8_ui_app/style_LY/generated/gui_scr/setup_scr_page_music.c \
 	../../../../apps/wifi_camera/lvgl_v8_ui_app/style_LY/generated/gui_scr/setup_scr_sys_popwin.c \
 	../../../../apps/wifi_camera/lvgl_v8_ui_app/style_LY/generated/gui_scr/setup_scr_sys_prompt.c \
 	../../../../apps/wifi_camera/lvgl_v8_ui_app/style_LY/generated/gui_scr/setup_scr_sys_setting.c \
@@ -1278,6 +1266,7 @@ c_SRC_FILES := \
 	../../../../audio/effect/spatial_effect/spatial_effects_process.c \
 	../../../../audio/effect/spatial_effect/spatial_imu_trim.c \
 	../../../../audio/effect/spk_eq.c \
+	../../../../audio/framework/nodes/a2dp_tx_node.c \
 	../../../../audio/framework/nodes/agc_node.c \
 	../../../../audio/framework/nodes/channle_swap_node.c \
 	../../../../audio/framework/nodes/cvp_3mic_node.c \
@@ -1309,6 +1298,7 @@ c_SRC_FILES := \
 	../../../../audio/framework/nodes/spdif_node.c \
 	../../../../audio/framework/nodes/surround_demo_node.c \
 	../../../../audio/framework/nodes/uart_node.c \
+	../../../../audio/framework/nodes/usb_host_mic_node.c \
 	../../../../audio/framework/nodes/vad_node.c \
 	../../../../audio/framework/nodes/vir_data_rx_node.c \
 	../../../../audio/framework/nodes/vir_data_tx_node.c \
@@ -1332,6 +1322,7 @@ c_SRC_FILES := \
 	../../../../audio/framework/plugs/source/source_dev3_file.c \
 	../../../../audio/framework/plugs/source/source_dev4_file.c \
 	../../../../audio/framework/plugs/source/spdif_file.c \
+	../../../../audio/framework/plugs/source/usb_host_spk_file.c \
 	../../../../audio/interface/player/a2dp_player.c \
 	../../../../audio/interface/player/adda_loop_player.c \
 	../../../../audio/interface/player/dev_flow_player.c \
@@ -1350,6 +1341,7 @@ c_SRC_FILES := \
 	../../../../audio/interface/player/tone_player.c \
 	../../../../audio/interface/player/tts_player.c \
 	../../../../audio/interface/player/tws_tone_player.c \
+	../../../../audio/interface/player/usb_host_spk_player.c \
 	../../../../audio/interface/player/video_dec_player.c \
 	../../../../audio/interface/player/vir_dev_player.c \
 	../../../../audio/interface/player/vir_source_player.c \
@@ -1359,6 +1351,7 @@ c_SRC_FILES := \
 	../../../../audio/interface/recorder/file_recorder.c \
 	../../../../audio/interface/recorder/le_audio_recorder.c \
 	../../../../audio/interface/recorder/pc_mic_recorder.c \
+	../../../../audio/interface/recorder/usb_host_mic_recorder.c \
 	../../../../audio/interface/recorder/video_rec_recorder.c \
 	../../../../audio/interface/recorder/voiceprint_cfg_recorder.c \
 	../../../../audio/jl_kws/jl_kws_algo.c \
@@ -1490,6 +1483,7 @@ LFLAGS := \
 	../../../../cpu/wl83/liba/video_rec_server.a \
 	../../../../cpu/wl83/liba/video_dec_server.a \
 	../../../../cpu/wl83/liba/video.a \
+	../../../../cpu/wl83/liba/lib_amap_demo.a \
 	../../../../cpu/wl83/liba/media.a \
 	../../../../cpu/wl83/liba/media/lib_mp3_dec.a \
 	../../../../cpu/wl83/liba/media/lib_m4a_dec.a \
@@ -1614,6 +1608,7 @@ LFLAGS := \
 	../../../../cpu/wl83/liba/libwebsockets.a \
 	../../../../cpu/wl83/liba/cJSON.a  \
 	../../../../cpu/wl83/liba/libmbedtls_3_4_0.a   \
+	../../../../cpu/wl83/liba/cJSON.a   \
 	../../../../include_lib/newlib/pi32v2-lib/libm.a \
 	../../../../include_lib/newlib/pi32v2-lib/libc.a \
 	../../../../include_lib/newlib/pi32v2-lib/libcompiler_rt.a \

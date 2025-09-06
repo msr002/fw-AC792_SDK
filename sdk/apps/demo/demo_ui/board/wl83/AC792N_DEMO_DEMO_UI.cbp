@@ -86,6 +86,7 @@
 <Add directory="../../../../../apps/common/example/third_party/rlottie_impl/src/vector" />
 <Add directory="../../../../../apps/common/example/third_party/rlottie_impl/src/vector/freetype" />
 <Add directory="../../../../../apps/common/example/third_party/freetype/include" />
+<Add directory="../../../../../include_lib/driver/cpu/wl83/asm" />
 <Add directory="../../../../../apps/common/example/third_party/lvgl_v9" />
 <Add directory="../../../../../apps/common/example/third_party/lvgl_v9/examples/porting" />
 <Add directory="../../../../../apps/common/example/third_party/lvgl_v9/examples/libs/freetype" />
@@ -183,6 +184,7 @@
 <Unit filename="../../../../../apps/common/camera/SP140A_dvp/sp140a_dvp_awb.h" />
 <Unit filename="../../../../../apps/common/camera/SP140A_dvp/sp140a_dvp_iq.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../../apps/common/camera/SP140A_dvp/sp140a_dvp_iq.h" />
+<Unit filename="../../../../../apps/common/camera/TVP5150A_DVP.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../../apps/common/camera/gc0308/gc0308.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../../apps/common/camera/gc1084_mipi/gc1084_mipi.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../../apps/common/camera/gc1084_mipi/gc1084_mipi.h" />
@@ -1759,6 +1761,8 @@
 <Unit filename="../../../../../apps/common/system/version.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../../apps/common/update/update.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../../apps/common/usb/usb_config.h" />
+<Unit filename="../../../../../apps/common/video/simple_avi_unpkg.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="../../../../../apps/common/video/simple_avi_unpkg.h" />
 <Unit filename="../../../../../apps/demo/demo_ui/app_main.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../../apps/demo/demo_ui/board/wl83/board_config.h" />
 <Unit filename="../../../../../apps/demo/demo_ui/board/wl83/board_develop.c"><Option compilerVer="CC"/></Unit>
@@ -1852,9 +1856,11 @@
 <Unit filename="../../../../../include_lib/driver/cpu/wl83/asm/isp_dev.h" />
 <Unit filename="../../../../../include_lib/driver/cpu/wl83/asm/jldma2d.h" />
 <Unit filename="../../../../../include_lib/driver/cpu/wl83/asm/jlgpu_driver.h" />
+<Unit filename="../../../../../include_lib/driver/cpu/wl83/asm/jpeg_codec.h" />
 <Unit filename="../../../../../include_lib/driver/cpu/wl83/asm/ladc.h" />
 <Unit filename="../../../../../include_lib/driver/cpu/wl83/asm/lcd_common.h" />
 <Unit filename="../../../../../include_lib/driver/cpu/wl83/asm/ledc.h" />
+<Unit filename="../../../../../include_lib/driver/cpu/wl83/asm/math_fast_function.h" />
 <Unit filename="../../../../../include_lib/driver/cpu/wl83/asm/mipi_sfr.h" />
 <Unit filename="../../../../../include_lib/driver/cpu/wl83/asm/pap.h" />
 <Unit filename="../../../../../include_lib/driver/cpu/wl83/asm/plnk.h" />
@@ -1952,6 +1958,7 @@
 <Unit filename="../../../../../include_lib/system/generic/circular_buf.h" />
 <Unit filename="../../../../../include_lib/system/generic/cpu.h" />
 <Unit filename="../../../../../include_lib/system/generic/debug_lite.h" />
+<Unit filename="../../../../../include_lib/system/generic/dlog.h" />
 <Unit filename="../../../../../include_lib/system/generic/errno-base.h" />
 <Unit filename="../../../../../include_lib/system/generic/includes.h" />
 <Unit filename="../../../../../include_lib/system/generic/ioctl.h" />
@@ -1997,6 +2004,7 @@
 <Unit filename="../../../../../include_lib/utils/fs/sdfile.h" />
 <Unit filename="../../../../../include_lib/utils/syscfg/syscfg_id.h" />
 <Unit filename="../../../../../include_lib/utils/version.z.S" />
+<Unit filename="../../../../../include_lib/utils/yuv_to_rgb.h" />
 <Unit filename="../../../../../lib/utils/version.z.S" />
 </Project>
 </CodeBlocks_project_file>

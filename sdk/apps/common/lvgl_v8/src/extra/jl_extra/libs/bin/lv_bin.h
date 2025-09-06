@@ -54,6 +54,7 @@ u32 lv_get_flash_src_addr(const char *src);
 /**********************
  *      MACROS
  **********************/
+extern const uint8_t flash_src_use_malloc;
 
 #ifdef __cplusplus
 } /*extern "C"*/

@@ -4,4 +4,4 @@
 
 include_lib_net_version:
 
-.asciz "INCLUDE_BTCTRLER-$9c35e7e"
+.asciz "INCLUDE_BTCTRLER-$d05d37a"

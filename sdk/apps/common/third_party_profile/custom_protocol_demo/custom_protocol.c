@@ -13,8 +13,12 @@
 #define LOG_WARN_ENABLE
 #include "debug.h"
 
+#if TCFG_USER_BLE_ENABLE
 #define CUSTOM_DEMO_BLE_ENABLE
+#endif
+#if TCFG_USER_BT_CLASSIC_ENABLE
 #define CUSTOM_DEMO_SPP_ENABLE
+#endif
 
 #ifdef CUSTOM_DEMO_BLE_ENABLE
 static void *custom_demo_ble_hdl = NULL;

@@ -25,24 +25,7 @@ typedef enum {
 
 extern gui_msg_send_status_t gui_msg_get_send_status();
 
-enum {
-    UI_MSG_TOUCH = 1,
-    UI_MSG_ENCODER,
-    UI_MSG_KEY,
-    UI_MSG_TIMER_TIMEOUT,
-    UI_MSG_MODULE_CHANGE,
-    UI_MSG_MODULE_CHANGE_REFRESH_NOW,
-    UI_MSG_SUSPEND,
-    UI_MSG_RESUME,
-    UI_MSG_RPC_FUNC,
-};
 
-
-
-enum LVGL_Q_USER_TYPE {
-    LVGL_Q_USER_TYPE_TOUCH = 0x10000,//从这个立即数开始是为了删消息池使用,不可更改
-    LVGL_Q_USER_TYPE_KEY = 0x20000,
-};
 void lv_port_get_touch_x_y_status(struct touch_event *e, u16 *x, u16 *y, u8 *status)
 {
     *x = e->x;
@@ -476,11 +459,6 @@ static struct list_head group_list_head = LIST_HEAD_INIT(group_list_head);
 static spinlock_t list_spinlock;
 static spinlock_t group_list_spinlock;
 
-enum LVGL_MODULE_MSG_TYPE {
-    LVGL_MODULE_MSG_CONST_OR_VALUE = 0x10000,//从这个立即数开始是为了删消息池使用,不可更改
-    LVGL_MODULE_MSG_PTR = 0x20000,
-    LVGL_MODULE_MSG_GROUP = 0x40000,
-};
 
 typedef struct {
     struct list_head entry;

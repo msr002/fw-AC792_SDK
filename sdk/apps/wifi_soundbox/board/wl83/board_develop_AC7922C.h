@@ -13,7 +13,6 @@
 #define CONFIG_BT_ENABLE
 // #define CONFIG_UI_ENABLE
 // #define CONFIG_VIDEO_ENABLE
-// #define CONFIG_AUDIO_ENABLE
 #define CONFIG_MEDIA_ENABLE
 
 
@@ -522,134 +521,6 @@
 #define TCFG_TOUCH_KEY2_PRESS_DELTA         100
 
 
-#if defined CONFIG_AUDIO_ENABLE
-
-//*********************************************************************************//
-//                                AUDIO DAC配置                                    //
-//*********************************************************************************//
-#define TCFG_AUDIO_DAC_ENABLE               1
-#define TCFG_AUDIO_DAC_PA_AUTO_MUTE_ENABLE  1
-#define TCFG_AUDIO_DAC_PA_MUTE_PORT         IO_PORTE_05
-#define TCFG_AUDIO_DAC_PA_MUTE_LEVEL        1
-#define TCFG_AUDIO_DAC_DIFFER_OUTPUT_ENABLE 0
-#define TCFG_AUDIO_DAC_HW_CHANNEL           (AUDIO_DAC_CH_L)// | AUDIO_DAC_CH_R)
-#define TCFG_AUDIO_DAC_VCM_CAP_ENABLE       1
-#if TCFG_AUDIO_DAC_VCM_CAP_ENABLE
-#define TCFG_AUDIO_DAC_VCM_INIT_DELAY_MS    1000
-#else
-#define TCFG_AUDIO_DAC_VCM_INIT_DELAY_MS    0
-#endif
-#define TCFG_AUDIO_DAC_PA_MUTE_DELAY_MS     500
-
-
-//*********************************************************************************//
-//                                AUDIO ADC配置                                    //
-//*********************************************************************************//
-//--- AIN_AP0: PC7 AIN_AN0: PC6 AIN_BP0: PC11 AIN_BN0: PC12
-//--- AIN_AP1: PC3 AIN_AN1: PC2 AIN_BP1: PC4  AIN_BN1: PC5
-#define TCFG_AUDIO_ADC_ENABLE               1
-#define TCFG_MIC_IO_PORT                    {-1/*MIC0P*/, -1/*MIC0N*/, IO_PORTC_11/*MIC1P*/, IO_PORTC_12/*MIC1N*/}
-#define TCFG_MIC_CHANNEL_NUM                1
-#define TCFG_LINEIN_IO_PORT                 {IO_PORTC_07/*AUX0P*/, IO_PORTC_06/*AUX0N*/, -1/*AUX1P*/, -1/*AUX1N*/}
-#define TCFG_LINEIN_CHANNEL_NUM             1
-#define TCFG_AUDIO_ADC_ALL_CHANNEL_OPEN     1
-#define TCFG_DMIC_ENABLE                    0
-#define TCFG_DMIC_SCLK_FREQUENCY            2000000
-#define TCFG_DMIC_IO_SCLK                   IO_PORTC_11
-#define TCFG_DMIC_IO_IDAT0                  IO_PORTA_11
-#define TCFG_DMIC_IO_IDAT1                  IO_PORTA_11
-
-
-//*********************************************************************************//
-//                                   PLNK配置                                      //
-//*********************************************************************************//
-#define TCFG_PLNK_ENABLE                    0
-#define TCFG_PLNK_HW_CHANNEL                PLNK_CH_MIC_DAT0
-#define TCFG_PLNK_INPUT_DAT_SHARE_IO_ENABLE 0
-#define TCFG_PLNK_SCLK_IO                   IO_PORTC_11
-#define TCFG_PLNK_INPUT_DAT0_IO             IO_PORTA_11
-#define TCFG_PLNK_INPUT_DAT1_IO             IO_PORTA_11
-#define TCFG_PLNK_SCLK_FREQUENCY            2000000
-#define TCFG_PLNK_CH0_SAMPLE_MODE           DATA0_SCLK_RISING_EDGE_SAMPLE
-#define TCFG_PLNK_CH1_SAMPLE_MODE           DATA0_SCLK_FALLING_EDGE_SAMPLE
-#define TCFG_PLNK_CIC_ORDER                 3
-#define TCFG_PLNK_CIC_DFDLY_M               2
-
-
-//*********************************************************************************//
-//                                   ALNK配置                                      //
-//*********************************************************************************//
-#define TCFG_ALNK_ENABLE                    0
-#define TCFG_ALNK_PORTS                     {\
-                                                IO_PORTC_03/*MCLK*/, IO_PORTB_14/*LRCLK*/, IO_PORTB_13/*SCLK*/, \
-                                                IO_PORTC_00/*DAT0*/, IO_PORTB_12/*DAT1*/, IO_PORTB_08/*DAT2*/, IO_PORTB_11/*DAT3*/, \
-                                            }
-#define TCFG_ALNK_CHANNLE_IN_MAP            ALNK_INPUT_CHANNEL1
-#define TCFG_ALNK_CHANNLE_OUT_MAP           ALNK_OUTPUT_CHANNEL0
-#define TCFG_ALNK_DATA_WIDTH                0
-#define TCFG_ALNK_MODE                      ALNK_BASIC_IIS_MODE
-#define TCFG_ALNK_DMA_MODE                  ALNK_DMA_PINGPANG_BUFFER
-#define TCFG_ALNK_SLAVE_MODE_ENABLE         0
-#define TCFG_ALNK_MCLK_SRC                  ALNK_MCLK_FROM_PLL_ALNK_CLOCK
-#define TCFG_ALNK_UPDATE_EDGE               0
-
-
-//*********************************************************************************//
-//                                    FM配置                                       //
-//*********************************************************************************//
-#define TCFG_FM_DEV_ENABLE                  0
-#define TCFG_FM_QN8035_ENABLE               1
-#define TCFG_FM_BK1080_ENABLE               0
-#define TCFG_FM_RDA5807_ENABLE              0
-
-
-//*********************************************************************************//
-//                            AUDIO_ADC应用的通道配置                              //
-//*********************************************************************************//
-#define CONFIG_AUDIO_ENC_SAMPLE_SOURCE      AUDIO_ENC_SAMPLE_SOURCE_MIC
-#define CONFIG_ASR_CLOUD_ADC_CHANNEL        1              //云端识别mic通道
-#define CONFIG_VOICE_NET_CFG_ADC_CHANNEL    1              //声波配网mic通道
-#define CONFIG_AISP_MIC0_ADC_CHANNEL        1              //本地唤醒左mic通道
-#define CONFIG_AISP_MIC1_ADC_CHANNEL        0              //本地唤醒右mic通道
-#define CONFIG_REVERB_ADC_CHANNEL           1              //混响mic通道
-#define CONFIG_PHONE_CALL_ADC_CHANNEL       1              //通话mic通道
-#define CONFIG_UAC_MIC_ADC_CHANNEL          1              //UAC mic通道
-#define CONFIG_AISP_LINEIN_ADC_CHANNEL      0              //本地唤醒LINEIN回采通道
-#define CONFIG_FM_LINEIN_ADC_CHANNEL        0              //FM音频流LINEIN回采通道
-#define CONFIG_AISP_MIC_ADC_GAIN            80             //本地唤醒mic增益
-#define CONFIG_AISP_LINEIN_ADC_GAIN         10             //本地唤醒LINEIN增益
-#define CONFIG_FM_LINEIN_ADC_GAIN           100            //FM音频流LINEIN增益
-#define CONFIG_AUDIO_LINEIN_CHANNEL         1              //LIENIN通道数
-#define CONFIG_AUDIO_LINEIN_ADC_GAIN        10             //LIENIN的模拟增益
-#define CONFIG_AUDIO_LINEIN_SAMPLERATE      16000          //LINEIN默认采样率
-#define CONFIG_AUDIO_LINEIN_CHANNEL_MAP     0
-
-
-//*********************************************************************************//
-//                                  EQ配置                                         //
-//*********************************************************************************//
-//EQ配置，使用在线EQ时，EQ文件和EQ模式无效。有EQ文件时，默认不用EQ模式切换功能
-#define TCFG_EQ_ENABLE                      1              //支持EQ功能
-#define TCFG_EQ_ONLINE_ENABLE               0              //支持在线EQ调试
-#define TCFG_LIMITER_ENABLE                 1              //限幅器
-#define TCFG_EQ_FILE_ENABLE                 1              //从bin文件读取eq配置数据
-#define TCFG_DRC_ENABLE                     TCFG_LIMITER_ENABLE
-#define TCFG_EQ_MODE_CHOOSE                 0              //0:多通道共用1个eq, drc功能丰富; 1:多通道独立eq,独立drc, 请替换对应的bin文件
-#if (TCFG_EQ_MODE_CHOOSE == 0)
-#define TCFG_AUDIO_MDRC_ENABLE              2              //0:不使能低中DRC 1: 多带分频器使能 2: 多带分频后，再做一次全带处理使能
-#define TCFG_LAST_WHOLE_DRC_ENABLE          1              //0:不使能最后的全带DRC; 1:使能
-#elif (TCFG_EQ_MODE_CHOOSE == 1)
-#define TCFG_EQ_DIVIDE_ENABLE               1              //0:前后通道共用EQ/DRC  1:支持EQ/DRC前后声道独立处理
-#define TCFG_EQ_SPILT_ENABLE                1              //0:左右通道共用EQ  1:支持EQ左右声道独立处理
-#define TCFG_DRC_SPILT_ENABLE               1              //0:左右通道共用DRC 1:支持DRC左右声道独立处理
-#endif
-#define TCFG_NULL_COMM                      0              //不支持通信
-#define TCFG_USB_COMM                       1              //USB通信
-#define TCFG_COMM_TYPE                      TCFG_USB_COMM  //EQ在线调试通信类型
-
-#endif
-
-
 //*********************************************************************************//
 //                                 ETH PHY配置                                     //
 //*********************************************************************************//
@@ -676,9 +547,6 @@
 //*********************************************************************************//
 //                                  USB相关配置                                    //
 //*********************************************************************************//
-#if defined CONFIG_AUDIO_ENABLE
-#define TCFG_HOST_AUDIO_ENABLE              1              //uac主机功能，用户需要自己补充uac_host_demo.c里面的两个函数
-#endif
 #if defined CONFIG_VIDEO_ENABLE
 #define TCFG_HOST_UVC_ENABLE                1              //UVC主机功能
 #endif

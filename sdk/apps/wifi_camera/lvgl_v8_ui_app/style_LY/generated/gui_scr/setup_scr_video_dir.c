@@ -19,13 +19,15 @@ lv_obj_t *setup_scr_video_dir(lv_ui *ui)
     lv_ui_video_dir *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_VIDEO_DIR);
     if (ui_scr == NULL) {
         ui_scr = lv_mem_alloc(sizeof(lv_ui_video_dir));
+        if (ui_scr == NULL) {
+            return NULL;
+        }
         memset(ui_scr, 0, sizeof(lv_ui_video_dir));
         ui->video_dir = ui_scr;
     }
 
     //Write codes video_dir
     ui_scr->video_dir = lv_obj_create(NULL);
-    lv_group_t *def_group = lv_group_get_default();
     lv_obj_set_scrollbar_mode(ui_scr->video_dir, LV_SCROLLBAR_MODE_OFF);
     ui_style_set(ui_scr->video_dir, GUI_CTRL_SCR);
 
@@ -65,7 +67,7 @@ lv_obj_t *setup_scr_video_dir(lv_ui *ui)
 
     lv_obj_update_layout(ui_scr->video_dir);
     ui_scr->video_dir_del = false;
-    i18n_refresh_texts("video_dir");
+    i18n_refresh_texts(GUI_SCREEN_VIDEO_DIR);
 
     //Init events for screen
     events_init_video_dir(ui);

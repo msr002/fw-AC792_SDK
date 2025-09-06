@@ -9,6 +9,7 @@ extern "C" {
 #include "../generated/gui_guider.h"
 #include "lvgl.h"
 #include "custom.h"
+#include "app_msg.h"
 #include <time.h>
 #include "../generated/gui_events/screen_handler.h"
 #include "../generated/gui_timelines/gui_timelines.h"

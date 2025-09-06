@@ -13,6 +13,19 @@ extern "C" {
 // Generate video_rec_timer_1 CallBack Handler
 extern void video_rec_timer_1_timer_cb(lv_timer_t *src);
 
+// Generate page_map_timer_1 CallBack Handler
+extern void page_map_timer_1_timer_cb(lv_timer_t *src);
+
+// Generate page_map_timer_2 CallBack Handler
+static int img_2_init_flag  = 0;
+extern void page_map_timer_2_timer_cb(lv_timer_t *src);
+
+// Generate page_meter_timer_1 CallBack Handler
+extern void page_meter_timer_1_timer_cb(lv_timer_t *src);
+
+// Generate page_music_timer_1 CallBack Handler
+extern void page_music_timer_1_timer_cb(lv_timer_t *src);
+
 #ifdef __cplusplus
 }
 #endif

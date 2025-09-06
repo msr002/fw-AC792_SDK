@@ -46,7 +46,7 @@ uint8_t compress_type;
 /**********************
  *      MACROS
  **********************/
-
+extern const uint8_t flash_src_use_malloc;
 /**********************
  *   GLOBAL FUNCTIONS
  **********************/
@@ -159,8 +159,10 @@ lv_res_t lv_img_decoder_open(lv_img_decoder_dsc_t *dsc, const void *src, lv_colo
     } else if (dsc->src_type == LV_IMG_SRC_BIN) {
         char *src_temp  = (char *)src;
         uint8_t storage_src = LV_SRC_IN_UNKNOWN;
-        if (src_temp[0] == 'm') {
+        if (src_temp[0] == 'm' && (flash_src_use_malloc == 0)) {
             storage_src = LV_SRC_IN_FLASH;
+        } else if (src_temp[0] == 'm' && flash_src_use_malloc) {
+            storage_src = LV_SRC_IN_FLASH_USE_MALLOC;
         } else if (src_temp[0] == 's') {
             storage_src = LV_SRC_IN_SD;
         } else {
@@ -256,7 +258,7 @@ void lv_img_decoder_close(lv_img_decoder_dsc_t *dsc)
 
         if (dsc->src_type == LV_IMG_SRC_BIN) {
             lv_img_dsc_t *free_dsc = (lv_img_dsc_t *)dsc->src;
-            if (dsc->storage_src == LV_SRC_IN_SD) {
+            if (dsc->storage_src == LV_SRC_IN_SD || dsc->storage_src == LV_SRC_IN_FLASH_USE_MALLOC) {
                 lv_mem_free(free_dsc->data);
             }
             lv_mem_free((void *)dsc->src);

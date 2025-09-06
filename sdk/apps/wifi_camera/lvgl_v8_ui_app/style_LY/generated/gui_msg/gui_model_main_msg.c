@@ -7,6 +7,21 @@
 static lv_ll_t subs_ll;
 static lv_ll_t timer_ll;
 
+#if LV_USE_GUIBUILDER_SIMULATOR
+_gui_msg_entry_t gui_model_main_msg_entry_table[] = {
+    { GUI_MODEL_MAIN_MSG_ID_SYSTIME, gui_model_main_msg_systime_cb, VALUE_TIME },
+    { GUI_MODEL_MAIN_MSG_ID_SD_ICON, gui_model_main_msg_sd_icon_cb, VALUE_INT },
+    { GUI_MODEL_MAIN_MSG_ID_BATTERY, gui_model_main_msg_battery_cb, VALUE_INT },
+    { GUI_MODEL_MAIN_MSG_ID_SYS_PROMPT, gui_model_main_msg_sys_prompt_cb, VALUE_STRING },
+    { GUI_MODEL_MAIN_MSG_ID_HEADLAMP, gui_model_main_msg_headlamp_cb, VALUE_BOOL },
+    { GUI_MODEL_MAIN_MSG_ID_SYS_PROMPT_SHOW, gui_model_main_msg_sys_prompt_show_cb, VALUE_BOOL },
+    { GUI_MODEL_MAIN_MSG_ID_SHOW_DEL_BTN, gui_model_main_msg_show_del_btn_cb, VALUE_INT },
+    { GUI_MODEL_MAIN_MSG_ID_HIDE_DEL_BTN, gui_model_main_msg_hide_del_btn_cb, VALUE_INT },
+    { GUI_MODEL_MAIN_MSG_ID_SHOW_HOME_BTN, gui_model_main_msg_show_home_btn_cb, VALUE_INT },
+    { GUI_MODEL_MAIN_MSG_ID_HIDE_HOME_BTN, gui_model_main_msg_hide_home_btn_cb, VALUE_INT },
+};
+#endif
+
 typedef struct {
     lv_timer_t *timer;
 } timer_dsc_t;
@@ -92,28 +107,19 @@ GUI_WEAK int gui_model_main_msg_systime_cb(gui_msg_action_t access, gui_msg_data
         .tm_min = 52,
         .tm_sec = 7,
     };
-    if (access == GUI_MSG_ACCESS_SET) {
-        systime_var = data->value_time;
-    }
-    data->value_time = systime_var;
+    _gui_msg_tm_cb(&systime_var, false, access, data);
     return 0;
 }
 GUI_WEAK int gui_model_main_msg_sd_icon_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type)
 {
     static int32_t sd_icon_var = RES_SD_CLOSE;
-    if (access == GUI_MSG_ACCESS_SET) {
-        sd_icon_var = data->value_int;
-    }
-    data->value_int = sd_icon_var;
+    _gui_msg_int32_cb(&sd_icon_var, access, data);
     return 0;
 }
 GUI_WEAK int gui_model_main_msg_battery_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type)
 {
     static int32_t battery_var = RES_CHAR;
-    if (access == GUI_MSG_ACCESS_SET) {
-        battery_var = data->value_int;
-    }
-    data->value_int = battery_var;
+    _gui_msg_int32_cb(&battery_var, access, data);
     return 0;
 }
 GUI_WEAK int gui_model_main_msg_sys_prompt_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type)
@@ -121,116 +127,65 @@ GUI_WEAK int gui_model_main_msg_sys_prompt_cb(gui_msg_action_t access, gui_msg_d
     char sys_prompt_init_var[] = "";
     static bool sys_prompt_is_init = false;
     static char *sys_prompt_var = NULL;
-    if (sys_prompt_is_init == false) {
-        sys_prompt_var = lv_mem_alloc(strlen(sys_prompt_init_var) + 1);
-        strcpy(sys_prompt_var, sys_prompt_init_var);
-        sys_prompt_is_init = true;
-    }
-    if (access == GUI_MSG_ACCESS_SET) {
-        lv_mem_free(sys_prompt_var);
-        sys_prompt_var = lv_mem_alloc(strlen(data->value_string) + 1);
-        strcpy(sys_prompt_var, data->value_string);
-    }
-    data->value_string = sys_prompt_var;
+    _gui_msg_char_array_cb(&sys_prompt_var, sys_prompt_init_var, &sys_prompt_is_init, access, data);
     return 0;
 }
 GUI_WEAK int gui_model_main_msg_headlamp_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type)
 {
     static bool headlamp_var = false;
-    if (access == GUI_MSG_ACCESS_SET) {
-        headlamp_var = data->value_int;
-    }
-    data->value_int = headlamp_var;
+    _gui_msg_bool_cb(&headlamp_var, access, data);
     return 0;
 }
 GUI_WEAK int gui_model_main_msg_sys_prompt_show_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type)
 {
     static bool sys_prompt_show_var = false;
-    if (access == GUI_MSG_ACCESS_SET) {
-        sys_prompt_show_var = data->value_int;
-    }
-    data->value_int = sys_prompt_show_var;
+    _gui_msg_bool_cb(&sys_prompt_show_var, access, data);
     return 0;
 }
 GUI_WEAK int gui_model_main_msg_show_del_btn_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type)
 {
     static lv_obj_flag_t show_del_btn_var = 0;
-    if (access == GUI_MSG_ACCESS_SET) {
-        show_del_btn_var = data->value_int;
-    }
-    data->value_int = show_del_btn_var;
+    _gui_msg_obj_flag_cb((int32_t *)&show_del_btn_var, access, data);
     return 0;
 }
 GUI_WEAK int gui_model_main_msg_hide_del_btn_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type)
 {
     static lv_obj_flag_t hide_del_btn_var = 0;
-    if (access == GUI_MSG_ACCESS_SET) {
-        hide_del_btn_var = data->value_int;
-    }
-    data->value_int = hide_del_btn_var;
+    _gui_msg_obj_flag_cb((int32_t *)&hide_del_btn_var, access, data);
     return 0;
 }
 GUI_WEAK int gui_model_main_msg_show_home_btn_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type)
 {
     static lv_obj_flag_t show_home_btn_var = 0;
-    if (access == GUI_MSG_ACCESS_SET) {
-        show_home_btn_var = data->value_int;
-    }
-    data->value_int = show_home_btn_var;
+    _gui_msg_obj_flag_cb((int32_t *)&show_home_btn_var, access, data);
     return 0;
 }
 GUI_WEAK int gui_model_main_msg_hide_home_btn_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type)
 {
     static lv_obj_flag_t hide_home_btn_var = 0;
-    if (access == GUI_MSG_ACCESS_SET) {
-        hide_home_btn_var = data->value_int;
-    }
-    data->value_int = hide_home_btn_var;
+    _gui_msg_obj_flag_cb((int32_t *)&hide_home_btn_var, access, data);
     return 0;
 }
 
 void gui_model_main_msg_init(lv_ui *ui)
 {
-    gui_msg_sub_t *sub;
-    sub = gui_msg_create_sub(GUI_MODEL_MAIN_MSG_ID_SYSTIME);
-    if (sub != NULL) {
-        lv_subject_init_pointer(sub->subject, &guider_msg_data);
-    }
-    sub = gui_msg_create_sub(GUI_MODEL_MAIN_MSG_ID_SD_ICON);
-    if (sub != NULL) {
-        lv_subject_init_pointer(sub->subject, &guider_msg_data);
-    }
-    sub = gui_msg_create_sub(GUI_MODEL_MAIN_MSG_ID_BATTERY);
-    if (sub != NULL) {
-        lv_subject_init_pointer(sub->subject, &guider_msg_data);
-    }
-    sub = gui_msg_create_sub(GUI_MODEL_MAIN_MSG_ID_SYS_PROMPT);
-    if (sub != NULL) {
-        lv_subject_init_pointer(sub->subject, &guider_msg_data);
-    }
-    sub = gui_msg_create_sub(GUI_MODEL_MAIN_MSG_ID_HEADLAMP);
-    if (sub != NULL) {
-        lv_subject_init_pointer(sub->subject, &guider_msg_data);
-    }
-    sub = gui_msg_create_sub(GUI_MODEL_MAIN_MSG_ID_SYS_PROMPT_SHOW);
-    if (sub != NULL) {
-        lv_subject_init_pointer(sub->subject, &guider_msg_data);
-    }
-    sub = gui_msg_create_sub(GUI_MODEL_MAIN_MSG_ID_SHOW_DEL_BTN);
-    if (sub != NULL) {
-        lv_subject_init_pointer(sub->subject, &guider_msg_data);
-    }
-    sub = gui_msg_create_sub(GUI_MODEL_MAIN_MSG_ID_HIDE_DEL_BTN);
-    if (sub != NULL) {
-        lv_subject_init_pointer(sub->subject, &guider_msg_data);
-    }
-    sub = gui_msg_create_sub(GUI_MODEL_MAIN_MSG_ID_SHOW_HOME_BTN);
-    if (sub != NULL) {
-        lv_subject_init_pointer(sub->subject, &guider_msg_data);
-    }
-    sub = gui_msg_create_sub(GUI_MODEL_MAIN_MSG_ID_HIDE_HOME_BTN);
-    if (sub != NULL) {
-        lv_subject_init_pointer(sub->subject, &guider_msg_data);
+    int32_t ids[10] = {
+        GUI_MODEL_MAIN_MSG_ID_SYSTIME,
+        GUI_MODEL_MAIN_MSG_ID_SD_ICON,
+        GUI_MODEL_MAIN_MSG_ID_BATTERY,
+        GUI_MODEL_MAIN_MSG_ID_SYS_PROMPT,
+        GUI_MODEL_MAIN_MSG_ID_HEADLAMP,
+        GUI_MODEL_MAIN_MSG_ID_SYS_PROMPT_SHOW,
+        GUI_MODEL_MAIN_MSG_ID_SHOW_DEL_BTN,
+        GUI_MODEL_MAIN_MSG_ID_HIDE_DEL_BTN,
+        GUI_MODEL_MAIN_MSG_ID_SHOW_HOME_BTN,
+        GUI_MODEL_MAIN_MSG_ID_HIDE_HOME_BTN,
+    };
+    for (int i = 0; i < 10; i++) {
+        gui_msg_sub_t *sub = gui_msg_create_sub(ids[i]);
+        if (sub != NULL) {
+            lv_subject_init_pointer(sub->subject, &guider_msg_data);
+        }
     }
     _lv_ll_init(&timer_ll, sizeof(timer_dsc_t));
 }
@@ -271,15 +226,8 @@ void gui_model_main_msg_init_events()
     }
 
     lv_subject_t *subject_systime = gui_msg_get_subject(GUI_MODEL_MAIN_MSG_ID_SYSTIME);
-    lv_subject_t *subject_sd_icon = gui_msg_get_subject(GUI_MODEL_MAIN_MSG_ID_SD_ICON);
     lv_subject_t *subject_battery = gui_msg_get_subject(GUI_MODEL_MAIN_MSG_ID_BATTERY);
     lv_subject_t *subject_sys_prompt = gui_msg_get_subject(GUI_MODEL_MAIN_MSG_ID_SYS_PROMPT);
-    lv_subject_t *subject_headlamp = gui_msg_get_subject(GUI_MODEL_MAIN_MSG_ID_HEADLAMP);
-    lv_subject_t *subject_sys_prompt_show = gui_msg_get_subject(GUI_MODEL_MAIN_MSG_ID_SYS_PROMPT_SHOW);
-    lv_subject_t *subject_show_del_btn = gui_msg_get_subject(GUI_MODEL_MAIN_MSG_ID_SHOW_DEL_BTN);
-    lv_subject_t *subject_hide_del_btn = gui_msg_get_subject(GUI_MODEL_MAIN_MSG_ID_HIDE_DEL_BTN);
-    lv_subject_t *subject_show_home_btn = gui_msg_get_subject(GUI_MODEL_MAIN_MSG_ID_SHOW_HOME_BTN);
-    lv_subject_t *subject_hide_home_btn = gui_msg_get_subject(GUI_MODEL_MAIN_MSG_ID_HIDE_HOME_BTN);
     if (guider_ui.video_rec) {
         lv_ui_video_rec *ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_VIDEO_REC);
         gui_msg_setup_component(true, false, subject_systime, ui_scr->video_rec_digitclock_1, &guider_msg_data, gui_model_main_msg_video_rec_digitclock_1_set_digit_clock_time_cb, GUI_MODEL_MAIN_MSG_ID_SYSTIME, GUI_MSG_ACCESS_GET, VALUE_TIME, NULL);
@@ -392,171 +340,48 @@ void gui_model_main_msg_unsubscribe()
     }
 }
 
-gui_msg_data_t *gui_model_main_msg_get(int32_t msg_id)
-{
-    switch (msg_id) {
-    case GUI_MODEL_MAIN_MSG_ID_SYSTIME: {
-        gui_model_main_msg_systime_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_TIME);
-        break;
-    }
-    case GUI_MODEL_MAIN_MSG_ID_SD_ICON: {
-        gui_model_main_msg_sd_icon_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
-        break;
-    }
-    case GUI_MODEL_MAIN_MSG_ID_BATTERY: {
-        gui_model_main_msg_battery_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
-        break;
-    }
-    case GUI_MODEL_MAIN_MSG_ID_SYS_PROMPT: {
-        gui_model_main_msg_sys_prompt_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_STRING);
-        break;
-    }
-    case GUI_MODEL_MAIN_MSG_ID_HEADLAMP: {
-        gui_model_main_msg_headlamp_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_BOOL);
-        break;
-    }
-    case GUI_MODEL_MAIN_MSG_ID_SYS_PROMPT_SHOW: {
-        gui_model_main_msg_sys_prompt_show_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_BOOL);
-        break;
-    }
-    case GUI_MODEL_MAIN_MSG_ID_SHOW_DEL_BTN: {
-        gui_model_main_msg_show_del_btn_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
-        break;
-    }
-    case GUI_MODEL_MAIN_MSG_ID_HIDE_DEL_BTN: {
-        gui_model_main_msg_hide_del_btn_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
-        break;
-    }
-    case GUI_MODEL_MAIN_MSG_ID_SHOW_HOME_BTN: {
-        gui_model_main_msg_show_home_btn_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
-        break;
-    }
-    case GUI_MODEL_MAIN_MSG_ID_HIDE_HOME_BTN: {
-        gui_model_main_msg_hide_home_btn_cb(GUI_MSG_ACCESS_GET, &guider_msg_data, VALUE_INT);
-        break;
-    }
-    default:
-        return NULL;
-    }
-    return &guider_msg_data;
-}
-
-void gui_model_main_msg_action_change(int32_t msg_id, gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type)
-{
-    switch (msg_id) {
-    case GUI_MODEL_MAIN_MSG_ID_SYSTIME: {
-        gui_model_main_msg_systime_cb(access, data, type);
-        break;
-    }
-    case GUI_MODEL_MAIN_MSG_ID_SD_ICON: {
-        gui_model_main_msg_sd_icon_cb(access, data, type);
-        break;
-    }
-    case GUI_MODEL_MAIN_MSG_ID_BATTERY: {
-        gui_model_main_msg_battery_cb(access, data, type);
-        break;
-    }
-    case GUI_MODEL_MAIN_MSG_ID_SYS_PROMPT: {
-        gui_model_main_msg_sys_prompt_cb(access, data, type);
-        break;
-    }
-    case GUI_MODEL_MAIN_MSG_ID_HEADLAMP: {
-        gui_model_main_msg_headlamp_cb(access, data, type);
-        break;
-    }
-    case GUI_MODEL_MAIN_MSG_ID_SYS_PROMPT_SHOW: {
-        gui_model_main_msg_sys_prompt_show_cb(access, data, type);
-        break;
-    }
-    case GUI_MODEL_MAIN_MSG_ID_SHOW_DEL_BTN: {
-        gui_model_main_msg_show_del_btn_cb(access, data, type);
-        break;
-    }
-    case GUI_MODEL_MAIN_MSG_ID_HIDE_DEL_BTN: {
-        gui_model_main_msg_hide_del_btn_cb(access, data, type);
-        break;
-    }
-    case GUI_MODEL_MAIN_MSG_ID_SHOW_HOME_BTN: {
-        gui_model_main_msg_show_home_btn_cb(access, data, type);
-        break;
-    }
-    case GUI_MODEL_MAIN_MSG_ID_HIDE_HOME_BTN: {
-        gui_model_main_msg_hide_home_btn_cb(access, data, type);
-        break;
-    }
-    default: {
-        break;
-    }
-    }
-}
-
 gui_msg_status_t gui_model_main_msg_send(int32_t msg_id, void *value, int32_t len)
 {
     if (msg_id == GUI_MODEL_MAIN_MSG_ID) {
     } else {
         gui_msg_data_type_t data_type = VALUE_INT;
         switch (msg_id) {
+        case GUI_MODEL_MAIN_MSG_ID_SHOW_DEL_BTN:
+        case GUI_MODEL_MAIN_MSG_ID_HIDE_DEL_BTN:
+        case GUI_MODEL_MAIN_MSG_ID_SHOW_HOME_BTN:
+        case GUI_MODEL_MAIN_MSG_ID_HIDE_HOME_BTN: {
+            data_type = VALUE_INT;
+            guider_msg_data.value_array.ptr = value;
+            guider_msg_data.value_array.len = len;
+        }
+        break;
+        case GUI_MODEL_MAIN_MSG_ID_HEADLAMP:
+        case GUI_MODEL_MAIN_MSG_ID_SYS_PROMPT_SHOW: {
+            data_type = VALUE_BOOL;
+            guider_msg_data.value_array.ptr = value;
+            guider_msg_data.value_array.len = len;
+        }
+        break;
+        case GUI_MODEL_MAIN_MSG_ID_SD_ICON:
+        case GUI_MODEL_MAIN_MSG_ID_BATTERY: {
+            data_type = VALUE_INT;
+            guider_msg_data.value_array.ptr = value;
+            guider_msg_data.value_array.len = len;
+        }
+        break;
+        case GUI_MODEL_MAIN_MSG_ID_SYS_PROMPT: {
+            data_type = VALUE_STRING;
+            guider_msg_data.value_array.ptr = value;
+            guider_msg_data.value_array.len = len;
+        }
+        break;
         case GUI_MODEL_MAIN_MSG_ID_SYSTIME: {
             data_type = VALUE_TIME;
             if (value) {
                 guider_msg_data.value_time = *((struct tm *)value);
             }
-            break;
         }
-        case GUI_MODEL_MAIN_MSG_ID_SD_ICON: {
-            data_type = VALUE_INT;
-            guider_msg_data.value_array.ptr = value;
-            guider_msg_data.value_array.len = len;
-            break;
-        }
-        case GUI_MODEL_MAIN_MSG_ID_BATTERY: {
-            data_type = VALUE_INT;
-            guider_msg_data.value_array.ptr = value;
-            guider_msg_data.value_array.len = len;
-            break;
-        }
-        case GUI_MODEL_MAIN_MSG_ID_SYS_PROMPT: {
-            data_type = VALUE_STRING;
-            guider_msg_data.value_array.ptr = value;
-            guider_msg_data.value_array.len = len;
-            break;
-        }
-        case GUI_MODEL_MAIN_MSG_ID_HEADLAMP: {
-            data_type = VALUE_BOOL;
-            guider_msg_data.value_array.ptr = value;
-            guider_msg_data.value_array.len = len;
-            break;
-        }
-        case GUI_MODEL_MAIN_MSG_ID_SYS_PROMPT_SHOW: {
-            data_type = VALUE_BOOL;
-            guider_msg_data.value_array.ptr = value;
-            guider_msg_data.value_array.len = len;
-            break;
-        }
-        case GUI_MODEL_MAIN_MSG_ID_SHOW_DEL_BTN: {
-            data_type = VALUE_INT;
-            guider_msg_data.value_array.ptr = value;
-            guider_msg_data.value_array.len = len;
-            break;
-        }
-        case GUI_MODEL_MAIN_MSG_ID_HIDE_DEL_BTN: {
-            data_type = VALUE_INT;
-            guider_msg_data.value_array.ptr = value;
-            guider_msg_data.value_array.len = len;
-            break;
-        }
-        case GUI_MODEL_MAIN_MSG_ID_SHOW_HOME_BTN: {
-            data_type = VALUE_INT;
-            guider_msg_data.value_array.ptr = value;
-            guider_msg_data.value_array.len = len;
-            break;
-        }
-        case GUI_MODEL_MAIN_MSG_ID_HIDE_HOME_BTN: {
-            data_type = VALUE_INT;
-            guider_msg_data.value_array.ptr = value;
-            guider_msg_data.value_array.len = len;
-            break;
-        }
+        break;
         default:
             break;
         }

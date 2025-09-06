@@ -35,10 +35,10 @@ void ui_load_scr_anim(lv_ui *ui, gui_scr_t *screen, lv_scr_load_anim_t anim_type
     gui_scr_set_act_anim(screen, ui, anim_type, time, delay, is_clean, auto_del);
 
     if (is_push_satck) {
+        lv_obj_remove_event_cb(screen->scr, scr_push_stack_loaded_handler);
         if (screen == gui_scr_get_act()) {
             gui_scr_stack_push(act_screen);
         } else {
-            lv_obj_remove_event_cb(screen->scr, scr_push_stack_loaded_handler);
             lv_obj_add_event_cb(screen->scr, scr_push_stack_loaded_handler, LV_EVENT_SCREEN_LOADED, (void *)act_screen->id);
         }
     }
@@ -100,6 +100,15 @@ gui_scr_t *ui_get_scr(int32_t scr_id)
     }
     if (scr_id == GUI_SCREEN_VIDEO_DEC_OPTIONS) {
         return gui_scr_create(GUI_SCREEN_VIDEO_DEC_OPTIONS, "video_dec_options", NULL, (gui_scr_setup_cb_t)setup_scr_video_dec_options, (gui_scr_unload_cb_t)unload_scr_video_dec_options);
+    }
+    if (scr_id == GUI_SCREEN_PAGE_MAP) {
+        return gui_scr_create(GUI_SCREEN_PAGE_MAP, "page_map", NULL, (gui_scr_setup_cb_t)setup_scr_page_map, (gui_scr_unload_cb_t)unload_scr_page_map);
+    }
+    if (scr_id == GUI_SCREEN_PAGE_METER) {
+        return gui_scr_create(GUI_SCREEN_PAGE_METER, "page_meter", NULL, (gui_scr_setup_cb_t)setup_scr_page_meter, (gui_scr_unload_cb_t)unload_scr_page_meter);
+    }
+    if (scr_id == GUI_SCREEN_PAGE_MUSIC) {
+        return gui_scr_create(GUI_SCREEN_PAGE_MUSIC, "page_music", NULL, (gui_scr_setup_cb_t)setup_scr_page_music, (gui_scr_unload_cb_t)unload_scr_page_music);
     }
     return NULL;
 }
@@ -179,6 +188,15 @@ void *ui_get_scr_ptr(lv_ui *ui, int32_t scr_id)
     }
     if (scr_id == GUI_SCREEN_VIDEO_DEC_OPTIONS) {
         return ui->video_dec_options;
+    }
+    if (scr_id == GUI_SCREEN_PAGE_MAP) {
+        return ui->page_map;
+    }
+    if (scr_id == GUI_SCREEN_PAGE_METER) {
+        return ui->page_meter;
+    }
+    if (scr_id == GUI_SCREEN_PAGE_MUSIC) {
+        return ui->page_music;
     }
     return NULL;
 }
@@ -267,9 +285,23 @@ void ui_free_scr_ptr(lv_ui *ui, int32_t scr_id)
         }
         ui->video_dec_options = NULL;
     }
-    gui_scr_t *scr = gui_scr_get(scr_id);
-    if (scr != NULL) {
-        scr->scr = NULL;
+    if (scr_id == GUI_SCREEN_PAGE_MAP) {
+        if (ui->page_map != NULL) {
+            lv_mem_free(ui->page_map);
+        }
+        ui->page_map = NULL;
+    }
+    if (scr_id == GUI_SCREEN_PAGE_METER) {
+        if (ui->page_meter != NULL) {
+            lv_mem_free(ui->page_meter);
+        }
+        ui->page_meter = NULL;
+    }
+    if (scr_id == GUI_SCREEN_PAGE_MUSIC) {
+        if (ui->page_music != NULL) {
+            lv_mem_free(ui->page_music);
+        }
+        ui->page_music = NULL;
     }
 }
 
@@ -299,7 +331,7 @@ void setup_ui(lv_ui *ui)
 #endif
     gui_group_init();
     ui_scr_manager_init();
-    gui_scr_t *scr = ui_get_scr(GUI_SCREEN_VIDEO_REC);
+    gui_scr_t *scr = ui_get_scr(GUI_SCREEN_USB_SLAVE);
     ui_load_scr_anim(ui, scr, LV_SCR_LOAD_ANIM_NONE, 0, 0, false, false, false);
     events_init(ui);
     gui_timelines_init(ui);

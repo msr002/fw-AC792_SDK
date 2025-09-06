@@ -37,20 +37,13 @@ int gui_src_action_video_photo(int action)
         lv_obj_set_style_bg_opa(ui_scr->video_photo, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
 #endif
         // printf("--->%s()----->%d\n", __func__, __LINE__);
+        key_event_disable();
         app = get_current_app();
-        if (app && strcmp(app->name, "video_photo")) {
-            printf("[chili] %s %d   \n", app->name, __LINE__);
-            key_event_disable();
-            it.name = app->name;
-            it.action = ACTION_BACK;
-            start_app(&it);
-        } else {
-            // printf("--->%s()----->%d\n", __func__, __LINE__);
-            break;
+        if (app) {
+            app_mode_go_back();
         }
-        it.name = "video_photo";
-        it.action = ACTION_PHOTO_TAKE_MAIN;
-        start_app(&it);
+        app_mode_change_replace(APP_MODE_PHOTO);
+        app_send_message(APP_MSG_PHOTO_TAKE_MAIN, 0);
         key_event_enable();
     }
     break;
@@ -104,10 +97,7 @@ REGISTER_UI_KEY_EVENT_HANDLER(GUI_SCREEN_VIDEO_PHOTO)
 int gui_take_photo(void)
 {
 #if !LV_USE_GUIBUILDER_SIMULATOR
-    struct intent it;
-    it.name = "video_photo";
-    it.action = ACTION_PHOTO_TAKE_CONTROL;
-    return  start_app(&it);
+    return app_send_message(APP_MSG_PHOTO_TAKE_CONTROL, 0);
 #else
     return 0;
 #endif
@@ -117,10 +107,7 @@ int gui_take_photo(void)
 int gui_switch_camera(void)
 {
 #if !LV_USE_GUIBUILDER_SIMULATOR
-    struct intent it;
-    it.name = "video_photo";
-    it.action = ACTION_PHOTO_TAKE_SWITCH_WIN;
-    return  start_app(&it);
+    return app_send_message(APP_MSG_PHOTO_TAKE_SWITCH_WIN, 0);
 #else
     return 0;
 #endif
@@ -130,12 +117,12 @@ int gui_switch_camera(void)
 int gui_set_camera_config(char *label, uint32_t value)
 {
 #if !LV_USE_GUIBUILDER_SIMULATOR
-    struct intent it;
-    it.name = "video_photo";
-    it.action = ACTION_PHOTO_TAKE_SET_CONFIG;
-    it.data = label;
-    it.exdata = value;
-    return  start_app(&it);
+    struct intent *it;
+    it = malloc(sizeof(struct intent));
+    init_intent(it);
+    it->data = label;
+    it->exdata = value;
+    return app_send_message(APP_MSG_PHOTO_TAKE_SET_CONFIG, 1, it);
 #else
     return 0;
 #endif
@@ -145,12 +132,13 @@ int gui_set_camera_config(char *label, uint32_t value)
 int gui_get_camera_config(char *label)
 {
 #if !LV_USE_GUIBUILDER_SIMULATOR
-    struct intent it;
-    it.name = "video_photo";
-    it.action = ACTION_PHOTO_TAKE_GET_CONFIG;
-    it.data = label;
-    start_app(&it);
-    return it.exdata;
+    struct intent *it = NULL;
+    it = malloc(sizeof(struct intent));
+    init_intent(it);
+    it->data = label;
+    app_send_message(APP_MSG_PHOTO_TAKE_SET_CONFIG, 1, it);
+    mdelay(40);
+    return it->exdata;
 #else
     return 0;
 #endif

@@ -5274,7 +5274,7 @@
        {
         "modeId": "id_1745198624460_1",
         "name": "Vol_BtMusic",
-        "current": "",
+        "current": "arg0",
         "originSize": 0,
         "list": [
          {
@@ -5306,11 +5306,11 @@
              },
              {
               "id": "id_1690535811640_0",
-              "value": 16
+              "value": 69
              },
              {
               "id": "id_1676801188975_0",
-              "value": 50
+              "value": 69
              }
             ]
            },
@@ -5318,10 +5318,12 @@
             "id": "id_1677751149521_1",
             "list": []
            }
-          ]
+          ],
+          "bypass": false
          }
         ],
-        "originCount": 1
+        "originCount": 1,
+        "bypass": false
        }
       ]
      },
@@ -5442,7 +5444,7 @@
        {
         "modeId": "id_1745198624460_1",
         "name": "MIXER2",
-        "current": "",
+        "current": "arg0",
         "originSize": 0,
         "list": [
          {
@@ -5510,12 +5512,14 @@
               "value": 0
              }
             ],
-            "expand": 1
+            "expand": 2
            }
-          ]
+          ],
+          "bypass": false
          }
         ],
-        "originCount": 1
+        "originCount": 1,
+        "bypass": false
        }
       ]
      },
@@ -6878,7 +6882,7 @@
        {
         "modeId": "id_1745198624460_1",
         "name": "DAC2",
-        "current": "",
+        "current": "music",
         "originSize": 0,
         "list": [
          {
@@ -6912,7 +6916,8 @@
             ],
             "expand": 1
            }
-          ]
+          ],
+          "bypass": false
          },
          {
           "name": "a2dp",
@@ -6945,7 +6950,8 @@
             ],
             "expand": 1
            }
-          ]
+          ],
+          "bypass": false
          },
          {
           "name": "linein",
@@ -6978,7 +6984,8 @@
             ],
             "expand": 1
            }
-          ]
+          ],
+          "bypass": false
          },
          {
           "name": "music",
@@ -7009,9 +7016,10 @@
               "value": 0
              }
             ],
-            "expand": 1
+            "expand": 2
            }
-          ]
+          ],
+          "bypass": false
          },
          {
           "name": "fm",
@@ -7044,7 +7052,8 @@
             ],
             "expand": 1
            }
-          ]
+          ],
+          "bypass": false
          },
          {
           "name": "spdif",
@@ -7077,10 +7086,12 @@
             ],
             "expand": 1
            }
-          ]
+          ],
+          "bypass": false
          }
         ],
-        "originCount": 6
+        "originCount": 6,
+        "bypass": false
        }
       ]
      },
@@ -7572,7 +7583,7 @@
        {
         "modeId": "id_1745198624460_1",
         "name": "Vol_LineinMusic",
-        "current": "",
+        "current": "arg0",
         "originSize": 0,
         "list": [
          {
@@ -7604,11 +7615,11 @@
              },
              {
               "id": "id_1690535811640_0",
-              "value": 16
+              "value": 71
              },
              {
               "id": "id_1676801188975_0",
-              "value": 50
+              "value": 71
              }
             ]
            },
@@ -7616,10 +7627,12 @@
             "id": "id_1677751149521_1",
             "list": []
            }
-          ]
+          ],
+          "bypass": false
          }
         ],
-        "originCount": 1
+        "originCount": 1,
+        "bypass": false
        }
       ]
      },
@@ -8080,7 +8093,7 @@
        {
         "modeId": "id_1745198624460_1",
         "name": "Vol_FileMusic",
-        "current": "",
+        "current": "arg0",
         "originSize": 0,
         "list": [
          {
@@ -8112,11 +8125,11 @@
              },
              {
               "id": "id_1690535811640_0",
-              "value": 16
+              "value": 70
              },
              {
               "id": "id_1676801188975_0",
-              "value": 50
+              "value": 70
              }
             ]
            },
@@ -8124,10 +8137,12 @@
             "id": "id_1677751149521_1",
             "list": []
            }
-          ]
+          ],
+          "bypass": false
          }
         ],
-        "originCount": 1
+        "originCount": 1,
+        "bypass": false
        }
       ]
      },
@@ -8588,7 +8603,7 @@
        {
         "modeId": "id_1745198624460_1",
         "name": "Vol_FmMusic",
-        "current": "",
+        "current": "arg0",
         "originSize": 0,
         "list": [
          {
@@ -8620,11 +8635,11 @@
              },
              {
               "id": "id_1690535811640_0",
-              "value": 16
+              "value": 69
              },
              {
               "id": "id_1676801188975_0",
-              "value": 50
+              "value": 69
              }
             ]
            },
@@ -8632,10 +8647,12 @@
             "id": "id_1677751149521_1",
             "list": []
            }
-          ]
+          ],
+          "bypass": false
          }
         ],
-        "originCount": 1
+        "originCount": 1,
+        "bypass": false
        }
       ]
      },
@@ -9303,7 +9320,7 @@
        {
         "modeId": "id_1745198624460_1",
         "name": "Vol_NetMusic",
-        "current": "",
+        "current": "arg0",
         "originSize": 0,
         "list": [
          {
@@ -9335,11 +9352,11 @@
              },
              {
               "id": "id_1690535811640_0",
-              "value": 16
+              "value": 67
              },
              {
               "id": "id_1676801188975_0",
-              "value": 50
+              "value": 67
              }
             ]
            },
@@ -9347,10 +9364,12 @@
             "id": "id_1677751149521_1",
             "list": []
            }
-          ]
+          ],
+          "bypass": false
          }
         ],
-        "originCount": 1
+        "originCount": 1,
+        "bypass": false
        }
       ]
      },
@@ -9671,7 +9690,7 @@
        {
         "modeId": "id_1745198624460_1",
         "name": "9B3B1",
-        "current": "",
+        "current": "arg0",
         "originSize": 0,
         "list": [
          {
@@ -9683,7 +9702,7 @@
             "list": [
              {
               "id": "id_1677140583268_0",
-              "value": 10
+              "value": 50
              },
              {
               "id": "id_1677144866465_6",
@@ -9695,10 +9714,12 @@
              }
             ]
            }
-          ]
+          ],
+          "bypass": false
          }
         ],
-        "originCount": 1
+        "originCount": 1,
+        "bypass": false
        }
       ]
      },
@@ -9766,7 +9787,7 @@
       "distance": 40
      }
     },
-    "id": "334fc141-3b76-4fa5-8fdd-85155338793b",
+    "id": "44eae15a-a7de-46b9-b6e3-53ec484b421d",
     "data": {
      "itemId": "id_1745198624852_14"
     },
@@ -9775,22 +9796,22 @@
      "port": "bef032bd-c6f1-4712-bf94-2814b1cf25a7"
     },
     "target": {
-     "cell": "2cd6e546-8907-49d9-8117-6b0b462b5d50",
+     "cell": "7e52aff0-afaf-452a-9e6a-57f94bd8efd0",
      "port": "fb076936-fb8e-408a-9e5a-1462ed222bb6"
     }
    },
    {
     "position": {
-     "x": 480,
+     "x": 440,
      "y": 880
     },
     "size": {
-     "width": 80,
+     "width": 120,
      "height": 80
     },
     "view": "vue-shape-view",
     "shape": "vue-shape",
-    "id": "2cd6e546-8907-49d9-8117-6b0b462b5d50",
+    "id": "7e52aff0-afaf-452a-9e6a-57f94bd8efd0",
     "component": "node-cust",
     "group": "hardware",
     "data": {
@@ -9814,17 +9835,16 @@
      "nodeDoc": "\\docs\\html\\SDK\\audio_effects\\Volume_manual.html",
      "subId": 5,
      "configs": {
-      "name": "Vol_FlowMusic",
+      "name": "74E35",
       "list": [
        {
         "modeId": "id_1745198624460_1",
-        "name": "Vol_FlowMusic",
-        "current": "",
-        "originSize": 0,
+        "name": "74E35",
+        "current": "arg0",
+        "bypass": false,
         "list": [
          {
           "name": "arg0",
-          "enable": true,
           "data": [
            {
             "id": "id_1725438750946_613",
@@ -9851,11 +9871,11 @@
              },
              {
               "id": "id_1690535811640_0",
-              "value": 16
+              "value": 100
              },
              {
               "id": "id_1676801188975_0",
-              "value": 50
+              "value": 100
              }
             ]
            },
@@ -9863,17 +9883,14 @@
             "id": "id_1677751149521_1",
             "list": []
            }
-          ]
+          ],
+          "enable": true,
+          "bypass": false
          }
-        ],
-        "originCount": 1
+        ]
        }
       ]
-     },
-     "configName": "Vol_FlowMusic",
-     "nodeName": "Vol_FlowMusic",
-     "inBitWidth": 16,
-     "outBitWidth": 16
+     }
     },
     "ports": {
      "groups": {
@@ -9933,12 +9950,12 @@
       "distance": 40
      }
     },
-    "id": "71a24fa7-fc26-49a6-99bc-771d90e9228e",
+    "id": "0e60e24c-380b-4073-8be4-f8604384d2d5",
     "data": {
      "itemId": "id_1745198624852_14"
     },
     "source": {
-     "cell": "2cd6e546-8907-49d9-8117-6b0b462b5d50",
+     "cell": "7e52aff0-afaf-452a-9e6a-57f94bd8efd0",
      "port": "4decb197-2782-4173-a600-958942b8109d"
     },
     "target": {
@@ -36131,5 +36148,6 @@
  "version": {
   "code": 1,
   "tool": "4.4.0"
- }
+ },
+ "abFlow": false
 }

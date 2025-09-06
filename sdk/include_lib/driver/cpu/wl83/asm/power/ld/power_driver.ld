@@ -30,3 +30,9 @@
         PROVIDE(p2m_msg_handler_end = .);
         p2m_msg_handler_end = .;
         
+        . = ALIGN(4);
+        soff_busy_dev_close_hdl_begin = .;
+        PROVIDE(soff_busy_dev_close_hdl_begin = .);
+        KEEP(*(.soff_busy_dev_close_hdl))
+        soff_busy_dev_close_hdl_end = .;
+        PROVIDE(soff_busy_dev_close_hdl_end = .);

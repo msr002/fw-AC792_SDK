@@ -143,6 +143,7 @@ enum stream_event {
     STREAM_EVENT_GET_SWITCH_CALLBACK,
     STREAM_EVENT_GET_MERGER_CALLBACK,
     STREAM_EVENT_GET_SPATIAL_ADV_CALLBACK,
+    STREAM_EVENT_GET_FILE_BUF_SIZE,
     STREAM_EVENT_GET_NOISEGATE_CALLBACK,
     STREAM_EVENT_GET_OUTPUT_NODE_DELAY,
 
@@ -179,6 +180,7 @@ enum stream_scene : u8 {
 
     STREAM_SCENE_LOUDSPEAKER_IIS, //扩音器IIS
     STREAM_SCENE_LOUDSPEAKER_MIC, //扩音器MIC
+    STREAM_SCENE_AI_RX,
 
     //最大32个场景，如果大于32个场景，需把tone、ring, key_tone场景号往后挪
     STREAM_SCENE_TONE = 0x20,
@@ -746,6 +748,19 @@ void jlstream_return_frame(struct stream_iport *iport, struct stream_frame *fram
 int jlstream_get_cpu_usage(void);
 
 void stream_mem_unfree_dump(void);
+
+struct jlsream_crossfade {
+    struct jlstream_fade fade[2]; //0:fade_out  1:fade_in
+    u32 sample_rate;
+    u16 msec;
+    u8 channel;
+    u8 bit_width;
+    u8 enable;
+};
+
+void jlstream_frames_cross_fade_init(struct jlsream_crossfade *crossfade);
+
+u8 jlstream_frames_cross_fade_run(struct jlsream_crossfade *crossfade, void *fadein_addr, void *fadeout_addr, void *output_addr, int len);
 
 #endif
 

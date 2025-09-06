@@ -57,6 +57,7 @@ static example_lv0_t s_tItem[8] = {
 /*----------------------------------------------------------------------------
   Main function
  *----------------------------------------------------------------------------*/
+#if 0
 int perf_counter_test(void *arg)
 {
     int32_t iCycleResult = 0;
@@ -202,4 +203,5 @@ int perf_counter_test(void *arg)
 
     }
 }
+#endif
 

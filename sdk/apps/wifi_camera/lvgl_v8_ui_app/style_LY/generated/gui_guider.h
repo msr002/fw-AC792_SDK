@@ -16,8 +16,11 @@ extern "C" {
 #include "./i18n/lv_i18n.h"
 
 #ifdef JL_GUI_KERNEL_VERSION_MAJOR
-#if GUI_CORE_VERSION_MAJOR != JL_GUI_KERNEL_VERSION_MAJOR
-#error "Current Kernel Version is not compatible, please replace or upgrade the kernel!"
+#if GUI_CORE_VERSION_MAJOR > JL_GUI_KERNEL_VERSION_MAJOR
+#error "Current SDK Version is older than the kernel version. Please update the SDK version!"
+#endif
+#if GUI_CORE_VERSION_MAJOR < JL_GUI_KERNEL_VERSION_MAJOR
+#error "Current SDK Version is newer than the kernel version. Please update the kernel version!"
 #endif
 #if GUI_CORE_VERSION_MINOR > JL_GUI_KERNEL_VERSION_MINOR
 #warning "Current Kernel Version is too low, some features may not be available, please update the kernel version!"
@@ -50,6 +53,8 @@ typedef struct {
     lv_obj_t *usb_slave_btn_pc_cam_label;
     lv_obj_t *usb_slave_btn_video_rec;
     lv_obj_t *usb_slave_btn_video_rec_label;
+    lv_obj_t *usb_slave_btn_1;
+    lv_obj_t *usb_slave_btn_1_label;
 } lv_ui_usb_slave;
 
 typedef struct {
@@ -444,6 +449,87 @@ typedef struct {
     lv_obj_t *video_dec_options_btn_2_label;
 } lv_ui_video_dec_options;
 
+typedef struct {
+    // Screen page_map
+    lv_obj_t *page_map;
+    bool      page_map_del;
+    lv_obj_t *page_map_view_1;
+    lv_obj_t *page_map_imgList_gear_mode;
+    lv_obj_t *page_map_lbl_time;
+    lv_obj_t *page_map_img_weather;
+    lv_obj_t *page_map_lbl_temp;
+    lv_obj_t *page_map_imgList_bluetooth;
+    lv_obj_t *page_map_imgList_phone_bl;
+    lv_obj_t *page_map_imgList_gps;
+    lv_obj_t *page_map_imgList_networksignal;
+    lv_obj_t *page_map_img_ready;
+    lv_obj_t *page_map_view_2;
+    lv_obj_t *page_map_lbl_endurance;
+    lv_obj_t *page_map_img_charge;
+    lv_obj_t *page_map_imgList_soc_beam;
+    lv_obj_t *page_map_lbl_bat;
+    lv_obj_t *page_map_imglist_bat;
+    lv_obj_t *page_map_lbl_odo_num;
+    lv_timer_t *page_map_timer_1;
+    lv_obj_t *page_map_view_3;
+    lv_obj_t *page_map_lbl_1;
+    lv_obj_t *page_map_lbl_2;
+    lv_obj_t *page_map_lbl_3;
+    lv_obj_t *page_map_lbl_4;
+    lv_obj_t *page_map_img_1;
+    lv_obj_t *page_map_img_2;
+    lv_timer_t *page_map_timer_2;
+    lv_obj_t *page_map_btn_1;
+    lv_obj_t *page_map_btn_1_label;
+    lv_obj_t *page_map_btn_2;
+    lv_obj_t *page_map_btn_2_label;
+} lv_ui_page_map;
+
+typedef struct {
+    // Screen page_meter
+    lv_obj_t *page_meter;
+    bool      page_meter_del;
+    lv_obj_t *page_meter_imglist_1;
+    lv_timer_t *page_meter_timer_1;
+    lv_obj_t *page_meter_imglist_2;
+    lv_obj_t *page_meter_imglist_3;
+    lv_obj_t *page_meter_img_1;
+    lv_obj_t *page_meter_img_2;
+    lv_obj_t *page_meter_img_3;
+    lv_obj_t *page_meter_img_4;
+    lv_obj_t *page_meter_img_5;
+    lv_obj_t *page_meter_img_6;
+    lv_obj_t *page_meter_img_7;
+    lv_obj_t *page_meter_img_8;
+    lv_obj_t *page_meter_img_9;
+    lv_obj_t *page_meter_img_10;
+    lv_obj_t *page_meter_img_11;
+    lv_obj_t *page_meter_img_12;
+    lv_obj_t *page_meter_img_13;
+    lv_obj_t *page_meter_img_14;
+    lv_obj_t *page_meter_img_15;
+    lv_obj_t *page_meter_img_16;
+    lv_obj_t *page_meter_img_17;
+    lv_obj_t *page_meter_img_18;
+    lv_obj_t *page_meter_btn_1;
+    lv_obj_t *page_meter_btn_1_label;
+    lv_obj_t *page_meter_btn_2;
+    lv_obj_t *page_meter_btn_2_label;
+} lv_ui_page_meter;
+
+typedef struct {
+    // Screen page_music
+    lv_obj_t *page_music;
+    bool      page_music_del;
+    lv_obj_t *page_music_img_1;
+    lv_obj_t *page_music_img_2;
+    lv_timer_t *page_music_timer_1;
+    lv_obj_t *page_music_slider_1;
+    lv_obj_t *page_music_img_3;
+    lv_obj_t *page_music_btn_1;
+    lv_obj_t *page_music_btn_1_label;
+} lv_ui_page_music;
+
 // generate lv_ui gui_guider
 typedef struct {
     lv_ui_usb_slave *usb_slave;
@@ -459,6 +545,9 @@ typedef struct {
     lv_ui_sys_popwin *sys_popwin;
     lv_ui_video_dec *video_dec;
     lv_ui_video_dec_options *video_dec_options;
+    lv_ui_page_map *page_map;
+    lv_ui_page_meter *page_meter;
+    lv_ui_page_music *page_music;
 
     lv_group_t *default_group;
 } lv_ui;
@@ -522,6 +611,25 @@ void unload_scr_video_dec(lv_ui *ui);
 // Screen video_dec_options
 lv_obj_t *setup_scr_video_dec_options(lv_ui *ui);
 void unload_scr_video_dec_options(lv_ui *ui);
+// Screen page_map
+lv_obj_t *setup_scr_page_map(lv_ui *ui);
+void unload_scr_page_map(lv_ui *ui);
+
+
+
+
+
+
+
+// Screen page_meter
+lv_obj_t *setup_scr_page_meter(lv_ui *ui);
+void unload_scr_page_meter(lv_ui *ui);
+
+
+
+// Screen page_music
+lv_obj_t *setup_scr_page_music(lv_ui *ui);
+void unload_scr_page_music(lv_ui *ui);
 #ifdef __cplusplus
 }
 #endif

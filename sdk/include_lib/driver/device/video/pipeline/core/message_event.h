@@ -150,6 +150,7 @@ enum {
 #define   EVENT_LINE_ERR             0x14
 #define   EVENT_OSD_ERR             0x15
 #define   EVENT_BUFFER_EMPTY        0x16
+#define   EVENT_JPEG_DEC_RESET        0x17
 
 
 #endif

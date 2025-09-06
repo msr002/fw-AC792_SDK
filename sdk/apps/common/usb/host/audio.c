@@ -1168,6 +1168,11 @@ void usb_audio_stop_recorder(const usb_dev usb_id)
     const struct usb_host_device *host_dev = host_id2device(usb_id);
     struct audio_device_t *audio = __find_headphone_interface(host_dev);
     struct audio_streaming_t *as_t = &audio->as[__this->host_mic.Cur_AlternateSetting - 1];
+
+    if (!audio) {
+        log_error("stop no find headphone interface!");
+        return;
+    }
     __this->host_mic.mic_state = AUDIO_MIC_STOP;
     usb_set_interface(host_dev, audio->interface_num, 0); // close
     usb_h_set_ep_isr(NULL, 0, NULL, NULL);
@@ -1666,7 +1671,7 @@ static void audio_player_task(void *p)
 
     __this->host_spk.spk_state = AUDIO_SPK_START;
 
-    __this->host_spk.put_buf(usb_id, NULL, 0, __this->host_spk.src_channel == as_t->bNrChannels ? __this->host_spk.src_channel : __this->host_spk.src_channel | BIT(7), __this->host_spk.sample_rate);
+    (__this->host_spk.put_buf)(usb_id, NULL, 0, __this->host_spk.src_channel == as_t->bNrChannels ? __this->host_spk.src_channel : __this->host_spk.src_channel | BIT(7), __this->host_spk.sample_rate);
 
     usb_h_ep_read_async(usb_id, as_t->host_ep, as_t->ep, NULL, 0, USB_ENDPOINT_XFER_ISOC, 1); //启动iso
 
@@ -1681,7 +1686,7 @@ static void audio_player_task(void *p)
                 rlen = msg[2];
                 /* putchar('b'); */
                 if (__this->host_spk.put_buf) {
-                    __this->host_spk.put_buf(usb_id, ptr, rlen, __this->host_spk.src_channel, __this->host_spk.sample_rate);
+                    (__this->host_spk.put_buf)(usb_id, ptr, rlen, __this->host_spk.src_channel, __this->host_spk.sample_rate);
                 }
                 write_file_len[usb_id] = 0;
                 break;
@@ -1795,6 +1800,10 @@ void usb_audio_stop_player(const usb_dev usb_id)
     const struct usb_host_device *host_dev = host_id2device(usb_id);
     struct audio_device_t *audio = __find_microphone_interface(host_dev);
     struct audio_streaming_t *as_t = &audio->as[__this->host_spk.Cur_AlternateSetting - 1];
+    if (!audio) {
+        log_error("stop no find host_spk interface!");
+        return;
+    }
     __this->host_spk.spk_state = AUDIO_SPK_STOP;
     usb_set_interface(host_dev, audio->interface_num, 0); // close
     usb_h_set_ep_isr(NULL, 0, NULL, NULL);
@@ -1805,7 +1814,7 @@ void usb_audio_stop_player(const usb_dev usb_id)
         task_kill("uac_play1");
     }
     if (__this->host_spk.put_buf) {
-        __this->host_spk.put_buf(usb_id, NULL, 0, 0, 0);
+        (__this->host_spk.put_buf)(usb_id, NULL, 0, 0, 0);
     }
     __this->host_spk.Cur_AlternateSetting = 0;
     __this->host_spk.sample_rate = 0;

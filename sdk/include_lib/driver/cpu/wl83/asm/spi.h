@@ -27,11 +27,12 @@
 #define IOCTL_SPI_SET_SYNC_TIMEOUT        _IOW(SPI_MAGIC, 13,u32)                    ///< 设置同步等待超时时间，单位ms
 #define IOCTL_SPI_FDX_TR_DATA             _IOR(SPI_MAGIC, 14,spi_fdx_data_t *)       ///< 全双工收发数据，仅STD模式支持
 #define IOCTL_SPI_SET_IRQ_EVENT_CB        _IOW(SPI_MAGIC, 15,void (*)(spi_irq_event_t))  ///< 设置中断事件回调函数
-
 #define IOCTL_SPI_SET_BLOCK_DATA_CFG      _IOW(SPI_MAGIC, 16,spi_block_data_cfg_t *) ///< 设置block data的配置
 #define IOCTL_SPI_READ_BLOCK_DATA         _IOR(SPI_MAGIC, 17,int *)                  ///< 读取block data
 #define IOCTL_SPI_FREE_BLOCK_DATA          _IO(SPI_MAGIC, 18)                        ///< 释放一个block data
 #define IOCTL_SPI_SET_BAUDRATE            _IOW(SPI_MAGIC, 19,u32)                    ///< 设置波特率
+#define IOCTL_SPI_9BIT_EN                 _IOW(SPI_MAGIC, 20,u8)                     ///< 9BIT模式开/关，0:关 非0:开，推屏用
+#define IOCTL_SPI_9BIT_DATA               _IOW(SPI_MAGIC, 21,u8)                     ///< 9BIT数据，0:低 非0:高，推屏用
 /* \} name */
 
 

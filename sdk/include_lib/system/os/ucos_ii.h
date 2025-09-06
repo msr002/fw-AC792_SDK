@@ -266,6 +266,7 @@ typedef struct os_tcb {
     u8          OSCoreAffinity;          /* core */
 
     u8 fork_thread;
+    u16           OSTCBDlyOri;
     OS_STK        *OSTCBStkTos;
     int *pid;
     OS_STK stk_size;

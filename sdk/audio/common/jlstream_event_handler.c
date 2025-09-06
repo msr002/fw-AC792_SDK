@@ -82,9 +82,6 @@ static int get_pipeline_uuid(const char *name)
         return PIPELINE_UUID_MIC_EFFECT;
     }
 
-    if (!strcmp(name, "pc_spk")) {
-        return PIPELINE_UUID_PC_AUDIO;
-    }
     if (!strcmp(name, "pc_mic")) {
         return PIPELINE_UUID_PC_AUDIO;
     }
@@ -254,22 +251,48 @@ static int get_merge_node_callback(const char *arg)
 }
 #endif
 
+static int a2dp_switch_get_status(void)
+{
+#if TCFG_USER_EMITTER_ENABLE
+    extern u8 *get_cur_connect_emitter_mac_addr(void);
+    if (get_cur_connect_emitter_mac_addr()) {
+        return 1;
+    }
+#endif
+    return 0;
+}
+
+static int dac_switch_get_status(void)
+{
+    if (!a2dp_switch_get_status()) {
+        return 1;
+    }
+    return 0;
+}
+
 #if TCFG_SWITCH_NODE_ENABLE
 static int get_switch_node_callback(const char *arg)
 {
     printf("get_switch_node_callback, node name:%s, need add yourself switch_node's callback!\n", arg);
 
 #if TCFG_MIX_RECORD_ENABLE
-    if (!strncmp(arg, "SW_Rec", strlen("SW_Rec"))) {
+    if (!strncmp(arg, "Switch_rec", strlen("Switch_rec"))) {
         return (int)get_mix_recorder_status;
     }
 #endif // TCFG_MIX_RECORD_ENABLE
 
 #if TCFG_LOCAL_TWS_ENABLE
-    if (!strncmp(arg, "Switch1", strlen("Switch1"))) {
+    if (!strncmp(arg, "Switch_TWS", strlen("Switch_TWS"))) {
         return (int)tws_switch_get_status;
     }
 #endif
+
+    if (!strncmp(arg, "Switch_a2dp", strlen("Switch_a2dp"))) {
+        return (int)a2dp_switch_get_status;
+    }
+    if (!strncmp(arg, "Switch_dac", strlen("Switch_dac"))) {
+        return (int)dac_switch_get_status;
+    }
 
     return 0;
 }

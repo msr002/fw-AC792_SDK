@@ -358,8 +358,8 @@ static int wifi_event_callback(void *network_ctx, enum WIFI_EVENT event)
 
 #ifndef WIFI_MODE_CYCLE_TEST
         if (!request_connect_flag) { //如果是应用程序主动请求连接导致断线就不需要发送重连事件, 否则像信号不好导致断线的原因就发送重连事件
-            net.event = NET_EVENT_DISCONNECTED_AND_REQ_CONNECT;
-            net_event_notify(NET_EVENT_FROM_USER, &net);
+            // net.event = NET_EVENT_DISCONNECTED_AND_REQ_CONNECT;
+            // net_event_notify(NET_EVENT_FROM_USER, &net);
         }
 #endif
         break;
@@ -490,7 +490,7 @@ static int wifi_event_callback(void *network_ctx, enum WIFI_EVENT event)
         break;
     case WIFI_EVENT_P2P_GC_DISCONNECTED:
         log_info("network_user_callback->WIFI_EVENT_P2P_GC_DISCONNECTED");
-        /* wifi_enter_p2p_mode(P2P_GC_MODE, WIFI_P2P_DEVICE_NAME); */
+        wifi_enter_p2p_mode(P2P_GC_MODE, WIFI_P2P_DEVICE_NAME);
         break;
     case WIFI_EVENT_P2P_GC_NETWORK_STACK_DHCP_SUCC:
         log_info("network_user_callback->WIFI_EVENT_P2P_GC_NETWORK_STACK_DHCP_SUCC");
@@ -503,7 +503,7 @@ static int wifi_event_callback(void *network_ctx, enum WIFI_EVENT event)
         break;
     case WIFI_EVENT_P2P_GO_STA_DISCONNECTED:
         log_info("network_user_callback->WIFI_EVENT_P2P_GO_STA_DISCONNECTED");
-        /* wifi_enter_p2p_mode(P2P_GO_MODE, WIFI_P2P_DEVICE_NAME); */
+        wifi_enter_p2p_mode(P2P_GO_MODE, WIFI_P2P_DEVICE_NAME);
         break;
     default:
         break;
@@ -640,7 +640,7 @@ static void wifi_demo_task(void *priv)
 #endif
 
     //wifi p2p
-#if 0
+#if 1
     //注意：p2p对mac地址有一定格式要求，在assign_macaddr.c已经做了更改，需要在download.c中通过-format all
     //擦除一下flash，重新生成mac地址
     wifi_enter_p2p_mode(P2P_GO_MODE, WIFI_P2P_DEVICE_NAME);

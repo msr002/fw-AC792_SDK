@@ -507,7 +507,7 @@ static void *disp_init(u8 id, u16 w, u16 h)
 #error "FB NOT SUPPORT INFO_FORMAT"
 #endif
     info.combine = 1;
-    info.z_order = 255; //最顶层
+    info.z_order = 253; //LVGL-UI层
     if (fb == NULL) {
         fb = fb_draw_open(&info);
     }

@@ -121,30 +121,29 @@ static void gui_video_dec_hide_menu(void)
 
 void gui_video_dec_confirm_btn(void)
 {
-    struct intent it;
-    init_intent(&it);
+    struct intent *it = NULL;
+    it = malloc(sizeof(struct intent));
+    init_intent(it);
 
-    it.name = "video_dec";
-    it.action = ACTION_VIDEO_DEC_SET_CONFIG;
-    it.exdata = video_dec_get_file_fd();
+    it->exdata = video_dec_get_file_fd();
 
     if (__this->is_del_file) {
-        it.data = "del:cur";
+        it->data = "del:cur";
     } else {
         if (__this->is_lock) {
             //unlock
-            it.data = "unlock:cur";
+            it->data = "unlock:cur";
             __this->is_lock = 0;
 
         } else {
             //lock
             __this->is_lock = 1;
-            it.data = "lock:cur";
+            it->data = "lock:cur";
         }
         lvgl_module_msg_send_value(GUI_MODEL_VIDEO_DEC_MSG_ID_FILE_LOCK_SHOW, __this->is_lock, 0);
     }
 
-    start_app(&it);
+    app_send_message(APP_MSG_DEC_SET_CONFIG, 1, it);
 
     lvgl_rpc_post_func(gui_video_dec_hide_menu, 0);
 }
@@ -204,21 +203,24 @@ void gui_switch_video_dec_page(void)
 
 static void video_dec_prev_next(u32 mode)
 {
-    struct intent it;
-    init_intent(&it);
-    it.name = "video_dec";
-    it.action = ACTION_VIDEO_PREV_NEXT_CONTROL;
-    it.exdata = mode;
-    start_app(&it);
+#if FILE_DISP_REVERSE_ORDER
+    if (mode == FSEL_NEXT_FILE) {
+        mode = FSEL_PREV_FILE;
+    } else {
+        mode = FSEL_NEXT_FILE;
+    }
+#endif
+    struct intent *it = NULL;
+    it = malloc(sizeof(struct intent));
+    printf("it:%p", it);
+    init_intent(it);
+    it->exdata = mode;
+    app_send_message(APP_MSG_DEC_PREV_NEXT_CONTROL, 1, it);
 }
 
 static void dec_play_pause(void)
 {
-    struct intent it;
-    init_intent(&it);
-    it.name = "video_dec";
-    it.action = ACTION_VIDEO_DEC_CONTROL;
-    start_app(&it);
+    app_send_message(APP_MSG_DEC_CONTROL, 0);
 }
 
 static int fname_handler(const char *type, u32 arg)
@@ -407,18 +409,16 @@ int gui_src_action_video_dec(int action)
         lv_obj_set_style_bg_opa(ui_scr->video_dec, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
 #endif
         app = get_current_app();
-        if (app && strcmp(app->name, "video_dec")) {
+        if (app) {
             printf("[chili] %s %d   \n", app->name, __LINE__);
             key_event_disable();
-            it.name = app->name;
-            it.action = ACTION_BACK;
-            start_app(&it);
+            app_mode_go_back();
         } else {
             break;
         }
-        it.name = "video_dec";
-        it.action = ACTION_VIDEO_DEC_MAIN;
-        start_app(&it);
+        app_mode_change_replace(APP_MODE_DEC);
+        app_send_message(APP_MSG_DEC_MAIN, 0);
+
         key_event_enable();
     }
     break;

@@ -478,7 +478,12 @@
     *(.audio_codec_code)
 
 	/********************CODEC LD Ends*************************/
-
+#if !AUDIO_LLNS_DNS_CODEC_AT_RAM
+    *(.llns_dns.const)
+    *(.llns_dns.code)
+    *(.conv_params)
+    *(.seq_params)
+#endif
     *(.media_device_code)
     *(.media_device_const)
     *(.audio_encoder_code)
@@ -699,9 +704,15 @@
     *(.freq_compressor.text.cache.L2.const)
 #endif
 
-#if AFx_GAIN_MIX_AT_RAM == 0
+#if (AFx_GAIN_MIX_AT_RAM == 0)
     *(.gain_mix.text.cache.L2.code)	
     *(.gain_mix.text.cache.L2.const)	
+#endif
+
+#if (AFx_SPECTRUM_ADV_TEXT_AT_RAM == 0)
+    *(.spectrum_adv.text)
+    *(.SPECTRUMTOOL.text)
+    *(.SPECTRUMTOOL.text.cache.L2)
 #endif
 
     . = ALIGN(4);

@@ -110,7 +110,7 @@ const u8 WIFI_COLD_START_FAST_CONNECTION = 1; //启用WIFI冷启动快连, 0为�
 #if defined CONFIG_NO_SDRAM_ENABLE
 const u8 MAX_LEN_OF_BSS_TABLE = 2; //BSS table 个数设置用于存放扫描结果，最少为1个，不能为0，个数越多占用内存越大
 #else
-const u8 MAX_LEN_OF_BSS_TABLE = 4; //BSS table 个数设置用于存放扫描结果，最少为1个，不能为0，个数越多占用内存越大
+const u8 MAX_LEN_OF_BSS_TABLE = 6; //BSS table 个数设置用于存放扫描结果，最少为1个，不能为0，个数越多占用内存越大
 #endif
 
 const u8 wifi_recv_poll = 0; //wifi接收数据方式，0为中断方式接收，1为轮询方式接收

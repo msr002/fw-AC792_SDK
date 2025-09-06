@@ -37,6 +37,9 @@ static const app_mode_table_t app_mode_table[] = {
 #if TCFG_APP_RECORD_EN
     { "recorder",       APP_MSG_RECORDER_BOTTOM,        APP_MSG_RECORDER_TOP,       APP_MODE_RECORDER },
 #endif
+#if TCFG_APP_USB_HOST_EN
+    { "usb_host_music", APP_MSG_USB_HOST_MUSIC_BOTTOM,  APP_MSG_USB_HOST_MUSIC_TOP, APP_MODE_USB_HOST},
+#endif
 #if TCFG_LOCAL_TWS_ENABLE
     { "sink_music",     APP_MSG_SINK_MUSIC_BOTTOM,      APP_MSG_SINK_MUSIC_TOP,     APP_MODE_SINK },
 #endif
@@ -136,7 +139,7 @@ void app_mode_change_replace(app_mode_t mode)
     for (int i = 0; i < ARRAY_SIZE(app_mode_table); ++i) {
         if (mode == app_mode_table[i].app_mode) {
             it.name = app_mode_table[i].app_name;
-            if (curr_mode != APP_MODE_BT && curr_mode != APP_MODE_NET) {
+            if (curr_mode != APP_MODE_BT) {
                 it.action = ACTION_REPLACE;
             }
             start_app(&it);
@@ -157,8 +160,8 @@ void app_mode_change_next(void)
     }
 
     do {
-        if (++curr_mode == APP_MODE_SINK || curr_mode < APP_MODE_LOCAL) {
-            curr_mode = APP_MODE_LOCAL;
+        if (++curr_mode == APP_MODE_SINK || curr_mode < APP_MODE_NET) {
+            curr_mode = APP_MODE_NET;
         }
 
         for (int i = 0; i < ARRAY_SIZE(app_mode_table); ++i) {

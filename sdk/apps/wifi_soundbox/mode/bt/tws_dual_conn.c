@@ -598,6 +598,16 @@ static void page_next_device(void *p)
     dual_conn_page_device();
 }
 
+void dual_conn_user_bt_connect(u8 *addr)
+{
+    add_device_2_page_list(addr, 0);
+    if (g_dual_conn.timer) {
+        sys_timeout_del(g_dual_conn.timer);
+        g_dual_conn.timer = 0;
+    }
+    dual_conn_page_device();
+}
+
 static int dual_conn_btstack_event_handler(void *evt)
 {
     struct bt_event *event = (struct bt_event *)evt;

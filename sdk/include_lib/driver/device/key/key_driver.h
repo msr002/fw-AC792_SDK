@@ -21,6 +21,7 @@ typedef enum {
     KEY_DRIVER_TYPE_BRIGHTNESS,
     KEY_DRIVER_TYPE_UART,
     KEY_DRIVER_TYPE_ASR,
+    KEY_DRIVER_TYPE_AVCTP,
 
     KEY_DRIVER_TYPE_MAX,
 } key_driver_type_t;

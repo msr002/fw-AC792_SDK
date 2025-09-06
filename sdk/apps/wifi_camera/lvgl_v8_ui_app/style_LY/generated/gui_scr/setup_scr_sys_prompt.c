@@ -19,6 +19,9 @@ lv_obj_t *setup_scr_sys_prompt(lv_ui *ui)
     lv_ui_sys_prompt *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_SYS_PROMPT);
     if (ui_scr == NULL) {
         ui_scr = lv_mem_alloc(sizeof(lv_ui_sys_prompt));
+        if (ui_scr == NULL) {
+            return NULL;
+        }
         memset(ui_scr, 0, sizeof(lv_ui_sys_prompt));
         ui->sys_prompt = ui_scr;
     }
@@ -28,7 +31,6 @@ lv_obj_t *setup_scr_sys_prompt(lv_ui *ui)
 
     //Write codes sys_prompt
     ui_scr->sys_prompt = lv_obj_create(lv_layer_top());
-    lv_group_t *def_group = lv_group_get_default();
     lv_obj_set_size(ui_scr->sys_prompt, 800, 480);
     lv_obj_set_scrollbar_mode(ui_scr->sys_prompt, LV_SCROLLBAR_MODE_OFF);
     lv_obj_clear_flag(ui_scr->sys_prompt, LV_OBJ_FLAG_CLICKABLE);
@@ -112,7 +114,7 @@ lv_obj_t *setup_scr_sys_prompt(lv_ui *ui)
 
     lv_obj_update_layout(ui_scr->sys_prompt);
     ui_scr->sys_prompt_del = false;
-    i18n_refresh_texts("sys_prompt");
+    i18n_refresh_texts(GUI_SCREEN_SYS_PROMPT);
 
     //Init events for screen
     events_init_sys_prompt(ui);

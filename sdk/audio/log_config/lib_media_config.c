@@ -363,15 +363,15 @@ const int config_wma_id3_enable  = 0;
  */
 //重复播放
 #if FILE_DEC_REPEAT_EN
-const u8 config_file_dec_repeat_en = 1;
+const int config_file_dec_repeat_en = 1;
 #else
-const u8 config_file_dec_repeat_en = 0;
+const int config_file_dec_repeat_en = 0;
 #endif
 //指定位置播放
 #if FILE_DEC_DEST_PLAY
-const u8 config_file_dec_dest_play = 1;
+const int config_file_dec_dest_play = 1;
 #else
-const u8 config_file_dec_dest_play = 0;
+const int config_file_dec_dest_play = 0;
 #endif
 //快进快退到文件end返回结束消息
 const int config_decoder_ff_fr_end_return_event_end = 0;
@@ -465,6 +465,7 @@ const int voicechange_mathfun_PLATFORM = PLATFORM_PARM_SEL;
 const int howling_freshift_PLATFORM = PLATFORM_PARM_SEL;
 const int howling_freshift_highmode_flag = 0; //移频快速模式
 const int howling_pitchshift_fastmode_flag = 1;//移频啸叫抑制快速模式使能
+const int howling_freqshift_lowdelay = 0;//0:fir分支，跟以前效果一致, 1:使用iir分支来节省延时
 
 #if TCFG_FREQUENCY_SHIFT_HOWLING_NODE_ENABLE
 const int config_audio_frequency_shift_howling_enable = 1; //啸叫抑制-移频使能
@@ -627,6 +628,8 @@ const int config_dev_sync_enable = 1;   //接到同个分流器下的多设备�
  *******************************************************************
  */
 const int config_stream_frame_debug     = 0;
+
+const int config_jlstream_scene_debug = 0xff;
 
 const char log_tag_const_v_EQ = CONFIG_DEBUG_LIB(FALSE);
 const char log_tag_const_d_EQ = CONFIG_DEBUG_LIB(FALSE);

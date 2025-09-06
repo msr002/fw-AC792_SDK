@@ -69,6 +69,7 @@ const struct task_info task_info_table[] = {
     { "systimer",            14,     SYSTIMER_STK_SIZE,                    0,    systimer_tcb_stk_q  },
     { "sys_timer",            9,     SYS_TIMER_STK_SIZE,    SYS_TIMER_Q_SIZE,    sys_timer_tcb_stk_q },
     { "thread_fork_kill",    25,     256,      0 },
+    { "dlog",                 1,     256,    128 },
 #ifdef CONFIG_MEDIA_ENABLE
 #if TCFG_ENC_AMR_16K_ENABLE //16k amr enc
     { "jlstream_",           25,    3072,      0 },
@@ -94,7 +95,8 @@ const struct task_info task_info_table[] = {
     { "aec_dbg",             13,     512,    128 },
     { "aud_capture",         24,     512,    256 },
     { "dac",                 22,     256,    128 },
-    { "spec_adv",            23,     512,    128 },
+    { "spec",                23,     512,      0 },
+    { "spec_adv",            23,     512,      0 },
     { "kws",                  3,     256,     64 },
     { "smart_voice",         11,     512,    128 },
     { "audio_vad",           11,     768,      0 },
@@ -106,6 +108,8 @@ const struct task_info task_info_table[] = {
     { "uda_main",             2,    7000,      0 },
     { "update",              21,     512,     32 },
     { "dw_update",           21,     512,     32 },
+    { "uac_play",            26,     512,     32 },
+    { "uac_record",          26,     512,      0 },
 
 #ifdef CONFIG_NET_ENABLE
     { "update_rtc_task",      1,     512,      0 },
@@ -184,6 +188,7 @@ const struct task_info task_info_table[] = {
 #ifdef CONFIG_UI_ENABLE
     { "lvgl_v8_main_task",   25,    8192,   1024 },
 #endif
+
     {0, 0},
 };
 

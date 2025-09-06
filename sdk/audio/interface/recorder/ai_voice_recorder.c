@@ -72,24 +72,52 @@ void *ai_voice_recorder_open(struct ai_voice_param *param)
 
     recorder->stream = jlstream_pipeline_parse(uuid, NODE_UUID_ADC);
     if (!recorder->stream) {
+        recorder->stream = jlstream_pipeline_parse(uuid, NODE_UUID_PDM_MIC);
+    }
+    if (!recorder->stream) {
+        recorder->stream = jlstream_pipeline_parse(uuid, NODE_UUID_IIS0_RX);
+    }
+    if (!recorder->stream) {
         goto __exit0;
     }
 
+    fmt.sample_rate = param->sample_rate;
+
     switch (param->code_type) {
     case AUDIO_CODING_OPUS:
-        //1. quality:bitrate     0:16kbps    1:32kbps    2:64kbps
-        //   quality: MSB_2:(bit7_bit6)     format_mode    //0:百度_无头.                   1:酷狗_eng+range.
-        //   quality:LMSB_2:(bit5_bit4)     low_complexity //0:高复杂度,高质量.兼容之前库.  1:低复杂度,低质量.
-        //2. sample_rate         sample_rate=16k         ignore
-        enc_fmt.quality = param->quality;
-        fmt.sample_rate = param->sample_rate;
+        //  bitrate
+        //     16000,32000,64000 这三个码率分别对应非ogg解码库
+        //     的 OPUS_SRINDEX 值为0,1,2
+        //  format
+        //     0:百度_无头.
+        //     1:酷狗_eng+range.
+        //     2:ogg封装,pc软件可播放.
+        //     3:size+rangeFinal. 源码可兼容版本.
+        //  complexity
+        //     0|1|2|3     3质量最好.速度要求最高.
+        //  frame_ms (由frame_dms / 10得出)
+        //     20|40|60|80|100 ms.
+        //  sample_rate
+        //     sample_rate=16k         ignore
+        //
+        //   注意
+        //   1. struct encoder_fmt是配置编码器私有参数
+        //   有效的参数：
+        //   complexity, format, frame_dms
+        //   不起效的参数：
+        //   bit_rate, sample_rate, ch_num, bit_width
+        enc_fmt.complexity = param->complexity;
+        enc_fmt.format = param->format_mode;
+        enc_fmt.frame_dms = param->frame_ms * 10;    //与工具保持一致，要乘以10,表示20ms
         fmt.coding_type = AUDIO_CODING_OPUS;
         break;
     case AUDIO_CODING_SPEEX:
         enc_fmt.quality = param->quality;
-        enc_fmt.complexity = 2;
-        fmt.sample_rate = param->sample_rate;
+        enc_fmt.complexity = param->complexity; //0~9
         fmt.coding_type = AUDIO_CODING_SPEEX;
+        break;
+    case AUDIO_CODING_AAC:
+        enc_fmt.format = param->format_mode; //标准头部
         break;
     default:
         goto __exit1;

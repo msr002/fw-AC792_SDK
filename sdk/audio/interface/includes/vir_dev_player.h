@@ -57,12 +57,12 @@ struct vir_player {
  * ---------------------------------------------------------*/
 
 /* 播放单个音乐文件 */
-struct vir_player *virtual_dev_play(FILE *file, struct stream_file_ops *ops, struct audio_dec_breakpoint *dbp);
+struct vir_player *virtual_dev_play(FILE *file, struct stream_file_ops *ops, struct audio_dec_breakpoint *dbp, u32 coding_type);
 
 /* 播放单个音乐文件,带有播放状态回调参数 */
 struct vir_player *virtual_dev_play_callback(FILE *file, struct stream_file_ops *ops, void *priv,
         music_player_cb_t callback,
-        struct audio_dec_breakpoint *dbp);
+        struct audio_dec_breakpoint *dbp, u32 coding_type);
 
 /* 停止播放单个音乐 */
 void virtual_dev_player_stop(struct vir_player *virtual_player);

@@ -458,11 +458,13 @@ static int pc_music_msg_handler(struct application *app, int *msg)
         break;
     case APP_MSG_SUSPEND:
 #if TCFG_USB_SLAVE_HID_ENABLE
+#if TCFG_USB_SLAVE_AUDIO_ENABLE && TCFG_USB_SLAVE_AUDIO_SPK_ENABLE
         if (pc_spk_player_runing()) {
             hid_key_handler(__this->curr_usb_id, USB_AUDIO_PP);
             os_time_dly(5);
             __this->suspend_play_flag = 1;
         }
+#endif
 #endif
         __this->suspend_flag = pc_task_stop(0xff);
         break;
@@ -719,6 +721,7 @@ REGISTER_APP_EVENT_HANDLER(pc_music_device_event) = {
     .handler    = pc_music_device_event_handler,
 };
 
+#if TCFG_USB_SLAVE_AUDIO_ENABLE && TCFG_USB_SLAVE_AUDIO_SPK_ENABLE
 #if TCFG_LOCAL_TWS_ENABLE
 static void local_tws_pc_music_start(void *priv)
 {
@@ -731,6 +734,7 @@ REGISTER_LOCAL_TWS_OPS(tws_pc_music) = {
     .audio_open = local_tws_pc_music_start,
     .get_play_status = pc_spk_player_runing,
 };
+#endif
 #endif
 
 #endif

@@ -78,12 +78,10 @@ typedef struct {
     bool enable;
     bool pair_enable;
     bool le_audio_enable;
-    u8 init_start;              //蓝牙协议栈已经开始初始化标志位
-    u8 init_ok;                 //蓝牙初始化完成标志
-    u8 exiting;                 //蓝牙正在退出
-    u8 wait_exit;               //蓝牙等待退出
-    u8 suspend_flag;
-    u8 back_to_prev_app;
+    bool init_ok;               //蓝牙初始化完成标志
+    bool exiting;               //蓝牙正在退出
+    bool suspend_flag;
+    bool back_to_prev_app;
 } bt_mode_t;
 
 static bt_mode_t bt_hdl;
@@ -93,6 +91,7 @@ u8 a2dp_support_delay_report = 1;
 
 int bt_get_unactive_remote_addr(bd_addr_t addr);
 u8 get_unactive_device_call_status(void);
+void wl_set_beaconlosttime(int sec);
 
 #include "bt_tws.c"
 #include "bt_test.c"
@@ -381,35 +380,6 @@ bool bt_app_exit_check(void)
     return TRUE;
 }
 
-#if 0
-static void bt_no_background_exit_check(void *priv)
-{
-    if (g_bt_hdl.init_ok == 0) {
-        return;
-    }
-    if (esco_player_runing() || a2dp_player_runing()) {
-        return;
-    }
-#if TCFG_USER_BLE_ENABLE && (TCFG_NORMAL_SET_DUT_MODE == 0)
-    if (BT_MODE_IS(BT_NORMAL)) {
-        bt_ble_exit();
-    }
-#endif
-
-#if THIRD_PARTY_PROTOCOLS_SEL
-    multi_protocol_bt_exit();
-#endif
-
-    btstack_exit();
-    sys_timer_del(g_bt_hdl.exit_check_timer);
-    g_bt_hdl.init_ok = 0;
-    g_bt_hdl.init_start = 0;
-    g_bt_hdl.exit_check_timer = 0;
-    bt_set_stack_exiting(0);
-    g_bt_hdl.exiting = 0;
-}
-#endif
-
 bool get_bt_connction_enable_status(void)
 {
     return __this->enable;
@@ -480,10 +450,6 @@ static void bt_connction_disable(void)
     if (__this->auto_connection_timer) {
         sys_timeout_del(__this->auto_connection_timer);
         __this->auto_connection_timer = 0;
-    }
-
-    if (__this->exit_check_timer == 0) {
-        /* __this->exit_check_timer = sys_timer_add(NULL, bt_no_background_exit_check, 10); */
     }
 
     play_tone_file(get_tone_files()->bt_close);
@@ -602,10 +568,15 @@ static int bt_tone_play_end_callback(void *priv, enum stream_event event)
 
 static int bt_mode_init(void)
 {
-    __this->init_start = 1;
-    __this->init_ok = 0;
-    __this->exiting = 0;
-    __this->wait_exit = 0;
+    __this->exiting = FALSE;
+
+    if (__this->exit_check_timer) {
+        sys_timer_del(__this->exit_check_timer);
+        __this->exit_check_timer = 0;
+        return 0;
+    }
+
+    __this->init_ok = FALSE;
     __this->phone_vol = 9;
 
     syscfg_read(CFG_BT_CALL_VOLUME, &__this->phone_vol, sizeof(__this->phone_vol));
@@ -642,57 +613,69 @@ static int bt_mode_init(void)
     return 0;
 }
 
-#if 0
-int bt_mode_try_exit()
+static void bt_no_background_exit_check(void *priv)
 {
-    putchar('k');
-
-    if (g_bt_hdl.wait_exit) {
-        //等待蓝牙断开或者音频资源释放或者电话资源释放
-        if (!g_bt_hdl.exiting) {
-            g_bt_hdl.wait_exit++;
-            if (g_bt_hdl.wait_exit > 3) {
-                //wait two round to do some hci event or other stack event
-                return 0;
-            }
-        }
-        return -EBUSY;
+    if (__this->exiting == 0) {
+        sys_timer_del(__this->exit_check_timer);
+        __this->exit_check_timer = 0;
+        return;
     }
-    g_bt_hdl.wait_exit = 1;
-    g_bt_hdl.exiting = 1;
-    //only need to do once
-#if (TCFG_BT_BACKGROUND_ENABLE)
-    bt_background_suspend();
-#else
-    bt_nobackground_exit();
+
+    if (esco_player_runing() || a2dp_player_runing()) {
+        return;
+    }
+
+#if THIRD_PARTY_PROTOCOLS_SEL
+    multi_protocol_bt_exit();
 #endif
-    return -EBUSY;
+
+    btstack_exit();
+
+    bt_set_stack_exiting(0);
+
+    sys_timer_del(__this->exit_check_timer);
+    __this->exit_check_timer = 0;
+
+    __this->init_ok = FALSE;
+    __this->exiting = FALSE;
 }
 
-static int app_bt_exit()
+static int bt_mode_exit(void)
 {
-    app_send_message(APP_MSG_EXIT_MODE, APP_MODE_BT);
+    __this->exiting = TRUE;
+    __this->enable = FALSE;
 
-#if TCFG_CODE_RUN_RAM_BT_CODE
-    if (bt_code_run_addr) {
-        mem_stats();
-
-        spin_lock(&bt_code_ram);
-        code_movable_unload(__bt_movable_region_start, __bt_movable_slot_start, __bt_movable_slot_end);
-        spin_unlock(&bt_code_ram);
-
-        phy_free(bt_code_run_addr);
-        bt_code_run_addr = NULL;
-        mem_stats();
-        printf("\n-------------bt_exit ok-------------\n");
-    }
+#if TCFG_LOCAL_TWS_ENABLE
+    local_tws_exit_mode();
 #endif
 
-    sys_auto_shut_down_disable();
+#if TCFG_USER_TWS_ENABLE
+    tws_dual_conn_close();
+    bt_tws_poweroff();
+#else
+    dual_conn_close();
+#endif
+
+    bt_set_stack_exiting(1);
+
+    bt_cmd_prepare(USER_CTRL_WRITE_SCAN_DISABLE, 0, NULL);
+    bt_cmd_prepare(USER_CTRL_WRITE_CONN_DISABLE, 0, NULL);
+    bt_cmd_prepare(USER_CTRL_PAGE_CANCEL, 0, NULL);
+    bt_cmd_prepare(USER_CTRL_CONNECTION_CANCEL, 0, NULL);
+    bt_cmd_prepare(USER_CTRL_POWER_OFF, 0, NULL);
+
+    if (__this->auto_connection_timer) {
+        sys_timeout_del(__this->auto_connection_timer);
+        __this->auto_connection_timer = 0;
+    }
+
+    if (__this->exit_check_timer == 0) {
+        __this->exit_check_timer = sys_timer_add(NULL, bt_no_background_exit_check, 40);
+        log_info("set exit timer");
+    }
 
     return 0;
 }
-#endif
 
 static void bt_music_app_suspend(void)
 {
@@ -1052,7 +1035,7 @@ static int bt_state_machine(struct application *app, enum app_state state,
     case APP_STA_STOP:
         break;
     case APP_STA_DESTROY:
-        /* bt_mode_exit(); */
+        bt_mode_exit();
         break;
     case APP_STA_COMPLETE:
 #if TCFG_LE_AUDIO_STREAM_ENABLE

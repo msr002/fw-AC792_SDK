@@ -4082,8 +4082,7 @@
           "defaultValue": [
            "CDC_CLASS",
            "MASSSTORAGE_CLASS",
-           "SPEAKER_CLASS",
-           "MIC_CLASS"
+           "UVC_CLASS"
           ],
           "span": 24,
           "showLabel": true,
@@ -4166,8 +4165,7 @@
           "defaultValue": [
            "CDC_CLASS",
            "MASSSTORAGE_CLASS",
-           "SPEAKER_CLASS",
-           "MIC_CLASS"
+           "UVC_CLASS"
           ],
           "span": 24,
           "showLabel": true,

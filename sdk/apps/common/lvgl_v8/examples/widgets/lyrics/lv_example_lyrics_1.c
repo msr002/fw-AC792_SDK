@@ -60,7 +60,7 @@ void lv_example_lyrics_1(void)
         assert(letter_num < LYRICS_LETTER_NUM_MAX);   // 歌词字符数量过大，有需求再修改
     }
 
-    lv_obj_t *obj = lv_lyrics_create(lv_scr_act(), CONFIG_FONT_TTF_PATH, 64, letter_buf, letter_num);
+    lv_obj_t *obj = lv_lyrics_create(lv_scr_act(), CONFIG_FONT_TTF_PATH, 64, 0, letter_buf, letter_num);
     if (obj == NULL) {
         printf("lv_lyrics_create is fail!!");
         goto example_exit;

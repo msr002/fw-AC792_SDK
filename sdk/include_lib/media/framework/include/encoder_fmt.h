@@ -14,7 +14,7 @@ struct encoder_fmt {
     u8 sw_hw_option;
     u8 ch_num;
     u8 bit_width;
-    u8 no_header;
+    u8 format;
     u16 frame_dms;
     u32 bit_rate;
     u32 sample_rate;

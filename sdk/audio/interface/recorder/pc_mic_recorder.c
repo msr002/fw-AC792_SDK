@@ -60,11 +60,13 @@ static void pc_mic_recorder_callback(void *private_data, int event)
         int err = jlstream_set_node_param(NODE_UUID_VOLUME_CTRLER, "Vol_PcMic", (void *)&cfg, sizeof(struct volume_cfg));
         log_info("pc mic vol: %d, ret: %d", volume, err);
 #if TCFG_AUDIO_CVP_OUTPUT_WAY_IIS_ENABLE && TCFG_IIS_NODE_ENABLE
+#if TCFG_USB_SLAVE_AUDIO_ENABLE && TCFG_USB_SLAVE_AUDIO_SPK_ENABLE
         /*打开pc mic，没有开skp，忽略外部参考数据*/
         if (!pc_spk_player_runing() || pc_spk_player_mute_status()) {
             log_info("CVP_OUTWAY_REF_IGNORE");
             audio_cvp_ioctl(CVP_OUTWAY_REF_IGNORE, 1, NULL);
         }
+#endif
 #endif
         break;
     }
@@ -84,7 +86,7 @@ struct pc_mic_recorder *pc_mic_recorder_open(struct stream_fmt *fmt)
         return NULL;
     }
 
-    recorder->stream = jlstream_pipeline_parse(uuid, NODE_UUID_ADC);
+    recorder->stream = jlstream_pipeline_parse_by_node_name(uuid, "USB_ADC");
 
     if (!recorder->stream) {
         goto __exit0;

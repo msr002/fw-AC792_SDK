@@ -50,6 +50,8 @@ MEMORY
     icache0_ram(rw)     : ORIGIN =  0x3c8000-((FREE_ICACHE0_WAY)*4K), LENGTH = FREE_ICACHE0_WAY*4K
     icache1_ram(rw)     : ORIGIN =  0x3d8000-((FREE_ICACHE1_WAY)*4K), LENGTH = FREE_ICACHE1_WAY*4K
     video_ram(rwx)      : ORIGIN =  0x7f00000, LENGTH = VIDEO_RAM_SIZE
+
+    dlog0(r)     	  : ORIGIN = 0x20000000, LENGTH = 0x100000
 }
 
 SECTIONS
@@ -241,6 +243,81 @@ SECTIONS
         *(.boot_info_dma)
         . = ALIGN(4); // must at tail, make ram0_data size align 4
     } > boot_info
+
+
+    . = ORIGIN(dlog0);
+    /* .dlog_data (NOLOAD):SUBALIGN(4) */
+    .dlog_data :SUBALIGN(4)
+    {
+        dlog_seg_begin = .;
+        // 头部的0x100空间
+        KEEP(*(.dlog.rodata.head))
+        /* . = 0x100 + ORIGIN(dlog0); */
+        . = ALIGN(0x100);
+
+        dlog_str_tab_seg_begin = .;
+        dlog_str_tab_seg0_begin = .;
+        *(.dlog.rodata.str_tab.0)
+
+        dlog_str_tab_seg1_begin = .;
+        *(.dlog.rodata.str_tab.1)
+
+        dlog_str_tab_seg2_begin = .;
+        *(.dlog.rodata.str_tab.2)
+
+        dlog_str_tab_seg3_begin = .;
+        *(.dlog.rodata.str_tab.3)
+
+        dlog_str_tab_seg4_begin = .;
+        *(.dlog.rodata.str_tab.4)
+
+        dlog_str_tab_seg5_begin = .;
+        *(.dlog.rodata.str_tab.5)
+
+        dlog_str_tab_seg6_begin = .;
+        *(.dlog.rodata.str_tab.6)
+
+        dlog_str_tab_seg7_begin = .;
+        *(.dlog.rodata.str_tab.7)
+
+        dlog_str_tab_segAll_begin = .;
+        *(.dlog.rodata.str_tab*)
+        dlog_str_tab_segAll_end = .;
+        dlog_str_tab_seg_end = .;
+
+        . = ALIGN(32);
+        dlog_str_seg_begin = .;
+        dlog_str_seg0_begin = .;
+        *(.dlog.rodata.string.0)
+
+        dlog_str_seg1_begin = .;
+        *(.dlog.rodata.string.1)
+
+        dlog_str_seg2_begin = .;
+        *(.dlog.rodata.string.2)
+
+        dlog_str_seg3_begin = .;
+        *(.dlog.rodata.string.3)
+
+        dlog_str_seg4_begin = .;
+        *(.dlog.rodata.string.4)
+
+        dlog_str_seg5_begin = .;
+        *(.dlog.rodata.string.5)
+
+        dlog_str_seg6_begin = .;
+        *(.dlog.rodata.string.6)
+
+        dlog_str_seg7_begin = .;
+        *(.dlog.rodata.string.7)
+
+        dlog_str_segAll_begin = .;
+        *(.dlog.rodata.string*)
+        dlog_str_segAll_end = .;
+        dlog_str_seg_end = .;
+
+        dlog_seg_end = .;
+    } > dlog0
 
 /********************************************/
     //dcache_ram由于设计时CPU0访问优先级总比CPU1高，导致双核不能当代码区会导致内核死锁，只能用来做数据存储

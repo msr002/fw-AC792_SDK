@@ -124,7 +124,7 @@
 #define CONFIG_UI_FILE_SAVE_IN_RESERVED_EXPAND_ZONE //UI资源打包后放在扩展预留区
 #endif
 
-#if defined CONFIG_AUDIO_ENABLE && !defined CONFIG_SDFILE_EXT_ENABLE
+#if defined CONFIG_MEDIA_ENABLE && !defined CONFIG_SDFILE_EXT_ENABLE
 //#define CONFIG_VOICE_PROMPT_FILE_SAVE_IN_RESERVED_EXPAND_ZONE //AUDIO资源打包后放在扩展预留区
 #endif
 
@@ -454,15 +454,11 @@
 
 #define TCFG_BT_MODE                            BT_NORMAL
 
-#define BT_EMITTER_EN                           1
-#define BT_RECEIVER_EN                          2
-
 #define TCFG_POWER_ON_ENABLE_EMITTER            0   //开机自动打开发射器
 #define TCFG_POWER_ON_ENABLE_BT                 0   //开机自动打开经典蓝牙
 #define TCFG_POWER_ON_ENABLE_BLE                0   //开机自动打开BLE
 #define TCFG_USER_BT_CLASSIC_ENABLE             1   //经典蓝牙功能
 #define TCFG_USER_BLE_ENABLE                    1   //BLE功能使能
-#define TCFG_USER_EMITTER_ENABLE                0   //蓝牙发射功能
 #define TCFG_BT_DUAL_CONN_ENABLE                1   //经典蓝牙支持同时连接2台设备
 
 #endif
@@ -580,22 +576,14 @@
 #define CUSTOM_DEMO_EN                          (1 << 19)   // 第三方协议的demo，用于示例客户开发自定义协议
 #define MULTI_BOX_ADV_EN                        (1 << 20)
 #define MIJIA_EN                                (1 << 21)
+#define CLIENT_EN                               (1 << 27)
 #define DUEROS_EN                               (1 << 28)
 #define NET_CFG_EN                              (1 << 29)
 #define LE_HOGP_EN                              (1 << 30)
 #define ALIPAY_EN                               (1 << 31)
 
 #if TCFG_THIRD_PARTY_PROTOCOLS_ENABLE
-#if TCFG_PAY_ALIOS_ENABLE
-#define ALIPAY_SEL                              ALIPAY_EN
-#else
-#define ALIPAY_SEL                              0
-#endif
-#if TCFG_AI_SERVER == TCFG_DUER_ENABLE
-#define THIRD_PARTY_PROTOCOLS_SEL               ((TCFG_THIRD_PARTY_PROTOCOLS_SEL & ~NET_CFG_EN) | DUEROS_EN)
-#else
-#define THIRD_PARTY_PROTOCOLS_SEL               (TCFG_THIRD_PARTY_PROTOCOLS_SEL|ALIPAY_SEL)
-#endif
+#define THIRD_PARTY_PROTOCOLS_SEL               TCFG_THIRD_PARTY_PROTOCOLS_SEL
 #endif
 
 #ifndef THIRD_PARTY_PROTOCOLS_SEL
@@ -622,12 +610,34 @@
 #endif
 
 
-#ifdef CONFIG_RELEASE_ENABLE
+//*********************************************************************************//
+//                             异常记录/离线log配置                                //
+//*********************************************************************************//
+#if !TCFG_DEBUG_UART_ENABLE
+#define TCFG_DEBUG_DLOG_ENABLE                  0    // 离线log功能
+#define TCFG_DEBUG_DLOG_FLASH_SEL               0    // 选择log保存到内置flash还是外置flash; 0:内置flash; 1:外置flash
+#define TCFG_DLOG_FLASH_START_ADDR              0    // 配置外置flash用于存储dlog和异常数据的区域起始地址
+#define TCFG_DLOG_FLASH_REGION_SIZE             (512 * 1024)    // 配置外置flash用于存储dlog和异常数据的区域大小
+#if (TCFG_DEBUG_DLOG_ENABLE && TCFG_DEBUG_DLOG_FLASH_SEL)
+#if (!defined(TCFG_NORFLASH_DEV_ENABLE) || (TCFG_NORFLASH_DEV_ENABLE == 0))
+#undef TCFG_NORFLASH_DEV_ENABLE
+#define TCFG_NORFLASH_DEV_ENABLE                1    // 使能外置flash驱动
+#define TCFG_NORFLASH_START_ADDR                0    // 配置外置flash起始地址
+#define TCFG_NORFLASH_SIZE                      (512 * 1024)   // 配置外置flash大小
+#endif
+#endif
+#define TCFG_DEBUG_DLOG_RESET_ERASE             0    // 开机擦除flash的log数据
+#define TCFG_DEBUG_DLOG_AUTO_FLUSH_TIMEOUT     30    // 主动刷新的超时时间(当指定时间没有刷新过缓存数据到flash, 则主动刷新)(单位秒)
+#define TCFG_DEBUG_DLOG_UART_TX_PIN            TCFG_DEBUG_PORT   // dlog串口打印的引脚
+#endif
+
+#if defined CONFIG_RELEASE_ENABLE || TCFG_DEBUG_DLOG_ENABLE
 #define LIB_DEBUG    1
 #else
 #define LIB_DEBUG    1
 #endif
 #define CONFIG_DEBUG_LIB(x)         (x & LIB_DEBUG)
+
 
 #endif
 

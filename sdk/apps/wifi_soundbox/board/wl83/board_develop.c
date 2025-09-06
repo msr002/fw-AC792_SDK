@@ -689,105 +689,6 @@ const struct adkey_platform_data *get_adkey_platform_data(void)
 #endif
 
 
-#ifdef CONFIG_AUDIO_ENABLE
-#if TCFG_AUDIO_DAC_ENABLE
-static const struct dac_platform_data dac_data = {
-    .pa_auto_mute           = TCFG_AUDIO_DAC_PA_AUTO_MUTE_ENABLE,
-    .pa_mute_port           = TCFG_AUDIO_DAC_PA_MUTE_PORT,
-    .pa_mute_value          = TCFG_AUDIO_DAC_PA_MUTE_LEVEL,
-    .differ_output          = TCFG_AUDIO_DAC_DIFFER_OUTPUT_ENABLE,
-    .hw_channel             = TCFG_AUDIO_DAC_HW_CHANNEL,
-#if !TCFG_AUDIO_DAC_DIFFER_OUTPUT_ENABLE && TCFG_AUDIO_DAC_HW_CHANNEL == (AUDIO_DAC_CH_L | AUDIO_DAC_CH_R)
-    .ch_num                 = 2,
-#else
-    .ch_num                 = 1,
-#endif
-    .vcm_init_delay_ms      = TCFG_AUDIO_DAC_VCM_INIT_DELAY_MS,
-    .trim_en                = 0,
-    .fade_enable            = 1,
-    .fade_points_step       = 1,
-    .fade_volume_step       = 1,
-    .mute_delay_ms          = TCFG_AUDIO_DAC_PA_MUTE_DELAY_MS,
-#ifdef CONFIG_AEC_USE_PLAY_MUSIC_ENABLE
-    .sr_points              = 1920,
-#endif
-};
-#endif
-
-#if TCFG_AUDIO_ADC_ENABLE
-static const struct adc_platform_data adc_data = {
-    .mic_port               = TCFG_MIC_IO_PORT,
-    .linein_port            = TCFG_LINEIN_IO_PORT,
-    .mic_ch_num             = TCFG_MIC_CHANNEL_NUM,
-    .linein_ch_num          = TCFG_LINEIN_CHANNEL_NUM,
-    .all_channel_open       = TCFG_AUDIO_ADC_ALL_CHANNEL_OPEN,
-    .dmic_enable            = TCFG_DMIC_ENABLE,
-    .dmic_sclk_fre          = TCFG_DMIC_SCLK_FREQUENCY,
-    .dmic_io_sclk           = TCFG_DMIC_IO_SCLK,
-    .dmic_io_idat0          = TCFG_DMIC_IO_IDAT0,
-    .dmic_io_idat1          = TCFG_DMIC_IO_IDAT1,
-    .dmic_init_delay_ms     = 150,
-    /* .dump_num            = 320, */
-};
-#endif
-
-#if TCFG_ALNK_ENABLE
-static const struct alnk_platform_data alnk_data = {
-    .port                   = TCFG_ALNK_PORTS,   ///< [0]MCLK [1]LRCLK [2]SCLK [3]DAT0 [4]DAT1 [5]DAT2 [6]DAT3
-    .channel_in             = TCFG_ALNK_CHANNLE_IN_MAP,
-    .channel_out            = TCFG_ALNK_CHANNLE_OUT_MAP,
-    .data_width             = TCFG_ALNK_DATA_WIDTH,
-    .mode                   = TCFG_ALNK_MODE,
-    .dma_mode               = TCFG_ALNK_DMA_MODE,
-    .slave_mode             = TCFG_ALNK_SLAVE_MODE_ENABLE,
-    .mclk_src               = TCFG_ALNK_MCLK_SRC,
-    .update_edge            = TCFG_ALNK_UPDATE_EDGE,
-#if TCFG_ALNK_DATA_WIDTH == ALNK_DATA_WIDTH_24_BIT
-    .dec_width_16_to_24     = 1,
-    .enc_width_24_to_32     = 1,
-#endif
-};
-#endif
-
-#if TCFG_PLNK_ENABLE
-static const struct plnk_platform_data plnk_data = {
-    .hw_channel             = TCFG_PLNK_HW_CHANNEL,
-    .share_data_io          = TCFG_PLNK_INPUT_DAT_SHARE_IO_ENABLE,
-    .sclk_io                = TCFG_PLNK_SCLK_IO,
-    .dat0_io                = TCFG_PLNK_INPUT_DAT0_IO,
-    .dat1_io                = TCFG_PLNK_INPUT_DAT1_IO,
-    .sclk_fre               = TCFG_PLNK_SCLK_FREQUENCY,
-    .ch0_mode               = TCFG_PLNK_CH0_SAMPLE_MODE,
-    .ch1_mode               = TCFG_PLNK_CH1_SAMPLE_MODE,
-    .order                  = TCFG_PLNK_CIC_ORDER,
-    .dfdly_m                = TCFG_PLNK_CIC_DFDLY_M,
-    .dc_cancelling_filter   = 4,
-    .init_delay_ms          = 80,
-    .dump_points_num        = 0,
-};
-#endif
-
-static const struct audio_pf_data audio_pf_d = {
-#if TCFG_AUDIO_DAC_ENABLE
-    .dac_pf_data            = &dac_data,
-#endif
-#if TCFG_AUDIO_ADC_ENABLE
-    .adc_pf_data            = &adc_data,
-#endif
-#if TCFG_ALNK_ENABLE
-    .alnk_pf_data           = &alnk_data,
-#endif
-#if TCFG_PLNK_ENABLE
-    .plnk_pf_data           = &plnk_data,
-#endif
-};
-
-static const struct audio_platform_data audio_data = {
-    .private_data           = (void *)&audio_pf_d,
-};
-#endif
-
-
 #if TCFG_ETH_ENABLE
 NET_PLATFORM_DATA_BEGIN(net_phy_data)
     .name                   = TCFG_ETH_PHY_DEVICE_NAME,
@@ -1071,6 +972,12 @@ REGISTER_DEVICES(device_table) = {
 #if TCFG_PAP_ENABLE
     { "pap", &pap_dev_ops, (void *)&pap_data }, ///< MCU屏使用了pap，pap设备需要放在lcd前面注册
 #endif
+#if TCFG_SPI0_ENABLE
+    { "spi0", &spi_dev_ops, (void *)&spi0_data },
+#endif
+#if TCFG_SPI1_ENABLE
+    { "spi1", &spi_dev_ops, (void *)&spi1_data },
+#endif
 #if TCFG_SPI2_ENABLE
     { "spi2", &spi_dev_ops, (void *)&spi2_data }, ///< SPI屏使用了spi2，spi2设备需要放在lcd前面注册
 #endif
@@ -1143,13 +1050,6 @@ REGISTER_DEVICES(device_table) = {
     { "can", &can_dev_ops, (void *)&can_data },
 #endif
 
-#if TCFG_SPI0_ENABLE
-    { "spi0", &spi_dev_ops, (void *)&spi0_data },
-#endif
-#if TCFG_SPI1_ENABLE
-    { "spi1", &spi_dev_ops, (void *)&spi1_data },
-#endif
-
 #if TCFG_UART0_ENABLE
     { "uart0", &uart_dev_ops, (void *)&uart0_data },
 #endif
@@ -1173,10 +1073,6 @@ REGISTER_DEVICES(device_table) = {
 #else
     { "fat_nor", &norflash_sfc_dev_ops, (void *)&norflash_sfc_dev_data },
 #endif
-#endif
-
-#ifdef CONFIG_AUDIO_ENABLE
-    { "audio", &audio_dev_ops, (void *)&audio_data },
 #endif
 
 #ifdef CONFIG_VIDEO_ENABLE
@@ -1538,12 +1434,6 @@ void board_early_init(void)
 
 void board_init(void)
 {
-#if defined CONFIG_AUDIO_ENABLE
-#if TCFG_AUDIO_DAC_ENABLE || TCFG_AUDIO_ADC_ENABLE
-    dac_early_init(dac_data.hw_channel, TCFG_AUDIO_DAC_VCM_CAP_ENABLE);
-#endif
-#endif
-
 #if TCFG_ADKEY_ENABLE || (defined CONFIG_BT_ENABLE || TCFG_WIFI_ENABLE) || TCFG_RTC_ENABLE
     adc_init();
 #endif

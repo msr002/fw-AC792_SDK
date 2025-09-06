@@ -9,7 +9,11 @@ extern "C" {
 
 #include "../gui_guider.h"
 //screen action function
+#if LV_USE_GUIBUILDER_SIMULATOR && LV_USE_CUSTOM_SCR_ACTION_CB
+extern void gui_scr_action_cb(gui_screen_id_t id, gui_screen_action_t action);
+#else
 extern GUI_WEAKREF void gui_scr_action_cb(gui_screen_id_t id, gui_screen_action_t action);
+#endif
 
 #ifdef __cplusplus
 }

@@ -68,13 +68,19 @@ struct linein_player *linein_player_open(void)
         goto __exit0;
     }
 
-    //设置中断点数
+#if TCFG_USER_EMITTER_ENABLE
+    extern u8 *get_cur_connect_emitter_mac_addr(void);
+    u8 *bt_addr = get_cur_connect_emitter_mac_addr();
+    if (bt_addr) {
+        jlstream_node_ioctl(player->stream, NODE_UUID_A2DP_TX, NODE_IOC_SET_BTADDR, (int)bt_addr);
+    }
+#endif
 
+    //设置中断点数
 #ifdef AUDIO_LINEIN_IRQ_POINTS
     jlstream_node_ioctl(player->stream, NODE_UUID_SOURCE, NODE_IOC_SET_PRIV_FMT, AUDIO_LINEIN_IRQ_POINTS);
 #else
     jlstream_node_ioctl(player->stream, NODE_UUID_SOURCE, NODE_IOC_SET_PRIV_FMT, AUDIO_ADC_IRQ_POINTS);
-
 #endif
     jlstream_set_callback(player->stream, player->stream, linein_player_callback);
     jlstream_set_scene(player->stream, STREAM_SCENE_LINEIN);

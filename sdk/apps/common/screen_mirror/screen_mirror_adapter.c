@@ -12,6 +12,19 @@
 #include "debug.h"
 
 #ifdef CONFIG_NET_SCR
+
+typedef struct jpg_node {
+    struct list_head entry;
+    struct __JPG_INFO *jpg;
+} jpg_node_t;
+
+struct __JPG_INFO {
+    u32 src_w;
+    u32 src_h;
+    u32 buf_len;
+    u8  buf[];
+};
+
 struct scr_handle {
     u8 channel;
     u8 ref;
@@ -28,21 +41,25 @@ struct scr_handle {
     u8 fps;
     u32 old_frame_seq;
 
-    int pid;
+    int pid;	// 收包线程
+    int push_pid;	// 推送jpg线程
+
+    struct list_head queue_head;
+
+    OS_MUTEX queue_lock;
+    OS_SEM queue_sem;
+
+    u8 queue_cnt;
 };
 
-struct __JPG_INFO {
-    u32 src_w;
-    u32 src_h;
-    u32 buf_len;
-    u8  buf[];
-};
 
 #define SCR_THREAD_TASK_NAME    "scr_recv"
+#define SCR_PUSH_THREAD_TASK_NAME    "scr_recv_push"
 #define JPG_BUF_MAX_SIZE  250 * 1024
 #define CHECK_CODE 0x88
 #define CHECK_CODE_NUM 32
 #define UDP_MAX_RECV  1 * 1472
+#define UDP_JPG_QUEUE_MAX_NUM 5
 static u8 recv_buf[UDP_MAX_RECV];
 
 
@@ -117,6 +134,9 @@ static int scr_init(pipe_plugin_t *plugin)
     plugin->private_data = hdl;
     g_scr_used[channel] = hdl;
     hdl->state = PLUGIN_INITED;
+
+    os_mutex_create(&hdl->queue_lock);
+    os_sem_create(&hdl->queue_sem, 0);
 
     return 0;
 }
@@ -213,7 +233,6 @@ static int get_jpg_packet(struct scr_handle *hdl, char *buf, int len, struct __J
     do {
         struct frm_head  *head_info = (struct frm_head *)(buf + position);
         frame_type = head_info->type & 0x7F;
-
         cur_frame_seq = head_info->seq;
         frame_offset = head_info->offset;
         slice_data_len = head_info->payload_size;
@@ -250,7 +269,7 @@ static int get_jpg_packet(struct scr_handle *hdl, char *buf, int len, struct __J
 
                 //校验是不是接收到重复的包
                 if (bytecmp((u8 *)jpg->buf + frame_offset, CHECK_CODE, CHECK_CODE_NUM) != 0) {
-                    log_debug("repeat the packet.\n");
+                    // log_debug("repeat the packet.\n");
                     break;
                 }
 
@@ -259,7 +278,7 @@ static int get_jpg_packet(struct scr_handle *hdl, char *buf, int len, struct __J
                 if (total_payload_len == frame_size) { //如果数据量相等,说明帧数据接收完成
                     jpg->buf_len = total_payload_len;
                     finish = 1;
-                    log_debug("jpg recv finish.");
+                    //log_debug("jpg recv finish");
                     return 0; //返回0表示完成
                 }
             } while (0);
@@ -293,9 +312,9 @@ static int save_jpg_data(struct __JPG_INFO *image)
 
 static void scr_recv_task(void *priv)
 {
-
     u32 tstart = 0, tdiff = 0;
     u8 fps_cnt = 0;
+
     int finish_flag;
     int recv_len = 0;
 
@@ -331,10 +350,9 @@ static void scr_recv_task(void *priv)
     //外部传进来的
     jpg->src_w = hdl->src_width;
     jpg->src_h = hdl->src_height;
-
     while (hdl->state == PLUGIN_RUNNING) {
 
-        if (hdl->socket_type == SOCK_STREAM) {
+        if (hdl->socket_type == SOCK_STREAM) { //tcp
             //接收头部信息
             struct frm_head head_info;
             recv_len = sock_recv(hdl->cli_sock_hdl, &head_info, sizeof(struct frm_head), MSG_WAITALL);
@@ -355,7 +373,7 @@ static void scr_recv_task(void *priv)
             }
             jpg->buf_len = recv_len;
             finish_flag = 0;
-        } else {
+        } else {	//udp
             recv_len = sock_recvfrom(hdl->sock_hdl, recv_buf, sizeof(recv_buf), 0, &cli_addr, &addrlen);
             if (recv_len < 0) {
                 log_warn("recv len = %d", recv_len);
@@ -370,11 +388,38 @@ static void scr_recv_task(void *priv)
         }
 
         if (!finish_flag) {
-            //送出去
-            struct video_buffer b = {0};
-            b.baddr = jpg->buf;
-            b.len = jpg->buf_len;
-            message_request(plugin->port, JPEG_DEC_ONE_FRAME | MESSAGE_NEXT, &b);
+            /* 先判断队列是否还允许插入 */
+            os_mutex_pend(&hdl->queue_lock, 0);
+            if (hdl->queue_cnt >= UDP_JPG_QUEUE_MAX_NUM) {
+                os_mutex_post(&hdl->queue_lock);
+                continue;
+            }
+            os_mutex_post(&hdl->queue_lock);
+
+            jpg_node_t *node = (jpg_node_t *)malloc(sizeof(jpg_node_t));
+            if (!node) {
+                log_error("jpg_node malloc failed");
+                continue;
+            }
+
+            node->jpg = malloc(sizeof(struct __JPG_INFO) + jpg->buf_len);
+            if (!node->jpg) {
+                log_error("jpg buf malloc failed");
+                free(node);
+                continue;
+            }
+
+            memcpy(node->jpg, jpg, sizeof(struct __JPG_INFO));
+            memcpy(node->jpg->buf, jpg->buf, jpg->buf_len);
+
+            INIT_LIST_HEAD(&node->entry);
+
+            os_mutex_pend(&hdl->queue_lock, 0);
+            list_add_tail(&node->entry, &hdl->queue_head);
+            hdl->queue_cnt++;
+            os_mutex_post(&hdl->queue_lock);
+
+            os_sem_post(&hdl->queue_sem);
             finish_flag = -1;
             fps_cnt++;
 #if 0
@@ -383,8 +428,6 @@ static void scr_recv_task(void *priv)
 #endif
         }
 
-        //为了拉开帧间隔,保证disp处理显示
-        os_time_dly(3);
         if (!tstart) {
             tstart = timer_get_ms();
         } else {
@@ -394,6 +437,45 @@ static void scr_recv_task(void *priv)
                 tstart = 0;
                 fps_cnt = 0;
             }
+        }
+
+    }
+    free(jpg);
+}
+
+/* jpg推送线程 */
+static void jpg_push_task(void *priv)
+{
+    pipe_plugin_t *plugin = (pipe_plugin_t *)priv;
+    struct scr_handle *hdl = (struct scr_handle *)plugin->private_data;
+
+    while (hdl->state == PLUGIN_RUNNING) {
+        os_sem_pend(&hdl->queue_sem, 0);
+
+        if (hdl->state != PLUGIN_RUNNING) {
+            break;
+        }
+
+        os_mutex_pend(&hdl->queue_lock, 0);
+        if (list_empty(&hdl->queue_head)) {
+            os_mutex_post(&hdl->queue_lock);
+            continue;
+        }
+
+        jpg_node_t *node = list_first_entry(&hdl->queue_head, jpg_node_t, entry);
+        list_del(&node->entry);
+        hdl->queue_cnt--;
+        os_mutex_post(&hdl->queue_lock);
+
+        if (node) {
+            //推送jpg
+            struct video_buffer b = {0};
+            b.baddr = node->jpg->buf;
+            b.len = node->jpg->buf_len;
+            message_request(plugin->port, JPEG_DEC_ONE_FRAME | MESSAGE_NEXT, &b);
+
+            free(node->jpg);
+            free(node);
         }
     }
 }
@@ -415,10 +497,20 @@ static int scr_start(pipe_plugin_t *plugin, int source_channel)
         log_debug("%s start. ref: %d\r\n", plugin->name, hdl->ref);
     } else {
         hdl->state = PLUGIN_RUNNING;
+
+        INIT_LIST_HEAD(&hdl->queue_head);
+        hdl->queue_cnt  = 0;
+
         char task_name[32] = {0};
         sprintf(task_name, SCR_THREAD_TASK_NAME"%d", hdl->channel);
         if (!hdl->pid) {
             thread_fork(task_name, 22, 1024, 32, &hdl->pid, scr_recv_task, plugin);
+        }
+
+        char push_task_name[32] = {0};
+        sprintf(push_task_name, SCR_PUSH_THREAD_TASK_NAME"%d", hdl->channel);
+        if (!hdl->push_pid) {
+            thread_fork(push_task_name, 22, 1024, 32, &hdl->push_pid, jpg_push_task, plugin);
         }
     }
 
@@ -444,6 +536,20 @@ static int scr_stop(pipe_plugin_t *plugin, int source_channel)
 
     hdl->state = PLUGIN_PAUSED;
 
+    os_mutex_pend(&hdl->queue_lock, 0);
+    struct list_head *pos, *n;
+    list_for_each_safe(pos, n, &hdl->queue_head) {
+        jpg_node_t *node = list_entry(pos, jpg_node_t, entry);
+        list_del(pos);
+        free(node->jpg);
+        free(node);
+
+    }
+
+    INIT_LIST_HEAD(&hdl->queue_head);
+    os_mutex_post(&hdl->queue_lock);
+
+    os_sem_post(&hdl->queue_sem);  //唤醒一次结束线程
     return 0;
 }
 
@@ -473,6 +579,20 @@ static int scr_reset(pipe_plugin_t *plugin, int source_channel)
     net_scr_sock_uninit(hdl);
 
     hdl->state = PLUGIN_UNINIT;
+    os_mutex_pend(&hdl->queue_lock, 0);
+    struct list_head *pos, *n;
+    list_for_each_safe(pos, n, &hdl->queue_head) {
+        jpg_node_t *node = list_entry(pos, jpg_node_t, entry);
+        list_del(pos);
+        free(node->jpg);
+        free(node);
+
+    }
+
+    INIT_LIST_HEAD(&hdl->queue_head);
+    os_mutex_post(&hdl->queue_lock);
+
+    os_sem_post(&hdl->queue_sem);  //唤醒一次结束线程
 
     return 0;
 }

@@ -8,9 +8,13 @@
 typedef struct {
     char  wideband;
     char  mode;
+    u8    lite;
     float AggressFactor;
     float MinSuppress;
     float NoiseLevel;
+    float eng_gain;
+    float output16;
+    float *noise_suppress_energy;
 } noise_suppress_param;
 
 int noise_suppress_frame_point_query(noise_suppress_param *param);
@@ -34,6 +38,7 @@ enum {
 * (2)LOWCUTTHR : 设定经过降噪后的信号清0阈值，低于此阈值的信号会被清0。
 *                主要为了应对硬件FFT精度不够，反变换太小的值时会出现噪声。
 */
+
 
 /******************************* DNS ***************************/
 /*dns参数*/
