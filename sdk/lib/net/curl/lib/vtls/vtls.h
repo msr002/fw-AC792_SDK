@@ -169,7 +169,7 @@ CURLcode Curl_cf_ssl_proxy_insert_after(struct Curl_cfilter *cf_at,
  * that will first come into effect when connecting.
  */
 struct ssl_config_data *Curl_ssl_get_config(struct Curl_easy *data,
-                                            int sockindex);
+        int sockindex);
 
 /**
  * True iff the underlying SSL implementation supports the option.

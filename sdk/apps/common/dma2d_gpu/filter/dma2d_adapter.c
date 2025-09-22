@@ -129,6 +129,7 @@ static int dma2d_filter_image_combine(u16 x, u16 y, u8 *sticker_data, u16 sticke
     out_layer_param.stride = bg_w * 2;
     out_layer_param.format = JLDMA2D_FORMAT_YUV422_BT601;
     out_layer_param.rbs = 1;
+    out_layer_param.dither_en = 1;
 
     dma2d_reset_all_regs();
     dma2d_create_task();

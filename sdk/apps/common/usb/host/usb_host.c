@@ -243,7 +243,8 @@ static int _usb_adb_interface_ptp_mtp_parse(struct usb_host_device *host_dev, u8
 {
     log_info("find adbmtp @ interface %d", interface_num);
 #if TCFG_ADB_ENABLE
-    return usb_adb_interface_ptp_mtp_parse(host_dev, interface_num, pBuf);
+    int ret = usb_adb_interface_ptp_mtp_parse(host_dev, interface_num, pBuf);
+    return ret == 0 ? USB_DT_INTERFACE_SIZE : ret;
 #else
     return USB_DT_INTERFACE_SIZE;
 #endif
@@ -275,11 +276,11 @@ static int _usb_wireless_parser(struct usb_host_device *host_dev, u8 interface_n
     return USB_DT_INTERFACE_SIZE;
 #endif
 }
-static int _usb_wireless_at_port_parser(struct usb_host_device *host_dev, u8 interface_num, const u8 *pBuf)
+static int _usb_wireless_at_port_parser(struct usb_host_device *host_dev, u8 interface_num, const u8 *pBuf, struct usb_device_descriptor *device_desc)
 {
     log_info("find wireless at_port @ interface %d", interface_num);
 #if TCFG_HOST_WIRELESS_ENABLE
-    return usbnet_at_port_parser(host_dev, interface_num, pBuf);
+    return usbnet_at_port_parser(host_dev, interface_num, pBuf, device_desc);
 #else
     return USB_DT_INTERFACE_SIZE;
 #endif
@@ -292,6 +293,24 @@ static int _usb_cdc_parser(struct usb_host_device *host_dev, u8 interface_num, c
 #else
     return USB_DT_INTERFACE_SIZE;
 #endif
+}
+
+static bool is_valid_interface_configuration(uint16_t idVendor, uint8_t bInterfaceClass, uint8_t bInterfaceSubClass)
+{
+    if (idVendor == 0x2c7c) {
+        return (bInterfaceClass == 0xff && bInterfaceSubClass == 0x00);
+    }
+
+    if (idVendor == 0x2c91) {
+        return (bInterfaceClass == 0x02 && bInterfaceSubClass == 0x02) ||
+               (bInterfaceClass == 0x0A && bInterfaceSubClass == 0x00);
+    }
+
+    if (idVendor == 0x2ecc || idVendor == 0x3361 || idVendor == 0x1e0e) {
+        return (bInterfaceClass == 0xff && bInterfaceSubClass == 0x00);
+    }
+
+    return false;
 }
 
 static int usb_descriptor_parser(struct usb_host_device *host_dev, const u8 *pBuf, u32 total_len, struct usb_device_descriptor *device_desc)
@@ -311,7 +330,7 @@ static int usb_descriptor_parser(struct usb_host_device *host_dev, const u8 *pBu
 
     len += USB_DT_CONFIG_SIZE;
     pBuf += USB_DT_CONFIG_SIZE;
-    int i;
+    int i = 0;
     u32 have_find_valid_class = 0;
     while (len < total_len) {
         if (interface_num > MAX_HOST_INTERFACE) {
@@ -348,11 +367,9 @@ static int usb_descriptor_parser(struct usb_host_device *host_dev, const u8 *pBu
                     pBuf += i;
                     have_find_valid_class = true;
                 }
-            } else if (device_desc->idVendor == 0x2c7c &&
-                       (device_desc->idProduct == 0x0191 || device_desc->idProduct == 0x0125 || device_desc->idProduct == 0x6002) &&
-                       interface->bInterfaceClass == 0xff &&
-                       interface->bInterfaceSubClass == 0x00) {
-                i = _usb_wireless_at_port_parser(host_dev, interface_num, pBuf);
+            } else if (is_valid_interface_configuration(device_desc->idVendor,
+                       interface->bInterfaceClass, interface->bInterfaceSubClass)) {
+                i = _usb_wireless_at_port_parser(host_dev, interface_num, pBuf, device_desc);
                 if (i < 0) {
                     log_error("---%s %d---, i = %d", __func__, __LINE__, i);
                     len = total_len;
@@ -455,7 +472,7 @@ static int usb_descriptor_parser(struct usb_host_device *host_dev, const u8 *pBu
                 }
                 have_find_valid_class = true;
             } else if (interface->bInterfaceClass == USB_CLASS_WIRELESS_CONTROLLER
-                       || (interface->bInterfaceClass == USB_CLASS_CDC_DATA && interface->bInterfaceSubClass == 0)) {
+                       || (interface->bInterfaceClass == USB_CLASS_CDC_DATA && interface->bInterfaceSubClass == 0x00)) {
                 i = _usb_wireless_parser(host_dev, interface_num, pBuf);
                 if (i < 0) {
                     log_error("---%s %d---, i = %d", __func__, __LINE__, i);
@@ -488,6 +505,9 @@ static int usb_descriptor_parser(struct usb_host_device *host_dev, const u8 *pBu
             }
         } else {
             /* log_error("unknown section %d %d", len, pBuf[0]); */
+            if (interface->bDescriptorType == 0x0B) {
+                log_info("%s %d IAD", __func__, __LINE__);
+            }
             if (pBuf[0]) {
                 len += pBuf[0];
                 pBuf += pBuf[0];
@@ -583,7 +603,8 @@ static u32 _usb_host_mount(const usb_dev usb_id, u32 port, u32 retry, u32 reset_
         private_data->status = 0;
         private_data->devnum = 0;
         private_data->ep0_max_packet_size = 8;
-        usb_get_device_descriptor(host_dev, &device_desc);
+        /* usb_get_device_descriptor(host_dev, &device_desc); */
+        usb_get_device_descriptor_64(host_dev, &device_desc);
 
         /**********set address*********/
         usb_mdelay(20);

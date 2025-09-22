@@ -43,18 +43,17 @@
 /*
  * The telnet options represented as strings
  */
-static const char * const telnetoptions[]=
-{
-  "BINARY",      "ECHO",           "RCP",           "SUPPRESS GO AHEAD",
-  "NAME",        "STATUS",         "TIMING MARK",   "RCTE",
-  "NAOL",        "NAOP",           "NAOCRD",        "NAOHTS",
-  "NAOHTD",      "NAOFFD",         "NAOVTS",        "NAOVTD",
-  "NAOLFD",      "EXTEND ASCII",   "LOGOUT",        "BYTE MACRO",
-  "DE TERMINAL", "SUPDUP",         "SUPDUP OUTPUT", "SEND LOCATION",
-  "TERM TYPE",   "END OF RECORD",  "TACACS UID",    "OUTPUT MARKING",
-  "TTYLOC",      "3270 REGIME",    "X3 PAD",        "NAWS",
-  "TERM SPEED",  "LFLOW",          "LINEMODE",      "XDISPLOC",
-  "OLD-ENVIRON", "AUTHENTICATION", "ENCRYPT",       "NEW-ENVIRON"
+static const char *const telnetoptions[] = {
+    "BINARY",      "ECHO",           "RCP",           "SUPPRESS GO AHEAD",
+    "NAME",        "STATUS",         "TIMING MARK",   "RCTE",
+    "NAOL",        "NAOP",           "NAOCRD",        "NAOHTS",
+    "NAOHTD",      "NAOFFD",         "NAOVTS",        "NAOVTD",
+    "NAOLFD",      "EXTEND ASCII",   "LOGOUT",        "BYTE MACRO",
+    "DE TERMINAL", "SUPDUP",         "SUPDUP OUTPUT", "SEND LOCATION",
+    "TERM TYPE",   "END OF RECORD",  "TACACS UID",    "OUTPUT MARKING",
+    "TTYLOC",      "3270 REGIME",    "X3 PAD",        "NAWS",
+    "TERM SPEED",  "LFLOW",          "LINEMODE",      "XDISPLOC",
+    "OLD-ENVIRON", "AUTHENTICATION", "ENCRYPT",       "NEW-ENVIRON"
 };
 #endif
 
@@ -84,12 +83,11 @@ static const char * const telnetoptions[]=
 /*
  * Then those numbers represented as strings:
  */
-static const char * const telnetcmds[]=
-{
-  "EOF",  "SUSP",  "ABORT", "EOR",  "SE",
-  "NOP",  "DMARK", "BRK",   "IP",   "AO",
-  "AYT",  "EC",    "EL",    "GA",   "SB",
-  "WILL", "WONT",  "DO",    "DONT", "IAC"
+static const char *const telnetcmds[] = {
+    "EOF",  "SUSP",  "ABORT", "EOR",  "SE",
+    "NOP",  "DMARK", "BRK",   "IP",   "AO",
+    "AYT",  "EC",    "EL",    "GA",   "SB",
+    "WILL", "WONT",  "DO",    "DONT", "IAC"
 };
 #endif
 

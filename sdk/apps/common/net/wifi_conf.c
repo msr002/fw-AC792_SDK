@@ -78,6 +78,8 @@ const char wifi_ap_miss_owndevice_channel = 0; //自己设备信道错开功能�
 
 const char wifi_rate_adapt_strategy = 0; //ap或sta模式下的wifi速率控制策略，0为使用默认策略，1为用于图传的策略，2为用于iperf的策略
 
+const char wifi_rts_auto_trigger_enable = 1;
+
 const u16 MAX_PACKETS_IN_QUEUE = 64; //配置WiFi驱动最大发送数据包队列
 const u16 MAX_PACKETS_IN_MCAST_PS_QUEUE = 16;  //配置WiFi驱动最大发送MCAST-power-save包队列 //modify by lyx 32
 const u16 MAX_PACKETS_IN_PS_QUEUE	= 128; //配置WiFi驱动最大发送power-save队列	//128	/*16 */

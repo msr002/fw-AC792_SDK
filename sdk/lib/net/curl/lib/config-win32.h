@@ -341,20 +341,20 @@
 /* ---------------------------------------------------------------- */
 
 #ifdef USE_WATT32
-  #include <tcp.h>
-  #undef byte
-  #undef word
-  #undef USE_WINSOCK
-  #undef HAVE_WINSOCK2_H
-  #undef HAVE_WS2TCPIP_H
-  #define HAVE_GETADDRINFO
-  #define HAVE_SYS_IOCTL_H
-  #define HAVE_SYS_SOCKET_H
-  #define HAVE_NETINET_IN_H
-  #define HAVE_NETDB_H
-  #define HAVE_ARPA_INET_H
-  #define HAVE_FREEADDRINFO
-  #define SOCKET int
+#include <tcp.h>
+#undef byte
+#undef word
+#undef USE_WINSOCK
+#undef HAVE_WINSOCK2_H
+#undef HAVE_WS2TCPIP_H
+#define HAVE_GETADDRINFO
+#define HAVE_SYS_IOCTL_H
+#define HAVE_SYS_SOCKET_H
+#define HAVE_NETINET_IN_H
+#define HAVE_NETDB_H
+#define HAVE_ARPA_INET_H
+#define HAVE_FREEADDRINFO
+#define SOCKET int
 #endif
 
 
@@ -401,28 +401,28 @@
 
 /* Define some minimum and default build targets for Visual Studio */
 #if defined(_MSC_VER)
-   /* Officially, Microsoft's Windows SDK versions 6.X does not support Windows
-      2000 as a supported build target. VS2008 default installations provides
-      an embedded Windows SDK v6.0A along with the claim that Windows 2000 is a
-      valid build target for VS2008. Popular belief is that binaries built with
-      VS2008 using Windows SDK versions v6.X and Windows 2000 as a build target
-      are functional. */
+/* Officially, Microsoft's Windows SDK versions 6.X does not support Windows
+   2000 as a supported build target. VS2008 default installations provides
+   an embedded Windows SDK v6.0A along with the claim that Windows 2000 is a
+   valid build target for VS2008. Popular belief is that binaries built with
+   VS2008 using Windows SDK versions v6.X and Windows 2000 as a build target
+   are functional. */
 #  define VS2008_MIN_TARGET 0x0500
 
-   /* The minimum build target for VS2012 is Vista unless Update 1 is installed
-      and the v110_xp toolset is chosen. */
+/* The minimum build target for VS2012 is Vista unless Update 1 is installed
+   and the v110_xp toolset is chosen. */
 #  if defined(_USING_V110_SDK71_)
 #    define VS2012_MIN_TARGET 0x0501
 #  else
 #    define VS2012_MIN_TARGET 0x0600
 #  endif
 
-   /* VS2008 default build target is Windows Vista. We override default target
-      to be Windows XP. */
+/* VS2008 default build target is Windows Vista. We override default target
+   to be Windows XP. */
 #  define VS2008_DEF_TARGET 0x0501
 
-   /* VS2012 default build target is Windows Vista unless Update 1 is installed
-      and the v110_xp toolset is chosen. */
+/* VS2012 default build target is Windows Vista unless Update 1 is installed
+   and the v110_xp toolset is chosen. */
 #  if defined(_USING_V110_SDK71_)
 #    define VS2012_DEF_TARGET 0x0501
 #  else

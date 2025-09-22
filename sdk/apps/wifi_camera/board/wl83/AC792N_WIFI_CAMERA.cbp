@@ -1369,6 +1369,7 @@
 <Unit filename="../../../../apps/common/lvgl_v8/examples/widgets/lyrics/lv_example_lyrics_2.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/common/lvgl_v8/examples/widgets/lyrics/lv_example_lyrics_3.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/common/lvgl_v8/examples/widgets/lyrics/lv_example_lyrics_4.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="../../../../apps/common/lvgl_v8/examples/widgets/lyrics/lv_example_lyrics_5.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/common/lvgl_v8/examples/widgets/menu/lv_example_menu_1.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/common/lvgl_v8/examples/widgets/menu/lv_example_menu_2.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/common/lvgl_v8/examples/widgets/menu/lv_example_menu_3.c"><Option compilerVer="CC"/></Unit>

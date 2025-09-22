@@ -31,44 +31,44 @@
 #include "llist.h"
 
 /* Hash function prototype */
-typedef size_t (*hash_function) (void *key,
-                                 size_t key_length,
-                                 size_t slots_num);
+typedef size_t (*hash_function)(void *key,
+                                size_t key_length,
+                                size_t slots_num);
 
 /*
    Comparator function prototype. Compares two keys.
 */
-typedef size_t (*comp_function) (void *key1,
-                                 size_t key1_len,
-                                 void *key2,
-                                 size_t key2_len);
+typedef size_t (*comp_function)(void *key1,
+                                size_t key1_len,
+                                void *key2,
+                                size_t key2_len);
 
 typedef void (*Curl_hash_dtor)(void *);
 
 struct Curl_hash {
-  struct Curl_llist *table;
+    struct Curl_llist *table;
 
-  /* Hash function to be used for this hash table */
-  hash_function hash_func;
+    /* Hash function to be used for this hash table */
+    hash_function hash_func;
 
-  /* Comparator function to compare keys */
-  comp_function comp_func;
-  Curl_hash_dtor   dtor;
-  int slots;
-  size_t size;
+    /* Comparator function to compare keys */
+    comp_function comp_func;
+    Curl_hash_dtor   dtor;
+    int slots;
+    size_t size;
 };
 
 struct Curl_hash_element {
-  struct Curl_llist_element list;
-  void   *ptr;
-  size_t key_len;
-  char   key[1]; /* allocated memory following the struct */
+    struct Curl_llist_element list;
+    void   *ptr;
+    size_t key_len;
+    char   key[1]; /* allocated memory following the struct */
 };
 
 struct Curl_hash_iterator {
-  struct Curl_hash *hash;
-  int slot_index;
-  struct Curl_llist_element *current_element;
+    struct Curl_hash *hash;
+    int slot_index;
+    struct Curl_llist_element *current_element;
 };
 
 void Curl_hash_init(struct Curl_hash *h,

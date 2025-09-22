@@ -37,6 +37,8 @@
 #endif
 #include "mbedtls/platform.h"
 
+#include "fs/fs.h"
+
 #if !defined(MBEDTLS_NO_PLATFORM_ENTROPY)
 
 #if !defined(unix) && !defined(__unix__) && !defined(__unix) && \
@@ -154,6 +156,8 @@ static int sysctl_arnd_wrapper(unsigned char *buf, size_t buflen)
 #endif /* __FreeBSD__ || __NetBSD__ */
 
 #include <stdio.h>
+
+int rand_val(void *p_rng, unsigned char *output, unsigned int output_len);
 
 int mbedtls_platform_entropy_poll(void *data,
                                   unsigned char *output, size_t len, size_t *olen)

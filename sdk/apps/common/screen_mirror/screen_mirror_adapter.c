@@ -3,6 +3,7 @@
 #include "sock_api/sock_api.h"
 #include "app_config.h"
 #include "server/rt_stream_pkg.h"
+#include "screen_mirror_api.h"
 
 #define LOG_TAG_CONST       SCREEN_MIRROR_ADAPTER
 #define LOG_TAG             "[SCREEN_MIRROR_ADAPTER]"
@@ -13,18 +14,6 @@
 
 #ifdef CONFIG_NET_SCR
 
-typedef struct jpg_node {
-    struct list_head entry;
-    struct __JPG_INFO *jpg;
-} jpg_node_t;
-
-struct __JPG_INFO {
-    u32 src_w;
-    u32 src_h;
-    u32 buf_len;
-    u8  buf[];
-};
-
 struct scr_handle {
     u8 channel;
     u8 ref;
@@ -32,40 +21,55 @@ struct scr_handle {
     spinlock_t lock;
 
     int socket_type;
+    void (*ack_cb)(int);
     void *sock_hdl;
     void *cli_sock_hdl;
+
+    u8 sock_fps;
+    u8 disp_fps;
+    u32 seq;
 
     struct sockaddr_in cli_addr;
     int src_width;
     int src_height;
     u8 fps;
     u32 old_frame_seq;
+    u32 jpg_size;
 
     int pid;	// 收包线程
-    int push_pid;	// 推送jpg线程
-
-    struct list_head queue_head;
-
-    OS_MUTEX queue_lock;
-    OS_SEM queue_sem;
-
-    u8 queue_cnt;
 };
 
+struct scr_state {
+    u8 fps_min;
+    u8 fps_max;
+    u32 fps_sum;
+
+    float jpg_sz_min;  //KB
+    float jpg_sz_max;
+    u32 jpg_sz_sum;
+
+    u32 cnt;
+};
 
 #define SCR_THREAD_TASK_NAME    "scr_recv"
-#define SCR_PUSH_THREAD_TASK_NAME    "scr_recv_push"
 #define JPG_BUF_MAX_SIZE  250 * 1024
 #define CHECK_CODE 0x88
 #define CHECK_CODE_NUM 32
 #define UDP_MAX_RECV  1 * 1472
-#define UDP_JPG_QUEUE_MAX_NUM 5
 static u8 recv_buf[UDP_MAX_RECV];
 
 
 #define SCR_CHANNEL_MAX     (1)
 static struct scr_handle *g_scr_used[SCR_CHANNEL_MAX];
-
+static struct scr_state g_scr_state = {
+    .fps_min = 0xFF,
+    .fps_max = 0,
+    .fps_sum = 0,
+    .jpg_sz_min = 1e6f,
+    .jpg_sz_max = 0,
+    .jpg_sz_sum = 0,
+    .cnt = 0,
+};
 
 static int bytecmp(unsigned char *p, unsigned char ch, unsigned int num)
 {
@@ -134,9 +138,6 @@ static int scr_init(pipe_plugin_t *plugin)
     plugin->private_data = hdl;
     g_scr_used[channel] = hdl;
     hdl->state = PLUGIN_INITED;
-
-    os_mutex_create(&hdl->queue_lock);
-    os_sem_create(&hdl->queue_sem, 0);
 
     return 0;
 }
@@ -257,7 +258,6 @@ static int get_jpg_packet(struct scr_handle *hdl, char *buf, int len, struct __J
                     break;
                 } else if (cur_frame_seq > hdl->old_frame_seq) {
                     if (total_payload_len && (finish == 0)) {
-                        //printf("\n [MSG] lose packet or disorder packet\n");
                     }
                     hdl->old_frame_seq = cur_frame_seq;
                     total_payload_len = 0;
@@ -277,8 +277,9 @@ static int get_jpg_packet(struct scr_handle *hdl, char *buf, int len, struct __J
                 total_payload_len += slice_data_len;
                 if (total_payload_len == frame_size) { //如果数据量相等,说明帧数据接收完成
                     jpg->buf_len = total_payload_len;
+                    hdl->seq = cur_frame_seq;
                     finish = 1;
-                    //log_debug("jpg recv finish");
+                    //log_debug("jpg recv finish, jpg_size: %d", frame_size);
                     return 0; //返回0表示完成
                 }
             } while (0);
@@ -310,12 +311,77 @@ static int save_jpg_data(struct __JPG_INFO *image)
 }
 #endif
 
+static void reset_scr_state(void)
+{
+    g_scr_state.fps_min = 0xFF;
+    g_scr_state.fps_max = 0;
+    g_scr_state.fps_sum = 0;
+
+    g_scr_state.jpg_sz_min = 1e6f;
+    g_scr_state.jpg_sz_max = 0.0f;
+    g_scr_state.jpg_sz_sum = 0;
+
+    g_scr_state.cnt = 0;
+}
+
+int get_in_ui_navi_flag();
+
+static void statistic_socket_fps(void *priv)
+{
+    static char fps_buf[32], jpg_sz_buf[32];
+    static u8 timer_cnt = 0;
+    struct scr_handle *hdl = (struct scr_handle *)priv;
+    ASSERT(hdl);
+
+    u8 cur_fps = hdl->sock_fps;
+    float cur_jpg_sz = (hdl->jpg_size + 1023) / 1024.0f;
+    log_info("sock fps: %d, disp fps: %d\n", hdl->sock_fps, hdl->disp_fps);
+    if (get_in_ui_navi_flag()) { 	//只有在导航界面才能更新导航UI数据
+        if (cur_fps < g_scr_state.fps_min) {
+            g_scr_state.fps_min = cur_fps;
+        }
+        if (cur_fps > g_scr_state.fps_max) {
+            g_scr_state.fps_max = cur_fps;
+        }
+
+        if (cur_jpg_sz < g_scr_state.jpg_sz_min) {
+            g_scr_state.jpg_sz_min = (float)cur_jpg_sz;
+        }
+        if (cur_jpg_sz > g_scr_state.jpg_sz_max) {
+            g_scr_state.jpg_sz_max = (float)cur_jpg_sz;
+        }
+
+        g_scr_state.fps_sum = g_scr_state.fps_sum + cur_fps;
+        g_scr_state.jpg_sz_sum = g_scr_state.jpg_sz_sum + cur_jpg_sz;
+        g_scr_state.cnt = g_scr_state.cnt + 1;
+
+        float fps_avg = (g_scr_state.cnt > 0) ? ((float)g_scr_state.fps_sum / g_scr_state.cnt) : 0.0f;
+        float jpg_sz_avg = (g_scr_state.cnt > 0) ? ((float)g_scr_state.jpg_sz_sum / g_scr_state.cnt) : 0.0f;
+
+        log_info("max fps: %d, min fps: %d, avg fps: %.2f\n", g_scr_state.fps_max, g_scr_state.fps_min, fps_avg);
+        log_info("max jpg_size: %.2f, min jpg_size: %.2f, avg jpg_size: %.2f\n", g_scr_state.jpg_sz_max, g_scr_state.jpg_sz_min, jpg_sz_avg);
+
+        snprintf(fps_buf, sizeof(fps_buf), "%d, %d, %.1f", g_scr_state.fps_max, g_scr_state.fps_min, fps_avg);
+        snprintf(jpg_sz_buf, sizeof(jpg_sz_buf), "%.1f, %.1f, %.1f", g_scr_state.jpg_sz_max, g_scr_state.jpg_sz_min, jpg_sz_avg);
+
+        update_text_lbl_7(fps_buf);
+        update_text_lbl_9(jpg_sz_buf);
+        if (timer_cnt >= 100) {
+            log_info("the average fps over 100 samples is: %.2f", fps_avg);
+            reset_scr_state();
+            timer_cnt = 0;
+        }
+    }
+    hdl->sock_fps = 0;
+    hdl->disp_fps = 0;
+    timer_cnt++;
+}
+
 static void scr_recv_task(void *priv)
 {
-    u32 tstart = 0, tdiff = 0;
-    u8 fps_cnt = 0;
+    buffer_meta_t *buffer_meta = NULL;
 
-    int finish_flag;
+    int finish_flag = -1;
     int recv_len = 0;
 
     pipe_plugin_t *plugin = (pipe_plugin_t *)priv;
@@ -341,20 +407,19 @@ static void scr_recv_task(void *priv)
         }
     }
 
-    struct __JPG_INFO *jpg = (struct __JPG_INFO *) calloc(1, sizeof(struct __JPG_INFO) + sizeof(u8) * JPG_BUF_MAX_SIZE);
-    if (!jpg) {
-        log_error("jpg buf malloc failed, size: %d", sizeof(struct __JPG_INFO) + sizeof(u8) * JPG_BUF_MAX_SIZE);
-        return ;
-    }
-
     //外部传进来的
+    struct __JPG_INFO *jpg = zalloc(sizeof(struct __JPG_INFO) + JPG_BUF_MAX_SIZE);
+    ASSERT(jpg);
+
     jpg->src_w = hdl->src_width;
     jpg->src_h = hdl->src_height;
+    int timer_id = 0;
+    timer_id = sys_timer_add_to_task("app_core", hdl, statistic_socket_fps, 1000);
     while (hdl->state == PLUGIN_RUNNING) {
-
-        if (hdl->socket_type == SOCK_STREAM) { //tcp
+        //tcp
+        if (hdl->socket_type == SOCK_STREAM) {
             //接收头部信息
-            struct frm_head head_info;
+            struct frm_head head_info = {0};
             recv_len = sock_recv(hdl->cli_sock_hdl, &head_info, sizeof(struct frm_head), MSG_WAITALL);
             if (recv_len <= 0) {
                 log_warn("recv len = %d", recv_len);
@@ -365,6 +430,10 @@ static void scr_recv_task(void *priv)
                 log_error("recv len = %d, need head len = %d", recv_len, sizeof(struct frm_head));
                 continue;
             }
+            hdl->seq = head_info.seq;
+            if (hdl->ack_cb) {  //net_scr_ack_func
+                hdl->ack_cb(hdl->seq);
+            }
 
             recv_len = sock_recv(hdl->cli_sock_hdl, jpg->buf, head_info.frm_sz, MSG_WAITALL);
             if (recv_len <= 0 || recv_len != head_info.frm_sz) {
@@ -373,7 +442,7 @@ static void scr_recv_task(void *priv)
             }
             jpg->buf_len = recv_len;
             finish_flag = 0;
-        } else {	//udp
+        } else {
             recv_len = sock_recvfrom(hdl->sock_hdl, recv_buf, sizeof(recv_buf), 0, &cli_addr, &addrlen);
             if (recv_len < 0) {
                 log_warn("recv len = %d", recv_len);
@@ -388,96 +457,41 @@ static void scr_recv_task(void *priv)
         }
 
         if (!finish_flag) {
-            /* 先判断队列是否还允许插入 */
-            os_mutex_pend(&hdl->queue_lock, 0);
-            if (hdl->queue_cnt >= UDP_JPG_QUEUE_MAX_NUM) {
-                os_mutex_post(&hdl->queue_lock);
-                continue;
+            hdl->jpg_size = jpg->buf_len;
+
+            buffer_meta = buffer->get_write_addr(buffer, jpg->buf_len);
+            if (!buffer_meta) {
+                log_warn("%s: next moudle buffer no enough. free_len: %d, need_len: %d", __func__, buffer->get_free_size(buffer), jpg->buf_len);
+                do {
+                    buffer_meta = buffer->read_data(buffer, BUFFER_NO_WAIT);
+                    buffer->free_read_data(buffer, buffer_meta);
+                } while (buffer->get_free_size(buffer) < jpg->buf_len);
+
+                buffer_meta = buffer->get_write_addr(buffer, jpg->buf_len);
+                ASSERT(buffer_meta);
             }
-            os_mutex_post(&hdl->queue_lock);
-
-            jpg_node_t *node = (jpg_node_t *)malloc(sizeof(jpg_node_t));
-            if (!node) {
-                log_error("jpg_node malloc failed");
-                continue;
+            if (buffer_meta) {
+                //根据规则发送回包
+                if (hdl->ack_cb && hdl->socket_type != SOCK_STREAM) {  //net_scr_ack_func
+                    hdl->ack_cb(hdl->seq);
+                }
+                if (buffer->type == EXTERN_BUFFER) {
+                    memcpy(buffer_meta->ext_data, jpg->buf, jpg->buf_len);
+                } else {
+                    memcpy(buffer_meta->data, jpg->buf, jpg->buf_len);
+                }
+                buffer_meta->data_len = jpg->buf_len;
+                buffer->update_data(buffer, buffer_meta);
+                hdl->disp_fps++;
             }
-
-            node->jpg = malloc(sizeof(struct __JPG_INFO) + jpg->buf_len);
-            if (!node->jpg) {
-                log_error("jpg buf malloc failed");
-                free(node);
-                continue;
-            }
-
-            memcpy(node->jpg, jpg, sizeof(struct __JPG_INFO));
-            memcpy(node->jpg->buf, jpg->buf, jpg->buf_len);
-
-            INIT_LIST_HEAD(&node->entry);
-
-            os_mutex_pend(&hdl->queue_lock, 0);
-            list_add_tail(&node->entry, &hdl->queue_head);
-            hdl->queue_cnt++;
-            os_mutex_post(&hdl->queue_lock);
-
-            os_sem_post(&hdl->queue_sem);
+            buffer_meta = NULL;
             finish_flag = -1;
-            fps_cnt++;
-#if 0
-            //打开则会将收到的图片保存到卡中，用于判断数据源是否正确
-            save_jpg_data(jpg);
-#endif
+            hdl->sock_fps++;
         }
-
-        if (!tstart) {
-            tstart = timer_get_ms();
-        } else {
-            tdiff = timer_get_ms() - tstart;
-            if (tdiff >= 1000) {
-                log_debug("fps_count = %d\n", fps_cnt *  1000 / tdiff);
-                tstart = 0;
-                fps_cnt = 0;
-            }
-        }
-
     }
+
+    sys_timer_del(timer_id);
     free(jpg);
-}
-
-/* jpg推送线程 */
-static void jpg_push_task(void *priv)
-{
-    pipe_plugin_t *plugin = (pipe_plugin_t *)priv;
-    struct scr_handle *hdl = (struct scr_handle *)plugin->private_data;
-
-    while (hdl->state == PLUGIN_RUNNING) {
-        os_sem_pend(&hdl->queue_sem, 0);
-
-        if (hdl->state != PLUGIN_RUNNING) {
-            break;
-        }
-
-        os_mutex_pend(&hdl->queue_lock, 0);
-        if (list_empty(&hdl->queue_head)) {
-            os_mutex_post(&hdl->queue_lock);
-            continue;
-        }
-
-        jpg_node_t *node = list_first_entry(&hdl->queue_head, jpg_node_t, entry);
-        list_del(&node->entry);
-        hdl->queue_cnt--;
-        os_mutex_post(&hdl->queue_lock);
-
-        if (node) {
-            //推送jpg
-            struct video_buffer b = {0};
-            b.baddr = node->jpg->buf;
-            b.len = node->jpg->buf_len;
-            message_request(plugin->port, JPEG_DEC_ONE_FRAME | MESSAGE_NEXT, &b);
-
-            free(node->jpg);
-            free(node);
-        }
-    }
 }
 
 static int scr_start(pipe_plugin_t *plugin, int source_channel)
@@ -497,20 +511,10 @@ static int scr_start(pipe_plugin_t *plugin, int source_channel)
         log_debug("%s start. ref: %d\r\n", plugin->name, hdl->ref);
     } else {
         hdl->state = PLUGIN_RUNNING;
-
-        INIT_LIST_HEAD(&hdl->queue_head);
-        hdl->queue_cnt  = 0;
-
         char task_name[32] = {0};
         sprintf(task_name, SCR_THREAD_TASK_NAME"%d", hdl->channel);
         if (!hdl->pid) {
             thread_fork(task_name, 22, 1024, 32, &hdl->pid, scr_recv_task, plugin);
-        }
-
-        char push_task_name[32] = {0};
-        sprintf(push_task_name, SCR_PUSH_THREAD_TASK_NAME"%d", hdl->channel);
-        if (!hdl->push_pid) {
-            thread_fork(push_task_name, 22, 1024, 32, &hdl->push_pid, jpg_push_task, plugin);
         }
     }
 
@@ -533,23 +537,9 @@ static int scr_stop(pipe_plugin_t *plugin, int source_channel)
     if (hdl->ref > 0) {
         return 0;
     }
-
+    reset_scr_state();
     hdl->state = PLUGIN_PAUSED;
 
-    os_mutex_pend(&hdl->queue_lock, 0);
-    struct list_head *pos, *n;
-    list_for_each_safe(pos, n, &hdl->queue_head) {
-        jpg_node_t *node = list_entry(pos, jpg_node_t, entry);
-        list_del(pos);
-        free(node->jpg);
-        free(node);
-
-    }
-
-    INIT_LIST_HEAD(&hdl->queue_head);
-    os_mutex_post(&hdl->queue_lock);
-
-    os_sem_post(&hdl->queue_sem);  //唤醒一次结束线程
     return 0;
 }
 
@@ -577,22 +567,8 @@ static int scr_reset(pipe_plugin_t *plugin, int source_channel)
     }
 
     net_scr_sock_uninit(hdl);
-
+    reset_scr_state();
     hdl->state = PLUGIN_UNINIT;
-    os_mutex_pend(&hdl->queue_lock, 0);
-    struct list_head *pos, *n;
-    list_for_each_safe(pos, n, &hdl->queue_head) {
-        jpg_node_t *node = list_entry(pos, jpg_node_t, entry);
-        list_del(pos);
-        free(node->jpg);
-        free(node);
-
-    }
-
-    INIT_LIST_HEAD(&hdl->queue_head);
-    os_mutex_post(&hdl->queue_lock);
-
-    os_sem_post(&hdl->queue_sem);  //唤醒一次结束线程
 
     return 0;
 }
@@ -636,7 +612,9 @@ static int scr_set_parameter(pipe_plugin_t *plugin, int cmd, void *arg, int sour
     case PIPELINE_SCR_SOCK_TYPE:
         hdl->socket_type = *(int *)arg;
         break;
-
+    case PIPELINE_SCR_ACK_CALLBACK:
+        hdl->ack_cb = *(int *)arg;
+        break;
     default:
         break;
 
@@ -680,7 +658,7 @@ static int tcp_client_init(const char *server_ip, const int server_port)
     //创建socket
     sock = sock_reg(AF_INET, SOCK_STREAM, 0, NULL, NULL);
     if (sock == NULL) {
-        printf("sock_reg fail.\n");
+        log_error("sock_reg fail.\n");
         return -1;
     }
 
@@ -688,12 +666,12 @@ static int tcp_client_init(const char *server_ip, const int server_port)
     dest.sin_addr.s_addr = inet_addr(server_ip);
     dest.sin_port = htons(server_port);
     if (0 != sock_connect(sock, (struct sockaddr *)&dest, sizeof(struct sockaddr_in))) {
-        printf("sock_connect fail.\n");
+        log_error("sock_connect fail.\n");
         sock_unreg(sock);
         return -1;
     }
 
-    printf("tcp_client_connect_task succ!");
+    log_info("tcp_client_connect_task succ!");
     if (sock) {
         sock_unreg(sock);
         sock = NULL;
@@ -704,20 +682,20 @@ static int tcp_client_init(const char *server_ip, const int server_port)
 
 static void tcp_client_connect_task(void *priv)
 {
-    printf("---------------------------------------------->");
+    log_info("---------------------------------------------->");
     char gateway[16] = {0};
     get_gateway(1, gateway);
 
-    printf("tcp connect : server ip[%s], port[%d]\n", gateway, SERVER_TCP_PORT);
+    log_info("tcp connect : server ip[%s], port[%d]\n", gateway, SERVER_TCP_PORT);
 
     tcp_client_init(gateway, SERVER_TCP_PORT);
-    printf("<----------------------------------------------");
+    log_info("<----------------------------------------------");
 }
 
 void connect_to_server_port_8888(void)
 {
     if (thread_fork("tcp_client_connect_task", 10, 512, 0, NULL, tcp_client_connect_task, NULL) != OS_NO_ERR) {
-        printf("thread fork fail\n");
+        log_error("thread fork fail\n");
     }
 }
 

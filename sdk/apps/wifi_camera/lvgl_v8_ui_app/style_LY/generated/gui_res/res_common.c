@@ -10,7 +10,7 @@
 
 #if !LV_USE_GUIBUILDER_SIMULATOR
 #define max(a, b) ((a) > (b) ? (a) : (b))
-const char sd_dir[] = "S:/";
+const char sd_dir[] = "storage/sd0/C/ui/";
 const char flash_dir[] = "mnt/sdfile/EXT_RESERVED/uipackres/ui/";
 char path_buf[max(sizeof(sd_dir), sizeof(flash_dir)) + 20];
 #endif

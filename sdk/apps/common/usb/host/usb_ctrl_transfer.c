@@ -306,6 +306,18 @@ int set_address(struct usb_host_device *host_dev, u8 devnum)
     return usb_control_msg(host_dev, USB_REQ_SET_ADDRESS, 0,  devnum, 0, NULL, 0);
 }
 
+int usb_get_device_descriptor_64(struct usb_host_device *host_dev, struct usb_device_descriptor *desc)
+{
+    return usb_control_msg(host_dev,
+                           USB_REQ_GET_DESCRIPTOR,
+                           USB_DIR_IN,
+                           (USB_DT_DEVICE << 8),
+                           0,
+                           desc,
+                           64
+                          );
+}
+
 int usb_get_device_descriptor(struct usb_host_device *host_dev, struct usb_device_descriptor *desc)
 {
     return usb_control_msg(host_dev,

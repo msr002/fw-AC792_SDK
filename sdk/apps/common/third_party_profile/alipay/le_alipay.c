@@ -175,7 +175,7 @@ static uint16_t alipay_att_read_callback(void *hdl, hci_con_handle_t connection_
     switch (handle) {
     case ATT_CHARACTERISTIC_4a02_01_CLIENT_CONFIGURATION_HANDLE:
         if (buffer) {
-            buffer[0] = att_get_ccc_config(handle);
+            buffer[0] = multi_att_get_ccc_config(connection_handle, handle);
             buffer[1] = 0;
         }
         att_value_len = 2;
@@ -198,7 +198,7 @@ static int alipay_att_write_callback(void *hdl, hci_con_handle_t connection_hand
     switch (handle) {
     case ATT_CHARACTERISTIC_4a02_01_CLIENT_CONFIGURATION_HANDLE:
         log_info("------write ccc 4a20:%04x, %02x", att_handle, buffer[0]);
-        att_set_ccc_config(handle, buffer[0]);
+        multi_att_set_ccc_config(connection_handle, handle, buffer[0]);
         break;
     case ATT_CHARACTERISTIC_4a02_01_VALUE_HANDLE:
         log_info("upay_ble_recv(%d):", buffer_size);

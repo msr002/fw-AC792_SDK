@@ -284,13 +284,13 @@
 #ifdef __AMIGA__
 #  ifdef __amigaos4__
 #    define __USE_INLINE__
-     /* use our own resolver which uses runtime feature detection */
+/* use our own resolver which uses runtime feature detection */
 #    define CURLRES_AMIGA
-     /* getaddrinfo() currently crashes bsdsocket.library, so disable */
+/* getaddrinfo() currently crashes bsdsocket.library, so disable */
 #    undef HAVE_GETADDRINFO
 #    if !(defined(__NEWLIB__) || \
           (defined(__CLIB2__) && defined(__THREAD_SAFE)))
-       /* disable threaded resolver with clib2 - requires newlib or clib-ts */
+/* disable threaded resolver with clib2 - requires newlib or clib-ts */
 #      undef USE_THREADS_POSIX
 #    endif
 #  endif
@@ -301,21 +301,21 @@
 #  include <unistd.h>
 #  if defined(HAVE_PROTO_BSDSOCKET_H) && \
     (!defined(__amigaos4__) || defined(USE_AMISSL))
-     /* use bsdsocket.library directly, instead of libc networking functions */
+/* use bsdsocket.library directly, instead of libc networking functions */
 #    define _SYS_MBUF_H /* m_len define clashes with curl */
 #    include <proto/bsdsocket.h>
 #    ifdef __amigaos4__
-       int Curl_amiga_select(int nfds, fd_set *readfds, fd_set *writefds,
-                             fd_set *errorfds, struct timeval *timeout);
+int Curl_amiga_select(int nfds, fd_set *readfds, fd_set *writefds,
+                      fd_set *errorfds, struct timeval *timeout);
 #      define select(a,b,c,d,e) Curl_amiga_select(a,b,c,d,e)
 #    else
 #      define select(a,b,c,d,e) WaitSelect(a,b,c,d,e,0)
 #    endif
-     /* must not use libc's fcntl() on bsdsocket.library sockfds! */
+/* must not use libc's fcntl() on bsdsocket.library sockfds! */
 #    undef HAVE_FCNTL
 #    undef HAVE_FCNTL_O_NONBLOCK
 #  else
-     /* use libc networking and hence close() and fnctl() */
+/* use libc networking and hence close() and fnctl() */
 #    undef HAVE_CLOSESOCKET_CAMEL
 #    undef HAVE_IOCTLSOCKET_CAMEL
 #  endif
@@ -349,11 +349,11 @@
  * Salford-C kludge section (mostly borrowed from wxWidgets).
  */
 #ifdef __SALFORDC__
-  #pragma suppress 353             /* Possible nested comments */
-  #pragma suppress 593             /* Define not used */
-  #pragma suppress 61              /* enum has no name */
-  #pragma suppress 106             /* unnamed, unused parameter */
-  #include <clib.h>
+#pragma suppress 353             /* Possible nested comments */
+#pragma suppress 593             /* Define not used */
+#pragma suppress 61              /* enum has no name */
+#pragma suppress 106             /* unnamed, unused parameter */
+#include <clib.h>
 #endif
 
 /*
@@ -375,10 +375,10 @@
 #  define open                       curlx_win32_open
 #  define fopen(fname,mode)          curlx_win32_fopen(fname, mode)
 #  define access(fname,mode)         curlx_win32_access(fname, mode)
-   int curlx_win32_open(const char *filename, int oflag, ...);
-   int curlx_win32_stat(const char *path, struct_stat *buffer);
-   FILE *curlx_win32_fopen(const char *filename, const char *mode);
-   int curlx_win32_access(const char *path, int mode);
+int curlx_win32_open(const char *filename, int oflag, ...);
+int curlx_win32_stat(const char *path, struct_stat *buffer);
+FILE *curlx_win32_fopen(const char *filename, const char *mode);
+int curlx_win32_access(const char *path, int mode);
 #endif
 
 /*
@@ -398,10 +398,10 @@
 #    define open                       curlx_win32_open
 #    define fopen(fname,mode)          curlx_win32_fopen(fname, mode)
 #    define access(fname,mode)         curlx_win32_access(fname, mode)
-     int curlx_win32_stat(const char *path, struct_stat *buffer);
-     int curlx_win32_open(const char *filename, int oflag, ...);
-     FILE *curlx_win32_fopen(const char *filename, const char *mode);
-     int curlx_win32_access(const char *path, int mode);
+int curlx_win32_stat(const char *path, struct_stat *buffer);
+int curlx_win32_open(const char *filename, int oflag, ...);
+FILE *curlx_win32_fopen(const char *filename, const char *mode);
+int curlx_win32_access(const char *path, int mode);
 #  endif
 #  define LSEEK_ERROR                (long)-1
 #endif
@@ -449,7 +449,7 @@
 #if (SIZEOF_CURL_OFF_T < 8)
 #error "too small curl_off_t"
 #else
-   /* assume SIZEOF_CURL_OFF_T == 8 */
+/* assume SIZEOF_CURL_OFF_T == 8 */
 #  define CURL_OFF_T_MAX CURL_OFF_T_C(0x7FFFFFFFFFFFFFFF)
 #endif
 #define CURL_OFF_T_MIN (-CURL_OFF_T_MAX - CURL_OFF_T_C(1))
@@ -530,15 +530,15 @@
 #  endif /* MSDOS */
 
 #  ifdef __minix
-     /* Minix 3 versions up to at least 3.1.3 are missing these prototypes */
-     extern char *strtok_r(char *s, const char *delim, char **last);
-     extern struct tm *gmtime_r(const time_t * const timep, struct tm *tmp);
+/* Minix 3 versions up to at least 3.1.3 are missing these prototypes */
+extern char *strtok_r(char *s, const char *delim, char **last);
+extern struct tm *gmtime_r(const time_t *const timep, struct tm *tmp);
 #  endif
 
 #  define DIR_CHAR      "/"
 
 #  ifndef fileno /* sunos 4 have this as a macro! */
-     int fileno(FILE *stream);
+int fileno(FILE *stream);
 #  endif
 
 #endif /* WIN32 */
@@ -630,7 +630,7 @@
 #  if !defined(HAVE_WINDOWS_H) || ((_MSC_VER < 1300) && !defined(_FILETIME_))
 #    if !defined(ALLOW_MSVC6_WITHOUT_PSDK)
 #      error MSVC 6.0 requires "February 2003 Platform SDK" a.k.a. \
-             "Windows Server 2003 PSDK"
+"Windows Server 2003 PSDK"
 #    else
 #      define CURL_DISABLE_LDAP 1
 #    endif
@@ -800,7 +800,7 @@ endings either CRLF or LF so 't' is appropriate.
 /* A convenience macro to provide both the string literal and the length of
    the string literal in one go, useful for functions that take "string,len"
    as their argument */
-#define STRCONST(x) x,sizeof(x)-1
+#define STRCONST(x) (x), (sizeof(x)-1)
 
 /* Some versions of the Android SDK is missing the declaration */
 #if defined(HAVE_GETPWUID_R) && defined(HAVE_DECL_GETPWUID_R_MISSING)
@@ -834,14 +834,14 @@ int getpwuid_r(uid_t uid, struct passwd *pwd, char *buf,
 
 #if defined(USE_UNIX_SOCKETS) && defined(WIN32)
 #  if !defined(UNIX_PATH_MAX)
-     /* Replicating logic present in afunix.h
-        (distributed with newer Windows 10 SDK versions only) */
+/* Replicating logic present in afunix.h
+   (distributed with newer Windows 10 SDK versions only) */
 #    define UNIX_PATH_MAX 108
-     /* !checksrc! disable TYPEDEFSTRUCT 1 */
-     typedef struct sockaddr_un {
-       ADDRESS_FAMILY sun_family;
-       char sun_path[UNIX_PATH_MAX];
-     } SOCKADDR_UN, *PSOCKADDR_UN;
+/* !checksrc! disable TYPEDEFSTRUCT 1 */
+typedef struct sockaddr_un {
+    ADDRESS_FAMILY sun_family;
+    char sun_path[UNIX_PATH_MAX];
+} SOCKADDR_UN, *PSOCKADDR_UN;
 #    define WIN32_SOCKADDR_UN
 #  endif
 #endif

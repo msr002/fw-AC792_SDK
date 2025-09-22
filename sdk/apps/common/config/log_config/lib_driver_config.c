@@ -92,6 +92,16 @@ const u8 g_isp_ae_freeze = 0;
 const u8 g_isp_awb_freeze = 0;
 /*****************************/
 
+//for pipe source config
+//csi摄像头保持打开变量
+const u8 g_csi_keep_open = 1;
+
+//isc摄像头保持打开变量
+const u8 g_isc_keep_open = 1;
+
+//mcv摄像头保持打开变量
+const u8 g_mcv_keep_open = 1;
+
 /*****************************/
 //vm_sfc_flash config
 //支持4线写Flash
@@ -102,6 +112,12 @@ const u8 g_flash_wr_4line_en = 1;// 0-仅单线写; 1-支持4线写
 //adc algo config
 //adc 算法使用配置
 const int config_gpadc_use_algo = 0; // 0:auto, 1:algo-1, 2:algo-2
+/*****************************/
+
+/*****************************/
+//flash
+const u32 config_pd_flash_dly_up_us = 0; // pdown退出时flash延时上电时间
+const u8 config_flash_block2sector_erase = 0; // 0:normal 1:block擦除强制改sector
 /*****************************/
 
 /**
@@ -291,7 +307,7 @@ const char log_tag_const_e_DMA AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(TRUE);
 const char log_tag_const_v_UART AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(FALSE);
 const char log_tag_const_d_UART AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(FALSE);
 const char log_tag_const_i_UART AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(TRUE);
-const char log_tag_const_w_UART AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(FALSE);
+const char log_tag_const_w_UART AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(TRUE);
 const char log_tag_const_e_UART AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(TRUE);
 
 const char log_tag_const_v_IIC AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(FALSE);

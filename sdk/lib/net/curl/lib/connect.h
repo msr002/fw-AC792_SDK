@@ -75,7 +75,7 @@ void Curl_conncontrol(struct connectdata *conn,
 #if defined(DEBUGBUILD) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
                       , const char *reason
 #endif
-  );
+                     );
 
 #if defined(DEBUGBUILD) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
 #define streamclose(x,y) Curl_conncontrol(x, CONNCTRL_STREAM, y)

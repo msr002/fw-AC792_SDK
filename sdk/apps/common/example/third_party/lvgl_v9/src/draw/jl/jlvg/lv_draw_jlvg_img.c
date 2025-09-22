@@ -85,7 +85,9 @@ void lv_draw_jlvg_img(lv_draw_unit_t *draw_unit, const lv_draw_image_dsc_t *dsc,
  **********************/
 static void _jlvg_draw_image_normal_helper(lv_draw_unit_t *draw_unit, const lv_draw_image_dsc_t *dsc, const lv_image_decoder_dsc_t *decoder_dsc, const lv_area_t *coords)
 {
-    lv_layer_t *layer = draw_unit->target_layer;
+    lv_draw_jlvg_unit_t *u = (lv_draw_jlvg_unit_t *)draw_unit;
+    lv_draw_task_t *t = u->task_act;
+    lv_layer_t *layer = t->target_layer;
     lv_draw_buf_t *draw_buf = layer->draw_buf;
     //printf("buf_area (x1,y1) = (%d,%d); (x2,y2) = (%d,%d).", layer->buf_area.x1, layer->buf_area.y1, layer->buf_area.x2, layer->buf_area.y2);
 
@@ -98,7 +100,7 @@ static void _jlvg_draw_image_normal_helper(lv_draw_unit_t *draw_unit, const lv_d
     bool has_angle = dsc->rotation == 0 ? false : true ;
     bool has_zoom = (dsc->scale_x == LV_SCALE_NONE) && (dsc->scale_y == LV_SCALE_NONE) ? false : true;
     if (has_angle || has_zoom) {
-        _lv_image_buf_get_transformed_area(
+        lv_image_buf_get_transformed_area(
             &image_tf_area,
             lv_area_get_width(coords),
             lv_area_get_height(coords),
@@ -119,7 +121,7 @@ static void _jlvg_draw_image_normal_helper(lv_draw_unit_t *draw_unit, const lv_d
     lv_area_move(&rel_image_tf_area, -layer->buf_area.x1, -layer->buf_area.y1);
 
     lv_area_t rel_clip_area;
-    lv_area_copy(&rel_clip_area, draw_unit->clip_area);
+    lv_area_copy(&rel_clip_area, &t->clip_area);
     lv_area_move(&rel_clip_area, -layer->buf_area.x1, -layer->buf_area.y1);
 
     lv_area_t blend_area;   //这个区域无论是帧buff还是行buff都是相对的新的绘制区域

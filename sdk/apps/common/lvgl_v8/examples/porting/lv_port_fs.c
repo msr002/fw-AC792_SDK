@@ -147,12 +147,12 @@ static void *fs_open(lv_fs_drv_t *drv, const char *path, lv_fs_mode_t mode)
     _path[long_file_name_encode(path, (unsigned char *)_path, sizeof(_path))] = '\0';
 
     if (path[0] == 'm') {
-        file = fopen(path, "r");
+        file = fopen(path, fmode);
     } else {
-        file = fopen(_path, "r");
+        file = fopen(_path, fmode);
     }
 #else
-    file = fopen(path, "r");
+    file = fopen(path, fmode);
 #endif
     if (file == NULL) {
         printf("%s, open [%s][%s] fail! \r\n", __FUNCTION__, path, fmode);

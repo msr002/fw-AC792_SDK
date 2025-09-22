@@ -4797,7 +4797,7 @@
        {
         "modeId": "id_1745198624460_1",
         "name": "A2DP_RX1",
-        "current": "",
+        "current": "arg0",
         "originSize": 0,
         "list": [
          {
@@ -4809,14 +4809,16 @@
             "list": [
              {
               "id": "id_1725438750914_60",
-              "value": 0
+              "value": 1
              }
             ]
            }
-          ]
+          ],
+          "bypass": false
          }
         ],
-        "originCount": 1
+        "originCount": 1,
+        "bypass": false
        }
       ]
      },

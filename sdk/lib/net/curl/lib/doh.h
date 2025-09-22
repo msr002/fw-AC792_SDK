@@ -30,45 +30,45 @@
 #ifndef CURL_DISABLE_DOH
 
 typedef enum {
-  DOH_OK,
-  DOH_DNS_BAD_LABEL,    /* 1 */
-  DOH_DNS_OUT_OF_RANGE, /* 2 */
-  DOH_DNS_LABEL_LOOP,   /* 3 */
-  DOH_TOO_SMALL_BUFFER, /* 4 */
-  DOH_OUT_OF_MEM,       /* 5 */
-  DOH_DNS_RDATA_LEN,    /* 6 */
-  DOH_DNS_MALFORMAT,    /* 7 */
-  DOH_DNS_BAD_RCODE,    /* 8 - no such name */
-  DOH_DNS_UNEXPECTED_TYPE,  /* 9 */
-  DOH_DNS_UNEXPECTED_CLASS, /* 10 */
-  DOH_NO_CONTENT,           /* 11 */
-  DOH_DNS_BAD_ID,           /* 12 */
-  DOH_DNS_NAME_TOO_LONG     /* 13 */
+    DOH_OK,
+    DOH_DNS_BAD_LABEL,    /* 1 */
+    DOH_DNS_OUT_OF_RANGE, /* 2 */
+    DOH_DNS_LABEL_LOOP,   /* 3 */
+    DOH_TOO_SMALL_BUFFER, /* 4 */
+    DOH_OUT_OF_MEM,       /* 5 */
+    DOH_DNS_RDATA_LEN,    /* 6 */
+    DOH_DNS_MALFORMAT,    /* 7 */
+    DOH_DNS_BAD_RCODE,    /* 8 - no such name */
+    DOH_DNS_UNEXPECTED_TYPE,  /* 9 */
+    DOH_DNS_UNEXPECTED_CLASS, /* 10 */
+    DOH_NO_CONTENT,           /* 11 */
+    DOH_DNS_BAD_ID,           /* 12 */
+    DOH_DNS_NAME_TOO_LONG     /* 13 */
 } DOHcode;
 
 typedef enum {
-  DNS_TYPE_A = 1,
-  DNS_TYPE_NS = 2,
-  DNS_TYPE_CNAME = 5,
-  DNS_TYPE_AAAA = 28,
-  DNS_TYPE_DNAME = 39           /* RFC6672 */
+    DNS_TYPE_A = 1,
+    DNS_TYPE_NS = 2,
+    DNS_TYPE_CNAME = 5,
+    DNS_TYPE_AAAA = 28,
+    DNS_TYPE_DNAME = 39           /* RFC6672 */
 } DNStype;
 
 /* one of these for each DoH request */
 struct dnsprobe {
-  CURL *easy;
-  DNStype dnstype;
-  unsigned char dohbuffer[512];
-  size_t dohlen;
-  struct dynbuf serverdoh;
+    CURL *easy;
+    DNStype dnstype;
+    unsigned char dohbuffer[512];
+    size_t dohlen;
+    struct dynbuf serverdoh;
 };
 
 struct dohdata {
-  struct curl_slist *headers;
-  struct dnsprobe probe[DOH_PROBE_SLOTS];
-  unsigned int pending; /* still outstanding requests */
-  int port;
-  const char *host;
+    struct curl_slist *headers;
+    struct dnsprobe probe[DOH_PROBE_SLOTS];
+    unsigned int pending; /* still outstanding requests */
+    int port;
+    const char *host;
 };
 
 /*
@@ -90,19 +90,19 @@ int Curl_doh_getsock(struct connectdata *conn, curl_socket_t *socks);
 #define DOH_MAX_CNAME 4
 
 struct dohaddr {
-  int type;
-  union {
-    unsigned char v4[4]; /* network byte order */
-    unsigned char v6[16];
-  } ip;
+    int type;
+    union {
+        unsigned char v4[4]; /* network byte order */
+        unsigned char v6[16];
+    } ip;
 };
 
 struct dohentry {
-  struct dynbuf cname[DOH_MAX_CNAME];
-  struct dohaddr addr[DOH_MAX_ADDR];
-  int numaddr;
-  unsigned int ttl;
-  int numcname;
+    struct dynbuf cname[DOH_MAX_CNAME];
+    struct dohaddr addr[DOH_MAX_ADDR];
+    int numaddr;
+    unsigned int ttl;
+    int numcname;
 };
 
 

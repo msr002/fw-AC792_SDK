@@ -183,7 +183,7 @@
 
 #elif defined(__TANDEM)
 # if ! defined(__LP64)
-   /* Required for 32-bit NonStop builds only. */
+/* Required for 32-bit NonStop builds only. */
 #  define CURL_TYPEOF_CURL_OFF_T     long long
 #  define CURL_FORMAT_CURL_OFF_T     "lld"
 #  define CURL_FORMAT_CURL_OFF_TU    "llu"
@@ -537,13 +537,13 @@ typedef struct fd_set curl_fd_set;
 
 /* Data type definition of curl_socklen_t. */
 #ifdef CURL_TYPEOF_CURL_SOCKLEN_T
-  typedef CURL_TYPEOF_CURL_SOCKLEN_T curl_socklen_t;
+typedef CURL_TYPEOF_CURL_SOCKLEN_T curl_socklen_t;
 #endif
 
 /* Data type definition of curl_off_t. */
 
 #ifdef CURL_TYPEOF_CURL_OFF_T
-  typedef CURL_TYPEOF_CURL_OFF_T curl_off_t;
+typedef CURL_TYPEOF_CURL_OFF_T curl_off_t;
 #endif
 
 /*
@@ -565,10 +565,10 @@ typedef struct fd_set curl_fd_set;
   defined(__HP_aCC) || defined(__BORLANDC__) || defined(__LCC__) || \
   defined(__POCC__) || defined(__SALFORDC__) || defined(__HIGHC__) || \
   defined(__ILEC400__)
-  /* This compiler is believed to have an ISO compatible preprocessor */
+/* This compiler is believed to have an ISO compatible preprocessor */
 #define CURL_ISOCPP
 #else
-  /* This compiler is believed NOT to have an ISO compatible preprocessor */
+/* This compiler is believed NOT to have an ISO compatible preprocessor */
 #undef CURL_ISOCPP
 #endif
 

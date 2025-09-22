@@ -233,6 +233,9 @@ static int bt_connction_status_event_handler(void *evt)
     case BT_STATUS_FIRST_DISCONNECT:
     case BT_STATUS_SECOND_DISCONNECT:
         log_info("BT_STATUS_DISCONNECT");
+#if TCFG_USER_EMITTER_ENABLE
+        rf_coexistence_scene_exit(RF_COEXISTENCE_SCENE_A2DP_SOURCE);
+#endif
         break;
     case BT_STATUS_CONN_A2DP_CH:
         log_info("BT_STATUS_CONN_A2DP_CH");
@@ -653,6 +656,7 @@ static int bt_mode_exit(void)
     tws_dual_conn_close();
     bt_tws_poweroff();
 #else
+    void dual_conn_close(void);
     dual_conn_close();
 #endif
 
@@ -1022,8 +1026,22 @@ static int bt_state_machine(struct application *app, enum app_state state,
         break;
     case APP_STA_PAUSE:
         bt_music_app_suspend();
+#if TCFG_USER_EMITTER_ENABLE
+        extern u8 *get_cur_connect_emitter_mac_addr(void);
+        extern void emitter_open(void);
+        if (get_cur_connect_emitter_mac_addr()) {
+            emitter_open();
+        }
+#endif
         break;
     case APP_STA_RESUME:
+#if TCFG_USER_EMITTER_ENABLE
+        extern u8 *get_cur_connect_emitter_mac_addr(void);
+        extern void emitter_close(void);
+        if (get_cur_connect_emitter_mac_addr()) {
+            emitter_close();
+        }
+#endif
 #if TCFG_LE_AUDIO_STREAM_ENABLE
         le_audio_scene_deal(LE_AUDIO_APP_MODE_EXIT);    //退出上一个模式
 #endif

@@ -10,6 +10,9 @@
 #define LBUF_RESERVE_LEN (256)
 #define UNDEFINE_BUFFER_TPYE (0)
 
+#define BUFFER_WAIT     0
+#define BUFFER_NO_WAIT  1
+
 typedef enum {
     GENERAL_BUFFER = 0x0,
     FAST_BUFFER,

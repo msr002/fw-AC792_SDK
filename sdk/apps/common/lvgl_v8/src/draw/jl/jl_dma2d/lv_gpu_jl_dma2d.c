@@ -148,6 +148,7 @@ static int dma2d_rgb_fpc(uint8_t *dest_bufc, uint32_t dest_stride, uint32_t dest
     out_layer_param.h = dest_h;
     out_layer_param.endian = 0;
     out_layer_param.rbs = 0;
+    out_layer_param.dither_en = 1;
     dma2d_set_fg_layer(&fg_layer_param);
     dma2d_set_out_layer(&out_layer_param);
     dma2d_set_mode(JLDMA2D_M2M_PFC);
@@ -186,6 +187,7 @@ static void dma2d_rle_copy(uint8_t *dest_bufc, uint32_t dest_stride, uint8_t *sr
     out_layer_param.stride = dest_stride;
     out_layer_param.alpha_inv = 0;
     out_layer_param.rbs = 0;
+    out_layer_param.dither_en = 1;
 
     dma2d_set_fg_layer(&fg_layer_param);
     dma2d_set_out_layer(&out_layer_param);
@@ -526,6 +528,7 @@ static void lv_draw_jl_dma2d_blend_map(lv_color_t *dest_buf, const lv_area_t *de
         out_layer_param.stride = (dest_stride * LV_COLOR_DEPTH_EXTEN) >> 3;
         out_layer_param.format = LV_DMA2D_COLOR_FORMAT;
         out_layer_param.rbs = 0;
+        out_layer_param.dither_en = 1;
         out_layer_param.endian = LV_JL_DMA2D_BE;
         /* lv_flush_inv_dcache(dest_buf,dest_w,dest_h,dest_stride, LV_COLOR_DEPTH); */
 
@@ -657,6 +660,7 @@ static void lv_draw_jl_dma2d_blend_map_with_mask(lv_color_t *dest_buf, lv_coord_
     out_layer_param.stride = area_w * 4;
     out_layer_param.format = JLDMA2D_FORMAT_ARGB8888;
     out_layer_param.endian = LV_JL_DMA2D_BE;
+    out_layer_param.dither_en = 1;
 
     lv_flush_inv_dcache(src_buf, area_w, area_h, src_stride, LV_COLOR_DEPTH);
     fg_layer_param.data = (uint32_t)src_buf;
@@ -764,6 +768,7 @@ static void lv_draw_jl_dma2d_blend_map_argb8565(lv_color_t *dest_buf, const lv_a
     out_layer_param.format = JLDMA2D_FORMAT_ARGB8565;
     out_layer_param.rbs = 0;
     out_layer_param.endian = LV_JL_DMA2D_BE;
+    out_layer_param.dither_en = 1;
 
     if (compress_type == LV_COMPRESS_RLE) {
         rle_info = (rle_info_t *)src_buf;

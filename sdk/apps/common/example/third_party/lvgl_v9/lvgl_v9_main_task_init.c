@@ -29,8 +29,8 @@ static void lv_example_img_bin(void)
     lv_img_set_src(img, "mnt/sdfile/EXT_RESERVED/uipackres/ui/logoargb.bin");
 
     //Font
-    lv_font_t *font_bin = lv_font_load_bin("mnt/sdfile/EXT_RESERVED/uipackres/ui/font1.bin"); //不压缩字体
-    /* lv_font_t* font_bin = lv_font_load_bin("mnt/sdfile/EXT_RESERVED/uipackres/ui/font1.rle");//压缩字体 */
+    /* lv_font_t *font_bin = lv_font_load_bin("mnt/sdfile/EXT_RESERVED/uipackres/ui/font1.bin"); //不压缩字体 */
+    lv_font_t *font_bin = lv_font_load_bin("mnt/sdfile/EXT_RESERVED/uipackres/ui/font1.rle");//压缩字体
     lv_obj_set_style_text_font(label, font_bin, LV_PART_MAIN);//
     /* lv_obj_set_style_text_font(label,&lv_font_montserrat_24, LV_PART_MAIN);//C数组 */
 

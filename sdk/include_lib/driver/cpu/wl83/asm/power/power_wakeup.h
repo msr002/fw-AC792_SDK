@@ -138,7 +138,17 @@ void p33_io_wakeup_port_uninit(u32 gpio);
 void p33_io_wakeup_filter(u32 gpio, p33_io_wkup_flt_t filter);
 
 /**
+ * @brief 获取gpio的wakeup pending状态
+ */
+int p33_io_wakeup_get_pending(u32 gpio);
+
+/**
  * @brief 使能IO唤醒功能
+ */
+void __p33_io_wakeup_enable(u32 gpio, u32 enable);
+
+/**
+ * @brief 使能IO唤醒功能(加了POWER_CRITICAL)
  */
 void p33_io_wakeup_enable(u32 gpio, u32 enable);
 

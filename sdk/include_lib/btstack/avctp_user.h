@@ -255,6 +255,8 @@ typedef enum {
     USER_CTRL_IAP_SEND_DATA, //len <= 512
     //serial port profile disconnect command
     USER_CTRL_IAP_DISCONNECT,
+    USER_CTRL_IAP_CONN,
+    USER_CTRL_IAP_CONN_RFCOMM,
     USER_CTRL_IAP_CMD_END,
 
 ///pbg发送命令
@@ -366,6 +368,7 @@ typedef enum {
     USER_CTRL_TWS_AUDIO_SHARE_START_CONNECT,
     USER_CTRL_ATWS_AUDIO_SHARE_CMD_START					,
     USER_CTRL_ATWS_AUDIO_SHARE_CMD_SUSPEND					,
+    USER_CTRL_ADT_SYNC_CONNECT_FLAG,
 
     USER_CTRL_LAST
 } USER_CMD_TYPE;
@@ -642,6 +645,8 @@ extern void bt_set_support_lhdc_flag(bool flag);
 extern void bt_set_support_lhdc_v5_flag(bool flag);
 /*配置协议栈使用支持LDAC的信息*/
 extern void bt_set_support_ldac_flag(bool flag);
+/*配置协议栈使用支持Super Wide Band Speech*/
+extern void bt_set_support_hfp_swb_flag(bool flag);
 
 /*有些自选接口用来实现个性化功能流程，回调函数注册，记得常来看看哟*/
 //蓝牙库注册接口的函数
@@ -880,5 +885,6 @@ u8 *get_other_dev_addr(u8 *addr);
 void make_rand_num(u8 *buf);
 //获取另一个设备的a2dp状态
 u8 bt_a2dp_get_status_for_other_addr(bd_addr_t addr);
+u32 unactice_device_cmd_prepare(USER_CMD_TYPE cmd, u16 param_len, u8 *param);
 
 #endif

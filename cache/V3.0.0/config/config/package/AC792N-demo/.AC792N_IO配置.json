@@ -23,6 +23,52 @@
               "changeTag": true,
               "tag": "el-input",
               "tagIcon": "input",
+              "defaultValue": -1,
+              "required": false,
+              "layout": "colFormItem",
+              "span": 6,
+              "regList": [],
+              "status": 0,
+              "dataType": [
+                "string",
+                "16",
+                "-1"
+              ],
+              "formId": 130,
+              "renderKey": "1301752065355135",
+              "originValue": -1,
+              "saveWay": "bin",
+              "eventField": [
+                "device",
+                "gpio"
+              ]
+            },
+            "__slot__": {
+              "prepend": "",
+              "append": ""
+            },
+            "placeholder": "请输入单行文本",
+            "style": {
+              "width": "100%"
+            },
+            "clearable": true,
+            "prefix-icon": "",
+            "suffix-icon": "",
+            "maxlength": null,
+            "show-word-limit": false,
+            "readonly": false,
+            "disabled": false,
+            "id": "id_1752065355135_0",
+            "__vModel__": "field130"
+          },
+          {
+            "__config__": {
+              "label": "单行文本",
+              "labelWidth": null,
+              "showLabel": true,
+              "changeTag": true,
+              "tag": "el-input",
+              "tagIcon": "input",
               "defaultValue": "IO_PORTA_00",
               "required": false,
               "layout": "colFormItem",

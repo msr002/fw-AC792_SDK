@@ -57,23 +57,23 @@ CURLcode Curl_client_unpause(struct Curl_easy *data);
 void Curl_client_cleanup(struct Curl_easy *data);
 
 struct contenc_writer {
-  const struct content_encoding *handler;  /* Encoding handler. */
-  struct contenc_writer *downstream;  /* Downstream writer. */
-  unsigned int order; /* Ordering within writer stack. */
+    const struct content_encoding *handler;  /* Encoding handler. */
+    struct contenc_writer *downstream;  /* Downstream writer. */
+    unsigned int order; /* Ordering within writer stack. */
 };
 
 /* Content encoding writer. */
 struct content_encoding {
-  const char *name;        /* Encoding name. */
-  const char *alias;       /* Encoding name alias. */
-  CURLcode (*init_writer)(struct Curl_easy *data,
-                          struct contenc_writer *writer);
-  CURLcode (*unencode_write)(struct Curl_easy *data,
-                             struct contenc_writer *writer,
-                             const char *buf, size_t nbytes);
-  void (*close_writer)(struct Curl_easy *data,
-                       struct contenc_writer *writer);
-  size_t writersize;
+    const char *name;        /* Encoding name. */
+    const char *alias;       /* Encoding name alias. */
+    CURLcode(*init_writer)(struct Curl_easy *data,
+                           struct contenc_writer *writer);
+    CURLcode(*unencode_write)(struct Curl_easy *data,
+                              struct contenc_writer *writer,
+                              const char *buf, size_t nbytes);
+    void (*close_writer)(struct Curl_easy *data,
+                         struct contenc_writer *writer);
+    size_t writersize;
 };
 
 

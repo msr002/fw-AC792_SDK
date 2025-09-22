@@ -239,6 +239,9 @@ static void app_task_handler(void *p)
             os_time_dly(10);
         }
     }
+#elif TCFG_EXT_RF_FCC_TEST_ENABLE
+    void rf_fcc_tool_init(void);
+    rf_fcc_tool_init();
 #endif
 
     __do_initcall(initcall);

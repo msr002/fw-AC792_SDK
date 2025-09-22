@@ -625,26 +625,11 @@ lv_obj_t *setup_scr_page_map(lv_ui *ui)
     lv_obj_add_flag(ui_scr->page_map_img_1, LV_OBJ_FLAG_CLICKABLE);
     ui_style_set(ui_scr->page_map_img_1, GUI_CTRL_IMG);
 
-    //Write codes page_map_img_2
-    ui_scr->page_map_img_2 = lv_img_create(ui_scr->page_map);
-    lv_img_set_src(ui_scr->page_map_img_2, gui_get_res_path(GUI_RES_TIPS_PNG));
-    lv_img_set_pivot(ui_scr->page_map_img_2, 0, 0);
-    lv_img_set_angle(ui_scr->page_map_img_2, 0);
-    lv_img_set_zoom(ui_scr->page_map_img_2, 256);
-    lv_obj_set_pos(ui_scr->page_map_img_2, 360, 147);
-    lv_obj_set_size(ui_scr->page_map_img_2, 360, 130);
-    lv_obj_add_flag(ui_scr->page_map_img_2, LV_OBJ_FLAG_HIDDEN);
-    lv_obj_add_flag(ui_scr->page_map_img_2, LV_OBJ_FLAG_CLICKABLE);
-    ui_style_set(ui_scr->page_map_img_2, GUI_CTRL_IMG);
-
-    //Set style for page_map_img_2. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
-    lv_obj_set_style_bg_opa(ui_scr->page_map_img_2, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
-
     // Write Timer page_map_timer_2
     if (ui_scr->page_map_timer_2 != NULL) {
         lv_timer_del(ui_scr->page_map_timer_2);
     }
-    ui_scr->page_map_timer_2 = lv_timer_create(page_map_timer_2_timer_cb, 2000, "");
+    ui_scr->page_map_timer_2 = lv_timer_create(page_map_timer_2_timer_cb, 5000, "");
     lv_timer_set_repeat_count(ui_scr->page_map_timer_2, -1);
 
     //Write codes page_map_btn_1
@@ -662,7 +647,7 @@ lv_obj_t *setup_scr_page_map(lv_ui *ui)
     lv_obj_remove_style(ui_scr->page_map_btn_1, &gui_btn_main_focus_key_style, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
     ui_scr->page_map_btn_1_label = lv_label_create(ui_scr->page_map_btn_1);
     lv_label_set_text(ui_scr->page_map_btn_1_label, "back");
-    lv_obj_set_style_pad_all(ui_scr->page_map_btn_1, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_all(ui_scr->page_map_btn_1, 0, LV_STATE_DEFAULT);
     lv_obj_align(ui_scr->page_map_btn_1_label, LV_ALIGN_CENTER, 0, 0);
 
     //Write codes page_map_btn_2
@@ -680,8 +665,128 @@ lv_obj_t *setup_scr_page_map(lv_ui *ui)
     lv_obj_remove_style(ui_scr->page_map_btn_2, &gui_btn_main_focus_key_style, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
     ui_scr->page_map_btn_2_label = lv_label_create(ui_scr->page_map_btn_2);
     lv_label_set_text(ui_scr->page_map_btn_2_label, "next");
-    lv_obj_set_style_pad_all(ui_scr->page_map_btn_2, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_all(ui_scr->page_map_btn_2, 0, LV_STATE_DEFAULT);
     lv_obj_align(ui_scr->page_map_btn_2_label, LV_ALIGN_CENTER, 0, 0);
+
+    //Write codes page_map_view_4
+    ui_scr->page_map_view_4 = lv_obj_create(ui_scr->page_map);
+    lv_obj_set_pos(ui_scr->page_map_view_4, 540, 74);
+    lv_obj_set_size(ui_scr->page_map_view_4, 245, 168);
+    lv_obj_set_scrollbar_mode(ui_scr->page_map_view_4, LV_SCROLLBAR_MODE_OFF);
+    ui_style_set(ui_scr->page_map_view_4, GUI_CTRL_CONT);
+
+    //Set style for page_map_view_4. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
+    lv_obj_set_style_radius(ui_scr->page_map_view_4, 10, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(ui_scr->page_map_view_4, lv_color_make(0xFF, 0xFF, 0xFF), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(ui_scr->page_map_view_4, 128, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    //Delete extra default style for page_map_view_4
+    lv_obj_remove_style(ui_scr->page_map_view_4, &gui_cont_main_focus_key_style, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+
+    //Write codes page_map_lbl_5
+    ui_scr->page_map_lbl_5 = lv_label_create(ui_scr->page_map_view_4);
+    lv_label_set_text(ui_scr->page_map_lbl_5, "resolution:");
+    lv_label_set_long_mode(ui_scr->page_map_lbl_5, LV_LABEL_LONG_WRAP);
+    lv_obj_set_pos(ui_scr->page_map_lbl_5, 4, 2);
+    lv_obj_set_size(ui_scr->page_map_lbl_5, 115, 29);
+    lv_obj_set_scrollbar_mode(ui_scr->page_map_lbl_5, LV_SCROLLBAR_MODE_OFF);
+    ui_style_set(ui_scr->page_map_lbl_5, GUI_CTRL_LABEL);
+
+    //Set style for page_map_lbl_5. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
+    lv_obj_set_style_bg_color(ui_scr->page_map_lbl_5, lv_color_make(0x21, 0x95, 0xF6), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_color(ui_scr->page_map_lbl_5, lv_color_make(0x00, 0x00, 0x00), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui_scr->page_map_lbl_5, &lv_font_montserratMedium_16, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_top(ui_scr->page_map_lbl_5, 8, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    //Write codes page_map_lbl_6
+    ui_scr->page_map_lbl_6 = lv_label_create(ui_scr->page_map_view_4);
+    lv_label_set_text(ui_scr->page_map_lbl_6, "fps:max,min,avg");
+    lv_label_set_long_mode(ui_scr->page_map_lbl_6, LV_LABEL_LONG_WRAP);
+    lv_obj_set_pos(ui_scr->page_map_lbl_6, 4, 39);
+    lv_obj_set_size(ui_scr->page_map_lbl_6, 219, 34);
+    lv_obj_set_scrollbar_mode(ui_scr->page_map_lbl_6, LV_SCROLLBAR_MODE_OFF);
+    ui_style_set(ui_scr->page_map_lbl_6, GUI_CTRL_LABEL);
+
+    //Set style for page_map_lbl_6. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
+    lv_obj_set_style_bg_color(ui_scr->page_map_lbl_6, lv_color_make(0x21, 0x95, 0xF6), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_color(ui_scr->page_map_lbl_6, lv_color_make(0x00, 0x00, 0x00), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui_scr->page_map_lbl_6, &lv_font_montserratMedium_16, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_top(ui_scr->page_map_lbl_6, 8, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    //Write codes page_map_lbl_7
+    ui_scr->page_map_lbl_7 = lv_label_create(ui_scr->page_map_view_4);
+    lv_label_set_text(ui_scr->page_map_lbl_7, "0,0,0");
+    lv_label_set_long_mode(ui_scr->page_map_lbl_7, LV_LABEL_LONG_WRAP);
+    lv_obj_set_pos(ui_scr->page_map_lbl_7, 42, 64);
+    lv_obj_set_size(ui_scr->page_map_lbl_7, 172, 28);
+    lv_obj_set_scrollbar_mode(ui_scr->page_map_lbl_7, LV_SCROLLBAR_MODE_OFF);
+    ui_style_set(ui_scr->page_map_lbl_7, GUI_CTRL_LABEL);
+
+    //Set style for page_map_lbl_7. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
+    lv_obj_set_style_bg_color(ui_scr->page_map_lbl_7, lv_color_make(0x21, 0x95, 0xF6), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_color(ui_scr->page_map_lbl_7, lv_color_make(0x00, 0x00, 0x00), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui_scr->page_map_lbl_7, &lv_font_montserratMedium_16, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_top(ui_scr->page_map_lbl_7, 8, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    //Write codes page_map_lbl_8
+    ui_scr->page_map_lbl_8 = lv_label_create(ui_scr->page_map_view_4);
+    lv_label_set_text(ui_scr->page_map_lbl_8, "bitrate:max,min,avg");
+    lv_label_set_long_mode(ui_scr->page_map_lbl_8, LV_LABEL_LONG_WRAP);
+    lv_obj_set_pos(ui_scr->page_map_lbl_8, 4, 96);
+    lv_obj_set_size(ui_scr->page_map_lbl_8, 238, 34);
+    lv_obj_set_scrollbar_mode(ui_scr->page_map_lbl_8, LV_SCROLLBAR_MODE_OFF);
+    ui_style_set(ui_scr->page_map_lbl_8, GUI_CTRL_LABEL);
+
+    //Set style for page_map_lbl_8. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
+    lv_obj_set_style_bg_color(ui_scr->page_map_lbl_8, lv_color_make(0x21, 0x95, 0xF6), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_color(ui_scr->page_map_lbl_8, lv_color_make(0x00, 0x00, 0x00), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui_scr->page_map_lbl_8, &lv_font_montserratMedium_16, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_top(ui_scr->page_map_lbl_8, 8, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    //Write codes page_map_lbl_9
+    ui_scr->page_map_lbl_9 = lv_label_create(ui_scr->page_map_view_4);
+    lv_label_set_text(ui_scr->page_map_lbl_9, "0,0,0");
+    lv_label_set_long_mode(ui_scr->page_map_lbl_9, LV_LABEL_LONG_WRAP);
+    lv_obj_set_pos(ui_scr->page_map_lbl_9, 42, 126);
+    lv_obj_set_size(ui_scr->page_map_lbl_9, 172, 28);
+    lv_obj_set_scrollbar_mode(ui_scr->page_map_lbl_9, LV_SCROLLBAR_MODE_OFF);
+    ui_style_set(ui_scr->page_map_lbl_9, GUI_CTRL_LABEL);
+
+    //Set style for page_map_lbl_9. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
+    lv_obj_set_style_bg_color(ui_scr->page_map_lbl_9, lv_color_make(0x21, 0x95, 0xF6), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_color(ui_scr->page_map_lbl_9, lv_color_make(0x00, 0x00, 0x00), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui_scr->page_map_lbl_9, &lv_font_montserratMedium_16, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_top(ui_scr->page_map_lbl_9, 8, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    //Write codes page_map_lbl_10
+    ui_scr->page_map_lbl_10 = lv_label_create(ui_scr->page_map_view_4);
+    lv_label_set_text(ui_scr->page_map_lbl_10, "800x400");
+    lv_label_set_long_mode(ui_scr->page_map_lbl_10, LV_LABEL_LONG_WRAP);
+    lv_obj_set_pos(ui_scr->page_map_lbl_10, 114, 3);
+    lv_obj_set_size(ui_scr->page_map_lbl_10, 117, 29);
+    lv_obj_set_scrollbar_mode(ui_scr->page_map_lbl_10, LV_SCROLLBAR_MODE_OFF);
+    ui_style_set(ui_scr->page_map_lbl_10, GUI_CTRL_LABEL);
+
+    //Set style for page_map_lbl_10. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
+    lv_obj_set_style_bg_color(ui_scr->page_map_lbl_10, lv_color_make(0x21, 0x95, 0xF6), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_color(ui_scr->page_map_lbl_10, lv_color_make(0x00, 0x00, 0x00), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui_scr->page_map_lbl_10, &lv_font_montserratMedium_16, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_top(ui_scr->page_map_lbl_10, 8, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    //Write codes page_map_img_2
+    ui_scr->page_map_img_2 = lv_img_create(ui_scr->page_map);
+    lv_img_set_src(ui_scr->page_map_img_2, gui_get_res_path(GUI_RES_TIPS_PNG));
+    lv_img_set_pivot(ui_scr->page_map_img_2, 0, 0);
+    lv_img_set_angle(ui_scr->page_map_img_2, 0);
+    lv_img_set_zoom(ui_scr->page_map_img_2, 256);
+    lv_obj_set_pos(ui_scr->page_map_img_2, 360, 147);
+    lv_obj_set_size(ui_scr->page_map_img_2, 360, 130);
+    lv_obj_add_flag(ui_scr->page_map_img_2, LV_OBJ_FLAG_HIDDEN);
+    lv_obj_add_flag(ui_scr->page_map_img_2, LV_OBJ_FLAG_CLICKABLE);
+    ui_style_set(ui_scr->page_map_img_2, GUI_CTRL_IMG);
+
+    //Set style for page_map_img_2. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
+    lv_obj_set_style_bg_opa(ui_scr->page_map_img_2, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     lv_obj_update_layout(ui_scr->page_map);
     ui_scr->page_map_del = false;

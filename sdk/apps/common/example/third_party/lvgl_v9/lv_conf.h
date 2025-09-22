@@ -259,13 +259,13 @@
 
 #endif
 /** Accelerate blends, fills, etc. with jieli DMA2D */
-#define LV_USE_DRAW_JLDMA2D 0
+#define LV_USE_DRAW_JLDMA2D 1
 #if LV_USE_DRAW_JLDMA2D
 #define LV_DRAW_JLDMA2D_ASYNC 1
 #endif
 
 /* Use JieLi's 2.5D GPU on ACxx platforms. */
-#define LV_USE_DRAW_JLVG 0  // 测试阶段
+#define LV_USE_DRAW_JLVG 1  // 测试阶段
 #if LV_USE_DRAW_JLVG
 #define LV_DRAW_JLVG_ASYNC 1
 /* The ability to perform rendering */

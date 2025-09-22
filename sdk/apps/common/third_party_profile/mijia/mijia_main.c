@@ -255,7 +255,7 @@ static uint16_t custom_att_read_callback(void *hdl, hci_con_handle_t connection_
     case ATT_CHARACTERISTIC_001c_01_CLIENT_CONFIGURATION_HANDLE:
     case ATT_CHARACTERISTIC_00000102_0065_6C62_2E74_6F696D2E696D_01_CLIENT_CONFIGURATION_HANDLE:
         if (buffer) {
-            buffer[0] = att_get_ccc_config(handle);
+            buffer[0] = multi_att_get_ccc_config(connection_handle, handle);
             buffer[1] = 0;
         }
         att_value_len = 2;
@@ -340,7 +340,7 @@ static int custom_att_write_callback(void *hdl, hci_con_handle_t connection_hand
     case ATT_CHARACTERISTIC_001c_01_CLIENT_CONFIGURATION_HANDLE:
     case ATT_CHARACTERISTIC_00000102_0065_6C62_2E74_6F696D2E696D_01_CLIENT_CONFIGURATION_HANDLE:
         printf("\nwrite ccc:%04x, %02x\n", handle, buffer[0]);
-        att_set_ccc_config(handle, buffer[0]);
+        multi_att_set_ccc_config(connection_handle, handle, buffer[0]);
         break;
     default:
         break;

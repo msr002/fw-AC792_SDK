@@ -8,6 +8,8 @@
 #include "common.h"
 #include "sha1_alt.h"
 
+void jl_sha1_process(int *is_start, unsigned int state[5], const unsigned char data[64]);
+
 int mbedtls_internal_sha1_process(mbedtls_sha1_context *ctx, const unsigned char data[64])
 {
     int sha1_start = 1;

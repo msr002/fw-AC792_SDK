@@ -59,11 +59,11 @@ struct connectdata;
 struct Curl_hash *Curl_global_host_cache_init(void);
 
 struct Curl_dns_entry {
-  struct Curl_addrinfo *addr;
-  /* timestamp == 0 -- permanent CURLOPT_RESOLVE entry (doesn't time out) */
-  time_t timestamp;
-  /* use-counter, use Curl_resolv_unlock to release reference */
-  long inuse;
+    struct Curl_addrinfo *addr;
+    /* timestamp == 0 -- permanent CURLOPT_RESOLVE entry (doesn't time out) */
+    time_t timestamp;
+    /* use-counter, use Curl_resolv_unlock to release reference */
+    long inuse;
 };
 
 bool Curl_host_is_ipnum(const char *hostname);
@@ -77,10 +77,10 @@ bool Curl_host_is_ipnum(const char *hostname);
  */
 /* return codes */
 enum resolve_t {
-  CURLRESOLV_TIMEDOUT = -2,
-  CURLRESOLV_ERROR    = -1,
-  CURLRESOLV_RESOLVED =  0,
-  CURLRESOLV_PENDING  =  1
+    CURLRESOLV_TIMEDOUT = -2,
+    CURLRESOLV_ERROR    = -1,
+    CURLRESOLV_RESOLVED =  0,
+    CURLRESOLV_PENDING  =  1
 };
 enum resolve_t Curl_resolv(struct Curl_easy *data,
                            const char *hostname,

@@ -12,6 +12,7 @@
 #include "lwip/tcpip.h"
 #include "lwip/dhcp.h"
 #include "lwip/dhcp6.h"
+#include "lwip/nd6.h"
 #include "lwip/prot/dhcp.h"
 #include "lwip/autoip.h"
 #include "lwip/dns.h"
@@ -24,12 +25,14 @@
 #include "sys_arch.h"
 /* #include "eth/eth_phy.h" */
 #include "wifi/wifi_connect.h"
+#include "system/sys_time.h"
 
 #define HAVE_ETH_WIRE_NETIF
 #define HAVE_LTE_NETIF
 #define HAVE_BT_NETIF
 #define HAVE_EXT_WIRELESS_NETIF
 #define HAVE_WRIELESS_RAW_NETIF
+#define HAVE_UART_NETIF
 
 extern const u8 IPV4_ADDR_CONFLICT_DETECT;
 extern char *itoa(int num, char *str, int radix);
@@ -39,6 +42,7 @@ extern err_t wired_ethernetif_init(struct netif *netif);
 extern err_t bt_ethernetif_init(struct netif *netif);
 extern err_t lte_ethernetif_init(struct netif *netif);
 extern err_t wireless_raw_ethernetif_init(struct netif *netif);
+extern err_t uart_ethernetif_init(struct netif *netif);
 extern void ntp_client_get_time(const char *host);
 extern int netdev_get_mac_addr(u8 *mac_addr);
 static void __lwip_renew(unsigned short parm);
@@ -151,6 +155,41 @@ static struct netif wireless_raw_netif;
 static struct netif wireless_netif;
 static u32 wireless_dhcp_timeout_cnt;
 static u8 lwip_static_ip_renew[MAX_NETIF_NUM];
+
+#ifdef HAVE_UART_NETIF
+static struct netif uart_netif;
+static struct lan_setting uart_lan_setting_info = {
+    .WIRELESS_IP_ADDR0  = 192,
+    .WIRELESS_IP_ADDR1  = 168,
+    .WIRELESS_IP_ADDR2  = 1,
+    .WIRELESS_IP_ADDR3  = 1,
+
+    .WIRELESS_NETMASK0  = 255,
+    .WIRELESS_NETMASK1  = 255,
+    .WIRELESS_NETMASK2  = 255,
+    .WIRELESS_NETMASK3  = 0,
+
+    .WIRELESS_GATEWAY0  = 192,
+    .WIRELESS_GATEWAY1  = 168,
+    .WIRELESS_GATEWAY2  = 1,
+    .WIRELESS_GATEWAY3  = 1,
+
+    .SERVER_IPADDR1  = 192,
+    .SERVER_IPADDR2  = 168,
+    .SERVER_IPADDR3  = 1,
+    .SERVER_IPADDR4  = 1,
+
+    .CLIENT_IPADDR1  = 192,
+    .CLIENT_IPADDR2  = 168,
+    .CLIENT_IPADDR3  = 1,
+    .CLIENT_IPADDR4  = 101,
+
+    .SUB_NET_MASK1   = 255,
+    .SUB_NET_MASK2   = 255,
+    .SUB_NET_MASK3   = 255,
+    .SUB_NET_MASK4   = 0,
+};
+#endif
 
 #ifdef HAVE_EXT_WIRELESS_NETIF
 static struct lan_setting ext_wireless_lan_setting_info = {
@@ -338,6 +377,11 @@ struct lan_setting *net_get_lan_info(u8_t lwip_netif)
         return &bt_lan_setting_info;
     }
 #endif
+#ifdef HAVE_UART_NETIF
+    else if (lwip_netif == UART_NETIF) {
+        return &uart_lan_setting_info;
+    }
+#endif
 
     return NULL;
 }
@@ -372,6 +416,11 @@ struct netif *net_get_netif_handle(u8_t lwip_netif)
 #ifdef HAVE_BT_NETIF
     else if (lwip_netif == BT_NETIF) {
         return &bt_netif;
+    }
+#endif
+#ifdef HAVE_UART_NETIF
+    else if (lwip_netif == UART_NETIF) {
+        return &uart_netif;
     }
 #endif
 
@@ -785,6 +834,7 @@ static void nd6_netif_cache_cleanup(struct netif *netif)
 
 void nd6_renew(struct netif *netif)
 {
+#if LWIP_IPV6
     nd6_netif_cache_cleanup(netif);
     nd6_cleanup_netif(netif);
     nd6_restart_netif(netif);
@@ -805,6 +855,7 @@ void nd6_renew(struct netif *netif)
     if (tcpip_callback((tcpip_callback_fn)dhcp6_enable_stateless, netif) != ERR_OK) {
         LWIP_ASSERT("failed to create timeout dhcp6_enable_stateless", 0);
     }
+#endif
 #endif
 #endif
 }
@@ -1170,6 +1221,14 @@ void Init_LwIP(u8_t lwip_netif)
         break;
 #endif
 
+#ifdef HAVE_UART_NETIF
+    case UART_NETIF:
+        netif = &uart_netif;
+        ethernetif_init = uart_ethernetif_init;
+        sprintf(host_name, "%s", LOCAL_WIRE_HOST_NAME);
+        break;
+#endif
+
     default:
         printf("no support netif = %d\n", lwip_netif);
         return;
@@ -1287,7 +1346,7 @@ int getdomainname(char *name, int namelen)
 
 u32_t sys_now(void)
 {
-    return OSGetTime() * 10;
+    return timer_get_ms();
 }
 
 /**
@@ -1482,6 +1541,16 @@ void lwip_set_netif_ipaddr(const u8_t lwip_netif, const ip4_addr_t *ipaddr)
 {
     struct netif *netif = net_get_netif_handle(lwip_netif);
     netif_set_ipaddr(netif, ipaddr);
+}
+
+void lwip_set_netif_hostname(const u8_t lwip_netif, const char *host_name)
+{
+#if LWIP_NETIF_HOSTNAME
+    struct netif *netif = net_get_netif_handle(lwip_netif);
+    if (netif) {
+        netif_set_hostname(netif, host_name);
+    }
+#endif
 }
 
 void lwip_get_netif_info(u8_t lwip_netif, struct netif_info *info)

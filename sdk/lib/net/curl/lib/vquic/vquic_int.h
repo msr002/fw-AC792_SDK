@@ -33,18 +33,18 @@
 #define MAX_UDP_PAYLOAD_SIZE  1452
 
 struct cf_quic_ctx {
-  curl_socket_t sockfd; /* connected UDP socket */
-  struct sockaddr_storage local_addr; /* address socket is bound to */
-  socklen_t local_addrlen; /* length of local address */
+    curl_socket_t sockfd; /* connected UDP socket */
+    struct sockaddr_storage local_addr; /* address socket is bound to */
+    socklen_t local_addrlen; /* length of local address */
 
-  struct bufq sendbuf; /* buffer for sending one or more packets */
-  size_t gsolen; /* length of individual packets in send buf */
-  size_t split_len; /* if != 0, buffer length after which GSO differs */
-  size_t split_gsolen; /* length of individual packets after split_len */
+    struct bufq sendbuf; /* buffer for sending one or more packets */
+    size_t gsolen; /* length of individual packets in send buf */
+    size_t split_len; /* if != 0, buffer length after which GSO differs */
+    size_t split_gsolen; /* length of individual packets after split_len */
 #ifdef DEBUGBUILD
-  int wblock_percent; /* percent of writes doing EAGAIN */
+    int wblock_percent; /* percent of writes doing EAGAIN */
 #endif
-  bool no_gso; /* do not use gso on sending */
+    bool no_gso; /* do not use gso on sending */
 };
 
 CURLcode vquic_ctx_init(struct cf_quic_ctx *qctx);
@@ -59,7 +59,7 @@ CURLcode vquic_send_blocked_pkts(struct Curl_cfilter *cf,
                                  struct cf_quic_ctx *qctx);
 
 CURLcode vquic_send(struct Curl_cfilter *cf, struct Curl_easy *data,
-                        struct cf_quic_ctx *qctx, size_t gsolen);
+                    struct cf_quic_ctx *qctx, size_t gsolen);
 
 CURLcode vquic_send_tail_split(struct Curl_cfilter *cf, struct Curl_easy *data,
                                struct cf_quic_ctx *qctx, size_t gsolen,

@@ -45,10 +45,10 @@ struct ssl_primary_config;
 struct ssl_config_data;
 
 struct gtls_instance {
-  gnutls_session_t session;
-  gnutls_certificate_credentials_t cred;
+    gnutls_session_t session;
+    gnutls_certificate_credentials_t cred;
 #ifdef USE_GNUTLS_SRP
-  gnutls_srp_client_credentials_t srp_client_cred;
+    gnutls_srp_client_credentials_t srp_client_cred;
 #endif
 };
 

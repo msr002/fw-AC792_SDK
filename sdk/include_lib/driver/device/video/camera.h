@@ -125,6 +125,7 @@ int camera_get_in_format(void *c);
 
 void sensor_driver_close(int channel, int interface_type);
 void *sensor_driver_open(int channel, int interface_type);
+int sensor_driver_init(void *_camera);
 
 void camera_info_copy(int interface_type, void *camera);
 

@@ -30,6 +30,8 @@ void a2dp_media_start_play(void *_file);
 
 void a2dp_media_stop_play(void *_file);
 
+void a2dp_media_suspend_play(void *_file);
+
 int a2dp_media_set_rx_notify(void *_file, void *priv, void (*notify)(void *));
 
 extern int a2dp_media_get_packet(void *_file, struct a2dp_media_frame *frame);
@@ -74,6 +76,12 @@ extern bool a2dp_media_unmute(u8 *addr);
 extern bool a2dp_media_is_mute(u8 *addr);
 
 extern int aac_energy_check(u8 *packet, u16 size);
+
+extern void aac_decoder_energy_det_close(void);
+
+extern void a2dp_media_update_delay_report_time(void *_file, u16 time);
+
+extern int a2dp_media_get_sbc_data_len(void *_file);
 
 extern void aac_decoder_energy_det_close(void);
 

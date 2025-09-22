@@ -308,7 +308,7 @@ static uint16_t le_net_cfg_att_read_callback(void *hdl, hci_con_handle_t connect
 
     case ATT_CHARACTERISTIC_ae82_01_CLIENT_CONFIGURATION_HANDLE:
         if (buffer) {
-            buffer[0] = att_get_ccc_config(handle);
+            buffer[0] = multi_att_get_ccc_config(connection_handle, handle);
             buffer[1] = 0;
         }
         att_value_len = 2;
@@ -377,7 +377,7 @@ static int le_net_cfg_att_write_callback(void *hdl, hci_con_handle_t connection_
         set_ble_work_state(BLE_ST_NOTIFY_IDICATE);
         check_connetion_updata_deal();
         log_info("write ccc: 0x%04x, 0x%02x", handle, buffer[0]);
-        att_set_ccc_config(handle, buffer[0]);
+        multi_att_set_ccc_config(connection_handle, handle, buffer[0]);
         user_buf_offset = 0;
         user_data_size = 0;
         memset(user_buf, 0, sizeof(user_buf));
@@ -430,7 +430,7 @@ static int app_send_user_data(u16 handle, const u8 *data, u16 len, u8 handle_typ
         return APP_BLE_OPERATION_ERROR;
     }
 
-    if (!att_get_ccc_config(handle + 1)) {
+    if (!multi_att_get_ccc_config(con_handle, handle + 1)) {
         log_info("fail,no write ccc!!!, 0x%04x", handle + 1);
         return APP_BLE_NO_WRITE_CCC;
     }

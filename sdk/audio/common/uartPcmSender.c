@@ -9,9 +9,11 @@
 #if ((defined TCFG_AUDIO_DATA_EXPORT_DEFINE) && (TCFG_AUDIO_DATA_EXPORT_DEFINE == AUDIO_DATA_EXPORT_VIA_UART))
 #include "system/includes.h"
 #include "uart.h"
+#include "asm/uart.h"
+#include "device/uart.h"
 
 struct uart_send_hdl_t {
-    int uart;
+    void *uart_hdl;
     u8 *dma_buf;
     int dma_buf_size;
 };
@@ -22,21 +24,40 @@ void uartSendData(void *buf, u16 len) 			//发送数据的接口。
     struct uart_send_hdl_t *hdl = uart_send_hdl;
     uartSendInit();
     if (hdl) {
-        if (hdl->uart != -1) {
+        if (hdl->uart_hdl != NULL) {
             if (hdl->dma_buf == NULL) {
                 printf("%s : %d", __func__, __LINE__);
                 hdl->dma_buf_size = len;
-                hdl->dma_buf = dma_malloc(hdl->dma_buf_size);
+                hdl->dma_buf = malloc(hdl->dma_buf_size);
+                if (!hdl->dma_buf) {
+                    printf("uartSendData malloc fail!");
+                }
+
+                // 设置发送数据为阻塞方式(非必须)
+                dev_ioctl(hdl->uart_hdl, IOCTL_UART_SET_SEND_BLOCK, 1);
+
+                // 使能串口,启动收发数据(必须)
+                dev_ioctl(hdl->uart_hdl, IOCTL_UART_START, 0);
+
             }
             if (hdl->dma_buf_size != len) {
                 printf("%s : %d", __func__, __LINE__);
-                dma_free(hdl->dma_buf);
+                free(hdl->dma_buf);
                 hdl->dma_buf_size = len;
-                hdl->dma_buf = dma_malloc(hdl->dma_buf_size);
+                hdl->dma_buf = malloc(hdl->dma_buf_size);
+                if (!hdl->dma_buf) {
+                    printf("uartSendData remalloc fail!");
+                }
+
+                // 设置发送数据为阻塞方式(非必须)
+                dev_ioctl(hdl->uart_hdl, IOCTL_UART_SET_SEND_BLOCK, 1);
+
+                // 使能串口,启动收发数据(必须)
+                dev_ioctl(hdl->uart_hdl, IOCTL_UART_START, 0);
             }
+
             memcpy(hdl->dma_buf, buf, len);
-            /* uart_send_bytes(hdl->uart, hdl->dma_buf, len); */
-            int wlen = uart_send_blocking(hdl->uart, hdl->dma_buf, hdl->dma_buf_size, 100);
+            int wlen = dev_write(hdl->uart_hdl, hdl->dma_buf, hdl->dma_buf_size);
             if (wlen != hdl->dma_buf_size) {
                 putchar('f');
             }
@@ -53,35 +74,26 @@ void uartSendInit()
     }
     struct uart_send_hdl_t *hdl = zalloc(sizeof(*hdl));
     uart_send_hdl = hdl;
-    struct uart_config ut = {
-        .baud_rate = PCM_UART1_BAUDRATE,
-        .tx_pin = PCM_UART1_TX_PORT,
-        .rx_pin = PCM_UART1_RX_PORT,
-    };
 
-    hdl->uart = uart_init(-1, &ut);
-    if (hdl->uart < 0) {
-        printf("open uart dev err\n");
-        hdl->uart  = -1;
+    hdl->uart_hdl = dev_open("uart1", 0);
+    if (!hdl->uart_hdl) {
+        printf("uartSendInit dev_open err!");
     }
 
-    struct uart_dma_config dma_config = {
-        .event_mask = UART_EVENT_TX_DONE,
-    };
-    uart_dma_init(hdl->uart, &dma_config);
+    return;
 }
 
 void uartSendExit()
 {
     struct uart_send_hdl_t *hdl = uart_send_hdl;
     if (hdl) {
-        if (hdl->uart != -1) {
-            uart_deinit(hdl->uart);
-            hdl->uart = -1 ;
+        if (hdl->uart_hdl) {
+            dev_close(hdl->uart_hdl);
+            hdl->uart_hdl = NULL;
         }
 
         if (hdl->dma_buf) {
-            dma_free(hdl->dma_buf);
+            free(hdl->dma_buf);
             hdl->dma_buf = NULL;
         }
         free(hdl);

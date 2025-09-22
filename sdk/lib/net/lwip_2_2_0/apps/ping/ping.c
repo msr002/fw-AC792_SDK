@@ -43,7 +43,7 @@
 #if LWIP_RAW /* don't build if not configured for use in lwipopts.h */
 
 #include "ping.h"
-
+#include "generic/jiffies.h"
 #include "lwip/mem.h"
 #include "lwip/raw.h"
 #include "lwip/icmp.h"
@@ -113,16 +113,17 @@ static const ip_addr_t ping_test = {0x0201A8C0};//192.168.1.2
 
 struct ping_t {
     struct raw_pcb *pcb;
-    void (*cb)(void *, u32_t succ_cnt, u32_t recv_time);
+    void (*cb)(void *, u32_t succ_cnt, int recv_time);
     void *priv;
     ip_addr_t ping_target;
     u32_t delayms;
     u32_t ping_time;
     u16_t ping_seq_num;
-    u16_t ping_cnt;
-    u16_t ping_total_cnt;
-    u8_t succ_cnt;
-    u32_t recv_time;
+    u8_t  send_at_once;
+    u32_t ping_cnt;
+    u32_t ping_total_cnt;
+    u32_t succ_cnt;
+    int recv_time;
 };
 #endif /* PING_USE_SOCKETS */
 
@@ -275,6 +276,8 @@ ping_init(const char *ip_addr_str)
 
 #else /* PING_USE_SOCKETS */
 
+static void ping_timeout(void *arg);
+
 /* Ping using the raw ip */
 static u8_t
 ping_recv(void *arg, struct raw_pcb *pcb, struct pbuf *p, const ip_addr_t *addr)
@@ -287,20 +290,27 @@ ping_recv(void *arg, struct raw_pcb *pcb, struct pbuf *p, const ip_addr_t *addr)
     LWIP_ASSERT("p != NULL", p != NULL);
 
     if ((p->tot_len >= (PBUF_IP_HLEN + sizeof(struct icmp_echo_hdr))) &&
+        IPH_PROTO((struct ip_hdr *)p->payload) == IP_PROTO_ICMP &&
         pbuf_header(p, -PBUF_IP_HLEN) == 0) {
         iecho = (struct icmp_echo_hdr *)p->payload;
 
         if ((iecho->id == PING_ID) && (iecho->seqno == htons(ping->ping_seq_num))) {
             LWIP_DEBUGF(PING_DEBUG, ("ping: recv "));
             ip_addr_debug_print(PING_DEBUG, addr);
-            LWIP_DEBUGF(PING_DEBUG, (" %"U32_F" ms\n", (sys_now() - ping->ping_time)));
-            ping->recv_time = sys_now() - ping->ping_time;
+            ping->recv_time = jiffies_msec2offset(ping->ping_time, jiffies_msec());
+            LWIP_DEBUGF(PING_DEBUG, (" %"U32_F" ms\n", ping->recv_time));
             /* do some ping result processing */
             PING_RESULT(1);
-            pbuf_free(p);
-            ping->succ_cnt++;
-            return 1; /* eat the packet */
+            ++ping->succ_cnt;
+            ++ping->ping_seq_num;   //过滤收到的重复seq
+            if (ping->send_at_once) {
+                sys_untimeout(ping_timeout, ping);
+                ping_timeout(ping);
+            }
         }
+
+        pbuf_free(p);
+        return 1; /* eat the packet */
     }
 
     return 0; /* don't eat the packet */
@@ -329,7 +339,8 @@ ping_send(struct raw_pcb *raw, ip_addr_t *addr, void *arg)
         ping_prepare_echo(iecho, (u16_t)ping_size, ping->ping_seq_num);
 
         raw_sendto(raw, p, addr);
-        ping->ping_time = sys_now();
+        ping->recv_time = -1;
+        ping->ping_time = jiffies_msec();
     }
     pbuf_free(p);
 }
@@ -346,9 +357,9 @@ ping_timeout(void *arg)
         ping->cb(ping->priv, ping->ping_cnt, ping->recv_time);
     }
     if (++ping->ping_cnt > ping->ping_total_cnt) {
-        //if (ping->cb) {
-        //    ping->cb(ping->priv, ping->succ_cnt);
-        //}
+        if (ping->cb) {
+            ping->cb(ping->priv, -1, ping->succ_cnt);
+        }
         raw_remove(pcb);
         free(ping);
         return;
@@ -369,11 +380,11 @@ ping_raw_init(struct ping_t *ping)
 
     raw_recv(ping->pcb, ping_recv, ping);
     raw_bind(ping->pcb, IP_ADDR_ANY);
-    sys_timeout(ping->delayms, ping_timeout, ping);
+    ping_timeout(ping);
 }
 
 int
-ping_init(const char *ip_addr_str, u32 delayms, u32 ping_total_cnt, void (*cb)(void *, u32), void *priv)
+ping_init(const char *ip_addr_str, u32 delayms, u32 ping_total_cnt, void (*cb)(void *, u32, int), void *priv, u8 send_at_once)
 {
     struct ping_t *ping = (struct ping_t *)zalloc(sizeof(struct ping_t));
     if (!ping) {
@@ -384,6 +395,7 @@ ping_init(const char *ip_addr_str, u32 delayms, u32 ping_total_cnt, void (*cb)(v
     memcpy(&ping->ping_target, &ip, sizeof(ip));
     ping->delayms = delayms;
     ping->ping_seq_num = LWIP_RAND();
+    ping->send_at_once = send_at_once;
     ping->ping_total_cnt = ping_total_cnt;
     ping->cb = cb;
     ping->priv = priv;

@@ -533,8 +533,6 @@ static int pc_music_init(void)
         }
     }
 
-    /* app_send_message(APP_MSG_ENTER_MODE, APP_MODE_PC); */
-
     return 0;
 }
 
@@ -562,7 +560,6 @@ static void pc_music_exit(void)
 #if TCFG_LE_AUDIO_STREAM_ENABLE
     le_audio_scene_deal(LE_AUDIO_APP_MODE_EXIT);
 #endif
-    /* app_send_message(APP_MSG_EXIT_MODE, APP_MODE_PC); */
 }
 
 static int pc_music_key_click(struct key_event *key)

@@ -751,6 +751,7 @@ static void auracast_sync_info_report(uint8_t *packet, uint16_t length)
 
     if (match_name((void *)config->broadcast_name, auracast_listen_name, strlen(auracast_listen_name))) {
         log_info("auracast name match");
+        ll_vendor_ble_sync_check_set(2);
         app_auracast_sink_big_sync_create(config);
         app_auracast_mutex_post(&mutex, __LINE__);
     } else {
@@ -963,7 +964,7 @@ static void app_auracast_sink_init(void)
 {
     log_info("app_auracast_sink_init");
 
-    auracast_sink_init();
+    auracast_sink_init(AURACAST_SINK_API_VERSION);
     auracast_sink_event_callback_register(auracast_sink_event_callback);
 
     //le_audio_bass_event_callback_register(app_auracast_bass_server_event_callback);
@@ -1002,6 +1003,7 @@ int app_auracast_sink_scan_start(void)
 {
     int ret = auracast_sink_scan_start();
     log_info("app_auracast_sink_scan_start ret:%d, ret");
+    ll_vendor_ble_sync_check_set(1);
     return ret;
 }
 
@@ -1168,16 +1170,16 @@ int app_auracast_sink_close(u8 status)
 
     app_auracast_mutex_pend(&mutex, __LINE__);
 
-    auracast_sink_set_audio_state(0);
+    /* auracast_sink_set_audio_state(0); */
     if (app_auracast.status == APP_AURACAST_STATUS_SYNC) {
         auracast_sink_big_sync_terminate();
     }
     auracast_sink_scan_stop();
     os_time_dly(10);
     auracast_sink_uninit();
-    app_auracast.status = status;
     auracast_sink_media_close();
 
+    app_auracast.status = status;
     app_auracast.bis_num = 0;
     app_auracast.role = 0;
     app_auracast.big_hdl = 0;
@@ -1351,7 +1353,7 @@ int app_auracast_source_open(void)
         return -1;
     }
 
-    auracast_source_init();
+    auracast_source_init(AURACAST_SOURCE_API_VERSION);
     auracast_source_config((auracast_user_config_t *)&user_config);
     auracast_source_advanced_config((auracast_advanced_config_t *)&user_advanced_config);
     auracast_source_event_callback_register(auracast_source_app_event_callback);
@@ -1683,7 +1685,7 @@ static int auracast_source_media_open(void)
     params.fmt.coding_type = AUDIO_CODING_LC3;
     params.fmt.frame_dms = frame_dms;
     params.fmt.bit_rate = params.fmt.nch * auracast_code_list[AURACAST_BIS_SAMPLING_RATE][AURACAST_BIS_VARIANT].bit_rate;
-    params.fmt.sdu_period = AURACAST_ISO_BN * auracast_code_list[AURACAST_BIS_SAMPLING_RATE][AURACAST_BIS_VARIANT].frame_len;
+    params.fmt.sdu_period = auracast_code_list[AURACAST_BIS_SAMPLING_RATE][AURACAST_BIS_VARIANT].frame_len;
     params.fmt.isoIntervalUs = AURACAST_ISO_BN * auracast_code_list[AURACAST_BIS_SAMPLING_RATE][AURACAST_BIS_VARIANT].frame_len;
     params.fmt.sample_rate = auracast_code_list[AURACAST_BIS_SAMPLING_RATE][AURACAST_BIS_VARIANT].sample_rate;
     params.fmt.dec_ch_mode = TCFG_LEA_TX_DEC_OUTPUT_CHANNEL;
@@ -1772,7 +1774,7 @@ static int auracast_sink_media_open(uint16_t bis_hdl, uint8_t *packet, uint16_t 
         ASSERT(0, "frame_dms err:%d", config->frame_duration);
     }
     params.fmt.sdu_period = config->sdu_period;
-    params.fmt.isoIntervalUs = config->sdu_period;
+    params.fmt.isoIntervalUs = g_sink_bn * config->sdu_period;
     params.fmt.sample_rate = config->sample_rate;
     params.fmt.bit_rate = params.fmt.nch * config->bit_rate;
     params.conn = bis_hdl;

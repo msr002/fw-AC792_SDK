@@ -104,6 +104,8 @@ extern struct clock_critical_handler clock_critical_handler_end[];
 #define list_for_each_loop_clock_critical(h) \
 	for (h=clock_critical_handler_begin; h<clock_critical_handler_end; h++)
 
+void clk_dvdd_vol_lev_update(void);
+
 int clk_early_init(void);
 
 void video_clock_early_init(u32 clk);

@@ -47,13 +47,13 @@
 #define ALPN_PROTO_BUF_MAX   (ALPN_ENTRIES_MAX * (ALPN_NAME_MAX + 1))
 
 struct alpn_spec {
-  const char entries[ALPN_ENTRIES_MAX][ALPN_NAME_MAX];
-  size_t count; /* number of entries */
+    const char entries[ALPN_ENTRIES_MAX][ALPN_NAME_MAX];
+    size_t count; /* number of entries */
 };
 
 struct alpn_proto_buf {
-  unsigned char data[ALPN_PROTO_BUF_MAX];
-  int len;
+    unsigned char data[ALPN_PROTO_BUF_MAX];
+    int len;
 };
 
 CURLcode Curl_alpn_to_proto_buf(struct alpn_proto_buf *buf,
@@ -68,16 +68,16 @@ CURLcode Curl_alpn_set_negotiated(struct Curl_cfilter *cf,
 
 /* Information in each SSL cfilter context: cf->ctx */
 struct ssl_connect_data {
-  ssl_connection_state state;
-  ssl_connect_state connecting_state;
-  char *hostname;                   /* hostname for verification */
-  char *dispname;                   /* display version of hostname */
-  const struct alpn_spec *alpn;     /* ALPN to use or NULL for none */
-  void *backend;                    /* vtls backend specific props */
-  struct cf_call_data call_data;    /* data handle used in current call */
-  struct curltime handshake_done;   /* time when handshake finished */
-  int port;                         /* remote port at origin */
-  BIT(use_alpn);                    /* if ALPN shall be used in handshake */
+    ssl_connection_state state;
+    ssl_connect_state connecting_state;
+    char *hostname;                   /* hostname for verification */
+    char *dispname;                   /* display version of hostname */
+    const struct alpn_spec *alpn;     /* ALPN to use or NULL for none */
+    void *backend;                    /* vtls backend specific props */
+    struct cf_call_data call_data;    /* data handle used in current call */
+    struct curltime handshake_done;   /* time when handshake finished */
+    int port;                         /* remote port at origin */
+    BIT(use_alpn);                    /* if ALPN shall be used in handshake */
 };
 
 
@@ -89,65 +89,65 @@ struct ssl_connect_data {
 /* Definitions for SSL Implementations */
 
 struct Curl_ssl {
-  /*
-   * This *must* be the first entry to allow returning the list of available
-   * backends in curl_global_sslset().
-   */
-  curl_ssl_backend info;
-  unsigned int supports; /* bitfield, see above */
-  size_t sizeof_ssl_backend_data;
+    /*
+     * This *must* be the first entry to allow returning the list of available
+     * backends in curl_global_sslset().
+     */
+    curl_ssl_backend info;
+    unsigned int supports; /* bitfield, see above */
+    size_t sizeof_ssl_backend_data;
 
-  int (*init)(void);
-  void (*cleanup)(void);
+    int (*init)(void);
+    void (*cleanup)(void);
 
-  size_t (*version)(char *buffer, size_t size);
-  int (*check_cxn)(struct Curl_cfilter *cf, struct Curl_easy *data);
-  int (*shut_down)(struct Curl_cfilter *cf,
-                   struct Curl_easy *data);
-  bool (*data_pending)(struct Curl_cfilter *cf,
-                       const struct Curl_easy *data);
+    size_t (*version)(char *buffer, size_t size);
+    int (*check_cxn)(struct Curl_cfilter *cf, struct Curl_easy *data);
+    int (*shut_down)(struct Curl_cfilter *cf,
+                     struct Curl_easy *data);
+    bool (*data_pending)(struct Curl_cfilter *cf,
+                         const struct Curl_easy *data);
 
-  /* return 0 if a find random is filled in */
-  CURLcode (*random)(struct Curl_easy *data, unsigned char *entropy,
-                     size_t length);
-  bool (*cert_status_request)(void);
+    /* return 0 if a find random is filled in */
+    CURLcode(*random)(struct Curl_easy *data, unsigned char *entropy,
+                      size_t length);
+    bool (*cert_status_request)(void);
 
-  CURLcode (*connect_blocking)(struct Curl_cfilter *cf,
-                               struct Curl_easy *data);
-  CURLcode (*connect_nonblocking)(struct Curl_cfilter *cf,
-                                  struct Curl_easy *data,
-                                  bool *done);
+    CURLcode(*connect_blocking)(struct Curl_cfilter *cf,
+                                struct Curl_easy *data);
+    CURLcode(*connect_nonblocking)(struct Curl_cfilter *cf,
+                                   struct Curl_easy *data,
+                                   bool *done);
 
-  /* If the SSL backend wants to read or write on this connection during a
-     handshake, set socks[0] to the connection's FIRSTSOCKET, and return
-     a bitmap indicating read or write with GETSOCK_WRITESOCK(0) or
-     GETSOCK_READSOCK(0). Otherwise return GETSOCK_BLANK.
-     Mandatory. */
-  int (*get_select_socks)(struct Curl_cfilter *cf, struct Curl_easy *data,
-                          curl_socket_t *socks);
+    /* If the SSL backend wants to read or write on this connection during a
+       handshake, set socks[0] to the connection's FIRSTSOCKET, and return
+       a bitmap indicating read or write with GETSOCK_WRITESOCK(0) or
+       GETSOCK_READSOCK(0). Otherwise return GETSOCK_BLANK.
+       Mandatory. */
+    int (*get_select_socks)(struct Curl_cfilter *cf, struct Curl_easy *data,
+                            curl_socket_t *socks);
 
-  void *(*get_internals)(struct ssl_connect_data *connssl, CURLINFO info);
-  void (*close1)(struct Curl_cfilter *cf, struct Curl_easy *data);
-  void (*close_all)(struct Curl_easy *data);
-  void (*session_free)(void *ptr);
+    void *(*get_internals)(struct ssl_connect_data *connssl, CURLINFO info);
+    void (*close1)(struct Curl_cfilter *cf, struct Curl_easy *data);
+    void (*close_all)(struct Curl_easy *data);
+    void (*session_free)(void *ptr);
 
-  CURLcode (*set_engine)(struct Curl_easy *data, const char *engine);
-  CURLcode (*set_engine_default)(struct Curl_easy *data);
-  struct curl_slist *(*engines_list)(struct Curl_easy *data);
+    CURLcode(*set_engine)(struct Curl_easy *data, const char *engine);
+    CURLcode(*set_engine_default)(struct Curl_easy *data);
+    struct curl_slist *(*engines_list)(struct Curl_easy *data);
 
-  bool (*false_start)(void);
-  CURLcode (*sha256sum)(const unsigned char *input, size_t inputlen,
-                    unsigned char *sha256sum, size_t sha256sumlen);
+    bool (*false_start)(void);
+    CURLcode(*sha256sum)(const unsigned char *input, size_t inputlen,
+                         unsigned char *sha256sum, size_t sha256sumlen);
 
-  bool (*attach_data)(struct Curl_cfilter *cf, struct Curl_easy *data);
-  void (*detach_data)(struct Curl_cfilter *cf, struct Curl_easy *data);
+    bool (*attach_data)(struct Curl_cfilter *cf, struct Curl_easy *data);
+    void (*detach_data)(struct Curl_cfilter *cf, struct Curl_easy *data);
 
-  void (*free_multi_ssl_backend_data)(struct multi_ssl_backend_data *mbackend);
+    void (*free_multi_ssl_backend_data)(struct multi_ssl_backend_data *mbackend);
 
-  ssize_t (*recv_plain)(struct Curl_cfilter *cf, struct Curl_easy *data,
-                        char *buf, size_t len, CURLcode *code);
-  ssize_t (*send_plain)(struct Curl_cfilter *cf, struct Curl_easy *data,
-                        const void *mem, size_t len, CURLcode *code);
+    ssize_t (*recv_plain)(struct Curl_cfilter *cf, struct Curl_easy *data,
+                          char *buf, size_t len, CURLcode *code);
+    ssize_t (*send_plain)(struct Curl_cfilter *cf, struct Curl_easy *data,
+                          const void *mem, size_t len, CURLcode *code);
 
 };
 
@@ -176,13 +176,13 @@ int Curl_ssl_get_select_socks(struct Curl_cfilter *cf, struct Curl_easy *data,
  * Get the ssl_config_data in `data` that is relevant for cfilter `cf`.
  */
 struct ssl_config_data *Curl_ssl_cf_get_config(struct Curl_cfilter *cf,
-                                               struct Curl_easy *data);
+        struct Curl_easy *data);
 
 /**
  * Get the primary config relevant for the filter from its connection.
  */
 struct ssl_primary_config *
-  Curl_ssl_cf_get_primary_config(struct Curl_cfilter *cf);
+Curl_ssl_cf_get_primary_config(struct Curl_cfilter *cf);
 
 /**
  * Get the first SSL filter in the chain starting with `cf`, or NULL.

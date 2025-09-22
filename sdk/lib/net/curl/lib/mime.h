@@ -42,56 +42,56 @@
 
 /* Part source kinds. */
 enum mimekind {
-  MIMEKIND_NONE = 0,            /* Part not set. */
-  MIMEKIND_DATA,                /* Allocated mime data. */
-  MIMEKIND_FILE,                /* Data from file. */
-  MIMEKIND_CALLBACK,            /* Data from `read' callback. */
-  MIMEKIND_MULTIPART,           /* Data is a mime subpart. */
-  MIMEKIND_LAST
+    MIMEKIND_NONE = 0,            /* Part not set. */
+    MIMEKIND_DATA,                /* Allocated mime data. */
+    MIMEKIND_FILE,                /* Data from file. */
+    MIMEKIND_CALLBACK,            /* Data from `read' callback. */
+    MIMEKIND_MULTIPART,           /* Data is a mime subpart. */
+    MIMEKIND_LAST
 };
 
 /* Readback state tokens. */
 enum mimestate {
-  MIMESTATE_BEGIN,              /* Readback has not yet started. */
-  MIMESTATE_CURLHEADERS,        /* In curl-generated headers. */
-  MIMESTATE_USERHEADERS,        /* In caller's supplied headers. */
-  MIMESTATE_EOH,                /* End of headers. */
-  MIMESTATE_BODY,               /* Placeholder. */
-  MIMESTATE_BOUNDARY1,          /* In boundary prefix. */
-  MIMESTATE_BOUNDARY2,          /* In boundary. */
-  MIMESTATE_CONTENT,            /* In content. */
-  MIMESTATE_END,                /* End of part reached. */
-  MIMESTATE_LAST
+    MIMESTATE_BEGIN,              /* Readback has not yet started. */
+    MIMESTATE_CURLHEADERS,        /* In curl-generated headers. */
+    MIMESTATE_USERHEADERS,        /* In caller's supplied headers. */
+    MIMESTATE_EOH,                /* End of headers. */
+    MIMESTATE_BODY,               /* Placeholder. */
+    MIMESTATE_BOUNDARY1,          /* In boundary prefix. */
+    MIMESTATE_BOUNDARY2,          /* In boundary. */
+    MIMESTATE_CONTENT,            /* In content. */
+    MIMESTATE_END,                /* End of part reached. */
+    MIMESTATE_LAST
 };
 
 /* Mime headers strategies. */
 enum mimestrategy {
-  MIMESTRATEGY_MAIL,            /* Mime mail. */
-  MIMESTRATEGY_FORM,            /* HTTP post form. */
-  MIMESTRATEGY_LAST
+    MIMESTRATEGY_MAIL,            /* Mime mail. */
+    MIMESTRATEGY_FORM,            /* HTTP post form. */
+    MIMESTRATEGY_LAST
 };
 
 /* Content transfer encoder. */
 struct mime_encoder {
-  const char *   name;          /* Encoding name. */
-  size_t         (*encodefunc)(char *buffer, size_t size, bool ateof,
-                               curl_mimepart *part);  /* Encoded read. */
-  curl_off_t     (*sizefunc)(curl_mimepart *part);  /* Encoded size. */
+    const char    *name;          /* Encoding name. */
+    size_t (*encodefunc)(char *buffer, size_t size, bool ateof,
+                         curl_mimepart *part);  /* Encoded read. */
+    curl_off_t (*sizefunc)(curl_mimepart *part);      /* Encoded size. */
 };
 
 /* Content transfer encoder state. */
 struct mime_encoder_state {
-  size_t         pos;           /* Position on output line. */
-  size_t         bufbeg;        /* Next data index in input buffer. */
-  size_t         bufend;        /* First unused byte index in input buffer. */
-  char           buf[ENCODING_BUFFER_SIZE]; /* Input buffer. */
+    size_t         pos;           /* Position on output line. */
+    size_t         bufbeg;        /* Next data index in input buffer. */
+    size_t         bufend;        /* First unused byte index in input buffer. */
+    char           buf[ENCODING_BUFFER_SIZE]; /* Input buffer. */
 };
 
 /* Mime readback state. */
 struct mime_state {
-  enum mimestate state;       /* Current state token. */
-  void *ptr;                  /* State-dependent pointer. */
-  curl_off_t offset;          /* State-dependent offset. */
+    enum mimestate state;       /* Current state token. */
+    void *ptr;                  /* State-dependent pointer. */
+    curl_off_t offset;          /* State-dependent offset. */
 };
 
 /* Boundary string length. */
@@ -99,35 +99,35 @@ struct mime_state {
 
 /* A mime multipart. */
 struct curl_mime {
-  curl_mimepart *parent;           /* Parent part. */
-  curl_mimepart *firstpart;        /* First part. */
-  curl_mimepart *lastpart;         /* Last part. */
-  char boundary[MIME_BOUNDARY_LEN + 1]; /* The part boundary. */
-  struct mime_state state;         /* Current readback state. */
+    curl_mimepart *parent;           /* Parent part. */
+    curl_mimepart *firstpart;        /* First part. */
+    curl_mimepart *lastpart;         /* Last part. */
+    char boundary[MIME_BOUNDARY_LEN + 1]; /* The part boundary. */
+    struct mime_state state;         /* Current readback state. */
 };
 
 /* A mime part. */
 struct curl_mimepart {
-  curl_mime *parent;               /* Parent mime structure. */
-  curl_mimepart *nextpart;         /* Forward linked list. */
-  enum mimekind kind;              /* The part kind. */
-  unsigned int flags;              /* Flags. */
-  char *data;                      /* Memory data or file name. */
-  curl_read_callback readfunc;     /* Read function. */
-  curl_seek_callback seekfunc;     /* Seek function. */
-  curl_free_callback freefunc;     /* Argument free function. */
-  void *arg;                       /* Argument to callback functions. */
-  FILE *fp;                        /* File pointer. */
-  struct curl_slist *curlheaders;  /* Part headers. */
-  struct curl_slist *userheaders;  /* Part headers. */
-  char *mimetype;                  /* Part mime type. */
-  char *filename;                  /* Remote file name. */
-  char *name;                      /* Data name. */
-  curl_off_t datasize;             /* Expected data size. */
-  struct mime_state state;         /* Current readback state. */
-  const struct mime_encoder *encoder; /* Content data encoder. */
-  struct mime_encoder_state encstate; /* Data encoder state. */
-  size_t lastreadstatus;           /* Last read callback returned status. */
+    curl_mime *parent;               /* Parent mime structure. */
+    curl_mimepart *nextpart;         /* Forward linked list. */
+    enum mimekind kind;              /* The part kind. */
+    unsigned int flags;              /* Flags. */
+    char *data;                      /* Memory data or file name. */
+    curl_read_callback readfunc;     /* Read function. */
+    curl_seek_callback seekfunc;     /* Seek function. */
+    curl_free_callback freefunc;     /* Argument free function. */
+    void *arg;                       /* Argument to callback functions. */
+    FILE *fp;                        /* File pointer. */
+    struct curl_slist *curlheaders;  /* Part headers. */
+    struct curl_slist *userheaders;  /* Part headers. */
+    char *mimetype;                  /* Part mime type. */
+    char *filename;                  /* Remote file name. */
+    char *name;                      /* Data name. */
+    curl_off_t datasize;             /* Expected data size. */
+    struct mime_state state;         /* Current readback state. */
+    const struct mime_encoder *encoder; /* Content data encoder. */
+    struct mime_encoder_state encstate; /* Data encoder state. */
+    size_t lastreadstatus;           /* Last read callback returned status. */
 };
 
 CURLcode Curl_mime_add_header(struct curl_slist **slp, const char *fmt, ...);

@@ -58,11 +58,8 @@ uint32_t volc_get_local_ip(volc_ip_addr_t *dest_ip_list, uint32_t *p_dest_ip_lis
 // getIpWithHostName
 uint32_t volc_get_ip_with_host_name(const char *hostname, volc_ip_addr_t *dest_ip)
 {
-//   volc_debug("%s\n", __FUNCTION__);
-//    printf("%s %d\n", __FUNCTION__, __LINE__);
     uint32_t ret = VOLC_STATUS_SUCCESS;
     int32_t err_code;
-    char *err_str;
     struct addrinfo *res, *rp;
     bool resolved = false;
     struct sockaddr_in *ipv4Addr;
@@ -70,7 +67,6 @@ uint32_t volc_get_ip_with_host_name(const char *hostname, volc_ip_addr_t *dest_i
     VOLC_CHK(hostname != NULL, VOLC_STATUS_NULL_ARG);
     err_code = getaddrinfo(hostname, NULL, NULL, &res);
     if (err_code != 0) {
-        err_str = err_code == EAI_SYSTEM ? strerror(errno) : (char *) gai_strerror(err_code);
         ret = VOLC_STATUS_RESOLVE_HOSTNAME_FAILED;
         goto err_out_label;
     }

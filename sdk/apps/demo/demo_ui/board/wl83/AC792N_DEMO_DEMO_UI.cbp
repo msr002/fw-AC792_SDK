@@ -969,6 +969,7 @@
 <Unit filename="../../../../../apps/common/example/third_party/lvgl_v9/src/draw/jl/jlvg/lv_draw_jlvg.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../../apps/common/example/third_party/lvgl_v9/src/draw/jl/jlvg/lv_draw_jlvg.h" />
 <Unit filename="../../../../../apps/common/example/third_party/lvgl_v9/src/draw/jl/jlvg/lv_draw_jlvg_common.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="../../../../../apps/common/example/third_party/lvgl_v9/src/draw/jl/jlvg/lv_draw_jlvg_common.h" />
 <Unit filename="../../../../../apps/common/example/third_party/lvgl_v9/src/draw/jl/jlvg/lv_draw_jlvg_fill.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../../apps/common/example/third_party/lvgl_v9/src/draw/jl/jlvg/lv_draw_jlvg_img.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../../apps/common/example/third_party/lvgl_v9/src/draw/jl/jlvg/lv_draw_jlvg_letter.c"><Option compilerVer="CC"/></Unit>

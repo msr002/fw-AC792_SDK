@@ -25,14 +25,14 @@
  ***************************************************************************/
 
 struct Curl_sec_client_mech {
-  const char *name;
-  size_t size;
-  int (*init)(void *);
-  int (*auth)(void *, struct Curl_easy *data, struct connectdata *);
-  void (*end)(void *);
-  int (*check_prot)(void *, int);
-  int (*encode)(void *, const void *, int, int, void **);
-  int (*decode)(void *, void *, int, int, struct connectdata *);
+    const char *name;
+    size_t size;
+    int (*init)(void *);
+    int (*auth)(void *, struct Curl_easy *data, struct connectdata *);
+    void (*end)(void *);
+    int (*check_prot)(void *, int);
+    int (*encode)(void *, const void *, int, int, void **);
+    int (*decode)(void *, void *, int, int, struct connectdata *);
 };
 
 #define AUTH_OK         0

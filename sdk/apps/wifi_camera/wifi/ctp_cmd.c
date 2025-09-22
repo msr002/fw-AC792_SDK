@@ -27,6 +27,8 @@
 #include "usb_stack.h"
 #endif
 
+#define __ALIGN_16(a)   (((a) + 15) / 16 * 16)
+#define __ALIGN_8(a)   (((a) + 7) / 8 * 8)
 
 #ifdef CONFIG_NET_ENABLE
 #define CTP_CMD_HEADER "{\"errno\":%d,\"op\":\"%s\",\"param\":{"
@@ -77,7 +79,11 @@ void reset_wifi_info()
     char ssid[32];
     char pwd[64];
     u8 mac_addr[6];
+#if TCFG_EXT_WIFI_ENABLE
+    ext_wifi_get_mac(mac_addr);
+#else
     wifi_get_mac(mac_addr);
+#endif
     sprintf(ssid, AP_WIFI_CAM_PREFIX"%02x%02x%02x%02x%02x%02x"
             , mac_addr[0]
             , mac_addr[1]
@@ -181,7 +187,6 @@ int ctp_cmd_analysis(const char *topic, char *content, void *priv)
         printf("%s  %d err....\n", __func__, __LINE__);
         return -1;
     }
-
 
     strcpy(ctp_info.topic, topic);
     ctp_info.content = NULL;
@@ -367,7 +372,8 @@ int cmd_put_app_access(void *priv, char *content)
     usb_app_flag = 1;
 #endif
 
-#if 0  //投屏导航功能不启用video_rec
+#ifndef CONFIG_NET_SCR//投屏导航功能不启用video_rec
+
     int gap = db_select("gap");
 
     if ((!app || !app->name || !strstr(app->name, "video_rec")) && !usb_app_flag && !gap) {
@@ -453,7 +459,11 @@ int cmd_get_uuid(void *priv, char *content)
     int i, j;
     char buf[128] = {0};
     u8 mac[6];
+#if TCFG_EXT_WIFI_ENABLE
+    ext_wifi_get_mac(mac);
+#else
     wifi_get_mac(mac);
+#endif
     snprintf(buf, sizeof(buf), "uuid:%s%02x%02x%02x%02x%02x%02x", "f2dd3cd7-b026-40aa-aaf4-", mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
     /*printf("\n\nUUID : %s \n\n",buf);*/
     CTP_CMD_COMBINED(priv, CTP_NO_ERR, "UUID", "NOTIFY", buf);
@@ -698,9 +708,15 @@ int cmd_put_video_cyc_savefile(void *priv,  char *content)
 }
 
 #ifdef CONFIG_NET_SCR
+static u8 scr_quality = 6;  //默认jpg压缩率为60%
+void set_jpg_quality_value(u8 qua)
+{
+    scr_quality = (qua > 10) ? 10 : qua;
+}
+
 static int cmd_get_net_scr(void *priv, char *content)
 {
-    char buf[128];
+    char buf[128] = {0};
     u8 status;
     status = get_net_scr_status();
     snprintf(buf, sizeof(buf), "status:%d", status);
@@ -708,36 +724,75 @@ static int cmd_get_net_scr(void *priv, char *content)
     return 0;
 }
 
+static void net_scr_ack_func(int seq)
+{
+    char buf[128];
+    snprintf(buf, sizeof(buf), "seq:%d", seq);
+    CTP_CMD_COMBINED(NULL, CTP_NO_ERR, "NET_SCR_ACK", "NOTIFY", buf);
+}
+
+#if 0   //for test
+
+int get_connect_info(struct __NET_SCR_CFG *cfg)
+{
+    void *fd = fopen("mnt/sdfile/res/cfg/connect.txt", "r");
+    if (!fd) {
+        printf("---%s---%s---%d \n\r", __FILE__, __func__, __LINE__);
+        return -1;
+    }
+    u8 buf[512] = {0};
+    fread(buf, sizeof(buf), 1, fd);
+    fclose(fd);
+
+    json_object *new_obj = json_tokener_parse(buf);
+    if (!new_obj) {
+        printf("---%s---%s---%d \n\r", __FILE__, __func__, __LINE__);
+        return -1;
+    }
+
+    cfg->prot = json_object_get_int(json_object_object_get(new_obj, "prot"));
+    cfg->ack = json_object_get_int(json_object_object_get(new_obj, "ack"));
+
+    json_object_put(new_obj);
+
+    return 0;
+}
+#endif
+
 static int cmd_put_net_scr(void *priv, char *content)
 {
+    char buf[128] = {0};
     struct __NET_SCR_CFG cfg = {0};
 
-    json_object *new_obj = NULL;
-    json_object *parm = NULL;
-    json_object *tmp = NULL;
-    char buf[128];
-    char *s_str;
-    u8 status;
-    new_obj = json_tokener_parse(content);
-    parm    =  json_object_object_get(new_obj, "param");
-    tmp  = json_object_object_get(parm, "status");
-    s_str = json_object_get_string(tmp);
-    status = atoi(s_str);
-    snprintf(buf, sizeof(buf), "status:%d,w:%d,h:%d,fps:25", status, LCD_W, LCD_H);
-    if (1 == status) {
-#if 0   //最新协商,采用设备主动发送过去的宽高,FPS
-        tmp  = json_object_object_get(parm, "w");
-        s_str = json_object_get_string(tmp);
-        cfg.src_w = atoi(s_str);
-        printf("\n [MSG] cfg.src_w = %d \n", cfg.src_w);
-        tmp  = json_object_object_get(parm, "h");
-        s_str = json_object_get_string(tmp);
-        cfg.src_h = atoi(s_str);
-        printf("\n [MSG] cfg.src_h = %d \n", cfg.src_h);
-        tmp  = json_object_object_get(parm, "fps");
-        s_str = json_object_get_string(tmp);
-        cfg.fps = atoi(s_str);
+    json_object *new_obj = json_tokener_parse(content);
+    json_object *parm = json_object_object_get(new_obj, "param");
+
+#if 0
+    cfg.prot = json_object_get_int(json_object_object_get(parm, "prot"));
+    cfg.ack = json_object_get_int(json_object_object_get(parm, "ack"));
+#else
+    //以设备端为主的命令
+
+    cfg.prot = 0;
+    cfg.ack = 1;
+    //get_connect_info(&cfg);
+
+
 #endif
+    if (cfg.ack) {
+        cfg.ack_cb = net_scr_ack_func;
+    }
+
+    char *s_str = json_object_get_string(json_object_object_get(parm, "status"));
+    u8 status = atoi(s_str);
+
+    //status: 1->打开  0->关闭
+    if (1 == status) {
+        cfg.src_w = __ALIGN_16(LCD_W);  //默认设备屏幕宽, 为了兼容YUV420格式, 如确认是YUV422/444格式, 可配置8对齐
+        cfg.src_h = LCD_H;  //默认设备屏幕高
+        cfg.fps = 25;       //初始状态fps
+        //qua:图片质量 prot:协议类型 0->tcp 1->udp ack:规则类型 0->以帧率为准 1->以回包为准
+        snprintf(buf, sizeof(buf), "status:%d,w:%d,h:%d,fps:%d,qua:%d,prot:%d,ack:%d", status, cfg.src_w, cfg.src_h, cfg.fps, scr_quality, cfg.prot, cfg.ack);
         if (ctp_srv_get_cli_addr(priv)) {
             memcpy(&cfg.cli_addr, ctp_srv_get_cli_addr(priv), sizeof(struct sockaddr_in));
         } else {
@@ -799,13 +854,10 @@ static int cmd_notify_simple_navi_info(void *priv, void *content)
     temp = json_object_object_get(parm, "remain_mileage");
     const char *remain_mileage = json_object_get_string(temp);
     extract_number_str(remain_mileage, remain_mileage_data, sizeof(remain_mileage_data));
-    extern void update_remain_mileage_label(const char *str);
-
 
     temp = json_object_object_get(parm, "remain_time");
     const char *remain_time = json_object_get_string(temp);
     extract_number_str(remain_time, remain_time_data, sizeof(remain_time_data));
-    extern void update_remain_time_label(const char *str);
     if (get_in_ui_navi_flag()) {
         update_text_lbl_2(remain_mileage_data);
         update_text_lbl_3(remain_time_data);
@@ -1474,7 +1526,13 @@ int cmd_put_system_default(void *priv, char *content)
 #if defined (WIFI_CAM_SUFFIX)
         sprintf(ssid, AP_WIFI_CAM_PREFIX WIFI_CAM_SUFFIX);
 #else
+
+#if TCFG_EXT_WIFI_ENABLE
+        ext_wifi_get_mac(mac_addr);
+#else
         wifi_get_mac(mac_addr);
+#endif
+
         sprintf(ssid, AP_WIFI_CAM_PREFIX"%02x%02x%02x%02x%02x%02x"
                 , mac_addr[0]
                 , mac_addr[1]
@@ -3844,6 +3902,7 @@ static int cmd_put_ctp_cli_disconnect(void *priv, char *content)
     //key_event_enable();
     //touch_event_enable();
 
+#if 0 //投屏导航模式不进video_rec
     struct intent it;
     struct application *app = NULL;
     app = get_current_app();
@@ -3864,6 +3923,7 @@ static int cmd_put_ctp_cli_disconnect(void *priv, char *content)
         printf("=========== out app , start rec\n");
         video_rec_control_start();
     }
+#endif
 
     return 0;
 }

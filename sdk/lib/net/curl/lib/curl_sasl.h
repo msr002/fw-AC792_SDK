@@ -67,67 +67,67 @@ struct connectdata;
 
 /* SASL machine states */
 typedef enum {
-  SASL_STOP,
-  SASL_PLAIN,
-  SASL_LOGIN,
-  SASL_LOGIN_PASSWD,
-  SASL_EXTERNAL,
-  SASL_CRAMMD5,
-  SASL_DIGESTMD5,
-  SASL_DIGESTMD5_RESP,
-  SASL_NTLM,
-  SASL_NTLM_TYPE2MSG,
-  SASL_GSSAPI,
-  SASL_GSSAPI_TOKEN,
-  SASL_GSSAPI_NO_DATA,
-  SASL_OAUTH2,
-  SASL_OAUTH2_RESP,
-  SASL_GSASL,
-  SASL_CANCEL,
-  SASL_FINAL
+    SASL_STOP,
+    SASL_PLAIN,
+    SASL_LOGIN,
+    SASL_LOGIN_PASSWD,
+    SASL_EXTERNAL,
+    SASL_CRAMMD5,
+    SASL_DIGESTMD5,
+    SASL_DIGESTMD5_RESP,
+    SASL_NTLM,
+    SASL_NTLM_TYPE2MSG,
+    SASL_GSSAPI,
+    SASL_GSSAPI_TOKEN,
+    SASL_GSSAPI_NO_DATA,
+    SASL_OAUTH2,
+    SASL_OAUTH2_RESP,
+    SASL_GSASL,
+    SASL_CANCEL,
+    SASL_FINAL
 } saslstate;
 
 /* Progress indicator */
 typedef enum {
-  SASL_IDLE,
-  SASL_INPROGRESS,
-  SASL_DONE
+    SASL_IDLE,
+    SASL_INPROGRESS,
+    SASL_DONE
 } saslprogress;
 
 /* Protocol dependent SASL parameters */
 struct SASLproto {
-  const char *service;     /* The service name */
-  CURLcode (*sendauth)(struct Curl_easy *data, const char *mech,
-                       const struct bufref *ir);
-                           /* Send authentication command */
-  CURLcode (*contauth)(struct Curl_easy *data, const char *mech,
-                       const struct bufref *contauth);
-                           /* Send authentication continuation */
-  CURLcode (*cancelauth)(struct Curl_easy *data, const char *mech);
-                           /* Cancel authentication. */
-  CURLcode (*getmessage)(struct Curl_easy *data, struct bufref *out);
-                           /* Get SASL response message */
-  size_t maxirlen;         /* Maximum initial response + mechanism length,
+    const char *service;     /* The service name */
+    CURLcode(*sendauth)(struct Curl_easy *data, const char *mech,
+                        const struct bufref *ir);
+    /* Send authentication command */
+    CURLcode(*contauth)(struct Curl_easy *data, const char *mech,
+                        const struct bufref *contauth);
+    /* Send authentication continuation */
+    CURLcode(*cancelauth)(struct Curl_easy *data, const char *mech);
+    /* Cancel authentication. */
+    CURLcode(*getmessage)(struct Curl_easy *data, struct bufref *out);
+    /* Get SASL response message */
+    size_t maxirlen;         /* Maximum initial response + mechanism length,
                               or zero if no max. This is normally the max
                               command length - other characters count.
                               This has to be zero for non-base64 protocols. */
-  int contcode;            /* Code to receive when continuation is expected */
-  int finalcode;           /* Code to receive upon authentication success */
-  unsigned short defmechs; /* Mechanisms enabled by default */
-  unsigned short flags;    /* Configuration flags. */
+    int contcode;            /* Code to receive when continuation is expected */
+    int finalcode;           /* Code to receive upon authentication success */
+    unsigned short defmechs; /* Mechanisms enabled by default */
+    unsigned short flags;    /* Configuration flags. */
 };
 
 /* Per-connection parameters */
 struct SASL {
-  const struct SASLproto *params; /* Protocol dependent parameters */
-  saslstate state;           /* Current machine state */
-  const char *curmech;       /* Current mechanism id. */
-  unsigned short authmechs;  /* Accepted authentication mechanisms */
-  unsigned short prefmech;   /* Preferred authentication mechanism */
-  unsigned short authused;   /* Auth mechanism used for the connection */
-  BIT(resetprefs);           /* For URL auth option parsing. */
-  BIT(mutual_auth);          /* Mutual authentication enabled (GSSAPI only) */
-  BIT(force_ir);             /* Protocol always supports initial response */
+    const struct SASLproto *params; /* Protocol dependent parameters */
+    saslstate state;           /* Current machine state */
+    const char *curmech;       /* Current mechanism id. */
+    unsigned short authmechs;  /* Accepted authentication mechanisms */
+    unsigned short prefmech;   /* Preferred authentication mechanism */
+    unsigned short authused;   /* Auth mechanism used for the connection */
+    BIT(resetprefs);           /* For URL auth option parsing. */
+    BIT(mutual_auth);          /* Mutual authentication enabled (GSSAPI only) */
+    BIT(force_ir);             /* Protocol always supports initial response */
 };
 
 /* This is used to test whether the line starts with the given mechanism */
@@ -145,7 +145,7 @@ unsigned short Curl_sasl_decode_mech(const char *ptr,
 
 /* Parse the URL login options */
 CURLcode Curl_sasl_parse_url_auth_option(struct SASL *sasl,
-                                         const char *value, size_t len);
+        const char *value, size_t len);
 
 /* Initializes an SASL structure */
 void Curl_sasl_init(struct SASL *sasl, struct Curl_easy *data,

@@ -47,8 +47,7 @@
 #define POLLHUP     0x10
 #define POLLNVAL    0x20
 
-struct pollfd
-{
+struct pollfd {
     curl_socket_t fd;
     short   events;
     short   revents;

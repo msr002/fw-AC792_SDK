@@ -1,6 +1,7 @@
 #include "app_config.h"
 #include "system/includes.h"
 #include "event/key_event.h"
+#include "asm/power_interface.h"
 
 /*中断列表 */
 const struct irq_info irq_info_table[] = {

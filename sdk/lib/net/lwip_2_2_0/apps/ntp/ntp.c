@@ -66,31 +66,27 @@
 #define NTP_DBG_PRINTF
 #endif
 
-typedef union  {
-    struct {
-        unsigned char integer;
-        unsigned char fraction;
-    };
-    unsigned int raw;
-} ufixed_16_16_t;
+#define NTP_ORIGIN_YEAR 1900
+#define NTP_EPOCH_DELTA 2208988800ULL  // 1900-1970的秒数差
+#define TIMEOUT_BASE_MS 1000
+#define MAX_RETRY 10
 
 typedef union {
     struct {
-        char  integer;
+        char integer;
         unsigned char fraction;
     };
     int raw;
 } fixed_16_16_t;
 
-typedef union  {
+typedef union {
     struct {
         unsigned int integer;
         unsigned int fraction;
     };
     unsigned long long raw;
-} ufixed_32_32_t;
+} ntp_timestamp_t;
 
-typedef ufixed_32_32_t ntp_timestamp_t; // Notice: the value will be in network byte order
 
 
 typedef enum  {
@@ -122,22 +118,81 @@ typedef enum  {
  *
  */
 typedef struct PACKED {
-    unsigned char         byte_1;                   // consist of multiple fields
-    unsigned char         stratum;
-    unsigned char         poll;
-    char          precision;
-    fixed_16_16_t   root_delay;
-    ufixed_16_16_t  root_dispersion;
-    char            reference_identifier[4];  // see figure 2 in rfc4330
-    ntp_timestamp_t reference_timestamp;
-    ntp_timestamp_t originate_timestamp;
-    ntp_timestamp_t recieve_timestamp;
-    ntp_timestamp_t transmit_timestamp;
-    unsigned int        key_identifier;           // not used by sntp
-    unsigned int        mesage_digest[4];         // not uses by sntp
+    uint8_t          flags;
+    uint8_t          stratum;
+    uint8_t          poll;
+    int8_t           precision;
+    fixed_16_16_t    root_delay;
+    fixed_16_16_t    root_dispersion;
+    uint8_t          ref_id[4];
+    ntp_timestamp_t  reference_timestamp;
+    ntp_timestamp_t  originate_timestamp;
+    ntp_timestamp_t  receive_timestamp;
+    ntp_timestamp_t  transmit_timestamp;
+    //增加这两个拓展参数会导致一些ntp服务器无回复
+    /* unsigned int        key_identifier;           // not used by sntp */
+    /* unsigned int        mesage_digest[4];         // not uses by sntp */
 } ntp_packet_t;
 
 
+//////////////////////////////////////////////////////////////
+//解析并打印接收到ntp数据信息
+static void print_fixed_point(const char *label, fixed_16_16_t fixed)
+{
+    NTP_DBG_PRINTF("%-18s: %d.%03d\n", label,
+                   (int8_t)fixed.integer,
+                   (fixed.fraction * 1000) / 256);
+}
+
+static void print_ntp_timestamp(const char *label, ntp_timestamp_t ts)
+{
+    uint32_t seconds = ntohl(ts.integer);
+    uint32_t fraction = ntohl(ts.fraction);
+
+    if (seconds == 0) {
+        NTP_DBG_PRINTF("%-18s: <null>\n", label);
+        return;
+    }
+
+    // 转换为UNIX时间
+    time_t unix_sec = seconds - NTP_EPOCH_DELTA;
+    uint32_t microsec = (uint64_t)fraction * 1000000ULL >> 32;
+
+    // 格式化为可读时间
+    struct tm *timeinfo = gmtime(&unix_sec);
+    char buffer[30];
+    strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", timeinfo);
+
+    NTP_DBG_PRINTF("%-18s: %s.%06d UTC\n", label, buffer, microsec);
+}
+
+// 打印整个NTP数据包
+static void print_ntp_packet(const ntp_packet_t *pkt)
+{
+    uint8_t li = (pkt->flags >> 6) & 0x03;
+    uint8_t vn = (pkt->flags >> 3) & 0x07;
+    uint8_t mode = pkt->flags & 0x07;
+
+    NTP_DBG_PRINTF("================= NTP 协议分析 =================\n");
+    NTP_DBG_PRINTF("%-18s: LI=%d VN=%d Mode=%d\n", "Header Flags", li, vn, mode);
+    NTP_DBG_PRINTF("%-18s: %u\n", "Stratum", pkt->stratum);
+    NTP_DBG_PRINTF("%-18s: %d\n", "Poll", pkt->poll);
+    NTP_DBG_PRINTF("%-18s: %d\n", "Precision", pkt->precision);
+
+    print_fixed_point("Root Delay", pkt->root_delay);
+    print_fixed_point("Root Dispersion", pkt->root_dispersion);
+
+    NTP_DBG_PRINTF("%-18s: %d.%d.%d.%d\n", "Ref Identifier",
+                   pkt->ref_id[0], pkt->ref_id[1], pkt->ref_id[2], pkt->ref_id[3]);
+
+    print_ntp_timestamp("Ref Timestamp", pkt->reference_timestamp);
+    print_ntp_timestamp("Originate", pkt->originate_timestamp);
+    print_ntp_timestamp("Receive", pkt->receive_timestamp);
+    print_ntp_timestamp("Transmit", pkt->transmit_timestamp);
+    NTP_DBG_PRINTF("=================================================\n");
+}
+////////////////////////////////////////////////////////////
+//
 #define NTP_PORT 123
 
 /*
@@ -150,7 +205,7 @@ typedef struct PACKED {
  * @notice Transmit timestamp is optional.
  *
  */
-#define NTP_REQUEST_MSG { .byte_1 = 0b000100011 } ;
+#define NTP_REQUEST_MSG { .flags = 0b000100011 } ;
 
 #define NTP_ORIGIN_YEAR 1900 /// aka epoch
 #define NTP_GET_LI(b1)   ((ntp_leap_indicator_t)(((b1) & 0b11000000) >> 6))
@@ -277,43 +332,37 @@ int ntp_remove_host_name(char *name)
  * @param month[out] 0 to 11.
  * @param day[out]   0 to 30.
  */
-static void ntp_get_date(ntp_timestamp_t ts, unsigned int *year, unsigned int *month, unsigned int *day)
+static void ntp_get_date(ntp_timestamp_t ts, unsigned int *year,
+                         unsigned int *month, unsigned int *day)
 {
-    unsigned int days_in_month[] = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
+    static const uint8_t days_in_month[] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+    uint32_t days = ntohl(ts.integer) / 86400;  // 从1900年1月1日开始的天数
 
-    /* initial value of day, changes throughout the computation of year and month */
-    *day  = NTP_GET_TS_DAYS_SINCE_JAN_1_1900(ts);
-
-    /* year */
-    for (*year = NTP_ORIGIN_YEAR; *year < 2037; (*year)++) {
-
-        if (NTP_IS_LEAP_YEAR(*year)) {
-            if (*day < 366) {
-                break;
-            } else {
-                *day -= 366;
-            }
-        } else {
-            if (*day < 365) {
-                break;
-            } else {
-                *day -= 365;
-            }
-        }
-    }
-
-    /* Month */
-    if (NTP_IS_LEAP_YEAR(*year)) {
-        days_in_month[1] = 29; // february, index starts at 0
-    }
-
-    for (*month = 0; *month < 12; (*month)++) {
-        if (*day >= days_in_month[*month]) {
-            *day -= days_in_month[*month];
-        } else {
+    *year = NTP_ORIGIN_YEAR;
+    while (days > 0) {
+        uint16_t year_days = NTP_IS_LEAP_YEAR(*year) ? 366 : 365;
+        if (days < year_days) {
             break;
         }
+        days -= year_days;
+        (*year)++;
     }
+
+    *month = 0;
+    while (*month < 12) {
+        uint8_t m_days = days_in_month[*month];
+        if (*month == 1 && NTP_IS_LEAP_YEAR(*year)) {
+            m_days++;
+        }
+
+        if (days < m_days) {
+            break;
+        }
+        days -= m_days;
+        (*month)++;
+    }
+
+    *day = days;
 }
 
 #if 0
@@ -587,20 +636,17 @@ void ntp_client_uninit(void)
 }
 #endif
 
-
-static inline void analysis_ntp_protocol_ext(ntp_timestamp_t ts, struct tm *s_tm)
+static void analysis_ntp_protocol_ext(ntp_timestamp_t ts, struct tm *s_tm)
 {
-    unsigned int y, mo, d;
-    unsigned int s  = NTP_GET_TS_SECONDS_AFTER_MINUTE(ts);
-    unsigned int mi = NTP_GET_TS_MINUTES_AFTER_HOUR(ts);
-    unsigned int h  = NTP_GET_TS_HOURS_SINCE_MIDNIGHT(ts);
-    ntp_get_date(ts, &y, &mo, &d);
-    s_tm->tm_sec = s;
-    s_tm->tm_min = mi;
-    s_tm->tm_hour = h;
-    s_tm->tm_mday = d + 1;
-    s_tm->tm_mon = mo;
-    s_tm->tm_year = y - 1900;
+    uint32_t seconds = ntohl(ts.integer);
+    time_t unix_sec = seconds - NTP_EPOCH_DELTA;
+    struct tm *timeinfo = gmtime(&unix_sec);
+
+    if (timeinfo) {
+        memcpy(s_tm, timeinfo, sizeof(struct tm));
+    } else {
+        memset(s_tm, 0, sizeof(struct tm));
+    }
 }
 
 static u8 net_time_init_flag = 0;
@@ -628,7 +674,6 @@ static void update_rtc_by_ntp(const char *host)
             os_time_dly(100);
         }
     }
-
     time_t mt = mktime(&pt);
     set_sys_source_timer(mt);
     set_time_compensate_sec(timer_get_sec());
@@ -741,6 +786,7 @@ void ntp_client_get_time(const char *host)
             break;
         } else {
             if (timeout_cnt > 10) {
+                ntp_time_exit = 1;
                 timeout_cnt = 0;
             }
             os_sem_pend(&ntp_sem, ++timeout_cnt * 100);
@@ -751,97 +797,49 @@ void ntp_client_get_time(const char *host)
 
 int ntp_client_get_time_all(struct tm *s_tm, int recv_to)
 {
-    if (!recv_to) {
-        recv_to = 2000;
-    }
-    if (s_tm == NULL) {
-        return -1;
-    }
-
-    /****/
-    struct hostent *hp[NTP_HOST_NUM] = {0};     /* host information */
-    struct sockaddr_in servaddr[NTP_HOST_NUM] = {0};
-
-    const int port = NTP_PORT;
-    int j = 0;
+    const int num_hosts = NTP_HOST_NUM;
     int ret = -1;
-    ntp_packet_t server_msg = {0};
-    ntp_packet_t client_msg = NTP_REQUEST_MSG;
 
-    struct sockaddr_in localaddr;
-    int fd;
-    u8 cnt = 10;
-
-    if ((fd = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
-        NTP_ERR_PRINTF("cannot create ntp socket\n");
+    if (!s_tm) {
         return -1;
     }
 
-    /* fill in the server's address and data */
-    for (int i = 0; i < NTP_HOST_NUM; i++) {
-        servaddr[i].sin_family = AF_INET;
-        servaddr[i].sin_port = htons(port);
-    }
-
-    localaddr.sin_family = AF_INET;
-    localaddr.sin_port = htons(0);
-    localaddr.sin_addr.s_addr = htonl(INADDR_ANY);
-    if (bind(fd, (struct sockaddr *)&localaddr, sizeof(localaddr)) < 0) {
-        NTP_ERR_PRINTF("ntp bind fail \n");
-        goto fail;
-    }
-
-    setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, (const void *)&recv_to, sizeof(recv_to));
-    /* look up the address of the server given its name */
-
-    int inactive_host = 0;
-    for (int i = 0; i < NTP_HOST_NUM; i++) {
-        hp[i] = gethostbyname(ntp_host[i]);
-        if (!hp[i]) {
-            NTP_ERR_PRINTF("could not obtain ntp address of %s\n", ntp_host[i]);
-            inactive_host++;
-            continue;
+    for (int i = 0; i < num_hosts; i++) {
+        if (ntp_client_get_time_once(ntp_host[i], s_tm, recv_to) == 0) {
+            ret = 0;
+            break;
         }
-        /* put the host's address into the server address structure */
-        memcpy((void *)&servaddr[i].sin_addr, hp[i]->h_addr_list[0], hp[i]->h_length);
     }
-    if (inactive_host >= NTP_HOST_NUM) {
-        goto fail;
-    }
-
-    NTP_DBG_PRINTF("sending data..\n");
-
-    /* send a message to the server */
-    for (int i = 0; i < NTP_HOST_NUM; i++) {
-        cnt = 10;
-        do {
-            if (!servaddr[i].sin_addr.s_addr) {
-                continue;
-            }
-            if (sendto(fd, &client_msg, sizeof(client_msg), 0, (struct sockaddr *)&servaddr[i], sizeof(servaddr[i])) < 0) {
-                NTP_ERR_PRINTF("ntp sendto failed\n");
-                goto fail;
-            }
-        } while (--cnt > 0);
-
-        NTP_DBG_PRINTF("recieving data..\n");
-
-    }
-    j = recv(fd, &server_msg, sizeof(server_msg), 0);
-    if (j > 0) {
-        NTP_DBG_PRINTF("received: %u out of %lu bytes \n", j, sizeof(server_msg));
-        analysis_ntp_protocol_ext(server_msg.recieve_timestamp, s_tm);
-        ntp_get_time(s_tm);
-        ret = 0;
-        /* break; */
-    } else {
-        NTP_ERR_PRINTF("recieving data err: %d\n", j);
-    }
-
-fail:
-    closesocket(fd);
-
     return ret;
+}
+
+bool is_valid_ntp_response(ntp_packet_t *packet)
+{
+    bool all_zeros = true;
+    for (size_t i = 1; i < sizeof(ntp_packet_t); i++) {
+        if (((uint8_t *)packet)[i] != 0) {
+            all_zeros = false;
+            break;
+        }
+    }
+    if (all_zeros) {
+        return false; // 检测到全0包
+    }
+    // 验证NTP头部的标志位（正确响应应为0x24）
+    const uint8_t valid_flags = 0x24; // LI=0, VN=4, Mode=4 (server)
+    if ((packet->flags & 0xFF) != valid_flags) {
+        return false;
+    }
+
+    return true;
+
+    /* uint32_t seconds = ntohl(packet->transmit_timestamp.integer); */
+    /* time_t timestamp = seconds - NTP_EPOCH_DELTA; */
+
+    /* const time_t MIN_VALID_TIME = 1609459200; // 2021-01-01 */
+    /* const time_t MAX_VALID_TIME = 2524608000; // 2050-01-01 */
+
+    /* return (timestamp >= MIN_VALID_TIME) & (timestamp <= MAX_VALID_TIME); */
 }
 
 int ntp_client_get_time_once(const char *host, struct tm *s_tm, int recv_to)
@@ -855,76 +853,73 @@ int ntp_client_get_time_once(const char *host, struct tm *s_tm, int recv_to)
     if (host == NULL) {
         host = "s2c.time.edu.cn";
     }
-    const int port = NTP_PORT;
-    int i = 0;
-    int ret = -1;
+    ntp_packet_t client_msg = {.flags = 0x23};  // Client mode, version 4
     ntp_packet_t server_msg = {0};
-    ntp_packet_t client_msg = NTP_REQUEST_MSG;
+    struct sockaddr_in servaddr = {0};
+    struct sockaddr_in localaddr = {0};
+    struct hostent *hp;
+    int fd, ret = -1;
+    socklen_t addr_len;
 
-    struct sockaddr_in servaddr;
-    struct sockaddr_in localaddr;
-    struct hostent *hp;     /* host information */
-    int fd;
-    NTP_DBG_PRINTF("will attemt to communicate with %s\n", host);
-    u8 cnt = 10;
-
-    if ((fd = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
-        NTP_ERR_PRINTF("cannot create ntp socket\n");
+    if (!host || !s_tm) {
         return -1;
     }
 
-    /* fill in the server's address and data */
-    memset((char *)&servaddr, 0, sizeof(servaddr));
-    servaddr.sin_family = AF_INET;
-    servaddr.sin_port = htons(port);
+    if ((fd = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
+        NTP_ERR_PRINTF("create socket failed: %d\n", errno);
+        return -1;
+    }
 
     localaddr.sin_family = AF_INET;
-    localaddr.sin_port = htons(0);
+    localaddr.sin_port = 0;
     localaddr.sin_addr.s_addr = htonl(INADDR_ANY);
     if (bind(fd, (struct sockaddr *)&localaddr, sizeof(localaddr)) < 0) {
-        NTP_ERR_PRINTF("ntp bind fail \n");
-        /* ret = 1; */
-        /* os_time_dly(200); */
-        goto err;
+        NTP_ERR_PRINTF("bind failed: %d\n", errno);
+        goto cleanup;
     }
 
-    setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, (const void *)&recv_to, sizeof(recv_to));
-    /* look up the address of the server given its name */
-    hp = gethostbyname(host);
+    setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, &recv_to, sizeof(recv_to));
 
-    if (!hp) {
-        NTP_ERR_PRINTF("could not obtain ntp address of %s\n", host);
-        goto err;
+    if (!(hp = gethostbyname(host))) {
+        NTP_ERR_PRINTF("host lookup failed: %s\n", host);
+        goto cleanup;
     }
 
-    /* put the host's address into the server address structure */
-    memcpy((void *)&servaddr.sin_addr, hp->h_addr_list[0], hp->h_length);
+    servaddr.sin_family = AF_INET;
+    servaddr.sin_port = htons(NTP_PORT);
+    memcpy(&servaddr.sin_addr, hp->h_addr, hp->h_length);
+    addr_len = sizeof(servaddr);
 
-    NTP_DBG_PRINTF("sending data..\n");
-
-    /* send a message to the server */
-    do {
-        if (sendto(fd, &client_msg, sizeof(client_msg), 0, (struct sockaddr *)&servaddr, sizeof(servaddr)) < 0) {
-            NTP_ERR_PRINTF("ntp sendto failed\n");
-            goto err;
+    for (int attempt = 0; attempt < MAX_RETRY; attempt++) {
+        if (sendto(fd, &client_msg, sizeof(client_msg), 0,
+                   (struct sockaddr *)&servaddr, addr_len) < 0) {
+            NTP_ERR_PRINTF("sendto failed(%d): %d\n", attempt, errno);
+            continue;
         }
-    } while (--cnt > 0);
-
-    NTP_DBG_PRINTF("recieving data..\n");
-
-    i = recv(fd, &server_msg, sizeof(server_msg), 0);
-    if (i > 0) {
-        NTP_DBG_PRINTF("received: %u out of %lu bytes \n", i, sizeof(server_msg));
-        analysis_ntp_protocol_ext(server_msg.recieve_timestamp, s_tm);
-        ntp_get_time(s_tm);
-        ret = 0;
-    } else {
-        NTP_ERR_PRINTF("recieving data err: %d\n", i);
+        while (1) {
+            ssize_t received = recvfrom(fd, &server_msg, sizeof(server_msg), 0,
+                                        (struct sockaddr *)&servaddr, &addr_len);
+            if (received < 0) {
+                NTP_DBG_PRINTF("recvfrom failed");
+                break;
+            }
+            if (received > 0) {
+                print_ntp_packet(&server_msg); //打印接收到的ntp数据包
+                if (is_valid_ntp_response(&server_msg)) {
+                    ntp_timestamp_t timestamp = (server_msg.transmit_timestamp.raw != 0) ?
+                                                server_msg.transmit_timestamp : server_msg.receive_timestamp;
+                    analysis_ntp_protocol_ext(timestamp, s_tm);
+                    ret = 0;
+                    goto cleanup;
+                } else {
+                    NTP_ERR_PRINTF("Received invalid NTP packet, ignoring\n");
+                }
+            }
+        }
     }
 
-err:
+cleanup:
     closesocket(fd);
-
     return ret;
 }
 
@@ -1015,3 +1010,4 @@ int ntp_test(void)
     return 0;
 }
 #endif
+

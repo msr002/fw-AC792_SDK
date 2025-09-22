@@ -50,6 +50,8 @@ struct fb_combine_t {
     u16 ui_timer_id;
     u8 *map_backup_baddr;
     int fb_frame_cnt[FB_COMBINE_MAX_NUM];
+
+    struct fb_map_user map_modify[FB_COMBINE_MAX_NUM];
 };
 
 static struct fb_combine_t _fb_combine[FB_MAX_OUT_NUM];
@@ -149,6 +151,34 @@ static void __dma2d_in_layer_conf(dma2d_layer_t *in, struct fb_out_t *p)
         in->color_key = 1;
         /* in->color = 0; //纯黑色 */
         in->color = 0x52aaa5;//特殊颜色值为透明值
+    }
+
+}
+/**
+ * @brief    帧buffer 属性二次修改
+ * @param:   id: lcd ID
+ * @param:   in: 输入图层
+ * @param:   p: fb 图层属性
+ * @return:  none
+ **/
+static void __dma2d_in_layer_modify(u8 id, dma2d_layer_t *in, struct fb_out_t *p)
+{
+    struct fb_map_user *map_modify = NULL;
+    if (!in || !p) {
+        return;
+    }
+
+    /* 图层二次修改参数 */
+    map_modify = &__this->map_modify[p->fb_name[2] - '0'];
+    if ((map_modify->width && map_modify->height) || map_modify->rotate || map_modify->mirror) {
+        in->width = map_modify->width;
+        in->height = map_modify->height;
+        in->v_width = map_modify->real_width;
+        in->v_height = map_modify->real_height;
+        in->rotate = map_modify->rotate;
+        in->mirror = map_modify->mirror;
+        in->x = map_modify->xoffset;
+        in->y = map_modify->yoffset;
     }
 }
 
@@ -266,6 +296,7 @@ static int __dma2d_frame_buf_fpc(dma2d_layer_t *in, dma2d_layer_t *out)
     out_layer_param.h = (in->height > out->height) ? out->height : in->height;
     out_layer_param.endian = 0;
     out_layer_param.rbs = 0;
+    out_layer_param.dither_en = 1;
     dma2d_set_fg_layer(&fg_layer_param);
     dma2d_set_out_layer(&out_layer_param);
     dma2d_set_mode(JLDMA2D_M2M_PFC);
@@ -373,6 +404,8 @@ static int combine_layer_process(dma2d_layer_t *in, dma2d_layer_t *out, u8 proce
         return 0;
     }
 
+    int out_bpp = jlvg_get_image_format_bpp(out->format) >> 3;
+
     if (process_type == LAYER_GPU_MIRROR) {
         if (in->width + in->x > out->width || in->height + in->y > out->height) {
             log_error("layer combine mirror cross over! in:(%d,%d)(%d,%d) out:(%d,%d)", in->x, in->y, in->height, in->width, out->width, out->height);
@@ -380,15 +413,20 @@ static int combine_layer_process(dma2d_layer_t *in, dma2d_layer_t *out, u8 proce
         }
         out_data_addr = out->addr;
         if (in->x || in->y) {
-            out_data_addr = out->addr + (in->y * out->width + in->x) * (jlvg_get_image_format_bpp(out->format) >> 3);
+            out_data_addr = out->addr + (in->y * out->width + in->x) * out_bpp;
         }
         fb_frame_buf_mirror(in->addr, out_data_addr, in->width, in->height, in->width, in->height, 2, in->format, out->format);
         return 1;
     }
 
     if ((process_type & LAYER_GPU_ROTATE) && (process_type & LAYER_GPU_SCALE)) {
-        //TODO
-        log_info("no support now");
+        //旋转缩放
+        out_data_addr = out->addr;
+        if (in->x || in->y) {
+            out_data_addr = out->addr + (in->y * out->width + in->x) * out_bpp;
+        }
+
+        fb_frame_buf_rotate(in->addr, out_data_addr, in->v_width, in->v_height, 0, in->width, in->height, out->width * out_bpp, in->rotate, 0, 0, in->format, out->format, in->mirror);
         return 0;
     }
     if (process_type & LAYER_GPU_SCALE) {
@@ -398,15 +436,20 @@ static int combine_layer_process(dma2d_layer_t *in, dma2d_layer_t *out, u8 proce
         return 1;
     }
     if (process_type & LAYER_GPU_ROTATE) {
-        if (in->height + in->x > out->width || in->width + in->y > out->height) {
+        u16 w = in->height;
+        u16 h = in->width;
+        if (in->rotate == 180) {
+            w = in->width;
+            h = in->height;
+        }
+        if (w + in->x > out->width || h + in->y > out->height) {
             log_error("layer combine rotate cross over! in:(%d,%d)(%d,%d) out:(%d,%d)", in->x, in->y, in->height, in->width, out->width, out->height);
             return 0;
         }
         u8 mirror = (process_type & LAYER_GPU_MIRROR) ? 1 : 0;
-        int out_bpp = jlvg_get_image_format_bpp(out->format) >> 3;
         out_data_addr = out->addr + (in->y * out->width + in->x) * out_bpp;
         fb_frame_buf_rotate(in->addr, out_data_addr, in->width, in->height, 0,
-                            in->height, in->width, out->width * out_bpp, in->rotate,
+                            w, h, out->width * out_bpp, in->rotate,
                             0, 0, in->format, out->format, mirror);
         return 1;
     }
@@ -1109,6 +1152,7 @@ int fb_combine_task(u8 id, void *priv)
                 /* printf("%s--%x\n", p->fb_name, p->map.baddr); */
                 __this->fb_frame_cnt[p->fb_name[2] - '0']--;
                 __dma2d_in_layer_conf(&in[fb_n], p);
+                __dma2d_in_layer_modify(id, &in[fb_n], p);
                 fb_n++;
             }
         }
@@ -1394,6 +1438,7 @@ void fb_combine_list_del(struct fb_out_t *ep)
     if (ep->buf_addr[0] || ep->buf_addr[1]) {
         list_del(&ep->entry);
     }
+    memset(&__this->map_modify[ep->fb_name[2] - '0'], 0, sizeof(struct fb_map_user));
     spin_unlock(&fb_lock[id]);
     _ep.ready_combine = 0xff;
     fb_combine_updata(&_ep, NULL); //当前fb图层删除了应该触发一次合成
@@ -1431,16 +1476,18 @@ int fb_combine_updata(struct fb_out_t *ep, struct fb_map_user *map)
                 return -1;
             }
             p->map.baddr_bk = p->map.baddr;
-            p->map.baddr = map->baddr;
-            p->map.width = map->width;
-            p->map.height = map->height;
-            p->map.real_width = map->real_width;
-            p->map.real_height = map->real_height;
-            p->map.rotate = map->rotate;
-            p->map.mirror = map->mirror;
-            p->map.format = map->format;
-            p->map.xoffset = map->xoffset;
-            p->map.yoffset = map->yoffset;
+            if (map) {
+                p->map.baddr = map->baddr;
+                p->map.width = map->width;
+                p->map.height = map->height;
+                p->map.real_width = map->real_width;
+                p->map.real_height = map->real_height;
+                p->map.rotate = map->rotate;
+                p->map.mirror = map->mirror;
+                p->map.format = map->format;
+                p->map.xoffset = map->xoffset;
+                p->map.yoffset = map->yoffset;
+            }
             p->ready_combine = 1;
             need_combine = 1;
             for (u8 i = 0; i < sizeof(p->buf_addr) / sizeof(p->buf_addr[0]); i++) {
@@ -1502,11 +1549,15 @@ int fb_combine_updata(struct fb_out_t *ep, struct fb_map_user *map)
     if (__this->combine_task_run == FB_COMBINE_STOP) {
 #if (defined CONFIG_UI_ENABLE && defined USE_LVGL_V8_UI_DEMO)
 #if (LV_DISP_UI_FB_NUM == 2 && FB_LCD_BUF_NUM == 1)
-        fb_lcd_frame_buf_update_async(id, map->baddr);
+        if (map) {
+            fb_lcd_frame_buf_update_async(id, map->baddr);
+        }
         return 0;
 #endif
 #endif
-        fb_lcd_frame_buf_update(id, map->baddr);
+        if (map) {
+            fb_lcd_frame_buf_update(id, map->baddr);
+        }
     }
 
     return 0;
@@ -1529,4 +1580,102 @@ int fb_combine_close(u8 id)
     return 0;
 }
 
+/**
+ * @brief : 动态修改指定fb图层属性
+ * @param: id: lcd ID
+ * @param: fb_name: fb名
+ * @param: map: 修改的图层属性
+ * @return: 0:成功  非0:失败
+ **/
+int fb_combine_layer_modify(u8 id, const char *fb_name, struct fb_map_user *map)
+{
+    u8 i = 0;
+    struct fb_map_user *map_modify = NULL;
+    struct fb_out_t *p = NULL;
+    if (!fb_name || !map) {
+        return -1;
+    }
+    fb_combine_mutex_enter(id);
+    i = fb_name[2] - '0';
+    if (i > FB_COMBINE_MAX_NUM) {
+        return -1;
+    }
+
+    spin_lock(&fb_lock[id]);
+    list_for_each_entry(p, &head[id], entry) {
+        if (!strcmp(p->fb_name, fb_name)) {
+            break;
+        }
+    }
+    spin_unlock(&fb_lock[id]);
+    log_info("fb_combine_layer_modify: %d %dx%d r:%d m:%d", id, map->width, map->height, map->rotate, map->mirror);
+    map_modify = &__this->map_modify[i];
+    memset(map_modify, 0, sizeof(struct fb_map_user));
+    /* map_modify->addr = map->baddr; */
+    /* map_modify->format = map->format; */
+    map_modify->width = map->width;
+    map_modify->height = map->height;
+    map_modify->real_width = map->real_width;
+    map_modify->real_height = map->real_height;
+    map_modify->rotate = map->rotate;
+    map_modify->mirror = map->mirror;
+    map_modify->xoffset = map->xoffset;
+    map_modify->yoffset = map->yoffset;
+    fb_combine_mutex_exit(id);
+
+    p->ready_combine = 0xff;
+    fb_combine_updata(p, NULL); //强制触发一次合成
+
+    return 0;
+}
+
+
+
+
+
+
+
+
+
+
+
+/********************* Demo Test*****************************/
+
+//动态修改FB属性Demo
+void fb_modify_test(void *p)
+{
+    static u8 index = 0;
+    struct fb_map_user map = {0};
+    const u16 rotate_array[4] = {0, 90, 180, 270};
+    //4个方向轮换
+    if (++index >= 4) {
+        index = 0;
+    }
+
+    u16 r = rotate_array[index];
+    switch (r) {
+    case 0:
+    case 180:
+        map.real_width = 800; //显示原图宽
+        map.real_height = 480;//显示原图高
+
+        map.rotate = r;    //显示旋转角度
+        map.width = 800;   //显示目标宽
+        map.height = 480;  //显示目标高
+        break;
+    case 90:
+    case 270:
+        map.xoffset = 250;    //显示位置x坐标偏移
+        map.yoffset = 0;      //显示位置y坐标偏移
+        map.real_width = 800; //显示原图宽
+        map.real_height = 480;//显示原图高
+
+        map.rotate = r;    //显示旋转角度
+        map.width = 288;   //显示目标宽
+        map.height = 480;  //显示目标高
+        break;
+    }
+    fb_combine_layer_modify(0, "fb1", &map);
+
+}
 #endif

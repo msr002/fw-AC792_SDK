@@ -417,7 +417,9 @@
                 "${workspaceFolder}/apps/common/usb/include",
                 "${workspaceFolder}/include_lib/driver/device/usb",
                 "${workspaceFolder}/include_lib/driver/device/usb/device",
-                "${workspaceFolder}/include_lib/driver/device/usb/host"
+                "${workspaceFolder}/include_lib/driver/device/usb/host",
+                "${workspaceFolder}/apps/common/ext_rf_fcc_tool/includes",
+                "${workspaceFolder}/lib/net/device/wireless_ext/WIFI_todo"
             ],
             "intelliSenseMode": "clang-x86",
             "name": "AC792N_DEMO_DEMO_WIFI_EXT"

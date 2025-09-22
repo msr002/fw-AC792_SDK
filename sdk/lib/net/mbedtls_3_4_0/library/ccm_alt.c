@@ -133,7 +133,7 @@ void mbedtls_ccm_init(mbedtls_ccm_context *ctx)
 {
     CCM_VALIDATE(ctx != NULL);
 
-    cryp_zeroize((void *)ctx, sizeof(mbedtls_ccm_context));
+    memset((void *)ctx, 0, sizeof(mbedtls_ccm_context));
 }
 
 int mbedtls_ccm_setkey(mbedtls_ccm_context *ctx,
@@ -212,7 +212,7 @@ void mbedtls_ccm_free(mbedtls_ccm_context *ctx)
         return;
     }
 
-    cryp_zeroize((void *)ctx, sizeof(mbedtls_ccm_context));
+    memset((void *)ctx, 0, sizeof(mbedtls_ccm_context));
 }
 
 

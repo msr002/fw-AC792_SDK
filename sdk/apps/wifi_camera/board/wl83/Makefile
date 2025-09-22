@@ -768,6 +768,7 @@ c_SRC_FILES := \
 	../../../../apps/common/lvgl_v8/examples/widgets/lyrics/lv_example_lyrics_2.c \
 	../../../../apps/common/lvgl_v8/examples/widgets/lyrics/lv_example_lyrics_3.c \
 	../../../../apps/common/lvgl_v8/examples/widgets/lyrics/lv_example_lyrics_4.c \
+	../../../../apps/common/lvgl_v8/examples/widgets/lyrics/lv_example_lyrics_5.c \
 	../../../../apps/common/lvgl_v8/examples/widgets/menu/lv_example_menu_1.c \
 	../../../../apps/common/lvgl_v8/examples/widgets/menu/lv_example_menu_2.c \
 	../../../../apps/common/lvgl_v8/examples/widgets/menu/lv_example_menu_3.c \

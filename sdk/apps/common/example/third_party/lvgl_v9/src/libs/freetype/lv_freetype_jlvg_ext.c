@@ -61,7 +61,9 @@ bool lv_jlvg_label_freetype_draw_task_create(lv_draw_unit_t *draw_unit, const lv
 {
     //printf("[%s]", __func__);
 
-    lv_layer_t *layer = draw_unit->target_layer;
+    lv_draw_jlvg_unit_t *u = (lv_draw_jlvg_unit_t *)draw_unit;
+    lv_draw_task_t *t = u->task_act;
+    lv_layer_t *layer = t->target_layer;
     lv_draw_buf_t *draw_buf = layer->draw_buf;
 
     lv_area_t rel_coords;
@@ -69,7 +71,7 @@ bool lv_jlvg_label_freetype_draw_task_create(lv_draw_unit_t *draw_unit, const lv
     lv_area_move(&rel_coords, -layer->buf_area.x1, -layer->buf_area.y1);
 
     lv_area_t rel_clip_area;
-    lv_area_copy(&rel_clip_area, draw_unit->clip_area);
+    lv_area_copy(&rel_clip_area, &t->clip_area);
     lv_area_move(&rel_clip_area, -layer->buf_area.x1, -layer->buf_area.y1);
 
     lv_area_t blend_area;   //这个区域无论是帧buff还是行buff都是相对的新的绘制区域

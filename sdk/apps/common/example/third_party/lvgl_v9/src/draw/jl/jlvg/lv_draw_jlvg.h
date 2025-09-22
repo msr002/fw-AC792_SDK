@@ -45,7 +45,7 @@ extern "C" {
 /*Can't use GPU with other formats*/
 #endif
 
-#define LV_JL_GPU_MIN_AREA_SIZE 4096    // 交付给 GPU 渲染的最小区域大小，小于这个大小则不采用 GPU，脏块太小的渲染动作反而影响整体的渲染速度
+#define LV_JL_GPU_MIN_AREA_SIZE 0    // 交付给 GPU 渲染的最小区域大小，小于这个大小则不采用 GPU，脏块太小的渲染动作反而影响整体的渲染速度
 
 #define JLVG_DRAW_FULL_FB_ENABLE 0      // 使用小窗绘制速度会更快，默认关闭这个宏
 
@@ -53,7 +53,17 @@ extern "C" {
  *      TYPEDEFS
  **********************/
 
-typedef lv_draw_sw_unit_t lv_draw_jlvg_unit_t;
+typedef struct _lv_draw_jlvg_unit_t {
+    lv_draw_unit_t base_unit;
+    lv_draw_task_t *task_act;
+    //lv_draw_sw_thread_dsc_t thread_dscs[LV_DRAW_SW_DRAW_UNIT_CNT];
+#if LV_USE_OS
+    lv_thread_sync_t sync;
+    lv_thread_t thread;
+    volatile bool inited;
+    volatile bool exit_status;
+#endif
+} lv_draw_jlvg_unit_t;
 
 /**********************
  * GLOBAL PROTOTYPES

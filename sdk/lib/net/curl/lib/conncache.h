@@ -37,13 +37,13 @@
 struct connectdata;
 
 struct conncache {
-  struct Curl_hash hash;
-  size_t num_conn;
-  curl_off_t next_connection_id;
-  curl_off_t next_easy_id;
-  struct curltime last_cleanup;
-  /* handle used for closing cached connections */
-  struct Curl_easy *closure_handle;
+    struct Curl_hash hash;
+    size_t num_conn;
+    curl_off_t next_connection_id;
+    curl_off_t next_easy_id;
+    struct curltime last_cleanup;
+    /* handle used for closing cached connections */
+    struct Curl_easy *closure_handle;
 };
 
 #define BUNDLE_NO_MULTIUSE -1
@@ -79,9 +79,9 @@ struct conncache {
 #endif
 
 struct connectbundle {
-  int multiuse;                 /* supports multi-use */
-  size_t num_connections;       /* Number of connections in the bundle */
-  struct Curl_llist conn_list;  /* The connectdata members of the bundle */
+    int multiuse;                 /* supports multi-use */
+    size_t num_connections;       /* Number of connections in the bundle */
+    struct Curl_llist conn_list;  /* The connectdata members of the bundle */
 };
 
 /* returns 1 on error, 0 is fine */
@@ -90,8 +90,8 @@ void Curl_conncache_destroy(struct conncache *connc);
 
 /* return the correct bundle, to a host or a proxy */
 struct connectbundle *Curl_conncache_find_bundle(struct Curl_easy *data,
-                                                 struct connectdata *conn,
-                                                 struct conncache *connc);
+        struct connectdata *conn,
+        struct conncache *connc);
 /* returns number of connections currently held in the connection cache */
 size_t Curl_conncache_size(struct Curl_easy *data);
 

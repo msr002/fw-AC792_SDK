@@ -31,11 +31,11 @@
 
 /* per-transfer data for the Hyper backend */
 struct hyptransfer {
-  hyper_waker *write_waker;
-  hyper_waker *read_waker;
-  const hyper_executor *exec;
-  hyper_waker *exp100_waker;
-  hyper_waker *send_body_waker;
+    hyper_waker *write_waker;
+    hyper_waker *read_waker;
+    const hyper_executor *exec;
+    hyper_waker *exp100_waker;
+    hyper_waker *send_body_waker;
 };
 
 size_t Curl_hyper_recv(void *userp, hyper_context *ctx,

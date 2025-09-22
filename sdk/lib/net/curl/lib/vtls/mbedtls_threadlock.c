@@ -49,86 +49,92 @@ static MBEDTLS_MUTEX_T *mutex_buf = NULL;
 
 int Curl_mbedtlsthreadlock_thread_setup(void)
 {
-  int i;
+    int i;
 
-  mutex_buf = calloc(NUMT * sizeof(MBEDTLS_MUTEX_T), 1);
-  if(!mutex_buf)
-    return 0;     /* error, no number of threads defined */
+    mutex_buf = calloc(NUMT * sizeof(MBEDTLS_MUTEX_T), 1);
+    if (!mutex_buf) {
+        return 0;    /* error, no number of threads defined */
+    }
 
-  for(i = 0;  i < NUMT;  i++) {
+    for (i = 0;  i < NUMT;  i++) {
 #if defined(USE_THREADS_POSIX) && defined(HAVE_PTHREAD_H)
-    if(pthread_mutex_init(&mutex_buf[i], NULL))
-      return 0; /* pthread_mutex_init failed */
+        if (pthread_mutex_init(&mutex_buf[i], NULL)) {
+            return 0;    /* pthread_mutex_init failed */
+        }
 #elif defined(USE_THREADS_WIN32)
-    mutex_buf[i] = CreateMutex(0, FALSE, 0);
-    if(mutex_buf[i] == 0)
-      return 0;  /* CreateMutex failed */
+        mutex_buf[i] = CreateMutex(0, FALSE, 0);
+        if (mutex_buf[i] == 0) {
+            return 0;    /* CreateMutex failed */
+        }
 #endif /* USE_THREADS_POSIX && HAVE_PTHREAD_H */
-  }
+    }
 
-  return 1; /* OK */
+    return 1; /* OK */
 }
 
 int Curl_mbedtlsthreadlock_thread_cleanup(void)
 {
-  int i;
+    int i;
 
-  if(!mutex_buf)
-    return 0; /* error, no threads locks defined */
+    if (!mutex_buf) {
+        return 0;    /* error, no threads locks defined */
+    }
 
-  for(i = 0; i < NUMT; i++) {
+    for (i = 0; i < NUMT; i++) {
 #if defined(USE_THREADS_POSIX) && defined(HAVE_PTHREAD_H)
-    if(pthread_mutex_destroy(&mutex_buf[i]))
-      return 0; /* pthread_mutex_destroy failed */
+        if (pthread_mutex_destroy(&mutex_buf[i])) {
+            return 0;    /* pthread_mutex_destroy failed */
+        }
 #elif defined(USE_THREADS_WIN32)
-    if(!CloseHandle(mutex_buf[i]))
-      return 0; /* CloseHandle failed */
+        if (!CloseHandle(mutex_buf[i])) {
+            return 0;    /* CloseHandle failed */
+        }
 #endif /* USE_THREADS_POSIX && HAVE_PTHREAD_H */
-  }
-  free(mutex_buf);
-  mutex_buf = NULL;
+    }
+    free(mutex_buf);
+    mutex_buf = NULL;
 
-  return 1; /* OK */
+    return 1; /* OK */
 }
 
 int Curl_mbedtlsthreadlock_lock_function(int n)
 {
-  if(n < NUMT) {
+    if (n < NUMT) {
 #if defined(USE_THREADS_POSIX) && defined(HAVE_PTHREAD_H)
-    if(pthread_mutex_lock(&mutex_buf[n])) {
-      DEBUGF(fprintf(stderr,
-                     "Error: mbedtlsthreadlock_lock_function failed\n"));
-      return 0; /* pthread_mutex_lock failed */
-    }
+        if (pthread_mutex_lock(&mutex_buf[n])) {
+            DEBUGF(fprintf(stderr,
+                           "Error: mbedtlsthreadlock_lock_function failed\n"));
+            return 0; /* pthread_mutex_lock failed */
+        }
 #elif defined(USE_THREADS_WIN32)
-    if(WaitForSingleObject(mutex_buf[n], INFINITE) == WAIT_FAILED) {
-      DEBUGF(fprintf(stderr,
-                     "Error: mbedtlsthreadlock_lock_function failed\n"));
-      return 0; /* pthread_mutex_lock failed */
-    }
+        if (WaitForSingleObject(mutex_buf[n], INFINITE) == WAIT_FAILED) {
+            DEBUGF(fprintf(stderr,
+                           "Error: mbedtlsthreadlock_lock_function failed\n"));
+            return 0; /* pthread_mutex_lock failed */
+        }
 #endif /* USE_THREADS_POSIX && HAVE_PTHREAD_H */
-  }
-  return 1; /* OK */
+    }
+    return 1; /* OK */
 }
 
 int Curl_mbedtlsthreadlock_unlock_function(int n)
 {
-  if(n < NUMT) {
+    if (n < NUMT) {
 #if defined(USE_THREADS_POSIX) && defined(HAVE_PTHREAD_H)
-    if(pthread_mutex_unlock(&mutex_buf[n])) {
-      DEBUGF(fprintf(stderr,
-                     "Error: mbedtlsthreadlock_unlock_function failed\n"));
-      return 0; /* pthread_mutex_unlock failed */
-    }
+        if (pthread_mutex_unlock(&mutex_buf[n])) {
+            DEBUGF(fprintf(stderr,
+                           "Error: mbedtlsthreadlock_unlock_function failed\n"));
+            return 0; /* pthread_mutex_unlock failed */
+        }
 #elif defined(USE_THREADS_WIN32)
-    if(!ReleaseMutex(mutex_buf[n])) {
-      DEBUGF(fprintf(stderr,
-                     "Error: mbedtlsthreadlock_unlock_function failed\n"));
-      return 0; /* pthread_mutex_lock failed */
-    }
+        if (!ReleaseMutex(mutex_buf[n])) {
+            DEBUGF(fprintf(stderr,
+                           "Error: mbedtlsthreadlock_unlock_function failed\n"));
+            return 0; /* pthread_mutex_lock failed */
+        }
 #endif /* USE_THREADS_POSIX && HAVE_PTHREAD_H */
-  }
-  return 1; /* OK */
+    }
+    return 1; /* OK */
 }
 
 #endif /* USE_MBEDTLS */

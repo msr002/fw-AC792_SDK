@@ -29,6 +29,7 @@
 #endif
 
 #include "common.h"
+#include "fs/fs.h"
 
 #if defined(MBEDTLS_ECDH_VARIANT_EVEREST_ENABLED)
 

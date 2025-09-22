@@ -39,20 +39,22 @@
 #ifndef HAVE_STRDUP
 char *Curl_strdup(const char *str)
 {
-  size_t len;
-  char *newstr;
+    size_t len;
+    char *newstr;
 
-  if(!str)
-    return (char *)NULL;
+    if (!str) {
+        return (char *)NULL;
+    }
 
-  len = strlen(str) + 1;
+    len = strlen(str) + 1;
 
-  newstr = malloc(len);
-  if(!newstr)
-    return (char *)NULL;
+    newstr = malloc(len);
+    if (!newstr) {
+        return (char *)NULL;
+    }
 
-  memcpy(newstr, str, len);
-  return newstr;
+    memcpy(newstr, str, len);
+    return newstr;
 }
 #endif
 
@@ -69,12 +71,13 @@ char *Curl_strdup(const char *str)
  ***************************************************************************/
 wchar_t *Curl_wcsdup(const wchar_t *src)
 {
-  size_t length = wcslen(src);
+    size_t length = wcslen(src);
 
-  if(length > (SIZE_T_MAX / sizeof(wchar_t)) - 1)
-    return (wchar_t *)NULL; /* integer overflow */
+    if (length > (SIZE_T_MAX / sizeof(wchar_t)) - 1) {
+        return (wchar_t *)NULL;    /* integer overflow */
+    }
 
-  return (wchar_t *)Curl_memdup(src, (length + 1) * sizeof(wchar_t));
+    return (wchar_t *)Curl_memdup(src, (length + 1) * sizeof(wchar_t));
 }
 #endif
 
@@ -90,13 +93,14 @@ wchar_t *Curl_wcsdup(const wchar_t *src)
  ***************************************************************************/
 void *Curl_memdup(const void *src, size_t length)
 {
-  void *buffer = malloc(length);
-  if(!buffer)
-    return NULL; /* fail */
+    void *buffer = malloc(length);
+    if (!buffer) {
+        return NULL;    /* fail */
+    }
 
-  memcpy(buffer, src, length);
+    memcpy(buffer, src, length);
 
-  return buffer;
+    return buffer;
 }
 
 /***************************************************************************
@@ -115,9 +119,11 @@ void *Curl_memdup(const void *src, size_t length)
  ***************************************************************************/
 void *Curl_saferealloc(void *ptr, size_t size)
 {
-  void *datap = realloc(ptr, size);
-  if(size && !datap)
-    /* only free 'ptr' if size was non-zero */
-    free(ptr);
-  return datap;
+    void *datap = realloc(ptr, size);
+    if (size && !datap)
+        /* only free 'ptr' if size was non-zero */
+    {
+        free(ptr);
+    }
+    return datap;
 }

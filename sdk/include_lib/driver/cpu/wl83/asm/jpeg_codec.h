@@ -130,6 +130,14 @@ struct jpeg_decoder_param {
     int line_cnt;
 };
 
+struct jpeg_basic_info {
+    int width;
+    int height;
+    int align_width;
+    int align_height;
+    int format;
+};
+
 enum {
     JPEG_INPUT_TYPE_FILE,
     JPEG_INPUT_TYPE_DATA,
@@ -287,6 +295,7 @@ int mjpg_dri_enc_start(void *_fh, struct YUV_frame_data *input_frame, u8 *bits_b
  * JPEG解码使用函数
  */
 u8 *find_jpg_frame(u8 *buf, int limit);
+u8 *find_jpg_frame_detail(u8 *buf, int limit, struct jpeg_basic_info *info);
 void *jpeg_decode_open(void *arg);
 int jpeg_decode_reset_param(void *fd, void *arg);
 int jpeg_decode_close(void *fd);

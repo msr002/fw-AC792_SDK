@@ -71,6 +71,7 @@ int dma2d_merge_frame_buf(dma2d_frame_t *fg, dma2d_frame_t *bg, dma2d_frame_t *o
     out_layer_param.stride = out->width * dma2d_get_format_bpp(out->format) / 8;
     out_layer_param.format = out->format;
     out_layer_param.rbs = out->rbs;
+    out_layer_param.dither_en = 1;
 
     fg_layer_param.data = (uint32_t)fg->addr;
     fg_layer_param.stride = fg->width * dma2d_get_format_bpp(fg->format) / 8;
@@ -285,6 +286,7 @@ int jldma2d_blend(uint8_t *dest_buf, uint8_t *fg_buf, uint8_t *bg_buf, uint32_t 
     out_layer_param.rbs = out_rbs;
     out_layer_param.w = w;
     out_layer_param.h = h;
+    out_layer_param.dither_en = 1;
 
 
     dma2d_reset_all_regs();

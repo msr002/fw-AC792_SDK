@@ -156,9 +156,9 @@ CURLcode Curl_resolver_wait_resolv(struct Curl_easy *data,
  * correct format to comply with this.
  */
 struct Curl_addrinfo *Curl_resolver_getaddrinfo(struct Curl_easy *data,
-                                                const char *hostname,
-                                                int port,
-                                                int *waitp);
+        const char *hostname,
+        int port,
+        int *waitp);
 
 #ifndef CURLRES_ASYNCH
 /* convert these functions if an asynch resolver isn't used */

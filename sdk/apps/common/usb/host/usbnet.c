@@ -187,7 +187,7 @@ static void usbnet_at_port_rx_isr(struct usb_host_device *host_dev, u32 ep)
     u8 usb_recv_buf[64];
     u8 usb_recv_len = sizeof(usb_recv_buf);
 
-    /* printf("usb%d lte rx hep %d %d tep %d \n", usb_id, ep, wireless_dev.host_epin_at, target_ep); */
+    /* printf("usb%d lte rx hep %d %d tep %d \n", usb_id, ep, wireless_dev[usb_id].host_epin_at, target_ep); */
     rx_len = usb_h_ep_read_async(usb_id, ep, target_ep, usb_recv_buf, usb_recv_len, USB_ENDPOINT_XFER_BULK, 0);
     if (rx_len > 0) {
         if (usbnet_at_port_rx_handler) {
@@ -198,8 +198,45 @@ static void usbnet_at_port_rx_isr(struct usb_host_device *host_dev, u32 ep)
     usb_h_ep_read_async(usb_id, ep, target_ep, NULL, 0, USB_ENDPOINT_XFER_BULK, 1);
 }
 
+static bool set_endpoints_by_product_id(uint16_t idProduct, uint8_t *in_ep, uint8_t *out_ep)
+{
+    bool found = true;
 
-s32 usbnet_at_port_parser(struct usb_host_device *host_dev, u8 interface_num, const u8 *pBuf)
+    if (idProduct == 0x904) {
+        *in_ep = 0x88;  // EC800G
+        *out_ep = 0x06;
+    } else if (idProduct == 0x903) {
+        *in_ep = 0x82;
+        *out_ep = 0x0B;
+    } else if (idProduct == 0x6002) {
+        *in_ep = 0x86;  // EC800K
+        *out_ep = 0x0F;
+    } else if (idProduct == 0x6026) {
+        *in_ep = 0x86;
+        *out_ep = 0x0F;
+    } else if (idProduct == 0x0002) {
+        *in_ep = 0x85;
+        *out_ep = 0x05;
+    } else if (idProduct == 0x3012) {
+        *in_ep = 0x81;
+        *out_ep = 0x0A;
+    } else if (idProduct == 0x7b6e) {
+        *in_ep = 0x86;
+        *out_ep = 0x03;
+    } else if (idProduct == 0x2104) {
+        *in_ep = 0x86;
+        *out_ep = 0x0f;
+    } else if (idProduct == 0x9011) {
+        *in_ep = 0x86;
+        *out_ep = 0x0f;
+    } else {
+        found = false;
+    }
+
+    return found;
+}
+
+s32 usbnet_at_port_parser(struct usb_host_device *host_dev, u8 interface_num, const u8 *pBuf, struct usb_device_descriptor *device_desc)
 {
     s32 len = 0;
     u8 rx_interval = 0;
@@ -210,26 +247,31 @@ s32 usbnet_at_port_parser(struct usb_host_device *host_dev, u8 interface_num, co
 
     u32 cur_len;
     u32 cur_type;
-    u32 cur_subtype;
+
+    u32 cur_bInterfaceNumber;
+    u32 cur_bNumEndpoints = 0;
+
     u8 is_next_interface = 0;
     u8 stage = 0;
     const u8 cs_interface_1[] = {0x05, 0x24, 0x00, 0x10, 0x01};
-    const u8 cs_interface_2[] = {0x05, 0x24, 0x01, 0x00, 0x00};
+    const u8 cs_interface_2[] = {0x05, 0x24, 0x01, 0x00/*, 0x00*/};
     const u8 cs_interface_3[] = {0x04, 0x24, 0x02, 0x02};
-    const u8 cs_interface_4[] = {0x05, 0x24, 0x06, 0x00, 0x00};
+    const u8 cs_interface_4[] = {0x05, 0x24, 0x06,/* 0x00, 0x00*/};
 
     while (1) {
         cur_len = pBuf[len + 0];
         cur_type = pBuf[len + 1];
-        cur_subtype = pBuf[len + 2];
+        cur_bInterfaceNumber = pBuf[len + 2];
+        if (cur_type == USB_DT_INTERFACE) {
+            cur_bNumEndpoints = pBuf[len + 4];
+        }
 
-        /* printf("cur_len = %x, cur_type = %x, cur_subtype = %x", cur_len, cur_type, cur_subtype); */
+        /* printf("cur_len = %x, cur_type = %x, cur_bInterfaceNumber = %x cur_bNumEndpoints = %d len = %d", cur_len, cur_type, cur_bInterfaceNumber,cur_bNumEndpoints,len); */
 
         if (cur_type == USB_DT_INTERFACE_ASSOCIATION) {
             if (is_next_interface) {
                 break;
             }
-            /* put_buf(pBuf + len, cur_len); */
         } else if (cur_type == USB_DT_INTERFACE) {
             interface = (struct usb_interface_descriptor *)(pBuf + len);
             if (interface->bLength != USB_DT_INTERFACE_SIZE) {
@@ -242,6 +284,7 @@ s32 usbnet_at_port_parser(struct usb_host_device *host_dev, u8 interface_num, co
             /* put_buf(pBuf + len, cur_len); */
         } else if (cur_type == USB_DT_CS_INTERFACE) {
             /* put_buf(pBuf + len, cur_len); */
+#if 0
             switch (stage) {
             case 0:
                 if (!memcmp(pBuf + len, cs_interface_1, sizeof(cs_interface_1))) {
@@ -272,17 +315,23 @@ s32 usbnet_at_port_parser(struct usb_host_device *host_dev, u8 interface_num, co
                 }
                 break;
             }
+#endif
         } else if (cur_type == USB_DT_ENDPOINT) {
             /* put_buf(pBuf + len, cur_len); */
             end_desc = (struct usb_endpoint_descriptor *)(pBuf + len);
-            if (stage != 4) { //过滤符合AT COM的CS INTERFACE
-                goto __parser_next;
-            }
+            /* if (stage != 4) { //过滤符合AT COM的CS INTERFACE */
+            /* goto __parser_next; */
+            /* } */
+
+            /* printf("\n\n >>>>>>>>>>>>>>>>cur_bNumEndpoints = %d\n\n",cur_bNumEndpoints); */
+            /* printf("\n\n >>>>>>>>>>>>>>>>end_desc->bEndpointAddress = 0x%x\n\n",end_desc->bEndpointAddress); */
+            u32 In_bEndpointAddress = 0;
+            u32 Out_bEndpointAddress = 0;
+            set_endpoints_by_product_id(device_desc->idProduct, &In_bEndpointAddress, &Out_bEndpointAddress);
 
             if ((end_desc->bmAttributes & USB_ENDPOINT_XFERTYPE_MASK) == USB_ENDPOINT_XFER_BULK) {
                 if (end_desc->bEndpointAddress & USB_DIR_IN) {
-                    if (end_desc->bEndpointAddress != 0x84 && \
-                        end_desc->bEndpointAddress != 0x86) {  //4G模块有好几个接形式一样的interface-endpoint接口，固定取AT COM端点
+                    if (end_desc->bEndpointAddress != In_bEndpointAddress) {  //4G模块有好几个接形式一样的interface-endpoint接口，固定取AT COM端点
                         goto __parser_next;
                     }
                     wireless_dev[usb_id].host_epin_at = usb_get_ep_num(usb_id, USB_DIR_IN, USB_ENDPOINT_XFER_BULK);
@@ -312,10 +361,13 @@ s32 usbnet_at_port_parser(struct usb_host_device *host_dev, u8 interface_num, co
 
                     usb_h_ep_read_async(usb_id, wireless_dev[usb_id].host_epin_at, wireless_dev[usb_id].epin_at, NULL, 0, USB_ENDPOINT_XFER_BULK, 1);
                 } else {
-                    if (end_desc->bEndpointAddress != 0x03 && \
-                        end_desc->bEndpointAddress != 0x0F) {  //4G模块有好几个接形式一样的interface-endpoint接口，固定取AT COM端点
+                    if (end_desc->bEndpointAddress != Out_bEndpointAddress) {  //4G模块有好几个接形式一样的interface-endpoint接口，固定取AT COM端点
                         goto __parser_next;
                     }
+                    /* if (end_desc->bEndpointAddress != 0x03 && \ */
+                    /* end_desc->bEndpointAddress != 0x0F) {  //4G模块有好几个接形式一样的interface-endpoint接口，固定取AT COM端点 */
+                    /* goto __parser_next; */
+                    /* } */
                     wireless_dev[usb_id].host_epout_at = usb_get_ep_num(usb_id, USB_DIR_OUT, USB_ENDPOINT_XFER_BULK);
                     wireless_dev[usb_id].epout_at  = end_desc->bEndpointAddress & 0x0f;
                     wireless_dev[usb_id].txmaxp_at = end_desc->wMaxPacketSize;
@@ -381,6 +433,7 @@ s32 usbnet_generic_cdc_parser(struct usb_host_device *host_dev, u8 interface_num
             }
             goto next_desc;
         }
+        /* printf("\n >>>>>>>>>>>>>>>type = 0x%x\n",buf[2]); */
         /* use bDescriptorSubType to identify the CDC descriptors.
          * We expect devices with CDC header and union descriptors.
          * For CDC Ethernet we need the ethernet descriptor.
@@ -406,13 +459,15 @@ s32 usbnet_generic_cdc_parser(struct usb_host_device *host_dev, u8 interface_num
                 len += USB_DT_INTERFACE_SIZE;
 
 __set_config:
-                for (int endnum = 0; endnum < 2; endnum++) {
+                for (int endnum = 0; endnum < 2;) {
                     end_desc = (struct usb_endpoint_descriptor *)(pBuf + len);
-
                     if (end_desc->bDescriptorType != USB_DT_ENDPOINT ||
                         end_desc->bLength < USB_DT_ENDPOINT_SIZE) {
-                        return -USB_DT_ENDPOINT;
+                        /* return -USB_DT_ENDPOINT; */
+                        len += end_desc->bLength;
+                        continue;
                     }
+                    endnum++;
                     len += USB_DT_ENDPOINT_SIZE;
 
                     if ((end_desc->bmAttributes & USB_ENDPOINT_XFERTYPE_MASK) == USB_ENDPOINT_XFER_BULK) {

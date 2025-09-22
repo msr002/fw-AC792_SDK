@@ -18,15 +18,9 @@ struct __NET_SCR_CFG {
     int fps;
     int src_w;
     int src_h;
-};
-
-struct __NET_SCR_INFO {
-    u8 state;
-    int pid;
-    void *video_dec;
-    void *sock_hdl;
-    struct __NET_SCR_CFG  cfg;
-
+    int prot;   //prot:协议类型 0->tcp 1->udp
+    int ack;    //ack:规则类型 0->以帧率为准 1->以回包为准
+    void *ack_cb;   //回包回调函数
 };
 
 u8 get_net_scr_status(void);

@@ -294,7 +294,7 @@ int usbnet_get_rxmaxp(usb_dev usb_id);
 void usbnet_set_rx_complete_cb(USBNET_RX_COMPLETE_CB cb);
 void usbnet_host_bulk_only_receive_int(usb_dev usb_id);
 s32 usbnet_generic_cdc_parser(struct usb_host_device *host_dev, u8 interface_num, const u8 *pBuf);
-s32 usbnet_at_port_parser(struct usb_host_device *host_dev, u8 interface_num, const u8 *pBuf);
+s32 usbnet_at_port_parser(struct usb_host_device *host_dev, u8 interface_num, const u8 *pBuf, struct usb_device_descriptor *device_desc);
 int usbnet_host_at_data_send(usb_dev usb_id, u8 *buf, u32 len);
 int usbnet_host_bulk_only_send(usb_dev usb_id, u8 *buf, u32 len);
 void usbnet_at_port_rx_handler_register(void (*func)(u8 *buf, u32 len));

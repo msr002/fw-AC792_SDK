@@ -91,13 +91,13 @@ void lv_draw_jldma2d_init(void)
     draw_unit->base_unit.evaluate_cb = evaluate_cb;
     draw_unit->base_unit.dispatch_cb = dispatch_cb;
     draw_unit->base_unit.delete_cb = delete_cb;
-    /* draw_unit->base_unit.name = "JLDMA2D"; */
+    draw_unit->base_unit.name = "JLDMA2D";
 
 
 #if LV_DRAW_JLDMA2D_ASYNC && LV_USE_OS
     g_unit = draw_unit;
 
-    lv_result_t res = lv_thread_init(&draw_unit->thread, LV_THREAD_PRIO_HIGH, thread_cb, 2 * 1024, draw_unit);
+    lv_result_t res = lv_thread_init(&draw_unit->thread, "lv_draw_jldma2d", LV_THREAD_PRIO_HIGH, thread_cb, 2 * 1024, draw_unit);
     LV_ASSERT(res == LV_RESULT_OK);
 #endif
 
@@ -192,7 +192,7 @@ uint32_t lv_draw_jldma2d_color_to_dma2d_color(uint16_t cf, lv_color_t color)
  */
 static bool __is_jldma2d_image_normal_map(lv_draw_image_dsc_t *dsc)
 {
-    if (dsc->header.cf < LV_COLOR_FORMAT_YUV_END
+    if (dsc->header.cf < LV_COLOR_FORMAT_PROPRIETARY_START
         && dsc->clip_radius == 0
         && dsc->bitmap_mask_src == NULL
         && dsc->sup == NULL
@@ -221,15 +221,15 @@ static int execute_drawing(lv_draw_jldma2d_unit_t *u)
     void *dest;
 
 
-    lv_layer_t *layer = u->base_unit.target_layer;
+    lv_layer_t *layer = t->target_layer;
     lv_area_t clipped_area, clipped_coords;
-    if (!lv_area_intersect(&clipped_area, &t->area, u->base_unit.clip_area)) {
+    if (!lv_area_intersect(&clipped_area, &t->area, &t->clip_area)) {
         return LV_DRAW_UNIT_IDLE;
     }
     lv_area_copy(&clipped_coords, &clipped_area);
 
-    int32_t x = 0 - u->base_unit.target_layer->buf_area.x1;
-    int32_t y = 0 - u->base_unit.target_layer->buf_area.y1;
+    int32_t x = 0 - layer->buf_area.x1;
+    int32_t y = 0 - layer->buf_area.y1;
     lv_area_move(&clipped_area, x, y);
     /* Invalidate cache */
     lv_draw_buf_invalidate_cache(layer->draw_buf, &clipped_area);
@@ -368,8 +368,6 @@ static int32_t dispatch_cb(lv_draw_unit_t *draw_unit, lv_layer_t *layer)
     }
 
     t->state = LV_DRAW_TASK_STATE_IN_PROGRESS;
-    dma2d_unit->base_unit.target_layer = layer;
-    dma2d_unit->base_unit.clip_area = &t->clip_area;
     dma2d_unit->task_act = t;
 
 #if LV_DRAW_JLDMA2D_ASYNC && LV_USE_OS

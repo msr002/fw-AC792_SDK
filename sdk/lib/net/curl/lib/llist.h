@@ -30,16 +30,16 @@
 typedef void (*Curl_llist_dtor)(void *, void *);
 
 struct Curl_llist_element {
-  void *ptr;
-  struct Curl_llist_element *prev;
-  struct Curl_llist_element *next;
+    void *ptr;
+    struct Curl_llist_element *prev;
+    struct Curl_llist_element *next;
 };
 
 struct Curl_llist {
-  struct Curl_llist_element *head;
-  struct Curl_llist_element *tail;
-  Curl_llist_dtor dtor;
-  size_t size;
+    struct Curl_llist_element *head;
+    struct Curl_llist_element *tail;
+    Curl_llist_dtor dtor;
+    size_t size;
 };
 
 void Curl_llist_init(struct Curl_llist *, Curl_llist_dtor);

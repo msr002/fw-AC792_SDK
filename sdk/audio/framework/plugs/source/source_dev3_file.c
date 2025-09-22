@@ -188,6 +188,7 @@ static void source_dev3_ioc_start(struct source_dev3_file_hdl *hdl)
 {
     printf("source_dev3_ioc_start");
     source_dev3_open(hdl);
+    stream_node_ioctl(hdl->node, NODE_UUID_DECODER, NODE_IOC_SET_TIME_STAMP, 0);
     hdl->start = 1;
 }
 

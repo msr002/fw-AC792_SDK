@@ -38,9 +38,29 @@
      "name": "ADC",
      "group": "输入输出",
      "type": 0,
+     "ports": [
+      {
+       "group": "out",
+       "label": "",
+       "id": "5114f0b1-23ea-4659-844f-a8bd9b1e634d"
+      }
+     ],
      "fun": 1,
+     "cmd": {
+      "exe": "",
+      "args": "",
+      "workplace": ""
+     },
      "formFile": "../../.ADC配置.json",
      "uuid": "0XD06D",
+     "groupId": 1652095106915,
+     "draginfo": {
+      "zIndex": 10001,
+      "pos": {
+       "x": 310,
+       "y": 170
+      }
+     },
      "outBit": 2,
      "inBit": 0,
      "bitConsistency": false,
@@ -116,30 +136,43 @@
      "outBitWidth": 16,
      "itemId": "id_1745198625250_19"
     },
+    "zIndex": 10001,
+    "visible": true,
     "ports": {
      "groups": {
       "in": {
-       "position": "left"
-      },
-      "out": {
-       "position": "right",
+       "position": "left",
+       "label": {
+        "position": "bottom"
+       },
        "attrs": {
-        "text": {
-         "fill": "#2b3f57",
-         "font-size": "12",
-         "visibility": "visible",
-         "text": ""
-        },
         "circle": {
          "r": 6,
-         "magnet": true,
-         "stroke": "#7DC06E",
-         "strokeWidth": 2,
-         "fill": "#f2f2f2",
+         "id": "1",
          "event": "port:click",
+         "magnet": true,
+         "stroke": "#409EFF",
+         "strokeWidth": 2,
+         "fill": "#fff",
          "style": {
           "visibility": "visible"
          }
+        }
+       }
+      },
+      "out": {
+       "position": "right",
+       "label": {
+        "position": "bottom"
+       },
+       "attrs": {
+        "circle": {
+         "r": 6,
+         "magnet": true,
+         "stroke": "#31d0c6",
+         "strokeWidth": 2,
+         "fill": "#fff",
+         "event": "port:click"
         }
        }
       }
@@ -147,39 +180,25 @@
      "items": [
       {
        "group": "out",
+       "dataType": "mp3",
+       "attrs": {
+        "text": {
+         "text": "",
+         "color": "#ffffff",
+         "fill": "#2b3f57",
+         "font-size": "12",
+         "visibility": "visible"
+        },
+        "circle": {
+         "fill": "#f2f2f2",
+         "stroke": "#7DC06E"
+        },
+        "color": "#ffffff"
+       },
        "id": "5114f0b1-23ea-4659-844f-a8bd9b1e634d",
        "index": 0
       }
      ]
-    }
-   },
-   {
-    "shape": "edge",
-    "attrs": {
-     "line": {
-      "stroke": "#A4A5A9",
-      "strokeWidth": "2px",
-      "targetMarker": {
-       "tagName": "path",
-       "d": "M 12 -5 0 0 12 5 Z",
-       "strokeWidth": 2,
-       "fill": "#A4A5A9",
-       "stroke": "#A4A5A9"
-      },
-      "distance": 40
-     }
-    },
-    "id": "27f9e135-54e6-4724-bbd8-6074285c84e4",
-    "data": {
-     "itemId": "id_1745198625250_19"
-    },
-    "source": {
-     "cell": "51cb47d4-c234-4528-8dff-f096437e6277",
-     "port": "5114f0b1-23ea-4659-844f-a8bd9b1e634d"
-    },
-    "target": {
-     "cell": "566d6b96-6921-4507-a7f7-b972626bbd12",
-     "port": "25ac1764-1e03-461d-8a28-4d109b881a7f"
     }
    },
    {
@@ -201,9 +220,23 @@
      "name": "编码器",
      "group": "编解码",
      "type": 1,
+     "ports": [],
      "fun": 1,
+     "cmd": {
+      "exe": "",
+      "args": "",
+      "workplace": ""
+     },
      "formFile": "../../.encoder_fmt.json",
      "uuid": "0XA2C",
+     "groupId": 1652095106915,
+     "draginfo": {
+      "zIndex": 10001,
+      "pos": {
+       "x": 190,
+       "y": 730
+      }
+     },
      "itemId": "id_1745198625250_19",
      "subId": 16,
      "configs": {
@@ -260,30 +293,43 @@
      "inBitWidth": 16,
      "outBitWidth": 16
     },
+    "zIndex": 10001,
+    "visible": true,
     "ports": {
      "groups": {
       "in": {
-       "position": "left"
-      },
-      "out": {
-       "position": "right",
+       "position": "left",
+       "label": {
+        "position": "bottom"
+       },
        "attrs": {
-        "text": {
-         "fill": "#2b3f57",
-         "font-size": "12",
-         "visibility": "visible",
-         "text": ""
-        },
         "circle": {
          "r": 6,
-         "magnet": true,
-         "stroke": "#7DC06E",
-         "strokeWidth": 2,
-         "fill": "#f2f2f2",
+         "id": "1",
          "event": "port:click",
+         "magnet": true,
+         "stroke": "#409EFF",
+         "strokeWidth": 2,
+         "fill": "#fff",
          "style": {
           "visibility": "visible"
          }
+        }
+       }
+      },
+      "out": {
+       "position": "right",
+       "label": {
+        "position": "bottom"
+       },
+       "attrs": {
+        "circle": {
+         "r": 6,
+         "magnet": true,
+         "stroke": "#31d0c6",
+         "strokeWidth": 2,
+         "fill": "#fff",
+         "event": "port:click"
         }
        }
       }
@@ -291,11 +337,41 @@
      "items": [
       {
        "group": "in",
+       "dataType": "mp3",
+       "attrs": {
+        "text": {
+         "text": "",
+         "color": "#ffffff",
+         "fill": "#2b3f57",
+         "font-size": "12",
+         "visibility": "visible"
+        },
+        "circle": {
+         "fill": "#f2f2f2",
+         "stroke": "#E3B14C"
+        },
+        "color": "#ffffff"
+       },
        "id": "25ac1764-1e03-461d-8a28-4d109b881a7f",
        "index": 0
       },
       {
        "group": "out",
+       "dataType": "mp3",
+       "attrs": {
+        "text": {
+         "text": "",
+         "color": "#ffffff",
+         "fill": "#2b3f57",
+         "font-size": "12",
+         "visibility": "visible"
+        },
+        "circle": {
+         "fill": "#f2f2f2",
+         "stroke": "#7DC06E"
+        },
+        "color": "#ffffff"
+       },
        "id": "5114f0b1-23ea-4659-844f-a8bd9b1e634d",
        "index": 0
       }
@@ -314,20 +390,20 @@
        "strokeWidth": 2,
        "fill": "#A4A5A9",
        "stroke": "#A4A5A9"
-      },
-      "distance": 40
+      }
      }
     },
-    "id": "687d5135-c6fe-4265-94e3-46e4a2b717aa",
+    "id": "27f9e135-54e6-4724-bbd8-6074285c84e4",
     "data": {
      "itemId": "id_1745198625250_19"
     },
+    "zIndex": 10002,
     "source": {
-     "cell": "566d6b96-6921-4507-a7f7-b972626bbd12",
+     "cell": "51cb47d4-c234-4528-8dff-f096437e6277",
      "port": "5114f0b1-23ea-4659-844f-a8bd9b1e634d"
     },
     "target": {
-     "cell": "40ac89d4-0d17-4617-9d2e-502a37a39a5e",
+     "cell": "566d6b96-6921-4507-a7f7-b972626bbd12",
      "port": "25ac1764-1e03-461d-8a28-4d109b881a7f"
     }
    },
@@ -350,8 +426,23 @@
      "name": "声波配网",
      "group": "输入输出",
      "type": 2,
+     "ports": [],
      "fun": 0,
+     "cmd": {
+      "exe": "",
+      "args": "",
+      "workplace": ""
+     },
+     "formFile": "",
      "uuid": "0X4448",
+     "groupId": 1652095106915,
+     "draginfo": {
+      "zIndex": 10001,
+      "pos": {
+       "x": 810,
+       "y": 730
+      }
+     },
      "itemId": "id_1745198625250_19",
      "marco": "TCFG_ACOUSTIC_COMMUNICATION_NODE_ENABLE",
      "sAlias": "",
@@ -369,30 +460,43 @@
       "list": []
      }
     },
+    "zIndex": 10125,
+    "visible": true,
     "ports": {
      "groups": {
       "in": {
-       "position": "left"
-      },
-      "out": {
-       "position": "right",
+       "position": "left",
+       "label": {
+        "position": "bottom"
+       },
        "attrs": {
-        "text": {
-         "fill": "#2b3f57",
-         "font-size": "12",
-         "visibility": "visible",
-         "text": ""
-        },
         "circle": {
          "r": 6,
-         "magnet": true,
-         "stroke": "#7DC06E",
-         "strokeWidth": 2,
-         "fill": "#f2f2f2",
+         "id": "1",
          "event": "port:click",
+         "magnet": true,
+         "stroke": "#409EFF",
+         "strokeWidth": 2,
+         "fill": "#fff",
          "style": {
           "visibility": "visible"
          }
+        }
+       }
+      },
+      "out": {
+       "position": "right",
+       "label": {
+        "position": "bottom"
+       },
+       "attrs": {
+        "circle": {
+         "r": 6,
+         "magnet": true,
+         "stroke": "#31d0c6",
+         "strokeWidth": 2,
+         "fill": "#fff",
+         "event": "port:click"
         }
        }
       }
@@ -400,10 +504,54 @@
      "items": [
       {
        "group": "in",
+       "dataType": "mp3",
+       "attrs": {
+        "text": {
+         "text": "",
+         "color": "#ffffff",
+         "fill": "#2b3f57",
+         "font-size": "12",
+         "visibility": "visible"
+        },
+        "circle": {
+         "fill": "#f2f2f2",
+         "stroke": "#E3B14C"
+        },
+        "color": "#ffffff"
+       },
        "id": "25ac1764-1e03-461d-8a28-4d109b881a7f",
        "index": 0
       }
      ]
+    }
+   },
+   {
+    "shape": "edge",
+    "attrs": {
+     "line": {
+      "stroke": "#A4A5A9",
+      "strokeWidth": "2px",
+      "targetMarker": {
+       "tagName": "path",
+       "d": "M 12 -5 0 0 12 5 Z",
+       "strokeWidth": 2,
+       "fill": "#A4A5A9",
+       "stroke": "#A4A5A9"
+      }
+     }
+    },
+    "id": "687d5135-c6fe-4265-94e3-46e4a2b717aa",
+    "data": {
+     "itemId": "id_1745198625250_19"
+    },
+    "zIndex": 10126,
+    "source": {
+     "cell": "566d6b96-6921-4507-a7f7-b972626bbd12",
+     "port": "5114f0b1-23ea-4659-844f-a8bd9b1e634d"
+    },
+    "target": {
+     "cell": "40ac89d4-0d17-4617-9d2e-502a37a39a5e",
+     "port": "25ac1764-1e03-461d-8a28-4d109b881a7f"
     }
    }
   ]

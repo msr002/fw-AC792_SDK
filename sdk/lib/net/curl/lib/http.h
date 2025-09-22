@@ -34,12 +34,12 @@
 #include "ws.h"
 
 typedef enum {
-  HTTPREQ_GET,
-  HTTPREQ_POST,
-  HTTPREQ_POST_FORM, /* we make a difference internally */
-  HTTPREQ_POST_MIME, /* we make a difference internally */
-  HTTPREQ_PUT,
-  HTTPREQ_HEAD
+    HTTPREQ_GET,
+    HTTPREQ_POST,
+    HTTPREQ_POST_FORM, /* we make a difference internally */
+    HTTPREQ_POST_MIME, /* we make a difference internally */
+    HTTPREQ_PUT,
+    HTTPREQ_HEAD
 } Curl_HttpReq;
 
 #ifndef CURL_DISABLE_HTTP
@@ -95,7 +95,7 @@ CURLcode Curl_add_timecondition(struct Curl_easy *data,
 #else
                                 void *headers
 #endif
-  );
+                               );
 CURLcode Curl_add_custom_headers(struct Curl_easy *data,
                                  bool is_connect,
 #ifndef USE_HYPER
@@ -103,7 +103,7 @@ CURLcode Curl_add_custom_headers(struct Curl_easy *data,
 #else
                                  void *headers
 #endif
-  );
+                                );
 CURLcode Curl_dynhds_add_custom(struct Curl_easy *data,
                                 bool is_connect,
                                 struct dynhds *hds);
@@ -198,26 +198,26 @@ CURLcode Curl_http_auth_act(struct Curl_easy *data);
  * HTTP unique setup
  ***************************************************************************/
 struct HTTP {
-  curl_off_t postsize; /* off_t to handle large file sizes */
-  const char *postdata;
-  struct back {
-    curl_read_callback fread_func; /* backup storage for fread pointer */
-    void *fread_in;           /* backup storage for fread_in pointer */
+    curl_off_t postsize; /* off_t to handle large file sizes */
     const char *postdata;
-    curl_off_t postsize;
-    struct Curl_easy *data;
-  } backup;
+    struct back {
+        curl_read_callback fread_func; /* backup storage for fread pointer */
+        void *fread_in;           /* backup storage for fread_in pointer */
+        const char *postdata;
+        curl_off_t postsize;
+        struct Curl_easy *data;
+    } backup;
 
-  enum {
-    HTTPSEND_NADA,    /* init */
-    HTTPSEND_REQUEST, /* sending a request */
-    HTTPSEND_BODY     /* sending body */
-  } sending;
+    enum {
+        HTTPSEND_NADA,    /* init */
+        HTTPSEND_REQUEST, /* sending a request */
+        HTTPSEND_BODY     /* sending body */
+    } sending;
 
 #ifndef CURL_DISABLE_HTTP
-  void *h2_ctx;              /* HTTP/2 implementation context */
-  void *h3_ctx;              /* HTTP/3 implementation context */
-  struct dynbuf send_buffer; /* used if the request couldn't be sent in one
+    void *h2_ctx;              /* HTTP/2 implementation context */
+    void *h3_ctx;              /* HTTP/3 implementation context */
+    struct dynbuf send_buffer; /* used if the request couldn't be sent in one
                                 chunk, points to an allocated send_buffer
                                 struct */
 #endif
@@ -263,12 +263,12 @@ CURLcode Curl_http_decode_status(int *pstatus, const char *s, size_t len);
  * All about a core HTTP request, excluding body and trailers
  */
 struct httpreq {
-  char method[12];
-  char *scheme;
-  char *authority;
-  char *path;
-  struct dynhds headers;
-  struct dynhds trailers;
+    char method[12];
+    char *scheme;
+    char *authority;
+    char *path;
+    struct dynhds headers;
+    struct dynhds trailers;
 };
 
 /**
@@ -314,11 +314,11 @@ CURLcode Curl_http_req_to_h2(struct dynhds *h2_headers,
  * All about a core HTTP response, excluding body and trailers
  */
 struct http_resp {
-  int status;
-  char *description;
-  struct dynhds headers;
-  struct dynhds trailers;
-  struct http_resp *prev;
+    int status;
+    char *description;
+    struct dynhds headers;
+    struct dynhds trailers;
+    struct http_resp *prev;
 };
 
 /**

@@ -8,7 +8,7 @@
 #define DRIVER                 "rtl871xdrv"
 #define DRIVER_NAME            "RTL818x"
 
-#if TCFG_RTL8189E_ENABLE || TCFG_RTL8822CS_ENABLE || TCFG_RTL8733BS_ENABLE
+#if TCFG_RTL8189E_ENABLE || TCFG_RTL8822CS_ENABLE || TCFG_RTL8733BS_ENABLE || TCFG_RTL8189F_ENABLE
 static char hostapd_config_file[] = \
                                     "interface="INTERFACE"\n\
 ssid=####SSID_LENTH_MUST_LESS_THAN_32\n\
@@ -213,6 +213,7 @@ wpa_group_rekey=86400\n";
 const char *get_hostapd_config_file(unsigned char enable_wps)
 {
 #if (TCFG_RTL8189E_ENABLE   || \
+	 TCFG_RTL8189F_ENABLE || \
 	 TCFG_RTL8822ES_10M_ENABLE  || \
 	 TCFG_RTL8733BS_ENABLE  || \
 	 TCFG_RTL8822CS_ENABLE)

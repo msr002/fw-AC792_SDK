@@ -47,7 +47,7 @@ CURLcode Curl_parse_login_details(const char *login, const size_t len,
                                   char **optionsptr);
 
 const struct Curl_handler *Curl_builtin_scheme(const char *scheme,
-                                               size_t schemelen);
+        size_t schemelen);
 
 #define CURL_DEFAULT_PROXY_PORT 1080 /* default proxy port unless specified */
 #define CURL_DEFAULT_HTTPS_PROXY_PORT 443 /* default https proxy port unless

@@ -14,10 +14,6 @@
 
 #include "board_config.h"
 
-#if TCFG_IIS_NODE_ENABLE && TCFG_DAC_NODE_ENABLE
-#undef TCFG_IIS_NODE_ENABLE
-#define TCFG_IIS_NODE_ENABLE                    0
-#endif
 #if TCFG_IIS_NODE_ENABLE
 #undef TCFG_ESCO_DL_CVSD_SR_USE_16K
 #define TCFG_ESCO_DL_CVSD_SR_USE_16K            0
@@ -307,6 +303,17 @@
 #define TCFG_AUDIO_CVP_OUTPUT_WAY_IIS_ENABLE    0 //回声消除参考数据为iis数据
 #endif
 
+/*Audio数据导出配置:通过蓝牙spp导出/sd写卡导出/uart写卡导出, 目前仅支持uart导出写卡*/
+#define AUDIO_DATA_EXPORT_VIA_UART              1
+#define AUDIO_DATA_EXPORT_VIA_SPP               2
+#define AUDIO_DATA_EXPORT_VIA_SD                3
+#define TCFG_AUDIO_DATA_EXPORT_DEFINE           0
+
+#if TCFG_DATA_EXPORT_NODE_ENABLE
+#undef TCFG_AUDIO_DATA_EXPORT_DEFINE
+#define TCFG_AUDIO_DATA_EXPORT_DEFINE           AUDIO_DATA_EXPORT_VIA_UART
+#endif
+
 #if TCFG_AUDIO_CVP_SMS_ANS_MODE                 /*单MIC+ANS通话*/
 #define TCFG_AUDIO_TRIPLE_MIC_ENABLE            0
 #define TCFG_AUDIO_DUAL_MIC_ENABLE              0
@@ -455,7 +462,6 @@
 #define TCFG_BT_MODE                            BT_NORMAL
 
 #define TCFG_POWER_ON_ENABLE_EMITTER            0   //开机自动打开发射器
-#define TCFG_POWER_ON_ENABLE_BT                 0   //开机自动打开经典蓝牙
 #define TCFG_POWER_ON_ENABLE_BLE                0   //开机自动打开BLE
 #define TCFG_USER_BT_CLASSIC_ENABLE             1   //经典蓝牙功能
 #define TCFG_USER_BLE_ENABLE                    1   //BLE功能使能
@@ -603,10 +609,6 @@
  * */
 #define LV_DISP_UI_FB_NUM      2
 #define FB_LCD_BUF_NUM         2
-
-//开发板硬件测试UI
-#define DEV_HARDWARE_VERIFY_UI_ENABLE   0
-
 #endif
 
 

@@ -302,6 +302,9 @@ vbass_node_adapter
 #if TCFG_NS_NODE_ENABLE
 ns_node_adapter
 #endif
+#if TCFG_NS_NODE_LITE_ENABLE
+ns_node_lite_adapter
+#endif
 #if TCFG_DNS_NODE_ENABLE
 dns_node_adapter
 #endif
@@ -517,8 +520,8 @@ file0
 uvc0
 uvc1
 uvc_dev_ops
-replay0
-replay1
+rep0
+rep1
 disp0
 disp1
 disp2

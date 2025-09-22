@@ -74,7 +74,10 @@ extern const int config_wanson_asr_enable;
 static struct smart_voice_context *this_sv = NULL;
 static u8 volatile smart_voice_wakeup = 0;
 
+#if ((defined TCFG_AUDIO_ASR_DEVELOP) && (TCFG_AUDIO_ASR_DEVELOP == ASR_CFG_WANSON))
 void wanson_asr_hdl_free(void);
+int wanson_platform_asr_open(void);
+#endif
 
 #if SMART_VOICE_TEST_LISTEN_SOUND
 #include "audio_config.h"

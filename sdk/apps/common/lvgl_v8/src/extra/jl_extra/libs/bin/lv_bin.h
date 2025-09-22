@@ -38,6 +38,28 @@ typedef struct {
     JLBinResourceHeader jl_header;
     void *resource;
 } JLBinResource;
+
+/**
+ * 用作加载sd卡图片资源加速;
+ * 调用tools/gen_info_file.py生成信息文件;
+ * 信息文件结构:
+ * uint32_t file_num;
+ * lv_src_file_header_info_t;
+ * lv_src_file_header_info_t;
+ * ...
+ */
+typedef struct _header_info {
+    char filename[16];//请勿改动，否则存在对齐问题
+    JLBinResource jl_bin;
+    lv_img_dsc_t img_dsc;
+} lv_src_file_header_info_t;
+
+/**
+ * 检查并加载信息文件,存在则从信息文件中获取资源信息,请在加载ui前调用
+ * info_file_name:信息文件路径
+ */
+lv_res_t lv_check_header_info_file(const char *info_file_name);
+lv_res_t lv_close_header_info_file(void);
 /*******************JL************************/
 /**********************
  * GLOBAL PROTOTYPES

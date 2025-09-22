@@ -242,6 +242,7 @@ static void cdp_recv_thread(void *arg)
 
             if (cdp_topic_len > cdp_srv.max_topic_len || cdp_ct_len > cdp_srv.max_content_slice_len) {
                 printf("\n>>>cdp_topic_len or cdp_ct_len is too large\n");
+                continue;
             }
             memcpy(topic, recv_buf + CDP_PREFIX_LEN + CDP_TOPIC_LEN, cdp_topic_len);
             topic[cdp_topic_len] = '\0';

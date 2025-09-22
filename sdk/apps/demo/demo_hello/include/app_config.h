@@ -125,8 +125,8 @@
 #define TCFG_PWM1_ENABLE                    1
 #define TCFG_PWM1_TIMER_PWM_REMAP_IO        { IO_PORTA_04/*PWM2*/, -1/*PWM3*/, -1/*PWM4*/, -1/*PWM5*/, }
 #define TCFG_PWM1_MCPWM_REMAP_IO            {\
-                                                -1/*MCPWM0L*/, -1/*MCPWM1L*/, -1/*MCPWM2L*/, -1/*MCPWM3L*/,\
                                                 -1/*MCPWM0H*/, -1/*MCPWM1H*/, -1/*MCPWM2H*/, -1/*MCPWM3H*/,\
+                                                -1/*MCPWM0L*/, -1/*MCPWM1L*/, -1/*MCPWM2L*/, -1/*MCPWM3L*/,\
                                             }
 #define TCFG_PWM1_CH_MAPPING                PWM_TIMER2_OPCH
 #define TCFG_PWM1_FREQUENCY                 2000000

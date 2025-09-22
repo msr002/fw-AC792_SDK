@@ -14,6 +14,7 @@
 #include "codec/sbc_enc.h"
 #include "app_config.h"
 #include "system/spinlock.h"
+#include "asm/rf_coexistence_config.h"
 
 
 #if TCFG_A2DP_TX_NODE_ENABLE
@@ -32,6 +33,12 @@
 
 #define AUDIO_BT_EMITTER_TIMESTAMP_USE_SYS_TIME     1   // 使用系统时钟来做传输时间戳参考
 #define TIMESTAMP_USE_AUDIO_JIFFIES                 0   // 是否用杰理时间戳
+#if TCFG_WIFI_ENABLE && TCFG_USER_EMITTER_ENABLE
+#define A2DP_SEND_ONCE_PACKET_NUM                   4
+#else
+#define A2DP_SEND_ONCE_PACKET_NUM                   0
+#endif
+
 
 struct bt_tx_param {
     u8 protocol;
@@ -43,6 +50,13 @@ struct a2dp_tx_sync_node {
     u8 trigger;
     void *syncts;
     struct list_head entry;
+};
+
+struct a2dp_tx_packet {
+    u8 *packet;
+    int len;
+    int frame_sum;
+    u32 ts;
 };
 
 #if AUDIO_BT_EMITTER_TIMESTAMP_USE_SYS_TIME
@@ -58,13 +72,17 @@ struct a2dp_tx_hdl {
     u8 start;
     u8 num;
     u8 reference_network;
-    u8 first_timestamp;
     u8 bt_addr[6];
     u16 packet_size;
+    u8 first_timestamp;
+    u8 channel;
+#if A2DP_SEND_ONCE_PACKET_NUM > 1
+    u8 temp_packet_num;
+    struct a2dp_tx_packet temp_packet[A2DP_SEND_ONCE_PACKET_NUM - 1];
+#endif
     u8 *packet;
     u32 timestamp;
     u32 start_timestamp;
-    void *conn;
     int offset;
     u32 sample_rate;
     u32 sample_offset;
@@ -87,6 +105,39 @@ extern void *a2dp_sbc_encoder_get_param(u8 *addr);
 extern int bt_source_a2dp_send_media_packet(void *priv, u8 *packet, int len, int frame_sum, u32 TS);
 extern int bt_get_source_send_a2dp_buf_size();
 extern u8 *get_cur_connect_emitter_mac_addr(void);
+extern void wifi_psm_run_notify(int power_save);
+extern u8 get_a2dp_source_open_flag(void);
+
+
+#if TCFG_WIFI_ENABLE && TCFG_USER_EMITTER_ENABLE
+static u8 tx_ok_num;
+
+void bredr_tx_prepare_callback(void *conn, void *bulk, int err)
+{
+    if (!get_a2dp_source_open_flag()) {
+        return;
+    }
+
+    if (get_rf_coexistence_config_index() != 10) {
+        switch_rf_coexistence_config_table(10);
+    }
+}
+
+void bredr_tx_result_callback(void *conn, void *bulk, int err)
+{
+    if (!get_a2dp_source_open_flag()) {
+        return;
+    }
+
+    if (++tx_ok_num == A2DP_SEND_ONCE_PACKET_NUM) {
+        if (get_rf_coexistence_config_index() != 4) {
+            switch_rf_coexistence_config_table(4);
+        }
+        tx_ok_num = 0;
+        wifi_psm_run_notify(0);
+    }
+}
+#endif
 
 #if AUDIO_BT_EMITTER_TIMESTAMP_USE_SYS_TIME
 static void audio_bt_emitter_time_func(void *priv)
@@ -175,7 +226,7 @@ static void a2dp_tx_handle_frame(struct stream_iport *iport, struct stream_note 
             /* g_printf("send : %d, %d\n", hdl->num, hdl->offset); */
             hdl->packet_sn++;
             hdl->timestamp = hdl->packet_sn * (128 * hdl->num);
-            bt_source_a2dp_send_media_packet(hdl->conn, hdl->packet, hdl->offset, hdl->num, hdl->timestamp);
+            bt_source_a2dp_send_media_packet(hdl, hdl->packet, hdl->offset, hdl->num, hdl->timestamp);
 #if TIMESTAMP_USE_AUDIO_JIFFIES
             a2dp_tx_timestamp_handler(hdl);
 #endif
@@ -207,10 +258,34 @@ static void a2dp_tx_handle_frame(struct stream_iport *iport, struct stream_note 
         hdl->num++;
         hdl->offset += hdl->frame->len;
         if (hdl->num >= hdl->tx_param.frame_num) {
-            /* g_printf("send 2: %d, %d \n", hdl->num, hdl->offset); */
+            /* g_printf("send2 : %d, %d\n", hdl->num, hdl->offset); */
             hdl->packet_sn++;
             hdl->timestamp = hdl->packet_sn * (128 * hdl->num);
-            bt_source_a2dp_send_media_packet(hdl->conn, hdl->packet, hdl->offset, hdl->num, hdl->timestamp);
+#if A2DP_SEND_ONCE_PACKET_NUM > 1
+            if (hdl->temp_packet_num == A2DP_SEND_ONCE_PACKET_NUM - 1) {
+#if TCFG_WIFI_ENABLE && TCFG_USER_EMITTER_ENABLE
+                tx_ok_num = 0;
+#endif
+                for (int i = 0; i < hdl->temp_packet_num; ++i) {
+                    bt_source_a2dp_send_media_packet(hdl, hdl->temp_packet[i].packet, hdl->temp_packet[i].len, hdl->temp_packet[i].frame_sum, hdl->temp_packet[i].ts);
+                }
+                bt_source_a2dp_send_media_packet(hdl, hdl->packet, hdl->offset, hdl->num, hdl->timestamp);
+                hdl->temp_packet_num = 0;
+            } else {
+                memcpy(hdl->temp_packet[hdl->temp_packet_num].packet, hdl->packet, hdl->offset);
+                hdl->temp_packet[hdl->temp_packet_num].len = hdl->offset;
+                hdl->temp_packet[hdl->temp_packet_num].frame_sum = hdl->num;
+                hdl->temp_packet[hdl->temp_packet_num].ts = hdl->timestamp;
+                ++hdl->temp_packet_num;
+#if TCFG_WIFI_ENABLE && TCFG_USER_EMITTER_ENABLE
+                if (hdl->temp_packet_num == A2DP_SEND_ONCE_PACKET_NUM - 1) {
+                    sys_hi_timeout_add((void *)1, (void (*)(void *))wifi_psm_run_notify, hdl->sbc_input_len * 1000 * hdl->tx_param.frame_num / hdl->sample_rate / 2 / hdl->channel - 5);
+                }
+#endif
+            }
+#else
+            bt_source_a2dp_send_media_packet(hdl, hdl->packet, hdl->offset, hdl->num, hdl->timestamp);
+#endif
 #if TIMESTAMP_USE_AUDIO_JIFFIES
             a2dp_tx_timestamp_handler(hdl);
 #endif
@@ -373,6 +448,7 @@ static int a2dp_tx_start(struct a2dp_tx_hdl *hdl)
             return -1;
         }
     }
+    hdl->channel = channels;
     hdl->ts->run_points = 0;
     hdl->ts->run_once = (hdl->sample_rate * 20 / 1000) * channels * 2;
     hdl->ts->id = sys_s_hi_timer_add((void *)hdl, audio_bt_emitter_time_func, 20);
@@ -393,6 +469,19 @@ static int a2dp_tx_start(struct a2dp_tx_hdl *hdl)
         log_error("a2dp tx packet buffer error.");
     }
     log_info("a2dp tx packet size : %d", hdl->packet_size);
+#if A2DP_SEND_ONCE_PACKET_NUM > 1
+    hdl->temp_packet_num = 0;
+
+    for (int i = 0; i < A2DP_SEND_ONCE_PACKET_NUM - 1; ++i) {
+        hdl->temp_packet[i].packet = malloc(hdl->packet_size);
+        if (!hdl->temp_packet[i].packet) {
+            break;
+        }
+    }
+#endif
+#if TCFG_WIFI_ENABLE && TCFG_USER_EMITTER_ENABLE
+    rf_coexistence_scene_enter(RF_COEXISTENCE_SCENE_A2DP_SOURCE, -1);
+#endif
 #if TIMESTAMP_USE_AUDIO_JIFFIES
     a2dp_tx_timestamp_init(hdl);
 #endif
@@ -405,6 +494,21 @@ static int a2dp_tx_start(struct a2dp_tx_hdl *hdl)
 static int a2dp_tx_stop(struct a2dp_tx_hdl *hdl)
 {
     hdl->start = 0;
+
+#if A2DP_SEND_ONCE_PACKET_NUM > 1
+    if (hdl->temp_packet_num > 0) {
+        for (int i = 0; i < hdl->temp_packet_num; ++i) {
+            bt_source_a2dp_send_media_packet(hdl, hdl->temp_packet[i].packet, hdl->temp_packet[i].len, hdl->temp_packet[i].frame_sum, hdl->temp_packet[i].ts);
+        }
+        hdl->temp_packet_num = 0;
+    }
+    for (int i = 0; i < A2DP_SEND_ONCE_PACKET_NUM - 1; ++i) {
+        if (hdl->temp_packet[i].packet) {
+            free(hdl->temp_packet[i].packet);
+            hdl->temp_packet[i].packet = NULL;
+        }
+    }
+#endif
 
     if (hdl->packet) {
         free(hdl->packet);
@@ -427,6 +531,11 @@ static int a2dp_tx_stop(struct a2dp_tx_hdl *hdl)
         jlstream_free_frame(hdl->frame);
         hdl->frame = NULL;
     }
+
+#if TCFG_WIFI_ENABLE && TCFG_USER_EMITTER_ENABLE
+    rf_coexistence_scene_exit(RF_COEXISTENCE_SCENE_A2DP_SOURCE);
+    wifi_psm_run_notify(0);
+#endif
 
     return 0;
 }

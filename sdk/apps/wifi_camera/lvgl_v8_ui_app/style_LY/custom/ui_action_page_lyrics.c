@@ -98,7 +98,7 @@ static void lv_example_lyrics_letter(lv_obj_t *dest_scr, const char *text, uint1
     lv_lyrics_set_color(curr_obj_0, color);
     lv_obj_clear_flag(curr_obj_0, LV_OBJ_FLAG_CLICKABLE);
 
-    lv_lyrics_set_pos(curr_obj_0, 400, 250);
+    lv_lyrics_set_pos(curr_obj_0, 450, 300);
 
     //lv_lyrics_set_rotation(curr_obj_0, -450, 0, 0);
     curr_obj_1 = lv_lyrics_create(dest_scr, font_file, font_size, 0, letter_buf + lyrics_0_len, (letter_num - lyrics_0_len));
@@ -110,7 +110,7 @@ static void lv_example_lyrics_letter(lv_obj_t *dest_scr, const char *text, uint1
 
     lv_lyrics_set_color(curr_obj_1, color);
 
-    lv_lyrics_set_pos(curr_obj_1, 420, 300);
+    lv_lyrics_set_pos(curr_obj_1, 450, 350);
     lv_obj_clear_flag(curr_obj_1, LV_OBJ_FLAG_CLICKABLE);
 
     lv_anim_t lyrics_example_play_anim0;

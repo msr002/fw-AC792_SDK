@@ -20,7 +20,7 @@
 //#define CONFIG_STATIC_IPADDR_ENABLE           //记忆路由器分配的IP,下次直接使用记忆IP节省DHCP时间
 #define CONFIG_RTOS_STACK_CHECK_ENABLE
 // #define CONFIG_MEM_LEAK_CHECK_ENABLE         //是否启用内存泄漏检查(需要包含mem_leak_test.h头文件)
-
+//#define TCFG_EXT_RF_FCC_TEST_ENABLE 1
 
 #define AP_TEST_MODE       0
 #define STA_TEST_MODE      1

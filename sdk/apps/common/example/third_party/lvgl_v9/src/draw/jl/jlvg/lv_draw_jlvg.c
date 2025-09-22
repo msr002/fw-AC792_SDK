@@ -230,8 +230,6 @@ static int32_t _jlvg_dispatch(lv_draw_unit_t *draw_unit, lv_layer_t *layer)
     }
 
     t->state = LV_DRAW_TASK_STATE_IN_PROGRESS;
-    draw_jlvg_unit->base_unit.target_layer = layer;
-    draw_jlvg_unit->base_unit.clip_area = &t->clip_area;
     draw_jlvg_unit->task_act = t;
 
 #if LV_DRAW_JLVG_ASYNC && LV_USE_OS
@@ -280,12 +278,12 @@ static void _jlvg_execute_drawing(lv_draw_jlvg_unit_t *u)
 
     lv_draw_task_t *t = u->task_act;
     lv_draw_unit_t *draw_unit = (lv_draw_unit_t *)u;
-    lv_layer_t *layer = draw_unit->target_layer;
+    lv_layer_t *layer = t->target_layer;
     lv_draw_buf_t *draw_buf = layer->draw_buf;
 
     /* Set target buffer */
     lv_area_t clip_area;
-    lv_area_copy(&clip_area, draw_unit->clip_area);
+    lv_area_copy(&clip_area, &t->clip_area);
     lv_area_move(&clip_area, -layer->buf_area.x1, -layer->buf_area.y1);
 
     lv_area_t draw_area;
@@ -377,7 +375,7 @@ void lv_draw_jlvg_init(void)
     draw_jlvg_unit->base_unit.evaluate_cb = _jlvg_evaluate;
     draw_jlvg_unit->base_unit.dispatch_cb = _jlvg_dispatch;
     draw_jlvg_unit->base_unit.delete_cb = _jlvg_delete;
-    draw_jlvg_unit->idx = DRAW_UNIT_ID_JLVG;
+    draw_jlvg_unit->base_unit.name = "JLVG";
 
     /* JL gpu hw init */
     g_jlvg = jlvg_create();
@@ -385,7 +383,7 @@ void lv_draw_jlvg_init(void)
     log_info("jl gpu hw init. >>>>>>>>>>>");
 
 #if LV_DRAW_JLVG_ASYNC && LV_USE_OS
-    lv_thread_init(&draw_jlvg_unit->thread, LV_THREAD_PRIO_HIGH, _jlvg_render_thread_cb, 8 * 1024, draw_jlvg_unit);
+    lv_thread_init(&draw_jlvg_unit->thread, "lv_draw_jlvg", LV_THREAD_PRIO_HIGH, _jlvg_render_thread_cb, 8 * 1024, draw_jlvg_unit);
 #endif
     return;
 }

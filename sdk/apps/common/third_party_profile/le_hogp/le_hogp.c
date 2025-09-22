@@ -297,11 +297,11 @@ static void le_hogp_cbk_sm_packet_handler(void *hdl, uint8_t packet_type, uint16
     }
 }
 
-static void check_report_map_change(void)
+static void check_report_map_change(hci_con_handle_t connection_handle)
 {
 #if 0 //部分手机不支持
     static const u16 change_handle_table[2] = {ATT_CHARACTERISTIC_2a4b_01_VALUE_HANDLE, ATT_CHARACTERISTIC_2a4b_01_VALUE_HANDLE};
-    if (hid_report_change && first_pair_flag && att_get_ccc_config(ATT_CHARACTERISTIC_2a05_01_CLIENT_CONFIGURATION_HANDLE)) {
+    if (hid_report_change && first_pair_flag && multi_att_get_ccc_config(connection_handle, ATT_CHARACTERISTIC_2a05_01_CLIENT_CONFIGURATION_HANDLE)) {
         log_info("send services changed");
         app_ble_att_send_data(le_hogp_ble_hdl, ATT_CHARACTERISTIC_2a05_01_VALUE_HANDLE, change_handle_table, 4, ATT_OP_INDICATE);
         hid_report_change = 0;
@@ -494,7 +494,7 @@ static void le_hogp_cbk_packet_handler(void *hdl, uint8_t packet_type, uint16_t 
                     log_info("list's remote_type:%d", remote_type);
                     att_check_remote_result(con_handle, remote_type);
                 }
-                check_report_map_change();
+                check_report_map_change(con_handle);
                 ble_state_to_user(BLE_PRIV_PAIR_ENCRYPTION_CHANGE, first_pair_flag);
             }
             break;
@@ -694,7 +694,7 @@ static uint16_t le_hogp_att_read_callback(void *hdl, hci_con_handle_t connection
     case ATT_CHARACTERISTIC_2a4d_07_CLIENT_CONFIGURATION_HANDLE:
     case ATT_CHARACTERISTIC_ae42_01_CLIENT_CONFIGURATION_HANDLE:
         if (buffer) {
-            buffer[0] = att_get_ccc_config(handle);
+            buffer[0] = multi_att_get_ccc_config(connection_handle, handle);
             buffer[1] = 0;
         }
         att_value_len = 2;
@@ -740,9 +740,9 @@ static int le_hogp_att_write_callback(void *hdl, hci_con_handle_t connection_han
         break;
 
     case ATT_CHARACTERISTIC_2a05_01_CLIENT_CONFIGURATION_HANDLE:
-        att_set_ccc_config(handle, buffer[0]);
+        multi_att_set_ccc_config(connection_handle, handle, buffer[0]);
         if (buffer[0]) {
-            check_report_map_change();
+            check_report_map_change(connection_handle);
         }
         break;
 
@@ -764,7 +764,7 @@ static int le_hogp_att_write_callback(void *hdl, hci_con_handle_t connection_han
         }
         check_connetion_updata_deal();
         log_info("write ccc:%04x, %02x", handle, buffer[0]);
-        att_set_ccc_config(handle, buffer[0]);
+        multi_att_set_ccc_config(connection_handle, handle, buffer[0]);
         break;
 
     case ATT_CHARACTERISTIC_ae41_01_VALUE_HANDLE:

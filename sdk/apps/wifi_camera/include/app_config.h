@@ -39,6 +39,15 @@
 #define WIFI_P2P_DEVICE_NAME "JLWiFi-P2P"
 
 //*********************************************************************************//
+//                                  调音工具                                       //
+//*********************************************************************************//
+#define TCFG_NULL_COMM                          0               //不支持通信
+#define TCFG_USB_COMM                           1               //USB通信
+#define TCFG_UART_COMM                          2               //串口通信
+
+
+
+//*********************************************************************************//
 //                                 资源分配相关配置                                //
 //*********************************************************************************//
 #ifdef CONFIG_SDFILE_EXT_ENABLE
@@ -143,10 +152,10 @@
 
 #if defined CONFIG_VOICE_PROMPT_FILE_SAVE_IN_RESERVED_EXPAND_ZONE
 #if defined CONFIG_UI_FILE_SAVE_IN_RESERVED_EXPAND_ZONE
-#define CONFIG_AUDIO_PACKRES_LEN 0x180000
+#define CONFIG_AUDIO_PACKRES_LEN 0x100000
 #define CONFIG_AUDIO_PACKRES_ADR ((__FLASH_SIZE__) - (CONFIG_UI_PACKRES_LEN) - 0x1000 - CONFIG_AUDIO_PACKRES_LEN)
 #else
-#define CONFIG_AUDIO_PACKRES_LEN 0x180000
+#define CONFIG_AUDIO_PACKRES_LEN 0x100000
 #define CONFIG_AUDIO_PACKRES_ADR ((__FLASH_SIZE__) - CONFIG_AUDIO_PACKRES_LEN - 0x1000)
 #endif
 #else
@@ -155,7 +164,7 @@
 #endif
 
 #if defined CONFIG_LOGO_FILE_SAVE_IN_RESERVED_EXPAND_ZONE
-#define CONFIG_LOGO_PACKRES_LEN 0x32000
+#define CONFIG_LOGO_PACKRES_LEN 0x30000
 #define CONFIG_LOGO_PACKRES_ADR ((__FLASH_SIZE__) - (CONFIG_UI_PACKRES_LEN) - 0x1000 - CONFIG_AUDIO_PACKRES_LEN - CONFIG_LOGO_PACKRES_LEN)
 #endif
 

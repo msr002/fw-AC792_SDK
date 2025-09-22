@@ -61,10 +61,10 @@ void Curl_infof(struct Curl_easy *data,
 #if defined(__GNUC__) && !defined(printf) &&                    \
   defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 199901L) && \
   !defined(__MINGW32__)
-                       const char *fmt, ...)
-                       __attribute__((format(printf, 2, 3)));
+                const char *fmt, ...)
+__attribute__((format(printf, 2, 3)));
 #else
-                       const char *fmt, ...);
+                const char *fmt, ...);
 #endif
 
 /**
@@ -74,10 +74,10 @@ void Curl_failf(struct Curl_easy *data,
 #if defined(__GNUC__) && !defined(printf) &&                    \
   defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 199901L) && \
   !defined(__MINGW32__)
-                       const char *fmt, ...)
-                       __attribute__((format(printf, 2, 3)));
+                const char *fmt, ...)
+__attribute__((format(printf, 2, 3)));
 #else
-                       const char *fmt, ...);
+                const char *fmt, ...);
 #endif
 
 #define failf Curl_failf
@@ -91,7 +91,7 @@ void Curl_trc_cf_infof(struct Curl_easy *data, struct Curl_cfilter *cf,
   defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 199901L) && \
   !defined(__MINGW32__)
                        const char *fmt, ...)
-                       __attribute__((format(printf, 3, 4)));
+__attribute__((format(printf, 3, 4)));
 #else
                        const char *fmt, ...);
 #endif

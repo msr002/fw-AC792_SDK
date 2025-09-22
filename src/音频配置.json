@@ -1468,6 +1468,10 @@
          "__slot__": {
           "options": [
            {
+            "label": -1,
+            "value": "id_1752065355135_0"
+           },
+           {
             "label": "IO_PORTA_00",
             "value": "id_1647485267192_66"
            },
@@ -2363,6 +2367,10 @@
          "__slot__": {
           "options": [
            {
+            "label": -1,
+            "value": "id_1752065355135_0"
+           },
+           {
             "label": "IO_PORTA_00",
             "value": "id_1647485267192_66"
            },
@@ -2824,7 +2832,7 @@
           "layout": "colFormItem",
           "span": 12,
           "required": false,
-          "defaultValue": "-1",
+          "defaultValue": "id_1752065355135_0",
           "regList": [],
           "changeTag": true,
           "searchSource": false,
@@ -2843,6 +2851,10 @@
          },
          "__slot__": {
           "options": [
+           {
+            "label": -1,
+            "value": "id_1752065355135_0"
+           },
            {
             "label": "IO_PORTA_00",
             "value": "id_1647485267192_66"
@@ -3279,7 +3291,7 @@
           "layout": "colFormItem",
           "span": 12,
           "required": false,
-          "defaultValue": "-1",
+          "defaultValue": "id_1752065355135_0",
           "regList": [],
           "changeTag": true,
           "searchSource": false,
@@ -3298,6 +3310,10 @@
          },
          "__slot__": {
           "options": [
+           {
+            "label": -1,
+            "value": "id_1752065355135_0"
+           },
            {
             "label": "IO_PORTA_00",
             "value": "id_1647485267192_66"
@@ -3690,7 +3706,7 @@
           "layout": "colFormItem",
           "span": 12,
           "required": false,
-          "defaultValue": "-1",
+          "defaultValue": "id_1752065355135_0",
           "regList": [],
           "changeTag": true,
           "searchSource": false,
@@ -3709,6 +3725,10 @@
          },
          "__slot__": {
           "options": [
+           {
+            "label": -1,
+            "value": "id_1752065355135_0"
+           },
            {
             "label": "IO_PORTA_00",
             "value": "id_1647485267192_66"

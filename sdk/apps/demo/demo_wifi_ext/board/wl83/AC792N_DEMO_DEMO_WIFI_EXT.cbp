@@ -76,6 +76,8 @@
 <Add directory="../../../../../include_lib/driver/device/usb" />
 <Add directory="../../../../../include_lib/driver/device/usb/device" />
 <Add directory="../../../../../include_lib/driver/device/usb/host" />
+<Add directory="../../../../../apps/common/ext_rf_fcc_tool/includes" />
+<Add directory="../../../../../lib/net/device/wireless_ext/WIFI_todo" />
 </Compiler>
 <Linker>
 <Add option="--plugin-opt=-pi32v2-always-use-itblock=false" />
@@ -124,7 +126,7 @@
 <Add option="../../../../../cpu/wl83/liba/ext_wifi_dev.a" />
 <Add option="../../../../../cpu/wl83/liba/sdio_card.a" />
 <Add option="../../../../../cpu/wl83/liba/hostapd_and_wpasupplicant.a" />
-<Add option="../../../../../cpu/wl83/liba/rtl8733bs.a" />
+<Add option="../../../../../cpu/wl83/liba/rtl8189e.a" />
 <Add option="../../../../../cpu/wl83/liba/lwip_2_2_0.a" />
 <Add option="../../../../../cpu/wl83/liba/wl_wifi.a" />
 <Add option="--end-group" />
@@ -158,6 +160,13 @@
 <Unit filename="../../../../../apps/common/eth/DP83848/DP83848.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../../apps/common/eth/rtl8201/RTL8201E.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../../apps/common/eth/rtl8201/RTL8201F.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="../../../../../apps/common/ext_rf_fcc_tool/communication.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="../../../../../apps/common/ext_rf_fcc_tool/includes/communication.h" />
+<Unit filename="../../../../../apps/common/ext_rf_fcc_tool/includes/datatype.h" />
+<Unit filename="../../../../../apps/common/ext_rf_fcc_tool/includes/rf_fcc_main.h" />
+<Unit filename="../../../../../apps/common/ext_rf_fcc_tool/includes/wifi_moudle.h" />
+<Unit filename="../../../../../apps/common/ext_rf_fcc_tool/rf_fcc_main.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="../../../../../apps/common/ext_rf_fcc_tool/wifi_moudle.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../../apps/common/net/assign_macaddr.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../../apps/common/net/assign_macaddr.h" />
 <Unit filename="../../../../../apps/common/net/config_network.c"><Option compilerVer="CC"/></Unit>
@@ -489,6 +498,7 @@
 <Unit filename="../../../../../include_lib/utils/fs/sdfile.h" />
 <Unit filename="../../../../../include_lib/utils/syscfg/syscfg_id.h" />
 <Unit filename="../../../../../include_lib/utils/version.z.S" />
+<Unit filename="../../../../../lib/net/device/wireless_ext/WIFI_todo/rtl_mp.h" />
 <Unit filename="../../../../../lib/net/version.z.S" />
 <Unit filename="../../../../../lib/server/version.z.S" />
 <Unit filename="../../../../../lib/utils/version.z.S" />

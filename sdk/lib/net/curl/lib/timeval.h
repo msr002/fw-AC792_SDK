@@ -29,8 +29,8 @@
 #include "timediff.h"
 
 struct curltime {
-  time_t tv_sec; /* seconds */
-  int tv_usec;   /* microseconds */
+    time_t tv_sec; /* seconds */
+    int tv_usec;   /* microseconds */
 };
 
 struct curltime Curl_now(void);

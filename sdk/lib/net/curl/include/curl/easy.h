@@ -32,9 +32,9 @@ extern "C" {
 #define CURL_BLOB_NOCOPY 0 /* tell libcurl to NOT copy the data */
 
 struct curl_blob {
-  void *data;
-  size_t len;
-  unsigned int flags; /* bit 0 is defined, the rest are reserved and should be
+    void *data;
+    size_t len;
+    unsigned int flags; /* bit 0 is defined, the rest are reserved and should be
                          left zeroes */
 };
 

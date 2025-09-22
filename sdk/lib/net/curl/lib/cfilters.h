@@ -55,10 +55,10 @@ typedef CURLcode Curl_cft_connect(struct Curl_cfilter *cf,
  * @param pport  on return, contains the port number
  */
 typedef void     Curl_cft_get_host(struct Curl_cfilter *cf,
-                                  struct Curl_easy *data,
-                                  const char **phost,
-                                  const char **pdisplay_host,
-                                  int *pport);
+                                   struct Curl_easy *data,
+                                   const char **phost,
+                                   const char **pdisplay_host,
+                                   int *pport);
 
 /* Filters may return sockets and fdset flags they are waiting for.
  * The passes array has room for up to MAX_SOCKSPEREASYHANDLE sockets.
@@ -66,8 +66,8 @@ typedef void     Curl_cft_get_host(struct Curl_cfilter *cf,
  *         or GETSOCK_BLANK when nothing to wait on
  */
 typedef int      Curl_cft_get_select_socks(struct Curl_cfilter *cf,
-                                           struct Curl_easy *data,
-                                           curl_socket_t *socks);
+        struct Curl_easy *data,
+        curl_socket_t *socks);
 
 typedef bool     Curl_cft_data_pending(struct Curl_cfilter *cf,
                                        const struct Curl_easy *data);
@@ -89,7 +89,7 @@ typedef bool     Curl_cft_conn_is_alive(struct Curl_cfilter *cf,
                                         bool *input_pending);
 
 typedef CURLcode Curl_cft_conn_keep_alive(struct Curl_cfilter *cf,
-                                          struct Curl_easy *data);
+        struct Curl_easy *data);
 
 /**
  * Events/controls for connection filters, their arguments and
@@ -164,31 +164,31 @@ typedef CURLcode Curl_cft_query(struct Curl_cfilter *cf,
 
 /* A connection filter type, e.g. specific implementation. */
 struct Curl_cftype {
-  const char *name;                       /* name of the filter type */
-  int flags;                              /* flags of filter type */
-  int log_level;                          /* log level for such filters */
-  Curl_cft_destroy_this *destroy;         /* destroy resources of this cf */
-  Curl_cft_connect *do_connect;           /* establish connection */
-  Curl_cft_close *do_close;               /* close conn */
-  Curl_cft_get_host *get_host;            /* host filter talks to */
-  Curl_cft_get_select_socks *get_select_socks;/* sockets to select on */
-  Curl_cft_data_pending *has_data_pending;/* conn has data pending */
-  Curl_cft_send *do_send;                 /* send data */
-  Curl_cft_recv *do_recv;                 /* receive data */
-  Curl_cft_cntrl *cntrl;                  /* events/control */
-  Curl_cft_conn_is_alive *is_alive;       /* FALSE if conn is dead, Jim! */
-  Curl_cft_conn_keep_alive *keep_alive;   /* try to keep it alive */
-  Curl_cft_query *query;                  /* query filter chain */
+    const char *name;                       /* name of the filter type */
+    int flags;                              /* flags of filter type */
+    int log_level;                          /* log level for such filters */
+    Curl_cft_destroy_this *destroy;         /* destroy resources of this cf */
+    Curl_cft_connect *do_connect;           /* establish connection */
+    Curl_cft_close *do_close;               /* close conn */
+    Curl_cft_get_host *get_host;            /* host filter talks to */
+    Curl_cft_get_select_socks *get_select_socks;/* sockets to select on */
+    Curl_cft_data_pending *has_data_pending;/* conn has data pending */
+    Curl_cft_send *do_send;                 /* send data */
+    Curl_cft_recv *do_recv;                 /* receive data */
+    Curl_cft_cntrl *cntrl;                  /* events/control */
+    Curl_cft_conn_is_alive *is_alive;       /* FALSE if conn is dead, Jim! */
+    Curl_cft_conn_keep_alive *keep_alive;   /* try to keep it alive */
+    Curl_cft_query *query;                  /* query filter chain */
 };
 
 /* A connection filter instance, e.g. registered at a connection */
 struct Curl_cfilter {
-  const struct Curl_cftype *cft; /* the type providing implementation */
-  struct Curl_cfilter *next;     /* next filter in chain */
-  void *ctx;                     /* filter type specific settings */
-  struct connectdata *conn;      /* the connection this filter belongs to */
-  int sockindex;                 /* the index the filter is installed at */
-  BIT(connected);                /* != 0 iff this filter is connected */
+    const struct Curl_cftype *cft; /* the type providing implementation */
+    struct Curl_cfilter *next;     /* next filter in chain */
+    void *ctx;                     /* filter type specific settings */
+    struct connectdata *conn;      /* the connection this filter belongs to */
+    int sockindex;                 /* the index the filter is installed at */
+    BIT(connected);                /* != 0 iff this filter is connected */
 };
 
 /* Default implementations for the type functions, implementing nop. */
@@ -210,8 +210,8 @@ ssize_t  Curl_cf_def_send(struct Curl_cfilter *cf, struct Curl_easy *data,
 ssize_t  Curl_cf_def_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
                           char *buf, size_t len, CURLcode *err);
 CURLcode Curl_cf_def_cntrl(struct Curl_cfilter *cf,
-                                struct Curl_easy *data,
-                                int event, int arg1, void *arg2);
+                           struct Curl_easy *data,
+                           int event, int arg1, void *arg2);
 bool     Curl_cf_def_conn_is_alive(struct Curl_cfilter *cf,
                                    struct Curl_easy *data,
                                    bool *input_pending);
@@ -488,9 +488,9 @@ size_t Curl_conn_get_max_concurrent(struct Curl_easy *data,
  * invocation.
  */
 struct cf_call_data {
-  struct Curl_easy *data;
+    struct Curl_easy *data;
 #ifdef DEBUGBUILD
-  int depth;
+    int depth;
 #endif
 };
 

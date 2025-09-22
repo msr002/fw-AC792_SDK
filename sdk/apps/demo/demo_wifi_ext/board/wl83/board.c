@@ -115,6 +115,8 @@ const struct wifi_calibration_param wifi_calibration_param = {
 WIFI_PLATFORM_DATA_BEGIN(wifi_data)
 #if TCFG_RTL8189E_ENABLE
 	.module = RTL8189E,
+#elif TCFG_RTL8189F_ENABLE
+	.module = RTL8189F,
 #elif TCFG_RTL8822ES_10M_ENABLE
 	.module = RTL8822E,
 #elif TCFG_RTL8822CS_ENABLE

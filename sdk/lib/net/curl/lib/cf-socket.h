@@ -59,14 +59,14 @@ struct Curl_sockaddr_ex;
  * been set, before that, it is initialized from parameters.
  */
 struct Curl_sockaddr_ex {
-  int family;
-  int socktype;
-  int protocol;
-  unsigned int addrlen;
-  union {
-    struct sockaddr addr;
-    struct Curl_sockaddr_storage buff;
-  } _sa_ex_u;
+    int family;
+    int socktype;
+    int protocol;
+    unsigned int addrlen;
+    union {
+        struct sockaddr addr;
+        struct Curl_sockaddr_storage buff;
+    } _sa_ex_u;
 };
 #define sa_addr _sa_ex_u.addr
 
@@ -79,10 +79,10 @@ struct Curl_sockaddr_ex {
  *
  */
 CURLcode Curl_socket_open(struct Curl_easy *data,
-                            const struct Curl_addrinfo *ai,
-                            struct Curl_sockaddr_ex *addr,
-                            int transport,
-                            curl_socket_t *sockfd);
+                          const struct Curl_addrinfo *ai,
+                          struct Curl_sockaddr_ex *addr,
+                          int transport,
+                          curl_socket_t *sockfd);
 
 int Curl_socket_close(struct Curl_easy *data, struct connectdata *conn,
                       curl_socket_t sock);

@@ -521,14 +521,6 @@ static int local_music_init(void)
     music_set_broadcast_local_open_flag(1);
 #endif
 
-#if TCFG_USER_EMITTER_ENABLE
-    extern u8 *get_cur_connect_emitter_mac_addr(void);
-    extern void emitter_open(void);
-    if (get_cur_connect_emitter_mac_addr()) {
-        emitter_open();
-    }
-#endif
-
     return 0;
 }
 
@@ -554,14 +546,6 @@ static int local_music_exit(void)
 
 #if TCFG_LE_AUDIO_STREAM_ENABLE
     le_audio_scene_deal(LE_AUDIO_APP_MODE_EXIT);
-#endif
-
-#if TCFG_USER_EMITTER_ENABLE
-    extern u8 *get_cur_connect_emitter_mac_addr(void);
-    extern void emitter_close(void);
-    if (get_cur_connect_emitter_mac_addr()) {
-        emitter_close();
-    }
 #endif
 
     return 0;

@@ -129,6 +129,7 @@ int audio_uart_transmit_demo_init()
     return 0;
 }
 
+#if 0
 static u8 audio_export_demo_idle_query()
 {
     return 0;
@@ -138,6 +139,7 @@ REGISTER_LP_TARGET(audio_export_demo_lp_target) = {
     .name = "audio_export_demo",
     .is_idle = audio_export_demo_idle_query,
 };
+#endif
 
 #endif/*TCFG_AUDIO_DATA_EXPORT_DEFINE*/
 

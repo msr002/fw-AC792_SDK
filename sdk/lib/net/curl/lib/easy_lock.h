@@ -71,26 +71,27 @@
 
 static inline void curl_simple_lock_lock(curl_simple_lock *lock)
 {
-  for(;;) {
-    if(!atomic_exchange_explicit(lock, true, memory_order_acquire))
-      break;
-    /* Reduce cache coherency traffic */
-    while(atomic_load_explicit(lock, memory_order_relaxed)) {
-      /* Reduce load (not mandatory) */
+    for (;;) {
+        if (!atomic_exchange_explicit(lock, true, memory_order_acquire)) {
+            break;
+        }
+        /* Reduce cache coherency traffic */
+        while (atomic_load_explicit(lock, memory_order_relaxed)) {
+            /* Reduce load (not mandatory) */
 #ifdef HAVE_BUILTIN_IA32_PAUSE
-      __builtin_ia32_pause();
+            __builtin_ia32_pause();
 #elif defined(__aarch64__)
-      __asm__ volatile("yield" ::: "memory");
+            __asm__ volatile("yield" ::: "memory");
 #elif defined(HAVE_SCHED_YIELD)
-      sched_yield();
+            sched_yield();
 #endif
+        }
     }
-  }
 }
 
 static inline void curl_simple_lock_unlock(curl_simple_lock *lock)
 {
-  atomic_store_explicit(lock, false, memory_order_release);
+    atomic_store_explicit(lock, false, memory_order_release);
 }
 
 #else

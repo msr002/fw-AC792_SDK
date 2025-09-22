@@ -558,7 +558,7 @@
           "layout": "colFormItem",
           "span": 6,
           "required": false,
-          "defaultValue": 2,
+          "defaultValue": 1,
           "regList": [],
           "changeTag": true,
           "searchSource": false,

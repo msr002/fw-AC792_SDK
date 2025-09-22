@@ -7,7 +7,7 @@
 		<Option compiler="pi32" />
 		<Build>
 			<Target title="Release">
-				<Option output="../../../../cpu/wl83/liba/lwip_2_2_0.a" prefix_auto="0" extension_auto="0" />
+				<Option output="../../../../cpu/wl82/liba/lwip_2_2_0.a" prefix_auto="0" extension_auto="0" />
 				<Option working_dir="" />
 				<Option object_output="obj/Release/" />
 				<Option type="2" />
@@ -26,7 +26,7 @@
 					<Add directory="../../../../include_lib/system" />
 					<Add directory="../../../../include_lib/system/generic" />
 					<Add directory="../../../../include_lib/system/device" />
-					<Add directory="../../../../include_lib/driver/cpu/wl83" />
+					<Add directory="../../../../include_lib/driver/cpu/wl82" />
 					<Add directory="../../../../include_lib" />
 					<Add directory="../../../../include_lib/utils" />
 					<Add directory="../../../../include_lib/driver" />

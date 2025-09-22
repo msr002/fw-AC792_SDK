@@ -8,6 +8,8 @@
 #include "os/os_api.h"
 #include "os/os_api.h"
 #include <string.h>
+#include "system/sys_time.h"
+
 #define LWIP_DEBUG_SEM_CNT 0
 #define LWIP_DEBUG_MBOX_CNT 0
 #define LWIP_DEBUG_MBOX_POST_CNT 0
@@ -262,7 +264,7 @@ sys_arch_sem_wait(sys_sem_t *sem, u32_t timeout)
         ucos_timeout = 0;
     }
 
-    timeout = OSGetTime(); // 记录起始时间
+    timeout = timer_get_ms(); // 记录起始时间
 
     ucErr = os_sem_pend(sem, ucos_timeout);
 
@@ -273,14 +275,16 @@ sys_arch_sem_wait(sys_sem_t *sem, u32_t timeout)
         //LWIP_ASSERT( "OSSemPend ", ucErr == OS_NO_ERR );
         //for pbuf_free, may be called from an ISR
 
-        timeout_new = OSGetTime(); // 记录终止时间
+        timeout_new = timer_get_ms(); // 记录终止时间
         if (timeout_new >= timeout) {
             timeout_new = timeout_new - timeout;
         } else {
+            LWIP_ASSERT("sys_arch_sem_wait", timeout_new >= timeout);
             timeout_new = 0xffffffff - timeout + timeout_new;
         }
 
-        timeout = (timeout_new * 1000 / OS_TICKS_PER_SEC + 1); //convert to milisecond 为什么加1？
+        /* timeout = (timeout_new * 1000 / OS_TICKS_PER_SEC + 1); //convert to milisecond 为什么加1？ */
+        timeout = timeout_new + 1;
     }
 
     return timeout;
@@ -425,7 +429,8 @@ u32_t sys_arch_mbox_fetch(sys_mbox_t *mbox, void **msg, u32_t timeout)
         ucos_timeout = 0;
     }
 
-    timeout = OSGetTime();
+    timeout = timer_get_ms();
+
     ucErr = os_q_pend(&mbox->pQ, ucos_timeout, &temp);
     if (msg != NULL) {
         if (temp == (void *)&pvNullPointer) {
@@ -444,14 +449,16 @@ u32_t sys_arch_mbox_fetch(sys_mbox_t *mbox, void **msg, u32_t timeout)
 #endif
         //if(ucErr != OS_NO_ERR)  printf("sys_arch_mbox_fetch ucErr = %d\n",ucErr);
         LWIP_ASSERT("OSQPend ", ucErr == OS_NO_ERR);
-        timeout_new = OSGetTime();
-        if (timeout_new > timeout) {
+        timeout_new = timer_get_ms();
+        if (timeout_new >= timeout) {
             timeout_new = timeout_new - timeout;
         } else {
+            LWIP_ASSERT("sys_arch_mbox_fetch", timeout_new >= timeout);
             timeout_new = 0xffffffff - timeout + timeout_new;
         }
 
-        timeout = timeout_new * 1000 / OS_TICKS_PER_SEC + 1; //convert to milisecond
+        /* timeout = timeout_new * 1000 / OS_TICKS_PER_SEC + 1; //convert to milisecond */
+        timeout = timeout_new + 1;
     }
 
     return timeout;

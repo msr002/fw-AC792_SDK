@@ -95,6 +95,8 @@ unsigned long mbedtls_timing_get_timer(struct mbedtls_timing_hr_time *val, int r
 
 #else /* _WIN32 && !EFIX64 && !EFI32 */
 
+int gettimeofday(struct timeval *tv, void *tz);
+
 unsigned long mbedtls_timing_get_timer(struct mbedtls_timing_hr_time *val, int reset)
 {
     struct _hr_time *t = (struct _hr_time *) val;

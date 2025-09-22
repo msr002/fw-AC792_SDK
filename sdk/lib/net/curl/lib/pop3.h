@@ -31,20 +31,20 @@
  * POP3 unique setup
  ***************************************************************************/
 typedef enum {
-  POP3_STOP,         /* do nothing state, stops the state machine */
-  POP3_SERVERGREET,  /* waiting for the initial greeting immediately after
+    POP3_STOP,         /* do nothing state, stops the state machine */
+    POP3_SERVERGREET,  /* waiting for the initial greeting immediately after
                         a connect */
-  POP3_CAPA,
-  POP3_STARTTLS,
-  POP3_UPGRADETLS,   /* asynchronously upgrade the connection to SSL/TLS
+    POP3_CAPA,
+    POP3_STARTTLS,
+    POP3_UPGRADETLS,   /* asynchronously upgrade the connection to SSL/TLS
                        (multi mode only) */
-  POP3_AUTH,
-  POP3_APOP,
-  POP3_USER,
-  POP3_PASS,
-  POP3_COMMAND,
-  POP3_QUIT,
-  POP3_LAST          /* never used */
+    POP3_AUTH,
+    POP3_APOP,
+    POP3_USER,
+    POP3_PASS,
+    POP3_COMMAND,
+    POP3_QUIT,
+    POP3_LAST          /* never used */
 } pop3state;
 
 /* This POP3 struct is used in the Curl_easy. All POP3 data that is
@@ -52,26 +52,26 @@ typedef enum {
    perhaps the Curl_easy is changed between the times the connection is
    used. */
 struct POP3 {
-  curl_pp_transfer transfer;
-  char *id;               /* Message ID */
-  char *custom;           /* Custom Request */
+    curl_pp_transfer transfer;
+    char *id;               /* Message ID */
+    char *custom;           /* Custom Request */
 };
 
 /* pop3_conn is used for struct connection-oriented data in the connectdata
    struct */
 struct pop3_conn {
-  struct pingpong pp;
-  pop3state state;        /* Always use pop3.c:state() to change state! */
-  size_t eob;             /* Number of bytes of the EOB (End Of Body) that
+    struct pingpong pp;
+    pop3state state;        /* Always use pop3.c:state() to change state! */
+    size_t eob;             /* Number of bytes of the EOB (End Of Body) that
                              have been received so far */
-  size_t strip;           /* Number of bytes from the start to ignore as
+    size_t strip;           /* Number of bytes from the start to ignore as
                              non-body */
-  struct SASL sasl;       /* SASL-related storage */
-  char *apoptimestamp;    /* APOP timestamp from the server greeting */
-  unsigned char authtypes; /* Accepted authentication types */
-  unsigned char preftype;  /* Preferred authentication type */
-  BIT(ssldone);           /* Is connect() over SSL done? */
-  BIT(tls_supported);     /* StartTLS capability supported by server */
+    struct SASL sasl;       /* SASL-related storage */
+    char *apoptimestamp;    /* APOP timestamp from the server greeting */
+    unsigned char authtypes; /* Accepted authentication types */
+    unsigned char preftype;  /* Preferred authentication type */
+    BIT(ssldone);           /* Is connect() over SSL done? */
+    BIT(tls_supported);     /* StartTLS capability supported by server */
 };
 
 extern const struct Curl_handler Curl_handler_pop3;

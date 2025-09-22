@@ -29,11 +29,11 @@ extern "C" {
 #endif
 
 struct curl_ws_frame {
-  int age;              /* zero */
-  int flags;            /* See the CURLWS_* defines */
-  curl_off_t offset;    /* the offset of this data into the frame */
-  curl_off_t bytesleft; /* number of pending bytes left of the payload */
-  size_t len;           /* size of the current data chunk */
+    int age;              /* zero */
+    int flags;            /* See the CURLWS_* defines */
+    curl_off_t offset;    /* the offset of this data into the frame */
+    curl_off_t bytesleft; /* number of pending bytes left of the payload */
+    size_t len;           /* size of the current data chunk */
 };
 
 /* flag bits */

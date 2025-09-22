@@ -470,11 +470,11 @@ u8 get_a2dp_source_open_flag(void)
 
 u8 bt_emitter_stu_set(u8 *addr, u8 pp)
 {
-    log_info("total con dev: %d", bt_get_total_connect_dev());
-
     if (pp && (bt_get_total_connect_dev() == 0) && !(bt_emitter_get_curr_channel_state() & A2DP_SRC_CH)) {
         pp = 0;
     }
+
+    log_info("total con dev: %d, pp: %d", bt_get_total_connect_dev(), pp);
 
     if (pp) {
         //开音频编码
@@ -604,9 +604,9 @@ static int bt_emitter_btstack_event_handler(void *msg)
     case BT_STATUS_CONN_A2DP_CH:
         log_info("EMITTER BT_STATUS_CONN_A2DP_CH :0x%x", bt->value);
         if (bt->value & A2DP_SRC_CH) {
-#if BT_EMITTER_TEST
-            bt_emitter_pp(1);
-#endif
+            if (!current_app_in_mode(APP_MODE_BT) && !current_app_in_mode(APP_MODE_SINK)) {
+                bt_emitter_pp(1);
+            }
         }
         break;
     }

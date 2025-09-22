@@ -29,12 +29,12 @@ extern "C" {
 #endif
 
 struct curl_header {
-  char *name;    /* this might not use the same case */
-  char *value;
-  size_t amount; /* number of headers using this name  */
-  size_t index;  /* ... of this instance, 0 or higher */
-  unsigned int origin; /* see bits below */
-  void *anchor; /* handle privately used by libcurl */
+    char *name;    /* this might not use the same case */
+    char *value;
+    size_t amount; /* number of headers using this name  */
+    size_t index;  /* ... of this instance, 0 or higher */
+    unsigned int origin; /* see bits below */
+    void *anchor; /* handle privately used by libcurl */
 };
 
 /* 'origin' bits */
@@ -45,14 +45,14 @@ struct curl_header {
 #define CURLH_PSEUDO    (1<<4) /* pseudo headers */
 
 typedef enum {
-  CURLHE_OK,
-  CURLHE_BADINDEX,      /* header exists but not with this index */
-  CURLHE_MISSING,       /* no such header exists */
-  CURLHE_NOHEADERS,     /* no headers at all exist (yet) */
-  CURLHE_NOREQUEST,     /* no request with this number was used */
-  CURLHE_OUT_OF_MEMORY, /* out of memory while processing */
-  CURLHE_BAD_ARGUMENT,  /* a function argument was not okay */
-  CURLHE_NOT_BUILT_IN   /* if API was disabled in the build */
+    CURLHE_OK,
+    CURLHE_BADINDEX,      /* header exists but not with this index */
+    CURLHE_MISSING,       /* no such header exists */
+    CURLHE_NOHEADERS,     /* no headers at all exist (yet) */
+    CURLHE_NOREQUEST,     /* no request with this number was used */
+    CURLHE_OUT_OF_MEMORY, /* out of memory while processing */
+    CURLHE_BAD_ARGUMENT,  /* a function argument was not okay */
+    CURLHE_NOT_BUILT_IN   /* if API was disabled in the build */
 } CURLHcode;
 
 CURL_EXTERN CURLHcode curl_easy_header(CURL *easy,
@@ -63,9 +63,9 @@ CURL_EXTERN CURLHcode curl_easy_header(CURL *easy,
                                        struct curl_header **hout);
 
 CURL_EXTERN struct curl_header *curl_easy_nextheader(CURL *easy,
-                                                     unsigned int origin,
-                                                     int request,
-                                                     struct curl_header *prev);
+        unsigned int origin,
+        int request,
+        struct curl_header *prev);
 
 #ifdef __cplusplus
 } /* end of extern "C" */

@@ -62,10 +62,11 @@
  */
 bool Curl_ipvalid(struct Curl_easy *data, struct connectdata *conn)
 {
-  if(conn->ip_version == CURL_IPRESOLVE_V6)
-    return Curl_ipv6works(data);
+    if (conn->ip_version == CURL_IPRESOLVE_V6) {
+        return Curl_ipv6works(data);
+    }
 
-  return TRUE;
+    return TRUE;
 }
 
 #if defined(CURLRES_SYNCH)
@@ -74,14 +75,14 @@ bool Curl_ipvalid(struct Curl_easy *data, struct connectdata *conn)
 static void dump_addrinfo(struct connectdata *conn,
                           const struct Curl_addrinfo *ai)
 {
-  printf("dump_addrinfo:\n");
-  for(; ai; ai = ai->ai_next) {
-    char buf[INET6_ADDRSTRLEN];
-    printf("    fam %2d, CNAME %s, ",
-           ai->ai_family, ai->ai_canonname ? ai->ai_canonname : "<none>");
-    Curl_printable_address(ai, buf, sizeof(buf));
-    printf("%s\n", buf);
-  }
+    printf("dump_addrinfo:\n");
+    for (; ai; ai = ai->ai_next) {
+        char buf[INET6_ADDRSTRLEN];
+        printf("    fam %2d, CNAME %s, ",
+               ai->ai_family, ai->ai_canonname ? ai->ai_canonname : "<none>");
+        Curl_printable_address(ai, buf, sizeof(buf));
+        printf("%s\n", buf);
+    }
 }
 #else
 #define dump_addrinfo(x,y) Curl_nop_stmt
@@ -101,57 +102,59 @@ struct Curl_addrinfo *Curl_getaddrinfo(struct Curl_easy *data,
                                        int port,
                                        int *waitp)
 {
-  struct addrinfo hints;
-  struct Curl_addrinfo *res;
-  int error;
-  char sbuf[12];
-  char *sbufptr = NULL;
+    struct addrinfo hints;
+    struct Curl_addrinfo *res;
+    int error;
+    char sbuf[12];
+    char *sbufptr = NULL;
 #ifndef USE_RESOLVE_ON_IPS
-  char addrbuf[128];
+    char addrbuf[128];
 #endif
-  int pf = PF_INET;
+    int pf = PF_INET;
 
-  *waitp = 0; /* synchronous response only */
+    *waitp = 0; /* synchronous response only */
 
-  if((data->conn->ip_version != CURL_IPRESOLVE_V4) && Curl_ipv6works(data))
-    /* The stack seems to be IPv6-enabled */
-    pf = PF_UNSPEC;
+    if ((data->conn->ip_version != CURL_IPRESOLVE_V4) && Curl_ipv6works(data))
+        /* The stack seems to be IPv6-enabled */
+    {
+        pf = PF_UNSPEC;
+    }
 
-  memset(&hints, 0, sizeof(hints));
-  hints.ai_family = pf;
-  hints.ai_socktype = (data->conn->transport == TRNSPRT_TCP) ?
-    SOCK_STREAM : SOCK_DGRAM;
+    memset(&hints, 0, sizeof(hints));
+    hints.ai_family = pf;
+    hints.ai_socktype = (data->conn->transport == TRNSPRT_TCP) ?
+                        SOCK_STREAM : SOCK_DGRAM;
 
 #ifndef USE_RESOLVE_ON_IPS
-  /*
-   * The AI_NUMERICHOST must not be set to get synthesized IPv6 address from
-   * an IPv4 address on iOS and Mac OS X.
-   */
-  if((1 == Curl_inet_pton(AF_INET, hostname, addrbuf)) ||
-     (1 == Curl_inet_pton(AF_INET6, hostname, addrbuf))) {
-    /* the given address is numerical only, prevent a reverse lookup */
-    hints.ai_flags = AI_NUMERICHOST;
-  }
+    /*
+     * The AI_NUMERICHOST must not be set to get synthesized IPv6 address from
+     * an IPv4 address on iOS and Mac OS X.
+     */
+    if ((1 == Curl_inet_pton(AF_INET, hostname, addrbuf)) ||
+        (1 == Curl_inet_pton(AF_INET6, hostname, addrbuf))) {
+        /* the given address is numerical only, prevent a reverse lookup */
+        hints.ai_flags = AI_NUMERICHOST;
+    }
 #endif
 
-  if(port) {
-    msnprintf(sbuf, sizeof(sbuf), "%d", port);
-    sbufptr = sbuf;
-  }
+    if (port) {
+        msnprintf(sbuf, sizeof(sbuf), "%d", port);
+        sbufptr = sbuf;
+    }
 
-  error = Curl_getaddrinfo_ex(hostname, sbufptr, &hints, &res);
-  if(error) {
-    infof(data, "getaddrinfo(3) failed for %s:%d", hostname, port);
-    return NULL;
-  }
+    error = Curl_getaddrinfo_ex(hostname, sbufptr, &hints, &res);
+    if (error) {
+        infof(data, "getaddrinfo(3) failed for %s:%d", hostname, port);
+        return NULL;
+    }
 
-  if(port) {
-    Curl_addrinfo_set_port(res, port);
-  }
+    if (port) {
+        Curl_addrinfo_set_port(res, port);
+    }
 
-  dump_addrinfo(conn, res);
+    dump_addrinfo(conn, res);
 
-  return res;
+    return res;
 }
 #endif /* CURLRES_SYNCH */
 

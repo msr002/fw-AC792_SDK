@@ -52,7 +52,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
 #endif
 
 CURLcode Curl_cf_socks_proxy_insert_after(struct Curl_cfilter *cf_at,
-                                          struct Curl_easy *data);
+        struct Curl_easy *data);
 
 extern struct Curl_cftype Curl_cft_socks_proxy;
 

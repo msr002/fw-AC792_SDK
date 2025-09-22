@@ -34,17 +34,17 @@ extern time_t deltatime;
 #endif
 
 struct stsentry {
-  struct Curl_llist_element node;
-  const char *host;
-  bool includeSubDomains;
-  curl_off_t expires; /* the timestamp of this entry's expiry */
+    struct Curl_llist_element node;
+    const char *host;
+    bool includeSubDomains;
+    curl_off_t expires; /* the timestamp of this entry's expiry */
 };
 
 /* The HSTS cache. Needs to be able to tailmatch host names. */
 struct hsts {
-  struct Curl_llist list;
-  char *filename;
-  unsigned int flags;
+    struct Curl_llist list;
+    char *filename;
+    unsigned int flags;
 };
 
 struct hsts *Curl_hsts_init(void);

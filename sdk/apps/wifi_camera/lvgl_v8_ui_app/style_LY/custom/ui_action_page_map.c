@@ -97,5 +97,24 @@ void update_text_lbl_4(const char *str)
     lvgl_rpc_post_func(lv_label_set_text, 2, ui_scr->page_map_lbl_4, str);
 }
 
+//resolution
+void update_text_lbl_10(const char *str)
+{
+    lv_ui_page_map *ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_PAGE_MAP);
+    lvgl_rpc_post_func(lv_label_set_text, 2, ui_scr->page_map_lbl_10, str);
+}
+//fps
+void update_text_lbl_7(const char *str)
+{
+    lv_ui_page_map *ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_PAGE_MAP);
+    lvgl_rpc_post_func(lv_label_set_text, 2, ui_scr->page_map_lbl_7, str);
+}
+//bitrate
+void update_text_lbl_9(const char *str)
+{
+    lv_ui_page_map *ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_PAGE_MAP);
+    lvgl_rpc_post_func(lv_label_set_text, 2, ui_scr->page_map_lbl_9, str);
+}
+
 #endif
 #endif

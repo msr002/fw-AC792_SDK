@@ -6,20 +6,24 @@
  *串口导出数据配置
  *注意IO口设置不要和普通log输出uart冲突
  */
-#ifdef TCFG_DATA_EXPORT_UART_TX_PORT
-#define PCM_UART1_TX_PORT			TCFG_DATA_EXPORT_UART_TX_PORT	/*数据导出发送IO*/
-#else
-#define PCM_UART1_TX_PORT			IO_PORT_DM	                    /*数据导出发送IO*/
-#endif
 
-#define PCM_UART1_RX_PORT			-1
+
+//WL83 以uartPcmSender.c中dev_open的串口板级设置使用
+
+// #ifdef TCFG_DATA_EXPORT_UART_TX_PORT
+// #define PCM_UART1_TX_PORT			TCFG_DATA_EXPORT_UART_TX_PORT	[>数据导出发送IO<]
+// #else
+// #define PCM_UART1_TX_PORT			IO_PORT_USB_DPA//IO_PORT_DM	                    [>数据导出发送IO<]
+// #endif
+
+// #define PCM_UART1_RX_PORT			-1
 
 /*数据导出波特率,不用修改，和接收端设置一直*/
-#ifdef TCFG_DATA_EXPORT_UART_BAUDRATE
-#define PCM_UART1_BAUDRATE			TCFG_DATA_EXPORT_UART_BAUDRATE
-#else
-#define PCM_UART1_BAUDRATE			2000000
-#endif
+// #ifdef TCFG_DATA_EXPORT_UART_BAUDRATE
+// #define PCM_UART1_BAUDRATE			TCFG_DATA_EXPORT_UART_BAUDRATE
+// #else
+// #define PCM_UART1_BAUDRATE			2000000
+// #endif
 
 // #if ((TCFG_DEBUG_UART_ENABLE == ENABLE_THIS_MOUDLE) && (PCM_UART1_TX_PORT == TCFG_DEBUG_UART_TX_PIN))
 // //IO口配置冲突，请检查修改

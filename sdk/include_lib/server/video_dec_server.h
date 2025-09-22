@@ -107,6 +107,7 @@ struct video_dec_param {
     u32 rotate;
     float speed;
     u8 dec_cyc;
+    u8 disp_id;
 };
 
 

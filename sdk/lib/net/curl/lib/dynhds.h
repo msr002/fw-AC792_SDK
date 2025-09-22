@@ -35,20 +35,20 @@ struct dynbuf;
  * `name` and `value` are non-NULL and always NUL terminated.
  */
 struct dynhds_entry {
-  char *name;
-  char *value;
-  size_t namelen;
-  size_t valuelen;
+    char *name;
+    char *value;
+    size_t namelen;
+    size_t valuelen;
 };
 
 struct dynhds {
-  struct dynhds_entry **hds;
-  size_t hds_len;   /* number of entries in hds */
-  size_t hds_allc;  /* size of hds allocation */
-  size_t max_entries;   /* size limit number of entries */
-  size_t strs_len; /* length of all strings */
-  size_t max_strs_size; /* max length of all strings */
-  int opts;
+    struct dynhds_entry **hds;
+    size_t hds_len;   /* number of entries in hds */
+    size_t hds_allc;  /* size of hds allocation */
+    size_t max_entries;   /* size limit number of entries */
+    size_t strs_len; /* length of all strings */
+    size_t max_strs_size; /* max length of all strings */
+    int opts;
 };
 
 #define DYNHDS_OPT_NONE          (0)

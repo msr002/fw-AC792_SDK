@@ -102,6 +102,22 @@ struct plugin_factory_entry {
 #define REGISTER_PLUGIN(ops) \
     const struct pipeline_plugin_ops ops SEC_USED(.pipeline_plugin)
 
+#define TO_STRING(x)    #x
+#define REGISTER_PLUGIN_OPS(plugin_type, plugin_name, plugin_id) \
+    const struct pipeline_plugin_ops plugin_name##plugin_id SEC_USED(.pipeline_plugin) = { \
+        .name           = TO_STRING(plugin_name##plugin_id),                 \
+        .type           = plugin_type,                  \
+        .init           = plugin_name##_init,            \
+        .connect        = plugin_name##_connect,         \
+        .prepare        = plugin_name##_prepare,         \
+        .start          = plugin_name##_start,           \
+        .stop           = plugin_name##_stop,            \
+        .reset           = plugin_name##_reset,          \
+        .get_parameter  = plugin_name##_get_parameter,   \
+        .set_parameter  = plugin_name##_set_parameter,   \
+        .msg_cb         = plugin_name##_message_callback,\
+    };
+
 extern const struct pipeline_plugin_ops plugin_begin[];
 extern const struct pipeline_plugin_ops plugin_end[];
 

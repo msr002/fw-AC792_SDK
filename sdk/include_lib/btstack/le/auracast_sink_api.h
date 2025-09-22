@@ -3,8 +3,10 @@
 
 #include "typedef.h"
 
+#define AURACAST_SINK_API_VERSION    (20250721)
+
 // max config
-#define MAX_NUM_BIS 2
+#define MAX_NUM_BIS 1
 #define NO_PAST_MAX_BASS_NUM_SOURCES 5
 
 typedef struct {
@@ -18,7 +20,7 @@ enum {
 
 typedef struct {
     uint8_t source_mac_addr[6];
-    uint8_t broadcast_name[28];
+    uint8_t broadcast_name[33];
     uint8_t Address_Type;
     uint8_t Advertising_SID;
     uint8_t feature;
@@ -34,6 +36,7 @@ typedef struct {
     uint8_t Num_BIS;
     uint8_t BIS[8];
     uint16_t Connection_Handle[2];
+    uint32_t presentation_delay_us;
     uint8_t *adv_data;
     uint16_t adv_data_len;
     uint8_t bn;
@@ -77,18 +80,13 @@ enum {
 
 typedef void (*auracast_sink_event_callback_t)(uint16_t event, uint8_t *packet, uint16_t length);
 
-extern int auracast_sink_init(void);
+extern int auracast_sink_init(u32 version);
 extern int auracast_sink_uninit(void);
 extern int auracast_sink_scan_start(void);
 extern int auracast_sink_scan_stop(void);
 extern int auracast_sink_big_sync_create(auracast_sink_source_info_t *param);
-extern void auracast_sink_big_create(void);
-extern void auracast_sink_rescan(void);
 extern int auracast_sink_big_sync_terminate(void);
-extern void auracast_sink_set_audio_state(u8 state);
 extern void auracast_sink_set_broadcast_code(u8 *key);
-extern void auracast_sink_set_source_filter(u8 state, u8 *mac);
-extern void auracast_sink_set_scan_filter(u8 state, u8 filter_num, u8 *mac);
 extern void auracast_sink_event_callback_register(auracast_sink_event_callback_t callback);
 extern int auracast_source_user_send_iso_packet(uint8_t bis_index, uint8_t bis_sub_event_counter, u8 *data, u8 len);
 
@@ -152,7 +150,7 @@ typedef enum {
     BASS_BIG_ENCRYPTION_RFU
 } bass_big_encryption_t;
 
-extern void le_audio_bass_notify_pa_sync_state(u8 id, u8 pa_sync_state, u8 big_encryption, u32 bis_sync_state);
+extern void app_le_audio_bass_notify_pa_sync_state(u8 pa_sync_state, u8 big_encryption, u32 bis_sync_state);
 
 
 #endif /* __AURACAST_SINK_API_H__ */

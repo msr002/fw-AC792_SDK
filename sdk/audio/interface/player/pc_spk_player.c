@@ -86,6 +86,14 @@ struct pc_spk_player *pc_spk_player_open(struct stream_fmt *fmt)
         goto __exit0;
     }
 
+#if TCFG_USER_EMITTER_ENABLE
+    extern u8 *get_cur_connect_emitter_mac_addr(void);
+    u8 *bt_addr = get_cur_connect_emitter_mac_addr();
+    if (bt_addr) {
+        jlstream_node_ioctl(player->stream, NODE_UUID_A2DP_TX, NODE_IOC_SET_BTADDR, (int)bt_addr);
+    }
+#endif
+
     u16 l_vol = 0, r_vol = 0;
     uac_speaker_stream_get_volume(fmt->chconfig_id, &l_vol, &r_vol);
     app_audio_set_volume(APP_AUDIO_STATE_MUSIC, (r_vol + l_vol) / 2, 1);

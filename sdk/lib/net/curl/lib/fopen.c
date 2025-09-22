@@ -51,68 +51,74 @@ CURLcode Curl_fopen(struct Curl_easy *data, const char *filename,
 {
 
 
-  #if 0// 
-  CURLcode result = CURLE_WRITE_ERROR;
-  unsigned char randsuffix[9];
-  char *tempstore = NULL;
-  struct_stat sb;
-  int fd = -1;
-  *tempname = NULL;
+#if 0//
+    CURLcode result = CURLE_WRITE_ERROR;
+    unsigned char randsuffix[9];
+    char *tempstore = NULL;
+    struct_stat sb;
+    int fd = -1;
+    *tempname = NULL;
 
-  *fh = fopen(filename, FOPEN_WRITETEXT);
-  if(!*fh)
-    goto fail;
-  if(fstat(fileno(*fh), &sb) == -1 || !S_ISREG(sb.st_mode))
-    return CURLE_OK;
-  fclose(*fh);
-  *fh = NULL;
-
-  result = Curl_rand_alnum(data, randsuffix, sizeof(randsuffix));
-  if(result)
-    goto fail;
-
-  tempstore = aprintf("%s.%s.tmp", filename, randsuffix);
-  if(!tempstore) {
-    result = CURLE_OUT_OF_MEMORY;
-    goto fail;
-  }
-
-  result = CURLE_WRITE_ERROR;
-  fd = open(tempstore, O_WRONLY | O_CREAT | O_EXCL, 0600);
-  if(fd == -1)
-    goto fail;
-
-#ifdef HAVE_FCHMOD
-  {
-    struct_stat nsb;
-    if((fstat(fd, &nsb) != -1) &&
-       (nsb.st_uid == sb.st_uid) && (nsb.st_gid == sb.st_gid)) {
-      /* if the user and group are the same, clone the original mode */
-      if(fchmod(fd, (mode_t)sb.st_mode) == -1)
+    *fh = fopen(filename, FOPEN_WRITETEXT);
+    if (!*fh) {
         goto fail;
     }
-  }
+    if (fstat(fileno(*fh), &sb) == -1 || !S_ISREG(sb.st_mode)) {
+        return CURLE_OK;
+    }
+    fclose(*fh);
+    *fh = NULL;
+
+    result = Curl_rand_alnum(data, randsuffix, sizeof(randsuffix));
+    if (result) {
+        goto fail;
+    }
+
+    tempstore = aprintf("%s.%s.tmp", filename, randsuffix);
+    if (!tempstore) {
+        result = CURLE_OUT_OF_MEMORY;
+        goto fail;
+    }
+
+    result = CURLE_WRITE_ERROR;
+    fd = open(tempstore, O_WRONLY | O_CREAT | O_EXCL, 0600);
+    if (fd == -1) {
+        goto fail;
+    }
+
+#ifdef HAVE_FCHMOD
+    {
+        struct_stat nsb;
+        if ((fstat(fd, &nsb) != -1) &&
+            (nsb.st_uid == sb.st_uid) && (nsb.st_gid == sb.st_gid)) {
+            /* if the user and group are the same, clone the original mode */
+            if (fchmod(fd, (mode_t)sb.st_mode) == -1) {
+                goto fail;
+            }
+        }
+    }
 #endif
 
-  *fh = fdopen(fd, FOPEN_WRITETEXT);
-  if(!*fh)
-    goto fail;
+    *fh = fdopen(fd, FOPEN_WRITETEXT);
+    if (!*fh) {
+        goto fail;
+    }
 
-  *tempname = tempstore;
-  return CURLE_OK;
+    *tempname = tempstore;
+    return CURLE_OK;
 
 fail:
-  if(fd != -1) {
-    close(fd);
-    unlink(tempstore);
-  }
+    if (fd != -1) {
+        close(fd);
+        unlink(tempstore);
+    }
 
-  free(tempstore);
+    free(tempstore);
 
-  return result;
-  #endif
-  printf("fopen.c not define\n");
-  return 0;
+    return result;
+#endif
+    printf("fopen.c not define\n");
+    return 0;
 }
 
 #endif /* ! disabled */

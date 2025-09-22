@@ -35,12 +35,12 @@ CURLcode Curl_pretransfer(struct Curl_easy *data);
 CURLcode Curl_posttransfer(struct Curl_easy *data);
 
 typedef enum {
-  FOLLOW_NONE,  /* not used within the function, just a placeholder to
+    FOLLOW_NONE,  /* not used within the function, just a placeholder to
                    allow initing to this */
-  FOLLOW_FAKE,  /* only records stuff, not actually following */
-  FOLLOW_RETRY, /* set if this is a request retry as opposed to a real
+    FOLLOW_FAKE,  /* only records stuff, not actually following */
+    FOLLOW_RETRY, /* set if this is a request retry as opposed to a real
                    redirect following */
-  FOLLOW_REDIR /* a full true redirect */
+    FOLLOW_REDIR /* a full true redirect */
 } followtype;
 
 CURLcode Curl_follow(struct Curl_easy *data, char *newurl,
@@ -61,13 +61,13 @@ CURLcode Curl_done_sending(struct Curl_easy *data,
 
 /* This sets up a forthcoming transfer */
 void
-Curl_setup_transfer (struct Curl_easy *data,
-                     int sockindex,     /* socket index to read from or -1 */
-                     curl_off_t size,   /* -1 if unknown at this point */
-                     bool getheader,    /* TRUE if header parsing is wanted */
-                     int writesockindex /* socket index to write to. May be
+Curl_setup_transfer(struct Curl_easy *data,
+                    int sockindex,     /* socket index to read from or -1 */
+                    curl_off_t size,   /* -1 if unknown at this point */
+                    bool getheader,    /* TRUE if header parsing is wanted */
+                    int writesockindex /* socket index to write to. May be
                                            the same we read from. -1
                                            disables */
-  );
+                   );
 
 #endif /* HEADER_CURL_TRANSFER_H */

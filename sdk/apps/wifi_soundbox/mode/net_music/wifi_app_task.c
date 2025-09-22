@@ -639,10 +639,47 @@ static void wifi_app_task(void *priv)  //主要是create wifi 线程的
 #endif
 }
 
+#if TCFG_USER_EMITTER_ENABLE
+struct wifi_store_info *get_cur_wifi_info(void);
+
+static void wifi_psm_fast_rsp_task(void *p)
+{
+    int msg[32];
+
+    while (1) {
+        os_task_pend("taskq", msg, ARRAY_SIZE(msg));
+    }
+}
+
+static void wifi_psm_run_callback(int power_save)
+{
+    if (get_cur_wifi_info()->mode == STA_MODE && wifi_get_sta_connect_state() == WIFI_STA_NETWORK_STACK_DHCP_SUCC) {
+        void RTMPSTAPowerSave(int power_save);
+        RTMPSTAPowerSave(power_save);
+    } else if (get_cur_wifi_info()->mode == P2P_MODE && wifi_get_sta_connect_state() == WIFI_STA_NETWORK_STACK_DHCP_SUCC) {
+        void RTMPP2PPowerSave(int power_save);
+        /* RTMPP2PPowerSave(power_save); */
+    }
+}
+
+void wifi_psm_run_notify(int power_save)
+{
+    int msg[3] = {(int)wifi_psm_run_callback, 1, power_save};
+    int err = os_taskq_post_type("wifi_psm_fast_rsp", Q_CALLBACK, ARRAY_SIZE(msg), msg);
+    if (err) {
+        log_error("psm notify error");
+    }
+}
+#endif
+
 #if TCFG_WIFI_ENABLE
 static int wireless_net_init(void)   //主要是create wifi 线程的
 {
     log_info("wireless_net_init");
+
+#if TCFG_USER_EMITTER_ENABLE
+    thread_fork("wifi_psm_fast_rsp", 29, 256, 32, 0, wifi_psm_fast_rsp_task, NULL);
+#endif
 
     return thread_fork("wifi_app_task", 10, 1792, 0, 0, wifi_app_task, NULL);
 }

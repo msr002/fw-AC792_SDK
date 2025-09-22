@@ -79,6 +79,15 @@ jlvg_hw_imageformat_t lv_jlvg_get_color_format(lv_color_format_t lv_cf, bool *cf
     case LV_COLOR_FORMAT_L8:
         jlvg_cf = VGHW_FORMAT_L8;
         break;
+    case LV_COLOR_FORMAT_I4:
+        jlvg_cf = VGHW_FORMAT_L4;
+        break;
+    case LV_COLOR_FORMAT_I2:
+        jlvg_cf = VGHW_FORMAT_L2;
+        break;
+    case LV_COLOR_FORMAT_I1:
+        jlvg_cf = VGHW_FORMAT_L1;
+        break;
     default:
         if (cf_flag != NULL) {
             *cf_flag = false;   // false : 不支持：true : 支持

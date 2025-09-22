@@ -31,8 +31,8 @@
 #include "urldata.h"
 
 CURLcode Curl_http_proxy_get_destination(struct Curl_cfilter *cf,
-                                         const char **phostname,
-                                         int *pport, bool *pipv6_ip);
+        const char **phostname,
+        int *pport, bool *pipv6_ip);
 
 CURLcode Curl_http_proxy_create_CONNECT(struct httpreq **preq,
                                         struct Curl_cfilter *cf,
@@ -49,7 +49,7 @@ void Curl_cf_http_proxy_get_host(struct Curl_cfilter *cf,
                                  int *pport);
 
 CURLcode Curl_cf_http_proxy_insert_after(struct Curl_cfilter *cf_at,
-                                         struct Curl_easy *data);
+        struct Curl_easy *data);
 
 extern struct Curl_cftype Curl_cft_http_proxy;
 

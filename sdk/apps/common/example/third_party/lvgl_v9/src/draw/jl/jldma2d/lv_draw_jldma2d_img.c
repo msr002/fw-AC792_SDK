@@ -23,7 +23,7 @@
 /**********************
  *  STATIC PROTOTYPES
  **********************/
-static void img_draw_core(lv_draw_unit_t *u_base, const lv_draw_image_dsc_t *draw_dsc,
+static void img_draw_core(lv_draw_task_t *t, const lv_draw_image_dsc_t *draw_dsc,
                           const lv_image_decoder_dsc_t *decoder_dsc, lv_draw_image_sup_t *sup,
                           const lv_area_t *img_coords, const lv_area_t *clipped_img_area);
 
@@ -42,16 +42,15 @@ static void img_draw_core(lv_draw_unit_t *u_base, const lv_draw_image_dsc_t *dra
 void lv_draw_jldma2d_image(lv_draw_jldma2d_unit_t *draw_unit, const lv_draw_image_dsc_t *draw_dsc,
                            const lv_area_t *coords)
 {
-    lv_draw_image_normal_helper((lv_draw_unit_t *)draw_unit, draw_dsc, coords, img_draw_core);
+    lv_draw_image_normal_helper(draw_unit->task_act, draw_dsc, coords, img_draw_core);
 }
 /**********************
  *   STATIC FUNCTIONS
  **********************/
-static void img_draw_core(lv_draw_unit_t *u_base, const lv_draw_image_dsc_t *draw_dsc,
+static void img_draw_core(lv_draw_task_t *t, const lv_draw_image_dsc_t *draw_dsc,
                           const lv_image_decoder_dsc_t *decoder_dsc, lv_draw_image_sup_t *sup,
                           const lv_area_t *img_coords, const lv_area_t *clipped_img_area)
 {
-    lv_draw_jldma2d_unit_t *u = (lv_draw_jldma2d_unit_t *)u_base;
 
     (void)sup; //remove warning about unused parameter
 
@@ -87,7 +86,7 @@ static void img_draw_core(lv_draw_unit_t *u_base, const lv_draw_image_dsc_t *dra
 
 
     //out
-    lv_layer_t *layer = u->base_unit.target_layer;
+    lv_layer_t *layer = t->target_layer;
     //lv_draw_buf_t* draw_buf = layer->draw_buf;
     uint8_t *dest = lv_draw_layer_go_to_xy(layer, clipped_img_area->x1 - layer->buf_area.x1, clipped_img_area->y1 - layer->buf_area.y1);
     int32_t dest_w = lv_area_get_width(clipped_img_area);
@@ -131,6 +130,7 @@ static void img_draw_core(lv_draw_unit_t *u_base, const lv_draw_image_dsc_t *dra
         out_layer_param.stride = dest_stride;
         out_layer_param.alpha_inv = 0;
         out_layer_param.rbs = 0;
+        out_layer_param.dither_en = 1;
 
         dma2d_reset_all_regs();
         dma2d_create_task();
@@ -148,6 +148,7 @@ static void img_draw_core(lv_draw_unit_t *u_base, const lv_draw_image_dsc_t *dra
         out_layer_param.format = lv_draw_jldma2d_cf_to_dma2d_output_cf(output_cf);
         out_layer_param.rbs = 0;
         out_layer_param.endian = 0;
+        out_layer_param.dither_en = 1;
 
         fg_layer_param.data = (uint32_t)src_buf;
         fg_layer_param.x = clipped_img_area->x1 - img_coords->x1;

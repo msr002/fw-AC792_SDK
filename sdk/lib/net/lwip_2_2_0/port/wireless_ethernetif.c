@@ -242,6 +242,23 @@ static void ethernetif_input(void *param, void *data, int len)
     }
 }
 
+void lwip_update_hwaddr(unsigned char *mac)
+{
+    struct netif *netif = net_get_netif_handle(WIFI_NETIF);
+    if (NULL == netif) {
+        return;
+    }
+
+    netif->hwaddr[0] = mac[0];
+    netif->hwaddr[1] = mac[1];
+    netif->hwaddr[2] = mac[2];
+    netif->hwaddr[3] = mac[3];
+    netif->hwaddr[4] = mac[4];
+    netif->hwaddr[5] = mac[5];
+
+    etharp_cleanup_netif(netif);
+}
+
 /**
  * Should be called at the beginning of the program to set up the
  * network interface. It calls the function low_level_init() to do the

@@ -28,19 +28,19 @@
 #include <curl/curl.h>
 
 struct Cookie {
-  struct Cookie *next; /* next in the chain */
-  char *name;        /* <this> = value */
-  char *value;       /* name = <this> */
-  char *path;         /* path = <this> which is in Set-Cookie: */
-  char *spath;        /* sanitized cookie path */
-  char *domain;      /* domain = <this> */
-  curl_off_t expires;  /* expires = <this> */
-  bool tailmatch;    /* whether we do tail-matching of the domain name */
-  bool secure;       /* whether the 'secure' keyword was used */
-  bool livecookie;   /* updated from a server, not a stored file */
-  bool httponly;     /* true if the httponly directive is present */
-  int creationtime;  /* time when the cookie was written */
-  unsigned char prefix; /* bitmap fields indicating which prefix are set */
+    struct Cookie *next; /* next in the chain */
+    char *name;        /* <this> = value */
+    char *value;       /* name = <this> */
+    char *path;         /* path = <this> which is in Set-Cookie: */
+    char *spath;        /* sanitized cookie path */
+    char *domain;      /* domain = <this> */
+    curl_off_t expires;  /* expires = <this> */
+    bool tailmatch;    /* whether we do tail-matching of the domain name */
+    bool secure;       /* whether the 'secure' keyword was used */
+    bool livecookie;   /* updated from a server, not a stored file */
+    bool httponly;     /* true if the httponly directive is present */
+    int creationtime;  /* time when the cookie was written */
+    unsigned char prefix; /* bitmap fields indicating which prefix are set */
 };
 
 /*
@@ -53,13 +53,13 @@ struct Cookie {
 #define COOKIE_HASH_SIZE 63
 
 struct CookieInfo {
-  /* linked list of cookies we know of */
-  struct Cookie *cookies[COOKIE_HASH_SIZE];
-  curl_off_t next_expiration; /* the next time at which expiration happens */
-  int numcookies;  /* number of cookies in the "jar" */
-  int lastct;      /* last creation-time used in the jar */
-  bool running;    /* state info, for cookie adding information */
-  bool newsession; /* new session, discard session cookies on load */
+    /* linked list of cookies we know of */
+    struct Cookie *cookies[COOKIE_HASH_SIZE];
+    curl_off_t next_expiration; /* the next time at which expiration happens */
+    int numcookies;  /* number of cookies in the "jar" */
+    int lastct;      /* last creation-time used in the jar */
+    bool running;    /* state info, for cookie adding information */
+    bool newsession; /* new session, discard session cookies on load */
 };
 
 /* The maximum sizes we accept for cookies. RFC 6265 section 6.1 says

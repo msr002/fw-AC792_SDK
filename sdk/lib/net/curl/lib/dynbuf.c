@@ -39,14 +39,14 @@
  */
 void Curl_dyn_init(struct dynbuf *s, size_t toobig)
 {
-  DEBUGASSERT(s);
-  DEBUGASSERT(toobig);
-  s->bufr = NULL;
-  s->leng = 0;
-  s->allc = 0;
-  s->toobig = toobig;
+    DEBUGASSERT(s);
+    DEBUGASSERT(toobig);
+    s->bufr = NULL;
+    s->leng = 0;
+    s->allc = 0;
+    s->toobig = toobig;
 #ifdef DEBUGBUILD
-  s->init = DYNINIT;
+    s->init = DYNINIT;
 #endif
 }
 
@@ -56,9 +56,9 @@ void Curl_dyn_init(struct dynbuf *s, size_t toobig)
  */
 void Curl_dyn_free(struct dynbuf *s)
 {
-  DEBUGASSERT(s);
-  Curl_safefree(s->bufr);
-  s->leng = s->allc = 0;
+    DEBUGASSERT(s);
+    Curl_safefree(s->bufr);
+    s->leng = s->allc = 0;
 }
 
 /*
@@ -67,56 +67,59 @@ void Curl_dyn_free(struct dynbuf *s)
 static CURLcode dyn_nappend(struct dynbuf *s,
                             const unsigned char *mem, size_t len)
 {
-  size_t indx = s->leng;
-  size_t a = s->allc;
-  size_t fit = len + indx + 1; /* new string + old string + zero byte */
+    size_t indx = s->leng;
+    size_t a = s->allc;
+    size_t fit = len + indx + 1; /* new string + old string + zero byte */
 
-  /* try to detect if there's rubbish in the struct */
-  DEBUGASSERT(s->init == DYNINIT);
-  DEBUGASSERT(s->toobig);
-  DEBUGASSERT(indx < s->toobig);
-  DEBUGASSERT(!s->leng || s->bufr);
-  DEBUGASSERT(a <= s->toobig);
+    /* try to detect if there's rubbish in the struct */
+    DEBUGASSERT(s->init == DYNINIT);
+    DEBUGASSERT(s->toobig);
+    DEBUGASSERT(indx < s->toobig);
+    DEBUGASSERT(!s->leng || s->bufr);
+    DEBUGASSERT(a <= s->toobig);
 
-  if(fit > s->toobig) {
-    Curl_dyn_free(s);
-    return CURLE_OUT_OF_MEMORY;
-  }
-  else if(!a) {
-    DEBUGASSERT(!indx);
-    /* first invoke */
-    if(MIN_FIRST_ALLOC > s->toobig)
-      a = s->toobig;
-    else if(fit < MIN_FIRST_ALLOC)
-      a = MIN_FIRST_ALLOC;
-    else
-      a = fit;
-  }
-  else {
-    while(a < fit)
-      a *= 2;
-    if(a > s->toobig)
-      /* no point in allocating a larger buffer than this is allowed to use */
-      a = s->toobig;
-  }
-
-  if(a != s->allc) {
-    /* this logic is not using Curl_saferealloc() to make the tool not have to
-       include that as well when it uses this code */
-    void *p = realloc(s->bufr, a);
-    if(!p) {
-      Curl_dyn_free(s);
-      return CURLE_OUT_OF_MEMORY;
+    if (fit > s->toobig) {
+        Curl_dyn_free(s);
+        return CURLE_OUT_OF_MEMORY;
+    } else if (!a) {
+        DEBUGASSERT(!indx);
+        /* first invoke */
+        if (MIN_FIRST_ALLOC > s->toobig) {
+            a = s->toobig;
+        } else if (fit < MIN_FIRST_ALLOC) {
+            a = MIN_FIRST_ALLOC;
+        } else {
+            a = fit;
+        }
+    } else {
+        while (a < fit) {
+            a *= 2;
+        }
+        if (a > s->toobig)
+            /* no point in allocating a larger buffer than this is allowed to use */
+        {
+            a = s->toobig;
+        }
     }
-    s->bufr = p;
-    s->allc = a;
-  }
 
-  if(len)
-    memcpy(&s->bufr[indx], mem, len);
-  s->leng = indx + len;
-  s->bufr[s->leng] = 0;
-  return CURLE_OK;
+    if (a != s->allc) {
+        /* this logic is not using Curl_saferealloc() to make the tool not have to
+           include that as well when it uses this code */
+        void *p = realloc(s->bufr, a);
+        if (!p) {
+            Curl_dyn_free(s);
+            return CURLE_OUT_OF_MEMORY;
+        }
+        s->bufr = p;
+        s->allc = a;
+    }
+
+    if (len) {
+        memcpy(&s->bufr[indx], mem, len);
+    }
+    s->leng = indx + len;
+    s->bufr[s->leng] = 0;
+    return CURLE_OK;
 }
 
 /*
@@ -125,12 +128,13 @@ static CURLcode dyn_nappend(struct dynbuf *s,
  */
 void Curl_dyn_reset(struct dynbuf *s)
 {
-  DEBUGASSERT(s);
-  DEBUGASSERT(s->init == DYNINIT);
-  DEBUGASSERT(!s->leng || s->bufr);
-  if(s->leng)
-    s->bufr[0] = 0;
-  s->leng = 0;
+    DEBUGASSERT(s);
+    DEBUGASSERT(s->init == DYNINIT);
+    DEBUGASSERT(!s->leng || s->bufr);
+    if (s->leng) {
+        s->bufr[0] = 0;
+    }
+    s->leng = 0;
 }
 
 /*
@@ -139,22 +143,21 @@ void Curl_dyn_reset(struct dynbuf *s)
  */
 CURLcode Curl_dyn_tail(struct dynbuf *s, size_t trail)
 {
-  DEBUGASSERT(s);
-  DEBUGASSERT(s->init == DYNINIT);
-  DEBUGASSERT(!s->leng || s->bufr);
-  if(trail > s->leng)
-    return CURLE_BAD_FUNCTION_ARGUMENT;
-  else if(trail == s->leng)
+    DEBUGASSERT(s);
+    DEBUGASSERT(s->init == DYNINIT);
+    DEBUGASSERT(!s->leng || s->bufr);
+    if (trail > s->leng) {
+        return CURLE_BAD_FUNCTION_ARGUMENT;
+    } else if (trail == s->leng) {
+        return CURLE_OK;
+    } else if (!trail) {
+        Curl_dyn_reset(s);
+    } else {
+        memmove(&s->bufr[0], &s->bufr[s->leng - trail], trail);
+        s->leng = trail;
+        s->bufr[s->leng] = 0;
+    }
     return CURLE_OK;
-  else if(!trail) {
-    Curl_dyn_reset(s);
-  }
-  else {
-    memmove(&s->bufr[0], &s->bufr[s->leng - trail], trail);
-    s->leng = trail;
-    s->bufr[s->leng] = 0;
-  }
-  return CURLE_OK;
 
 }
 
@@ -163,10 +166,10 @@ CURLcode Curl_dyn_tail(struct dynbuf *s, size_t trail)
  */
 CURLcode Curl_dyn_addn(struct dynbuf *s, const void *mem, size_t len)
 {
-  DEBUGASSERT(s);
-  DEBUGASSERT(s->init == DYNINIT);
-  DEBUGASSERT(!s->leng || s->bufr);
-  return dyn_nappend(s, mem, len);
+    DEBUGASSERT(s);
+    DEBUGASSERT(s->init == DYNINIT);
+    DEBUGASSERT(!s->leng || s->bufr);
+    return dyn_nappend(s, mem, len);
 }
 
 /*
@@ -174,11 +177,11 @@ CURLcode Curl_dyn_addn(struct dynbuf *s, const void *mem, size_t len)
  */
 CURLcode Curl_dyn_add(struct dynbuf *s, const char *str)
 {
-  size_t n = strlen(str);
-  DEBUGASSERT(s);
-  DEBUGASSERT(s->init == DYNINIT);
-  DEBUGASSERT(!s->leng || s->bufr);
-  return dyn_nappend(s, (unsigned char *)str, n);
+    size_t n = strlen(str);
+    DEBUGASSERT(s);
+    DEBUGASSERT(s->init == DYNINIT);
+    DEBUGASSERT(!s->leng || s->bufr);
+    return dyn_nappend(s, (unsigned char *)str, n);
 }
 
 /*
@@ -187,27 +190,28 @@ CURLcode Curl_dyn_add(struct dynbuf *s, const char *str)
 CURLcode Curl_dyn_vaddf(struct dynbuf *s, const char *fmt, va_list ap)
 {
 #ifdef BUILDING_LIBCURL
-  int rc;
-  DEBUGASSERT(s);
-  DEBUGASSERT(s->init == DYNINIT);
-  DEBUGASSERT(!s->leng || s->bufr);
-  rc = Curl_dyn_vprintf(s, fmt, ap);
+    int rc;
+    DEBUGASSERT(s);
+    DEBUGASSERT(s->init == DYNINIT);
+    DEBUGASSERT(!s->leng || s->bufr);
+    rc = Curl_dyn_vprintf(s, fmt, ap);
 
-  if(!rc)
-    return CURLE_OK;
+    if (!rc) {
+        return CURLE_OK;
+    }
 #else
-  char *str;
-  str = vaprintf(fmt, ap); /* this allocs a new string to append */
+    char *str;
+    str = vaprintf(fmt, ap); /* this allocs a new string to append */
 
-  if(str) {
-    CURLcode result = dyn_nappend(s, (unsigned char *)str, strlen(str));
-    free(str);
-    return result;
-  }
-  /* If we failed, we cleanup the whole buffer and return error */
-  Curl_dyn_free(s);
+    if (str) {
+        CURLcode result = dyn_nappend(s, (unsigned char *)str, strlen(str));
+        free(str);
+        return result;
+    }
+    /* If we failed, we cleanup the whole buffer and return error */
+    Curl_dyn_free(s);
 #endif
-  return CURLE_OUT_OF_MEMORY;
+    return CURLE_OUT_OF_MEMORY;
 }
 
 /*
@@ -215,15 +219,15 @@ CURLcode Curl_dyn_vaddf(struct dynbuf *s, const char *fmt, va_list ap)
  */
 CURLcode Curl_dyn_addf(struct dynbuf *s, const char *fmt, ...)
 {
-  CURLcode result;
-  va_list ap;
-  DEBUGASSERT(s);
-  DEBUGASSERT(s->init == DYNINIT);
-  DEBUGASSERT(!s->leng || s->bufr);
-  va_start(ap, fmt);
-  result = Curl_dyn_vaddf(s, fmt, ap);
-  va_end(ap);
-  return result;
+    CURLcode result;
+    va_list ap;
+    DEBUGASSERT(s);
+    DEBUGASSERT(s->init == DYNINIT);
+    DEBUGASSERT(!s->leng || s->bufr);
+    va_start(ap, fmt);
+    result = Curl_dyn_vaddf(s, fmt, ap);
+    va_end(ap);
+    return result;
 }
 
 /*
@@ -231,10 +235,10 @@ CURLcode Curl_dyn_addf(struct dynbuf *s, const char *fmt, ...)
  */
 char *Curl_dyn_ptr(const struct dynbuf *s)
 {
-  DEBUGASSERT(s);
-  DEBUGASSERT(s->init == DYNINIT);
-  DEBUGASSERT(!s->leng || s->bufr);
-  return s->bufr;
+    DEBUGASSERT(s);
+    DEBUGASSERT(s->init == DYNINIT);
+    DEBUGASSERT(!s->leng || s->bufr);
+    return s->bufr;
 }
 
 /*
@@ -242,10 +246,10 @@ char *Curl_dyn_ptr(const struct dynbuf *s)
  */
 unsigned char *Curl_dyn_uptr(const struct dynbuf *s)
 {
-  DEBUGASSERT(s);
-  DEBUGASSERT(s->init == DYNINIT);
-  DEBUGASSERT(!s->leng || s->bufr);
-  return (unsigned char *)s->bufr;
+    DEBUGASSERT(s);
+    DEBUGASSERT(s->init == DYNINIT);
+    DEBUGASSERT(!s->leng || s->bufr);
+    return (unsigned char *)s->bufr;
 }
 
 /*
@@ -253,10 +257,10 @@ unsigned char *Curl_dyn_uptr(const struct dynbuf *s)
  */
 size_t Curl_dyn_len(const struct dynbuf *s)
 {
-  DEBUGASSERT(s);
-  DEBUGASSERT(s->init == DYNINIT);
-  DEBUGASSERT(!s->leng || s->bufr);
-  return s->leng;
+    DEBUGASSERT(s);
+    DEBUGASSERT(s->init == DYNINIT);
+    DEBUGASSERT(!s->leng || s->bufr);
+    return s->leng;
 }
 
 /*
@@ -264,12 +268,13 @@ size_t Curl_dyn_len(const struct dynbuf *s)
  */
 CURLcode Curl_dyn_setlen(struct dynbuf *s, size_t set)
 {
-  DEBUGASSERT(s);
-  DEBUGASSERT(s->init == DYNINIT);
-  DEBUGASSERT(!s->leng || s->bufr);
-  if(set > s->leng)
-    return CURLE_BAD_FUNCTION_ARGUMENT;
-  s->leng = set;
-  s->bufr[s->leng] = 0;
-  return CURLE_OK;
+    DEBUGASSERT(s);
+    DEBUGASSERT(s->init == DYNINIT);
+    DEBUGASSERT(!s->leng || s->bufr);
+    if (set > s->leng) {
+        return CURLE_BAD_FUNCTION_ARGUMENT;
+    }
+    s->leng = set;
+    s->bufr[s->leng] = 0;
+    return CURLE_OK;
 }

@@ -31,11 +31,11 @@
 
 #ifndef OS
 #if defined(DJGPP)
-  #define OS  "MSDOS/djgpp"
+#define OS  "MSDOS/djgpp"
 #elif defined(__HIGHC__)
-  #define OS  "MSDOS/HighC"
+#define OS  "MSDOS/HighC"
 #else
-  #define OS  "MSDOS/?"
+#define OS  "MSDOS/?"
 #endif
 #endif
 
@@ -110,27 +110,27 @@
 
 #if defined(__HIGHC__) || \
     (defined(__GNUC__) && (__GNUC__ < 4))
-  #define ssize_t  int
+#define ssize_t  int
 #endif
 
 /* Target HAVE_x section */
 
 #if defined(DJGPP)
-  #define HAVE_BASENAME   1
-  #define HAVE_STRCASECMP 1
-  #define HAVE_SIGACTION  1
-  #define HAVE_SIGSETJMP  1
-  #define HAVE_SYS_TIME_H 1
-  #define HAVE_TERMIOS_H  1
-  #define HAVE_VARIADIC_MACROS_GCC 1
+#define HAVE_BASENAME   1
+#define HAVE_STRCASECMP 1
+#define HAVE_SIGACTION  1
+#define HAVE_SIGSETJMP  1
+#define HAVE_SYS_TIME_H 1
+#define HAVE_TERMIOS_H  1
+#define HAVE_VARIADIC_MACROS_GCC 1
 
 #elif defined(__HIGHC__)
-  #define HAVE_SYS_TIME_H 1
-  #define strerror(e) strerror_s_((e))
+#define HAVE_SYS_TIME_H 1
+#define strerror(e) strerror_s_((e))
 #endif
 
 #ifdef MSDOS  /* Watt-32 */
-  #define HAVE_CLOSE_S    1
+#define HAVE_CLOSE_S    1
 #endif
 
 #undef word

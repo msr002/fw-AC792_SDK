@@ -28,12 +28,12 @@
 #if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_HEADERS_API)
 
 struct Curl_header_store {
-  struct Curl_llist_element node;
-  char *name; /* points into 'buffer' */
-  char *value; /* points into 'buffer */
-  int request; /* 0 is the first request, then 1.. 2.. */
-  unsigned char type; /* CURLH_* defines */
-  char buffer[1]; /* this is the raw header blob */
+    struct Curl_llist_element node;
+    char *name; /* points into 'buffer' */
+    char *value; /* points into 'buffer */
+    int request; /* 0 is the first request, then 1.. 2.. */
+    unsigned char type; /* CURLH_* defines */
+    char buffer[1]; /* this is the raw header blob */
 };
 
 /*

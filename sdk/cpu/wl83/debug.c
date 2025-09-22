@@ -807,7 +807,7 @@ void exception_analyze(int *sp)
                         if (j < 2) {
                             int k = 0;
                             int id = JL_CEMU->LOG3 & 0xff;
-                            while (!(id & BIT(k)) && ++k < 8);
+                            while (!(id & BIT(k)) && ++k < 8) {};
                             EXCEPTION_PRINTF("tzmpu limit range index : %d", k);
                         }
                     }
@@ -832,7 +832,7 @@ void exception_analyze(int *sp)
                                                  JL_HEMU->LOG1);
                                 int k = 0;
                                 int id = JL_HEMU->LOG2 & 0x1f;
-                                while (!(id & BIT(k)) && ++k < 4);
+                                while (!(id & BIT(k)) && ++k < 4) {};
                                 EXCEPTION_PRINTF("tzasc limit range index : %d", k);
                             } else if (j < 7) {
                                 EXCEPTION_PRINTF("sfc mmu err msg : %s", sfc_mmu_err_msg[j == 5 ? (JL_SFC0_MMU->CON0 >> 30) : (JL_SFC1_MMU->CON0 >> 30)]);

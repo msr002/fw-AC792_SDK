@@ -49,9 +49,10 @@
 static bool pmatch(const char *hostname, size_t hostlen,
                    const char *pattern, size_t patternlen)
 {
-  if(hostlen != patternlen)
-    return FALSE;
-  return strncasecompare(hostname, pattern, hostlen);
+    if (hostlen != patternlen) {
+        return FALSE;
+    }
+    return strncasecompare(hostname, pattern, hostlen);
 }
 
 /*
@@ -83,42 +84,46 @@ static bool hostmatch(const char *hostname,
                       const char *pattern,
                       size_t patternlen)
 {
-  const char *pattern_label_end;
+    const char *pattern_label_end;
 
-  DEBUGASSERT(pattern);
-  DEBUGASSERT(patternlen);
-  DEBUGASSERT(hostname);
-  DEBUGASSERT(hostlen);
+    DEBUGASSERT(pattern);
+    DEBUGASSERT(patternlen);
+    DEBUGASSERT(hostname);
+    DEBUGASSERT(hostlen);
 
-  /* normalize pattern and hostname by stripping off trailing dots */
-  if(hostname[hostlen-1]=='.')
-    hostlen--;
-  if(pattern[patternlen-1]=='.')
-    patternlen--;
-
-  if(strncmp(pattern, "*.", 2))
-    return pmatch(hostname, hostlen, pattern, patternlen);
-
-  /* detect IP address as hostname and fail the match if so */
-  else if(Curl_host_is_ipnum(hostname))
-    return FALSE;
-
-  /* We require at least 2 dots in the pattern to avoid too wide wildcard
-     match. */
-  pattern_label_end = memchr(pattern, '.', patternlen);
-  if(!pattern_label_end ||
-     (memrchr(pattern, '.', patternlen) == pattern_label_end))
-    return pmatch(hostname, hostlen, pattern, patternlen);
-  else {
-    const char *hostname_label_end = memchr(hostname, '.', hostlen);
-    if(hostname_label_end) {
-      size_t skiphost = hostname_label_end - hostname;
-      size_t skiplen = pattern_label_end - pattern;
-      return pmatch(hostname_label_end, hostlen - skiphost,
-                    pattern_label_end, patternlen - skiplen);
+    /* normalize pattern and hostname by stripping off trailing dots */
+    if (hostname[hostlen - 1] == '.') {
+        hostlen--;
     }
-  }
-  return FALSE;
+    if (pattern[patternlen - 1] == '.') {
+        patternlen--;
+    }
+
+    if (strncmp(pattern, "*.", 2)) {
+        return pmatch(hostname, hostlen, pattern, patternlen);
+    }
+
+    /* detect IP address as hostname and fail the match if so */
+    else if (Curl_host_is_ipnum(hostname)) {
+        return FALSE;
+    }
+
+    /* We require at least 2 dots in the pattern to avoid too wide wildcard
+       match. */
+    pattern_label_end = memchr(pattern, '.', patternlen);
+    if (!pattern_label_end ||
+        (memrchr(pattern, '.', patternlen) == pattern_label_end)) {
+        return pmatch(hostname, hostlen, pattern, patternlen);
+    } else {
+        const char *hostname_label_end = memchr(hostname, '.', hostlen);
+        if (hostname_label_end) {
+            size_t skiphost = hostname_label_end - hostname;
+            size_t skiplen = pattern_label_end - pattern;
+            return pmatch(hostname_label_end, hostlen - skiphost,
+                          pattern_label_end, patternlen - skiplen);
+        }
+    }
+    return FALSE;
 }
 
 /*
@@ -127,9 +132,10 @@ static bool hostmatch(const char *hostname,
 bool Curl_cert_hostcheck(const char *match, size_t matchlen,
                          const char *hostname, size_t hostlen)
 {
-  if(match && *match && hostname && *hostname)
-    return hostmatch(hostname, hostlen, match, matchlen);
-  return FALSE;
+    if (match && *match && hostname && *hostname) {
+        return hostmatch(hostname, hostlen, match, matchlen);
+    }
+    return FALSE;
 }
 
 #endif /* OPENSSL or SCHANNEL */

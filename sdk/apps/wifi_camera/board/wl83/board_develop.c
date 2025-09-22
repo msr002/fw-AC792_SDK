@@ -50,6 +50,8 @@
 WIFI_PLATFORM_DATA_BEGIN(wifi_data)
 #if TCFG_RTL8189E_ENABLE
 .module = RTL8189E,
+#elif TCFG_RTL8189F_ENABLE
+.module = RTL8189F,
 #elif TCFG_RTL8822ES_10M_ENABLE
 .module = RTL8822E,
 #elif TCFG_RTL8822CS_ENABLE
@@ -57,7 +59,8 @@ WIFI_PLATFORM_DATA_BEGIN(wifi_data)
 #elif TCFG_RTL8733BS_ENABLE
 .module = RTL8733B,
 #endif
- .sdio_parm = SDIO_GRP_1 | SDIO_PORT_1 | SDIO_4_BIT_DATA | SDIO_POLLING | SDIO_CLOCK_20M,
+ .sdio_parm = SDIO_GRP_0 | SDIO_PORT_0 | SDIO_4_BIT_DATA | SDIO_POLLING | SDIO_CLOCK_20M,
+
   .wakeup_port = -1,
    .cs_port = -1,
     .power_port = -1,

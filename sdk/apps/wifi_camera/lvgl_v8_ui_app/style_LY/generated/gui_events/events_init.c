@@ -56,7 +56,7 @@ extern void logo_stop(void (*func)());
 #if !LV_USE_GUIBUILDER_SIMULATOR
 extern int logo_show(char *logo_path, char *audio_path, int time_out, void (*func)());
 
-char *lyrics_test = "222222222222222223";
+char *lyrics_test = "lyrics one lyrics two";
 #endif
 #if !LV_USE_GUIBUILDER_SIMULATOR
 extern void logo_stop(void (*func)());
@@ -4470,6 +4470,7 @@ static void page_map_event_handler(lv_event_t *e)
             }
         }
         if (dir & LV_DIR_RIGHT) {
+            set_in_ui_navi_flag(0);
             gui_scr_t *screen = ui_get_scr(GUI_SCREEN_USB_SLAVE);
             if (screen != NULL) {
                 ui_load_scr_anim(&guider_ui, screen, LV_SCR_LOAD_ANIM_NONE, 0, 0, true, true, false);

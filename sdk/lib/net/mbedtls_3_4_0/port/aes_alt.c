@@ -89,14 +89,6 @@ exit :
     return (ret);
 }
 
-void cryp_zeroize(void *v, size_t n)
-{
-    volatile unsigned char *p = (unsigned char *)v;
-    while (n--) {
-        *p++ = 0;
-    }
-}
-
 void mbedtls_aes_init(mbedtls_aes_context *ctx)
 {
     AES_VALIDATE(ctx != NULL);
@@ -109,9 +101,8 @@ void mbedtls_aes_init(mbedtls_aes_context *ctx)
     }
 #endif /* MBEDTLS_THREADING_C */
 
-    cryp_zeroize((void *)ctx, sizeof(mbedtls_aes_context));
+    memset((void *)ctx, 0, sizeof(mbedtls_aes_context));
 }
-
 
 void mbedtls_aes_free(mbedtls_aes_context *ctx)
 {
@@ -128,7 +119,7 @@ void mbedtls_aes_free(mbedtls_aes_context *ctx)
 
     HAL_CRYP_DeInit(&ctx->hcryp_aes);
 
-    cryp_zeroize((void *)ctx, sizeof(mbedtls_aes_context));
+    memset((void *)ctx, 0, sizeof(mbedtls_aes_context));
 }
 
 /* XTS SW implementation inherited code from aes.c */

@@ -216,6 +216,15 @@ void app_default_volume_change_handler(int inc)
 #endif
 }
 
+static int poweroff_tone_play_end_callback(void *priv, enum stream_event event)
+{
+    if (event == STREAM_EVENT_STOP) {
+        power_set_soft_poweroff(0);
+    }
+
+    return 0;
+}
+
 static void app_default_key_click(struct key_event *key)
 {
     switch (key->value) {
@@ -233,6 +242,11 @@ static void app_default_key_click(struct key_event *key)
         break;
     case KEY_MODE:
         app_mode_change_next();
+        break;
+    case KEY_POWER:
+        if (0 != play_tone_file_alone_callback(get_tone_files()->power_off, NULL, poweroff_tone_play_end_callback)) {
+            poweroff_tone_play_end_callback(NULL, STREAM_EVENT_STOP);
+        }
         break;
     default:
         break;

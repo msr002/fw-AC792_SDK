@@ -8,6 +8,8 @@
 #include "sha256_alt.h"
 
 #ifdef MBEDTLS_SHA256_PROCESS_ALT
+void jl_sha256_process(int *is_start, unsigned int state[8], const unsigned char data[64]);
+
 int mbedtls_internal_sha256_process(mbedtls_sha256_context *ctx,
                                     const unsigned char data[64])
 {

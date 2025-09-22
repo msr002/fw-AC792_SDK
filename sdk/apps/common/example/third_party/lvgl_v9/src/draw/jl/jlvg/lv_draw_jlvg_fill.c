@@ -43,17 +43,18 @@
 void lv_draw_jlvg_fill(lv_draw_unit_t *draw_unit, const lv_draw_fill_dsc_t *dsc, const lv_area_t *coords)
 {
     //log_debug("%s()", __func__);
-
+    lv_draw_jlvg_unit_t *u = (lv_draw_jlvg_unit_t *)draw_unit;
+    lv_draw_task_t *t = u->task_act;
     if (dsc->opa <= (lv_opa_t)LV_OPA_MIN) {
         return;
     }
 
-    lv_layer_t *layer = draw_unit->target_layer;
+    lv_layer_t *layer = t->target_layer;
     lv_draw_buf_t *draw_buf = layer->draw_buf;
 
     lv_area_t rel_coords;
     lv_area_t rel_clip_area;
-    lv_area_copy(&rel_clip_area, draw_unit->clip_area);
+    lv_area_copy(&rel_clip_area, &t->clip_area);
     //lv_area_move(&rel_clip_area, -layer->buf_area.x1, -layer->buf_area.y1);
 
     lv_area_t blend_area;   //这个区域无论是帧buff还是行buff都是相对的新的绘制区域

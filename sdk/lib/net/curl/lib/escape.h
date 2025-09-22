@@ -29,9 +29,9 @@
 #include "curl_ctype.h"
 
 enum urlreject {
-  REJECT_NADA = 2,
-  REJECT_CTRL,
-  REJECT_ZERO
+    REJECT_NADA = 2,
+    REJECT_CTRL,
+    REJECT_ZERO
 };
 
 CURLcode Curl_urldecode(const char *string, size_t length,

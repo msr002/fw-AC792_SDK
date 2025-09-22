@@ -39,9 +39,9 @@ unsigned int Curl_ipv6_scope(const struct sockaddr *sa);
 #endif
 
 typedef enum {
-  IF2IP_NOT_FOUND = 0, /* Interface not found */
-  IF2IP_AF_NOT_SUPPORTED = 1, /* Int. exists but has no address for this af */
-  IF2IP_FOUND = 2 /* The address has been stored in "buf" */
+    IF2IP_NOT_FOUND = 0, /* Interface not found */
+    IF2IP_AF_NOT_SUPPORTED = 1, /* Int. exists but has no address for this af */
+    IF2IP_FOUND = 2 /* The address has been stored in "buf" */
 } if2ip_result_t;
 
 if2ip_result_t Curl_if2ip(int af,
@@ -58,19 +58,19 @@ if2ip_result_t Curl_if2ip(int af,
 struct ifreq {
 #define IFNAMSIZ 16
 #define IFHWADDRLEN 6
-  union {
-    char ifrn_name[IFNAMSIZ]; /* if name, e.g. "en0" */
-  } ifr_ifrn;
+    union {
+        char ifrn_name[IFNAMSIZ]; /* if name, e.g. "en0" */
+    } ifr_ifrn;
 
- union {
-   struct sockaddr ifru_addr;
-   struct sockaddr ifru_broadaddr;
-   struct sockaddr ifru_netmask;
-   struct sockaddr ifru_hwaddr;
-   short ifru_flags;
-   int ifru_metric;
-   int ifru_mtu;
- } ifr_ifru;
+    union {
+        struct sockaddr ifru_addr;
+        struct sockaddr ifru_broadaddr;
+        struct sockaddr ifru_netmask;
+        struct sockaddr ifru_hwaddr;
+        short ifru_flags;
+        int ifru_metric;
+        int ifru_mtu;
+    } ifr_ifru;
 };
 
 /* This define was added by Daniel to avoid an extra #ifdef INTERIX in the

@@ -152,6 +152,8 @@ INCLUDES := \
 	-I../../../../../include_lib/driver/device/usb \
 	-I../../../../../include_lib/driver/device/usb/device \
 	-I../../../../../include_lib/driver/device/usb/host \
+	-I../../../../../apps/common/ext_rf_fcc_tool/includes \
+	-I../../../../../lib/net/device/wireless_ext/WIFI_todo \
 
 
 # 需要编译的 .c 文件
@@ -166,6 +168,9 @@ c_SRC_FILES := \
 	../../../../../apps/common/eth/DP83848/DP83848.c \
 	../../../../../apps/common/eth/rtl8201/RTL8201E.c \
 	../../../../../apps/common/eth/rtl8201/RTL8201F.c \
+	../../../../../apps/common/ext_rf_fcc_tool/communication.c \
+	../../../../../apps/common/ext_rf_fcc_tool/rf_fcc_main.c \
+	../../../../../apps/common/ext_rf_fcc_tool/wifi_moudle.c \
 	../../../../../apps/common/net/assign_macaddr.c \
 	../../../../../apps/common/net/config_network.c \
 	../../../../../apps/common/net/ext_wifi_conf.c \
@@ -306,7 +311,7 @@ LFLAGS := \
 	../../../../../cpu/wl83/liba/ext_wifi_dev.a \
 	../../../../../cpu/wl83/liba/sdio_card.a \
 	../../../../../cpu/wl83/liba/hostapd_and_wpasupplicant.a \
-	../../../../../cpu/wl83/liba/rtl8733bs.a \
+	../../../../../cpu/wl83/liba/rtl8189e.a \
 	../../../../../cpu/wl83/liba/lwip_2_2_0.a \
 	../../../../../cpu/wl83/liba/wl_wifi.a \
 	--end-group \

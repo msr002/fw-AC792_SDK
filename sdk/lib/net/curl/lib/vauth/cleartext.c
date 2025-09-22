@@ -64,36 +64,39 @@ CURLcode Curl_auth_create_plain_message(const char *authzid,
                                         const char *passwd,
                                         struct bufref *out)
 {
-  char *plainauth;
-  size_t plainlen;
-  size_t zlen;
-  size_t clen;
-  size_t plen;
+    char *plainauth;
+    size_t plainlen;
+    size_t zlen;
+    size_t clen;
+    size_t plen;
 
-  zlen = (authzid == NULL ? 0 : strlen(authzid));
-  clen = strlen(authcid);
-  plen = strlen(passwd);
+    zlen = (authzid == NULL ? 0 : strlen(authzid));
+    clen = strlen(authcid);
+    plen = strlen(passwd);
 
-  /* Compute binary message length. Check for overflows. */
-  if((zlen > SIZE_T_MAX/4) || (clen > SIZE_T_MAX/4) ||
-     (plen > (SIZE_T_MAX/2 - 2)))
-    return CURLE_OUT_OF_MEMORY;
-  plainlen = zlen + clen + plen + 2;
+    /* Compute binary message length. Check for overflows. */
+    if ((zlen > SIZE_T_MAX / 4) || (clen > SIZE_T_MAX / 4) ||
+        (plen > (SIZE_T_MAX / 2 - 2))) {
+        return CURLE_OUT_OF_MEMORY;
+    }
+    plainlen = zlen + clen + plen + 2;
 
-  plainauth = malloc(plainlen + 1);
-  if(!plainauth)
-    return CURLE_OUT_OF_MEMORY;
+    plainauth = malloc(plainlen + 1);
+    if (!plainauth) {
+        return CURLE_OUT_OF_MEMORY;
+    }
 
-  /* Calculate the reply */
-  if(zlen)
-    memcpy(plainauth, authzid, zlen);
-  plainauth[zlen] = '\0';
-  memcpy(plainauth + zlen + 1, authcid, clen);
-  plainauth[zlen + clen + 1] = '\0';
-  memcpy(plainauth + zlen + clen + 2, passwd, plen);
-  plainauth[plainlen] = '\0';
-  Curl_bufref_set(out, plainauth, plainlen, curl_free);
-  return CURLE_OK;
+    /* Calculate the reply */
+    if (zlen) {
+        memcpy(plainauth, authzid, zlen);
+    }
+    plainauth[zlen] = '\0';
+    memcpy(plainauth + zlen + 1, authcid, clen);
+    plainauth[zlen + clen + 1] = '\0';
+    memcpy(plainauth + zlen + clen + 2, passwd, plen);
+    plainauth[plainlen] = '\0';
+    Curl_bufref_set(out, plainauth, plainlen, curl_free);
+    return CURLE_OK;
 }
 
 /*
@@ -111,8 +114,8 @@ CURLcode Curl_auth_create_plain_message(const char *authzid,
  */
 CURLcode Curl_auth_create_login_message(const char *valuep, struct bufref *out)
 {
-  Curl_bufref_set(out, valuep, strlen(valuep), NULL);
-  return CURLE_OK;
+    Curl_bufref_set(out, valuep, strlen(valuep), NULL);
+    return CURLE_OK;
 }
 
 /*
@@ -129,10 +132,10 @@ CURLcode Curl_auth_create_login_message(const char *valuep, struct bufref *out)
  * Returns CURLE_OK on success.
  */
 CURLcode Curl_auth_create_external_message(const char *user,
-                                           struct bufref *out)
+        struct bufref *out)
 {
-  /* This is the same formatting as the login message */
-  return Curl_auth_create_login_message(user, out);
+    /* This is the same formatting as the login message */
+    return Curl_auth_create_login_message(user, out);
 }
 
 #endif /* if no users */

@@ -315,14 +315,6 @@ static int net_music_init(void)
         }
     }
 
-#if TCFG_USER_EMITTER_ENABLE
-    extern u8 *get_cur_connect_emitter_mac_addr(void);
-    extern void emitter_open(void);
-    if (get_cur_connect_emitter_mac_addr()) {
-        emitter_open();
-    }
-#endif
-
     return 0;
 }
 
@@ -336,14 +328,6 @@ static int net_music_exit(void)
     if (__this->lrc_info) {
         lyric_exit(__this->lrc_info);
         __this->lrc_info = NULL;
-    }
-#endif
-
-#if TCFG_USER_EMITTER_ENABLE
-    extern u8 *get_cur_connect_emitter_mac_addr(void);
-    extern void emitter_close(void);
-    if (get_cur_connect_emitter_mac_addr()) {
-        emitter_close();
     }
 #endif
 
@@ -626,6 +610,10 @@ static int net_music_msg_handler(struct application *app, int *msg)
         ai_app_event_notify(AI_EVENT_MEDIA_END);
         if (strcmp(__this->ai_name, __this->tts_ai_name)) {
             main_ai_app_event_notify_value(AI_EVENT_MEDIA_STOP, 1);
+        }
+        if (__this->breakpoint) {
+            __this->breakpoint->dbp.len = 0;
+            __this->breakpoint->dbp.fptr = 0;
         }
         break;
     case APP_MSG_NET_MUSIC_PLAY_STOP:

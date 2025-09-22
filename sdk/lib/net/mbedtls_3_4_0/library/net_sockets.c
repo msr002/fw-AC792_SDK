@@ -180,6 +180,7 @@ int mbedtls_net_connect_bind(mbedtls_net_context *ctx, int domain, int socktype,
     if (ctx->hdl == NULL) {
         return -1;
     }
+    ctx->fd = sock_get_socket(ctx->hdl);
 
     sock_set_reuseaddr(ctx->hdl);
 
@@ -275,6 +276,7 @@ int mbedtls_net_connect(mbedtls_net_context *ctx, const char *host,
             continue;
         }
 
+        ctx->fd = sock_get_socket(ctx->hdl);
 #if 1
         if (ctx->send_to_ms) {
             sock_set_send_timeout((void *)ctx->hdl, ctx->send_to_ms);
@@ -292,12 +294,14 @@ int mbedtls_net_connect(mbedtls_net_context *ctx, const char *host,
         if (cur->ai_family == AF_INET6) { //ipv6
             if (mbedtls_bind(ctx->hdl, "::", NULL, proto)) {
                 sock_unreg(ctx->hdl);
-                return MBEDTLS_ERR_NET_BIND_FAILED;
+                ret = MBEDTLS_ERR_NET_BIND_FAILED;
+                goto finish;
             }
         } else { //ipv4
             if (mbedtls_bind(ctx->hdl, NULL, "0", proto)) {
                 sock_unreg(ctx->hdl);
-                return MBEDTLS_ERR_NET_BIND_FAILED;
+                ret =  MBEDTLS_ERR_NET_BIND_FAILED;
+                goto finish;
             }
         }
 #endif
@@ -311,8 +315,8 @@ int mbedtls_net_connect(mbedtls_net_context *ctx, const char *host,
         ret = MBEDTLS_ERR_NET_CONNECT_FAILED;
     }
 
+finish:
     freeaddrinfo(addr_list);
-
     return (ret);
 }
 
@@ -348,6 +352,7 @@ int mbedtls_net_bind(mbedtls_net_context *ctx, const char *bind_ip, const char *
     for (cur = addr_list; cur != NULL; cur = cur->ai_next) {
         ctx->hdl = sock_reg(cur->ai_family, cur->ai_socktype, cur->ai_protocol, ctx->cb_func, ctx->priv);
 
+        ctx->fd = sock_get_socket(ctx->hdl);
         if (ctx->hdl == 0) {
             ret = MBEDTLS_ERR_NET_SOCKET_FAILED;
             continue;
@@ -470,6 +475,7 @@ int mbedtls_net_accept(mbedtls_net_context *bind_ctx,
     if (type == SOCK_STREAM) {
         /* TCP: actual accept() */
         client_ctx->hdl =  sock_accept(bind_ctx->hdl, (struct sockaddr *) &client_addr, (socklen_t *)(&n), bind_ctx->cb_func, bind_ctx->priv);
+        client_ctx->fd = sock_get_socket(client_ctx->hdl);
         ret = (int)client_ctx->hdl;
 
         if (ret == 0) {
@@ -521,6 +527,7 @@ int mbedtls_net_accept(mbedtls_net_context *bind_ctx,
 
         if (sock_getsockname(client_ctx->hdl, (struct sockaddr *) &local_addr, (socklen_t *)(&n)) == 0) {
             bind_ctx->hdl = sock_reg(local_addr.ss_family, SOCK_DGRAM, IPPROTO_UDP, bind_ctx->cb_func, bind_ctx->priv);
+            bind_ctx->fd = sock_get_socket(bind_ctx->hdl);
             if (bind_ctx->hdl) {
                 if (sock_set_reuseaddr(bind_ctx->hdl)) {
                     sock_unreg(bind_ctx->hdl);

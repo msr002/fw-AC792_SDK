@@ -45,25 +45,25 @@
 #endif
 
 struct dynbuf {
-  char *bufr;    /* point to a null-terminated allocated buffer */
-  size_t leng;   /* number of bytes *EXCLUDING* the null-terminator */
-  size_t allc;   /* size of the current allocation */
-  size_t toobig; /* size limit for the buffer */
+    char *bufr;    /* point to a null-terminated allocated buffer */
+    size_t leng;   /* number of bytes *EXCLUDING* the null-terminator */
+    size_t allc;   /* size of the current allocation */
+    size_t toobig; /* size limit for the buffer */
 #ifdef DEBUGBUILD
-  int init;     /* detect API usage mistakes */
+    int init;     /* detect API usage mistakes */
 #endif
 };
 
 void Curl_dyn_init(struct dynbuf *s, size_t toobig);
 void Curl_dyn_free(struct dynbuf *s);
 CURLcode Curl_dyn_addn(struct dynbuf *s, const void *mem, size_t len)
-  WARN_UNUSED_RESULT;
+WARN_UNUSED_RESULT;
 CURLcode Curl_dyn_add(struct dynbuf *s, const char *str)
-  WARN_UNUSED_RESULT;
+WARN_UNUSED_RESULT;
 CURLcode Curl_dyn_addf(struct dynbuf *s, const char *fmt, ...)
-  WARN_UNUSED_RESULT;
+WARN_UNUSED_RESULT;
 CURLcode Curl_dyn_vaddf(struct dynbuf *s, const char *fmt, va_list ap)
-  WARN_UNUSED_RESULT;
+WARN_UNUSED_RESULT;
 void Curl_dyn_reset(struct dynbuf *s);
 CURLcode Curl_dyn_tail(struct dynbuf *s, size_t trail);
 CURLcode Curl_dyn_setlen(struct dynbuf *s, size_t set);

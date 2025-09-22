@@ -645,16 +645,21 @@ void lv_draw_label_iterate_characters(lv_draw_task_t *t, const lv_draw_label_dsc
 }
 
 #if ((LV_USE_DRAW_JLVG == 1) && (LV_USE_DRAW_JLVG_LABEL_ENABLE == 1))
+#include "jl/jlvg/lv_draw_jlvg.h"
 void lv_draw_label_jlvg_path_collection(lv_draw_unit_t *draw_unit, const lv_draw_label_dsc_t *dsc,
                                         const lv_area_t *coords,
                                         lv_draw_glyph_cb_t cb,
                                         lv_jlvg_label_info_t *curr_label_info)
 {
+
+    lv_draw_jlvg_unit_t *u = (lv_draw_jlvg_unit_t *)draw_unit;
+    lv_draw_task_t *t = u->task_act;
+
     const lv_font_t *font = dsc->font;
     int32_t w;
 
     lv_area_t clipped_area;
-    bool clip_ok = lv_area_intersect(&clipped_area, coords, draw_unit->clip_area);
+    bool clip_ok = lv_area_intersect(&clipped_area, coords, &t->clip_area);
     if (!clip_ok) {
         return;
     }
@@ -707,14 +712,15 @@ void lv_draw_label_jlvg_path_collection(lv_draw_unit_t *draw_unit, const lv_draw
         pos.y += dsc->hint->y;
     }
 
-    uint32_t line_end = line_start + lv_text_get_next_line(&dsc->text[line_start], font, dsc->letter_space, w, NULL,
+    uint32_t remaining_len = dsc->text_length;
+    uint32_t line_end = line_start + lv_text_get_next_line(&dsc->text[line_start], remaining_len, font, dsc->letter_space, w, NULL,
                         dsc->flag);
 
     /*Go the first visible line*/
-    while (pos.y + line_height_font < draw_unit->clip_area->y1) {
+    while (pos.y + line_height_font < t->clip_area.y1) {
         /*Go to next line*/
         line_start = line_end;
-        line_end += lv_text_get_next_line(&dsc->text[line_start], font, dsc->letter_space, w, NULL, dsc->flag);
+        line_end += lv_text_get_next_line(&dsc->text[line_start], remaining_len, font, dsc->letter_space, w, NULL, dsc->flag);
         pos.y += line_height;
 
         /*Save at the threshold coordinate*/
@@ -766,7 +772,7 @@ void lv_draw_label_jlvg_path_collection(lv_draw_unit_t *draw_unit, const lv_draw
     int32_t letter_w;
 
     /*Write out all lines*/
-    while (dsc->text[line_start] != '\0') {
+    while (remaining_len && dsc->text[line_start] != '\0') {
         pos.x += x_ofs;
         line_start_x = pos.x;
 
@@ -836,7 +842,7 @@ void lv_draw_label_jlvg_path_collection(lv_draw_unit_t *draw_unit, const lv_draw
             }
 
             draw_letter_dsc.label_info = curr_label_info;
-            draw_letter(draw_unit, &draw_letter_dsc, &pos, font, letter, cb);
+            lv_draw_unit_draw_letter(t, &draw_letter_dsc, &pos, font, letter, cb);
 
             if (letter_w > 0) {
                 pos.x += letter_w + dsc->letter_space;
@@ -848,8 +854,11 @@ void lv_draw_label_jlvg_path_collection(lv_draw_unit_t *draw_unit, const lv_draw
         bidi_txt = NULL;
 #endif
         /*Go to next line*/
+        remaining_len -= line_end - line_start;
         line_start = line_end;
-        line_end += lv_text_get_next_line(&dsc->text[line_start], font, dsc->letter_space, w, NULL, dsc->flag);
+        if (remaining_len) {
+            line_end += lv_text_get_next_line(&dsc->text[line_start], remaining_len, font, dsc->letter_space, w, NULL, dsc->flag);
+        }
 
         pos.x = coords->x1;
         /*Align to middle*/
@@ -869,7 +878,7 @@ void lv_draw_label_jlvg_path_collection(lv_draw_unit_t *draw_unit, const lv_draw
         /*Go the next line position*/
         pos.y += line_height;
 
-        if (pos.y > draw_unit->clip_area->y2) {
+        if (pos.y > t->clip_area.y2) {
             break;
         }
     }

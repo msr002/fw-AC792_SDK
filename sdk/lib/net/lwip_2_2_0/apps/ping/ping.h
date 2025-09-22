@@ -5,7 +5,7 @@
  * PING_USE_SOCKETS: Set to 1 to use sockets, otherwise the raw api is used
  */
 #ifndef PING_USE_SOCKETS
-int ping_init(const char *ip_addr_str, u32 delayms, u32 ping_total_cnt, void (*cb)(void *, u32), void *priv);
+int ping_init(const char *ip_addr_str, u32 delayms, u32 ping_total_cnt, void (*cb)(void *, u32, int), void *priv, u8 send_at_once);
 #else
 int ping_init(const char *ip_addr_str);
 #endif

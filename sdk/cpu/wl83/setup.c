@@ -61,6 +61,7 @@ void setup_arch(void)
     video_clock_early_init(TCFG_VIDEO_CLK);
     video_eva_xbus_init();
     jlgpu_clock_early_init(TCFG_GPU_CLK);
+    clk_dvdd_vol_lev_update();
 #endif
 
     debug_init();

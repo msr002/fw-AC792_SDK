@@ -25,6 +25,8 @@
 
 #include <mbedtls/ecdh.h>
 
+#include "fs/fs.h"
+
 #if !(defined(__SIZEOF_INT128__) && (__SIZEOF_INT128__ == 16))
 #define KRML_VERIFIED_UINT128
 #endif

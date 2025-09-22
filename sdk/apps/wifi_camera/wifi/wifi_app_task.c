@@ -25,6 +25,7 @@
 #include "syscfg/syscfg_id.h"
 #include "product_main.h"
 
+#if TCFG_WIFI_ENABLE
 
 #ifdef CONFIG_NET_ENABLE
 #define WIFI_APP_TASK_NAME "wifi_app_task"
@@ -825,4 +826,5 @@ const char *get_rec_emr_path_3()
 }
 #endif
 
+#endif
 #endif

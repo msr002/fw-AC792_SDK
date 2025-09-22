@@ -963,7 +963,7 @@ static void app_auracast_sink_init(void)
 {
     log_info("app_auracast_sink_init");
 
-    auracast_sink_init();
+    auracast_sink_init(AURACAST_SINK_API_VERSION);
     auracast_sink_event_callback_register(auracast_sink_event_callback);
 
     //le_audio_bass_event_callback_register(app_auracast_bass_server_event_callback);
@@ -1168,7 +1168,6 @@ int app_auracast_sink_close(u8 status)
 
     app_auracast_mutex_pend(&mutex, __LINE__);
 
-    auracast_sink_set_audio_state(0);
     if (app_auracast.status == APP_AURACAST_STATUS_SYNC) {
         auracast_sink_big_sync_terminate();
     }
@@ -1351,7 +1350,7 @@ int app_auracast_source_open(void)
         return -1;
     }
 
-    auracast_source_init();
+    auracast_source_init(AURACAST_SOURCE_API_VERSION);
     auracast_source_config((auracast_user_config_t *)&user_config);
     auracast_source_advanced_config((auracast_advanced_config_t *)&user_advanced_config);
     auracast_source_event_callback_register(auracast_source_app_event_callback);

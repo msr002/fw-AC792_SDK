@@ -477,12 +477,19 @@ typedef struct {
     lv_obj_t *page_map_lbl_3;
     lv_obj_t *page_map_lbl_4;
     lv_obj_t *page_map_img_1;
-    lv_obj_t *page_map_img_2;
     lv_timer_t *page_map_timer_2;
     lv_obj_t *page_map_btn_1;
     lv_obj_t *page_map_btn_1_label;
     lv_obj_t *page_map_btn_2;
     lv_obj_t *page_map_btn_2_label;
+    lv_obj_t *page_map_view_4;
+    lv_obj_t *page_map_lbl_5;
+    lv_obj_t *page_map_lbl_6;
+    lv_obj_t *page_map_lbl_7;
+    lv_obj_t *page_map_lbl_8;
+    lv_obj_t *page_map_lbl_9;
+    lv_obj_t *page_map_lbl_10;
+    lv_obj_t *page_map_img_2;
 } lv_ui_page_map;
 
 typedef struct {

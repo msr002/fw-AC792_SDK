@@ -15,99 +15,95 @@
 
 #ifdef CONFIG_NET_SCR
 
-static pipe_core_t *pipe_core;
-static struct __NET_SCR_INFO  net_scr_info;
-
-#define __ALIGN_16(a)   (((a) + 15) / 16 * 16)
-#define __ALIGN_8(a)   (((a) + 7) / 8 * 8)
+struct __NET_SCR_INFO {
+    u8 state;
+    pipe_core_t *pipe_core;
+    struct sockaddr_in cli_addr;
+};
+struct __NET_SCR_INFO scr_info = {0};
+#define __this (&scr_info)
 
 int net_scr_init(struct __NET_SCR_CFG *cfg)
 {
     pipe_filter_t *source_filter, *jpeg_dec_filter, *imc_filter, *rep_filter, *disp_filter;
     struct video_format f = {0};
 
-    if (net_scr_info.state) {
+    if (__this->state) {
         log_error("%s multiple init\n", __func__);
         return 0;
     }
-    memcpy(&net_scr_info.cfg, cfg, sizeof(struct __NET_SCR_CFG));
-    log_info("scr size: %d x %d", net_scr_info.cfg.src_w, net_scr_info.cfg.src_h);
+    memcpy(&__this->cli_addr, &cfg->cli_addr, sizeof(struct sockaddr_in));
 
-    pipe_core = pipeline_init(NULL, NULL);
-    ASSERT(pipe_core);
+    log_info("scr size: %d x %d", cfg->src_w, cfg->src_h);
+    log_info("scr fps: %d, prot: %s, ack: %d", cfg->fps, (cfg->prot == 0) ? "tcp" : "udp", cfg->ack);
+
+    __this->pipe_core = pipeline_init(NULL, NULL);
+    ASSERT(__this->pipe_core);
 
     char *source_name = "scr0";
-    pipe_core->channel = plugin_source_to_channel(source_name);
+    __this->pipe_core->channel = plugin_source_to_channel(source_name);
 
-    source_filter = pipeline_filter_add(pipe_core, source_name);
-    jpeg_dec_filter = pipeline_filter_add(pipe_core, plugin_factory_find("jpeg_dec"));
-    rep_filter = pipeline_filter_add(pipe_core, plugin_factory_find("rep"));
-    imc_filter = pipeline_filter_add(pipe_core, find_use_for_display_plugin("imc"));
-    disp_filter = pipeline_filter_add(pipe_core, plugin_factory_find("disp"));
+    source_filter = pipeline_filter_add(__this->pipe_core, source_name);
+    jpeg_dec_filter = pipeline_filter_add(__this->pipe_core, plugin_factory_find("jpeg_dec"));
+    rep_filter = pipeline_filter_add(__this->pipe_core, plugin_factory_find("rep"));
+    imc_filter = pipeline_filter_add(__this->pipe_core, find_use_for_display_plugin("imc"));
+    disp_filter = pipeline_filter_add(__this->pipe_core, plugin_factory_find("disp"));
 
-#if 0   //最新协商,采用设备主动发送过去的宽高,FPS
     //数据源数据格式
-    f.src_width = __ALIGN_16(net_scr_info.cfg.src_w);   //为了兼容YUV420格式, 如确认是YUV422/444格式, 可配置8对齐
-    f.src_height = net_scr_info.cfg.src_h;
-    f.fps = net_scr_info.cfg.fps;
-#else
-    f.src_width = LCD_W;
-    f.src_height = LCD_H;
-    f.fps = 25;
-#endif
+    f.src_width = cfg->src_w;
+    f.src_height = cfg->src_h;
+    //imc不做帧率控制,以下发帧率为准
+    f.fps = cfg->fps;
 
     //显示配置
     f.win.left 	 = 0;
     f.win.top  	 = 0;
-    f.win.width = LCD_W;
-    f.win.height = LCD_H;
+    f.win.width = f.src_width;
+    f.win.height = f.src_height;
     f.win.combine = 1; //合成显示
 
-    pipeline_param_set(pipe_core, NULL, PIPELINE_SET_FORMAT, &f);
-    pipeline_param_set(pipe_core, NULL, PIPELINE_SCR_CLI_ADR, &net_scr_info.cfg.cli_addr);
-    int sock_type = SOCK_STREAM;
-    pipeline_param_set(pipe_core, NULL, PIPELINE_SCR_SOCK_TYPE, &sock_type);
+    pipeline_param_set(__this->pipe_core, NULL, PIPELINE_SET_FORMAT, &f);
+    pipeline_param_set(__this->pipe_core, NULL, PIPELINE_SCR_CLI_ADR, &cfg->cli_addr);
+    int sock_type = (cfg->prot == 0) ? SOCK_STREAM : SOCK_DGRAM;
+    pipeline_param_set(__this->pipe_core, NULL, PIPELINE_SCR_SOCK_TYPE, &sock_type);
+    pipeline_param_set(__this->pipe_core, NULL, PIPELINE_SCR_ACK_CALLBACK, &cfg->ack_cb);
     int line_cnt = 16;
-    pipeline_param_set(pipe_core, NULL, PIPELINE_SET_BUFFER_LINE, (int)&line_cnt);
+    pipeline_param_set(__this->pipe_core, NULL, PIPELINE_SET_BUFFER_LINE, (int)&line_cnt);
 
     pipeline_filter_link(source_filter, jpeg_dec_filter);
     pipeline_filter_link(jpeg_dec_filter, rep_filter);
     pipeline_filter_link(rep_filter, imc_filter);
     pipeline_filter_link(imc_filter, disp_filter);
 
-    pipeline_prepare(pipe_core);
-    pipeline_start(pipe_core);
+    pipeline_prepare(__this->pipe_core);
+    pipeline_start(__this->pipe_core);
 
-    net_scr_info.state = 1;
+    __this->state = 1;
 
     return 0;
 }
 
 int net_scr_uninit(struct __NET_SCR_CFG *cfg)
 {
-    if (!net_scr_info.state || memcmp((char *)&net_scr_info.cfg.cli_addr + 2, (char *)&cfg->cli_addr + 2, 6)) {
+    if (!__this->state || memcmp((char *)&__this->cli_addr + 2, (char *)&cfg->cli_addr + 2, 6)) {
         log_error("cli addr not match.\n");
         return -1;
     }
 
-    net_scr_info.state = 0;
+    __this->state = 0;
 
-    pipeline_stop(pipe_core);
-    pipeline_reset(pipe_core);
+    pipeline_stop(__this->pipe_core);
+    pipeline_reset(__this->pipe_core);
 
-    pipeline_uninit(pipe_core);
+    pipeline_uninit(__this->pipe_core);
 
     return 0;
 }
 
 u8 get_net_scr_status(void)
 {
-    return net_scr_info.state;
+    return __this->state;
 }
-
-
-
-
 
 #endif
 

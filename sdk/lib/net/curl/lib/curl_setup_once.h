@@ -115,8 +115,8 @@
 
 #ifndef HAVE_STRUCT_TIMEVAL
 struct timeval {
- long tv_sec;
- long tv_usec;
+    long tv_sec;
+    long tv_usec;
 };
 #endif
 
@@ -169,9 +169,9 @@ struct timeval {
                                    (RECV_TYPE_ARG4)(0))
 #else /* HAVE_RECV */
 #ifndef sread
-  /* */
-  Error Missing_definition_of_macro_sread
-  /* */
+/* */
+Error Missing_definition_of_macro_sread
+/* */
 #endif
 #endif /* HAVE_RECV */
 
@@ -181,7 +181,7 @@ struct timeval {
                                     (SEND_TYPE_ARG2)(y), \
                                     (SEND_TYPE_ARG3)(z))
 #elif defined(FreeRTOS)
-  /* The flags argument (4) marked as 'Not currently used' */
+/* The flags argument (4) marked as 'Not currently used' */
 #define swrite(a,b,c) FreeRTOS_send(a,b,c,0)
 
 #elif defined(HAVE_SEND)
@@ -191,9 +191,9 @@ struct timeval {
                                     (SEND_TYPE_ARG4)(SEND_4TH_ARG))
 #else /* HAVE_SEND */
 #ifndef swrite
-  /* */
-  Error Missing_definition_of_macro_swrite
-  /* */
+/* */
+Error Missing_definition_of_macro_swrite
+/* */
 #endif
 #endif /* HAVE_SEND */
 
@@ -230,7 +230,7 @@ struct timeval {
  */
 
 #if defined(__hpux) && !defined(HAVE_BOOL_T)
-   typedef int bool;
+typedef int bool;
 #  define false 0
 #  define true 1
 #  define HAVE_BOOL_T
@@ -245,10 +245,10 @@ struct timeval {
  */
 
 #ifndef HAVE_BOOL_T
-  typedef enum {
-      bool_false = 0,
-      bool_true  = 1
-  } bool;
+typedef enum {
+    bool_false = 0,
+    bool_true  = 1
+} bool;
 
 /*
  * Use a define to let 'true' and 'false' use those enums.  There

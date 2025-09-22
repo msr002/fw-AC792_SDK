@@ -90,7 +90,7 @@
 void mbedtls_gcm_init(mbedtls_gcm_context *ctx)
 {
     GCM_VALIDATE(ctx != NULL);
-    cryp_zeroize((void *)ctx, sizeof(mbedtls_gcm_context));
+    memset((void *)ctx, 0, sizeof(mbedtls_gcm_context));
 }
 
 int mbedtls_gcm_setkey(mbedtls_gcm_context *ctx,
@@ -561,7 +561,7 @@ void mbedtls_gcm_free(mbedtls_gcm_context *ctx)
         free(ctx->hcryp_gcm.Init.gcm_mbed_iv);
     }
 
-    cryp_zeroize((void *)ctx, sizeof(mbedtls_gcm_context));
+    memset((void *)ctx, 0, sizeof(mbedtls_gcm_context));
 }
 
 
