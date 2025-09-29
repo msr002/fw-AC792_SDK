@@ -505,6 +505,15 @@ static int wifi_event_callback(void *network_ctx, enum WIFI_EVENT event)
         log_info("network_user_callback->WIFI_EVENT_P2P_GO_STA_DISCONNECTED");
         wifi_enter_p2p_mode(P2P_GO_MODE, WIFI_P2P_DEVICE_NAME);
         break;
+
+    case WIFI_EVENT_P2P_WSC_OPERATION:
+        PP2P_GO_STA_INFO sta_info = (PP2P_GO_STA_INFO)network_ctx;
+        printf("WIFI_EVENT_P2P_WSC_OPERATION device name[%d] = %.*s, mac = %02x:%02x:%02x:%02x:%02x:%02x\n",
+               sta_info->dev_name_len, sta_info->dev_name_len, sta_info->dev_name,
+               sta_info->dev_addr[0], sta_info->dev_addr[1], sta_info->dev_addr[2], sta_info->dev_addr[3], sta_info->dev_addr[4], sta_info->dev_addr[5]);
+        void p2p_wsc_trigger(void);
+        p2p_wsc_trigger();
+        break;
     default:
         break;
     }
@@ -640,7 +649,7 @@ static void wifi_demo_task(void *priv)
 #endif
 
     //wifi p2p
-#if 1
+#if 0
     //注意：p2p对mac地址有一定格式要求，在assign_macaddr.c已经做了更改，需要在download.c中通过-format all
     //擦除一下flash，重新生成mac地址
     wifi_enter_p2p_mode(P2P_GO_MODE, WIFI_P2P_DEVICE_NAME);

@@ -617,6 +617,7 @@
                 "${workspaceFolder}/apps/common/rf_fcc_tool/include",
                 "${workspaceFolder}/apps/common/product_test_tool/includes",
                 "${workspaceFolder}/apps/common/gsensor",
+                "${workspaceFolder}/apps/common/ext_uart_bt",
                 "${workspaceFolder}/apps/common/net/testbox/include",
                 "${workspaceFolder}/apps/common/third_party_profile/mijia",
                 "${workspaceFolder}/apps/common/third_party_profile/mijia/mijia_ble_api",

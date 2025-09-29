@@ -434,10 +434,10 @@ void effect_scene_set(u8 scene)
 #if TCFG_STEROMIX_NODE_ENABLE
     for (int i = 0; i < ARRAY_SIZE(smix_name); i++) {
         effects_name_sprintf(tar_name, smix_name[i], music_mode[cur_mode]);
-        ret = stero_mix_update_parm(scene, tar_name, 0);
+        ret = stereo_mix_update_parm(scene, tar_name, 0);
         if (ret < 0) {
 #if MEDIA_MODULE_NODE_UPDATE_EN
-            module_node_update_parm(stero_mix_update_parm, scene, smix_name[i], 0);
+            module_node_update_parm(stereo_mix_update_parm, scene, smix_name[i], 0);
 #endif
         }
     }

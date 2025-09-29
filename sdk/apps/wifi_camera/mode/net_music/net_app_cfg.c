@@ -82,6 +82,10 @@ static int net_wifi_event_handler(void *evt)
             wifi_return_sta_mode();
         }
         break;
+    case NET_SCR_EVENT_DISCONNECTED:
+        int net_scr_stop(void);
+        net_scr_stop();
+        break;
     default:
         break;
     }

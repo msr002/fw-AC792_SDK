@@ -709,6 +709,27 @@ int cmd_put_video_cyc_savefile(void *priv,  char *content)
 
 #ifdef CONFIG_NET_SCR
 static u8 scr_quality = 6;  //默认jpg压缩率为60%
+struct __NET_SCR_CFG g_scr_cfg = {0};
+static int g_scr_inited = 0;
+
+int net_scr_start(struct __NET_SCR_CFG *cfg)
+{
+    memcpy(&g_scr_cfg, cfg, sizeof(struct __NET_SCR_CFG));
+    g_scr_inited = 1;
+    return net_scr_init(&g_scr_cfg);
+}
+
+int net_scr_stop(void)
+{
+    if (!g_scr_inited) {
+        return -1;
+    }
+    int ret = net_scr_uninit(&g_scr_cfg);
+    g_scr_inited = 0;
+    memset(&g_scr_cfg, 0, sizeof(g_scr_cfg));
+    return ret;
+}
+
 void set_jpg_quality_value(u8 qua)
 {
     scr_quality = (qua > 10) ? 10 : qua;
@@ -772,11 +793,9 @@ static int cmd_put_net_scr(void *priv, char *content)
     cfg.ack = json_object_get_int(json_object_object_get(parm, "ack"));
 #else
     //以设备端为主的命令
-
     cfg.prot = 0;
     cfg.ack = 1;
     //get_connect_info(&cfg);
-
 
 #endif
     if (cfg.ack) {
@@ -798,14 +817,14 @@ static int cmd_put_net_scr(void *priv, char *content)
         } else {
             memcpy(&cfg.cli_addr, cdp_srv_get_cli_addr(priv), sizeof(struct sockaddr_in));
         }
-        net_scr_init(&cfg);
+        net_scr_start(&cfg);
     } else if (0 == status) {
         if (ctp_srv_get_cli_addr(priv)) {
             memcpy(&cfg.cli_addr, ctp_srv_get_cli_addr(priv), sizeof(struct sockaddr_in));
         } else {
             memcpy(&cfg.cli_addr, cdp_srv_get_cli_addr(priv), sizeof(struct sockaddr_in));
         }
-        net_scr_uninit(&cfg);
+        net_scr_stop();
     }
     CTP_CMD_COMBINED(priv, CTP_NO_ERR, "NET_SCR", "NOTIFY", buf);
 

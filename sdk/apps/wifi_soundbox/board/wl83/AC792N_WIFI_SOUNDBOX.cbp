@@ -264,6 +264,7 @@
 <Add option="../../../../cpu/wl83/liba/media/lib_dts_dec.a" />
 <Add option="../../../../cpu/wl83/liba/media/lib_wma_dec.a" />
 <Add option="../../../../cpu/wl83/liba/media/lib_sbc_dec.a" />
+<Add option="../../../../cpu/wl83/liba/media/lib_midi_dec.a" />
 <Add option="../../../../cpu/wl83/liba/media/lib_bt_aac_dec.a" />
 <Add option="../../../../cpu/wl83/liba/media/lib_ogg_opus_dec.a" />
 <Add option="../../../../cpu/wl83/liba/media/lib_ogg_vorbis_dec.a" />
@@ -2218,6 +2219,8 @@
 <Unit filename="../../../../audio/le_audio/wireless_trans_manager.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../audio/le_audio/wireless_trans_manager.h" />
 <Unit filename="../../../../audio/log_config/lib_media_config.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="../../../../audio/music/audio_dec_midi_ctrl.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="../../../../audio/music/audio_dec_midi_file.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../audio/music/breakpoint.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../audio/music/breakpoint.h" />
 <Unit filename="../../../../audio/music/music_decrypt.c"><Option compilerVer="CC"/></Unit>
@@ -2455,6 +2458,8 @@
 <Unit filename="../../../../include_lib/media/audio_splicing.h" />
 <Unit filename="../../../../include_lib/media/automute.h" />
 <Unit filename="../../../../include_lib/media/bt_audio_timestamp.h" />
+<Unit filename="../../../../include_lib/media/codec/MIDI_CTRL_API.h" />
+<Unit filename="../../../../include_lib/media/codec/MIDI_DEC_API.h" />
 <Unit filename="../../../../include_lib/media/codec/sbc_codec.h" />
 <Unit filename="../../../../include_lib/media/codec/sbc_enc.h" />
 <Unit filename="../../../../include_lib/media/cpu/wl83/asm/audio_common.h" />
@@ -2500,6 +2505,7 @@
 <Unit filename="../../../../include_lib/media/effects/audio_howling_gate.h" />
 <Unit filename="../../../../include_lib/media/effects/audio_hw_crossover.h" />
 <Unit filename="../../../../include_lib/media/effects/audio_limiter.h" />
+<Unit filename="../../../../include_lib/media/effects/audio_llns_dns.h" />
 <Unit filename="../../../../include_lib/media/effects/audio_multiband_crossover.h" />
 <Unit filename="../../../../include_lib/media/effects/audio_multiband_drc.h" />
 <Unit filename="../../../../include_lib/media/effects/audio_multiband_limiter.h" />
@@ -2586,7 +2592,9 @@
 <Unit filename="../../../../include_lib/media/tech_lib/bt_audio_energy_det_api.h" />
 <Unit filename="../../../../include_lib/media/tech_lib/effect_surTheta_api.h" />
 <Unit filename="../../../../include_lib/media/tech_lib/jlsp_far_keyword.h" />
+<Unit filename="../../../../include_lib/media/tech_lib/jlsp_llns_dns.h" />
 <Unit filename="../../../../include_lib/media/tech_lib/jlsp_vad.h" />
+<Unit filename="../../../../include_lib/media/tech_lib/spatial_imp_ctrl.h" />
 <Unit filename="../../../../include_lib/media/tws/jl_tws.h" />
 <Unit filename="../../../../include_lib/net/http/http_cli.h" />
 <Unit filename="../../../../include_lib/net/json_c/arraylist.h" />

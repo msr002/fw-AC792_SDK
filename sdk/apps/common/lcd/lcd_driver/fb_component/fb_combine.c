@@ -672,7 +672,7 @@ static u8 __is_need_create_combine_task(u8 open_fb, struct fb_draw_info *info)
 #if (LV_DISP_UI_FB_NUM <= 1)
     __this->combine_task_run = FB_COMBINE_FUNC_RUN;
     return 0;
-#elif (LV_DISP_UI_FB_NUM >= 2)
+#elif (LV_DISP_UI_FB_NUM >= 2 && FB_LCD_BUF_NUM)
     return 1;
 #endif
 #else
@@ -1399,6 +1399,7 @@ void fb_combine_list_add(struct fb_out_t *ep)
 {
     struct fb_out_t *p0 = NULL;
     u8 id = ep->out_id;
+#if 0
     //约定fb3作为次顶层
     if (ep->fb_name[2] - '0' == 3) {
         ep->z_order = 254;
@@ -1407,6 +1408,7 @@ void fb_combine_list_add(struct fb_out_t *ep)
     if (ep->fb_name[2] - '0' == 4) {
         ep->z_order = 255;
     }
+#endif
     spin_lock(&fb_lock[id]);
     __this->fb_frame_cnt[ep->fb_name[2] - '0'] = 0;
     list_for_each_entry(p0, &head[id], entry) {

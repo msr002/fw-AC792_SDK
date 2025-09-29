@@ -35,11 +35,11 @@ static void spatial_tws_audio_handler(void *buf, u16 len, bool rx)
         return;
     }
 
-    media_irq_disable();
+    local_irq_disable();
     if (local_conn) {
         local_conn->data_handler(local_conn->priv, buf, len);
     }
-    media_irq_enable();
+    local_irq_enable();
 }
 
 REGISTER_TWS_FUNC_STUB(spatial_tws_audio) = {
@@ -71,9 +71,9 @@ void spatial_tws_delete_connection(void *conn)
     if (!CONFIG_BTCTLER_TWS_ENABLE) {
         return;
     }
-    media_irq_disable();
+    local_irq_disable();
     local_conn = NULL;
-    media_irq_enable();
+    local_irq_enable();
     if (conn) {
         free(conn);
     }

@@ -32,6 +32,8 @@
 #define VM_DUAL_CONN_DEVICE_ADDR_INDEX  7
 #define VM_DUAL_CONN_LINK_KEY_INDEX     8
 
+#define CFG_IMU_ACC_OFFEST_ID           12
+#define CFG_IMU_GYRO_OFFEST_ID          13
 #define CFG_BT_CALL_VOLUME              14
 #define CFG_WIRELESS_MIC0_VOLUME        15
 #define CFG_WIRELESS_MIC1_VOLUME        16

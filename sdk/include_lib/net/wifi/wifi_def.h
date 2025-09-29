@@ -28,4 +28,10 @@ struct wifi_scan_ssid_info {
     WIFI_802_11_AUTH_MODE auth_mode;
 };
 
+typedef struct _P2P_GO_STA_INFO {
+    u8 dev_addr[6];
+    u8 dev_name[32];
+    u32 dev_name_len;
+} P2P_GO_STA_INFO, *PP2P_GO_STA_INFO;
+
 #endif

@@ -393,6 +393,22 @@ int lcd_touch_xy_coord_rotate(u8 lcd_id, u16 *x, u16 *y, u8 status)
     return 0;
 }
 
+
+//dsi帧中断回调
+void dsi_isr_frame_done(void)
+{
+    struct lcd_device_info *lcd_dev = NULL;
+    struct lcd_dev_drive *lcd = NULL;
+    u8 id = 0;
+    for (id = 0; id < LCD_DRIVER_MAX_NUM; id++) {
+        lcd_dev = &lcd_dev_info_t[id];
+        lcd = lcd_dev->lcd;
+        if (lcd && lcd->esd.timer && lcd->esd.esd_check_isr) {
+            lcd->esd.count = 0;
+        }
+    }
+
+}
 static struct lcd_board_cfg *lcd_bd_cfg_match(char *name, struct lcd_platform_data *pdata)
 {
     if (pdata && pdata->cfg_num && pdata->config_ptr) {
@@ -499,6 +515,9 @@ static int lcd_open_send_code_port(struct lcd_dev_drive *lcd, struct lcd_board_c
         break;
 
     case LCD_MIPI:
+        if (lcd->esd.esd_check_isr) {
+            dsi_port_set_isr_en(1);
+        }
         dsi_dev_init(&lcd->dev->mipi);
         break;
 
@@ -591,6 +610,23 @@ static void lcd_early_init_task(void *arg)
     }
 }
 
+int lcd_reinit(u8 lcd_id)
+{
+    struct lcd_device_info *lcd_dev = NULL;
+    struct lcd_dev_drive *lcd = NULL;
+    struct lcd_board_cfg *bd_cfg = __this->bd_cfg;
+    lcd_dev = &lcd_dev_info_t[lcd_id];
+    lcd = lcd_dev->lcd;
+    if (lcd && lcd->type == LCD_MIPI) {
+        dsi_dev_deinit();
+        dsi_dev_init(&lcd->dev->mipi);
+        if (lcd->init) {
+            lcd->init(bd_cfg);
+        }
+        dsi_send_init_code(&lcd->dev->mipi);
+        dsi_video_kick_start();
+    }
+}
 static int lcd_dev_init(const struct dev_node *node, void *pdata)
 {
     int lcd_num = 0;
@@ -675,6 +711,10 @@ static int __lcd_open(struct lcd_dev_drive *lcd, struct lcd_board_cfg *bd_cfg)
         }
         dmm_config(&dev->mipi.info);
         log_info("open lcd_mipi....");
+        if ((lcd->esd.esd_check_isr) && !lcd->esd.timer) {
+            lcd->esd.timer = sys_timer_add(&lcd->esd, (void (*)(void *))lcd->esd.esd_check_isr, lcd->esd.interval);
+        }
+
         break;
 
     case LCD_MCU:
@@ -977,6 +1017,9 @@ static int lcd_dev_close(struct device *device)
         dsi_dev_deinit();
         dmm_deinit();
         __this->start_disp_flag = 0;
+        if ((lcd->esd.esd_check_isr) && lcd->esd.timer) {
+            sys_timer_del((int)lcd->esd.timer);
+        }
         break;
     case LCD_MCU_SINGLE_FRAME:
         dpi_close();

@@ -1170,6 +1170,8 @@ c_SRC_FILES := \
 	../../../../audio/le_audio/le_audio_stream.c \
 	../../../../audio/le_audio/wireless_trans_manager.c \
 	../../../../audio/log_config/lib_media_config.c \
+	../../../../audio/music/audio_dec_midi_ctrl.c \
+	../../../../audio/music/audio_dec_midi_file.c \
 	../../../../audio/music/breakpoint.c \
 	../../../../audio/music/music_decrypt.c \
 	../../../../audio/music/music_id3.c \
@@ -1334,6 +1336,7 @@ LFLAGS := \
 	../../../../cpu/wl83/liba/media/lib_dts_dec.a \
 	../../../../cpu/wl83/liba/media/lib_wma_dec.a \
 	../../../../cpu/wl83/liba/media/lib_sbc_dec.a \
+	../../../../cpu/wl83/liba/media/lib_midi_dec.a \
 	../../../../cpu/wl83/liba/media/lib_bt_aac_dec.a \
 	../../../../cpu/wl83/liba/media/lib_ogg_opus_dec.a \
 	../../../../cpu/wl83/liba/media/lib_ogg_vorbis_dec.a \

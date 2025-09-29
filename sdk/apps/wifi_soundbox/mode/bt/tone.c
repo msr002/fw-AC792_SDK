@@ -31,9 +31,9 @@ static int tone_btstack_event_handler(void *evt)
         if (state & TWS_STA_ESCO_OPEN) {
             break;
         }
-        tws_play_tone_file(get_tone_files()->bt_connect, 400);
+        tws_play_tone_file_alone(get_tone_files()->bt_connect, 400);
 #else
-        play_tone_file(get_tone_files()->bt_connect);
+        play_tone_file_alone(get_tone_files()->bt_connect);
 #endif
         break;
     case BT_STATUS_FIRST_DISCONNECT:
@@ -43,10 +43,9 @@ static int tone_btstack_event_handler(void *evt)
             if (tws_api_get_role() == TWS_ROLE_SLAVE) {
                 break;
             }
-            tws_play_tone_file(get_tone_files()->bt_disconnect, 400);
+            tws_play_tone_file_alone(get_tone_files()->bt_disconnect, 400);
 #else
-            play_tone_file(get_tone_files()->bt_disconnect);
-
+            play_tone_file_alone(get_tone_files()->bt_disconnect);
 #endif
         }
         break;
@@ -78,8 +77,8 @@ static void tws_disconn_dly_deal(void *priv)
     tws_dly_discon_time = 0;
 
     if (get_bt_connction_enable_status()) {
-        tone_player_stop();
-        play_tone_file(get_tone_files()->tws_disconnect);
+        /* tone_player_stop(); */
+        play_tone_file_alone(get_tone_files()->tws_disconnect);
     }
 }
 
@@ -97,7 +96,7 @@ static int tone_tws_event_handler(void *evt)
             break;
         }
 
-        tone_player_stop();
+        /* tone_player_stop(); */
 
         int role = event->args[0];
         if (role == TWS_ROLE_MASTER) {
@@ -112,7 +111,7 @@ static int tone_tws_event_handler(void *evt)
                 break;
             }
 #endif
-            tws_play_tone_file(get_tone_files()->tws_connect, 400);
+            tws_play_tone_file_alone(get_tone_files()->tws_connect, 400);
         }
         break;
     case TWS_EVENT_CONNECTION_DETACH:
@@ -135,7 +134,7 @@ static int tone_tws_event_handler(void *evt)
         }
 #endif
         if (get_bt_connction_enable_status()) {
-            tone_player_stop();
+            /* tone_player_stop(); */
             play_tone_file(get_tone_files()->tws_disconnect);
         }
         break;
@@ -144,7 +143,7 @@ static int tone_tws_event_handler(void *evt)
         break;
     case TWS_EVENT_ROLE_SWITCH:
         if (g_role_switch) {
-            tws_play_tone_file(get_tone_files()->tws_connect, 400);
+            tws_play_tone_file_alone(get_tone_files()->tws_connect, 400);
         }
         break;
     }

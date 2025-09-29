@@ -56,12 +56,15 @@ static uint32_t lcd_rotate_task_pid[LV_DISP_DRV_MAX_NUM];
  *      MACROS
  **********************/
 
+#define LV_UI_TRIPLE_BUFFER_EN   0//ui 3buffer使能 适配v9.3.0新特性
 
 struct lv_fb_t {
     lv_display_t *disp;
     LV_PIXEL_COLOR_T *fb;
 };
 volatile static struct lv_fb_t next_disp[LV_DISP_DRV_MAX_NUM];/* 下一帧待显示的next_fb地址 */
+
+static struct lv_fb_t rotate_disp_fh[LV_DISP_DRV_MAX_NUM];
 
 static void *lcd_dev[LV_DISP_DRV_MAX_NUM];
 static lv_display_t *lv_disp[LV_DISP_DRV_MAX_NUM];
@@ -75,6 +78,9 @@ static volatile u16 g_dmm_line;
 static volatile u16 lcd_vert_total = 0;
 static OS_SEM rotate_sem[LV_DISP_DRV_MAX_NUM];
 
+#if LV_UI_TRIPLE_BUFFER_EN
+static OS_SEM triple_buf_sem[LV_DISP_DRV_MAX_NUM];
+#endif
 /**********************
  *   GLOBAL FUNCTIONS
  **********************/
@@ -137,6 +143,17 @@ void lv_port_disp_init(void)
     lv_display_set_buffers(disp, buf_3_1, buf_3_2, sizeof(buf_3_1), LV_DISPLAY_RENDER_MODE_DIRECT);
 
 
+#if LV_UI_TRIPLE_BUFFER_EN
+    static lv_draw_buf_t draw_buf3 = {0};
+    static LV_PIXEL_COLOR_T buf_3_3[LCD_W * LCD_H] __attribute__((aligned(32)));
+    lv_color_format_t cf = lv_display_get_color_format(disp);
+    uint32_t stride = lv_draw_buf_width_to_stride(LCD_W, cf);
+    lv_draw_buf_init(&draw_buf3, LCD_W, LCD_H, cf, stride, buf_3_3, sizeof(buf_3_3));
+    lv_display_set_3rd_draw_buffer(disp, &draw_buf3);
+    os_sem_create(&triple_buf_sem[disp->disp_id], 0);
+#endif
+
+
 #if TCFG_LCD_SUPPORT_MULTI_DRIVER_EN //双屏显示
     disp_init(1);
     disp = lv_display_create(LCD1_W, LCD1_H);
@@ -177,6 +194,10 @@ static void *lv_lcd_frame_end_hook_func(void)
     }
     lv_draw_buf_t *cur_fb = next_disp[id].fb;
     next_disp[id].fb = NULL;
+
+#if LV_UI_TRIPLE_BUFFER_EN
+    os_sem_post(&triple_buf_sem[id]);
+#endif
     return cur_fb->data;
 }
 
@@ -196,6 +217,34 @@ static uint8_t *lv_get_lcd_idle_buf(u8 id, u8 index)
 #endif
 }
 
+#if LV_UI_TRIPLE_BUFFER_EN
+//判断下一个渲染buffer是否繁忙(和推屏buffer冲突)
+static u8 is_display_buffer_busy(u8 id, lv_display_t *disp)
+{
+    u32 dmm_addr = 0;
+    dmm_addr = dmm_addr_base;
+    lv_draw_buf_t *next_act;
+    if (disp->buf_act == disp->buf_1) {
+        next_act = disp->buf_2;
+    } else if (disp->buf_act == disp->buf_2) {
+        next_act = disp->buf_3 ? disp->buf_3 : disp->buf_1;
+    } else {
+        next_act = disp->buf_1;
+    }
+    if (lcd_rotate[id]) {
+        if (next_act->data == (uint8_t *)rotate_disp_fh[id].fb) {
+            return 1;
+        }
+    } else {
+        if (next_act->data == (uint8_t *)CPU_ADDR(dmm_addr)) {
+            return 1;
+        }
+    }
+
+    return 0;
+}
+#endif
+
 #if (LV_LCD_DISP_BUF_NUM == 1)
 void dmm_vsync_int_handler(void)
 {
@@ -210,7 +259,7 @@ void dmm_vsync_int_handler(void)
         ++statistics_cnt;
         dmm_frame_period = get_system_us() - g_last_vsync_trig_time;
         g_last_vsync_trig_time = get_system_us();
-        if (lcd_dev[id] && lcd_rotate) {
+        if (lcd_dev[id] && lcd_rotate[id]) {
             dev_ioctl(lcd_dev[id], IOCTL_LCD_RGB_GET_LCD_HANDLE, (u32)&lcd);
             lcd_vert_total = lcd->dev->imd.info.target_xres;
             if (lcd->type == LCD_MIPI) {
@@ -265,6 +314,7 @@ static void lcd_rotate_task(void *p)
         ret = os_taskq_pend_timeout(msg, ARRAY_SIZE(msg), 0);
         if (ret == OS_TASKQ)  {
             frame_buffer = msg[1];
+            rotate_disp_fh[id].fb = frame_buffer;
 #if (LV_LCD_DISP_BUF_NUM == 1)
             //1. wait line pend
             if (lcd->type == LCD_MIPI || lcd->type == LCD_RGB) {
@@ -331,6 +381,7 @@ static void lcd_rotate_task(void *p)
                     dev_ioctl(lcd_dev[id], IOCTL_LCD_RGB_WAIT_FB_SWAP_FINISH, (u32)lcd_disp_buffer[id][0]);
                 }
             }
+            rotate_disp_fh[id].fb = NULL;
             os_sem_post(&rotate_sem[id]);
 
 #elif (LV_LCD_DISP_BUF_NUM == 2)
@@ -352,11 +403,10 @@ static void lv_lcd_swap_fb(lv_display_t *disp_drv, const lv_area_t *area, LV_PIX
     if (first_render[id] == 1) { //LVGL首次启动渲染
         first_render[id] = 0;
         if (lcd_rotate[id] != 0) {
-            static struct lv_fb_t disp_fh[LV_DISP_DRV_MAX_NUM];
-            disp_fh[id].disp = disp_drv;
-            disp_fh[id].fb = px_map;
+            rotate_disp_fh[id].disp = disp_drv;
+            rotate_disp_fh[id].fb = px_map;
             sprintf(rotate_task_name, "lcd_rotate_task%d", id);
-            thread_fork(rotate_task_name, 20, 1024, 256, &lcd_rotate_task_pid[id], lcd_rotate_task, (void *)&disp_fh[id]);
+            thread_fork(rotate_task_name, 20, 1024, 256, &lcd_rotate_task_pid[id], lcd_rotate_task, (void *)&rotate_disp_fh[id]);
         } else {
             dev_ioctl(lcd_dev[id], IOCTL_LCD_RGB_SET_ISR_CB, (u32)lv_lcd_frame_end_hook_func);
             dev_ioctl(lcd_dev[id], IOCTL_LCD_RGB_START_DISPLAY, (u32)LV_GLOBAL_DEFAULT()->disp_refresh->buf_act->data);
@@ -367,13 +417,30 @@ static void lv_lcd_swap_fb(lv_display_t *disp_drv, const lv_area_t *area, LV_PIX
         int msg[1];
         msg[0] = (int)px_map;
         sprintf(rotate_task_name, "lcd_rotate_task%d", id);
+#if LV_UI_TRIPLE_BUFFER_EN
+        if (is_display_buffer_busy(id, disp_drv)) {
+            os_sem_set(&rotate_sem[id], 0);
+            os_sem_pend(&rotate_sem[id], 0);
+        }
+#else
         os_sem_pend(&rotate_sem[id], 0);
+#endif
         os_taskq_post_type(rotate_task_name, Q_USER, ARRAY_SIZE(msg), msg);
         return;
     }
+
+#if LV_UI_TRIPLE_BUFFER_EN
+    if (is_display_buffer_busy(id, disp_drv)) {
+        os_sem_set(&triple_buf_sem[id], 0);
+        os_sem_pend(&triple_buf_sem[id], 0);
+    }
+#endif
     next_disp[id].fb = LV_GLOBAL_DEFAULT()->disp_refresh->buf_act;
     lv_draw_buf_t *cur_fb = next_disp[id].fb;
+
+#if (LV_UI_TRIPLE_BUFFER_EN == 0)
     dev_ioctl(lcd_dev[id], IOCTL_LCD_RGB_WAIT_FB_SWAP_FINISH, (u32)cur_fb->data);
+#endif
 
 }
 /*Initialize your display and the required peripherals.*/

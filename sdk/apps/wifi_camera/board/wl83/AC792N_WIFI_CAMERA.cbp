@@ -156,6 +156,7 @@
 <Add directory="../../../../apps/common/rf_fcc_tool/include" />
 <Add directory="../../../../apps/common/product_test_tool/includes" />
 <Add directory="../../../../apps/common/gsensor" />
+<Add directory="../../../../apps/common/ext_uart_bt" />
 <Add directory="../../../../apps/common/net/testbox/include" />
 <Add directory="../../../../apps/common/third_party_profile/mijia" />
 <Add directory="../../../../apps/common/third_party_profile/mijia/mijia_ble_api" />
@@ -1042,6 +1043,17 @@
 <Unit filename="../../../../apps/common/example/third_party/sqlite/sqlite3.h" />
 <Unit filename="../../../../apps/common/example/third_party/sqlite/sqlite_test_main.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/common/example/video/image/jpeg/jpeg_disp_frame.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="../../../../apps/common/ext_uart_bt/bt_device_manager.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="../../../../apps/common/ext_uart_bt/bt_music_manager.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="../../../../apps/common/ext_uart_bt/bt_ota_manager.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="../../../../apps/common/ext_uart_bt/bt_phone_manager.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="../../../../apps/common/ext_uart_bt/bt_test_example.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="../../../../apps/common/ext_uart_bt/serial_packager.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="../../../../apps/common/ext_uart_bt/serial_packager.h" />
+<Unit filename="../../../../apps/common/ext_uart_bt/serial_unpackager.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="../../../../apps/common/ext_uart_bt/uart_driver.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="../../../../apps/common/ext_uart_bt/uart_manager.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="../../../../apps/common/ext_uart_bt/uart_manager.h" />
 <Unit filename="../../../../apps/common/fat_nor/extflash.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/common/file_operate/file_bs_deal.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/common/file_operate/file_bs_deal.h" />
@@ -2365,6 +2377,8 @@
 <Unit filename="../../../../audio/le_audio/wireless_trans_manager.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../audio/le_audio/wireless_trans_manager.h" />
 <Unit filename="../../../../audio/log_config/lib_media_config.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="../../../../audio/music/audio_dec_midi_ctrl.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="../../../../audio/music/audio_dec_midi_file.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../audio/music/breakpoint.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../audio/music/breakpoint.h" />
 <Unit filename="../../../../audio/music/music_decrypt.c"><Option compilerVer="CC"/></Unit>
@@ -2599,6 +2613,8 @@
 <Unit filename="../../../../include_lib/media/audio_splicing.h" />
 <Unit filename="../../../../include_lib/media/automute.h" />
 <Unit filename="../../../../include_lib/media/bt_audio_timestamp.h" />
+<Unit filename="../../../../include_lib/media/codec/MIDI_CTRL_API.h" />
+<Unit filename="../../../../include_lib/media/codec/MIDI_DEC_API.h" />
 <Unit filename="../../../../include_lib/media/codec/sbc_codec.h" />
 <Unit filename="../../../../include_lib/media/codec/sbc_enc.h" />
 <Unit filename="../../../../include_lib/media/cpu/wl83/asm/audio_common.h" />
@@ -2644,6 +2660,7 @@
 <Unit filename="../../../../include_lib/media/effects/audio_howling_gate.h" />
 <Unit filename="../../../../include_lib/media/effects/audio_hw_crossover.h" />
 <Unit filename="../../../../include_lib/media/effects/audio_limiter.h" />
+<Unit filename="../../../../include_lib/media/effects/audio_llns_dns.h" />
 <Unit filename="../../../../include_lib/media/effects/audio_multiband_crossover.h" />
 <Unit filename="../../../../include_lib/media/effects/audio_multiband_drc.h" />
 <Unit filename="../../../../include_lib/media/effects/audio_multiband_limiter.h" />
@@ -2730,7 +2747,9 @@
 <Unit filename="../../../../include_lib/media/tech_lib/bt_audio_energy_det_api.h" />
 <Unit filename="../../../../include_lib/media/tech_lib/effect_surTheta_api.h" />
 <Unit filename="../../../../include_lib/media/tech_lib/jlsp_far_keyword.h" />
+<Unit filename="../../../../include_lib/media/tech_lib/jlsp_llns_dns.h" />
 <Unit filename="../../../../include_lib/media/tech_lib/jlsp_vad.h" />
+<Unit filename="../../../../include_lib/media/tech_lib/spatial_imp_ctrl.h" />
 <Unit filename="../../../../include_lib/media/tws/jl_tws.h" />
 <Unit filename="../../../../include_lib/net/cJSON_common/cJSON.h" />
 <Unit filename="../../../../include_lib/net/curl/curl/curl.h" />

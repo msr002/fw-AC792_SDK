@@ -235,6 +235,7 @@ INCLUDES := \
 	-I../../../../apps/common/rf_fcc_tool/include \
 	-I../../../../apps/common/product_test_tool/includes \
 	-I../../../../apps/common/gsensor \
+	-I../../../../apps/common/ext_uart_bt \
 	-I../../../../apps/common/net/testbox/include \
 	-I../../../../apps/common/third_party_profile/mijia \
 	-I../../../../apps/common/third_party_profile/mijia/mijia_ble_api \
@@ -497,6 +498,15 @@ c_SRC_FILES := \
 	../../../../apps/common/example/third_party/sqlite/sqlite3.c \
 	../../../../apps/common/example/third_party/sqlite/sqlite_test_main.c \
 	../../../../apps/common/example/video/image/jpeg/jpeg_disp_frame.c \
+	../../../../apps/common/ext_uart_bt/bt_device_manager.c \
+	../../../../apps/common/ext_uart_bt/bt_music_manager.c \
+	../../../../apps/common/ext_uart_bt/bt_ota_manager.c \
+	../../../../apps/common/ext_uart_bt/bt_phone_manager.c \
+	../../../../apps/common/ext_uart_bt/bt_test_example.c \
+	../../../../apps/common/ext_uart_bt/serial_packager.c \
+	../../../../apps/common/ext_uart_bt/serial_unpackager.c \
+	../../../../apps/common/ext_uart_bt/uart_driver.c \
+	../../../../apps/common/ext_uart_bt/uart_manager.c \
 	../../../../apps/common/fat_nor/extflash.c \
 	../../../../apps/common/file_operate/file_bs_deal.c \
 	../../../../apps/common/file_operate/file_manager.c \
@@ -1364,6 +1374,8 @@ c_SRC_FILES := \
 	../../../../audio/le_audio/le_audio_stream.c \
 	../../../../audio/le_audio/wireless_trans_manager.c \
 	../../../../audio/log_config/lib_media_config.c \
+	../../../../audio/music/audio_dec_midi_ctrl.c \
+	../../../../audio/music/audio_dec_midi_file.c \
 	../../../../audio/music/breakpoint.c \
 	../../../../audio/music/music_decrypt.c \
 	../../../../audio/music/music_id3.c \

@@ -354,12 +354,12 @@
 //                               定义触摸使能                                      //
 //*********************************************************************************//
 #define TCFG_TP_DRIVER_ENABLE               1
-#define TCFG_TOUCH_GT1151_ENABLE            0
-#define TCFG_TOUCH_FT6236_ENABLE            0
-#define TCFG_TOUCH_GT911_ENABLE             0
-#define TCFG_TOUCH_PL6133_ENABLE            0
-#define TCFG_TOUCH_CST3240_ENABLE           1
-#define TCFG_TOUCH_GT9271_ENABLE            0
+#define TCFG_TP_GT1151_ENABLE               0
+#define TCFG_TP_FT6236_ENABLE               0
+#define TCFG_TP_GT911_ENABLE                0
+#define TCFG_TP_CST3240_ENABLE              1
+#define TCFG_TP_GT9271_ENABLE               0
+#define TCFG_TP_CST816D_ENABLE              0
 
 /*
  * TP旋转坐标常用的配置参数
@@ -373,9 +373,9 @@
  *  Y_MIRROR |     1      |     1     |      0      |
  * ---------------------------------------------------
 */
-#define TCFG_TP_SWAP_X_Y                    0///< 是否交换TP的X和Y坐标
+#define TCFG_TP_SWAP_X_Y                    1///< 是否交换TP的X和Y坐标
 #define TCFG_TP_X_MIRROR                    0///< 是否以TP的X中心轴镜像y坐标。
-#define TCFG_TP_Y_MIRROR                    0///< 是否以TP的Y中心轴镜像x坐标。
+#define TCFG_TP_Y_MIRROR                    1///< 是否以TP的Y中心轴镜像x坐标。
 #define TCFG_TP_RST_PIN                     IO_PORTE_06
 #define TCFG_TP_INT_PIN                     IO_PORTA_03
 #define TCFG_TP_COMMUNICATE_IF              "iic0"

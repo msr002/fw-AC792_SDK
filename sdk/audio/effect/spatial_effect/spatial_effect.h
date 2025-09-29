@@ -1,10 +1,12 @@
 #ifndef _SPATIAL_EFFECT_H_
 #define _SPATIAL_EFFECT_H_
+
 #include "system/includes.h"
 #include "generic/typedef.h"
 #include "app_config.h"
 #include "tech_lib/effect_surTheta_api.h"
 #include "tech_lib/3DSpatial_ctrl.h"
+#include "tech_lib/spatial_imp_ctrl.h"
 
 #define SPATIAL_AUDIO_EXPORT_DATA       0
 #define SPATIAL_AUDIO_EXPORT_MODE       0
@@ -14,6 +16,7 @@
 /*音效版本*/
 #define SPATIAL_EFFECT_V1   0
 #define SPATIAL_EFFECT_V2   1
+#define SPATIAL_EFFECT_V3   2
 
 /*音效使能*/
 #define SPATIAL_AUDIO_EFFECT_ENABLE     1
@@ -59,7 +62,7 @@ struct spatial_audio_context {
     void *calculator;
 #if SPATIAL_AUDIO_ANGLE_TWS_SYNC
     void *tws_conn;
-    int tws_angle;
+    int tws_angle;      //v300版本空间音效，低16bit存储 angle_azimuth，高16bit存储 angle_elevation
 #endif /*SPATIAL_AUDIO_ANGLE_TWS_SYNC*/
     u8 mapping_channel;
     u32 head_tracked;
@@ -102,6 +105,8 @@ typedef struct {
     source_cfi scfi;
     source_ang sag;
     core cor;
+    /*第三版音效算法参数*/
+    struct spatial_imp si;
 
 } spatial_effect_cfg_t;
 
@@ -138,15 +143,19 @@ void spatial_audio_sensor_sleep(u8 en);
 int spatial_audio_remapping_data_handler(u8 mapping_channel, u8 bit_width, void *data, int len);
 
 /*角度归0回正*/
-void spatial_audio_angle_reset();
+void spatial_audio_angle_reset(void);
 
 void spatial_effect_update_parm(u8 mode_index, char *node_name, u8 cfg_index);
 
 /*获取节点位宽*/
-u8 get_spatial_effect_node_bit_width();
+u8 get_spatial_effect_node_bit_width(void);
+
+/*获取节点采样率*/
+u32 get_spatial_effect_node_sample_rate();
 
 /*获取节点bypass*/
-u8 get_spatial_effect_node_bypass();
+u8 get_spatial_effect_node_bypass(void);
 
 extern void put_float(double fv);
+
 #endif

@@ -219,6 +219,7 @@ void app_default_volume_change_handler(int inc)
 static int poweroff_tone_play_end_callback(void *priv, enum stream_event event)
 {
     if (event == STREAM_EVENT_STOP) {
+        void power_set_soft_poweroff(u32 ms);
         power_set_soft_poweroff(0);
     }
 

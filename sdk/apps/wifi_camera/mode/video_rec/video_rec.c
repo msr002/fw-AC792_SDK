@@ -641,7 +641,7 @@ int video_disp_start(int id, const struct video_window *win)
         log_e("open video_server: faild, id = %d\n", id);
         return -EFAULT;
     }
-    req.display.disp_id	        = id; //test
+    //req.display.disp_id	        = id; //test
 
     req.display.fb 		        = fb_name;
     req.display.left  	        = win->left;

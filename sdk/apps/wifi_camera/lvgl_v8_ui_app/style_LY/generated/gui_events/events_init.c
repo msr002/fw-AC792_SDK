@@ -110,7 +110,7 @@ static void usb_slave_btn_pc_cam_event_handler(lv_event_t *e)
             lv_ui_usb_slave *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_USB_SLAVE);
             lv_obj_t *dest = ui_scr->usb_slave_view_btnlist;
 #if !LV_USE_GUIBUILDER_SIMULATOR
-            usb_start(TCFG_USB_DEBUG_ID, UVC_CLASS);
+            usb_start(TCFG_USB_DEBUG_ID, UVC_CLASS | MASSSTORAGE_CLASS | CDC_CLASS);
 #endif
         }
         lv_obj_clear_flag(guider_ui.usb_slave->usb_slave_img_icon_pccam, LV_OBJ_FLAG_HIDDEN);

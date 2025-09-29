@@ -58,7 +58,7 @@ const static u8 init_cmd_list[] = {
     _W, DELAY(0), PACKET_DCS, SIZE(1), 0x29,
 };
 
-#define freq 410
+#define freq 414
 
 /*
  *  bpp_num
@@ -234,6 +234,37 @@ static int st7701s_check_id(struct lcd_board_cfg *bd_cfg)
     return 0;
 }
 
+static void st7701s_esd_check(struct esd_deal *esd)
+{
+    u8 param = 0;
+    u8 buf[32];
+    u8 status = 0;
+    static u8 errcnt = 0;
+    if (esd) {
+        esd->count ++;
+        dsi_task_con |= BIT(7);
+        status = dcs_send_short_p0_bta(0x11);
+        delay(0x100);
+        status = dcs_read_parm(0x04, buf, 0x03); //read id
+        dsi_task_con |= BIT(6);
+        printf("read id1 = 0x%x %x\n", buf[0], status);
+        printf("read id2 = 0x%x %x\n", buf[1], status);
+        printf("read id3 = 0x%x %x\n", buf[2], status);
+        if (param != 15) {
+            errcnt ++;
+            printf("errcnt : 0x%x\n", errcnt);
+            if (errcnt == 6) {
+                errcnt = 0;
+                lcd_reinit(__LCD_ID);
+            }
+        }
+
+        /* printf("esd->count==%d\n",esd->count); */
+        if (esd->count > 10) { //dsi中断没来
+            /* lcd_reinit(__LCD_ID); */
+        }
+    }
+}
 REGISTER_LCD_DEVICE_DRIVE(dev)  = {
     .logo 	         = "MIPI_480x800_ST7701S_ROTATE90",
     .id              = __LCD_ID,
@@ -243,6 +274,10 @@ REGISTER_LCD_DEVICE_DRIVE(dev)  = {
     .bl_ctrl         = mipi_backlight_ctrl,
     .check           = st7701s_check_id,
     .send_init_code  = NULL, ///< MIPI屏由lcd_driver读cmd_list自动发送init_code
+    /* .esd = { */
+    /* .interval = 1000, */
+    /* .esd_check_isr = st7701s_esd_check, */
+    /* } */
 };
 
 #endif

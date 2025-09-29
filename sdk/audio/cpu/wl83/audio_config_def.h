@@ -52,6 +52,13 @@
 #define AFX_VIRTUAL_SURRUOUND_PRO_AT_RAM    0   //虚拟环绕声pro/2t4/2t5
 #define AFX_SW_EQ_AT_RAM                    0   //软件EQ
 #define AFx_SPATIAL_EFFECT_AT_RAM           0   //空间音效
+#define AFx_DAC_IO_IRQ_HANDLER_AT_RAM       0   //dac io中断代码放ram
+#define AFx_MIXER_TEXT_AT_RAM               0   //mixer
+#define AFx_DAC_TEXT_AT_RAM                 0   //dac
+#define AFx_CONVERT_TEXT_AT_RAM             0   //convert,bitwidth convert
+#define AFx_VOCAL_REMOVER_TEXT_AT_RAM       0   //人声消除
+#define AFx_SPECTRUM_ADV_TEXT_AT_RAM        0   //频谱计算
+#define AUDIO_JLSTREAM_TEXT_AT_RAM          0   //数据流
 
 /*通话语音处理算法*/
 #define AUDIO_CVP_TEXT_AT_RAM               0	//COMMON TEXT

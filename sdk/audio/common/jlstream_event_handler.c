@@ -255,7 +255,8 @@ static int a2dp_switch_get_status(void)
 {
 #if TCFG_USER_EMITTER_ENABLE
     extern u8 *get_cur_connect_emitter_mac_addr(void);
-    if (get_cur_connect_emitter_mac_addr()) {
+    bool a2dp_sbc_encoder_status_check_ready(u8 * addr);
+    if (get_cur_connect_emitter_mac_addr() && a2dp_sbc_encoder_status_check_ready(get_cur_connect_emitter_mac_addr())) {
         return 1;
     }
 #endif

@@ -214,6 +214,8 @@ int node_param_update(u16 uuid, char *node_name, u8 mode_index, u8 cfg_index)
         ret = multiband_drc_update_parm(mode_index, node_name, cfg_index);
         return ret;
 #endif
+    case NODE_UUID_VOLUME_CTRLER://音量节点不参与音效切换
+        break;
 
     default://通用更新
         ret = node_param_update_parm(uuid, mode_index, node_name, cfg_index);
@@ -226,7 +228,7 @@ int node_param_update(u16 uuid, char *node_name, u8 mode_index, u8 cfg_index)
     switch (uuid) {
 #if TCFG_STEROMIX_NODE_ENABLE
     case NODE_UUID_STEROMIX:
-        ret = stero_mix_update_parm(mode_index, node_name, cfg_index);
+        ret = stereo_mix_update_parm(mode_index, node_name, cfg_index);
         return ret;
 #endif
 #if TCFG_SURROUND_NODE_ENABLE
@@ -272,7 +274,7 @@ int node_param_update(u16 uuid, char *node_name, u8 mode_index, u8 cfg_index)
 #endif
 #if TCFG_CHORUS_NODE_ENABLE
     case NODE_UUID_CHORUS:
-        ret = chorus_udpate_update_parm(mode_index, node_name, cfg_index);
+        ret = chorus_udpate_parm(mode_index, node_name, cfg_index);
         return ret;
 #endif
 #if TCFG_DYNAMIC_EQ_NODE_ENABLE

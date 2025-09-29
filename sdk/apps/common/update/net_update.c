@@ -24,11 +24,13 @@
 #define NET_UPDATE_STATE_CLOSE	3
 
 #define NET_UPDATE_BUF_CHECK	0x12345678 //防止写超buf检测
-/* #define DUAL_BANK_VERIFY_ENABLE */    //回读flash进行校验
+#define DUAL_BANK_VERIFY_ENABLE    //回读flash进行校验
 /* #define DATA_DOWNLOAD_VERIFY_ENABLE */ //对下载的数据进行校验
 
 #define FLASH_SECTOR_SIZE 			(4*1024)
 #define NET_UPDATE_BUFF_SIZE_MAX	(4*1024) //缓存要>=4K，否则可能会引起在初始化时候升级失败
+
+static int net_update_finish_callback(int result);
 
 struct net_update {
     u8 update_doing;

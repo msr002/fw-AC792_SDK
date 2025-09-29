@@ -24,6 +24,7 @@
 #include "streaming_media_server/fenice_config.h"
 #include "syscfg/syscfg_id.h"
 #include "product_main.h"
+#include "event/net_event.h"
 
 #if TCFG_WIFI_ENABLE
 
@@ -320,7 +321,7 @@ void wifi_all_sta_discon(void)//AP模式下主动断开所有MAC的STA
 static int wifi_event_callback(void *network_ctx, enum WIFI_EVENT event)
 {
     int ret = 0;
-
+    struct net_event net = {0};
     switch (event) {
 
     case WIFI_EVENT_MODULE_INIT:
@@ -524,6 +525,8 @@ static int wifi_event_callback(void *network_ctx, enum WIFI_EVENT event)
     case WIFI_EVENT_P2P_GC_DISCONNECTED:
         puts("|network_user_callback->WIFI_EVENT_P2P_GC_DISCONNECTED\n");
         wifi_enter_p2p_mode(P2P_GC_MODE, WIFI_P2P_DEVICE_NAME);
+        net.event = NET_SCR_EVENT_DISCONNECTED;
+        net_event_notify(NET_EVENT_FROM_WIFI, &net);
         break;
     case WIFI_EVENT_P2P_GC_NETWORK_STACK_DHCP_SUCC:
         puts("|network_user_callback->WIFI_EVENT_P2P_GC_NETWORK_STACK_DHCP_SUCC\n");
@@ -539,6 +542,17 @@ static int wifi_event_callback(void *network_ctx, enum WIFI_EVENT event)
     case WIFI_EVENT_P2P_GO_STA_DISCONNECTED:
         puts("network_user_callback->WIFI_EVENT_P2P_GO_STA_DISCONNECTED");
         wifi_enter_p2p_mode(P2P_GO_MODE, WIFI_P2P_DEVICE_NAME);
+        net.event = NET_SCR_EVENT_DISCONNECTED;
+        net_event_notify(NET_EVENT_FROM_WIFI, &net);
+        break;
+
+    case WIFI_EVENT_P2P_WSC_OPERATION:
+        PP2P_GO_STA_INFO info = (PP2P_GO_STA_INFO)network_ctx;
+        printf("WIFI_EVENT_P2P_WSC_OPERATION device name[%d] = %.*s, mac = %02x:%02x:%02x:%02x:%02x:%02x\n",
+               info->dev_name_len, info->dev_name_len, info->dev_name,
+               info->dev_addr[0], info->dev_addr[1], info->dev_addr[2], info->dev_addr[3], info->dev_addr[4], info->dev_addr[5]);
+        void p2p_wsc_trigger(void);
+        p2p_wsc_trigger();
         break;
 
     case WIFI_EVENT_SMP_CFG_START:
@@ -580,6 +594,8 @@ static int wifi_event_callback(void *network_ctx, enum WIFI_EVENT event)
         ctp_keep_alive_find_dhwaddr_disconnect((struct eth_addr *)hwaddr->addr);
         cdp_keep_alive_find_dhwaddr_disconnect((struct eth_addr *)hwaddr->addr);
         wifi_connect_sta_mac(0,  hwaddr->addr, 6, 2);//清空mac
+        net.event = NET_SCR_EVENT_DISCONNECTED;
+        net_event_notify(NET_EVENT_FROM_WIFI, &net);
         break;
     case WIFI_EVENT_STA_IP_GOT_IPV6_SUCC:
         puts("network_user_callback->WIFI_EVENT_STA_IP_GOT_IPV6_SUCC");
@@ -676,7 +692,6 @@ void net_app_init(void)
         preview_init(VIDEO_PREVIEW_PORT, NULL); //2226
         playback_init(VIDEO_PLAYBACK_PORT, NULL);
 #endif
-
 
         /* printf("ftpd server init \n"); */
         /*extern void ftpd_vfs_interface_cfg(void);*/

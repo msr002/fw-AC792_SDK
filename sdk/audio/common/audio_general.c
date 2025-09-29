@@ -298,17 +298,33 @@ const int iir_filter_run_mode           = 0  //不支持32进16出
 #if defined(TCFG_AUDIO_EFX_02E6_RUN_MODE)
         | TCFG_AUDIO_EFX_02E6_RUN_MODE
 #endif
-#if !defined(TCFG_AUDIO_EFX_3845_RUN_MODE) && !defined(TCFG_AUDIO_EFX_6700_RUN_MODE) && !defined(TCFG_AUDIO_EFX_02E6_RUN_MODE)
+#if defined(TCFG_AUDIO_EFX_A64E_RUN_MODE)
+        | EFx_BW_16t32 | EFx_BW_32t32
+#endif
+#if !defined(TCFG_AUDIO_EFX_3845_RUN_MODE) && !defined(TCFG_AUDIO_EFX_6700_RUN_MODE) && !defined(TCFG_AUDIO_EFX_02E6_RUN_MODE) && !defined(TCFG_AUDIO_EFX_A64E_RUN_MODE)
         | EFx_BW_16t16 | EFx_BW_16t32 | EFx_BW_32t32  //不支持32进16出
 #endif
         ;
 
 #ifdef TCFG_AUDIO_EFX_BFE4_RUN_MODE
-const int frequency_compressor_run_mode  = TCFG_AUDIO_EFX_BFE4_RUN_MODE; //只支持16进16出与32进32出
+const int frequency_compressor_run_mode = TCFG_AUDIO_EFX_BFE4_RUN_MODE; //只支持16进16出与32进32出
 #else
-const int frequency_compressor_run_mode  = EFx_BW_16t32 | EFx_BW_32t32;
+const int frequency_compressor_run_mode = EFx_BW_16t32 | EFx_BW_32t32;
 #endif
 
+/* 空间音效V300 */
+#ifdef TCFG_AUDIO_EFX_83E1_RUN_MODE
+const int spatial_imp_run_mode          = TCFG_AUDIO_EFX_83E1_RUN_MODE;
+#else
+const int spatial_imp_run_mode          = EFx_BW_16t16 | EFx_BW_32t32;
+#endif
+const int spatial_imp_fft_mode = 2;     //1软件fft(浮点输入输出) 2硬件fft(定点输入输出)
+const int spatial_imp_run_points = 128; //运算点数
+#if TCFG_SPATIAL_EFFECT_VERSION
+const int CONFIG_SPATIAL_EFFECT_VERSION = TCFG_SPATIAL_EFFECT_VERSION;
+#else
+const int CONFIG_SPATIAL_EFFECT_VERSION = 0;
+#endif
 
 /*变声模式使能*/
 const int config_voicechanger_effect_v_config   = (0

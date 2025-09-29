@@ -8,6 +8,12 @@
 /*1：音效节点固定输出立体声，0：音效节点根据传进来的ch来输出单声道还是立体声*/
 #define SPATIAL_AUDIO_EFFECT_OUT_STEREO_EN    1
 
+//模式切换是否添加打断提示音，数据流重新开关
+#define SPATIAL_AUDIO_EFFECT_SW_TONE_PLAY     0
+
+#define A2DP_SPATIAL_ON     "A2DPSpatialOn"
+#define A2DP_SPATIAL_OFF    "A2DPSpatialOff"
+
 /* 配置空间音效的起始节点前面的节点和空间音效结束节点的后一个节点
  * 用于配置开关空间音效*/
 /*起始节点uuid和名字*/
@@ -38,20 +44,9 @@ enum SPATIAL_EFX_MODE {
 };
 
 /*节点是否在跑*/
-u8 spatial_effect_node_is_running();
+u8 spatial_effect_node_is_running(void);
 
-/*资源初始化*/
-int aud_spatial_sensor_init();
-/*关闭资源*/
-int aud_spatial_sensor_exit();
-/*定时读取传感器数据到cbuf*/
-int aud_spatial_sensor_run(void *priv, void *data, int len);
-/*从cbuf读取传感器数据*/
-int aud_spatial_sensor_data_read(s16 *data, int len);
-/*当前传感器数据量*/
-int aud_spatial_sensor_get_data_len();
-
-u8 get_spatial_effects_busy();
+u8 get_spatial_effects_busy(void);
 
 void set_a2dp_spatial_audio_mode(enum SPATIAL_EFX_MODE mode);
 
@@ -69,9 +64,15 @@ int audio_spatial_effects_data_handler(u8 out_channel, s16 *data, u16 len);
 /*空间音频模式选择*/
 void audio_spatial_effects_mode_switch(enum SPATIAL_EFX_MODE mode);
 
+void audio_spatial_effects_mode_switch_tone_play(enum SPATIAL_EFX_MODE mode);
+
 /*默认eq参数设置*/
 int spatial_effect_eq_default_parm_set(char name[16], struct eq_default_parm *get_eq_parm);
 
 int spatial_effects_node_param_cfg_read(void *cfg, int size);
+
+int audio_spatial_effects_frame_pack_disable(void);
+
+int spatial_effect_dy_eq_bypass(u8 is_bypass);
 
 #endif

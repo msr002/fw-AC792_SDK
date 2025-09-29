@@ -41,6 +41,7 @@ struct pdm_file_cfg {
 struct pdm_mic_file_hdl {
     char name[16];
     void *source_node;
+    struct stream_node *node;
     enum stream_scene scene;
     u8 start;
     u8 dump_cnt;
@@ -80,6 +81,8 @@ static void pdm_mic_output_handler(void *priv, void *data, u32 len)
         if (frame) {
             memcpy(frame->data, (u8 *)data, len);
             frame->len = len;
+            frame->flags = FRAME_FLAG_TIMESTAMP_ENABLE | FRAME_FLAG_PERIOD_SAMPLE | FRAME_FLAG_UPDATE_TIMESTAMP;
+            frame->timestamp = audio_jiffies_usec() * TIMESTAMP_US_DENOMINATOR;
             source_plug_put_output_frame(hdl->source_node, frame);
         }
     } else if (hdl->pdm_mic->ch_num == 2) {
@@ -104,6 +107,7 @@ static void *pdm_mic_init(void *source_node, struct stream_node *node)
     struct pdm_mic_file_hdl *hdl = zalloc(sizeof(*hdl));
     log_info("%s\n", __func__);
     hdl->source_node = source_node;
+    hdl->node = node;
     node->type |= NODE_TYPE_IRQ;
     return hdl;
 }
@@ -144,7 +148,8 @@ int pdm_mic_file_param_init(PLNK_PARM *pdm_mic)
     /*
      *获取配置文件内的参数,及名字
      * */
-    int len = jlstream_read_node_data_new(NODE_UUID_PDM_MIC, 0XFF, (void *)&pdm_cfg, name);
+    struct pdm_mic_file_hdl *hdl = (struct pdm_mic_file_hdl *)pdm_mic->private_data;
+    int len = jlstream_read_node_data_new(NODE_UUID_PDM_MIC, hdl->node->subid, (void *)&pdm_cfg, name);
     if (!len) {
         log_error("%s, read node data err\n", __FUNCTION__);
     }

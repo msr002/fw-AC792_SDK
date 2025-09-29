@@ -394,7 +394,7 @@ static void bt_connction_enable(void)
         return;
     }
 
-    play_tone_file(get_tone_files()->bt_open);
+    play_tone_file_alone(get_tone_files()->bt_open);
 
 #if TCFG_BT_CONNECTION_CLOSE_ALL
     bt_set_stack_exiting(0);
@@ -455,7 +455,7 @@ static void bt_connction_disable(void)
         __this->auto_connection_timer = 0;
     }
 
-    play_tone_file(get_tone_files()->bt_close);
+    play_tone_file_alone(get_tone_files()->bt_close);
 }
 
 void bt_connction_disconnect(void)

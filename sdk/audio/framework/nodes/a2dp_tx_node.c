@@ -107,6 +107,7 @@ extern int bt_get_source_send_a2dp_buf_size();
 extern u8 *get_cur_connect_emitter_mac_addr(void);
 extern void wifi_psm_run_notify(int power_save);
 extern u8 get_a2dp_source_open_flag(void);
+extern bool a2dp_sbc_encoder_status_check_ready(u8 *addr);
 
 
 #if TCFG_WIFI_ENABLE && TCFG_USER_EMITTER_ENABLE
@@ -369,6 +370,10 @@ static int a2dp_tx_ioc_fmt_nego(struct stream_iport *iport)
         return 0;     // 若无蓝牙发射连接，直接返回
     }
 
+    if (!a2dp_sbc_encoder_status_check_ready(bt_addr)) {
+        return 0;
+    }
+
     struct a2dp_tx_hdl *hdl = (struct a2dp_tx_hdl *)iport->node->private_data;
     struct stream_fmt *in_fmt = &iport->prev->fmt;
     int ret = NEGO_STA_ACCPTED;
@@ -421,6 +426,22 @@ static int a2dp_tx_ioc_fmt_nego(struct stream_iport *iport)
     stream_node_ioctl(iport->prev->node, NODE_UUID_ENCODER, NODE_IOC_SET_PARAM, (int)sbc_param);
 
     return ret;
+}
+
+static int a2dp_tx_get_fmt(struct a2dp_tx_hdl *hdl, struct stream_fmt *fmt)
+{
+    if (!hdl) {
+        return -1;
+    }
+
+    sbc_t *sbc_param = a2dp_sbc_encoder_get_param(hdl->bt_addr);
+    if (!sbc_param) {
+        return -1;
+    }
+
+    fmt->sample_rate = get_a2dp_tx_sr(sbc_param->frequency);
+
+    return 0;
 }
 
 static int bt_a2dp_get_packet_frame_num(void)
@@ -633,6 +654,9 @@ static int a2dp_tx_ioctl(struct stream_iport *iport, int cmd, int arg)
         break;
     case NODE_IOC_START:
         a2dp_tx_start(hdl);
+        break;
+    case NODE_IOC_GET_FMT:
+        a2dp_tx_get_fmt(hdl, (struct stream_fmt *)arg);
         break;
     case NODE_IOC_SUSPEND:
     case NODE_IOC_STOP:

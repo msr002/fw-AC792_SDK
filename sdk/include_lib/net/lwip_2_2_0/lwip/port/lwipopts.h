@@ -297,13 +297,13 @@ ip4_route2(src, dest)
  * with scaling applied. Maximum window value in the TCP header
  * will be TCP_WND >> TCP_RCV_SCALE
  */
-#define TCP_WND                 (32*TCP_MSS) 		//最大可以设置为65535
+#define TCP_WND                 (44*TCP_MSS)   		//最大可以设置为65535
 
 /**
  * TCP_SND_BUF: TCP sender buffer space (bytes).
  * To achieve good performance, this should be at least 2 * TCP_MSS.
  */
-#define TCP_SND_BUF             (32*TCP_MSS)
+#define TCP_SND_BUF             (44*TCP_MSS)
 
 /**
  * TCP_RTO_TIME: TCP retransmission timeout (ms). (default is 3000, for faster recovery,

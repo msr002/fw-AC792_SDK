@@ -72,6 +72,15 @@ static struct lcd_board_cfg data[] = { \
     },\
 };
 
+
+struct esd_deal {
+    u8  en;
+    u16 count;
+    u16 interval;
+    void (*esd_check_isr)(struct esd_deal *esd);
+    int timer;
+};
+
 struct spi_dev {
     struct basic_info info;
     enum LCD_ENDIAN data_out_endian;
@@ -111,6 +120,7 @@ struct lcd_dev_drive {
     void (*bl_ctrl)(struct lcd_board_cfg *bd_cfg, u8 onoff);
     int (*check)(struct lcd_board_cfg *bd_cfg);
     int (*send_init_code)(struct lcd_board_cfg *bd_cfg);
+    struct esd_deal esd;
     union lcd_dev_info *dev;
 };
 

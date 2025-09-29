@@ -826,6 +826,12 @@ static void app_audio_volume_change(void)
 
 int audio_digital_vol_node_name_get(u8 dvol_idx, char *node_name)
 {
+#if TCFG_VIRTUAL_SURROUND_PRO_MODULE_NODE_ENABLE
+    //虚拟环绕声2.0与2.1流程使用的音量节点名，如有多通路的音量节点需要调音，需自行实现
+    sprintf(node_name, "%s%s", "VolLR", "Media");
+    return 0;
+#endif
+
     //flow play
     if (dvol_idx & FLOW_DVOL) {
         sprintf(node_name, "%s%s", "Vol_Flow", "Music");

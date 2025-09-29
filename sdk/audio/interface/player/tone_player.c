@@ -472,13 +472,15 @@ int tone_player_add(struct tone_player *player)
     os_mutex_pend(&g_tone_mutex, 0);
 
     if (list_empty(&g_head)) {
+        list_add_tail(&player->entry, &g_head);
         int err = tone_player_start(player, 0);
         if (err) {
             os_mutex_post(&g_tone_mutex);
             return err;
         }
+    } else {
+        list_add_tail(&player->entry, &g_head);
     }
-    list_add_tail(&player->entry, &g_head);
 
     os_mutex_post(&g_tone_mutex);
 

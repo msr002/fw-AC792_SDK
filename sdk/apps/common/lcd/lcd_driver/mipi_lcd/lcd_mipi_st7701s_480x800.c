@@ -58,7 +58,7 @@ const static u8 init_cmd_list[] = {
     _W, DELAY(0), PACKET_DCS, SIZE(1), 0x29,
 };
 
-#define freq 410
+#define freq 414
 
 /*
  *  bpp_num

@@ -638,7 +638,8 @@ void lv_demo_benchmark_summary_display(const lv_demo_benchmark_summary_t *summar
            LVGL_VERSION_MINOR,
            LVGL_VERSION_PATCH,
            LVGL_VERSION_INFO);
-    LV_LOG("Name, Avg. CPU, Avg. FPS, Avg. time, render time, flush time\r\n");
+    LV_LOG("Name                        | Avg. CPU | Avg. FPS | Avg. time | render time | flush time\n");
+    LV_LOG("-----------------------------------------------------------------------------------------");
 
     lv_obj_update_layout(table);
     const int32_t col_w = lv_obj_get_content_width(table) / 4;
@@ -667,7 +668,7 @@ void lv_demo_benchmark_summary_display(const lv_demo_benchmark_summary_t *summar
                                         total_time, render_time, flush_time);
 
             /* csv log */
-            LV_LOG("%s, %"LV_PRIu32"%%, %"LV_PRIu32", %"LV_PRIu32", %"LV_PRIu32", %"LV_PRIu32"\r\n",
+            LV_LOG("%-26s | %8" LV_PRIu32 "%% | %8" LV_PRIu32 " | %9" LV_PRIu32 " | %11" LV_PRIu32 " | %10" LV_PRIu32,
                    scenes[i].name,
                    scenes[i].cpu_avg_usage / cnt,
                    scenes[i].fps_avg / cnt,
@@ -692,7 +693,7 @@ void lv_demo_benchmark_summary_display(const lv_demo_benchmark_summary_t *summar
         lv_table_set_cell_value_fmt(table, 1, 3, "%"LV_PRIu32" ms (%"LV_PRIu32" + %"LV_PRIu32")",
                                     total_time, render_time, flush_time);
         /* csv log */
-        LV_LOG("All scenes avg.,%"LV_PRIu32"%%, %"LV_PRIu32", %"LV_PRIu32", %"LV_PRIu32", %"LV_PRIu32"\r\n",
+        LV_LOG("All scenes avg. \t\t | %8"LV_PRIu32"%% | %8"LV_PRIu32" | %9"LV_PRIu32" | %11"LV_PRIu32" | %10"LV_PRIu32"\r\n",
                summary->total_avg_cpu / summary->valid_scene_cnt,
                summary->total_avg_fps / summary->valid_scene_cnt,
                total_time,

@@ -250,7 +250,8 @@ static u8 auracast_switch_onoff = 0;
 static u8 le_auracast_state = 0;
 static u16 auracast_scan_time = 0;
 static u16 multi_box_bis_role_change_timer;
-extern void set_ext_scan_priority(u8 set_pr);
+int ll_ext_scan_priority(u8 set_pr);
+void ll_vendor_ble_sync_check_set(u8 sync_check);
 
 static u8 app_auracast_idle_query(void)
 {
@@ -368,10 +369,10 @@ void auracast_scan_switch_priority(void *_sw)
     //edr classic acl priority 30-11=19
     if (sw) {
         /* putchar('S'); */
-        set_ext_scan_priority(12);//30-12=18
+        ll_ext_scan_priority(12);//30-12=18
     } else {
         /* putchar('s'); */
-        set_ext_scan_priority(8);//30-8=22
+        ll_ext_scan_priority(8);//30-8=22
         timeout = a2dp_play ? 300 : 400;
     }
     sw = !sw;

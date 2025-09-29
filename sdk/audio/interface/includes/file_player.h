@@ -43,6 +43,10 @@ enum play_status : u8 {
     FILE_PLAYER_PAUSE//播放暂停
 };
 
+struct midi_player {
+    struct jlstream *stream;
+};
+
 struct file_player {
     struct list_head entry;
     u8 ref;
