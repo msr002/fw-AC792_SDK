@@ -4357,7 +4357,6 @@ static void sys_popwin_btn_1_event_handler(lv_event_t *e)
             if (ui_scr->sys_popwin_del == false && lv_obj_is_valid(ui_scr->sys_popwin)) {
                 lv_obj_add_flag(ui_scr->sys_popwin, LV_OBJ_FLAG_HIDDEN);
                 unload_scr_sys_popwin(&guider_ui);
-                lv_obj_clean(ui_scr->sys_popwin);
                 gui_msg_init_ui();
                 gui_msg_init_events();
                 delete_gui_timelines();
@@ -4386,7 +4385,6 @@ static void sys_popwin_btn_2_event_handler(lv_event_t *e)
             if (ui_scr->sys_popwin_del == false && lv_obj_is_valid(ui_scr->sys_popwin)) {
                 lv_obj_add_flag(ui_scr->sys_popwin, LV_OBJ_FLAG_HIDDEN);
                 unload_scr_sys_popwin(&guider_ui);
-                lv_obj_clean(ui_scr->sys_popwin);
                 gui_msg_init_ui();
                 gui_msg_init_events();
                 delete_gui_timelines();

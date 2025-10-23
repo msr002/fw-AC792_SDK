@@ -532,6 +532,7 @@ void usb_host_event_handler(struct device_event *event)
 #if TCFG_HOST_HUB_ENABLE
         if (!strncmp((const char *)event->value, "hub", 3)) {
             /* hub_mount = 0; */
+            usb_hub_exit(usb_id);
             log_info("usb_hub offline %d", usb_id);
         }
 #endif

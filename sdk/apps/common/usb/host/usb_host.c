@@ -610,7 +610,9 @@ static u32 _usb_host_mount(const usb_dev usb_id, u32 port, u32 retry, u32 reset_
         /**********set configuration*********/
         ret = set_configuration(host_dev);
         /* printf_buf(desc_buf, cfg_desc.wTotalLength); */
+
         ret |= usb_descriptor_parser(host_dev, desc_buf, cfg_desc.wTotalLength, &device_desc);
+
 #if USB_H_MALLOC_ENABLE
         log_info("free:desc_buf= %x\n", desc_buf);
         free(desc_buf);
@@ -842,14 +844,14 @@ static int usb_event_notify(const struct usb_host_device *host_dev, u32 ev)
 
 #if TCFG_HOST_HUB_ENABLE
             case USB_CLASS_HUB:
-                if (have_post_event & BIT(11)) {
+                if (have_post_event & BIT(31)) {
                     no_send_event = 1;
                 } else {
-                    have_post_event |= BIT(11);
+                    have_post_event |= BIT(31);
                 }
                 sprintf(itf_set[id].subdev[i], "hub%d", id);
                 event.value = (int)itf_set[id].subdev[i];
-                bmUsbEvent[id] |= BIT(11);
+                bmUsbEvent[id] |= BIT(31);
                 break;
 #endif
             }
@@ -875,7 +877,7 @@ static int usb_event_notify(const struct usb_host_device *host_dev, u32 ev)
 
 __usb_event_out:
     if (event.event == DEVICE_EVENT_OUT) {
-        for (int i = 0; i < 32; i++) {
+        for (int i = 31; i >= 0; i--) {
             if (bmUsbEvent[id] & BIT(i)) {
                 switch (i) {
 #if TCFG_UDISK_ENABLE
@@ -930,14 +932,15 @@ __usb_event_out:
                         memset(uvc_map, 0, sizeof(host_dev));
                         snprintf(uvc_map, sizeof(uvc_map), "uvc%d", uvc_id + 1);
                         event.value = (int)uvc_map;
+                        break; //hub 情况下只拔uvc */
                     } else {
                         if (id == 0) {
                             event.value = (int)"uvc0";
                         } else {
                             event.value = (int)"uvc1";
                         }
+                        break;
                     }
-                    break;
 #endif
 #if TCFG_HOST_WIRELESS_ENABLE
                 case 6:
@@ -981,14 +984,16 @@ __usb_event_out:
                     break;
 #endif
 #if TCFG_HOST_HUB_ENABLE
-                case 11:
-                    if (id == 0) {
-                        event.value = (int)"hub0";
-                    } else {
-                        event.value = (int)"hub1";
+                case 31:
+                    if (!host_dev->father) {
+                        if (id == 0) {
+                            event.value = (int)"hub0";
+                        } else {
+                            event.value = (int)"hub1";
+                        }
+                        sprintf(itf_set[id].subdev[i], "hub%d", id);
+                        event.value = (int)itf_set[id].subdev[i];
                     }
-                    sprintf(itf_set[id].subdev[i], "hub%d", id);
-                    event.value = (int)itf_set[id].subdev[i];
                     break;
 #endif
                 default:
@@ -1157,7 +1162,22 @@ static u32 _usb_host_unmount(const usb_dev usb_id, u32 port)
             /* if (host_dev->interface_info[i]->ctrl->release) { */
             /* host_dev->interface_info[i]->ctrl->release(host_dev); */
             /* } */
-            host_dev->interface_info[i] = NULL;
+
+            if (!host_dev->father) {
+                if (host_dev->interface_info[0]->dev.hub) {
+                    for (int k = 0; k < 7; k++) {
+                        if (host_dev->interface_info[0]->dev.hub->child_dev[k] != NULL) {
+                            break;
+                        }
+                    }
+
+                }  else {
+                    host_dev->interface_info[i] = NULL;
+                }
+            } else {
+                host_dev->interface_info[i] = NULL;
+            }
+
         }
     }
 

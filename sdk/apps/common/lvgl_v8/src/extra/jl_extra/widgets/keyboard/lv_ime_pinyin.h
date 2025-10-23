@@ -64,6 +64,9 @@ typedef struct {
     uint16_t py_num[26];        /* Number and length of Pinyin */
     uint16_t py_pos[26];        /* Pinyin position */
     lv_ime_pinyin_mode_t  mode; /* Set mode, 1: 26-key input(k26), 0: 9-key input(k9). Default: 1. */
+    uint8_t zh_mode;            /* K26: 1=ZH 中文，0=EN 英文 */
+    char lang_hint_when_zh[12]; /* pinyin mode when zh. eg: "EN" or "英" */
+    char lang_hint_when_en[12]; /* pinyin mode when en. eg: "ZH" or "中" */
 } lv_ime_pinyin_t;
 
 /***********************
@@ -126,6 +129,14 @@ lv_obj_t *lv_ime_pinyin_get_cand_panel(lv_obj_t *obj);
  * @return     pointer to the Pinyin input method dictionary
  */
 const lv_pinyin_dict_t *lv_ime_pinyin_get_dict(lv_obj_t *obj);
+
+/**
+ * Set the language hint text when pinyin mode.
+ * @param obj            pointer to a Pinyin IME object
+ * @param when_zh        the "switch target" hint text when pinyin mode (Chinese)
+ * @param when_en        the "switch target" hint text when pinyin mode (English)
+ */
+void lv_ime_pinyin_set_lang_hint_text(lv_obj_t *obj, const char *when_zh, const char *when_en);
 
 /*=====================
  * Other functions

@@ -234,14 +234,14 @@ c_SRC_FILES := \
 	../../../../apps/common/camera/gc1084_mipi/gc1084_mipi_ae.c \
 	../../../../apps/common/camera/gc1084_mipi/gc1084_mipi_awb.c \
 	../../../../apps/common/camera/gc1084_mipi/gc1084_mipi_iq.c \
-	../../../../apps/common/camera/h63_dvp/h63_dvp.c \
-	../../../../apps/common/camera/h63_dvp/h63_dvp_ae.c \
-	../../../../apps/common/camera/h63_dvp/h63_dvp_awb.c \
-	../../../../apps/common/camera/h63_dvp/h63_dvp_iq.c \
-	../../../../apps/common/camera/h63_mipi/h63_mipi.c \
-	../../../../apps/common/camera/h63_mipi/h63_mipi_ae.c \
-	../../../../apps/common/camera/h63_mipi/h63_mipi_awb.c \
-	../../../../apps/common/camera/h63_mipi/h63_mipi_iq.c \
+	../../../../apps/common/camera/h63p_dvp/h63p_dvp.c \
+	../../../../apps/common/camera/h63p_dvp/h63p_dvp_ae.c \
+	../../../../apps/common/camera/h63p_dvp/h63p_dvp_awb.c \
+	../../../../apps/common/camera/h63p_dvp/h63p_dvp_iq.c \
+	../../../../apps/common/camera/h63p_mipi/h63p_mipi.c \
+	../../../../apps/common/camera/h63p_mipi/h63p_mipi_ae.c \
+	../../../../apps/common/camera/h63p_mipi/h63p_mipi_awb.c \
+	../../../../apps/common/camera/h63p_mipi/h63p_mipi_iq.c \
 	../../../../apps/common/camera/isp_scenes.c \
 	../../../../apps/common/camera/isp_tools.c \
 	../../../../apps/common/camera/sc1245_dvp/sc1245.c \
@@ -948,6 +948,7 @@ c_SRC_FILES := \
 	../../../../apps/wifi_camera/wifi/stream/video_rt_usr.c \
 	../../../../apps/wifi_camera/wifi/strm_video_rec.c \
 	../../../../apps/wifi_camera/wifi/tx_camera_cWF/tx_camera_cWF.c \
+	../../../../apps/wifi_camera/wifi/video_downscale.c \
 	../../../../apps/wifi_camera/wifi/video_playback.c \
 	../../../../apps/wifi_camera/wifi/video_preview.c \
 	../../../../apps/wifi_camera/wifi/wifi_app_task.c \

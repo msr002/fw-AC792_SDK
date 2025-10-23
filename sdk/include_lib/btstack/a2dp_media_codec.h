@@ -79,4 +79,6 @@ extern void aac_decoder_energy_det_close(void);
 
 extern void a2dp_media_update_delay_report_time(void *_file, u16 time);
 
+extern int a2dp_media_get_sbc_data_len(void *_file);
+
 #endif

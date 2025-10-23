@@ -322,6 +322,7 @@ int f_free_cache(const char *path);
  * @return 指向文件流的文件指针
  * @return NULL: 打开失败
  * @note fopen自动打开、创建文件夹和文件，打开模式只支持"r" "w" "w+"，如需要追加写请使用"w"，文件名长度超过8个字节的需要用长文件名打开
+ * @note  现在fopen 支持，1、外面自己传入Unicode的长文件进来创建，2、utf8或者内码的形式进来创建，3、带* 号的长短文件名创建。注意事项：不允许1、2两点混合形式
  */
 FILE *fopen(const char *path, const char *mode);
 

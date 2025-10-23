@@ -416,6 +416,8 @@
 //默认网络视频为JPEG格式
 #define CONFIG_NET_JPEG
 
+// #define VIDEO_SCALE_ENABLE
+
 // #define CONFIG_NET_TCP_ENABLE
 #define CONFIG_NET_UDP_ENABLE
 

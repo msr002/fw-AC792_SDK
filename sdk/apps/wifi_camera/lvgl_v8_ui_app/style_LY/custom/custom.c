@@ -82,6 +82,9 @@ static bool is_area_in(const lv_area_t *outer, const lv_area_t *inner)
 void key_scroll_to_view(void)
 {
     lv_obj_t *focused_obj = lv_group_get_focused(lv_group_get_default());
+    if (focused_obj == NULL) {
+        return;
+    }
     lv_obj_t *focused_obj_parent = lv_obj_get_parent(focused_obj);
 
     // 获取滚动容器的滚动区域

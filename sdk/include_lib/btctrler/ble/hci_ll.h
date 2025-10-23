@@ -200,7 +200,7 @@ typedef struct {
     uint8_t         Peer_Address_Type;
     uint8_t         Peer_Address[6];
     uint8_t         Advertising_Filter_Policy;
-    uint8_t         Advertising_Tx_Power;
+    int8_t          Advertising_Tx_Power;
     uint8_t         Primary_Advertising_PHY;
     uint8_t         Secondary_Advertising_Max_Skip;
     uint8_t         Secondary_Advertising_PHY;

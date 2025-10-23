@@ -257,6 +257,11 @@ static void video_playback_cli_thread(void *arg)
         puts("get video media fail\n");
         goto err1;
     }
+
+#ifdef VIDEO_SCALE_ENABLE
+    video_scaler_init(cli->pinfo.info.length, cli->pinfo.info.height, 640, 480);
+#endif
+
     i = find_idr_frame(&cli->pinfo, cli->msec);
 
     if (send_media_packet(&cli->pinfo) <= 0) {
@@ -389,6 +394,11 @@ err1:
 #if 0
     unfind_gps_data();
 #endif
+
+#ifdef VIDEO_SCALE_ENABLE
+    video_scaler_release();
+#endif
+
 #ifdef CONFIG_NET_JPEG
     avi_net_unpkg_exit(cli->pinfo.fd, cli->pinfo.state);
 #endif

@@ -103,6 +103,7 @@ struct video_dec_param {
     u32 jaggy;
     u32 rotate;
     float speed;
+    u32 seek_position;
 };
 
 

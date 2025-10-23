@@ -194,6 +194,12 @@ enum {
     UNKNOW_TYPE_PACKET,
 };
 
+enum {
+    Q_USER_EXIT = 1,
+    Q_USER_START_REC,
+    Q_USER_STOP_REC,
+};
+
 struct parse_info {
     u8 *data_buf;        //解析出来的数据缓存
     int data_len;
@@ -226,7 +232,6 @@ struct rt_stream_dev {
     char task_name[64];
 
     //rec
-    //TODO
     avi_t *rec_out_fd;
 };
 
@@ -322,6 +327,7 @@ static int deal_recv_packet(u8 *recv_buf, int recv_len, u32 ip_addr)
             if (!lbuf_data) {
                 printf("rt lbuf_alloc err ip:%d \n", ip_addr);
                 lbuf_clear(rt_dev->lbuf_handle);
+                os_mutex_post(&recv_mutex);
                 return -1;
             }
             lbuf_data->len = recv_len;
@@ -572,7 +578,38 @@ static void rt_stream_dev_task(void *priv)
                 }
                 break;
             case Q_USER:
-                goto exit;
+                if (msg[1] == Q_USER_EXIT) {
+                    goto exit;
+                } else if (msg[1] == Q_USER_START_REC) {
+                    if (rt_dev->rec_out_fd) {
+                        printf("rx rec is recording \n");
+                        continue;
+                    }
+                    char *filename = "storage/sd0/C/DCIM/1/VID_****.AVI";
+                    avi_t *out_fd = AVI_open_output_file(filename);
+
+                    if (out_fd == NULL) {
+                        printf("rx rec open file error\n");
+                        continue;
+                    }
+
+                    AVI_set_video(out_fd, rt_dev->src_width, rt_dev->src_height, 25, "MJPG");
+                    AVI_set_audio(out_fd, 1, 8000, 16, WAVE_FORMAT_PCM, 0);
+
+                    rt_dev->rec_out_fd = out_fd;
+                    printf("rx rec start \n");
+                } else if (msg[1] == Q_USER_STOP_REC) {
+                    if (rt_dev->rec_out_fd) {
+                        AVI_close(rt_dev->rec_out_fd);
+                        rt_dev->rec_out_fd = NULL;
+                        printf("stop rec \n");
+                    } else {
+                        printf("rx rec not recording \n");
+                    }
+                } else {
+                    printf("unknow user msg:%d \n", msg[1]);
+                }
+
                 break;
             default:
                 break;
@@ -586,6 +623,10 @@ static void rt_stream_dev_task(void *priv)
 exit:
     if (parse_info.data_buf) {
         free(parse_info.data_buf);
+    }
+    if (rt_dev->rec_out_fd) {
+        AVI_close(rt_dev->rec_out_fd);
+        rt_dev->rec_out_fd = NULL;
     }
     printf("rt_stream_dev_task exit\n");
 }
@@ -763,6 +804,7 @@ static int bbm_rt_dev_exit(u32 ip_addr)
     os_mutex_post(&recv_mutex);
 
     os_taskq_del_type(rt_dev->task_name, Q_MSG);
+    msg = Q_USER_EXIT;
     os_taskq_post_type(rt_dev->task_name, Q_USER, 1, &msg);
     thread_kill(&rt_dev->task_pid, KILL_WAIT);
 
@@ -772,11 +814,6 @@ static int bbm_rt_dev_exit(u32 ip_addr)
 
     if (rt_dev->lbuf_ptr) {
         free(rt_dev->lbuf_ptr);
-    }
-
-    if (rt_dev->rec_out_fd) {
-        AVI_close(rt_dev->rec_out_fd);
-        rt_dev->rec_out_fd = NULL;
     }
 
 #if RT_AUDIO_SEND_ENABLE
@@ -1114,28 +1151,8 @@ int bbm_rx_rec_start(void *priv)
     os_mutex_pend(&recv_mutex, 0);
     list_for_each_entry(rt_dev, &recv_dev_list_head, recv_entry) {
         if (rt_dev->ip_addr == bbm_hdl->ip_addr) {
-
-            if (rt_dev->rec_out_fd) {
-                printf("rx rec has started ! \n");
-                return -1;
-            }
-
-            char *filename = "storage/sd0/C/DCIM/1/VID_****.AVI";
-            avi_t *out_fd = AVI_open_output_file(filename);
-
-            if (out_fd == NULL) {
-                printf("rx rec open file error\n");
-                os_mutex_post(&recv_mutex);
-                return -1;
-            }
-
-            AVI_set_video(out_fd, bbm_hdl->rt_config.width,
-                          bbm_hdl->rt_config.height, bbm_hdl->rt_config.fps, "MJPG");
-            AVI_set_audio(out_fd, 1, 8000, 16, WAVE_FORMAT_PCM, 0);
-
-            rt_dev->rec_out_fd = out_fd;
-            printf("rx rec start \n");
-
+            int msg = Q_USER_START_REC;
+            os_taskq_post_type(rt_dev->task_name, Q_USER, 1, &msg);
         }
     }
     os_mutex_post(&recv_mutex);
@@ -1154,16 +1171,8 @@ int bbm_rx_rec_stop(void *priv)
     os_mutex_pend(&recv_mutex, 0);
     list_for_each_entry(rt_dev, &recv_dev_list_head, recv_entry) {
         if (rt_dev->ip_addr == bbm_hdl->ip_addr) {
-
-            if (!rt_dev->rec_out_fd) {
-                printf("rx rec has stopped ! \n");
-                return -1;
-            }
-
-            avi_t *out_fd = rt_dev->rec_out_fd;
-            rt_dev->rec_out_fd = NULL;
-            AVI_close(out_fd);
-            printf("rx rec stop \n");
+            int msg = Q_USER_STOP_REC;
+            os_taskq_post_type(rt_dev->task_name, Q_USER, 1, &msg);
         }
     }
     os_mutex_post(&recv_mutex);

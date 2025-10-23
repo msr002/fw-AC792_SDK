@@ -167,6 +167,12 @@ int tws_api_get_tws_state();
 int tws_api_get_lmp_state(u8 *bt_addr);
 
 bool tws_api_is_connect();
+
+/*
+ * 强制清除tws对方地址
+ */
+int tws_api_clear_sibling_addr(void);
+
 /*
  * 设置tws对方地址
  */

@@ -54,6 +54,8 @@ struct camera_platform_data {
             u8 timing_mode; //时序选择 0:DVP 1:BT601 2:VSYNC 3:BT656
             u8 scan_mode;   //扫描模式 0:逐行扫描(default) 1:奇场数据 2:偶场数据
             u8 width_mode;  //位宽选择 0:全位宽(8/10bit) 1: 4bit 2: 2bit 3: 1bit
+            u32 h_blank; //水平消隐后肩周期数, 默认填0
+            u32 v_blank; //垂直消隐后肩行数, 默认填0
             u32 data_gpio[10];
         } dvp;
         struct {

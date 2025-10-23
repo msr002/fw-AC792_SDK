@@ -1978,6 +1978,7 @@ int uvc_host_camera_out(const usb_dev usb_id)
     }
 
     usb_free_ep_num(usb_id, uvc->host_ep | USB_DIR_IN);
+    hdl->online = 0;
     free(uvc);
     if (hdl->buffer) {
         free(hdl->buffer);

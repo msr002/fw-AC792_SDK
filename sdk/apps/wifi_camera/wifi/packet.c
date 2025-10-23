@@ -454,6 +454,8 @@ int send_video_packet(struct __packet_info  *pinfo, u32 i)
     u32 start_code = 0x01000000;
     u32 send_len = 0;
     int flen;
+    char *des_buf = NULL;
+    int des_len;
 
     struct frm_head *frame_head = (struct frm_head *)pinfo->data;
     memset(frame_head, 0, sizeof(struct frm_head));
@@ -547,8 +549,20 @@ int send_video_packet(struct __packet_info  *pinfo, u32 i)
     if (!pinfo->state) {
         printf("get video frame ok...\n");
     }
+
+#ifdef VIDEO_SCALE_ENABLE
+    if (pinfo->type != PREVIEW_TYPE) {
+        flen = video_scaler_process(pinfo->data + sizeof(struct frm_head), flen, &des_buf);
+        memcpy(pinfo->data + sizeof(struct frm_head), des_buf, flen);
+    }
+#endif
+
     frame_head->frm_sz = flen;
     ret = sock_send(pinfo->sock, (char *)pinfo->data, flen + sizeof(struct frm_head), 0);
+    if (des_buf) {
+        free(des_buf);
+        des_buf = NULL;
+    }
     return ret;
 #endif
 #endif

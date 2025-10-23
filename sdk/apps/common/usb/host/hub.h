@@ -37,6 +37,8 @@ struct hub_device_t {
     u32 buf; //hub常见就一个byte
     u8 nbrports;
     struct usb_host_device *child_dev[7];
+    u8 *epin_buffer;
+    u8  host_epin;
     // u8 report_count; ///<报告描述符中item计数器
     // u8 bNumEndpoints; ///<端点数量
     // struct report_info_t report_list[MAX_REPORT_COUNT]; ///<报告描述符结构体
@@ -47,7 +49,7 @@ u32 usb_hub_process(u32 usb_id);
 u32 usb_hub_event(struct usb_host_device *host_dev, u8 hub_status, u32 host_ep);
 u32 usb_hub_port_reset_event(struct usb_host_device *host_dev, u32 value);
 u32 usb_hub_port_event(struct usb_host_device *host_dev, u32 value, enum hub_port_event port_event);
-
+u32 usb_hub_exit(u32 usb_id);
 
 
 #endif  /*HUB_H*/

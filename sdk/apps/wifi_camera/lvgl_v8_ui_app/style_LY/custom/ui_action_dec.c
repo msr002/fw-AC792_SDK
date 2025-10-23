@@ -28,16 +28,14 @@ static void dec_play_pause(void);
 void gui_show_video_dec_options(void)
 {
     lv_ui_video_dec_options *ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_VIDEO_DEC_OPTIONS);
-    if (!ui_scr) {
-        return;
-    }
-    if (ui_scr->video_dec_options_del == false && lv_obj_is_valid(ui_scr->video_dec_options)) {
+    if (ui_scr && ui_scr->video_dec_options_del == false && lv_obj_is_valid(ui_scr->video_dec_options)) {
         lv_obj_clear_flag(ui_scr->video_dec_options, LV_OBJ_FLAG_HIDDEN);
     } else {
         setup_scr_video_dec_options(&guider_ui);
         gui_msg_init_ui();
         gui_msg_init_events();
         delete_gui_timelines();
+        ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_VIDEO_DEC_OPTIONS);
     }
 
     //按键导航

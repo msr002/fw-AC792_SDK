@@ -53,6 +53,24 @@ const u32 otg_slave_detect_dm_delay_2 = 1;
 const int config_uvc_host_acceleration = 0; //1:使能
 
 /*****************************/
+//video source
+/*****************************/
+/*****************************/
+//isc config
+const int config_isc_frame_ie = 1;
+const int config_isc_line_ie = 0;
+
+/*****************************/
+//csi config
+const int config_csi_frame_ie = 1;
+const int config_csi_line_ie = 0;
+
+/*****************************/
+//mcv config
+const int config_mcv_frame_ie = 1;
+const int config_mcv_line_ie = 0;
+/*****************************/
+/*****************************/
 //isp config
 //isp算法控制打印变量
 const int g_isp_debug_level = 0;//ISPT_DEBUG_LEVEL_AE;
@@ -62,6 +80,15 @@ const u8 g_isp_ae_freeze = 0;
 const u8 g_isp_awb_freeze = 0;
 /*****************************/
 
+//for pipe source config
+//csi摄像头保持打开变量
+const u8 g_csi_keep_open = 1;
+
+//isc摄像头保持打开变量
+const u8 g_isc_keep_open = 1;
+
+//mcv摄像头保持打开变量
+const u8 g_mcv_keep_open = 1;
 
 /**
  * @brief Log (Verbose/Info/Debug/Warn/Error)
