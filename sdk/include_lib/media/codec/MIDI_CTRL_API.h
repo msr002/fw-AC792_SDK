@@ -23,6 +23,7 @@ typedef struct _MIDI_CTRL_PARM_ {
     unsigned int tempo;             //tempo
     void *priv;
     int (*output)(void *priv, void *data, int len);
+    // void (*output)(void* priv, void* data, int len);
 } MIDI_CTRL_PARM;
 
 typedef struct _MIDI_CTRL_CONTEXT_ {
@@ -40,7 +41,7 @@ typedef struct _MIDI_CTRL_CONTEXT_ {
 } MIDI_CTRL_CONTEXT;
 
 
-extern MIDI_CTRL_CONTEXT *get_midi_ctrl_ops();
+// extern MIDI_CTRL_CONTEXT* get_midi_ctrl_ops();
 extern int get_midi_tone_compressor(void *work_buf);
 
 

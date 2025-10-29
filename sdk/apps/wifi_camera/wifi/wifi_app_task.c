@@ -325,7 +325,6 @@ static int wifi_event_callback(void *network_ctx, enum WIFI_EVENT event)
     switch (event) {
 
     case WIFI_EVENT_MODULE_INIT:
-
         wifi_set_smp_cfg_timeout(30);       //配置MONITOR模式超时后事件回调通知时间
 
         struct wifi_store_info wifi_default_mode_parm;
@@ -743,10 +742,9 @@ static void wifi_app_task(void *priv)
     wifi_set_long_retry(4);
     wifi_set_short_retry(7);
 
-#if 0
+#if WIFI_ENTER_P2P_MODE
     wifi_enter_p2p_mode(P2P_GO_MODE, WIFI_P2P_DEVICE_NAME);
 #endif
-
     //非量产模式下的AP和ST设置
 #ifndef CONFIG_MASS_PRODUCTION_ENABLE
     //以下在wifi启动之后可以设置模式、名称、密码，不使用则是默认AP模式、wifi_camera_wl8x_xxxx、12345678

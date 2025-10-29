@@ -1772,6 +1772,7 @@
 <Unit filename="../../../../../apps/demo/demo_ui/include/app_config.h" />
 <Unit filename="../../../../../cpu/wl83/adc_api.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../../cpu/wl83/debug.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="../../../../../cpu/wl83/debug_exception.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../../cpu/wl83/setup.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../../include_lib/btctrler/ble/hci_ll.h" />
 <Unit filename="../../../../../include_lib/btctrler/btcontroller_mode.h" />

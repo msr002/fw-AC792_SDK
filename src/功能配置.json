@@ -229,6 +229,42 @@
       "inactive-value": 0,
       "id": "id_1702539762956_7",
       "__vModel__": "field170"
+     },
+     {
+      "__config__": {
+       "label": "USB_HOST_AUDIO模式",
+       "tag": "el-switch",
+       "tagIcon": "switch",
+       "defaultValue": 0,
+       "span": 4,
+       "showLabel": true,
+       "labelWidth": 160,
+       "layout": "colFormItem",
+       "required": false,
+       "regList": [],
+       "changeTag": true,
+       "status": 0,
+       "dataType": [
+        "8",
+        "1"
+       ],
+       "formId": 136,
+       "renderKey": "1361756804288283",
+       "uuid": "TCFG_APP_USB_HOST_EN",
+       "saveWay": "macro",
+       "eventField": [],
+       "originValue": 0
+      },
+      "style": {},
+      "disabled": false,
+      "active-text": "",
+      "inactive-text": "",
+      "active-color": null,
+      "inactive-color": null,
+      "active-value": 1,
+      "inactive-value": 0,
+      "id": "id_1756804288283_0",
+      "__vModel__": "field136"
      }
     ],
     "eventField": []

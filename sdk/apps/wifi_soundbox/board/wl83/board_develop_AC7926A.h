@@ -15,6 +15,11 @@
 /* #define CONFIG_VIDEO_ENABLE */
 #define CONFIG_MEDIA_ENABLE
 
+#ifdef CONFIG_UI_ENABLE
+#ifndef CONFIG_VIDEO_ENABLE
+#define CONFIG_VIDEO_ENABLE
+#endif
+#endif
 
 //
 //*********************************************************************************//

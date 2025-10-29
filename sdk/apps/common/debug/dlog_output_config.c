@@ -6,7 +6,7 @@
 
 #if TCFG_DEBUG_DLOG_ENABLE
 
-#define DLOG_OUTPUT_LBUF_MAX_SIZE       (2 * 1024)
+#define DLOG_OUTPUT_LBUF_MAX_SIZE       (20 * 1024)
 
 #define DLOG_OUTPUT_BY_UART     (1 << 0)
 #define DLOG_OUTPUT_BY_SPP      (1 << 1)
@@ -28,6 +28,7 @@
 
 #if DLOG_OUT_CHANNEL
 void dlog_output_resume(u8 flush);
+int dlog_uart_clear_busy(void);
 
 extern const struct dlog_output_channel_s dlog_out_channel_begin[];
 extern const struct dlog_output_channel_s dlog_out_channel_end[];
@@ -225,6 +226,22 @@ void dlog_output_flush(void)
     dlog_uart_wait_send(200);
 #endif
 }
+void dlog_uart_output_flush(void)
+{
+    if (g_dlog_output.lbuf_head == NULL) {
+        return;
+    }
+#if DLOG_OUTPUT_BY_UART  // 仅支持串口清缓存
+    dlog_uart_clear_busy();
+    u32 cnt = 0;
+    while ((cnt < 100) && (!lbuf_empty(g_dlog_output.lbuf_head))) {
+        dlog_output_resume(0);
+        /* os_time_dly(2); */
+        cnt++;
+    }
+    dlog_uart_wait_send(200);
+#endif
+}
 
 void dlog_uart_en_switch(u8 enable);
 int dlog_uart_output_set(enum DLOG_OUTPUT_TYPE type)
@@ -238,6 +255,7 @@ int dlog_uart_output_set(enum DLOG_OUTPUT_TYPE type)
         printf("dlog output type setting\n");
         return -2;
     }
+    dlog_output_type_set(0);
     if (dlog_output_type_get() == type) {
         spin_unlock(&g_dlog_output_lock);
         return 0;
@@ -281,14 +299,16 @@ __dlog_exit_type_set:
 
 #define DLOG_UART_NUM           -1
 
-#define  DLOG_UART    JL_UART2
+#define  DLOG_UART    JL_UART1
 
 struct dlog_uart_s {
     void *hdl;
     int uart_num;
     u8  busy;
+    u8  isr_mode;
 } dlog_uart = {
     .uart_num   = -1,
+    .isr_mode = 1, //1:uart采用中断方式  0: while发送
 };
 
 /* 串口中断事件回调函数，该函数在中断中调用，程序执行时间应尽量短 */
@@ -323,12 +343,39 @@ int dlog_uart_is_busy()
     return dlog_uart.busy;
 }
 
+int dlog_uart_clear_busy(void)
+{
+    dlog_uart.busy = 0;
+}
+
+void dlog_uart_set_isr_mode(u8 mode)
+{
+    dlog_uart.isr_mode = mode;
+    dlog_uart.busy = 0;
+}
+
+void dlog_uart_putbyte(char a)
+{
+    DLOG_UART->CON0 |= BIT(13);
+    DLOG_UART->BUF = a;
+    __asm_csync();
+    while ((DLOG_UART->CON0 & (BIT(15) | BIT(0))) == 0x0001);
+}
+
 int dlog_uart_send(const void *buf, u16 len)
 {
     /* printf("uart send %d %s\n", cpu_in_irq(), os_current_task()); */
     if (dlog_uart.uart_num == -1) {
         return -1;
     }
+    if (dlog_uart.isr_mode == 0) {
+        u8 *tmp_buf = (u8 *)buf;
+        for (int i = 0; i < len; i++) {
+            dlog_uart_putbyte(tmp_buf[i]);
+        }
+        return 0;
+    }
+
     dlog_uart.busy = 1;
 
     DLOG_UART->TXADR = buf;
@@ -377,9 +424,10 @@ void dlog_uart_init()
     /* JL_OMAP->PD1_OUT = FO_UART2_TX; */
     /* JL_OMAP->USBDP_OUT = FO_UART2_TX;     //tx_io_config */
 
-    gpio_enable_function(TCFG_DEBUG_DLOG_UART_TX_PIN, GPIO_FUNC_UART2_TX, 1);
+    printf("%s io:%d\n", __func__, TCFG_DEBUG_DLOG_UART_TX_PIN);
+    gpio_enable_function(TCFG_DEBUG_DLOG_UART_TX_PIN, GPIO_FUNC_UART1_TX, 1);
 
-    request_irq(IRQ_UART2_IDX, 5, uart_tx_isr, 1);
+    request_irq(IRQ_UART1_IDX, 5, uart_tx_isr, 1);
 
     dlog_uart.uart_num = 1;
 
@@ -389,7 +437,7 @@ void dlog_uart_init()
 void dlog_uart_deinit()
 {
     printf("%s", __func__);
-    if (!dlog_uart.uart_num) {
+    if (dlog_uart.uart_num == -1) {
         return;
     }
 

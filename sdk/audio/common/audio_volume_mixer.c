@@ -965,6 +965,15 @@ int audio_digital_vol_update_parm(u8 dvol_idx, s32 param)
     return err;
 }
 
+void set_dvol_by_nodename(char *vol_name, s16 volume)
+{
+    struct volume_cfg cfg = {0};
+    cfg.bypass = VOLUME_NODE_CMD_SET_VOL;
+    cfg.cur_vol = volume;
+
+    jlstream_set_node_param(NODE_UUID_VOLUME_CTRLER, vol_name, (void *)&cfg, sizeof(struct volume_cfg));
+}
+
 extern const struct volume_cfg *get_default_volume_cfg(void);
 
 //获取当前模式music数据流节点的默认音量

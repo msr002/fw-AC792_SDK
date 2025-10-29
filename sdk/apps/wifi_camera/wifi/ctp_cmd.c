@@ -793,8 +793,13 @@ static int cmd_put_net_scr(void *priv, char *content)
     cfg.ack = json_object_get_int(json_object_object_get(parm, "ack"));
 #else
     //以设备端为主的命令
+#if	CONFIG_NET_PROTOCOL_TCP 	//TCP下默认需要回复app ack包
     cfg.prot = 0;
     cfg.ack = 1;
+#elif CONFIG_NET_PROTOCOL_UDP   //UDP默认不需要ack
+    cfg.prot = 1;
+    cfg.ack = 0;
+#endif
     //get_connect_info(&cfg);
 
 #endif

@@ -32,6 +32,7 @@
 #define PIPELINE_UUID_ACOUSTIC_COMMUNICAT 0x92C8
 #define PIPELINE_UUID_VIDEO_REC     0xF7A2
 #define PIPELINE_UUID_VIDEO_DEC     0xBC14
+#define PIPELINE_UUID_VIR_VOICE     0x8026
 
 void a2dp_energy_detect_handler(int *arg);
 
@@ -109,6 +110,10 @@ static int get_pipeline_uuid(const char *name)
             return PIPELINE_UUID_A2DP_DUT;
         }
 #endif
+    }
+
+    if (!strcmp(name, "vir_voice")) {
+        return PIPELINE_UUID_VIR_VOICE;
     }
 
     if (!strcmp(name, "a2dp_le_audio") || \

@@ -192,6 +192,12 @@ lp_req_proc_t low_power_user_request_ext(u32 time_ms, u8 need_block, u8 timeout)
 //******************************************************************
 #include "pmu_flag.h"
 
+/**
+ * @brief power_set_soft_poweroff 软关机接口
+ *
+ * @Params ms 软关机定时唤醒时间, 范围在大概1~20000000(受LRC实际频率影
+ *            响0xFFFFFFFF / lrc * 1000)之间, 0关闭定时唤醒
+ */
 void power_set_soft_poweroff(u32 ms);
 
 void mask_softflag_config(struct boot_soft_flag_t *softflag);

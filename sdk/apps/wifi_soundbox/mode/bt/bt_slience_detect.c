@@ -16,6 +16,8 @@
 #define LOG_CLI_ENABLE
 #include "debug.h"
 
+#define TCFG_BT_BACKGROUND_DETECT_DELAY_TIME        (TCFG_BT_BACKGROUND_DETECT_TIME + 1000)         // 微信通知、hello酷狗等提示音，加一个iPhone会有没收到AVRCP命令就延长时间再切的流程
+
 struct detect_handler {
     u8 codec_type;
     u8 unmute_packet_cnt;
@@ -28,6 +30,18 @@ struct detect_handler {
 };
 
 static struct detect_handler *g_detect_hdl[2];
+extern u8 a2dp_avrcp_play_cmd_addr[6]; // 收到avrcp播放命令的蓝牙设备地址
+
+#if TCFG_A2DP_PREEMPTED_ENABLE
+
+struct dual_detect_handler {
+    u8 is_receive_avrcp_play_cmd;				// 是否收到avrcp的播放命令，有些时候iOS会不发这个命令
+    u8 use_bt_background_detect_delay_time;	// 当没有收到avrcp的播放命令，需要使用较长的默认检测时间
+};
+
+static struct dual_detect_handler *g_dual_detect = NULL;
+
+#endif
 
 static struct detect_handler *get_detect_handler(u8 *bt_addr)
 {
@@ -73,7 +87,7 @@ static void bt_sync_open_a2dp(void *_data, u16 len, bool rx)
         if (data[0] == TWS_MSG_SYNC_OPEN_A2DP_PLAYER) {
             int msg[2];
             memcpy(msg, data + 1, 6);
-            app_send_message(APP_MSG_BT_A2DP_START, 2, msg);
+            app_send_message(APP_MSG_BT_A2DP_START, 2, msg[0], msg[1]);
         }
     }
 }
@@ -145,24 +159,60 @@ __check:
         //能量检测
         int energy = 0;
         int unmute_packet_num = 0;
+        int unmute_packet_delay_num = 0;
         if (detect->codec_type == A2DP_CODEC_SBC) {             //20ms
             energy = bt_audio_energy_detect_run(detect->codec_type, packet, len);
             unmute_packet_num = TCFG_BT_BACKGROUND_DETECT_TIME / 20;
+            unmute_packet_delay_num = TCFG_BT_BACKGROUND_DETECT_DELAY_TIME / 20;
         } else if (detect->codec_type == A2DP_CODEC_MPEG24) {   //25ms
             energy = bt_audio_energy_detect_run(detect->codec_type, packet, len);
             unmute_packet_num = TCFG_BT_BACKGROUND_DETECT_TIME / 25;
+            unmute_packet_delay_num = TCFG_BT_BACKGROUND_DETECT_DELAY_TIME / 25;
         } else if (detect->codec_type == A2DP_CODEC_LDAC) {
             energy = bt_audio_energy_detect_run(detect->codec_type, packet, len);
             unmute_packet_num = TCFG_BT_BACKGROUND_DETECT_TIME / 25;
+            unmute_packet_delay_num = unmute_packet_num;
         }
 
         log_info("energy: %d, %d, %d", seqn, energy, detect->unmute_packet_cnt);
 
         if (energy >= 10) {
+#if TCFG_BT_DUAL_CONN_ENABLE && TCFG_A2DP_PREEMPTED_ENABLE
+            /* printf("g_dual_detect->is_receive_avrcp_play_cmd = %d\n", g_dual_detect->is_receive_avrcp_play_cmd); */
+            if (!g_dual_detect->use_bt_background_detect_delay_time) {
+                if (++detect->unmute_packet_cnt < unmute_packet_num) {
+                    a2dp_media_free_packet(detect->file, packet);
+                    /* putchar('#'); */
+                    continue;
+                } else {
+                    if (!g_dual_detect->is_receive_avrcp_play_cmd) {
+                        // 如果没有收到avrcp的播放命令，则延长能量检测时间
+                        g_dual_detect->use_bt_background_detect_delay_time = 1;
+                        g_dual_detect->is_receive_avrcp_play_cmd = 1;
+                        log_info("%s, %d g_dual_detect->is_receive_avrcp_play_cmd = %d", __FUNCTION__, __LINE__, g_dual_detect->is_receive_avrcp_play_cmd);
+                        ++detect->unmute_packet_cnt;
+                        /* printf("use_bt_background_detect_delay_time, unmute_packet_num = %d, unmute_packet_cnt = %d\n", unmute_packet_num, detect->unmute_packet_cnt); */
+                        continue;
+                    }
+                    // 能量检测结束，允许抢占播歌
+                }
+            } else {
+                if (++detect->unmute_packet_cnt < unmute_packet_delay_num) {
+                    // 如果没有收到avrcp的播放命令，则延长能量检测时间
+                    a2dp_media_free_packet(detect->file, packet);
+                    /* putchar('/'); */
+                    continue;
+                } else {
+                    g_dual_detect->use_bt_background_detect_delay_time = 0;
+                    // 能量检测结束，允许抢占播歌
+                }
+            }
+#else
             if (++detect->unmute_packet_cnt < unmute_packet_num) {
                 a2dp_media_free_packet(detect->file, packet);
                 continue;
             }
+#endif
         } else {
             if (energy >= 0) {
                 detect->unmute_packet_cnt >>= 1;
@@ -198,7 +248,7 @@ __check:
 
         int msg[2];
         memcpy(msg, detect->bt_addr, 6);
-        app_send_message(APP_MSG_BT_A2DP_START, 2, msg);
+        app_send_message(APP_MSG_BT_A2DP_START, 2, msg[0], msg[1]);
 
 #if TCFG_USER_TWS_ENABLE
         u8 data[7];
@@ -248,6 +298,23 @@ void bt_start_a2dp_slience_detect(u8 *bt_addr, int ingore_packet_num)
 
     log_info("bt_start_a2dp_slience_detect:");
     put_buf(bt_addr,  6);
+
+#if TCFG_BT_DUAL_CONN_ENABLE && TCFG_A2DP_PREEMPTED_ENABLE
+    if (!g_dual_detect) {
+        g_dual_detect = (struct dual_detect_handler *)zalloc(sizeof(struct dual_detect_handler));
+    }
+    if (!g_dual_detect) {
+        return;
+    }
+    if (memcmp(a2dp_avrcp_play_cmd_addr, detect->bt_addr, 6) == 0) {
+        g_dual_detect->is_receive_avrcp_play_cmd = 1;
+    } else {
+        g_dual_detect->is_receive_avrcp_play_cmd = 0;
+    }
+    g_dual_detect->use_bt_background_detect_delay_time = 0;
+    log_info("%s, %d g_dual_detect->is_receive_avrcp_play_cmd = %d", __FUNCTION__, __LINE__, g_dual_detect->is_receive_avrcp_play_cmd);
+    memset(a2dp_avrcp_play_cmd_addr, 0, 6);
+#endif
 }
 
 void bt_stop_a2dp_slience_detect(u8 *bt_addr)
@@ -282,6 +349,13 @@ void bt_stop_a2dp_slience_detect(u8 *bt_addr)
         detect = NULL;
     }
 
+#if TCFG_BT_DUAL_CONN_ENABLE && TCFG_A2DP_PREEMPTED_ENABLE
+    if (g_dual_detect) {
+        free(g_dual_detect);
+        g_dual_detect = NULL;
+    }
+#endif
+
     close_energy_detect(codec_type);
 }
 
@@ -311,6 +385,17 @@ int bt_slience_detect_get_result(u8 *bt_addr)
         return BT_SLIENCE_HAVE_ENERGY;
     }
     return BT_SLIENCE_NO_ENERGY;
+}
+
+u8 bt_a2dp_slience_detect_num(void)
+{
+    u8 detect_num = 0;
+    for (int i = 0; i < 2; i++) {
+        if (g_detect_hdl[i]) {
+            detect_num++;
+        }
+    }
+    return detect_num;
 }
 
 bool bt_slience_get_detect_addr(u8 *bt_addr)

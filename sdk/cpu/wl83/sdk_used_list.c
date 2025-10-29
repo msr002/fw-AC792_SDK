@@ -93,10 +93,10 @@ alac_dec_plug
 #if TCFG_DEC_APE_ENABLE
 ape_dec_plug
 #endif
-#if TCFG_MIDI_FILE_DEC_ENABLE
+#if TCFG_DEC_MIDI_FILE_ENABLE
 midi_dec_plug
 #endif
-#if TCFG_MIDI_CTRL_DEC_ENABLE
+#if TCFG_DEC_MIDI_CTRL_ENABLE
 midi_ctrl_dec_plug
 #endif
 #if (TCFG_LE_AUDIO_CODEC_TYPE == AUDIO_CODING_JLA_LW)

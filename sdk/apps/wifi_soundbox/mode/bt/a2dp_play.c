@@ -45,7 +45,7 @@ static u8 g_a2dp_slience_detect;
 static u32 g_a2dp_slience_time;
 static u32 g_a2dp_play_time;
 #if TCFG_A2DP_PREEMPTED_ENABLE
-u8 a2dp_avrcp_play_cmd_addr[6] = {0};
+u8 a2dp_avrcp_play_cmd_addr[6];
 #endif
 
 static u8 *get_g_play_addr(void)
@@ -106,7 +106,12 @@ void a2dp_energy_detect_handler(int *arg)
             memset(a2dp_energy_detect_addr, 0xff, 6);
         }
     }
-
+#if !TCFG_A2DP_PREEMPTED_ENABLE
+    if (bt_a2dp_slience_detect_num() < 1) {
+        // 无后台待播放设备
+        return;
+    }
+#endif
     if (g_a2dp_slience_detect == 0 && g_a2dp_play_time >= 10000) {
         /* 播放1s后开启静音检测 */
         g_a2dp_slience_detect = 1;
@@ -299,6 +304,25 @@ static void a2dp_suspend_by_call(u8 *play_addr, void *play_device)
         btstack_device_control(play_device, USER_CTRL_AVCTP_OPID_PAUSE);
         a2dp_play_send_cmd(CMD_A2DP_MUTE_BY_CALL, play_addr, 6);
     }
+}
+
+static void bt_app_msg_a2dp_start(u8 *bt_addr)
+{
+#if TCFG_A2DP_PREEMPTED_ENABLE
+    u8 addr[6];
+
+    if (a2dp_player_get_btaddr(addr)) {
+        /* 后台设备a2dp有能量,转为前台播放,
+         * 前台设备转为后台静音, 不做能量检测, 防止抖音这种无法暂停的播放器又抢回来
+         */
+        void *device = btstack_get_conn_device(addr);
+        if (device) {
+            btstack_device_control(device, USER_CTRL_AVCTP_OPID_PAUSE);
+        }
+        a2dp_play_send_cmd(CMD_A2DP_MUTE, addr, 6);
+    }
+    a2dp_play(bt_addr);
+#endif
 }
 
 static int a2dp_bt_status_event_handler(void *evt)

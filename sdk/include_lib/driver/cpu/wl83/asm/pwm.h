@@ -15,10 +15,10 @@
 #define PWMCH1_H  		BIT(1)
 #define PWMCH2_H  		BIT(2)
 #define PWMCH3_H  		BIT(3)
-#define PWMCH4_H  		BIT(4)
-#define PWMCH5_H  		BIT(5)
-#define PWMCH6_H  		BIT(6)
-#define PWMCH7_H  		BIT(7)
+// #define PWMCH4_H  		BIT(4)
+// #define PWMCH5_H  		BIT(5)
+// #define PWMCH6_H  		BIT(6)
+// #define PWMCH7_H  		BIT(7)
 /* \} name */
 
 /**
@@ -30,10 +30,10 @@
 #define PWMCH1_L  		BIT(PWM_CHL_OFFSET + 1)
 #define PWMCH2_L  		BIT(PWM_CHL_OFFSET + 2)
 #define PWMCH3_L  		BIT(PWM_CHL_OFFSET + 3)
-#define PWMCH4_L  		BIT(PWM_CHL_OFFSET + 4)
-#define PWMCH5_L  		BIT(PWM_CHL_OFFSET + 5)
-#define PWMCH6_L  		BIT(PWM_CHL_OFFSET + 6)
-#define PWMCH7_L  		BIT(PWM_CHL_OFFSET + 7)
+// #define PWMCH4_L  		BIT(PWM_CHL_OFFSET + 4)
+// #define PWMCH5_L  		BIT(PWM_CHL_OFFSET + 5)
+// #define PWMCH6_L  		BIT(PWM_CHL_OFFSET + 6)
+// #define PWMCH7_L  		BIT(PWM_CHL_OFFSET + 7)
 /* \} name */
 
 /**
@@ -70,11 +70,11 @@
  * \{
  */
 typedef struct {
-    float duty;                         ///<  用于带2位小数点占空比的PWM，0.00%-100.00%
-    u8 deathtime;                       ///<  死区时间，最大值31
-    u8  point_bit;                      ///<  小数点精度:0-2
-    u32 pwm_ch;
-    u32 freq;
+    float duty;                         ///< 用于带2位小数点占空比的PWM，0.00%-100.00%
+    u8 deathtime;                       ///< 死区时间，最大值31
+    u8  point_bit;                      ///< 小数点精度:0-2
+    u32 pwm_ch;                         ///< PWM通道使能
+    u32 freq;                           ///< PWM输出频率配置
 } pwm_config_t;
 /* \} name */
 
@@ -83,9 +83,9 @@ typedef struct {
  * \{
  */
 struct pwm_platform_data {
-    int timer_pwm_port[TIME_PWM_MAX];
-    int mcpwm_port[MCPWM_MAX_NUM * 2];
-    pwm_config_t pwm_config;
+    int timer_pwm_port[TIME_PWM_MAX];   ///< TIMER PWM IO口配置
+    int mcpwm_port[MCPWM_MAX_NUM * 2];  ///< MCPWM IO配置
+    pwm_config_t pwm_config;            ///< PWM参数配置
     u8 hd_level;                        ///< IO强驱等级
 };
 /* \} name */

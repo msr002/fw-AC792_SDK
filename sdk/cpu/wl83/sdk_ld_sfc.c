@@ -165,6 +165,11 @@ SECTIONS
 #endif
         #include "common/movable/movable_data.ld"
 
+        . = ALIGN(4);
+        *(.debug_exception.debug_text)
+        *(.debug_exception.debug_const)
+        *(.debug_exception.data)
+
         . = ALIGN(4); // must at tail, make ram0_data size align 4
     } > ram0
 
@@ -177,6 +182,9 @@ SECTIONS
 #endif
         . = ALIGN(4);
         *(.power_driver.data.bss)
+
+        . = ALIGN(4);
+        *(.debug_exception.data.bss)
 
         . = ALIGN(4);
         *(.bss)

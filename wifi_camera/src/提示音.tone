@@ -17,7 +17,7 @@
       "value": "原格式"
      },
      "size": 3648,
-     "sizeKey": "b14ecf21"
+     "sizeKey": "53e8bbb3"
     },
     {
      "name": "数字1",
@@ -29,7 +29,7 @@
       "value": "原格式"
      },
      "size": 3072,
-     "sizeKey": "c9965119"
+     "sizeKey": "6c303dab"
     },
     {
      "name": "数字2",
@@ -41,7 +41,7 @@
       "value": "原格式"
      },
      "size": 2880,
-     "sizeKey": "9f133740"
+     "sizeKey": "41ad23d2"
     },
     {
      "name": "数字3",
@@ -53,7 +53,7 @@
       "value": "原格式"
      },
      "size": 2976,
-     "sizeKey": "92e293c7"
+     "sizeKey": "357c8059"
     },
     {
      "name": "数字4",
@@ -65,7 +65,7 @@
       "value": "原格式"
      },
      "size": 3360,
-     "sizeKey": "9ea6ed5c"
+     "sizeKey": "4140d9ee"
     },
     {
      "name": "数字5",
@@ -77,7 +77,7 @@
       "value": "原格式"
      },
      "size": 2496,
-     "sizeKey": "9ef97246"
+     "sizeKey": "41935ed8"
     },
     {
      "name": "数字6",
@@ -89,7 +89,7 @@
       "value": "原格式"
      },
      "size": 4032,
-     "sizeKey": "b7ed101b"
+     "sizeKey": "5a86fcad"
     },
     {
      "name": "数字7",
@@ -101,7 +101,7 @@
       "value": "原格式"
      },
      "size": 3840,
-     "sizeKey": "8d69f642"
+     "sizeKey": "3003e2d4"
     },
     {
      "name": "数字8",
@@ -113,7 +113,7 @@
       "value": "原格式"
      },
      "size": 2688,
-     "sizeKey": "e8c8368c"
+     "sizeKey": "8b62231e"
     },
     {
      "name": "数字9",
@@ -125,7 +125,7 @@
       "value": "原格式"
      },
      "size": 3072,
-     "sizeKey": "f48c9021"
+     "sizeKey": "97267cb3"
     },
     {
      "name": "开机",
@@ -137,7 +137,7 @@
       "value": "原格式"
      },
      "size": 3936,
-     "sizeKey": "4a3412ba"
+     "sizeKey": "5477e70c"
     },
     {
      "name": "关机",
@@ -149,7 +149,7 @@
       "value": "原格式"
      },
      "size": 4608,
-     "sizeKey": "1905b715"
+     "sizeKey": "6bc415a7"
     },
     {
      "name": "低电",
@@ -161,7 +161,7 @@
       "value": "原格式"
      },
      "size": 4512,
-     "sizeKey": "b49e32c6"
+     "sizeKey": "75c9158"
     },
     {
      "name": "最大音量",
@@ -173,7 +173,7 @@
       "value": "原格式"
      },
      "size": 6432,
-     "sizeKey": "8cb917c1"
+     "sizeKey": "94caa9d3"
     },
     {
      "name": "连接成功",
@@ -185,7 +185,7 @@
       "value": "原格式"
      },
      "size": 3936,
-     "sizeKey": "47dac7b"
+     "sizeKey": "c8f3e8d"
     },
     {
      "name": "连接断开",
@@ -197,7 +197,7 @@
       "value": "原格式"
      },
      "size": 4896,
-     "sizeKey": "286bf321"
+     "sizeKey": "d2f623f3"
     },
     {
      "name": "响铃",
@@ -209,7 +209,7 @@
       "value": "原格式"
      },
      "size": 11944,
-     "sizeKey": "51404eaf"
+     "sizeKey": "51423441"
     },
     {
      "name": "默认",
@@ -221,7 +221,7 @@
       "value": "sin"
      },
      "size": 36,
-     "sizeKey": "2ce11ccb"
+     "sizeKey": "e404cadd"
     },
     {
      "name": "bt模式",
@@ -232,7 +232,7 @@
      },
      "enable": true,
      "size": 5472,
-     "sizeKey": "e6d8c444"
+     "sizeKey": "dcb04316"
     },
     {
      "name": "linein模式",
@@ -243,7 +243,7 @@
      },
      "enable": true,
      "size": 16222,
-     "sizeKey": "296fd40a"
+     "sizeKey": "d3fa04dc"
     },
     {
      "name": "music模式",
@@ -254,7 +254,7 @@
      },
      "enable": true,
      "size": 3168,
-     "sizeKey": "f5db486f"
+     "sizeKey": "f5dd2e01"
     },
     {
      "name": "fm模式",
@@ -265,7 +265,7 @@
      },
      "enable": true,
      "size": 15438,
-     "sizeKey": "d9b326c6"
+     "sizeKey": "d9f1be98"
     },
     {
      "name": "rtc模式",
@@ -276,7 +276,7 @@
      },
      "enable": true,
      "size": 14798,
-     "sizeKey": "67c34d84"
+     "sizeKey": "6fd4df96"
     },
     {
      "name": "sd_dev",
@@ -287,7 +287,7 @@
      },
      "enable": true,
      "size": 13950,
-     "sizeKey": "1e9fb685"
+     "sizeKey": "c929e757"
     },
     {
      "name": "usb_dev",
@@ -298,7 +298,7 @@
      },
      "enable": true,
      "size": 5760,
-     "sizeKey": "1be79ed8"
+     "sizeKey": "ccaef7ea"
     },
     {
      "name": "spdif模式",
@@ -309,7 +309,7 @@
      },
      "enable": true,
      "size": 8160,
-     "sizeKey": "ee8eee33"
+     "sizeKey": "f8d2c285"
     },
     {
      "name": "tws连接",
@@ -320,7 +320,7 @@
      },
      "enable": true,
      "size": 36,
-     "sizeKey": "8f71424d"
+     "sizeKey": "9e38bcdf"
     },
     {
      "name": "tws断开",
@@ -331,7 +331,7 @@
      },
      "enable": true,
      "size": 52,
-     "sizeKey": "53ce004f"
+     "sizeKey": "3b84cd21"
     },
     {
      "name": "pc模式",
@@ -342,7 +342,14 @@
      },
      "enable": true,
      "size": 43953,
-     "sizeKey": "35e927f7"
+     "sizeKey": "e6b08109"
+    },
+    {
+     "name": "网络模式",
+     "path": "",
+     "outputName": "",
+     "format": {},
+     "size": 0
     },
     {
      "name": "按键音",
@@ -351,25 +358,14 @@
      "format": {
       "value": "原格式"
      },
-     "size": 14927,
      "sizeKey": "11bff253",
-     "enable": true
-    },
-    {
-     "name": "拍照特效",
-     "path": "E:\\photo_ka.mp3",
-     "outputName": "photo_ka",
-     "format": {
-      "value": "原格式"
-     },
-     "sizeKey": "1c9b396f",
-     "size": 23068,
+     "size": 14927,
      "enable": true
     }
    ],
    "enableOutput": 1,
    "isOpen": true,
-   "size": 238928
+   "size": 215808
   },
   {
    "title": "tone_zh",
@@ -385,7 +381,7 @@
       "value": "原格式"
      },
      "size": 10344,
-     "sizeKey": "e17e8cb3"
+     "sizeKey": "ab310805"
     },
     {
      "name": "数字1",
@@ -397,7 +393,7 @@
       "value": "原格式"
      },
      "size": 9912,
-     "sizeKey": "32158d8d"
+     "sizeKey": "e2dce69f"
     },
     {
      "name": "数字2",
@@ -409,7 +405,7 @@
       "value": "原格式"
      },
      "size": 10488,
-     "sizeKey": "c82be3e"
+     "sizeKey": "d6353990"
     },
     {
      "name": "数字3",
@@ -421,7 +417,7 @@
       "value": "原格式"
      },
      "size": 9912,
-     "sizeKey": "fcd31d4f"
+     "sizeKey": "ad9a7661"
     },
     {
      "name": "数字4",
@@ -433,7 +429,7 @@
       "value": "原格式"
      },
      "size": 10056,
-     "sizeKey": "81695817"
+     "sizeKey": "4b1bd369"
     },
     {
      "name": "数字5",
@@ -445,7 +441,7 @@
       "value": "原格式"
      },
      "size": 10488,
-     "sizeKey": "402a0a41"
+     "sizeKey": "9dc8593"
     },
     {
      "name": "数字6",
@@ -457,7 +453,7 @@
       "value": "原格式"
      },
      "size": 10200,
-     "sizeKey": "40387b30"
+     "sizeKey": "9eaf682"
     },
     {
      "name": "数字7",
@@ -469,7 +465,7 @@
       "value": "原格式"
      },
      "size": 10344,
-     "sizeKey": "5a04e8ba"
+     "sizeKey": "23b7640c"
     },
     {
      "name": "数字8",
@@ -481,7 +477,7 @@
       "value": "原格式"
      },
      "size": 9912,
-     "sizeKey": "f7ad04b4"
+     "sizeKey": "a8745dc6"
     },
     {
      "name": "数字9",
@@ -493,7 +489,7 @@
       "value": "原格式"
      },
      "size": 9912,
-     "sizeKey": "5d0bcc95"
+     "sizeKey": "dd325a7"
     },
     {
      "name": "开机",
@@ -505,7 +501,7 @@
       "value": "原格式"
      },
      "size": 9624,
-     "sizeKey": "55b809a5"
+     "sizeKey": "423a77"
     },
     {
      "name": "关机",
@@ -517,7 +513,7 @@
       "value": "原格式"
      },
      "size": 9480,
-     "sizeKey": "c0a0f4a3"
+     "sizeKey": "bc713fb5"
     },
     {
      "name": "低电",
@@ -529,7 +525,7 @@
       "value": "原格式"
      },
      "size": 10344,
-     "sizeKey": "92afde21"
+     "sizeKey": "8898b73"
     },
     {
      "name": "最大音量",
@@ -541,7 +537,7 @@
       "value": "原格式"
      },
      "size": 12216,
-     "sizeKey": "99e09e79"
+     "sizeKey": "446acf4b"
     },
     {
      "name": "连接成功",
@@ -553,7 +549,7 @@
       "value": "原格式"
      },
      "size": 13656,
-     "sizeKey": "88eff64f"
+     "sizeKey": "337a2721"
     },
     {
      "name": "连接断开",
@@ -565,7 +561,7 @@
       "value": "原格式"
      },
      "size": 14890,
-     "sizeKey": "25d71174"
+     "sizeKey": "21a75c86"
     },
     {
      "name": "响铃",
@@ -577,7 +573,7 @@
       "value": "sin"
      },
      "size": 36,
-     "sizeKey": "ee4fcff2"
+     "sizeKey": "3a2cd184"
     },
     {
      "name": "默认",
@@ -589,7 +585,7 @@
       "value": "sin"
      },
      "size": 36,
-     "sizeKey": "2ce11ccb"
+     "sizeKey": "e404cadd"
     },
     {
      "name": "按键音",
@@ -601,7 +597,7 @@
       "value": "sin"
      },
      "size": 36,
-     "sizeKey": "993a65a0"
+     "sizeKey": "a801e032"
     },
     {
      "name": "bt模式",
@@ -612,7 +608,7 @@
      },
      "enable": true,
      "size": 5472,
-     "sizeKey": "4ac2a98f"
+     "sizeKey": "147524e1"
     },
     {
      "name": "linein模式",
@@ -623,7 +619,7 @@
      },
      "enable": true,
      "size": 12792,
-     "sizeKey": "b17acbcb"
+     "sizeKey": "4392a5d"
     },
     {
      "name": "music模式",
@@ -634,7 +630,7 @@
      },
      "enable": true,
      "size": 11640,
-     "sizeKey": "5f63e804"
+     "sizeKey": "69a7bc56"
     },
     {
      "name": "fm模式",
@@ -645,7 +641,7 @@
      },
      "enable": true,
      "size": 11064,
-     "sizeKey": "82ee33f6"
+     "sizeKey": "82f01988"
     },
     {
      "name": "record模式",
@@ -656,7 +652,7 @@
      },
      "enable": true,
      "size": 11496,
-     "sizeKey": "281b4feb"
+     "sizeKey": "7ad9ae7d"
     },
     {
      "name": "rtc模式",
@@ -667,7 +663,7 @@
      },
      "enable": true,
      "size": 11784,
-     "sizeKey": "b42d8b75"
+     "sizeKey": "b46c2347"
     },
     {
      "name": "pc模式",
@@ -678,7 +674,7 @@
      },
      "enable": true,
      "size": 12072,
-     "sizeKey": "764421b6"
+     "sizeKey": "76460748"
     },
     {
      "name": "sd_dev",
@@ -689,7 +685,7 @@
      },
      "enable": true,
      "size": 3121,
-     "sizeKey": "e436df25"
+     "sizeKey": "ade95a77"
     },
     {
      "name": "usb_dev",
@@ -700,7 +696,7 @@
      },
      "enable": true,
      "size": 2473,
-     "sizeKey": "23ee4557"
+     "sizeKey": "2bffd769"
     },
     {
      "name": "spdif模式",
@@ -711,7 +707,7 @@
      },
      "enable": true,
      "size": 10368,
-     "sizeKey": "9c79c8ff"
+     "sizeKey": "a6bd9d51"
     },
     {
      "name": "tws连接",
@@ -722,7 +718,7 @@
      },
      "enable": true,
      "size": 15178,
-     "sizeKey": "bb5d77f8"
+     "sizeKey": "b72dc30a"
     },
     {
      "name": "tws断开",
@@ -733,7 +729,159 @@
      },
      "enable": true,
      "size": 15322,
-     "sizeKey": "2f5e9713"
+     "sizeKey": "a5384465"
+    },
+    {
+     "name": "网络播放",
+     "path": "%PROJECT_PATH%\\SDK\\cpu\\wl83\\tools\\soundbox_and_res\\NetMusic.mp3",
+     "outputName": "NetMusic",
+     "format": {
+      "value": "原格式"
+     },
+     "enable": false,
+     "size": 0
+    },
+    {
+     "name": "NetCfgEnter",
+     "path": "%PROJECT_PATH%\\SDK\\cpu\\wl83\\tools\\soundbox_and_res\\NetCfgEnter.mp3",
+     "outputName": "NetCfgEnter",
+     "format": {
+      "value": "原格式"
+     },
+     "enable": false,
+     "size": 0
+    },
+    {
+     "name": "NetCfgFail",
+     "path": "%PROJECT_PATH%\\SDK\\cpu\\wl83\\tools\\soundbox_and_res\\NetCfgFail.mp3",
+     "outputName": "NetCfgFail",
+     "format": {
+      "value": "原格式"
+     },
+     "enable": false,
+     "size": 0
+    },
+    {
+     "name": "NetCfgSucc",
+     "path": "%PROJECT_PATH%\\SDK\\cpu\\wl83\\tools\\soundbox_and_res\\NetCfgSucc.mp3",
+     "outputName": "NetCfgSucc",
+     "format": {
+      "value": "原格式"
+     },
+     "enable": false,
+     "size": 0
+    },
+    {
+     "name": "NetCfgTo",
+     "path": "%PROJECT_PATH%\\SDK\\cpu\\wl83\\tools\\soundbox_and_res\\NetCfgTo.mp3",
+     "outputName": "NetCfgTo",
+     "format": {
+      "value": "原格式"
+     },
+     "enable": false,
+     "size": 0
+    },
+    {
+     "name": "NetConnting",
+     "path": "%PROJECT_PATH%\\SDK\\cpu\\wl83\\tools\\soundbox_and_res\\NetConnting.mp3",
+     "outputName": "NetConnting",
+     "format": {
+      "value": "原格式"
+     },
+     "enable": false,
+     "size": 0
+    },
+    {
+     "name": "NetDisc",
+     "path": "%PROJECT_PATH%\\SDK\\cpu\\wl83\\tools\\soundbox_and_res\\NetDisc.mp3",
+     "outputName": "NetDisc",
+     "format": {
+      "value": "原格式"
+     },
+     "enable": false,
+     "size": 0
+    },
+    {
+     "name": "NetEmpty",
+     "path": "%PROJECT_PATH%\\SDK\\cpu\\wl83\\tools\\soundbox_and_res\\NetEmpty.mp3",
+     "outputName": "NetEmpty",
+     "format": {
+      "value": "原格式"
+     },
+     "enable": false,
+     "size": 0
+    },
+    {
+     "name": "SsidRecv",
+     "path": "%PROJECT_PATH%\\SDK\\cpu\\wl83\\tools\\soundbox_and_res\\SsidRecv.mp3",
+     "outputName": "SsidRecv",
+     "format": {
+      "value": "原格式"
+     },
+     "enable": false,
+     "size": 0
+    },
+    {
+     "name": "接收",
+     "path": "%PROJECT_PATH%\\SDK\\cpu\\wl83\\tools\\soundbox_and_res\\rec.mp3",
+     "outputName": "rec",
+     "format": {
+      "value": "原格式"
+     },
+     "enable": false,
+     "size": 0
+    },
+    {
+     "name": "发送",
+     "path": "%PROJECT_PATH%\\SDK\\cpu\\wl83\\tools\\soundbox_and_res\\send.mp3",
+     "outputName": "send",
+     "format": {
+      "value": "原格式"
+     },
+     "enable": false,
+     "size": 0
+    },
+    {
+     "name": "打开蓝牙",
+     "path": "%PROJECT_PATH%\\SDK\\cpu\\wl83\\tools\\soundbox_and_res\\BtOpen.mp3",
+     "outputName": "bt_open",
+     "format": {
+      "value": "原格式"
+     },
+     "size": 0,
+     "enable": false
+    },
+    {
+     "name": "关闭蓝牙",
+     "path": "%PROJECT_PATH%\\SDK\\cpu\\wl83\\tools\\soundbox_and_res\\BtClose.mp3",
+     "outputName": "bt_close",
+     "format": {
+      "value": "原格式"
+     },
+     "size": 0,
+     "enable": false
+    },
+    {
+     "name": "打开广播音箱",
+     "path": "%TOOL_PATH%\\resource\\提示音\\soundbox\\big_mode.mp3",
+     "outputName": "bis_open",
+     "format": {
+      "value": "原格式"
+     },
+     "sizeKey": "c80e17aa",
+     "size": 7488,
+     "enable": true
+    },
+    {
+     "name": "关闭广播音箱",
+     "path": "%TOOL_PATH%\\resource\\提示音\\soundbox\\big_close.mp3",
+     "outputName": "bis_close",
+     "format": {
+      "value": "原格式"
+     },
+     "sizeKey": "4457cc7b",
+     "size": 8784,
+     "enable": true
     },
     {
      "name": "按键音",
@@ -745,22 +893,11 @@
      "sizeKey": "11bff253",
      "size": 14927,
      "enable": true
-    },
-    {
-     "name": "拍照特效",
-     "path": "E:\\photo_ka.mp3",
-     "outputName": "photo_ka",
-     "format": {
-      "value": "原格式"
-     },
-     "sizeKey": "1c9b396f",
-     "size": 23068,
-     "enable": true
     }
    ],
    "enableOutput": 1,
-   "isOpen": false,
-   "size": 334496
+   "isOpen": true,
+   "size": 327744
   }
  ],
  "version": {

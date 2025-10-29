@@ -30,13 +30,18 @@
 #define CONFIG_VIDEO_DEC_ENABLE             1
 #define AP_TEST_MODE       0
 #define STA_TEST_MODE      1
+#define P2P_TEST_MODE 		3
 #define MONITOR_TEST_MODE  2
+
+#define WIFI_ENTER_P2P_MODE	  0
+#define WIFI_P2P_DEVICE_NAME  "JLWiFi-P2P"
+
 #define EXT_WIFI_TEST_MODE STA_TEST_MODE
 #define EXT_WIFI_AP_SSID   "AC79_EXT_WIFI_"    //配置外挂wifi的AP模式的SSID前缀
 #define EXT_WIFI_AP_PWD    "12345678"          //配置外挂wifi的AP模式的密码
 #define EXT_WIFI_STA_SSID  "zpc23"              //配置外挂wifi的STA模式的SSID前缀
 #define EXT_WIFI_STA_PWD   "abc12345"          //配置外挂wifi的STA模式的密码
-#define WIFI_P2P_DEVICE_NAME "JLWiFi-P2P"
+
 
 //*********************************************************************************//
 //                                  调音工具                                       //
@@ -331,6 +336,10 @@
 
 #define CONFIG_NET_SCR  /*网络投屏*/
 
+#ifdef CONFIG_NET_SCR
+#define CONFIG_NET_PROTOCOL_TCP  0  //网络投屏协议选择
+#define CONFIG_NET_PROTOCOL_UDP  1
+#endif
 /*-------------网络端口----------------*/
 #define CTP_CTRL_PORT   	3333
 #define CDP_CTRL_PORT   	2228
@@ -811,9 +820,7 @@
 #define TCFG_USER_BLE_ENABLE                    0   //BLE功能使能
 #endif
 
-
-#define TCFG_INSTR_DEV_UART_ENABLE              0 //拓展串口-蓝牙协议使能
-
+#define TCFG_INSTR_DEV_UART_ENABLE              0	//拓展串口-蓝牙协议使能
 //*********************************************************************************//
 //                                     TWS配置                                     //
 //*********************************************************************************//

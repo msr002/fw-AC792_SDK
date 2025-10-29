@@ -257,6 +257,7 @@
 <Unit filename="../../../../../apps/demo/demo_wifi_ext/wire_app_task.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../../cpu/wl83/adc_api.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../../cpu/wl83/debug.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="../../../../../cpu/wl83/debug_exception.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../../cpu/wl83/setup.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../../include_lib/btctrler/ble/hci_ll.h" />
 <Unit filename="../../../../../include_lib/btctrler/btcontroller_mode.h" />
@@ -424,6 +425,7 @@
 <Unit filename="../../../../../include_lib/net/wifi/wifi_connect.h" />
 <Unit filename="../../../../../include_lib/net/wifi/wifi_def.h" />
 <Unit filename="../../../../../include_lib/net/wireless_ext/hsm_ext.h" />
+<Unit filename="../../../../../include_lib/net/wireless_ext/rtl_mp.h" />
 <Unit filename="../../../../../include_lib/net/wireless_ext/wifi_connect.h" />
 <Unit filename="../../../../../include_lib/net/wireless_ext/wifi_dev.h" />
 <Unit filename="../../../../../include_lib/net/wireless_ext/wifi_module_event.h" />
@@ -498,7 +500,6 @@
 <Unit filename="../../../../../include_lib/utils/fs/sdfile.h" />
 <Unit filename="../../../../../include_lib/utils/syscfg/syscfg_id.h" />
 <Unit filename="../../../../../include_lib/utils/version.z.S" />
-<Unit filename="../../../../../lib/net/device/wireless_ext/WIFI_todo/rtl_mp.h" />
 <Unit filename="../../../../../lib/net/version.z.S" />
 <Unit filename="../../../../../lib/server/version.z.S" />
 <Unit filename="../../../../../lib/utils/version.z.S" />

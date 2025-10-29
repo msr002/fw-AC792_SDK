@@ -19,20 +19,20 @@
    "curTab": "id_1675673742042_2"
   },
   {
-   "id": "id_1745198625001_15",
+   "id": "id_1726047780443_14",
    "title": "单声道pro",
    "select": true,
    "tabs": [
     {
      "uuid": 48452,
      "title": "标准",
-     "id": "id_1745198624460_2",
-     "disable": false,
+     "id": "id_1726047780024_2",
      "selected": "A",
-     "preset": ""
+     "preset": "",
+     "disable": false
     }
    ],
-   "curTab": "id_1745198624460_2"
+   "curTab": "id_1726047780024_2"
   },
   {
    "id": "id_1729649937448_10",
@@ -2140,7 +2140,7 @@
     },
     "view": "vue-shape-view",
     "shape": "vue-shape",
-    "id": "e72b861c-fe75-4310-83c3-f804d4661b9c",
+    "id": "212e1eea-b7c6-42fc-91b9-0d316f0226ac",
     "component": "node-cust",
     "group": "hardware",
     "data": {
@@ -2150,7 +2150,7 @@
      "type": 0,
      "fun": 0,
      "uuid": "0X8458",
-     "itemId": "id_1745198625001_15",
+     "itemId": "id_1726047780443_14",
      "marco": "TCFG_ESCO_RX_NODE_ENABLE",
      "subId": 4,
      "inBitWidth": 16,
@@ -2213,16 +2213,16 @@
       "distance": 40
      }
     },
-    "id": "fa56a241-8766-4dd8-8e89-64d37578a05b",
+    "id": "282ab765-0f11-4324-9f45-ad1e18699bfc",
     "data": {
-     "itemId": "id_1745198625001_15"
+     "itemId": "id_1726047780443_14"
     },
     "source": {
-     "cell": "e72b861c-fe75-4310-83c3-f804d4661b9c",
+     "cell": "212e1eea-b7c6-42fc-91b9-0d316f0226ac",
      "port": "5114f0b1-23ea-4659-844f-a8bd9b1e634d"
     },
     "target": {
-     "cell": "89ddc11a-8f52-475a-b7d2-8212fc1d2b91",
+     "cell": "1dffad8b-e4c3-4379-b74e-d788cd8607ad",
      "port": "f6b1a025-238f-476a-8a35-7e285b7eb193"
     }
    },
@@ -2237,7 +2237,7 @@
     },
     "view": "vue-shape-view",
     "shape": "vue-shape",
-    "id": "89ddc11a-8f52-475a-b7d2-8212fc1d2b91",
+    "id": "1dffad8b-e4c3-4379-b74e-d788cd8607ad",
     "component": "node-cust",
     "group": "hardware",
     "data": {
@@ -2247,7 +2247,7 @@
      "type": 1,
      "fun": 0,
      "uuid": "0X1A85",
-     "itemId": "id_1745198625001_15",
+     "itemId": "id_1726047780443_14",
      "outBit": 2,
      "bitConsistency": false,
      "inBit": 2,
@@ -2317,16 +2317,16 @@
       "distance": 40
      }
     },
-    "id": "70086182-ef6a-430f-87c3-8befc4784c80",
+    "id": "47e4e4c6-130b-48f8-8da5-65cb7bc7b27c",
     "data": {
-     "itemId": "id_1745198625001_15"
+     "itemId": "id_1726047780443_14"
     },
     "source": {
-     "cell": "89ddc11a-8f52-475a-b7d2-8212fc1d2b91",
+     "cell": "1dffad8b-e4c3-4379-b74e-d788cd8607ad",
      "port": "c3184336-f5f8-4399-acb7-61531732c642"
     },
     "target": {
-     "cell": "8c4cc309-3b22-4b5c-8aea-c355d2a2af5d",
+     "cell": "e7e11a69-d0e2-4f14-92da-4d554fb856c8",
      "port": "ee23422e-bb59-459b-b8e2-cfdb434bb422"
     }
    },
@@ -2341,7 +2341,7 @@
     },
     "view": "vue-shape-view",
     "shape": "vue-shape",
-    "id": "8c4cc309-3b22-4b5c-8aea-c355d2a2af5d",
+    "id": "e7e11a69-d0e2-4f14-92da-4d554fb856c8",
     "component": "node-cust",
     "group": "hardware",
     "data": {
@@ -2357,7 +2357,7 @@
      "subId": 22,
      "inBitWidth": 16,
      "outBitWidth": 16,
-     "itemId": "id_1745198625001_15",
+     "itemId": "id_1726047780443_14",
      "configs": {
       "name": "",
       "list": []
@@ -2421,16 +2421,16 @@
       "distance": 40
      }
     },
-    "id": "91ac31a9-7b1a-4232-8dd5-e041bf8f406d",
+    "id": "b20d39c4-d239-43e1-b0c4-ab44e4c374c1",
     "data": {
-     "itemId": "id_1745198625001_15"
+     "itemId": "id_1726047780443_14"
     },
     "source": {
-     "cell": "8c4cc309-3b22-4b5c-8aea-c355d2a2af5d",
+     "cell": "e7e11a69-d0e2-4f14-92da-4d554fb856c8",
      "port": "7136931c-6a27-4921-b16e-0b40480921ae"
     },
     "target": {
-     "cell": "c078e162-bc14-4402-8aab-b5e0c81a051e",
+     "cell": "4a339ad2-cf89-4664-b892-b227fa2c0fe6",
      "port": "e603488f-6e9b-497f-9aa1-2a74ee00ff5e"
     }
    },
@@ -2445,7 +2445,7 @@
     },
     "view": "vue-shape-view",
     "shape": "vue-shape",
-    "id": "c078e162-bc14-4402-8aab-b5e0c81a051e",
+    "id": "4a339ad2-cf89-4664-b892-b227fa2c0fe6",
     "component": "node-cust",
     "group": "hardware",
     "data": {
@@ -2455,7 +2455,7 @@
      "type": 1,
      "fun": 1,
      "formFile": "../../.sync配置.json",
-     "itemId": "id_1745198625001_15",
+     "itemId": "id_1726047780443_14",
      "inBit": 2,
      "bitConsistency": true,
      "outBit": 2,
@@ -2464,9 +2464,9 @@
       "name": "config4235827",
       "list": [
        {
-        "modeId": "id_1745198624460_2",
+        "modeId": "id_1726047780024_2",
         "name": "config4235827",
-        "current": "",
+        "current": "arg0",
         "originSize": 0,
         "list": [
          {
@@ -2486,10 +2486,12 @@
              }
             ]
            }
-          ]
+          ],
+          "bypass": false
          }
         ],
-        "originCount": 1
+        "originCount": 1,
+        "bypass": false
        }
       ]
      },
@@ -2556,16 +2558,16 @@
       "distance": 40
      }
     },
-    "id": "be414617-8aa5-45c1-b7af-70a034e53fc8",
+    "id": "f1980a6c-3fb3-41e0-aab2-19b7ed2e5cb4",
     "data": {
-     "itemId": "id_1745198625001_15"
+     "itemId": "id_1726047780443_14"
     },
     "source": {
-     "cell": "c078e162-bc14-4402-8aab-b5e0c81a051e",
+     "cell": "4a339ad2-cf89-4664-b892-b227fa2c0fe6",
      "port": "b71c2066-9e03-4698-9ed3-2e714f17e78a"
     },
     "target": {
-     "cell": "bff06027-e0ef-4801-a856-62bad176eb27",
+     "cell": "fb22ddc6-e3dc-41f7-8cf9-f8f7373737a4",
      "port": "37de61f6-bdc1-4fe1-9089-27160ed8330a"
     }
    },
@@ -2580,7 +2582,7 @@
     },
     "view": "vue-shape-view",
     "shape": "vue-shape",
-    "id": "bff06027-e0ef-4801-a856-62bad176eb27",
+    "id": "fb22ddc6-e3dc-41f7-8cf9-f8f7373737a4",
     "component": "node-cust",
     "group": "hardware",
     "data": {
@@ -2600,9 +2602,9 @@
       "name": "NoiseGate1",
       "list": [
        {
-        "modeId": "id_1745198624460_2",
+        "modeId": "id_1726047780024_2",
         "name": "NoiseGate1",
-        "current": "",
+        "current": "arg0",
         "originSize": 0,
         "list": [
          {
@@ -2634,18 +2636,20 @@
              }
             ]
            }
-          ]
+          ],
+          "bypass": false
          }
         ],
-        "originCount": 1
+        "originCount": 1,
+        "bypass": false
        }
       ]
      },
-     "configName": "NoiseGate1",
-     "nodeName": "NoiseGate1",
+     "configName": "NoiseGate16",
+     "nodeName": "NoiseGate16",
      "inBitWidth": 16,
      "outBitWidth": 16,
-     "itemId": "id_1745198625001_15"
+     "itemId": "id_1726047780443_14"
     },
     "ports": {
      "groups": {
@@ -2705,16 +2709,16 @@
       "distance": 40
      }
     },
-    "id": "5e57785a-b025-4b3d-99af-26dcb75a4b3e",
+    "id": "d06a0a93-0c45-4d42-9cd3-b8095b7009aa",
     "data": {
-     "itemId": "id_1745198625001_15"
+     "itemId": "id_1726047780443_14"
     },
     "source": {
-     "cell": "bff06027-e0ef-4801-a856-62bad176eb27",
+     "cell": "fb22ddc6-e3dc-41f7-8cf9-f8f7373737a4",
      "port": "66e0b840-9019-4aba-aa7d-a2eaa1aaa109"
     },
     "target": {
-     "cell": "499d728b-079a-4cc3-a6d9-68b8303f5d1d",
+     "cell": "6e96436b-c58f-4004-a2ee-a972ce740cd1",
      "port": "fb076936-fb8e-408a-9e5a-1462ed222bb6"
     }
    },
@@ -2724,12 +2728,12 @@
      "y": 0
     },
     "size": {
-     "width": 80,
+     "width": 120,
      "height": 80
     },
     "view": "vue-shape-view",
     "shape": "vue-shape",
-    "id": "499d728b-079a-4cc3-a6d9-68b8303f5d1d",
+    "id": "6e96436b-c58f-4004-a2ee-a972ce740cd1",
     "component": "node-cust",
     "group": "hardware",
     "data": {
@@ -2739,7 +2743,7 @@
      "type": 1,
      "fun": 1,
      "formFile": "../../.音量配置.json",
-     "itemId": "id_1745198625001_15",
+     "itemId": "id_1726047780443_14",
      "inBit": 2,
      "bitConsistency": true,
      "outBit": 2,
@@ -2756,7 +2760,7 @@
       "name": "Vol_BtCall",
       "list": [
        {
-        "modeId": "id_1745198624460_2",
+        "modeId": "id_1726047780024_2",
         "name": "Vol_BtCall",
         "current": "arg0",
         "originSize": 0,
@@ -2790,11 +2794,11 @@
              },
              {
               "id": "id_1690535811640_0",
-              "value": 15
+              "value": 10
              },
              {
               "id": "id_1676801188975_0",
-              "value": 15
+              "value": 10
              }
             ]
            },
@@ -2874,16 +2878,16 @@
       "distance": 40
      }
     },
-    "id": "c914511f-ba8a-4df9-8c59-0478f890df21",
+    "id": "06e8d9c9-0f3a-4ecd-a62f-ee39009163b7",
     "data": {
-     "itemId": "id_1745198625001_15"
+     "itemId": "id_1726047780443_14"
     },
     "source": {
-     "cell": "499d728b-079a-4cc3-a6d9-68b8303f5d1d",
+     "cell": "6e96436b-c58f-4004-a2ee-a972ce740cd1",
      "port": "4decb197-2782-4173-a600-958942b8109d"
     },
     "target": {
-     "cell": "3a6dbf48-6d88-4f84-8347-5d6f5605fb1c",
+     "cell": "2916de66-4c69-49fd-8dbf-c927f595e88a",
      "port": "2cd250bb-4d53-4d7c-9907-33f84277abc7"
     }
    },
@@ -2898,7 +2902,7 @@
     },
     "view": "vue-shape-view",
     "shape": "vue-shape",
-    "id": "3a6dbf48-6d88-4f84-8347-5d6f5605fb1c",
+    "id": "2916de66-4c69-49fd-8dbf-c927f595e88a",
     "component": "node-cust",
     "group": "hardware",
     "data": {
@@ -2908,7 +2912,7 @@
      "type": 1,
      "fun": 4,
      "uuid": "0X737B",
-     "itemId": "id_1745198625001_15",
+     "itemId": "id_1726047780443_14",
      "marco": "TCFG_EQ_ENABLE",
      "outBit": 2,
      "inBit": 2,
@@ -2918,7 +2922,7 @@
       "name": "EscoDlEq",
       "list": [
        {
-        "modeId": "id_1745198624460_2",
+        "modeId": "id_1726047780024_2",
         "name": "EscoDlEq",
         "current": "",
         "originSize": 0,
@@ -3110,16 +3114,16 @@
       "distance": 40
      }
     },
-    "id": "8a74ee6e-8a95-4d80-87ca-f5a8c7bff224",
+    "id": "76dfdd42-58b6-4965-9686-9eae36052357",
     "data": {
-     "itemId": "id_1745198625001_15"
+     "itemId": "id_1726047780443_14"
     },
     "source": {
-     "cell": "3a6dbf48-6d88-4f84-8347-5d6f5605fb1c",
+     "cell": "2916de66-4c69-49fd-8dbf-c927f595e88a",
      "port": "34328acc-9cb1-48be-b0ba-d408f1f6f4b3"
     },
     "target": {
-     "cell": "133bea55-f4cd-415f-8c32-7b1b7a2a5421",
+     "cell": "8e4eb410-585f-494d-9512-b0b8c1d6bb6b",
      "port": "347eecd8-ba96-490c-a8fd-818333ef4bb6"
     }
    },
@@ -3134,7 +3138,7 @@
     },
     "view": "vue-shape-view",
     "shape": "vue-shape",
-    "id": "133bea55-f4cd-415f-8c32-7b1b7a2a5421",
+    "id": "8e4eb410-585f-494d-9512-b0b8c1d6bb6b",
     "component": "node-cust",
     "group": "hardware",
     "data": {
@@ -3151,7 +3155,7 @@
      "subId": 20,
      "inBitWidth": 16,
      "outBitWidth": 16,
-     "itemId": "id_1745198625001_15",
+     "itemId": "id_1726047780443_14",
      "configs": {
       "name": "",
       "list": []
@@ -3215,16 +3219,16 @@
       "distance": 40
      }
     },
-    "id": "e6caaf38-85f9-4f63-9b3f-fe27a371f8ea",
+    "id": "be3c4546-555d-4625-8870-e4b9f6144f01",
     "data": {
-     "itemId": "id_1745198625001_15"
+     "itemId": "id_1726047780443_14"
     },
     "source": {
-     "cell": "133bea55-f4cd-415f-8c32-7b1b7a2a5421",
+     "cell": "8e4eb410-585f-494d-9512-b0b8c1d6bb6b",
      "port": "d28d4082-a2bd-4cc0-a704-f23994e8baf8"
     },
     "target": {
-     "cell": "bd637278-fab3-4160-ae57-5cdeba2f7f45",
+     "cell": "f44caecc-9703-49ed-a3b4-b1ba59caf017",
      "port": "affc17ac-7fd4-4f15-8df2-083e80e03886"
     }
    },
@@ -3239,7 +3243,7 @@
     },
     "view": "vue-shape-view",
     "shape": "vue-shape",
-    "id": "bd637278-fab3-4160-ae57-5cdeba2f7f45",
+    "id": "f44caecc-9703-49ed-a3b4-b1ba59caf017",
     "component": "node-cust",
     "group": "hardware",
     "data": {
@@ -3266,7 +3270,7 @@
       "name": "DAC3",
       "list": [
        {
-        "modeId": "id_1745198624460_2",
+        "modeId": "id_1726047780024_2",
         "name": "DAC3",
         "current": "",
         "originSize": 0,
@@ -3302,18 +3306,20 @@
             ],
             "expand": 1
            }
-          ]
+          ],
+          "bypass": false
          }
         ],
-        "originCount": 1
+        "originCount": 1,
+        "bypass": false
        }
       ]
      },
-     "configName": "DAC3",
-     "nodeName": "DAC3",
+     "configName": "DAC2",
+     "nodeName": "DAC2",
      "inBitWidth": 16,
      "outBitWidth": 16,
-     "itemId": "id_1745198625001_15"
+     "itemId": "id_1726047780443_14"
     },
     "ports": {
      "groups": {
@@ -3363,7 +3369,7 @@
     },
     "view": "vue-shape-view",
     "shape": "vue-shape",
-    "id": "1b1aefc0-1d97-4526-a248-bc6eb187f1f6",
+    "id": "20da357e-605a-4292-bac4-bcd41953ec8a",
     "component": "node-cust",
     "group": "hardware",
     "data": {
@@ -3390,9 +3396,9 @@
       "name": "esco_adc",
       "list": [
        {
-        "modeId": "id_1745198624460_2",
+        "modeId": "id_1726047780024_2",
         "name": "esco_adc",
-        "current": "",
+        "current": "arg0",
         "originSize": 0,
         "list": [
          {
@@ -3436,10 +3442,12 @@
              }
             ]
            }
-          ]
+          ],
+          "bypass": false
          }
         ],
-        "originCount": 1
+        "originCount": 1,
+        "bypass": false
        }
       ]
      },
@@ -3447,7 +3455,7 @@
      "nodeName": "esco_adc",
      "inBitWidth": 16,
      "outBitWidth": 16,
-     "itemId": "id_1745198625001_15"
+     "itemId": "id_1726047780443_14"
     },
     "ports": {
      "groups": {
@@ -3502,16 +3510,16 @@
       "distance": 40
      }
     },
-    "id": "b1ef54fe-c75e-4561-adaa-9fd9e3aa16ab",
+    "id": "650520d9-630b-4163-bb9d-a2bbbaea6286",
     "data": {
-     "itemId": "id_1745198625001_15"
+     "itemId": "id_1726047780443_14"
     },
     "source": {
-     "cell": "1b1aefc0-1d97-4526-a248-bc6eb187f1f6",
+     "cell": "20da357e-605a-4292-bac4-bcd41953ec8a",
      "port": "5114f0b1-23ea-4659-844f-a8bd9b1e634d"
     },
     "target": {
-     "cell": "980ee97c-c29b-40bb-8ced-78ddaf6aa4b3",
+     "cell": "ed07d066-d097-4daa-b11b-9ebc09927402",
      "port": "85bffb47-14f7-4eb9-bc33-fa5061f20b11"
     }
    },
@@ -3526,7 +3534,7 @@
     },
     "view": "vue-shape-view",
     "shape": "vue-shape",
-    "id": "980ee97c-c29b-40bb-8ced-78ddaf6aa4b3",
+    "id": "ed07d066-d097-4daa-b11b-9ebc09927402",
     "component": "node-cust",
     "group": "hardware",
     "data": {
@@ -3544,9 +3552,9 @@
       "name": "MIC534361",
       "list": [
        {
-        "modeId": "id_1745198624460_2",
+        "modeId": "id_1726047780024_2",
         "name": "MIC534361",
-        "current": "",
+        "current": "arg0",
         "originSize": 0,
         "list": [
          {
@@ -3689,10 +3697,12 @@
              }
             ]
            }
-          ]
+          ],
+          "bypass": false
          }
         ],
-        "originCount": 1
+        "originCount": 1,
+        "bypass": false
        }
       ]
      },
@@ -3700,7 +3710,7 @@
      "nodeName": "MIC534361",
      "inBitWidth": 16,
      "outBitWidth": 16,
-     "itemId": "id_1745198625001_15"
+     "itemId": "id_1726047780443_14"
     },
     "ports": {
      "groups": {
@@ -3760,16 +3770,16 @@
       "distance": 40
      }
     },
-    "id": "cc1a45d8-50f5-44aa-9816-ba7ca9b7b1a0",
+    "id": "71369a86-1d56-4f5b-935f-a2a8e7f04912",
     "data": {
-     "itemId": "id_1745198625001_15"
+     "itemId": "id_1726047780443_14"
     },
     "source": {
-     "cell": "980ee97c-c29b-40bb-8ced-78ddaf6aa4b3",
+     "cell": "ed07d066-d097-4daa-b11b-9ebc09927402",
      "port": "d270af71-f421-4c5b-a493-43ff4598df88"
     },
     "target": {
-     "cell": "1ee89f2d-8649-4a1e-a3c6-02e562e51951",
+     "cell": "3b400212-4ad1-4647-82ad-7bced5520a91",
      "port": "2cd250bb-4d53-4d7c-9907-33f84277abc7"
     }
    },
@@ -3784,7 +3794,7 @@
     },
     "view": "vue-shape-view",
     "shape": "vue-shape",
-    "id": "1ee89f2d-8649-4a1e-a3c6-02e562e51951",
+    "id": "3b400212-4ad1-4647-82ad-7bced5520a91",
     "component": "node-cust",
     "group": "hardware",
     "data": {
@@ -3794,7 +3804,7 @@
      "type": 1,
      "fun": 4,
      "uuid": "0X737B",
-     "itemId": "id_1745198625001_15",
+     "itemId": "id_1726047780443_14",
      "marco": "TCFG_EQ_ENABLE",
      "outBit": 2,
      "inBit": 2,
@@ -3804,7 +3814,7 @@
       "name": "EscoUlEq",
       "list": [
        {
-        "modeId": "id_1745198624460_2",
+        "modeId": "id_1726047780024_2",
         "name": "EscoUlEq",
         "current": "",
         "originSize": 0,
@@ -3996,16 +4006,16 @@
       "distance": 40
      }
     },
-    "id": "ead5ac26-73e1-4e44-bc70-75015730cd42",
+    "id": "cf23f441-9cbb-4c1c-bf4c-7ff00d19b934",
     "data": {
-     "itemId": "id_1745198625001_15"
+     "itemId": "id_1726047780443_14"
     },
     "source": {
-     "cell": "1ee89f2d-8649-4a1e-a3c6-02e562e51951",
+     "cell": "3b400212-4ad1-4647-82ad-7bced5520a91",
      "port": "34328acc-9cb1-48be-b0ba-d408f1f6f4b3"
     },
     "target": {
-     "cell": "e3a6fbc5-3ddc-4adb-bc26-6440f0c52db7",
+     "cell": "43aec378-b910-424a-ac0b-684d78d9c0a5",
      "port": "25ac1764-1e03-461d-8a28-4d109b881a7f"
     }
    },
@@ -4020,7 +4030,7 @@
     },
     "view": "vue-shape-view",
     "shape": "vue-shape",
-    "id": "e3a6fbc5-3ddc-4adb-bc26-6440f0c52db7",
+    "id": "43aec378-b910-424a-ac0b-684d78d9c0a5",
     "component": "node-cust",
     "group": "hardware",
     "data": {
@@ -4031,15 +4041,15 @@
      "fun": 1,
      "formFile": "../../.encoder_fmt.json",
      "uuid": "0XA2C",
-     "itemId": "id_1745198625001_15",
+     "itemId": "id_1726047780443_14",
      "subId": 7,
      "configs": {
       "name": "config26049",
       "list": [
        {
-        "modeId": "id_1745198624460_2",
+        "modeId": "id_1726047780024_2",
         "name": "config26049",
-        "current": "",
+        "current": "arg0",
         "originSize": 0,
         "list": [
          {
@@ -4075,10 +4085,12 @@
              }
             ]
            }
-          ]
+          ],
+          "bypass": false
          }
         ],
-        "originCount": 1
+        "originCount": 1,
+        "bypass": false
        }
       ]
      },
@@ -4145,16 +4157,16 @@
       "distance": 40
      }
     },
-    "id": "e4388a7b-0388-4b16-8612-2b8f8f50e485",
+    "id": "7583752d-90b4-4fd0-9af9-5ecf96d19fc9",
     "data": {
-     "itemId": "id_1745198625001_15"
+     "itemId": "id_1726047780443_14"
     },
     "source": {
-     "cell": "e3a6fbc5-3ddc-4adb-bc26-6440f0c52db7",
+     "cell": "43aec378-b910-424a-ac0b-684d78d9c0a5",
      "port": "5114f0b1-23ea-4659-844f-a8bd9b1e634d"
     },
     "target": {
-     "cell": "9c92f18f-57dc-42e8-957f-a05e7c2ef693",
+     "cell": "d71195c7-528a-4c28-a0bb-594837329ae3",
      "port": "25ac1764-1e03-461d-8a28-4d109b881a7f"
     }
    },
@@ -4169,7 +4181,7 @@
     },
     "view": "vue-shape-view",
     "shape": "vue-shape",
-    "id": "9c92f18f-57dc-42e8-957f-a05e7c2ef693",
+    "id": "d71195c7-528a-4c28-a0bb-594837329ae3",
     "component": "node-cust",
     "group": "hardware",
     "data": {
@@ -4179,7 +4191,7 @@
      "type": 2,
      "fun": 0,
      "uuid": "0X849A",
-     "itemId": "id_1745198625001_15",
+     "itemId": "id_1726047780443_14",
      "marco": "TCFG_ESCO_TX_NODE_ENABLE",
      "subId": 4,
      "inBitWidth": 16,
@@ -10870,6 +10882,5 @@
  "version": {
   "code": 1,
   "tool": "4.4.0"
- },
- "abFlow": false
+ }
 }

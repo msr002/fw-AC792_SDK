@@ -910,7 +910,7 @@ extern const struct device_operations cdrom_dev_ops;
 #endif
 #endif
 
-#if TCFG_VIDEO0_ENABLE
+#ifdef CONFIG_VIDEO0_ENABLE
 static const struct camera_platform_data camera0_data_mipi = {
     .iic_sel        = TCFG_VIDEO0_IIC_SEL,
     .xclk_gpio      = TCFG_VIDEO0_XCLK,
@@ -940,7 +940,7 @@ static const struct video_platform_data video0_data = {
 };
 #endif
 
-#if TCFG_VIDEO1_ENABLE
+#ifdef CONFIG_VIDEO1_ENABLE
 const struct camera_platform_data camera1_data = {
     .iic_sel        = TCFG_VIDEO1_IIC_SEL,
 	.xclk_gpio      = TCFG_VIDEO1_XCLK,//注意： 如果硬件xclk接到芯片IO，则会占用OUTPUT_CHANNEL1
@@ -985,7 +985,7 @@ static const struct video_platform_data video1_data = {
 #endif
 
 
-#if TCFG_VIDEO2_ENABLE
+#ifdef CONFIG_VIDEO2_ENABLE
 UVC_PLATFORM_DATA_BEGIN(uvc_data)
 #if THREE_WAY_ENABLE
     .width = 640,

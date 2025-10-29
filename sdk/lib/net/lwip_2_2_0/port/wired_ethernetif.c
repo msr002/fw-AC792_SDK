@@ -2,6 +2,7 @@
 
 #include "lwip/err.h"
 #include "etharp.h"
+#include "ethip6.h"
 #include "lwip/pbuf.h"
 #include "lwip/stats.h"
 #include "lwip/snmp.h"
@@ -83,6 +84,16 @@ wired_low_level_init(struct netif *netif)
     /* device capabilities */
     /* don't set NETIF_FLAG_ETHARP if this device is not an ethernet one */
     netif->flags = NETIF_FLAG_BROADCAST | NETIF_FLAG_ETHARP | NETIF_FLAG_LINK_UP | NETIF_FLAG_IGMP;
+
+#if LWIP_IPV6
+    netif->flags |= NETIF_FLAG_MLD6;
+    netif->output_ip6 = ethip6_output;
+
+#if LWIP_IPV6_DHCP6
+    static struct dhcp6 dhcp6_lte;
+    dhcp6_set_struct(netif, &dhcp6_lte);
+#endif
+#endif
 
     /* Do whatever else is needed to initialize interface. */
 

@@ -309,12 +309,16 @@ static void ext_wifi_app_task(void *priv)
     info.pwd  = AP_PWD;
     info.force_default_mode = 1;
     dev_ioctl(wifi_dev, DEV_AP_MODE, (u32)&info);
-#else
+#elif (EXT_WIFI_TEST_MODE == STA_TEST_MODE)
     info.mode = STA_MODE;
     info.ssid = STA_SSID;
     info.pwd  = STA_PWD;
     info.force_default_mode = 1;
     dev_ioctl(wifi_dev, DEV_STA_MODE, (u32)&info);
+#elif (EXT_WIFI_TEST_MODE == P2P_TEST_MODE)
+	info.p2p_role = 1;
+	info.force_default_mode = 1;
+	dev_ioctl(wifi_dev, DEV_P2P_MODE, (u32)&info);
 #endif
 
     while (1) {
@@ -349,4 +353,21 @@ static int ext_wireless_net_init(void)//主要是create wifi 线程的
     return thread_fork(WIFI_APP_TASK_NAME, 10, 0x1000, 64, 0, ext_wifi_app_task, NULL);
 }
 late_initcall(ext_wireless_net_init);
+
+const char *get_rec_path_0()
+{
+    return NULL;
+}
+const char *get_rec_path_1()
+{
+    return CONFIG_REC_PATH_0;
+}
+const char *get_rec_path_2()
+{
+    return CONFIG_REC_PATH_1;
+}
+const char *get_rec_path_3()
+{
+    return CONFIG_REC_PATH_2;
+}
 #endif

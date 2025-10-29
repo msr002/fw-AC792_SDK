@@ -21,4 +21,6 @@ bool bt_a2dp_slience_detecting(void);
 
 bool bt_slience_get_detect_addr(u8 *bt_addr);
 
+u8 bt_a2dp_slience_detect_num(void);
+
 #endif

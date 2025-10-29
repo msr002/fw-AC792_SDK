@@ -625,6 +625,7 @@
 #define LV_USE_LISTMENU 1
 #define LV_USE_POLYGONMENU 1
 #define LV_USE_KALEIDOSCOPEMENU 1
+#define LV_USE_ALBUM  1
 
 #define LV_USE_JS_ANIM_EFFECT 0
 
@@ -713,7 +714,7 @@
 #define LV_USE_QRCODE 0
 
 /*FreeType library*/
-#define LV_USE_FREETYPE 0
+#define LV_USE_FREETYPE 1
 #if LV_USE_FREETYPE
 /*Memory used by FreeType to cache characters [bytes] (-1: no caching)*/
 #define LV_FREETYPE_CACHE_SIZE (16 * 1024)

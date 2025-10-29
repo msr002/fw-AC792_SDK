@@ -4,17 +4,19 @@
  "uuid": "0x1BA8",
  "childrenGroup": [
   {
-   "id": "id_1745198625262_20",
+   "id": "id_1726047781090_19",
    "title": "默认分组",
    "select": true,
    "tabs": [
     {
      "uuid": 48452,
      "title": "标准",
-     "id": "id_1745198624462_11"
+     "id": "id_1726047780026_11",
+     "selected": "A",
+     "preset": ""
     }
    ],
-   "curTab": "id_1745198624462_11"
+   "curTab": "id_1726047780026_11"
   }
  ],
  "nodeData": {
@@ -30,7 +32,7 @@
     },
     "view": "vue-shape-view",
     "shape": "vue-shape",
-    "id": "cadea96e-73a4-41ad-ae73-d6f3eff6097e",
+    "id": "7349c796-5c6c-4889-b5d2-87167fe8e364",
     "component": "node-cust",
     "group": "hardware",
     "data": {
@@ -57,7 +59,7 @@
       "name": "AI_ADC",
       "list": [
        {
-        "modeId": "id_1745198624462_11",
+        "modeId": "id_1726047780026_11",
         "name": "AI_ADC",
         "current": "",
         "originSize": 0,
@@ -103,18 +105,20 @@
              }
             ]
            }
-          ]
+          ],
+          "bypass": false
          }
         ],
-        "originCount": 1
+        "originCount": 1,
+        "bypass": false
        }
       ]
      },
-     "configName": "AI_ADC",
-     "nodeName": "AI_ADC",
+     "configName": "ADC28",
+     "nodeName": "ADC28",
      "inBitWidth": 16,
      "outBitWidth": 16,
-     "itemId": "id_1745198625262_20"
+     "itemId": "id_1726047781090_19"
     },
     "ports": {
      "groups": {
@@ -169,16 +173,16 @@
       "distance": 40
      }
     },
-    "id": "47d1bdf1-5a39-478d-b53d-ee97069cf4b3",
+    "id": "a597fef0-9a05-49c4-9192-b039b5749dcb",
     "data": {
-     "itemId": "id_1745198625262_20"
+     "itemId": "id_1726047781090_19"
     },
     "source": {
-     "cell": "cadea96e-73a4-41ad-ae73-d6f3eff6097e",
+     "cell": "7349c796-5c6c-4889-b5d2-87167fe8e364",
      "port": "5114f0b1-23ea-4659-844f-a8bd9b1e634d"
     },
     "target": {
-     "cell": "5b60e1bb-bbb0-4c82-a297-214c74753269",
+     "cell": "dfe3cda2-cfa9-40b0-b522-6cdaac46bfa8",
      "port": "f6b1a025-238f-476a-8a35-7e285b7eb193"
     }
    },
@@ -193,7 +197,7 @@
     },
     "view": "vue-shape-view",
     "shape": "vue-shape",
-    "id": "5b60e1bb-bbb0-4c82-a297-214c74753269",
+    "id": "dfe3cda2-cfa9-40b0-b522-6cdaac46bfa8",
     "component": "node-cust",
     "group": "hardware",
     "data": {
@@ -203,7 +207,7 @@
      "type": 1,
      "fun": 0,
      "uuid": "0X2960",
-     "itemId": "id_1745198625262_20",
+     "itemId": "id_1726047781090_19",
      "outBit": 2,
      "bitConsistency": false,
      "inBit": 2,
@@ -281,16 +285,16 @@
       "distance": 40
      }
     },
-    "id": "26333840-7a30-48e6-9124-8cfbd809ad76",
+    "id": "af6bc3b2-97e3-43ab-821b-fa17e55d8739",
     "data": {
-     "itemId": "id_1745198625262_20"
+     "itemId": "id_1726047781090_19"
     },
     "source": {
-     "cell": "5b60e1bb-bbb0-4c82-a297-214c74753269",
+     "cell": "dfe3cda2-cfa9-40b0-b522-6cdaac46bfa8",
      "port": "c3184336-f5f8-4399-acb7-61531732c642"
     },
     "target": {
-     "cell": "1abb5e5b-df8b-41b8-972a-5bd2f6ddc9b5",
+     "cell": "150db41f-3dbb-4193-a79e-d1fbfc5ce1c3",
      "port": "25ac1764-1e03-461d-8a28-4d109b881a7f"
     }
    },
@@ -305,7 +309,7 @@
     },
     "view": "vue-shape-view",
     "shape": "vue-shape",
-    "id": "1abb5e5b-df8b-41b8-972a-5bd2f6ddc9b5",
+    "id": "150db41f-3dbb-4193-a79e-d1fbfc5ce1c3",
     "component": "node-cust",
     "group": "hardware",
     "data": {
@@ -316,15 +320,15 @@
      "fun": 1,
      "formFile": "../../.encoder_fmt.json",
      "uuid": "0XA2C",
-     "itemId": "id_1745198625262_20",
+     "itemId": "id_1726047781090_19",
      "subId": 17,
      "configs": {
       "name": "config260416",
       "list": [
        {
-        "modeId": "id_1745198624462_11",
+        "modeId": "id_1726047780026_11",
         "name": "config260416",
-        "current": "",
+        "current": "arg0",
         "originSize": 0,
         "list": [
          {
@@ -360,10 +364,12 @@
              }
             ]
            }
-          ]
+          ],
+          "bypass": false
          }
         ],
-        "originCount": 1
+        "originCount": 1,
+        "bypass": false
        }
       ]
      },
@@ -430,16 +436,16 @@
       "distance": 40
      }
     },
-    "id": "62bc0f32-c429-40a8-bf09-c6cd512bbea6",
+    "id": "fa0728cd-7503-4c35-b2a0-71de29d07760",
     "data": {
-     "itemId": "id_1745198625262_20"
+     "itemId": "id_1726047781090_19"
     },
     "source": {
-     "cell": "1abb5e5b-df8b-41b8-972a-5bd2f6ddc9b5",
+     "cell": "150db41f-3dbb-4193-a79e-d1fbfc5ce1c3",
      "port": "5114f0b1-23ea-4659-844f-a8bd9b1e634d"
     },
     "target": {
-     "cell": "9f7fba8d-cba5-46f7-ae4f-810c2c708592",
+     "cell": "b6c80f69-87cb-463b-becc-89e80eea6686",
      "port": "dbf2419f-efc1-4a8b-a7e5-f3d3e81614d2"
     }
    },
@@ -454,7 +460,7 @@
     },
     "view": "vue-shape-view",
     "shape": "vue-shape",
-    "id": "9f7fba8d-cba5-46f7-ae4f-810c2c708592",
+    "id": "b6c80f69-87cb-463b-becc-89e80eea6686",
     "component": "node-cust",
     "group": "hardware",
     "data": {
@@ -474,7 +480,7 @@
      "subId": 1,
      "inBitWidth": 16,
      "outBitWidth": 16,
-     "itemId": "id_1745198625262_20",
+     "itemId": "id_1726047781090_19",
      "configs": {
       "name": "",
       "list": []

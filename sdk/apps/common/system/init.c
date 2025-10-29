@@ -128,6 +128,9 @@ void cpu1_main(void)
 
 void cpu_assert_debug()
 {
+#if (defined TCFG_DEBUG_DLOG_ENABLE && TCFG_DEBUG_DLOG_ENABLE == 1)
+    dlog_flush2flash(100);
+#endif
 #ifdef CONFIG_DEBUG_ENABLE
     log_flush();
     local_irq_disable();
@@ -223,12 +226,25 @@ static void app_task_handler(void *p)
 
 
 #if (defined(TCFG_DEBUG_DLOG_ENABLE) && TCFG_DEBUG_DLOG_ENABLE)
-    dlog_init();
-    dlog_enable(1);
+    //dlog 输出设备初始化
+    int dlog_flash_output_device_init(void);
+    dlog_flash_output_device_init(); //初始化flash设备
+    /* dlog_init(); */
+    /* dlog_enable(1); */
     extern int dlog_uart_output_set(enum DLOG_OUTPUT_TYPE type);
-    dlog_uart_output_set(DLOG_OUTPUT_2_FLASH | DLOG_OUTPUT_2_UART);
-    // 设置log的等级
-    /* dlog_level_set(__LOG_INFO); */
+    dlog_uart_output_set(TCFG_DLOG_OUTPUT_TYPE);
+    if (dlog_output_type_get() & DLOG_OUTPUT_2_FLASH) {
+        int dlog_flush_all_cache_2_flash();
+        /* dlog_flush_all_cache_2_flash(); */
+        int dlog_flush_all_cache_and_clear(u32 timeout);
+        dlog_flush_all_cache_and_clear(-1);
+    }
+    if (dlog_output_type_get() & DLOG_OUTPUT_2_UART) {
+        //重新初始化uart
+        dlog_uart_deinit();
+        dlog_uart_init();
+        dlog_uart_output_flush();//刷uart dlog 缓存
+    }
 #endif
 
 

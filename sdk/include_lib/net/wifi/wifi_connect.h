@@ -14,6 +14,10 @@ enum WIFI_MODE {
     NONE_MODE,
 };
 
+#define WSC_PBC_MODE 0x0
+#define WSC_PIN_DISPLAY_MODE 0x4
+#define WSC_PIN_KEYPAD_MODE 0x8
+
 enum P2P_ROLE {
     P2P_GC_MODE = 1,
     P2P_GO_MODE,

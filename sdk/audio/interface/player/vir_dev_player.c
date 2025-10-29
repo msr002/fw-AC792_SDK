@@ -946,6 +946,7 @@ static void virtual_thread(void *net_buf)
     FILE *vfd = fopen("storage/sd0/C/2.mp3", "r");
     /* FILE *vfd = fopen("storage/sd0/C/2.opu", "r"); */
     /* FILE *vfd = fopen("storage/sd0/C/2.pcm", "r"); */
+    /* FILE *vfd = fopen("storage/sd0/C/test.spx", "r"); */
     if (!vfd) {
         printf("===virtual_thread vfd open fail!");
     }
@@ -1011,7 +1012,7 @@ void virtual_test()
     os_time_dly(10);
 
     //虚拟源输入读取net buf数据解码
-    __this->player = virtual_dev_play_callback((FILE *)net_buf, &virtual_dev_ops, NULL, virtual_music_player_decode_event_callback, NULL);
+    __this->player = virtual_dev_play_callback((FILE *)net_buf, &virtual_dev_ops, NULL, virtual_music_player_decode_event_callback, NULL, AUDIO_CODING_MP3);
 }
 
 #endif //VIRTUAL_PLAY_TEST

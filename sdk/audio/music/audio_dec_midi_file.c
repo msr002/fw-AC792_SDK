@@ -6,7 +6,7 @@
 #include "fs/fs.h"
 #include "media/audio_def.h"
 
-#if TCFG_MIDI_FILE_DEC_ENABLE
+#if TCFG_DEC_MIDI_FILE_ENABLE
 
 #define LOG_TAG     		"[MIDI-FILE]"
 #define LOG_ERROR_ENABLE
@@ -147,7 +147,7 @@ void init_midi_info_val(MIDI_INIT_STRUCT  *midi_init_info_v, void *addr)
     midi_init_info_v->mode_info.mode = CMD_MIDI_CTRL_MODE_0; //CMD_MIDI_CTRL_MODE_2;
 
     //midi节奏初始化
-    midi_init_info_v->tempo_info.tempo_val = 1042;
+    midi_init_info_v->tempo_info.tempo_val = 1024;
 
     for (u32 tmp_i = 0; tmp_i < 16; tmp_i++) {
         midi_init_info_v->tempo_info.decay_val[tmp_i] = ((u16)31 << 11) | 1024;
@@ -155,7 +155,7 @@ void init_midi_info_val(MIDI_INIT_STRUCT  *midi_init_info_v, void *addr)
     midi_init_info_v->tempo_info.mute_threshold = (u16)1L << 29;
 
     //midi主轨道初始化
-    midi_init_info_v->mainTrack_info.chn = 17; //把哪个轨道当成主轨道 , 17:库内自动分配
+    midi_init_info_v->mainTrack_info.chn = 0; //把哪个轨道当成主轨道
 
     //midi外部音量初始化
     for (u32 tmp_i = 0; tmp_i < 16; tmp_i++) {

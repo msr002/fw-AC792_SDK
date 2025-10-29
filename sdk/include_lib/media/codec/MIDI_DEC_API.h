@@ -224,6 +224,9 @@ struct midi_cmd {
     void *priv;
 };
 
+// extern audio_decoder_ops* get_midi_ops();
+extern int get_midi_tone_compressor(void *work_buf);
+
 #endif // MIDI_DEC_API_h__
 
 

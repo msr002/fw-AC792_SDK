@@ -4,17 +4,19 @@
  "uuid": "0x92C8",
  "childrenGroup": [
   {
-   "id": "id_1745198625250_19",
+   "id": "id_1726047781039_18",
    "title": "默认分组",
    "select": true,
    "tabs": [
     {
      "uuid": 48452,
      "title": "标准",
-     "id": "id_1745198624462_10"
+     "id": "id_1726047780025_10",
+     "selected": "A",
+     "preset": ""
     }
    ],
-   "curTab": "id_1745198624462_10"
+   "curTab": "id_1726047780025_10"
   }
  ],
  "nodeData": {
@@ -30,7 +32,7 @@
     },
     "view": "vue-shape-view",
     "shape": "vue-shape",
-    "id": "51cb47d4-c234-4528-8dff-f096437e6277",
+    "id": "7f2b2138-a8e1-41df-930d-65591a45c134",
     "component": "node-cust",
     "group": "hardware",
     "data": {
@@ -38,29 +40,9 @@
      "name": "ADC",
      "group": "输入输出",
      "type": 0,
-     "ports": [
-      {
-       "group": "out",
-       "label": "",
-       "id": "5114f0b1-23ea-4659-844f-a8bd9b1e634d"
-      }
-     ],
      "fun": 1,
-     "cmd": {
-      "exe": "",
-      "args": "",
-      "workplace": ""
-     },
      "formFile": "../../.ADC配置.json",
      "uuid": "0XD06D",
-     "groupId": 1652095106915,
-     "draginfo": {
-      "zIndex": 10001,
-      "pos": {
-       "x": 310,
-       "y": 170
-      }
-     },
      "outBit": 2,
      "inBit": 0,
      "bitConsistency": false,
@@ -77,7 +59,7 @@
       "name": "SOUND_ADC",
       "list": [
        {
-        "modeId": "id_1745198624462_10",
+        "modeId": "id_1726047780025_10",
         "name": "SOUND_ADC",
         "current": "",
         "originSize": 0,
@@ -123,56 +105,45 @@
              }
             ]
            }
-          ]
+          ],
+          "bypass": false
          }
         ],
-        "originCount": 1
+        "originCount": 1,
+        "bypass": false
        }
       ]
      },
-     "configName": "SOUND_ADC",
-     "nodeName": "SOUND_ADC",
+     "configName": "ADC27",
+     "nodeName": "ADC27",
      "inBitWidth": 16,
      "outBitWidth": 16,
-     "itemId": "id_1745198625250_19"
+     "itemId": "id_1726047781039_18"
     },
-    "zIndex": 10001,
-    "visible": true,
     "ports": {
      "groups": {
       "in": {
-       "position": "left",
-       "label": {
-        "position": "bottom"
-       },
-       "attrs": {
-        "circle": {
-         "r": 6,
-         "id": "1",
-         "event": "port:click",
-         "magnet": true,
-         "stroke": "#409EFF",
-         "strokeWidth": 2,
-         "fill": "#fff",
-         "style": {
-          "visibility": "visible"
-         }
-        }
-       }
+       "position": "left"
       },
       "out": {
        "position": "right",
-       "label": {
-        "position": "bottom"
-       },
        "attrs": {
+        "text": {
+         "fill": "#2b3f57",
+         "font-size": "12",
+         "visibility": "visible",
+         "text": ""
+        },
         "circle": {
          "r": 6,
          "magnet": true,
-         "stroke": "#31d0c6",
+         "stroke": "#7DC06E",
          "strokeWidth": 2,
-         "fill": "#fff",
-         "event": "port:click"
+         "fill": "#f2f2f2",
+         "event": "port:click",
+         "style": {
+          "visibility": "visible"
+         }
         }
        }
       }
@@ -180,25 +151,39 @@
      "items": [
       {
        "group": "out",
-       "dataType": "mp3",
-       "attrs": {
-        "text": {
-         "text": "",
-         "color": "#ffffff",
-         "fill": "#2b3f57",
-         "font-size": "12",
-         "visibility": "visible"
-        },
-        "circle": {
-         "fill": "#f2f2f2",
-         "stroke": "#7DC06E"
-        },
-        "color": "#ffffff"
-       },
        "id": "5114f0b1-23ea-4659-844f-a8bd9b1e634d",
        "index": 0
       }
      ]
+    }
+   },
+   {
+    "shape": "edge",
+    "attrs": {
+     "line": {
+      "stroke": "#A4A5A9",
+      "strokeWidth": "2px",
+      "targetMarker": {
+       "tagName": "path",
+       "d": "M 12 -5 0 0 12 5 Z",
+       "strokeWidth": 2,
+       "fill": "#A4A5A9",
+       "stroke": "#A4A5A9"
+      },
+      "distance": 40
+     }
+    },
+    "id": "3e6d86da-ad2c-4f03-ae18-d24316d3713f",
+    "data": {
+     "itemId": "id_1726047781039_18"
+    },
+    "source": {
+     "cell": "7f2b2138-a8e1-41df-930d-65591a45c134",
+     "port": "5114f0b1-23ea-4659-844f-a8bd9b1e634d"
+    },
+    "target": {
+     "cell": "1c731c98-8e5b-4335-9f61-86cf15334571",
+     "port": "25ac1764-1e03-461d-8a28-4d109b881a7f"
     }
    },
    {
@@ -212,7 +197,7 @@
     },
     "view": "vue-shape-view",
     "shape": "vue-shape",
-    "id": "566d6b96-6921-4507-a7f7-b972626bbd12",
+    "id": "1c731c98-8e5b-4335-9f61-86cf15334571",
     "component": "node-cust",
     "group": "hardware",
     "data": {
@@ -220,32 +205,18 @@
      "name": "编码器",
      "group": "编解码",
      "type": 1,
-     "ports": [],
      "fun": 1,
-     "cmd": {
-      "exe": "",
-      "args": "",
-      "workplace": ""
-     },
      "formFile": "../../.encoder_fmt.json",
      "uuid": "0XA2C",
-     "groupId": 1652095106915,
-     "draginfo": {
-      "zIndex": 10001,
-      "pos": {
-       "x": 190,
-       "y": 730
-      }
-     },
-     "itemId": "id_1745198625250_19",
+     "itemId": "id_1726047781039_18",
      "subId": 16,
      "configs": {
       "name": "config260414",
       "list": [
        {
-        "modeId": "id_1745198624462_10",
+        "modeId": "id_1726047780025_10",
         "name": "config260414",
-        "current": "",
+        "current": "arg0",
         "originSize": 0,
         "list": [
          {
@@ -281,10 +252,12 @@
              }
             ]
            }
-          ]
+          ],
+          "bypass": false
          }
         ],
-        "originCount": 1
+        "originCount": 1,
+        "bypass": false
        }
       ]
      },
@@ -293,43 +266,30 @@
      "inBitWidth": 16,
      "outBitWidth": 16
     },
-    "zIndex": 10001,
-    "visible": true,
     "ports": {
      "groups": {
       "in": {
-       "position": "left",
-       "label": {
-        "position": "bottom"
-       },
-       "attrs": {
-        "circle": {
-         "r": 6,
-         "id": "1",
-         "event": "port:click",
-         "magnet": true,
-         "stroke": "#409EFF",
-         "strokeWidth": 2,
-         "fill": "#fff",
-         "style": {
-          "visibility": "visible"
-         }
-        }
-       }
+       "position": "left"
       },
       "out": {
        "position": "right",
-       "label": {
-        "position": "bottom"
-       },
        "attrs": {
+        "text": {
+         "fill": "#2b3f57",
+         "font-size": "12",
+         "visibility": "visible",
+         "text": ""
+        },
         "circle": {
          "r": 6,
          "magnet": true,
-         "stroke": "#31d0c6",
+         "stroke": "#7DC06E",
          "strokeWidth": 2,
-         "fill": "#fff",
-         "event": "port:click"
+         "fill": "#f2f2f2",
+         "event": "port:click",
+         "style": {
+          "visibility": "visible"
+         }
         }
        }
       }
@@ -337,41 +297,11 @@
      "items": [
       {
        "group": "in",
-       "dataType": "mp3",
-       "attrs": {
-        "text": {
-         "text": "",
-         "color": "#ffffff",
-         "fill": "#2b3f57",
-         "font-size": "12",
-         "visibility": "visible"
-        },
-        "circle": {
-         "fill": "#f2f2f2",
-         "stroke": "#E3B14C"
-        },
-        "color": "#ffffff"
-       },
        "id": "25ac1764-1e03-461d-8a28-4d109b881a7f",
        "index": 0
       },
       {
        "group": "out",
-       "dataType": "mp3",
-       "attrs": {
-        "text": {
-         "text": "",
-         "color": "#ffffff",
-         "fill": "#2b3f57",
-         "font-size": "12",
-         "visibility": "visible"
-        },
-        "circle": {
-         "fill": "#f2f2f2",
-         "stroke": "#7DC06E"
-        },
-        "color": "#ffffff"
-       },
        "id": "5114f0b1-23ea-4659-844f-a8bd9b1e634d",
        "index": 0
       }
@@ -390,20 +320,20 @@
        "strokeWidth": 2,
        "fill": "#A4A5A9",
        "stroke": "#A4A5A9"
-      }
+      },
+      "distance": 40
      }
     },
-    "id": "27f9e135-54e6-4724-bbd8-6074285c84e4",
+    "id": "41322533-710f-4f5b-bb09-0d3c7888bfee",
     "data": {
-     "itemId": "id_1745198625250_19"
+     "itemId": "id_1726047781039_18"
     },
-    "zIndex": 10002,
     "source": {
-     "cell": "51cb47d4-c234-4528-8dff-f096437e6277",
+     "cell": "1c731c98-8e5b-4335-9f61-86cf15334571",
      "port": "5114f0b1-23ea-4659-844f-a8bd9b1e634d"
     },
     "target": {
-     "cell": "566d6b96-6921-4507-a7f7-b972626bbd12",
+     "cell": "ffd24b98-722e-4f74-b756-c8fe4de6cb9a",
      "port": "25ac1764-1e03-461d-8a28-4d109b881a7f"
     }
    },
@@ -418,7 +348,7 @@
     },
     "view": "vue-shape-view",
     "shape": "vue-shape",
-    "id": "40ac89d4-0d17-4617-9d2e-502a37a39a5e",
+    "id": "ffd24b98-722e-4f74-b756-c8fe4de6cb9a",
     "component": "node-cust",
     "group": "hardware",
     "data": {
@@ -426,24 +356,9 @@
      "name": "声波配网",
      "group": "输入输出",
      "type": 2,
-     "ports": [],
      "fun": 0,
-     "cmd": {
-      "exe": "",
-      "args": "",
-      "workplace": ""
-     },
-     "formFile": "",
      "uuid": "0X4448",
-     "groupId": 1652095106915,
-     "draginfo": {
-      "zIndex": 10001,
-      "pos": {
-       "x": 810,
-       "y": 730
-      }
-     },
-     "itemId": "id_1745198625250_19",
+     "itemId": "id_1726047781039_18",
      "marco": "TCFG_ACOUSTIC_COMMUNICATION_NODE_ENABLE",
      "sAlias": "",
      "dynamicPort": {
@@ -460,43 +375,30 @@
       "list": []
      }
     },
-    "zIndex": 10125,
-    "visible": true,
     "ports": {
      "groups": {
       "in": {
-       "position": "left",
-       "label": {
-        "position": "bottom"
-       },
-       "attrs": {
-        "circle": {
-         "r": 6,
-         "id": "1",
-         "event": "port:click",
-         "magnet": true,
-         "stroke": "#409EFF",
-         "strokeWidth": 2,
-         "fill": "#fff",
-         "style": {
-          "visibility": "visible"
-         }
-        }
-       }
+       "position": "left"
       },
       "out": {
        "position": "right",
-       "label": {
-        "position": "bottom"
-       },
        "attrs": {
+        "text": {
+         "fill": "#2b3f57",
+         "font-size": "12",
+         "visibility": "visible",
+         "text": ""
+        },
         "circle": {
          "r": 6,
          "magnet": true,
-         "stroke": "#31d0c6",
+         "stroke": "#7DC06E",
          "strokeWidth": 2,
-         "fill": "#fff",
-         "event": "port:click"
+         "fill": "#f2f2f2",
+         "event": "port:click",
+         "style": {
+          "visibility": "visible"
+         }
         }
        }
       }
@@ -504,54 +406,10 @@
      "items": [
       {
        "group": "in",
-       "dataType": "mp3",
-       "attrs": {
-        "text": {
-         "text": "",
-         "color": "#ffffff",
-         "fill": "#2b3f57",
-         "font-size": "12",
-         "visibility": "visible"
-        },
-        "circle": {
-         "fill": "#f2f2f2",
-         "stroke": "#E3B14C"
-        },
-        "color": "#ffffff"
-       },
        "id": "25ac1764-1e03-461d-8a28-4d109b881a7f",
        "index": 0
       }
      ]
-    }
-   },
-   {
-    "shape": "edge",
-    "attrs": {
-     "line": {
-      "stroke": "#A4A5A9",
-      "strokeWidth": "2px",
-      "targetMarker": {
-       "tagName": "path",
-       "d": "M 12 -5 0 0 12 5 Z",
-       "strokeWidth": 2,
-       "fill": "#A4A5A9",
-       "stroke": "#A4A5A9"
-      }
-     }
-    },
-    "id": "687d5135-c6fe-4265-94e3-46e4a2b717aa",
-    "data": {
-     "itemId": "id_1745198625250_19"
-    },
-    "zIndex": 10126,
-    "source": {
-     "cell": "566d6b96-6921-4507-a7f7-b972626bbd12",
-     "port": "5114f0b1-23ea-4659-844f-a8bd9b1e634d"
-    },
-    "target": {
-     "cell": "40ac89d4-0d17-4617-9d2e-502a37a39a5e",
-     "port": "25ac1764-1e03-461d-8a28-4d109b881a7f"
     }
    }
   ]

@@ -174,6 +174,10 @@ SECTIONS
 #if defined CONFIG_MEDIA_ENABLE
         #include "media/media_lib_data.ld"
 #endif
+        . = ALIGN(4);
+        *(.debug_exception.debug_text)
+        *(.debug_exception.debug_const)
+        *(.debug_exception.data)
 
         . = ALIGN(4);
         *(.data)
@@ -190,6 +194,10 @@ SECTIONS
 #if defined CONFIG_MEDIA_ENABLE
         #include "media/media_lib_bss.ld"
 #endif
+
+        . = ALIGN(4);
+        *(.debug_exception.data.bss)
+
         *(.bss)
 #if defined CONFIG_CXX_SUPPORT
         *(.bss.*)

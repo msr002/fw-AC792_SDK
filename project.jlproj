@@ -1,8 +1,9 @@
 {
  "type": "音箱",
  "sdk": "wifi_soundbox",
+ "singleSeries": false,
  "chip": "AC792N",
- "version": "V3.0.0",
+ "version": "V1.0.0",
  "ingoreConfig": false,
  "pack": "AC792N-demo",
  "patch": {
@@ -151,46 +152,34 @@
      "data": ""
     },
     {
-     "showName": "回放播放",
-     "fileName": "src\\音频流程\\回放播放.x6flow",
-     "folder": false,
-     "binName": "stream.bin",
      "type": 4,
-     "data": ""
-    },
-    {
-     "showName": "录像录音",
-     "fileName": "src\\音频流程\\录像录音.x6flow",
-     "folder": false,
+     "fileName": "src\\音频流程\\recoder_vir_tx.x6flow",
      "binName": "stream.bin",
-     "type": 4,
+     "showName": "recoder_vir_tx",
      "data": ""
     }
    ]
   }
  ],
- "create_time": "2025-04-21T01:21:45.057Z",
- "update_time": "2025-09-22T03:07:33.150Z",
+ "create_time": "2025-10-27T08:06:27.568Z",
+ "update_time": "2025-10-28T08:58:26.950Z",
  "standardPatch": "",
- "lastOpenToolVersion": "4.5.2",
- "lastStencilFlowTime": "2025-08-05T16:00:45.7314339+08:00",
- "versionName": "V3.0.0",
+ "lastOpenToolVersion": "4.6.2",
+ "lastStencilFlowTime": "2025-10-27T15:31:14.0177676+08:00",
+ "createFromBranch": "",
+ "versionName": "V1.0.0",
  "checkPatchTime": 0,
  "relateVersion": "",
  "variant": [
   {
    "name": "wifi_camera",
    "path": ".\\sdk\\apps\\wifi_camera\\board\\wl83",
-   "task": "ac792n_wifi_camera",
-   "cPath": ".\\sdk\\apps\\wifi_camera\\board\\wl83/sdk_config.c",
-   "hPath": ".\\sdk\\apps\\wifi_camera\\board\\wl83/sdk_config.h",
-   "sPath": ".\\sdk\\apps\\wifi_camera\\board\\wl83/jlstream_node_cfg.h"
+   "task": " ac792n_wifi_camera"
   }
  ],
  "defaultVariant": {
-  "name": "默认配置",
-  "cPath": "",
-  "hPath": "",
-  "sPath": ""
+  "path": ".\\sdk\\apps\\wifi_soundbox\\board\\wl83",
+  "task": "ac792n_wifi_soundbox",
+  "name": "默认配置"
  }
 }

@@ -223,6 +223,72 @@
        "tag": "group",
        "tagIcon": "row",
        "layoutTree": true,
+       "componentName": "row_139",
+       "enableUuid": "",
+       "showComponentName": false,
+       "dataType": [
+        "8",
+        "1"
+       ],
+       "template": "",
+       "span": 24,
+       "formId": 139,
+       "renderKey": "1391757043304927",
+       "children": [
+        {
+         "__config__": {
+          "label": "蓝牙发射器使能",
+          "tag": "el-switch",
+          "tagIcon": "switch",
+          "defaultValue": 0,
+          "span": 4,
+          "showLabel": true,
+          "labelWidth": 200,
+          "layout": "colFormItem",
+          "required": false,
+          "regList": [],
+          "changeTag": true,
+          "dataType": [
+           "8",
+           "1"
+          ],
+          "document": "https://element.eleme.cn/#/zh-CN/component/switch",
+          "formId": 141,
+          "renderKey": "1411757043380697",
+          "saveWay": "macro",
+          "uuid": "TCFG_USER_EMITTER_ENABLE",
+          "eventField": [],
+          "originValue": 0
+         },
+         "style": {},
+         "disabled": false,
+         "active-text": "",
+         "inactive-text": "",
+         "active-color": null,
+         "inactive-color": null,
+         "active-value": 1,
+         "inactive-value": 0,
+         "id": "id_1757043380697_4",
+         "__vModel__": "field141"
+        }
+       ],
+       "eventField": []
+      },
+      "type": "default",
+      "justify": "start",
+      "align": "top",
+      "style": {
+       "height": "70px",
+       "paddingLeft": "0px"
+      },
+      "id": "id_1757043304927_2"
+     },
+     {
+      "__config__": {
+       "layout": "rowFormItem",
+       "tag": "group",
+       "tagIcon": "row",
+       "layoutTree": true,
        "componentName": "row_245",
        "showComponentName": false,
        "dataType": [
@@ -1728,6 +1794,154 @@
       "inactive-value": 0,
       "id": "id_1725592024699_0",
       "__vModel__": "field107"
+     },
+     {
+      "__config__": {
+       "label": "BIP",
+       "tag": "el-switch",
+       "tagIcon": "switch",
+       "defaultValue": 0,
+       "span": 5,
+       "showLabel": true,
+       "labelWidth": 100,
+       "layout": "colFormItem",
+       "required": false,
+       "regList": [],
+       "changeTag": true,
+       "dataType": [
+        "8",
+        "1",
+        "macro"
+       ],
+       "document": "https://element.eleme.cn/#/zh-CN/component/switch",
+       "formId": 137,
+       "renderKey": "1371757043021934",
+       "saveWay": "macro",
+       "uuid": "TCFG_BT_SUPPORT_PROFILE_BIP",
+       "eventField": [],
+       "originValue": 0
+      },
+      "style": {},
+      "disabled": false,
+      "active-text": "",
+      "inactive-text": "",
+      "active-color": null,
+      "inactive-color": null,
+      "active-value": 1,
+      "inactive-value": 0,
+      "id": "id_1757043021934_0",
+      "__vModel__": "field137"
+     },
+     {
+      "__config__": {
+       "label": "OPP",
+       "tag": "el-switch",
+       "tagIcon": "switch",
+       "defaultValue": 0,
+       "span": 5,
+       "showLabel": true,
+       "labelWidth": 100,
+       "layout": "colFormItem",
+       "required": false,
+       "regList": [],
+       "changeTag": true,
+       "dataType": [
+        "8",
+        "1",
+        "macro"
+       ],
+       "document": "https://element.eleme.cn/#/zh-CN/component/switch",
+       "formId": 104,
+       "renderKey": "1041757475772763",
+       "saveWay": "macro",
+       "uuid": "TCFG_BT_SUPPORT_PROFILE_OPP",
+       "eventField": [],
+       "originValue": 0
+      },
+      "style": {},
+      "disabled": false,
+      "active-text": "",
+      "inactive-text": "",
+      "active-color": null,
+      "inactive-color": null,
+      "active-value": 1,
+      "inactive-value": 0,
+      "id": "id_1757475772763_0",
+      "__vModel__": "field104"
+     },
+     {
+      "__config__": {
+       "label": "IAP",
+       "tag": "el-switch",
+       "tagIcon": "switch",
+       "defaultValue": 0,
+       "span": 5,
+       "showLabel": true,
+       "labelWidth": 100,
+       "layout": "colFormItem",
+       "required": false,
+       "regList": [],
+       "changeTag": true,
+       "dataType": [
+        "8",
+        "1",
+        "macro"
+       ],
+       "document": "https://element.eleme.cn/#/zh-CN/component/switch",
+       "formId": 105,
+       "renderKey": "1051757475773822",
+       "saveWay": "macro",
+       "uuid": "TCFG_BT_SUPPORT_PROFILE_IAP",
+       "eventField": [],
+       "originValue": 0
+      },
+      "style": {},
+      "disabled": false,
+      "active-text": "",
+      "inactive-text": "",
+      "active-color": null,
+      "inactive-color": null,
+      "active-value": 1,
+      "inactive-value": 0,
+      "id": "id_1757475773822_1",
+      "__vModel__": "field105"
+     },
+     {
+      "__config__": {
+       "label": "HSP",
+       "tag": "el-switch",
+       "tagIcon": "switch",
+       "defaultValue": 0,
+       "span": 5,
+       "showLabel": true,
+       "labelWidth": 100,
+       "layout": "colFormItem",
+       "required": false,
+       "regList": [],
+       "changeTag": true,
+       "dataType": [
+        "8",
+        "1",
+        "macro"
+       ],
+       "document": "https://element.eleme.cn/#/zh-CN/component/switch",
+       "formId": 108,
+       "renderKey": "1081757483649216",
+       "saveWay": "macro",
+       "uuid": "TCFG_BT_SUPPORT_PROFILE_HSP",
+       "eventField": [],
+       "originValue": 0
+      },
+      "style": {},
+      "disabled": false,
+      "active-text": "",
+      "inactive-text": "",
+      "active-color": null,
+      "inactive-color": null,
+      "active-value": 1,
+      "inactive-value": 0,
+      "id": "id_1757483649216_4",
+      "__vModel__": "field108"
      }
     ],
     "eventField": [],
@@ -2639,41 +2853,6 @@
          "inactive-value": 0,
          "id": "id_1705040278234_6",
          "__vModel__": "field137"
-        },
-        {
-         "__config__": {
-          "label": "后台关闭经典蓝牙连接",
-          "tag": "el-switch",
-          "tagIcon": "switch",
-          "defaultValue": 0,
-          "span": 6,
-          "showLabel": true,
-          "labelWidth": 200,
-          "layout": "colFormItem",
-          "required": false,
-          "regList": [],
-          "changeTag": true,
-          "status": 0,
-          "dataType": [
-           "8",
-           "1"
-          ],
-          "formId": 147,
-          "renderKey": "1471709263465059",
-          "saveWay": "macro",
-          "uuid": "TCFG_BACKGROUND_WITHOUT_EDR_CONNECT",
-          "eventField": []
-         },
-         "style": {},
-         "disabled": false,
-         "active-text": "",
-         "inactive-text": "",
-         "active-color": null,
-         "inactive-color": null,
-         "active-value": 1,
-         "inactive-value": 0,
-         "id": "id_1709263465059_0",
-         "__vModel__": "field147"
         }
        ],
        "eventField": []
@@ -3029,13 +3208,12 @@
        "uuid": "TCFG_THIRD_PARTY_PROTOCOLS_SEL",
        "saveWay": "macro",
        "originValue": [
-        "MULTI_BOX_ADV_EN",
-        "MIJIA_EN"
+        "NET_CFG_EN"
        ],
        "tipAlways": true,
        "tip": "",
        "formItemWidth": "400px",
-       "emptyValue": "MULTI_BOX_ADV_EN"
+       "emptyValue": "NET_CFG_EN"
       },
       "__slot__": {
        "options": [
@@ -3060,6 +3238,36 @@
         {
          "label": "MIJIA",
          "value": "MIJIA_EN",
+         "hide": false,
+         "disabled": false
+        },
+        {
+         "label": "CLIENT",
+         "value": "CLIENT_EN",
+         "hide": false,
+         "disabled": false
+        },
+        {
+         "label": "DUEROS",
+         "value": "DUEROS_EN",
+         "hide": false,
+         "disabled": false
+        },
+        {
+         "label": "NET_CFG",
+         "value": "NET_CFG_EN",
+         "hide": false,
+         "disabled": false
+        },
+        {
+         "label": "LE_HOGP",
+         "value": "LE_HOGP_EN",
+         "hide": false,
+         "disabled": false
+        },
+        {
+         "label": "ALIPAY",
+         "value": "ALIPAY_EN",
          "hide": false,
          "disabled": false
         }
@@ -3097,7 +3305,7 @@
  "formRules": "rules",
  "gutter": 30,
  "disabled": false,
- "span": 13,
+ "span": 24,
  "formBtns": false,
  "unFocusedComponentBorder": false,
  "maxFormId": 306,

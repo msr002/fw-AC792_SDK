@@ -1,0 +1,19 @@
+
+音频配置
+#########
+
+.. toctree::
+   :maxdepth: 1
+
+   DAC_cfg.md
+   ADC_cfg.md
+   ANC_cfg.md
+   General_cfg.md
+   codec.md
+   music_palyback.md
+   production_test.md
+   kws.md
+   spatial_audio.md
+   Hi_Res_Audio/index.rst
+
+

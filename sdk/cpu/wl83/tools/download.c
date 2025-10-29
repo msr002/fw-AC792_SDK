@@ -56,10 +56,10 @@ echo "packres\packres.exe -n tone -o packres/AUPACKRES dvr_aud_res" >> ${PROJ_BU
 #if defined CONFIG_VOICE_PROMPT_FILE_SAVE_IN_RESERVED_EXPAND_ZONE
 echo "packres\packres.exe -n tone -o packres/AUPACKRES dvr_aud_res" >> ${PROJ_BUILD}
 #endif
-echo "copy ../../../../wifi_camera/output/stream.bin stream.bin"     >> ${PROJ_BUILD}
-echo "copy ../../../../wifi_camera/output/cfg_tool.bin cfg_tool.bin" >> ${PROJ_BUILD}
-echo "copy ../../../../wifi_camera/output/tone_en.cfg tone_en.cfg"   >> ${PROJ_BUILD}
-echo "copy ../../../../wifi_camera/output/tone_zh.cfg tone_en.cfg"   >> ${PROJ_BUILD}
+echo "copy ..\\..\\..\\..\\wifi_camera\\output\\stream.bin stream.bin"     >> ${PROJ_BUILD}
+echo "copy ..\\..\\..\\..\\wifi_camera\\output\\cfg_tool.bin cfg_tool.bin" >> ${PROJ_BUILD}
+echo "copy ..\\..\\..\\..\\wifi_camera\\output\\tone_en.cfg tone_en.cfg"   >> ${PROJ_BUILD}
+echo "copy ..\\..\\..\\..\\wifi_camera\\output\\tone_zh.cfg tone_zh.cfg"   >> ${PROJ_BUILD}
 #elif defined CONFIG_DEMO_AUDIO_PROJECT_ENABLE
 #if defined CONFIG_VOICE_PROMPT_FILE_SAVE_IN_RESERVED_EXPAND_ZONE && defined CONFIG_VOICE_PROMPT_FILE_PATH
 echo "packres\packres.exe -n tone -o packres/AUPACKRES story_aud_res" >> ${PROJ_BUILD}

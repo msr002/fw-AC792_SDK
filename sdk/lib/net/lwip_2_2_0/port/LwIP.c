@@ -755,6 +755,29 @@ void Get_IPAddress(u8_t lwip_netif, char *ipaddr)
     inet_ntoa_r(*((ip4_addr_t *) & (netif->ip_addr)), ipaddr, IP4ADDR_STRLEN_MAX);
 }
 
+void Get_IP6Address(u8_t lwip_netif, char *ipaddr)
+{
+#if LWIP_IPV6
+    struct netif *netif = net_get_netif_handle(lwip_netif);
+    if (netif == NULL) {
+        return;
+    }
+
+    for (int i = 0; i < LWIP_IPV6_NUM_ADDRESSES; i++) {
+        if (netif_ip6_addr_state(netif, i) & IP6_ADDR_PREFERRED)  {
+            if (!ip6_addr_islinklocal(netif_ip6_addr(netif, i))\
+                && !ip6_addr_isany(netif_ip6_addr(netif, i))) {
+
+                strcpy(ipaddr, ip6addr_ntoa(netif_ip_addr6(netif, i)));
+                return;
+            }
+        }
+    }
+
+    printf("Get_IP6Address not Found\n");
+#endif /* #if LWIP_IPV6 */
+}
+
 void get_gateway(u8_t lwip_netif, char *ipaddr)
 {
     struct netif *netif = net_get_netif_handle(lwip_netif);
@@ -980,14 +1003,14 @@ static void __lwip_renew(unsigned short parm)
         return;
     }
 
+#if LWIP_NETIF_EXT_STATUS_CALLBACK
+    netif_remove_ext_callback(&netif_callback);
+    netif_add_ext_callback(&netif_callback, netif_callback_fn);
+#endif
+
     if (lwip_netif == WIFI_NETIF) {
         int wifi_get_mac(u8 * mac);
         wifi_get_mac(wireless_netif.hwaddr);
-
-#if LWIP_NETIF_EXT_STATUS_CALLBACK
-        netif_remove_ext_callback(&netif_callback);
-        netif_add_ext_callback(&netif_callback, netif_callback_fn);
-#endif
 
 #if LWIP_IPV6
         nd6_renew(&wireless_netif);
@@ -1034,6 +1057,10 @@ static void __lwip_renew(unsigned short parm)
 #ifdef HAVE_EXT_WIRELESS_NETIF
     else if (lwip_netif == EXT_WIFI_NETIF) {
         netdev_get_mac_addr(ext_wireless_netif.hwaddr);
+
+#if LWIP_IPV6
+        nd6_renew(&ext_wireless_netif);
+#endif
         if (dhcp) {
             dhcp_renew_ipaddr(&ext_wireless_netif);
 
@@ -1044,6 +1071,14 @@ static void __lwip_renew(unsigned short parm)
             if (tcpip_timeout(DHCP_TMR_INTERVAL, (sys_timeout_handler)network_is_dhcp_bound, &ext_wireless_netif) != ERR_OK) {
                 LWIP_ASSERT("failed to create timeout network_is_dhcp_bound", 0);
             }
+        } else {
+            tcpip_untimeout((sys_timeout_handler)network_is_dhcp_bound, &ext_wireless_netif);
+            IP4_ADDR(&ipaddr, lan_setting_info->WIRELESS_IP_ADDR0, lan_setting_info->WIRELESS_IP_ADDR1, lan_setting_info->WIRELESS_IP_ADDR2, lan_setting_info->WIRELESS_IP_ADDR3);
+            IP4_ADDR(&netmask, lan_setting_info->WIRELESS_NETMASK0, lan_setting_info->WIRELESS_NETMASK1, lan_setting_info->WIRELESS_NETMASK2, lan_setting_info->WIRELESS_NETMASK3);
+            IP4_ADDR(&gw, lan_setting_info->WIRELESS_GATEWAY0, lan_setting_info->WIRELESS_GATEWAY1, lan_setting_info->WIRELESS_GATEWAY2, lan_setting_info->WIRELESS_GATEWAY3);
+            netif_set_addr(&ext_wireless_netif, &ipaddr, &netmask, &gw);
+            lwip_event_cb(NULL, LWIP_EXT_WIRELESS_DHCP_BOUND_SUCC);
+            Display_IPAddress();
         }
     }
 #endif
@@ -1051,6 +1086,10 @@ static void __lwip_renew(unsigned short parm)
     else if (lwip_netif == LTE_NETIF) {
         u8 *lte_module_get_mac_addr(void);
         memcpy(lte_netif.hwaddr, lte_module_get_mac_addr(), 6);
+
+#if LWIP_IPV6
+        nd6_renew(&lte_netif);
+#endif
         if (dhcp) {
             dhcp_renew_ipaddr(&lte_netif);
 
@@ -1066,6 +1105,9 @@ static void __lwip_renew(unsigned short parm)
 #endif
 #ifdef HAVE_ETH_WIRE_NETIF
     else if (lwip_netif == ETH_NETIF) {
+#if LWIP_IPV6
+        nd6_renew(&wire_netif);
+#endif
         if (dhcp) {
             dhcp_renew_ipaddr(&wire_netif);
 
@@ -1081,6 +1123,9 @@ static void __lwip_renew(unsigned short parm)
 #endif
 #ifdef HAVE_BT_NETIF
     else if (lwip_netif == BT_NETIF) {
+#if LWIP_IPV6
+        nd6_renew(&bt_netif);
+#endif
         if (dhcp) {
             dhcp_renew_ipaddr(&bt_netif);
 

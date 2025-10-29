@@ -6,10 +6,15 @@
 #include "asm/sfc_norflash_api.h"
 #include "system/includes.h"
 #include "generic/dlog.h"
+#include "asm/rtc.h"
+#include "asm/spi.h"
+#include "device/gpio.h"
 /* #include "norflash.h" */
 
 #if TCFG_DEBUG_DLOG_ENABLE
 extern u32 __attribute__((weak)) dlog_log_data_start_addr[];
+
+struct sys_time dlog_sys_time = {0};
 
 __attribute__((weak))
 int dlog_output_direct(void *buf, u16 len)
@@ -62,131 +67,217 @@ void dlog_print_test(void *priv)
 
 #if TCFG_DEBUG_DLOG_FLASH_SEL // 外置flash获取其它自定义的区域
 
-extern int _norflash_init(const char *name, struct norflash_dev_platform_data *pdata);
-extern int _norflash_open(void *arg);
-extern int _norflash_read(u32 addr, u8 *buf, u32 len, u8 cache);
-extern int _norflash_write(u32 addr, void *buf, u32 len, u8 cache);
-extern int _norflash_eraser(u8 eraser, u32 addr);
-extern int _norflash_close(void);
+struct _dlog_ext_flash_ {
+    void *spi;
+    int cs_gpio;
+};
+
+static struct _dlog_ext_flash_ hdl = {0};
+
+#define FLASH_PAGE_SIZE 256
+
+#define WINBOND_READ_DATA	        0x03
+#define WINBOND_DUAL_READ_DATA	    0x3b
+#define WINBOND_DUAL_READ	        0xbb
+#define WINBOND_READ_SR1            0x05
+#define DUMMY_BYTE                  0xff
+#define WINBOND_CHIP_ERASE          0xC7
+#define W25X_JedecDeviceID          0x9f
+#define WINBOND_WRITE_ENABLE        0x06
+#define WINBOND_PAGE_PROGRAM_QUAD	0x32
+#define W25X_SectorErase		    0x20
+#define W25X_PageProgram         	0x02
+
+static void cs_gpio(int sta)
+{
+    gpio_direction_output(hdl.cs_gpio, sta);
+}
+static void spiflash_send_write_enable(void)
+{
+    cs_gpio(0);
+    dev_ioctl(hdl.spi, IOCTL_SPI_SEND_BYTE, WINBOND_WRITE_ENABLE);
+    cs_gpio(1);
+}
+static int W25X_GetChipID(void)
+{
+    u8 id[0x3] = {0, 0, 0};
+    int id_mub = 0;
+    int err = 0;
+
+    cs_gpio(0);
+    dev_ioctl(hdl.spi, IOCTL_SPI_SEND_BYTE, W25X_JedecDeviceID);
+
+    for (u8 i = 0; i < sizeof(id); i++) {
+        err = dev_ioctl(hdl.spi, IOCTL_SPI_READ_BYTE, (u32)&id[i]);
+        printf(">>>>>>>>>>id = 0x%x", id[i]);
+        if (err) {
+            printf(">>>>>>>>>>>ERR");
+            id[0] = id[1] = id[2] = 0xff;
+            break;
+        }
+    }
+
+    cs_gpio(1);
+
+    id_mub = id[0] << 16 | id[1] << 8 | id[2];
+
+#define W25Q16 0XEF4015
+#define W25Q32 0XEF4016
+#define W25Q64 0XEF4017
+#define W25Q128 0XEF4018
+#define W25Q256 0XEF4019
+
+    switch (id_mub) {
+    case W25Q16:
+        printf("\n>>>>>flash IC is W25Q16\n");
+        break;
+
+    case W25Q32:
+        printf("\n>>>>>flash IC is W25Q32\n");
+        break;
+
+    case W25Q64:
+        printf("\n>>>>>flash IC is W25Q64\n");
+        break;
+
+    case W25Q128:
+        printf("\n>>>>>flash IC is W25Q128\n");
+        break;
+
+    case W25Q256:
+        printf("\n>>>>>flash IC is W25Q256\n");
+        break;
+
+    default:
+        printf("\n>>>>>no flash\n");
+        /* err = -1; */
+        break;
+    }
+
+    return err;
+}
+
+static int spiflash_wait_ok(void)
+{
+    u8 state = 0;
+
+    cs_gpio(0);
+    dev_ioctl(hdl.spi, IOCTL_SPI_SEND_BYTE, WINBOND_READ_SR1);
+    dev_ioctl(hdl.spi, IOCTL_SPI_READ_BYTE, (u32)&state);
+    cs_gpio(1);
+    os_time_dly(1);
+    while ((state & 0x01) == 0x01) {
+        cs_gpio(0);
+        dev_ioctl(hdl.spi, IOCTL_SPI_SEND_BYTE, WINBOND_READ_SR1);
+        dev_ioctl(hdl.spi, IOCTL_SPI_READ_BYTE, (u32)&state);
+        cs_gpio(1);
+        os_time_dly(1);
+    }
+    return 0;
+}
+
+static void spiflash_send_addr(u32 addr)
+{
+    dev_ioctl(hdl.spi, IOCTL_SPI_SEND_BYTE, addr >> 16);
+    dev_ioctl(hdl.spi, IOCTL_SPI_SEND_BYTE, addr >> 8);
+    dev_ioctl(hdl.spi, IOCTL_SPI_SEND_BYTE, addr);
+}
+
+static void SectorErase(u32 addr)
+{
+    spiflash_send_write_enable();
+    cs_gpio(0);
+    dev_ioctl(hdl.spi, IOCTL_SPI_SEND_BYTE, W25X_SectorErase);//擦除当前页
+    addr &= ~(4096 - 1); //4k对齐
+    spiflash_send_addr(addr) ;
+    cs_gpio(1);
+    spiflash_wait_ok();
+}
+
+static void write_data(u8 *buf, u32 addr, u32 len)
+{
+    spiflash_send_write_enable();
+    cs_gpio(0);
+    dev_ioctl(hdl.spi, IOCTL_SPI_SEND_BYTE, W25X_PageProgram);//向当前页写入数据
+    spiflash_send_addr(addr);
+    dev_write(hdl.spi, buf, len);
+    cs_gpio(1);
+    spiflash_wait_ok();
+}
+
+static s32 spiflash_write(u8 *buf, u32 addr, u32 len)
+{
+
+    s32 pages = len >> 8;
+    u32 waddr = addr;
+
+    //每次最多写入SPI_FLASH_PAGE_SIZE字节
+    SectorErase(waddr);
+    do {
+
+        write_data(buf, waddr, FLASH_PAGE_SIZE);
+        waddr += FLASH_PAGE_SIZE;
+        buf	 += FLASH_PAGE_SIZE;
+    } while (pages--);
+
+    return 0;
+}
+
+static int spiflash_read(u8 *buf, u32 addr, u16 len)
+{
+
+    int err = 0;
+    cs_gpio(0);
+    err = dev_ioctl(hdl.spi, IOCTL_SPI_SEND_BYTE, WINBOND_READ_DATA);
+
+    if (err == 0) {
+        spiflash_send_addr(addr);
+        /* dev_bulk_read(hdl.spi, buf, addr, len); */
+        for (int i = 0; i < len; i++) {
+            dev_ioctl(hdl.spi, IOCTL_SPI_READ_BYTE, (u32)(buf + i));
+        }
+    }
+    cs_gpio(1);
+    return err ? -EFAULT : len;
+}
+
+//spi双线使用这个接口读
+static int spiflash_dual_read(u8 *buf, u32 addr, u16 len)
+{
+    int err = 0;
+    cs_gpio(0);
+    err = dev_ioctl(hdl.spi, IOCTL_SPI_SEND_BYTE, WINBOND_DUAL_READ_DATA);
+    if (err == 0) {
+        spiflash_send_addr(addr);
+        dev_ioctl(hdl.spi, IOCTL_SPI_SEND_BYTE, WINBOND_DUAL_READ);
+        dev_bulk_read(hdl.spi, buf, addr, len);
+    }
+    cs_gpio(1);
+    return err ? -EFAULT : len;
+}
+static void spi_open(void)
+{
+    hdl.cs_gpio = IO_PORTC_05;
+    hdl.spi = dev_open("spi1", NULL);
+
+    if (hdl.spi == NULL) {
+        printf(">>>>>>>>>>open_fail");
+        hdl.cs_gpio = -1;
+        return;
+    }
+    cs_gpio(1);
+    dev_ioctl(hdl.spi, IOCTL_SPI_SET_USE_SEM, 0); //不使用信号量
+    dev_ioctl(hdl.spi, IOCTL_SPI_SET_ASYNC_SEND, 0); //同步模式
+}
+static void spi_close(void)
+{
+    if (hdl.spi) {
+        dev_close(hdl.spi);
+        hdl.spi = NULL;
+    }
+}
 
 u8 dlog_use_ex_flash = 0;
-
-//重写弱函数
-#ifdef CONFIG_CPU_BR36
-const struct spi_platform_data spix_p_data[HW_SPI_MAX_NUM] = {
-    {
-        //spi0
-    },
-    {
-        //spi1
-        .port = {
-            IO_PORTA_07, //clk any io
-            IO_PORTC_00, //do any io
-            IO_PORTB_05, //di any io
-            0xff, //d2 any io
-            0xff, //d3 any io
-            0xff, //cs any io(主机不操作cs)
-        },
-        .role = 0,//SPI_ROLE_MASTER,
-        .clk  = 1000000,
-        .mode = 0,//SPI_MODE_BIDIR_1BIT,//SPI_MODE_UNIDIR_2BIT,
-        .bit_mode = 0, //SPI_FIRST_BIT_MSB
-        .cpol = 0,//clk level in idle state:0:low,  1:high
-        .cpha = 0,//sampling edge:0:first,  1:second
-        .ie_en = 0, //ie enbale:0:disable,  1:enable
-        .irq_priority = 3,
-        .spi_isr_callback = NULL,  //spi isr callback
-    },
-    {
-        //spi2
-    },
-};
-
-static const struct norflash_dev_platform_data spi_flash_platform_data = {
-    .spi_hw_num     = 1,
-    .spi_cs_port    = IO_PORTA_04,
-    .spi_read_width = 0,
-    .start_addr     = TCFG_NORFLASH_START_ADDR,
-    .size           = TCFG_NORFLASH_SIZE,
-};
-#endif
-
-//重写弱函数
-#ifdef CONFIG_CPU_BR56
-const struct spi_platform_data spix_p_data[HW_SPI_MAX_NUM] = {
-    {
-        //spi0
-    },
-    {
-        //spi1
-        .port = {
-            IO_PORTA_04, //clk any io
-            IO_PORTA_05, //do any io
-            IO_PORTC_00, //di any io
-            0xff, //d2 any io
-            0xff, //d3 any io
-            0xff, //cs any io(主机不操作cs)
-        },
-        .role = 0,//SPI_ROLE_MASTER,
-        .clk  = 1000000,
-        .mode = 0,//SPI_MODE_BIDIR_1BIT,//SPI_MODE_UNIDIR_2BIT,
-        .bit_mode = 0, //SPI_FIRST_BIT_MSB
-        .cpol = 0,//clk level in idle state:0:low,  1:high
-        .cpha = 0,//sampling edge:0:first,  1:second
-        .ie_en = 0, //ie enbale:0:disable,  1:enable
-        .irq_priority = 3,
-        .spi_isr_callback = NULL,  //spi isr callback
-    },
-};
-
-static const struct norflash_dev_platform_data spi_flash_platform_data = {
-    .spi_hw_num     = 1,
-    .spi_cs_port    = IO_PORTA_06,
-    .spi_read_width = 0,
-    .start_addr     = TCFG_NORFLASH_START_ADDR,
-    .size           = TCFG_NORFLASH_SIZE,
-};
-#endif
-
-
-#ifdef CONFIG_CPU_BR52
-const struct spi_platform_data spix_p_data[HW_SPI_MAX_NUM] = {
-    {
-        //spi0
-    },
-    {
-        //spi1
-        .port = {
-            IO_PORTC_06, //clk any io
-            IO_PORTC_07, //do any io
-            IO_PORTC_00, //di any io
-            0xff, //d2 any io
-            0xff, //d3 any io
-            0xff, //cs any io(主机不操作cs)
-        },
-        .role = 0,//SPI_ROLE_MASTER,
-        .clk  = 1000000,
-        .mode = 0,//SPI_MODE_BIDIR_1BIT,//SPI_MODE_UNIDIR_2BIT,
-        .bit_mode = 0, //SPI_FIRST_BIT_MSB
-        .cpol = 0,//clk level in idle state:0:low,  1:high
-        .cpha = 0,//sampling edge:0:first,  1:second
-        .ie_en = 0, //ie enbale:0:disable,  1:enable
-        .irq_priority = 3,
-        .spi_isr_callback = NULL,  //spi isr callback
-    },
-    {
-        //spi2
-    },
-};
-
-static const struct norflash_dev_platform_data spi_flash_platform_data = {
-    .spi_hw_num     = 1,
-    .spi_cs_port    = IO_PORTC_05,
-    .spi_read_width = 0,
-    .start_addr     = TCFG_NORFLASH_START_ADDR,
-    .size           = TCFG_NORFLASH_SIZE,
-};
-#endif
 
 /*----------------------------------------------------------------------------*/
 /**@brief 获取保存dlog数据的flash起始地址和大小
@@ -222,12 +313,12 @@ static int dlog_get_ex_flash_zone(u32 *addr, u32 *len)
 static int dlog_ex_flash_zone_erase(u16 erase_sector, u16 sector_num)
 {
     // 需要实现
-    printf("%s, %d, %d", __func__, erase_sector, sector_num);
+    /* printf("%s, %d, %d", __func__, erase_sector, sector_num); */
 
     if (dlog_use_ex_flash) {
         for (int i = 0; i < sector_num; i++) {
-            /* _norflash_eraser(FLASH_SECTOR_ERASER, (erase_sector + i) * LOG_BASE_UNIT_SIZE + TCFG_DLOG_FLASH_START_ADDR + (u32)dlog_log_data_start_addr); */
-            norflash_erase(0, IOCTL_ERASE_SECTOR, (erase_sector + i) * LOG_BASE_UNIT_SIZE + TCFG_DLOG_FLASH_START_ADDR + (u32)dlog_log_data_start_addr);
+            /* norflash_erase(0, IOCTL_ERASE_SECTOR, (erase_sector + i) * LOG_BASE_UNIT_SIZE + TCFG_DLOG_FLASH_START_ADDR + (u32)dlog_log_data_start_addr); */
+            SectorErase((erase_sector + i) * LOG_BASE_UNIT_SIZE + TCFG_DLOG_FLASH_START_ADDR + (u32)dlog_log_data_start_addr);
         }
     }
     return 0;
@@ -250,11 +341,26 @@ static int dlog_ex_flash_write(void *buf, u16 len, u32 offset)
     }
 
     if (dlog_use_ex_flash) {
-        norflash_write(NULL, buf, len, offset);
+        /* norflash_write(NULL, buf, len, offset); */
+        u32 waddr = offset;
+        u8 *data = (u8 *)buf;
+        s32 pages = len >> 8;
+        //每次最多写入SPI_FLASH_PAGE_SIZE字节
+        do {
+            /* SectorErase(waddr); */
+            write_data(data, waddr, FLASH_PAGE_SIZE);
+            waddr += FLASH_PAGE_SIZE;
+            data += FLASH_PAGE_SIZE;
+        } while (pages--);
     }
 
-    printf("%s, %d", __func__, len);
+    /* printf("%s, addr:%x %d", __func__, offset, len); */
     /* put_buf(buf, len); */
+
+    /* u8 *tmp_buf = malloc(len); */
+    /* spiflash_read(tmp_buf, offset, len); */
+    /* put_buf(tmp_buf, len); */
+    /* free(tmp_buf); */
     return len;
 }
 
@@ -270,10 +376,12 @@ static int dlog_ex_flash_write(void *buf, u16 len, u32 offset)
 static int dlog_ex_flash_read(void *buf, u16 len, u32 offset)
 {
     // 需要实现
+    int err = 0;
     if (dlog_use_ex_flash) {
-        norflash_read(NULL, buf, len, offset);
+        /* norflash_read(NULL, buf, len, offset); */
+        err = spiflash_read(buf, offset, len);
     }
-    printf("%s, %d", __func__, len);
+    /* printf("%s, err:%d addr:%x %d", __func__, err, offset, len); */
     /* put_buf(buf, len); */
     return len;
 }
@@ -281,31 +389,47 @@ static int dlog_ex_flash_read(void *buf, u16 len, u32 offset)
 // 返回 0 表示初始化成功
 static int dlog_ex_flash_init(void)
 {
-    int err;
+    int err = 0;
 
-#ifdef CONFIG_CPU_BR36
-    gpio_set_mode(IO_PORT_SPILT(IO_PORTC_01), PORT_OUTPUT_HIGH);
-#endif
-#ifdef CONFIG_CPU_BR52
-    gpio_set_mode(IO_PORT_SPILT(IO_PORTB_04), PORT_OUTPUT_HIGH);
-#endif
-#ifdef CONFIG_CPU_BR56
-    gpio_set_mode(IO_PORT_SPILT(IO_PORTA_03), PORT_OUTPUT_HIGH);
-#endif
-    os_time_dly(1);
-    /* _norflash_init("flash1", (struct norflash_dev_platform_data *)&spi_flash_platform_data); */
+    void *fd = dev_open("rtc", NULL);
+    if (fd) {
+        dev_ioctl(fd, IOCTL_GET_SYS_TIME, (u32)&dlog_sys_time);
+        dev_close(fd);
+    }
 
     printf("dlog ex flash init\n");
 
-    err = norflash_open(NULL, NULL, NULL);
+    spi_open(); //打开spi 外挂flash设备
+
+    err = W25X_GetChipID(); //获取flashID
     if (err) {
-        /* _norflash_close(); */
-        /* gpio_set_mode(IO_PORT_SPILT(IO_PORTC_01), PORT_HIGHZ); */
+        spi_close();
     } else {
         dlog_use_ex_flash = 1;
+        printf("dlog_ex_flash_init ok\n");
+#if 0
+        //test
+        printf("begin test....\n");
+        int test_len = 256;
+        u8 *buf = malloc(test_len);
+        for (u8 i = 1; i < 4; i++) {
+            /* 写入数据  */
+            memset(buf, i, test_len);
+            spiflash_write(buf, 0x00, test_len);
+
+            /* 读出数据  */
+            memset(buf, 0, test_len);
+            spiflash_read(buf, 0x00, test_len);
+            printf(">>>>>>>>> read_spiflash_data addr = 0x00 , len = %d", test_len);
+            put_buf(buf, test_len);
+        }
+        if (buf) {
+            free(buf);
+        }
+#endif
     }
     //sys_timeout_add(NULL, dlog_print_test, 3000);
-    return 0;
+    return err;
 }
 
 REGISTER_DLOG_OPS(ex_flash_op, 1) = {
@@ -391,6 +515,13 @@ static int dlog_inside_flash_init(void)
     printf("dlog flash init ok!\n");
     printf("dlog file addr 0x%x, len %d\n", flash_info.addr, flash_info.len);
 
+
+    void *fd = dev_open("rtc", NULL);
+    if (fd) {
+        dev_ioctl(fd, IOCTL_GET_SYS_TIME, (u32)&dlog_sys_time);
+        dev_close(fd);
+    }
+
     return 0;
 }
 
@@ -454,7 +585,7 @@ u16 dlog_read_log_data(u8 *buf, u16 len, u32 offset)
 }
 
 
-#if 0  // dlog demo
+#if 1  // dlog demo
 // 以下是部分离线log接口的使用示例
 
 void dlog_demo(void)
@@ -518,23 +649,69 @@ void dlog_demo(void)
     if (f) {
         fclose(f);
     }
+
+
 }
 
+// 判断是否为闰年
+static int is_leap_year(u16 year)
+{
+    return (year % 4 == 0 && year % 100 != 0) || (year % 400 == 0);
+}
+
+// 获取当月的天数
+static u8 days_in_month(u16 year, u8 month)
+{
+    const u8 days[] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+
+    if (month < 1 || month > 12) {
+        return 0;
+    }
+
+    if (month == 2 && is_leap_year(year)) {
+        return 29;
+    }
+
+    return days[month - 1];
+}
+
+static void add_days(struct sys_time *time, u32 days)
+{
+    while (days > 0) {
+        u8 days_in_current_month = days_in_month(time->year, time->month);
+        u8 remaining_days_in_month = days_in_current_month - time->day + 1;
+
+        if (days < remaining_days_in_month) {
+            // 在当前月内增加
+            time->day += days;
+            break;
+        } else {
+            // 需要进位到下个月
+            days -= remaining_days_in_month;
+            time->day = 1;
+            time->month++;
+
+            if (time->month > 12) {
+                // 需要进位到下一年
+                time->month = 1;
+                time->year++;
+            }
+        }
+    }
+}
 // 重写弱函数的实现示例
 int dlog_get_rtc_time(void *time_p)
 {
     // 仅需返回年月日
-    /* struct sys_time *time = time_p; */
-    /* u32 year  = get_sys_year();  // get_sys_year函数需要自行实现,此处仅示例 */
-    /* u32 month = get_sys_month(); // get_sys_month函数需要自行实现,此处仅示例 */
-    /* u32 day   = get_sys_day();   // get_sys_day函数需要自行实现,此处仅示例 */
-    /* time->year = year; */
-    /* time->month = month; */
-    /* time->day = day; */
 
-    /* return 0;  // 返回大于等于0表示成功 */
+    struct sys_time *time = time_p;
+    time->year = dlog_sys_time.year;
+    time->month = dlog_sys_time.month;
+    time->day = dlog_sys_time.day;
 
-    return -1;
+    return 0;
+
+    /* return -1; */
 }
 
 // 重写弱函数的实现示例
@@ -543,8 +720,30 @@ u32 dlog_get_rtc_time_ms(void)
     // dlog会多次调用这个接口获取系统时间戳, 需要应用层维护一个全局时间戳, 要处理好网络时间和本地时间的同步
     // 返回的时间单位是毫秒, 24小时制
     //如当前时间为 20:13:30.100, 则返回 ((21 * 60 + 13) * 60) + 30) * 1000 + 100 = 76410100毫秒
-    u32 time_ms = get_system_ms();  // get_sys_time_ms函数需要自行实现, 此处仅示例
-    return time_ms;
+    /* u32 time_ms = get_system_ms();  // get_sys_time_ms函数需要自行实现, 此处仅示例 */
+    //这里get_system_ms 为系统运行时间ms 开机从0开始计数
+    u32 base_time_ms = (dlog_sys_time.hour * 3600 + dlog_sys_time.min * 60 + dlog_sys_time.sec) * 1000;
+    u32 total_ms = base_time_ms + get_system_ms();
+
+    // 检查是否超过一天
+#define MS_PER_DAY (24 * 3600 * 1000)  // 86400000毫秒
+    if (total_ms >= MS_PER_DAY) {
+        u32 overflow_days = total_ms / MS_PER_DAY;
+        u32 remain_ms = total_ms % MS_PER_DAY;
+
+        // 更新日期
+        add_days(&dlog_sys_time, overflow_days);
+
+        // 更新时分秒为新的一天的时间
+        u32 remain_sec = remain_ms / 1000;
+        dlog_sys_time.hour = remain_sec / 3600;
+        dlog_sys_time.min = (remain_sec % 3600) / 60;
+        dlog_sys_time.sec = remain_sec % 60;
+
+        return remain_ms;
+    }
+
+    return total_ms;
 }
 #endif
 

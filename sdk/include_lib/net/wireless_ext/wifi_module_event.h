@@ -52,8 +52,8 @@ enum WIFI_MODULE {
 struct WIFI_INIT_INFO {
     enum WIFI_MODULE module;
     enum WIFI_MODE mode;
-    u8 pwd[3][64];
-    u8 ssid[3][33];
+    u8 pwd[4][64];
+    u8 ssid[4][33];
     u8 p2p_role;
 } __attribute__((packed));
 
@@ -66,6 +66,7 @@ enum WIFI_MODULE_EVENT {
     AP_ON_ASSOC = 0x5,
     PM_SUSPEND = 0x6,
     PM_RESUME = 0x7,
+    P2P_WSC_OPERATION = 0x8,
 };
 
 struct netdev_ssid_info {

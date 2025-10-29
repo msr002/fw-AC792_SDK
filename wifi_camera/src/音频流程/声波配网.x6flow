@@ -4,17 +4,19 @@
  "uuid": "0x92C8",
  "childrenGroup": [
   {
-   "id": "id_1745198625250_19",
+   "id": "id_1726047781039_18",
    "title": "默认分组",
    "select": true,
    "tabs": [
     {
      "uuid": 48452,
      "title": "标准",
-     "id": "id_1745198624462_10"
+     "id": "id_1726047780025_10",
+     "selected": "A",
+     "preset": ""
     }
    ],
-   "curTab": "id_1745198624462_10"
+   "curTab": "id_1726047780025_10"
   }
  ],
  "nodeData": {
@@ -30,7 +32,7 @@
     },
     "view": "vue-shape-view",
     "shape": "vue-shape",
-    "id": "51cb47d4-c234-4528-8dff-f096437e6277",
+    "id": "7f2b2138-a8e1-41df-930d-65591a45c134",
     "component": "node-cust",
     "group": "hardware",
     "data": {
@@ -57,7 +59,7 @@
       "name": "SOUND_ADC",
       "list": [
        {
-        "modeId": "id_1745198624462_10",
+        "modeId": "id_1726047780025_10",
         "name": "SOUND_ADC",
         "current": "",
         "originSize": 0,
@@ -103,18 +105,20 @@
              }
             ]
            }
-          ]
+          ],
+          "bypass": false
          }
         ],
-        "originCount": 1
+        "originCount": 1,
+        "bypass": false
        }
       ]
      },
-     "configName": "SOUND_ADC",
-     "nodeName": "SOUND_ADC",
+     "configName": "ADC27",
+     "nodeName": "ADC27",
      "inBitWidth": 16,
      "outBitWidth": 16,
-     "itemId": "id_1745198625250_19"
+     "itemId": "id_1726047781039_18"
     },
     "ports": {
      "groups": {
@@ -169,16 +173,16 @@
       "distance": 40
      }
     },
-    "id": "27f9e135-54e6-4724-bbd8-6074285c84e4",
+    "id": "3e6d86da-ad2c-4f03-ae18-d24316d3713f",
     "data": {
-     "itemId": "id_1745198625250_19"
+     "itemId": "id_1726047781039_18"
     },
     "source": {
-     "cell": "51cb47d4-c234-4528-8dff-f096437e6277",
+     "cell": "7f2b2138-a8e1-41df-930d-65591a45c134",
      "port": "5114f0b1-23ea-4659-844f-a8bd9b1e634d"
     },
     "target": {
-     "cell": "566d6b96-6921-4507-a7f7-b972626bbd12",
+     "cell": "1c731c98-8e5b-4335-9f61-86cf15334571",
      "port": "25ac1764-1e03-461d-8a28-4d109b881a7f"
     }
    },
@@ -193,7 +197,7 @@
     },
     "view": "vue-shape-view",
     "shape": "vue-shape",
-    "id": "566d6b96-6921-4507-a7f7-b972626bbd12",
+    "id": "1c731c98-8e5b-4335-9f61-86cf15334571",
     "component": "node-cust",
     "group": "hardware",
     "data": {
@@ -204,15 +208,15 @@
      "fun": 1,
      "formFile": "../../.encoder_fmt.json",
      "uuid": "0XA2C",
-     "itemId": "id_1745198625250_19",
+     "itemId": "id_1726047781039_18",
      "subId": 16,
      "configs": {
       "name": "config260414",
       "list": [
        {
-        "modeId": "id_1745198624462_10",
+        "modeId": "id_1726047780025_10",
         "name": "config260414",
-        "current": "",
+        "current": "arg0",
         "originSize": 0,
         "list": [
          {
@@ -248,10 +252,12 @@
              }
             ]
            }
-          ]
+          ],
+          "bypass": false
          }
         ],
-        "originCount": 1
+        "originCount": 1,
+        "bypass": false
        }
       ]
      },
@@ -318,16 +324,16 @@
       "distance": 40
      }
     },
-    "id": "687d5135-c6fe-4265-94e3-46e4a2b717aa",
+    "id": "41322533-710f-4f5b-bb09-0d3c7888bfee",
     "data": {
-     "itemId": "id_1745198625250_19"
+     "itemId": "id_1726047781039_18"
     },
     "source": {
-     "cell": "566d6b96-6921-4507-a7f7-b972626bbd12",
+     "cell": "1c731c98-8e5b-4335-9f61-86cf15334571",
      "port": "5114f0b1-23ea-4659-844f-a8bd9b1e634d"
     },
     "target": {
-     "cell": "40ac89d4-0d17-4617-9d2e-502a37a39a5e",
+     "cell": "ffd24b98-722e-4f74-b756-c8fe4de6cb9a",
      "port": "25ac1764-1e03-461d-8a28-4d109b881a7f"
     }
    },
@@ -342,7 +348,7 @@
     },
     "view": "vue-shape-view",
     "shape": "vue-shape",
-    "id": "40ac89d4-0d17-4617-9d2e-502a37a39a5e",
+    "id": "ffd24b98-722e-4f74-b756-c8fe4de6cb9a",
     "component": "node-cust",
     "group": "hardware",
     "data": {
@@ -352,7 +358,7 @@
      "type": 2,
      "fun": 0,
      "uuid": "0X4448",
-     "itemId": "id_1745198625250_19",
+     "itemId": "id_1726047781039_18",
      "marco": "TCFG_ACOUSTIC_COMMUNICATION_NODE_ENABLE",
      "sAlias": "",
      "dynamicPort": {

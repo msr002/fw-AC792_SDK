@@ -579,6 +579,7 @@ c_SRC_FILES := \
 	../../../../apps/common/lvgl_v8/examples/styles/lv_example_style_7.c \
 	../../../../apps/common/lvgl_v8/examples/styles/lv_example_style_8.c \
 	../../../../apps/common/lvgl_v8/examples/styles/lv_example_style_9.c \
+	../../../../apps/common/lvgl_v8/examples/widgets/album/lv_example_album_1.c \
 	../../../../apps/common/lvgl_v8/examples/widgets/animimg/lv_example_animimg_1.c \
 	../../../../apps/common/lvgl_v8/examples/widgets/arc/lv_example_arc_1.c \
 	../../../../apps/common/lvgl_v8/examples/widgets/arc/lv_example_arc_2.c \
@@ -1160,6 +1161,7 @@ c_SRC_FILES := \
 	../../../../audio/interface/recorder/pc_mic_recorder.c \
 	../../../../audio/interface/recorder/usb_host_mic_recorder.c \
 	../../../../audio/interface/recorder/video_rec_recorder.c \
+	../../../../audio/interface/recorder/vir_dev_recorder.c \
 	../../../../audio/interface/recorder/voiceprint_cfg_recorder.c \
 	../../../../audio/jl_kws/jl_kws_algo.c \
 	../../../../audio/jl_kws/jl_kws_audio.c \
@@ -1186,6 +1188,7 @@ c_SRC_FILES := \
 	../../../../audio/smart_voice/wanson_asr.c \
 	../../../../cpu/wl83/adc_api.c \
 	../../../../cpu/wl83/debug.c \
+	../../../../cpu/wl83/debug_exception.c \
 	../../../../cpu/wl83/setup.c \
 
 

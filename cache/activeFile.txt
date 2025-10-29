@@ -1,11 +1,9 @@
 {
  "activeFile": {
-  "showName": "录像录音",
-  "fileName": "src\\音频流程\\录像录音.x6flow",
-  "folder": false,
-  "binName": "stream.bin",
-  "type": 4,
-  "data": ""
+  "type": 1,
+  "fileName": "src\\板级配置.json",
+  "binName": "boardcfg.bin",
+  "showName": "板级配置"
  },
  "currentVariant": {
   "name": "wifi_camera"

@@ -148,6 +148,7 @@ enum stream_event {
     STREAM_EVENT_GET_OUTPUT_NODE_DELAY,
 
     STREAM_EVENT_GLOBAL_PAUSE,
+    STREAM_EVENT_CHECK_DECODER_CONTINUE,
 };
 
 enum stream_scene : u8 {

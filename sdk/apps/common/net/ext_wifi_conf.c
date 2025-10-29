@@ -8,6 +8,10 @@
 #define DRIVER                 "rtl871xdrv"
 #define DRIVER_NAME            "RTL818x"
 
+
+u8 ext_wps_push_button_enable = 0;
+u8 ext_wps_push_button_start = 0;
+
 #if TCFG_RTL8189E_ENABLE || TCFG_RTL8822CS_ENABLE || TCFG_RTL8733BS_ENABLE || TCFG_RTL8189F_ENABLE
 static char hostapd_config_file[] = \
                                     "interface="INTERFACE"\n\
@@ -182,16 +186,16 @@ wmm_ac_vo_txop_limit=47\n\
 wmm_ac_vo_acm=0\n\
 eapol_key_index_workaround=0\n\
 own_ip_addr=192.168.1.1\n\
-ssid=wifi_camera_ac54_wlan_direct\n\
+ssid=####SSID_LENTH_MUST_LESS_THAN_32\n\
 channel=06\n\
 wpa=2\n\
-wpa_passphrase=12345678\n\
+wpa_passphrase=#########wpa_passphrase_lenth_must_more_than_7_and_less_than_63\n\
 auth_algs=3\n\
 ignore_broadcast_ssid=0\n\
 eap_server=1\n\
 wps_state=2\n\
 uuid=12345678-9abc-def0-1234-56789abcdef0\n\
-device_name=wifi_camera_ac54_wlan_direct\n\
+device_name=####SSID_LENTH_MUST_LESS_THAN_32\n\
 manufacturer=Realtek\n\
 model_name=RTW_SOFTAP\n\
 model_number=WLAN_ES\n\
@@ -226,6 +230,12 @@ const char *get_hostapd_config_file(unsigned char enable_wps)
     return (char *)0;
 }
 
+void ext_p2p_wsc_trigger(void)
+{
+    if (ext_wps_push_button_start && !ext_wps_push_button_enable) {
+        ext_wps_push_button_enable = 1;
+    }
+}
 
 #if TCFG_RTL8822CS_ENABLE
 

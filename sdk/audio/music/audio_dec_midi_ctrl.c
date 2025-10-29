@@ -6,7 +6,14 @@
 #include "media/audio_def.h"
 #include "file_player.h"
 
-#if TCFG_MIDI_CTRL_DEC_ENABLE && TCFG_MIDI_FILE_DEC_ENABLE
+#if TCFG_DEC_MIDI_CTRL_ENABLE
+
+#define LOG_TAG     		"[MIDI-CTRL]"
+#define LOG_ERROR_ENABLE
+#include "debug.h"
+
+//midi文件播放时，对应的音色文件路径(用户可修改路径)
+#define MIDI_CTRL_FILE_PATH  CONFIG_ROOT_PATH"MIDI1.mdb"
 
 extern const int MIDI_DEC_SR;
 /*
@@ -41,9 +48,57 @@ struct _midi_obj {
 
 void midi_ctrl_ioctrl(struct jlstream *stream, u32 cmd, void *priv);
 
-extern int midi_get_cfg_addr(void **addr);
-extern int midi_fread_api(void *file, void *buf, u32 len);
-extern int midi_fseek(void *file, u32 offset, int seek_mode);
+int midi_ctrl_get_cfg_addr(void **addr)
+{
+    //音色文件支持在外部存储卡或者外挂flash,sdk默认使用本方式
+    //获取音色文件
+    FILE *file = fopen(MIDI_CTRL_FILE_PATH, "r");
+    if (!file) {
+        log_error("MIDI.bin open err");
+        return -1;
+    }
+    *addr = (void *)file;
+
+    return 0;
+}
+
+/*----------------------------------------------------------------------------*/
+/**@brief    midi音色文件读
+   @param
+   @return
+   @note     内部调用
+*/
+/*----------------------------------------------------------------------------*/
+int midi_ctrl_fread_api(void *file, void *buf, u32 len)
+{
+#ifndef CONFIG_MIDI_DEC_ADDR
+    FILE *hd = (FILE *)file;
+    if (hd) {
+        len = fread(buf, len, 1, hd);
+        /* printf("MT:%d\n",len); */
+        /* put_buf(buf,len); */
+    }
+#endif
+    return len;
+}
+
+/*----------------------------------------------------------------------------*/
+/**@brief    midi音色文件seek
+   @param
+   @return
+   @note     内部调用
+*/
+/*----------------------------------------------------------------------------*/
+int midi_ctrl_fseek(void *file, u32 offset, int seek_mode)
+{
+#ifndef CONFIG_MIDI_DEC_ADDR
+    FILE *hd = (FILE *)file;
+    if (hd) {
+        fseek(hd, offset, seek_mode);
+    }
+#endif
+    return 0;
+}
 
 /*----------------------------------------------------------------------------*/
 /**@brief    midi ctrl初始化函数，该函数由库调用
@@ -55,7 +110,7 @@ extern int midi_fseek(void *file, u32 offset, int seek_mode);
 int midi_ctrl_init(void *info)
 {
     void *cache_addr;
-    if (midi_get_cfg_addr(&cache_addr)) {
+    if (midi_ctrl_get_cfg_addr(&cache_addr)) {
         return -1;
     }
     midi_ctrl_open_parm *parm = (midi_ctrl_open_parm *)info;
@@ -65,8 +120,8 @@ int midi_ctrl_init(void *info)
     parm->sample_rate = MIDI_DEC_SR;//midi_samplerate_tab[5];
     parm->cfg_parm.player_t = MIDI_KEY_NUM; //(支持多少个key同时发声,用户可修改)
     parm->cfg_parm.spi_pos = (unsigned int)cache_addr;
-    parm->cfg_parm.fread = midi_fread_api;
-    parm->cfg_parm.fseek = midi_fseek;
+    parm->cfg_parm.fread = midi_ctrl_fread_api;
+    parm->cfg_parm.fseek = midi_ctrl_fseek;
     parm->cfg_parm.bitwidth = 16;//输出pcm数据位宽  16 或者24
     parm->cfg_parm.out_channel = 2;		//输出通道
     parm->cfg_parm.OutdataBit = 0;//输出数据位宽  0->16bit  1->32bit
@@ -275,9 +330,6 @@ static void midi_paly_test(u32 key)
     switch (key) {
     case MIDI_SWITCH_KEY:
         if (!open_close) {
-            /* midi_ctrl_dec_open(16000);//启动midi key */
-            /* midi_ctrl_dec_open(16000, "storage/sd0/C/MIDI.mdb\0");//启动midi key */
-            /* midi_ctrl_dec_open(16000, SDFILE_RES_ROOT_PATH"MIDI.mdb\0");//启动midi key */
             g_midi_player = midi_ctrl_player_open();
         } else {
             if (g_midi_player) {
@@ -303,6 +355,49 @@ static void midi_paly_test(u32 key)
             break;
         }
         if (!note_on_off) {
+            //模拟按键57、58、59、60、61、62,以力度127，通道0，按下/松开测试
+            midi_ctrl_note_on(g_midi_player->stream, 57, 127, 0);
+            os_time_dly(10);
+            midi_ctrl_note_off(g_midi_player->stream, 57, 0, 0);
+            os_time_dly(100);
+
+            set_dvol_by_nodename("Vol_MidiMusic", 60);
+
+            midi_ctrl_note_on(g_midi_player->stream, 58, 127, 0);
+            os_time_dly(1);
+            midi_ctrl_note_off(g_midi_player->stream, 58, 0, 0);
+            os_time_dly(100);
+
+            set_dvol_by_nodename("Vol_MidiMusic", 70);
+
+            midi_ctrl_note_on(g_midi_player->stream, 59, 127, 0);
+            os_time_dly(1);
+            midi_ctrl_note_off(g_midi_player->stream, 59, 0, 0);
+            os_time_dly(100);
+
+            set_dvol_by_nodename("Vol_MidiMusic", 80);
+
+            midi_ctrl_note_on(g_midi_player->stream, 60, 127, 0);
+            os_time_dly(1);
+            midi_ctrl_note_off(g_midi_player->stream, 60, 0, 0);
+            os_time_dly(100);
+
+            set_dvol_by_nodename("Vol_MidiMusic", 90);
+
+            midi_ctrl_note_on(g_midi_player->stream, 61, 127, 0);
+            os_time_dly(1);
+            midi_ctrl_note_off(g_midi_player->stream, 61, 0, 0);
+            os_time_dly(100);
+
+            set_dvol_by_nodename("Vol_MidiMusic", 100);
+
+            midi_ctrl_note_on(g_midi_player->stream, 62, 127, 0);
+            os_time_dly(1);
+            midi_ctrl_note_off(g_midi_player->stream, 62, 0, 0);
+            os_time_dly(100);
+
+            set_dvol_by_nodename("Vol_MidiMusic", 30);
+        } else {
             //模拟按键57、58、59、60、61、62,以力度127，通道0，按下测试
             midi_ctrl_note_on(g_midi_player->stream, 57, 127, 0);
             midi_ctrl_note_on(g_midi_player->stream, 58, 127, 0);
@@ -310,14 +405,7 @@ static void midi_paly_test(u32 key)
             midi_ctrl_note_on(g_midi_player->stream, 60, 127, 0);
             midi_ctrl_note_on(g_midi_player->stream, 61, 127, 0);
             midi_ctrl_note_on(g_midi_player->stream, 62, 127, 0);
-        } else {
-            //模拟按键57、58、59、60、61、62松开测试
-            midi_ctrl_note_off(g_midi_player->stream, 57,  0, 0);
-            midi_ctrl_note_off(g_midi_player->stream, 58,  0, 0);
-            midi_ctrl_note_off(g_midi_player->stream, 59,  0, 0);
-            midi_ctrl_note_off(g_midi_player->stream, 60,  0, 0);
-            midi_ctrl_note_off(g_midi_player->stream, 61,  0, 0);
-            midi_ctrl_note_off(g_midi_player->stream, 62,  0, 0);
+
         }
         note_on_off = !note_on_off;
         break;
@@ -333,9 +421,25 @@ void midi_test_demo(void)
     midi_paly_test(MIDI_SET_KEY);
     os_time_dly(100);
     midi_paly_test(MIDI_PLAY_KEY);
+    os_time_dly(100);
+    midi_paly_test(MIDI_PLAY_KEY);
     os_time_dly(200);
     midi_paly_test(MIDI_SWITCH_KEY);
 }
+
+static void test_main()
+{
+    if (!strncmp(MIDI_CTRL_FILE_PATH, "storage/sd", 10)) {
+        extern int storage_device_ready(void);
+        while (!storage_device_ready()) {//等待sd文件系统挂载完成
+            printf("midi test wait sd ready");
+            os_time_dly(2);
+        }
+    }
+
+    thread_fork("midi_test_main", 12, 1024, 0, 0, midi_test_demo, 0);
+}
+late_initcall(test_main);
 
 #endif
 

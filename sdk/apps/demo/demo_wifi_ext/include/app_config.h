@@ -24,7 +24,8 @@
 
 #define AP_TEST_MODE       0
 #define STA_TEST_MODE      1
-#define MONITOR_TEST_MODE  2
+#define P2P_TEST_MODE 	   2
+#define MONITOR_TEST_MODE  3
 
 #define EXT_WIFI_TEST_MODE AP_TEST_MODE
 #define EXT_WIFI_AP_SSID   "AC79_EXT_WIFI_"    //配置外挂wifi的AP模式的SSID前缀

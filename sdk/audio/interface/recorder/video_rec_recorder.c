@@ -48,7 +48,7 @@ void *video_mic_recorder_open(u16 sample_rate, u8 code_type, void *priv, void (*
     struct stream_fmt fmt = {0};
     struct encoder_fmt enc_fmt = {0};
 
-    u16 uuid = jlstream_event_notify(STREAM_EVENT_GET_PIPELINE_UUID, (int)"video_rec");
+    u16 uuid = jlstream_event_notify(STREAM_EVENT_GET_PIPELINE_UUID, (int)"vir_voice");
     if (uuid == 0) {
         return NULL;
     }

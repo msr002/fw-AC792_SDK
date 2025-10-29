@@ -31,6 +31,7 @@ extern "C" {
 #include "listmenu/lv_listmenu.h"
 #include "polygonmenu/lv_polygonmenu.h"
 #include "kaleidoscopemenu/lv_kaleidoscopemenu.h"
+#include "album/lv_album.h"
 /*********************
  *      DEFINES
  *********************/

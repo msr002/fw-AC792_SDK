@@ -5481,7 +5481,7 @@
         },
         {
          "__config__": {
-          "label": "AMR_16k",
+          "label": "AMR_16K",
           "tag": "el-switch",
           "tagIcon": "switch",
           "defaultValue": 0,
@@ -5499,7 +5499,7 @@
           "formId": 124,
           "renderKey": "1241742442194212",
           "saveWay": "macro",
-          "uuid": "TCFG_DEC_AMR_16k_ENABLE",
+          "uuid": "TCFG_DEC_AMR_16K_ENABLE",
           "originValue": 0,
           "eventField": []
          },
@@ -5554,7 +5554,7 @@
           "tag": "el-switch",
           "tagIcon": "switch",
           "defaultValue": 1,
-          "span": 4,
+          "span": 5,
           "showLabel": true,
           "labelWidth": 60,
           "layout": "colFormItem",
@@ -5726,7 +5726,7 @@
           "tag": "el-switch",
           "tagIcon": "switch",
           "defaultValue": 1,
-          "span": 4,
+          "span": 5,
           "showLabel": true,
           "labelWidth": 60,
           "layout": "colFormItem",
@@ -5877,7 +5877,8 @@
           "renderKey": "1551736837338118",
           "saveWay": "macro",
           "uuid": "TCFG_DEC_LC3_ENABLE",
-          "originValue": 1
+          "originValue": 1,
+          "eventField": []
          },
          "style": {},
          "disabled": false,
@@ -5889,6 +5890,76 @@
          "inactive-value": 0,
          "id": "id_1736837338118_1",
          "__vModel__": "field155"
+        },
+        {
+         "__config__": {
+          "label": "MIDI_FILE",
+          "tag": "el-switch",
+          "tagIcon": "switch",
+          "defaultValue": 1,
+          "span": 5,
+          "showLabel": true,
+          "labelWidth": 100,
+          "layout": "colFormItem",
+          "required": false,
+          "regList": [],
+          "changeTag": true,
+          "dataType": [
+           "8",
+           "1"
+          ],
+          "formId": 137,
+          "renderKey": "1371760422717753",
+          "saveWay": "macro",
+          "uuid": "TCFG_DEC_MIDI_FILE_ENABLE",
+          "originValue": 1,
+          "eventField": []
+         },
+         "style": {},
+         "disabled": false,
+         "active-text": "",
+         "inactive-text": "",
+         "active-color": null,
+         "inactive-color": null,
+         "active-value": 1,
+         "inactive-value": 0,
+         "id": "id_1760422717753_0",
+         "__vModel__": "field137"
+        },
+        {
+         "__config__": {
+          "label": "MIDI_CTRL",
+          "tag": "el-switch",
+          "tagIcon": "switch",
+          "defaultValue": 1,
+          "span": 5,
+          "showLabel": true,
+          "labelWidth": 100,
+          "layout": "colFormItem",
+          "required": false,
+          "regList": [],
+          "changeTag": true,
+          "dataType": [
+           "8",
+           "1"
+          ],
+          "formId": 138,
+          "renderKey": "1381760422914678",
+          "saveWay": "macro",
+          "uuid": "TCFG_DEC_MIDI_CTRL_ENABLE",
+          "originValue": 1,
+          "eventField": []
+         },
+         "style": {},
+         "disabled": false,
+         "active-text": "",
+         "inactive-text": "",
+         "active-color": null,
+         "inactive-color": null,
+         "active-value": 1,
+         "inactive-value": 0,
+         "id": "id_1760422914678_1",
+         "__vModel__": "field138"
         }
        ],
        "eventField": []
@@ -6369,6 +6440,41 @@
          "inactive-value": 0,
          "id": "id_1736837317685_0",
          "__vModel__": "field154"
+        },
+        {
+         "__config__": {
+          "label": "SPEEX",
+          "tag": "el-switch",
+          "tagIcon": "switch",
+          "defaultValue": 1,
+          "span": 5,
+          "showLabel": true,
+          "labelWidth": 60,
+          "layout": "colFormItem",
+          "required": false,
+          "regList": [],
+          "changeTag": true,
+          "dataType": [
+           "8",
+           "1"
+          ],
+          "formId": 109,
+          "renderKey": "1091757570324475",
+          "saveWay": "macro",
+          "uuid": "TCFG_ENC_SPEEX_ENABLE",
+          "eventField": [],
+          "originValue": 1
+         },
+         "style": {},
+         "disabled": false,
+         "active-text": "",
+         "inactive-text": "",
+         "active-color": null,
+         "inactive-color": null,
+         "active-value": 1,
+         "inactive-value": 0,
+         "id": "id_1757570324475_0",
+         "__vModel__": "field109"
         }
        ],
        "eventField": []
@@ -6474,7 +6580,7 @@
         },
         {
          "__config__": {
-          "label": "AMR_16k",
+          "label": "AMR_16K",
           "tag": "el-switch",
           "tagIcon": "switch",
           "defaultValue": 0,
@@ -6492,7 +6598,7 @@
           "formId": 125,
           "renderKey": "1251742442248394",
           "saveWay": "macro",
-          "uuid": "TCFG_ENC_AMR_16k_ENABLE",
+          "uuid": "TCFG_ENC_AMR_16K_ENABLE",
           "eventField": [],
           "originValue": 0
          },
@@ -6541,41 +6647,6 @@
          "inactive-value": 0,
          "id": "id_1725333457305_15",
          "__vModel__": "field117"
-        },
-        {
-         "__config__": {
-          "label": "SPEEX",
-          "tag": "el-switch",
-          "tagIcon": "switch",
-          "defaultValue": 1,
-          "span": 5,
-          "showLabel": true,
-          "labelWidth": 60,
-          "layout": "colFormItem",
-          "required": false,
-          "regList": [],
-          "changeTag": true,
-          "dataType": [
-           "8",
-           "1"
-          ],
-          "formId": 118,
-          "renderKey": "1181725333477853",
-          "saveWay": "macro",
-          "uuid": "TCFG_ENC_SPEEX_ENABLE",
-          "eventField": [],
-          "originValue": 1
-         },
-         "style": {},
-         "disabled": false,
-         "active-text": "",
-         "inactive-text": "",
-         "active-color": null,
-         "inactive-color": null,
-         "active-value": 1,
-         "inactive-value": 0,
-         "id": "id_1725333477853_16",
-         "__vModel__": "field118"
         }
        ],
        "eventField": []
@@ -6852,7 +6923,7 @@
  "formRules": "rules",
  "gutter": 15,
  "disabled": false,
- "span": 12,
+ "span": 5,
  "formBtns": false,
  "maxFormId": 300,
  "version": {

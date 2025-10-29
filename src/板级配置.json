@@ -3901,6 +3901,77 @@
           "paddingLeft": "0px"
          },
          "id": "id_1684736257128_27"
+        },
+        {
+         "__config__": {
+          "label": "USB AUDIO主机使能",
+          "tag": "el-switch",
+          "tagIcon": "switch",
+          "defaultValue": 0,
+          "span": 5,
+          "showLabel": true,
+          "labelWidth": 150,
+          "layout": "colFormItem",
+          "required": false,
+          "regList": [],
+          "changeTag": true,
+          "dataType": [
+           "8",
+           "1"
+          ],
+          "formId": 134,
+          "renderKey": "1341756804072922",
+          "saveWay": "macro",
+          "uuid": "TCFG_HOST_AUDIO_ENABLE",
+          "emptyValue": "0",
+          "originValue": 0,
+          "eventField": [],
+          "formItemWidth": ""
+         },
+         "style": {},
+         "disabled": false,
+         "active-text": "",
+         "inactive-text": "",
+         "active-color": null,
+         "inactive-color": null,
+         "active-value": 1,
+         "inactive-value": 0,
+         "id": "id_1756804072922_4",
+         "__vModel__": "field134"
+        },
+        {
+         "__config__": {
+          "label": "关闭USB HOST APP模式使能",
+          "tag": "el-switch",
+          "tagIcon": "switch",
+          "defaultValue": 0,
+          "span": 6,
+          "showLabel": true,
+          "labelWidth": 190,
+          "layout": "colFormItem",
+          "required": false,
+          "regList": [],
+          "changeTag": true,
+          "status": 0,
+          "dataType": [
+           "macro"
+          ],
+          "formId": 135,
+          "renderKey": "1351756804151137",
+          "eventField": [],
+          "saveWay": "macro",
+          "uuid": "USB_HOST_NO_APP_MODE"
+         },
+         "style": {},
+         "disabled": false,
+         "active-text": "",
+         "inactive-text": "",
+         "active-color": null,
+         "inactive-color": null,
+         "active-value": 2,
+         "inactive-value": 0,
+         "id": "id_1756804151137_5",
+         "__vModel__": "field135"
         }
        ],
        "eventField": []

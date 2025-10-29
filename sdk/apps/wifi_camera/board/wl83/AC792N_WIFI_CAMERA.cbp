@@ -304,6 +304,7 @@
 <Add option="../../../../cpu/wl83/liba/media/lib_dts_dec.a" />
 <Add option="../../../../cpu/wl83/liba/media/lib_wma_dec.a" />
 <Add option="../../../../cpu/wl83/liba/media/lib_sbc_dec.a" />
+<Add option="../../../../cpu/wl83/liba/media/lib_midi_dec.a" />
 <Add option="../../../../cpu/wl83/liba/media/lib_bt_aac_dec.a" />
 <Add option="../../../../cpu/wl83/liba/media/lib_ogg_opus_dec.a" />
 <Add option="../../../../cpu/wl83/liba/media/lib_ogg_vorbis_dec.a" />
@@ -1328,6 +1329,7 @@
 <Unit filename="../../../../apps/common/lvgl_v8/examples/styles/lv_example_style_7.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/common/lvgl_v8/examples/styles/lv_example_style_8.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/common/lvgl_v8/examples/styles/lv_example_style_9.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="../../../../apps/common/lvgl_v8/examples/widgets/album/lv_example_album_1.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/common/lvgl_v8/examples/widgets/animimg/lv_example_animimg_1.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/common/lvgl_v8/examples/widgets/arc/lv_example_arc_1.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/common/lvgl_v8/examples/widgets/arc/lv_example_arc_2.c"><Option compilerVer="CC"/></Unit>
@@ -1535,6 +1537,7 @@
 <Unit filename="../../../../apps/common/lvgl_v8/src/extra/jl_extra/others/file_explorer/lv_file_explorer.h" />
 <Unit filename="../../../../apps/common/lvgl_v8/src/extra/jl_extra/others/font/lv_font_loader_bin.h" />
 <Unit filename="../../../../apps/common/lvgl_v8/src/extra/jl_extra/others/jl_others.h" />
+<Unit filename="../../../../apps/common/lvgl_v8/src/extra/jl_extra/widgets/album/lv_album.h" />
 <Unit filename="../../../../apps/common/lvgl_v8/src/extra/jl_extra/widgets/analogclock/lv_analogclock.h" />
 <Unit filename="../../../../apps/common/lvgl_v8/src/extra/jl_extra/widgets/arcmenu/lv_arcmenu.h" />
 <Unit filename="../../../../apps/common/lvgl_v8/src/extra/jl_extra/widgets/carousel/lv_carousel.h" />
@@ -2362,6 +2365,7 @@
 <Unit filename="../../../../audio/interface/recorder/pc_mic_recorder.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../audio/interface/recorder/usb_host_mic_recorder.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../audio/interface/recorder/video_rec_recorder.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="../../../../audio/interface/recorder/vir_dev_recorder.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../audio/interface/recorder/voiceprint_cfg_recorder.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../audio/jl_kws/jl_kws_algo.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../audio/jl_kws/jl_kws_api.h" />
@@ -2403,6 +2407,7 @@
 <Unit filename="../../../../audio/smart_voice/wanson_asr.h" />
 <Unit filename="../../../../cpu/wl83/adc_api.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../cpu/wl83/debug.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="../../../../cpu/wl83/debug_exception.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../cpu/wl83/setup.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../include_lib/btctrler/ble/hci_ll.h" />
 <Unit filename="../../../../include_lib/btctrler/ble/ll_config.h" />

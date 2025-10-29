@@ -7,7 +7,7 @@
 #include "asm/crc16.h"
 #include "asm/includes.h"
 #include "os/os_api.h"
-#include "rtl_mp.h"
+#include "wireless_ext/rtl_mp.h"
 #include "device/uart.h"
 #include "device/device.h"
 #include "wireless_ext/wifi_dev.h"

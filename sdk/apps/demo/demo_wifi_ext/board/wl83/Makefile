@@ -231,6 +231,7 @@ c_SRC_FILES := \
 	../../../../../apps/demo/demo_wifi_ext/wire_app_task.c \
 	../../../../../cpu/wl83/adc_api.c \
 	../../../../../cpu/wl83/debug.c \
+	../../../../../cpu/wl83/debug_exception.c \
 	../../../../../cpu/wl83/setup.c \
 
 

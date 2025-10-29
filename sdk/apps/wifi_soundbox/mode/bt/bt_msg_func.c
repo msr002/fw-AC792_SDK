@@ -746,33 +746,3 @@ static void bt_action_a2dp_pause(void *device, u8 *bt_addr)
     app_send_message(MSG_FROM_APP, 3, msg);
 }
 
-static void bt_app_msg_a2dp_start(u8 *bt_addr)
-{
-#if TCFG_A2DP_PREEMPTED_ENABLE && TCFG_BT_SUPPORT_PROFILE_A2DP
-    /*这里处理有些设备切到后台一直不推a2dp stop，手动切到蓝牙模式后能量检测还在跑，这时候点击设备播放按钮之后，
-      能量检测有数据之后结束推APP_MSG_BT_A2DP_START，这种情况需要在这里打开解码*/
-#if TCFG_BT_DUAL_CONN_ENABLE
-    void *device = get_the_other_device(bt_addr);
-    if (device) {
-        if (a2dp_player_is_playing(btstack_get_device_mac_addr(device))) {
-            bt_action_a2dp_pause(device, btstack_get_device_mac_addr(device));
-            bt_action_a2dp_play(btstack_get_conn_device(bt_addr), bt_addr);
-            return;
-        }
-    }
-#endif
-    app_audio_state_switch(APP_AUDIO_STATE_MUSIC, app_audio_volume_max_query(AppVol_BT_MUSIC), NULL);
-    u8 dev_vol = bt_get_music_volume(bt_addr);
-    if (dev_vol > 127) {
-        dev_vol = app_audio_bt_volume_update(bt_addr, APP_AUDIO_STATE_MUSIC);
-    }
-    bt_set_music_device_volume(dev_vol);
-    rf_coexistence_scene_enter(RF_COEXISTENCE_SCENE_A2DP_PLAY, -1);
-    int err = a2dp_player_open(bt_addr);
-    if (err == -EBUSY) {
-        log_error("bt_app_msg_handler open a2dp_player failed");
-        bt_start_a2dp_slience_detect(bt_addr, 50);
-    }
-#endif
-}
-

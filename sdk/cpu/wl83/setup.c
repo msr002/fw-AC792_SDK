@@ -39,6 +39,18 @@ void setup_arch(void)
 #ifdef __LOG_ENABLE
     log_early_init(10 * 1024);
 #endif
+#if (defined(TCFG_DEBUG_DLOG_ENABLE) && TCFG_DEBUG_DLOG_ENABLE)
+    //dlog提前初始化
+    dlog_early_init();
+    dlog_enable(1);
+    dlog_output_type_set(TCFG_DLOG_OUTPUT_TYPE);
+    if (dlog_output_type_get() & DLOG_OUTPUT_2_UART) {
+        void dlog_uart_en_switch(u8 enable);
+        dlog_uart_en_switch(1);
+    }
+    // 设置log的等级
+    /* dlog_level_set(__LOG_INFO); */
+#endif
 #endif
 
     //让cpu0去初始化cpu1的icache, 或者run_cpu1 那边加, 否则CPU1跑不出来,BR27是把 cpu1_start 放内部ram, 但是WL83 icache代码没放mask, 所以浪费内部ram就算了

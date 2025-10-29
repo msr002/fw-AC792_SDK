@@ -2765,6 +2765,1494 @@
        "paddingLeft": "0px"
       },
       "id": "id_1726724282785_27"
+     },
+     {
+      "__config__": {
+       "layout": "rowFormItem",
+       "tag": "group",
+       "tagIcon": "row",
+       "layoutTree": true,
+       "componentName": "ADC数字麦配置",
+       "enableUuid": "",
+       "showComponentName": true,
+       "dataType": [
+        "8",
+        "1"
+       ],
+       "status": 0,
+       "template": "",
+       "hideAddTemplate": false,
+       "span": 24,
+       "formId": 130,
+       "renderKey": "1301752052599852",
+       "children": [
+        {
+         "__config__": {
+          "label": "数字麦使能",
+          "tag": "el-switch",
+          "tagIcon": "switch",
+          "defaultValue": 0,
+          "span": 24,
+          "showLabel": true,
+          "labelWidth": 140,
+          "layout": "colFormItem",
+          "required": false,
+          "regList": [],
+          "changeTag": true,
+          "status": 0,
+          "dataType": [
+           "8",
+           "-1",
+           "macro"
+          ],
+          "formId": 126,
+          "renderKey": "1261752049260495",
+          "eventField": [],
+          "uuid": "TCFG_DMIC_ENABLE",
+          "saveWay": "macro"
+         },
+         "style": {},
+         "disabled": false,
+         "active-text": "",
+         "inactive-text": "",
+         "active-color": null,
+         "inactive-color": null,
+         "active-value": 1,
+         "inactive-value": 0,
+         "id": "id_1752049260495_0",
+         "__vModel__": "field126"
+        },
+        {
+         "__config__": {
+          "label": "数字麦SCLK_IO",
+          "showLabel": true,
+          "labelWidth": 120,
+          "tag": "el-select",
+          "tagIcon": "select",
+          "layout": "colFormItem",
+          "span": 12,
+          "required": false,
+          "defaultValue": "id_1752065355135_0",
+          "regList": [],
+          "changeTag": true,
+          "searchSource": false,
+          "status": 0,
+          "dataType": [
+           "macro"
+          ],
+          "formId": 126,
+          "renderKey": "1261752049805596",
+          "eventField": [
+           "gpio"
+          ],
+          "uuid": "TCFG_DMIC_IO_SCLK",
+          "saveWay": "macro",
+          "originValue": "id_1752065355135_0"
+         },
+         "__slot__": {
+          "options": [
+           {
+            "label": -1,
+            "value": "id_1752065355135_0"
+           },
+           {
+            "label": "IO_PORTA_00",
+            "value": "id_1647485267192_66"
+           },
+           {
+            "label": "IO_PORTA_01",
+            "value": "id_1647485267192_67"
+           },
+           {
+            "label": "IO_PORTA_02",
+            "value": "id_1647485267192_68"
+           },
+           {
+            "label": "IO_PORTA_03",
+            "value": "id_1647485267192_69"
+           },
+           {
+            "label": "IO_PORTA_04",
+            "value": "id_1647485267192_70"
+           },
+           {
+            "label": "IO_PORTA_05",
+            "value": "id_1647485267192_71"
+           },
+           {
+            "label": "IO_PORTA_06",
+            "value": "id_1647485267192_72"
+           },
+           {
+            "label": "IO_PORTA_07",
+            "value": "id_1647485267192_73"
+           },
+           {
+            "label": "IO_PORTA_08",
+            "value": "id_1653449701350_0"
+           },
+           {
+            "label": "IO_PORTA_09",
+            "value": "id_1659942254419_11"
+           },
+           {
+            "label": "IO_PORTA_10",
+            "value": "id_1659942300489_12"
+           },
+           {
+            "label": "IO_PORTA_11",
+            "value": "id_1659942301465_13"
+           },
+           {
+            "label": "IO_PORTA_12",
+            "value": "id_1659942302985_15"
+           },
+           {
+            "label": "IO_PORTA_13",
+            "value": "id_1659942303977_16"
+           },
+           {
+            "label": "IO_PORTA_14",
+            "value": "id_1659942305385_17"
+           },
+           {
+            "label": "IO_PORTA_15",
+            "value": "id_1659942302234_14"
+           },
+           {
+            "label": "IO_PORTB_00",
+            "value": "id_1647485267192_74"
+           },
+           {
+            "label": "IO_PORTB_01",
+            "value": "id_1647485267192_75"
+           },
+           {
+            "label": "IO_PORTB_02",
+            "value": "id_1647485267192_76"
+           },
+           {
+            "label": "IO_PORTB_03",
+            "value": "id_1647485267192_77"
+           },
+           {
+            "label": "IO_PORTB_04",
+            "value": "id_1647485267192_78"
+           },
+           {
+            "label": "IO_PORTB_05",
+            "value": "id_1647485267192_79"
+           },
+           {
+            "label": "IO_PORTB_06",
+            "value": "id_1647485267192_80"
+           },
+           {
+            "label": "IO_PORTB_07",
+            "value": "id_1647485267192_81"
+           },
+           {
+            "label": "IO_PORTB_08",
+            "value": "id_1659942520267_25"
+           },
+           {
+            "label": "IO_PORTB_09",
+            "value": "id_1659942416666_18"
+           },
+           {
+            "label": "IO_PORTB_10",
+            "value": "id_1659942417369_19"
+           },
+           {
+            "label": "IO_PORTB_11",
+            "value": "id_1659942418129_20"
+           },
+           {
+            "label": "IO_PORTB_12",
+            "value": "id_1659942418537_21"
+           },
+           {
+            "label": "IO_PORTB_13",
+            "value": "id_1659942418961_22"
+           },
+           {
+            "label": "IO_PORTB_14",
+            "value": "id_1659942419409_23"
+           },
+           {
+            "label": "IO_PORTB_15",
+            "value": "id_1659942420017_24"
+           },
+           {
+            "label": "IO_PORTC_00",
+            "value": "id_1647485267192_82"
+           },
+           {
+            "label": "IO_PORTC_01",
+            "value": "id_1647485267192_83"
+           },
+           {
+            "label": "IO_PORTC_02",
+            "value": "id_1647485267192_84"
+           },
+           {
+            "label": "IO_PORTC_03",
+            "value": "id_1647485267192_85"
+           },
+           {
+            "label": "IO_PORTC_04",
+            "value": "id_1647485267192_86"
+           },
+           {
+            "label": "IO_PORTC_05",
+            "value": "id_1647485267192_87"
+           },
+           {
+            "label": "IO_PORTC_06",
+            "value": "id_1647485267192_88"
+           },
+           {
+            "label": "IO_PORTC_07",
+            "value": "id_1647485267192_89"
+           },
+           {
+            "label": "IO_PORTC_08",
+            "value": "id_1659942689298_34"
+           },
+           {
+            "label": "IO_PORTC_09",
+            "value": "id_1659942548530_27"
+           },
+           {
+            "label": "IO_PORTC_10",
+            "value": "id_1659942549845_32"
+           },
+           {
+            "label": "IO_PORTC_11",
+            "value": "id_1659942548938_29"
+           },
+           {
+            "label": "IO_PORTC_12",
+            "value": "id_1659942549182_30"
+           },
+           {
+            "label": "IO_PORTC_13",
+            "value": "id_1651200719084_10"
+           },
+           {
+            "label": "IO_PORTD_00",
+            "value": "id_1651200755336_11"
+           },
+           {
+            "label": "IO_PORTD_01",
+            "value": "id_1651200760502_13"
+           },
+           {
+            "label": "IO_PORTD_02",
+            "value": "id_1651200764534_16"
+           },
+           {
+            "label": "IO_PORTD_03",
+            "value": "id_1651200765594_17"
+           },
+           {
+            "label": "IO_PORTD_04",
+            "value": "id_1725345971572_1"
+           },
+           {
+            "label": "IO_PORTD_05",
+            "value": "id_1725345976302_2"
+           },
+           {
+            "label": "IO_PORTD_06",
+            "value": "id_1725345979290_3"
+           },
+           {
+            "label": "IO_PORTD_07",
+            "value": "id_1725345982692_4"
+           },
+           {
+            "label": "IO_PORTD_08",
+            "value": "id_1725345985823_5"
+           },
+           {
+            "label": "IO_PORTD_09",
+            "value": "id_1725345988378_6"
+           },
+           {
+            "label": "IO_PORTD_10",
+            "value": "id_1725345993143_7"
+           },
+           {
+            "label": "IO_PORTD_11",
+            "value": "id_1725346005172_8"
+           },
+           {
+            "label": "IO_PORTD_12",
+            "value": "id_1725346007108_9"
+           },
+           {
+            "label": "IO_PORTD_13",
+            "value": "id_1725346009408_10"
+           },
+           {
+            "label": "IO_PORTD_14",
+            "value": "id_1725346012081_11"
+           },
+           {
+            "label": "IO_PORTD_15",
+            "value": "id_1725346014831_12"
+           },
+           {
+            "label": "IO_PORTE_00",
+            "value": "id_1725346022376_13"
+           },
+           {
+            "label": "IO_PORTE_01",
+            "value": "id_1725346045551_14"
+           },
+           {
+            "label": "IO_PORTE_02",
+            "value": "id_1725346049391_15"
+           },
+           {
+            "label": "IO_PORTE_03",
+            "value": "id_1725346068012_16"
+           },
+           {
+            "label": "IO_PORTE_04",
+            "value": "id_1725346070525_17"
+           },
+           {
+            "label": "IO_PORTE_05",
+            "value": "id_1725346072425_18"
+           },
+           {
+            "label": "IO_PORTE_06",
+            "value": "id_1725346074625_19"
+           },
+           {
+            "label": "IO_PORTE_07",
+            "value": "id_1725346077626_20"
+           },
+           {
+            "label": "IO_PORTE_08",
+            "value": "id_1725346079769_21"
+           },
+           {
+            "label": "IO_PORTE_09",
+            "value": "id_1725346082306_22"
+           },
+           {
+            "label": "IO_PORTE_10",
+            "value": "id_1725346084374_23"
+           },
+           {
+            "label": "IO_PORTE_11",
+            "value": "id_1725346088758_24"
+           },
+           {
+            "label": "IO_PORTE_12",
+            "value": "id_1725346091600_25"
+           },
+           {
+            "label": "IO_PORTE_13",
+            "value": "id_1725346093490_26"
+           },
+           {
+            "label": "IO_PORTE_14",
+            "value": "id_1725346095994_27"
+           },
+           {
+            "label": "IO_PORTE_15",
+            "value": "id_1725346097907_28"
+           },
+           {
+            "label": "IO_PORTF_00",
+            "value": "id_1725346101994_29"
+           },
+           {
+            "label": "IO_PORTF_01",
+            "value": "id_1725346108551_30"
+           },
+           {
+            "label": "IO_PORTF_02",
+            "value": "id_1725346110018_31"
+           },
+           {
+            "label": "IO_PORTF_03",
+            "value": "id_1725346112218_32"
+           },
+           {
+            "label": "IO_PORTF_04",
+            "value": "id_1725346115254_33"
+           },
+           {
+            "label": "IO_PORTF_05",
+            "value": "id_1725346117147_34"
+           },
+           {
+            "label": "IO_PORT_USB_DPA",
+            "value": "id_1725346120279_35"
+           },
+           {
+            "label": "IO_PORT_USB_DMA",
+            "value": "id_1725346126371_36"
+           },
+           {
+            "label": "IO_PORT_USB_DPB",
+            "value": "id_1725346131470_37"
+           },
+           {
+            "label": "IO_PORT_USB_DMB",
+            "value": "id_1725346138127_38"
+           },
+           {
+            "label": "IO_PORT_PR_00",
+            "value": "id_1725346145090_39"
+           },
+           {
+            "label": "IO_PORT_PR_01",
+            "value": "id_1725346151106_40"
+           },
+           {
+            "label": "IO_PORT_PV_00",
+            "value": "id_1725346154616_41"
+           },
+           {
+            "label": "IO_PORT_PV_01",
+            "value": "id_1725346159660_42"
+           }
+          ]
+         },
+         "placeholder": "请选择数字麦SCLK_IO",
+         "style": {
+          "width": "100%"
+         },
+         "clearable": true,
+         "disabled": false,
+         "filterable": false,
+         "multiple": false,
+         "id": "id_1752049805595_2",
+         "__vModel__": "field126",
+         "searchSource": true,
+         "children": []
+        },
+        {
+         "__config__": {
+          "label": "数字麦SCLK频率",
+          "labelWidth": 125,
+          "showLabel": true,
+          "changeTag": true,
+          "tag": "el-input",
+          "tagIcon": "input",
+          "defaultValue": 2000000,
+          "required": false,
+          "layout": "colFormItem",
+          "span": 12,
+          "regList": [],
+          "status": 0,
+          "dataType": [
+           "32",
+           "1"
+          ],
+          "formId": 130,
+          "renderKey": "1301752052770167",
+          "eventField": [],
+          "saveWay": "macro",
+          "uuid": "TCFG_DMIC_SCLK_FREQUENCY",
+          "originValue": 2000000
+         },
+         "__slot__": {
+          "prepend": "",
+          "append": ""
+         },
+         "placeholder": "请输入数字麦SCLK频率",
+         "style": {
+          "width": "100%"
+         },
+         "clearable": true,
+         "prefix-icon": "",
+         "suffix-icon": "",
+         "maxlength": null,
+         "show-word-limit": false,
+         "readonly": false,
+         "disabled": false,
+         "id": "id_1752052770167_1",
+         "__vModel__": "field130"
+        },
+        {
+         "__config__": {
+          "label": "数字麦IDAT0_IO",
+          "showLabel": true,
+          "labelWidth": 120,
+          "tag": "el-select",
+          "tagIcon": "select",
+          "layout": "colFormItem",
+          "span": 12,
+          "required": false,
+          "defaultValue": "id_1752065355135_0",
+          "regList": [],
+          "changeTag": true,
+          "searchSource": false,
+          "status": 0,
+          "dataType": [
+           "macro"
+          ],
+          "formId": 126,
+          "renderKey": "1261752050584732",
+          "eventField": [
+           "gpio"
+          ],
+          "saveWay": "macro",
+          "uuid": "TCFG_DMIC_IO_IDAT0",
+          "originValue": "id_1752065355135_0"
+         },
+         "__slot__": {
+          "options": [
+           {
+            "label": -1,
+            "value": "id_1752065355135_0"
+           },
+           {
+            "label": "IO_PORTA_00",
+            "value": "id_1647485267192_66"
+           },
+           {
+            "label": "IO_PORTA_01",
+            "value": "id_1647485267192_67"
+           },
+           {
+            "label": "IO_PORTA_02",
+            "value": "id_1647485267192_68"
+           },
+           {
+            "label": "IO_PORTA_03",
+            "value": "id_1647485267192_69"
+           },
+           {
+            "label": "IO_PORTA_04",
+            "value": "id_1647485267192_70"
+           },
+           {
+            "label": "IO_PORTA_05",
+            "value": "id_1647485267192_71"
+           },
+           {
+            "label": "IO_PORTA_06",
+            "value": "id_1647485267192_72"
+           },
+           {
+            "label": "IO_PORTA_07",
+            "value": "id_1647485267192_73"
+           },
+           {
+            "label": "IO_PORTA_08",
+            "value": "id_1653449701350_0"
+           },
+           {
+            "label": "IO_PORTA_09",
+            "value": "id_1659942254419_11"
+           },
+           {
+            "label": "IO_PORTA_10",
+            "value": "id_1659942300489_12"
+           },
+           {
+            "label": "IO_PORTA_11",
+            "value": "id_1659942301465_13"
+           },
+           {
+            "label": "IO_PORTA_12",
+            "value": "id_1659942302985_15"
+           },
+           {
+            "label": "IO_PORTA_13",
+            "value": "id_1659942303977_16"
+           },
+           {
+            "label": "IO_PORTA_14",
+            "value": "id_1659942305385_17"
+           },
+           {
+            "label": "IO_PORTA_15",
+            "value": "id_1659942302234_14"
+           },
+           {
+            "label": "IO_PORTB_00",
+            "value": "id_1647485267192_74"
+           },
+           {
+            "label": "IO_PORTB_01",
+            "value": "id_1647485267192_75"
+           },
+           {
+            "label": "IO_PORTB_02",
+            "value": "id_1647485267192_76"
+           },
+           {
+            "label": "IO_PORTB_03",
+            "value": "id_1647485267192_77"
+           },
+           {
+            "label": "IO_PORTB_04",
+            "value": "id_1647485267192_78"
+           },
+           {
+            "label": "IO_PORTB_05",
+            "value": "id_1647485267192_79"
+           },
+           {
+            "label": "IO_PORTB_06",
+            "value": "id_1647485267192_80"
+           },
+           {
+            "label": "IO_PORTB_07",
+            "value": "id_1647485267192_81"
+           },
+           {
+            "label": "IO_PORTB_08",
+            "value": "id_1659942520267_25"
+           },
+           {
+            "label": "IO_PORTB_09",
+            "value": "id_1659942416666_18"
+           },
+           {
+            "label": "IO_PORTB_10",
+            "value": "id_1659942417369_19"
+           },
+           {
+            "label": "IO_PORTB_11",
+            "value": "id_1659942418129_20"
+           },
+           {
+            "label": "IO_PORTB_12",
+            "value": "id_1659942418537_21"
+           },
+           {
+            "label": "IO_PORTB_13",
+            "value": "id_1659942418961_22"
+           },
+           {
+            "label": "IO_PORTB_14",
+            "value": "id_1659942419409_23"
+           },
+           {
+            "label": "IO_PORTB_15",
+            "value": "id_1659942420017_24"
+           },
+           {
+            "label": "IO_PORTC_00",
+            "value": "id_1647485267192_82"
+           },
+           {
+            "label": "IO_PORTC_01",
+            "value": "id_1647485267192_83"
+           },
+           {
+            "label": "IO_PORTC_02",
+            "value": "id_1647485267192_84"
+           },
+           {
+            "label": "IO_PORTC_03",
+            "value": "id_1647485267192_85"
+           },
+           {
+            "label": "IO_PORTC_04",
+            "value": "id_1647485267192_86"
+           },
+           {
+            "label": "IO_PORTC_05",
+            "value": "id_1647485267192_87"
+           },
+           {
+            "label": "IO_PORTC_06",
+            "value": "id_1647485267192_88"
+           },
+           {
+            "label": "IO_PORTC_07",
+            "value": "id_1647485267192_89"
+           },
+           {
+            "label": "IO_PORTC_08",
+            "value": "id_1659942689298_34"
+           },
+           {
+            "label": "IO_PORTC_09",
+            "value": "id_1659942548530_27"
+           },
+           {
+            "label": "IO_PORTC_10",
+            "value": "id_1659942549845_32"
+           },
+           {
+            "label": "IO_PORTC_11",
+            "value": "id_1659942548938_29"
+           },
+           {
+            "label": "IO_PORTC_12",
+            "value": "id_1659942549182_30"
+           },
+           {
+            "label": "IO_PORTC_13",
+            "value": "id_1651200719084_10"
+           },
+           {
+            "label": "IO_PORTD_00",
+            "value": "id_1651200755336_11"
+           },
+           {
+            "label": "IO_PORTD_01",
+            "value": "id_1651200760502_13"
+           },
+           {
+            "label": "IO_PORTD_02",
+            "value": "id_1651200764534_16"
+           },
+           {
+            "label": "IO_PORTD_03",
+            "value": "id_1651200765594_17"
+           },
+           {
+            "label": "IO_PORTD_04",
+            "value": "id_1725345971572_1"
+           },
+           {
+            "label": "IO_PORTD_05",
+            "value": "id_1725345976302_2"
+           },
+           {
+            "label": "IO_PORTD_06",
+            "value": "id_1725345979290_3"
+           },
+           {
+            "label": "IO_PORTD_07",
+            "value": "id_1725345982692_4"
+           },
+           {
+            "label": "IO_PORTD_08",
+            "value": "id_1725345985823_5"
+           },
+           {
+            "label": "IO_PORTD_09",
+            "value": "id_1725345988378_6"
+           },
+           {
+            "label": "IO_PORTD_10",
+            "value": "id_1725345993143_7"
+           },
+           {
+            "label": "IO_PORTD_11",
+            "value": "id_1725346005172_8"
+           },
+           {
+            "label": "IO_PORTD_12",
+            "value": "id_1725346007108_9"
+           },
+           {
+            "label": "IO_PORTD_13",
+            "value": "id_1725346009408_10"
+           },
+           {
+            "label": "IO_PORTD_14",
+            "value": "id_1725346012081_11"
+           },
+           {
+            "label": "IO_PORTD_15",
+            "value": "id_1725346014831_12"
+           },
+           {
+            "label": "IO_PORTE_00",
+            "value": "id_1725346022376_13"
+           },
+           {
+            "label": "IO_PORTE_01",
+            "value": "id_1725346045551_14"
+           },
+           {
+            "label": "IO_PORTE_02",
+            "value": "id_1725346049391_15"
+           },
+           {
+            "label": "IO_PORTE_03",
+            "value": "id_1725346068012_16"
+           },
+           {
+            "label": "IO_PORTE_04",
+            "value": "id_1725346070525_17"
+           },
+           {
+            "label": "IO_PORTE_05",
+            "value": "id_1725346072425_18"
+           },
+           {
+            "label": "IO_PORTE_06",
+            "value": "id_1725346074625_19"
+           },
+           {
+            "label": "IO_PORTE_07",
+            "value": "id_1725346077626_20"
+           },
+           {
+            "label": "IO_PORTE_08",
+            "value": "id_1725346079769_21"
+           },
+           {
+            "label": "IO_PORTE_09",
+            "value": "id_1725346082306_22"
+           },
+           {
+            "label": "IO_PORTE_10",
+            "value": "id_1725346084374_23"
+           },
+           {
+            "label": "IO_PORTE_11",
+            "value": "id_1725346088758_24"
+           },
+           {
+            "label": "IO_PORTE_12",
+            "value": "id_1725346091600_25"
+           },
+           {
+            "label": "IO_PORTE_13",
+            "value": "id_1725346093490_26"
+           },
+           {
+            "label": "IO_PORTE_14",
+            "value": "id_1725346095994_27"
+           },
+           {
+            "label": "IO_PORTE_15",
+            "value": "id_1725346097907_28"
+           },
+           {
+            "label": "IO_PORTF_00",
+            "value": "id_1725346101994_29"
+           },
+           {
+            "label": "IO_PORTF_01",
+            "value": "id_1725346108551_30"
+           },
+           {
+            "label": "IO_PORTF_02",
+            "value": "id_1725346110018_31"
+           },
+           {
+            "label": "IO_PORTF_03",
+            "value": "id_1725346112218_32"
+           },
+           {
+            "label": "IO_PORTF_04",
+            "value": "id_1725346115254_33"
+           },
+           {
+            "label": "IO_PORTF_05",
+            "value": "id_1725346117147_34"
+           },
+           {
+            "label": "IO_PORT_USB_DPA",
+            "value": "id_1725346120279_35"
+           },
+           {
+            "label": "IO_PORT_USB_DMA",
+            "value": "id_1725346126371_36"
+           },
+           {
+            "label": "IO_PORT_USB_DPB",
+            "value": "id_1725346131470_37"
+           },
+           {
+            "label": "IO_PORT_USB_DMB",
+            "value": "id_1725346138127_38"
+           },
+           {
+            "label": "IO_PORT_PR_00",
+            "value": "id_1725346145090_39"
+           },
+           {
+            "label": "IO_PORT_PR_01",
+            "value": "id_1725346151106_40"
+           },
+           {
+            "label": "IO_PORT_PV_00",
+            "value": "id_1725346154616_41"
+           },
+           {
+            "label": "IO_PORT_PV_01",
+            "value": "id_1725346159660_42"
+           }
+          ]
+         },
+         "placeholder": "请选择数字麦IDAT0_IO",
+         "style": {
+          "width": "100%"
+         },
+         "clearable": false,
+         "disabled": false,
+         "filterable": false,
+         "multiple": false,
+         "id": "id_1752050584732_0",
+         "__vModel__": "field126",
+         "searchSource": true
+        },
+        {
+         "__config__": {
+          "label": "数字麦IDAT1_IO",
+          "showLabel": true,
+          "labelWidth": 125,
+          "tag": "el-select",
+          "tagIcon": "select",
+          "layout": "colFormItem",
+          "span": 12,
+          "required": false,
+          "defaultValue": "id_1752065355135_0",
+          "regList": [],
+          "changeTag": true,
+          "searchSource": false,
+          "status": 0,
+          "dataType": [
+           "macro"
+          ],
+          "formId": 127,
+          "renderKey": "1271752050672667",
+          "saveWay": "macro",
+          "uuid": "TCFG_DMIC_IO_IDAT1",
+          "eventField": [
+           "gpio"
+          ],
+          "originValue": "id_1752065355135_0"
+         },
+         "__slot__": {
+          "options": [
+           {
+            "label": -1,
+            "value": "id_1752065355135_0"
+           },
+           {
+            "label": "IO_PORTA_00",
+            "value": "id_1647485267192_66"
+           },
+           {
+            "label": "IO_PORTA_01",
+            "value": "id_1647485267192_67"
+           },
+           {
+            "label": "IO_PORTA_02",
+            "value": "id_1647485267192_68"
+           },
+           {
+            "label": "IO_PORTA_03",
+            "value": "id_1647485267192_69"
+           },
+           {
+            "label": "IO_PORTA_04",
+            "value": "id_1647485267192_70"
+           },
+           {
+            "label": "IO_PORTA_05",
+            "value": "id_1647485267192_71"
+           },
+           {
+            "label": "IO_PORTA_06",
+            "value": "id_1647485267192_72"
+           },
+           {
+            "label": "IO_PORTA_07",
+            "value": "id_1647485267192_73"
+           },
+           {
+            "label": "IO_PORTA_08",
+            "value": "id_1653449701350_0"
+           },
+           {
+            "label": "IO_PORTA_09",
+            "value": "id_1659942254419_11"
+           },
+           {
+            "label": "IO_PORTA_10",
+            "value": "id_1659942300489_12"
+           },
+           {
+            "label": "IO_PORTA_11",
+            "value": "id_1659942301465_13"
+           },
+           {
+            "label": "IO_PORTA_12",
+            "value": "id_1659942302985_15"
+           },
+           {
+            "label": "IO_PORTA_13",
+            "value": "id_1659942303977_16"
+           },
+           {
+            "label": "IO_PORTA_14",
+            "value": "id_1659942305385_17"
+           },
+           {
+            "label": "IO_PORTA_15",
+            "value": "id_1659942302234_14"
+           },
+           {
+            "label": "IO_PORTB_00",
+            "value": "id_1647485267192_74"
+           },
+           {
+            "label": "IO_PORTB_01",
+            "value": "id_1647485267192_75"
+           },
+           {
+            "label": "IO_PORTB_02",
+            "value": "id_1647485267192_76"
+           },
+           {
+            "label": "IO_PORTB_03",
+            "value": "id_1647485267192_77"
+           },
+           {
+            "label": "IO_PORTB_04",
+            "value": "id_1647485267192_78"
+           },
+           {
+            "label": "IO_PORTB_05",
+            "value": "id_1647485267192_79"
+           },
+           {
+            "label": "IO_PORTB_06",
+            "value": "id_1647485267192_80"
+           },
+           {
+            "label": "IO_PORTB_07",
+            "value": "id_1647485267192_81"
+           },
+           {
+            "label": "IO_PORTB_08",
+            "value": "id_1659942520267_25"
+           },
+           {
+            "label": "IO_PORTB_09",
+            "value": "id_1659942416666_18"
+           },
+           {
+            "label": "IO_PORTB_10",
+            "value": "id_1659942417369_19"
+           },
+           {
+            "label": "IO_PORTB_11",
+            "value": "id_1659942418129_20"
+           },
+           {
+            "label": "IO_PORTB_12",
+            "value": "id_1659942418537_21"
+           },
+           {
+            "label": "IO_PORTB_13",
+            "value": "id_1659942418961_22"
+           },
+           {
+            "label": "IO_PORTB_14",
+            "value": "id_1659942419409_23"
+           },
+           {
+            "label": "IO_PORTB_15",
+            "value": "id_1659942420017_24"
+           },
+           {
+            "label": "IO_PORTC_00",
+            "value": "id_1647485267192_82"
+           },
+           {
+            "label": "IO_PORTC_01",
+            "value": "id_1647485267192_83"
+           },
+           {
+            "label": "IO_PORTC_02",
+            "value": "id_1647485267192_84"
+           },
+           {
+            "label": "IO_PORTC_03",
+            "value": "id_1647485267192_85"
+           },
+           {
+            "label": "IO_PORTC_04",
+            "value": "id_1647485267192_86"
+           },
+           {
+            "label": "IO_PORTC_05",
+            "value": "id_1647485267192_87"
+           },
+           {
+            "label": "IO_PORTC_06",
+            "value": "id_1647485267192_88"
+           },
+           {
+            "label": "IO_PORTC_07",
+            "value": "id_1647485267192_89"
+           },
+           {
+            "label": "IO_PORTC_08",
+            "value": "id_1659942689298_34"
+           },
+           {
+            "label": "IO_PORTC_09",
+            "value": "id_1659942548530_27"
+           },
+           {
+            "label": "IO_PORTC_10",
+            "value": "id_1659942549845_32"
+           },
+           {
+            "label": "IO_PORTC_11",
+            "value": "id_1659942548938_29"
+           },
+           {
+            "label": "IO_PORTC_12",
+            "value": "id_1659942549182_30"
+           },
+           {
+            "label": "IO_PORTC_13",
+            "value": "id_1651200719084_10"
+           },
+           {
+            "label": "IO_PORTD_00",
+            "value": "id_1651200755336_11"
+           },
+           {
+            "label": "IO_PORTD_01",
+            "value": "id_1651200760502_13"
+           },
+           {
+            "label": "IO_PORTD_02",
+            "value": "id_1651200764534_16"
+           },
+           {
+            "label": "IO_PORTD_03",
+            "value": "id_1651200765594_17"
+           },
+           {
+            "label": "IO_PORTD_04",
+            "value": "id_1725345971572_1"
+           },
+           {
+            "label": "IO_PORTD_05",
+            "value": "id_1725345976302_2"
+           },
+           {
+            "label": "IO_PORTD_06",
+            "value": "id_1725345979290_3"
+           },
+           {
+            "label": "IO_PORTD_07",
+            "value": "id_1725345982692_4"
+           },
+           {
+            "label": "IO_PORTD_08",
+            "value": "id_1725345985823_5"
+           },
+           {
+            "label": "IO_PORTD_09",
+            "value": "id_1725345988378_6"
+           },
+           {
+            "label": "IO_PORTD_10",
+            "value": "id_1725345993143_7"
+           },
+           {
+            "label": "IO_PORTD_11",
+            "value": "id_1725346005172_8"
+           },
+           {
+            "label": "IO_PORTD_12",
+            "value": "id_1725346007108_9"
+           },
+           {
+            "label": "IO_PORTD_13",
+            "value": "id_1725346009408_10"
+           },
+           {
+            "label": "IO_PORTD_14",
+            "value": "id_1725346012081_11"
+           },
+           {
+            "label": "IO_PORTD_15",
+            "value": "id_1725346014831_12"
+           },
+           {
+            "label": "IO_PORTE_00",
+            "value": "id_1725346022376_13"
+           },
+           {
+            "label": "IO_PORTE_01",
+            "value": "id_1725346045551_14"
+           },
+           {
+            "label": "IO_PORTE_02",
+            "value": "id_1725346049391_15"
+           },
+           {
+            "label": "IO_PORTE_03",
+            "value": "id_1725346068012_16"
+           },
+           {
+            "label": "IO_PORTE_04",
+            "value": "id_1725346070525_17"
+           },
+           {
+            "label": "IO_PORTE_05",
+            "value": "id_1725346072425_18"
+           },
+           {
+            "label": "IO_PORTE_06",
+            "value": "id_1725346074625_19"
+           },
+           {
+            "label": "IO_PORTE_07",
+            "value": "id_1725346077626_20"
+           },
+           {
+            "label": "IO_PORTE_08",
+            "value": "id_1725346079769_21"
+           },
+           {
+            "label": "IO_PORTE_09",
+            "value": "id_1725346082306_22"
+           },
+           {
+            "label": "IO_PORTE_10",
+            "value": "id_1725346084374_23"
+           },
+           {
+            "label": "IO_PORTE_11",
+            "value": "id_1725346088758_24"
+           },
+           {
+            "label": "IO_PORTE_12",
+            "value": "id_1725346091600_25"
+           },
+           {
+            "label": "IO_PORTE_13",
+            "value": "id_1725346093490_26"
+           },
+           {
+            "label": "IO_PORTE_14",
+            "value": "id_1725346095994_27"
+           },
+           {
+            "label": "IO_PORTE_15",
+            "value": "id_1725346097907_28"
+           },
+           {
+            "label": "IO_PORTF_00",
+            "value": "id_1725346101994_29"
+           },
+           {
+            "label": "IO_PORTF_01",
+            "value": "id_1725346108551_30"
+           },
+           {
+            "label": "IO_PORTF_02",
+            "value": "id_1725346110018_31"
+           },
+           {
+            "label": "IO_PORTF_03",
+            "value": "id_1725346112218_32"
+           },
+           {
+            "label": "IO_PORTF_04",
+            "value": "id_1725346115254_33"
+           },
+           {
+            "label": "IO_PORTF_05",
+            "value": "id_1725346117147_34"
+           },
+           {
+            "label": "IO_PORT_USB_DPA",
+            "value": "id_1725346120279_35"
+           },
+           {
+            "label": "IO_PORT_USB_DMA",
+            "value": "id_1725346126371_36"
+           },
+           {
+            "label": "IO_PORT_USB_DPB",
+            "value": "id_1725346131470_37"
+           },
+           {
+            "label": "IO_PORT_USB_DMB",
+            "value": "id_1725346138127_38"
+           },
+           {
+            "label": "IO_PORT_PR_00",
+            "value": "id_1725346145090_39"
+           },
+           {
+            "label": "IO_PORT_PR_01",
+            "value": "id_1725346151106_40"
+           },
+           {
+            "label": "IO_PORT_PV_00",
+            "value": "id_1725346154616_41"
+           },
+           {
+            "label": "IO_PORT_PV_01",
+            "value": "id_1725346159660_42"
+           }
+          ]
+         },
+         "placeholder": "请选择数字麦IDAT1_IO",
+         "style": {
+          "width": "100%"
+         },
+         "clearable": true,
+         "disabled": false,
+         "filterable": false,
+         "multiple": false,
+         "id": "id_1752050672667_1",
+         "__vModel__": "field127",
+         "children": [],
+         "searchSource": true
+        },
+        {
+         "__config__": {
+          "label": "数字麦通道0模式",
+          "showLabel": true,
+          "labelWidth": 120,
+          "tag": "el-select",
+          "tagIcon": "select",
+          "layout": "colFormItem",
+          "span": 12,
+          "required": false,
+          "defaultValue": 4,
+          "regList": [],
+          "changeTag": true,
+          "searchSource": false,
+          "status": 0,
+          "dataType": [
+           "8",
+           "1"
+          ],
+          "formId": 128,
+          "renderKey": "1281752050849182",
+          "eventField": [],
+          "saveWay": "macro",
+          "uuid": "TCFG_DMIC_CH0_MODE",
+          "originValue": 4
+         },
+         "__slot__": {
+          "options": [
+           {
+            "label": "SCLK上升沿采样DATA0",
+            "value": 4,
+            "hide": false,
+            "disabled": false
+           },
+           {
+            "label": "SCLK下降沿采样DATA0",
+            "value": 5,
+            "hide": false,
+            "disabled": false
+           },
+           {
+            "label": "SCLK上升沿采样DATA1",
+            "value": 6,
+            "hide": false,
+            "disabled": false
+           },
+           {
+            "label": "SCLK下降沿采样DATA1",
+            "value": 7,
+            "hide": false,
+            "disabled": false
+           }
+          ]
+         },
+         "placeholder": "请选择数字麦通道0模式",
+         "style": {
+          "width": "100%"
+         },
+         "clearable": false,
+         "disabled": false,
+         "filterable": false,
+         "multiple": false,
+         "id": "id_1752050849182_2",
+         "__vModel__": "field128"
+        },
+        {
+         "__config__": {
+          "label": "数字麦通道1模式",
+          "showLabel": true,
+          "labelWidth": 125,
+          "tag": "el-select",
+          "tagIcon": "select",
+          "layout": "colFormItem",
+          "span": 12,
+          "required": false,
+          "defaultValue": 5,
+          "regList": [],
+          "changeTag": true,
+          "searchSource": false,
+          "status": 0,
+          "dataType": [
+           "8",
+           "1"
+          ],
+          "formId": 129,
+          "renderKey": "1291752050987814",
+          "eventField": [],
+          "saveWay": "macro",
+          "uuid": "TCFG_DMIC_CH1_MODE",
+          "originValue": 5
+         },
+         "__slot__": {
+          "options": [
+           {
+            "label": "SCLK上升沿采样DATA0",
+            "value": 4,
+            "hide": false,
+            "disabled": false
+           },
+           {
+            "label": "SCLK下降沿采样DATA0",
+            "value": 5,
+            "hide": false,
+            "disabled": false
+           },
+           {
+            "label": "SCLK上升沿采样DATA1",
+            "value": 6,
+            "hide": false,
+            "disabled": false
+           },
+           {
+            "label": "SCLK下降沿采样DATA1",
+            "value": 7,
+            "hide": false,
+            "disabled": false
+           }
+          ]
+         },
+         "placeholder": "请选择数字麦通道1模式",
+         "style": {
+          "width": "100%"
+         },
+         "clearable": false,
+         "disabled": false,
+         "filterable": false,
+         "multiple": false,
+         "id": "id_1752050987814_3",
+         "__vModel__": "field129"
+        }
+       ],
+       "eventField": []
+      },
+      "type": "default",
+      "justify": "start",
+      "align": "top",
+      "style": {
+       "height": "400px",
+       "paddingLeft": "0px"
+      },
+      "id": "id_1752052599852_0"
      }
     ],
     "eventField": [],
@@ -3499,7 +4987,7 @@
        "formItemWidth": "",
        "tip": "通用词条：小杰同学/小杰小杰 、 播放音乐、 暂停播放 、  上一首 、 下一首 、 增大音量 、 减小音量 、 接听电话 、 挂断电话 等",
        "tipAlways": true,
-       "originValue": 1
+       "originValue": 0
       },
       "style": {},
       "disabled": false,
@@ -3823,7 +5311,7 @@
           "label": "WMA",
           "tag": "el-switch",
           "tagIcon": "switch",
-          "defaultValue": 0,
+          "defaultValue": 1,
           "span": 5,
           "showLabel": true,
           "labelWidth": 60,
@@ -3993,7 +5481,7 @@
         },
         {
          "__config__": {
-          "label": "AMR_16k",
+          "label": "AMR_16K",
           "tag": "el-switch",
           "tagIcon": "switch",
           "defaultValue": 0,
@@ -4011,7 +5499,7 @@
           "formId": 124,
           "renderKey": "1241742442194212",
           "saveWay": "macro",
-          "uuid": "TCFG_DEC_AMR_16k_ENABLE",
+          "uuid": "TCFG_DEC_AMR_16K_ENABLE",
           "originValue": 0,
           "eventField": []
          },
@@ -4066,7 +5554,7 @@
           "tag": "el-switch",
           "tagIcon": "switch",
           "defaultValue": 0,
-          "span": 4,
+          "span": 5,
           "showLabel": true,
           "labelWidth": 60,
           "layout": "colFormItem",
@@ -4133,7 +5621,7 @@
           "label": "OGG_OPUS",
           "tag": "el-switch",
           "tagIcon": "switch",
-          "defaultValue": 1,
+          "defaultValue": 0,
           "span": 5,
           "showLabel": true,
           "labelWidth": 100,
@@ -4238,7 +5726,7 @@
           "tag": "el-switch",
           "tagIcon": "switch",
           "defaultValue": 1,
-          "span": 4,
+          "span": 5,
           "showLabel": true,
           "labelWidth": 60,
           "layout": "colFormItem",
@@ -4389,7 +5877,8 @@
           "renderKey": "1551736837338118",
           "saveWay": "macro",
           "uuid": "TCFG_DEC_LC3_ENABLE",
-          "originValue": 1
+          "originValue": 1,
+          "eventField": []
          },
          "style": {},
          "disabled": false,
@@ -4401,6 +5890,76 @@
          "inactive-value": 0,
          "id": "id_1736837338118_1",
          "__vModel__": "field155"
+        },
+        {
+         "__config__": {
+          "label": "MIDI_FILE",
+          "tag": "el-switch",
+          "tagIcon": "switch",
+          "defaultValue": 0,
+          "span": 5,
+          "showLabel": true,
+          "labelWidth": 100,
+          "layout": "colFormItem",
+          "required": false,
+          "regList": [],
+          "changeTag": true,
+          "dataType": [
+           "8",
+           "1"
+          ],
+          "formId": 137,
+          "renderKey": "1371760422717753",
+          "saveWay": "macro",
+          "uuid": "TCFG_DEC_MIDI_FILE_ENABLE",
+          "originValue": 1,
+          "eventField": []
+         },
+         "style": {},
+         "disabled": false,
+         "active-text": "",
+         "inactive-text": "",
+         "active-color": null,
+         "inactive-color": null,
+         "active-value": 1,
+         "inactive-value": 0,
+         "id": "id_1760422717753_0",
+         "__vModel__": "field137"
+        },
+        {
+         "__config__": {
+          "label": "MIDI_CTRL",
+          "tag": "el-switch",
+          "tagIcon": "switch",
+          "defaultValue": 1,
+          "span": 5,
+          "showLabel": true,
+          "labelWidth": 100,
+          "layout": "colFormItem",
+          "required": false,
+          "regList": [],
+          "changeTag": true,
+          "dataType": [
+           "8",
+           "1"
+          ],
+          "formId": 138,
+          "renderKey": "1381760422914678",
+          "saveWay": "macro",
+          "uuid": "TCFG_DEC_MIDI_CTRL_ENABLE",
+          "originValue": 1,
+          "eventField": []
+         },
+         "style": {},
+         "disabled": false,
+         "active-text": "",
+         "inactive-text": "",
+         "active-color": null,
+         "inactive-color": null,
+         "active-value": 1,
+         "inactive-value": 0,
+         "id": "id_1760422914678_1",
+         "__vModel__": "field138"
         }
        ],
        "eventField": []
@@ -4782,7 +6341,7 @@
           "label": "SBC",
           "tag": "el-switch",
           "tagIcon": "switch",
-          "defaultValue": 1,
+          "defaultValue": 0,
           "span": 5,
           "showLabel": true,
           "labelWidth": 60,
@@ -4881,6 +6440,41 @@
          "inactive-value": 0,
          "id": "id_1736837317685_0",
          "__vModel__": "field154"
+        },
+        {
+         "__config__": {
+          "label": "SPEEX",
+          "tag": "el-switch",
+          "tagIcon": "switch",
+          "defaultValue": 0,
+          "span": 5,
+          "showLabel": true,
+          "labelWidth": 60,
+          "layout": "colFormItem",
+          "required": false,
+          "regList": [],
+          "changeTag": true,
+          "dataType": [
+           "8",
+           "1"
+          ],
+          "formId": 109,
+          "renderKey": "1091757570324475",
+          "saveWay": "macro",
+          "uuid": "TCFG_ENC_SPEEX_ENABLE",
+          "eventField": [],
+          "originValue": 1
+         },
+         "style": {},
+         "disabled": false,
+         "active-text": "",
+         "inactive-text": "",
+         "active-color": null,
+         "inactive-color": null,
+         "active-value": 1,
+         "inactive-value": 0,
+         "id": "id_1757570324475_0",
+         "__vModel__": "field109"
         }
        ],
        "eventField": []
@@ -4986,7 +6580,7 @@
         },
         {
          "__config__": {
-          "label": "AMR_16k",
+          "label": "AMR_16K",
           "tag": "el-switch",
           "tagIcon": "switch",
           "defaultValue": 0,
@@ -5004,7 +6598,7 @@
           "formId": 125,
           "renderKey": "1251742442248394",
           "saveWay": "macro",
-          "uuid": "TCFG_ENC_AMR_16k_ENABLE",
+          "uuid": "TCFG_ENC_AMR_16K_ENABLE",
           "eventField": [],
           "originValue": 0
          },
@@ -5053,41 +6647,6 @@
          "inactive-value": 0,
          "id": "id_1725333457305_15",
          "__vModel__": "field117"
-        },
-        {
-         "__config__": {
-          "label": "SPEEX",
-          "tag": "el-switch",
-          "tagIcon": "switch",
-          "defaultValue": 0,
-          "span": 5,
-          "showLabel": true,
-          "labelWidth": 60,
-          "layout": "colFormItem",
-          "required": false,
-          "regList": [],
-          "changeTag": true,
-          "dataType": [
-           "8",
-           "1"
-          ],
-          "formId": 118,
-          "renderKey": "1181725333477853",
-          "saveWay": "macro",
-          "uuid": "TCFG_ENC_SPEEX_ENABLE",
-          "eventField": [],
-          "originValue": 1
-         },
-         "style": {},
-         "disabled": false,
-         "active-text": "",
-         "inactive-text": "",
-         "active-color": null,
-         "inactive-color": null,
-         "active-value": 1,
-         "inactive-value": 0,
-         "id": "id_1725333477853_16",
-         "__vModel__": "field118"
         }
        ],
        "eventField": []
@@ -5364,7 +6923,7 @@
  "formRules": "rules",
  "gutter": 15,
  "disabled": false,
- "span": 7,
+ "span": 5,
  "formBtns": false,
  "maxFormId": 300,
  "version": {

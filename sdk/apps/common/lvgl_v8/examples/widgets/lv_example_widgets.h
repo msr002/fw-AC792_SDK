@@ -144,6 +144,7 @@ void lv_example_lyrics_1(void);
 void lv_example_lyrics_2(void);
 void lv_example_lyrics_3(void);
 
+void lv_example_dynamic_album_1(void);
 /**********************
  *      MACROS
  **********************/

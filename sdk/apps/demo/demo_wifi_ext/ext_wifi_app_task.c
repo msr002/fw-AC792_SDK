@@ -208,6 +208,15 @@ static int network_user_callback(void *network_ctx, enum WIFI_EVENT state, void 
                  hwaddr->addr[0], hwaddr->addr[1], hwaddr->addr[2], hwaddr->addr[3], hwaddr->addr[4], hwaddr->addr[5]);
         break;
 
+    case WIFI_EVENT_P2P_WSC_OPERATION:
+        PP2P_GO_STA_INFO sta_info = (PP2P_GO_STA_INFO)network_ctx;
+        printf("WIFI_EVENT_P2P_WSC_OPERATION device name[%d] = %.*s, mac = %02x:%02x:%02x:%02x:%02x:%02x\n",
+               sta_info->dev_name_len, sta_info->dev_name_len, sta_info->dev_name,
+               sta_info->dev_addr[0], sta_info->dev_addr[1], sta_info->dev_addr[2], sta_info->dev_addr[3], sta_info->dev_addr[4], sta_info->dev_addr[5]);
+        void ext_p2p_wsc_trigger(void);
+        ext_p2p_wsc_trigger();
+        break;
+
     default:
         break;
     }
@@ -297,6 +306,11 @@ static void ext_wifi_app_task(void *priv)
     ext_wifi_on();
 #endif
 
+#ifdef CONFIG_IPERF_ENABLE
+    void iperf_test(void);
+    iperf_test();
+#endif
+
     sys_timer_add(NULL, wifi_app_timer_func, 1000);
 
 #if (EXT_WIFI_TEST_MODE == AP_TEST_MODE)
@@ -305,12 +319,17 @@ static void ext_wifi_app_task(void *priv)
     info.pwd  = AP_PWD;
     info.force_default_mode = 1;
     dev_ioctl(wifi_dev, DEV_AP_MODE, (u32)&info);
-#else
+#elif (EXT_WIFI_TEST_MODE == STA_TEST_MODE)
     info.mode = STA_MODE;
     info.ssid = STA_SSID;
     info.pwd  = STA_PWD;
     info.force_default_mode = 1;
     dev_ioctl(wifi_dev, DEV_STA_MODE, (u32)&info);
+#elif (EXT_WIFI_TEST_MODE == P2P_TEST_MODE)
+    info.p2p_role = 1;
+    info.ssid = "AP79N-P2P-EXT";
+    info.force_default_mode = 1;
+    dev_ioctl(wifi_dev, DEV_P2P_MODE, (u32)&info);
 #endif
 
     while (1) {
@@ -334,6 +353,7 @@ static void ext_wifi_app_task(void *priv)
         default:
             break;
         }
+
     }
 }
 
