@@ -92,6 +92,8 @@ typedef enum {
     AVDD28_VOL_320V,
 } avdd28_vol_t;
 
+vddiom_vol_t get_vddiom_vol_sel(void);
+vddiow_vol_t get_vddiow_vol_sel(void);
 
 //
 //

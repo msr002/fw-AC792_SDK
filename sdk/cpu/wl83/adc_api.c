@@ -15,6 +15,7 @@
 #define LOG_ERROR_ENABLE
 #include "debug.h"
 
+extern const int config_gpadc_use_algo;
 
 static volatile u16 g_adc_res;
 static u8 cur_ch = 0;
@@ -22,12 +23,21 @@ static volatile u8 adc_scan_busy;
 static u16 scan_timer;
 static OS_MUTEX adc_mutex;
 
+// adc trim 相关
+#define CENTER_VBG_VOL      800  // VBG中心电压mv
+#define CENTER_2V5_VAL      775  // 2.5V参考电压的中心值，需与烧写器一致
+#define TRIM_LSB            2    // efuse lsb的精度，需与烧写器一致
+#define ADC_TRIM_VIO_VOL    3300 // 烧写器trim 2.5V REF时芯片IOVDD档位
+#define ADC_TRIM_REF_VOL    2500 // 烧写器2.5V REF 电压值
+static u32 adc_trim_2V5_A;       // 烧写器读2.5V REF的adc值
+static u8 adc_algo_sel;          // adc_trim算法选择
+
 struct adc_info_t {
     u32 ch;
     u16 value;
 };
 
-#define VBG_VBAT_SCAN_CNT    100
+#define VBG_VBAT_SCAN_CNT       100
 #define VBAT_VALUE_ARRAY_SIZE   20
 
 static struct adc_info_t adc_queue[ADC_MAX_CH];
@@ -162,30 +172,75 @@ u32 adc_get_value(u32 ch)
     return 0;
 }
 
-#define     CENTER0 800
-#define 	TRIM_MV	3
+static u32 adc_get_ref_trim_value(void)
+{
+    u8 adc_trim_efuse = efuse_get_adc_trim();
+    if (adc_trim_efuse & BIT(4)) {
+        return (u32)(CENTER_2V5_VAL - TRIM_LSB * (adc_trim_efuse & 0xF));
+    } else {
+        return (u32)(CENTER_2V5_VAL + TRIM_LSB * (adc_trim_efuse & 0xF));
+    }
+}
+
+// 算法1.认为VBG 800mV准确，参考VBG计算adc值。
+u32 adc_value_to_voltage_algo1(u32 adc_vbg, u32 adc_ch_val)
+{
+    return adc_ch_val * CENTER_VBG_VOL / adc_vbg;
+}
+
+u32 adc_get_voltage_algo1(u32 ch)
+{
+    u32 adc_vbg = adc_get_value(ADC_PMU_CH_VBG);
+    u32 adc_res = adc_get_value(ch);
+    return adc_value_to_voltage_algo1(adc_vbg, adc_res);
+}
+
+// 算法2.烧写器阶段trim好烧写器上的LDO2.5V，参考2.5V的trim值计算adc值。
+u32 adc_value_to_voltage_algo2(u32 adc_value_B)
+{
+    vddiom_vol_t vol_level = get_vddiom_vol_sel();
+    u32 vddio_vol;
+    if (vol_level == VDDIOM_VOL_240V) {
+        vddio_vol = 2400;
+    } else {
+        vddio_vol = (u32)((vol_level - VDDIOM_VOL_280V) * 100 + 2800);
+    }
+
+    u32 voltage = ADC_TRIM_REF_VOL * adc_value_B / adc_trim_2V5_A;
+    /* printf("[msg]>>>>no comp voltage= %d\n", voltage); */
+
+    if (vddio_vol <= ADC_TRIM_VIO_VOL) {
+        voltage = voltage - (ADC_TRIM_VIO_VOL - vddio_vol) * adc_value_B / 1024;
+    } else {
+        voltage = voltage + (vddio_vol - ADC_TRIM_VIO_VOL) * adc_value_B / 1024;
+    }
+
+    return voltage;
+}
+
+u32 adc_get_voltage_algo2(u32 ch)
+{
+    u32 adc_value = adc_get_value(ch);
+
+    return adc_value_to_voltage_algo2(adc_value);
+}
+
 u32 adc_value_to_voltage(u32 adc_vbg, u32 adc_ch_val)
 {
-    u32 adc_trim = get_vbg_trim();
-    u32 tmp, tmp1, center;
-
-    tmp1 = (adc_trim & 0x7f) >> 2;
-    center = CENTER0;
-    tmp = (adc_trim & BIT(7)) ? center - tmp1 * TRIM_MV : center + tmp1 * TRIM_MV;
-    return adc_ch_val * tmp / adc_vbg;
+    if (adc_algo_sel == 1) {
+        return adc_value_to_voltage_algo1(adc_vbg, adc_ch_val);
+    } else {
+        return adc_value_to_voltage_algo2(adc_ch_val);
+    }
 }
 
 u32 adc_get_voltage(u32 ch)
 {
-    u32 adc_vbg = adc_get_value(ADC_PMU_CH_VBG);
-    u32 adc_res = adc_get_value(ch);
-    u32 adc_trim = get_vbg_trim();
-    u32 tmp, tmp1, center;
-
-    tmp1 = (adc_trim & 0x7f) >> 2;
-    center = CENTER0;
-    tmp = (adc_trim & BIT(7)) ? center - tmp1 * TRIM_MV : center + tmp1 * TRIM_MV;
-    return adc_res * tmp / adc_vbg;
+    if (adc_algo_sel == 1) {
+        return adc_get_voltage_algo1(ch);
+    } else {
+        return adc_get_voltage_algo2(ch);
+    }
 }
 
 static void adc_audio_ch_select(u32 ch)
@@ -375,6 +430,31 @@ void adc_init(void)
     }
     vbg_adc_value /= 10;
     log_info("vbg_adc_value = %d", vbg_adc_value);
+
+    u8 adc_trim_efuse = efuse_get_adc_trim();
+    if (config_gpadc_use_algo == 0) {
+        adc_algo_sel = (adc_trim_efuse == 0x1f) ? 1 : 2; // adc未trim则使用算法1
+    } else if (config_gpadc_use_algo == 1) {
+        adc_algo_sel = 1;
+    } else {
+        adc_algo_sel = 2;
+    }
+    log_info("adc_trim_efuse = 0x%x", adc_trim_efuse);
+
+    if (adc_algo_sel == 1) {
+        if (config_gpadc_use_algo == 1) {
+            log_info("adc using algorithm 1");
+        } else {
+            log_warn("ADC has not been trimmed. " \
+                     "Program will use adc Algorithm 1.\n" \
+                     "It is recommended to use a programmer to " \
+                     "trim the ADC to reduce sampling errors!");
+        }
+    } else {
+        adc_trim_2V5_A = adc_get_ref_trim_value();
+        log_info("adc_trim_2V5 = %d", adc_trim_2V5_A);
+        log_info("adc using algorithm 2");
+    }
 
     g_adc_res = 1;
 

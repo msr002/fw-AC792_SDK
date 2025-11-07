@@ -180,6 +180,7 @@
 <Add option="../../../../cpu/wl83/liba/video_rec_server.a" />
 <Add option="../../../../cpu/wl83/liba/video_dec_server.a" />
 <Add option="../../../../cpu/wl83/liba/audio_server.a" />
+<Add option="../../../../cpu/wl83/liba/lib_pitch_speed.a" />
 <Add option="../../../../cpu/wl83/liba/libaec.a" />
 <Add option="../../../../cpu/wl83/liba/libdns.a" />
 <Add option="../../../../cpu/wl83/liba/libjlsp.a" />
@@ -1176,6 +1177,7 @@
 <Unit filename="../../../../apps/wifi_bbm/include/dev_desc.h" />
 <Unit filename="../../../../apps/wifi_bbm/include/net_stream_info.h" />
 <Unit filename="../../../../apps/wifi_bbm/include/packet.h" />
+<Unit filename="../../../../apps/wifi_bbm/include/ps_api.h" />
 <Unit filename="../../../../apps/wifi_bbm/include/simple_avi_unpkg.h" />
 <Unit filename="../../../../apps/wifi_bbm/include/storage_device.h" />
 <Unit filename="../../../../apps/wifi_bbm/include/video_buf_config.h" />

@@ -1164,7 +1164,7 @@ static u32 _usb_host_unmount(const usb_dev usb_id, u32 port)
             /* } */
 
             if (!host_dev->father) {
-                if (host_dev->interface_info[0]->dev.hub) {
+                if (host_dev->interface_info[0] && host_dev->interface_info[0]->dev.hub) {
                     for (int k = 0; k < 7; k++) {
                         if (host_dev->interface_info[0]->dev.hub->child_dev[k] != NULL) {
                             break;

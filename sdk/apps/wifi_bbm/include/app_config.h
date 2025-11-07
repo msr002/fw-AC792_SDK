@@ -30,6 +30,19 @@
 //开发板使用PA时不使用MIPI摄像头(video0)
 #define BBM_WIFI_PA_ENABLE          1
 
+//USB配对
+#define BBM_USB_PAIR_ENABLE         1
+// RX端作为CDC主机、TX端作为CDC从机进行通讯配对
+// 注意:board_develop.c中 detect_mode 只能SLAVE/HOST二选一. RX端HOST_MODE TX端SLAVE_MODE
+
+//开启显示本端设备的摄像头(双向视频)
+//RX端暂不支持开启此功能的情况下,连接多台TX设备出图。
+#define BBM_LOCAL_CAMERA_DISP_ENABLE         0
+
+//RX端选择发送音频、 视频+音频. 不可同时开启,二选一或都不开启
+#define RX_AUDIO_SEND_ENABLE        1       //只发送音频
+#define RX_STREAM_SEND_ENABLE       0       //发送音频和视频
+
 // 使用额外的信道,避开干扰
 // 23->2360MHz， 24->2370MHz， 25->2380MHz，26->2390MHz
 // 不同频率可能会影响到MIPI屏幕显示，根据实际情况使用
@@ -333,7 +346,7 @@
 // #define CONFIG_SPECTRUM_FFT_EFFECT_ENABLE    //频谱运算
 // #define CONFIG_REVERB_MODE_ENABLE            //打开混响功能
 // #define CONFIG_AUDIO_MIX_ENABLE              //打开叠音功能
-// #define CONFIG_AUDIO_PS_ENABLE                  //打开变调变速功能
+#define CONFIG_AUDIO_PS_ENABLE                  //打开变调变速功能
 #endif
 
 #ifdef CONFIG_AEC_ENC_ENABLE

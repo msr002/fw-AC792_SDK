@@ -2,7 +2,6 @@
 <CodeBlocks_workspace_file>
 	<Workspace title="Workspace">
 		<Project filename="apps/wifi_camera/board/wl83/AC792N_WIFI_CAMERA.cbp" />
-		<Project filename="apps/wifi_ipc/board/wl83/AC792N_WIFI_IPC.cbp" />
 		<Project filename="apps/wifi_bbm/board/wl83/AC792N_WIFI_BBM.cbp" />
 		<Project filename="apps/demo/demo_ble/board/wl83/AC792N_DEMO_DEMO_BLE.cbp" />
 		<Project filename="apps/demo/demo_wifi_ext/board/wl83/AC792N_DEMO_DEMO_WIFI_EXT.cbp" />

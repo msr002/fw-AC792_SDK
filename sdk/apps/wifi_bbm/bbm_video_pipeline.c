@@ -43,19 +43,14 @@ int bbm_pipe_disp_one_frame(pipe_core_t *pipeline_core, u8 *buf, int len)
     return 0;
 }
 
-int bbm_video_pipe_init(pipe_core_t **pipe_core, struct video_window *win, int src_w, int src_h)
+int bbm_video_pipe_init(pipe_core_t **pipe_core, struct video_format *f)
 {
     int ret;
     pipe_core_t *pipeline_core = NULL;
     pipe_filter_t *virtual_filter, *jpeg_dec_filter, *rep_filter, *imc_filter, *disp_filter, *sft_filter;
 
-    struct video_format f = {0};
-
-    f.src_width = src_w;
-    f.src_height = src_h;
-    f.type = VIDEO_BUF_TYPE_VIDEO_PLAY;
-    f.pixelformat = VIDEO_PIX_FMT_JPEG | VIDEO_PIX_FMT_YUV420;
-    memcpy(&f.win, win, sizeof(struct video_window));
+    f->type = VIDEO_BUF_TYPE_VIDEO_PLAY;
+    f->pixelformat = VIDEO_PIX_FMT_JPEG | VIDEO_PIX_FMT_YUV420;
 
     pipeline_core = pipeline_init(on_event, NULL);
     if (!pipeline_core) {
@@ -77,7 +72,7 @@ int bbm_video_pipe_init(pipe_core_t **pipe_core, struct video_window *win, int s
         imc_filter = pipeline_filter_add(pipeline_core, plugin_factory_find("imc"));
         disp_filter = pipeline_filter_add(pipeline_core, plugin_factory_find("disp"));
 
-        pipeline_param_set(pipeline_core, NULL, PIPELINE_SET_FORMAT, &f);
+        pipeline_param_set(pipeline_core, NULL, PIPELINE_SET_FORMAT, (int)f);
 
         int line_cnt = 16;
         pipeline_param_set(pipeline_core, NULL, PIPELINE_SET_BUFFER_LINE, (int)&line_cnt);
@@ -94,10 +89,10 @@ int bbm_video_pipe_init(pipe_core_t **pipe_core, struct video_window *win, int s
         sft_filter = pipeline_filter_add(pipeline_core, plugin_factory_find("sft"));
         disp_filter = pipeline_filter_add(pipeline_core, plugin_factory_find("disp"));
 
-        pipeline_param_set(pipeline_core, NULL, PIPELINE_SET_FORMAT, &f);
+        pipeline_param_set(pipeline_core, NULL, PIPELINE_SET_FORMAT, (int)f);
 
-        f.three_way_type = 1;
-        pipeline_param_set(pipeline_core, jpeg_dec_filter, PIPELINE_SET_FORMAT, &f);
+        f->three_way_type = 1;
+        pipeline_param_set(pipeline_core, jpeg_dec_filter, PIPELINE_SET_FORMAT, (int)f);
 
         //TODO jpeg按行解
         int line_cnt = 16;
@@ -126,12 +121,92 @@ int bbm_video_pipe_init(pipe_core_t **pipe_core, struct video_window *win, int s
 }
 
 
+int bbm_video_pipe_disp_init(pipe_core_t **pipe_core, struct video_format *f, int camera_id)
+{
+    int ret;
+    char source[12];
+    pipe_core_t *pipeline_core = NULL;
+    pipe_filter_t *source_filter = NULL, *isp_filter = NULL,
+                   *imc_filter = NULL, *disp_filter = NULL;
+
+    f->pixelformat = VIDEO_PIX_FMT_YUV420;
+
+    if (camera_id == 0) {
+        sprintf(source, "csi0");
+    } else if (camera_id == 1) {
+        sprintf(source, "isc0");
+    } else {
+        printf(" camera_id err \n");
+        return -1;
+    }
+
+    pipeline_core = pipeline_init(on_event, NULL);
+    if (!pipeline_core) {
+        printf("pipeline init err\n");
+        return -1;
+    }
+
+    pipeline_core->channel = plugin_source_to_channel(source);
+    source_filter = pipeline_filter_add(pipeline_core, source);
+    if (!source_filter) {
+        printf("add source filter fail \n");
+        pipeline_uninit(pipeline_core);
+        return -1;
+    }
+
+    pipeline_param_get(pipeline_core, source_filter, PIPELINE_GET_FORMAT, (int)f);
+    if (f->pixelformat & ISP_OUT_FORMAT_RAW) {
+        isp_filter = pipeline_filter_add(pipeline_core, "isp");
+        if (!isp_filter) {
+            printf("add isp filter fail \n");
+            pipeline_uninit(pipeline_core);
+            return -1;
+        }
+    }
+
+    imc_filter = pipeline_filter_add(pipeline_core, plugin_factory_find("imc"));
+    disp_filter = pipeline_filter_add(pipeline_core, plugin_factory_find("disp"));
+
+    if (!imc_filter || !disp_filter) {
+        printf("add imc or disp filter fail \n");
+        pipeline_uninit(pipeline_core);
+        return -1;
+    }
+
+    pipeline_param_set(pipeline_core, NULL, PIPELINE_SET_FORMAT, (int)f);
+    if (f->pixelformat & ISP_OUT_FORMAT_RAW) {
+        pipeline_filter_link(source_filter, isp_filter);
+        pipeline_filter_link(isp_filter, imc_filter);
+    } else {
+        pipeline_filter_link(source_filter, imc_filter);
+    }
+
+    pipeline_filter_link(imc_filter, disp_filter);
+
+    pipeline_prepare(pipeline_core);
+    pipeline_start(pipeline_core);
+
+    *pipe_core = pipeline_core;
+
+    return 0;
+}
+
+void bbm_video_pipe_init_format(struct video_format *f, struct video_window *win, int src_w, int src_h, char *fb)
+{
+    memcpy(&f->win, win, sizeof(struct video_window));
+    f->src_width = src_w;
+    f->src_height = src_h;
+    f->private_data = fb;
+}
+
+
 
 int bbm_video_pipe_exit(pipe_core_t **pipe_core)
 {
     pipe_core_t *pipeline_core = *pipe_core;
 
     if (!pipeline_core) {
+        printf(" pipeline ptr err \n");
         return -1;
     }
 

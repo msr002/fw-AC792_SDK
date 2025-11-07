@@ -76,6 +76,11 @@ struct bbm_client_hdl {
     int play_index;
 };
 
+struct lbuf_pair_data_head {
+    int len;
+    int usb_id;
+    u8 data[0];
+};
 
 enum {
     BBM_FILE_PLAY_STOP = 0,

@@ -90,6 +90,12 @@ const u8 g_isc_keep_open = 1;
 //mcv摄像头保持打开变量
 const u8 g_mcv_keep_open = 1;
 
+/*****************************/
+//adc algo config
+//adc 算法使用配置
+const int config_gpadc_use_algo = 0; // 0:auto, 1:algo-1, 2:algo-2
+/*****************************/
+
 /**
  * @brief Log (Verbose/Info/Debug/Warn/Error)
  */
@@ -241,7 +247,7 @@ const char log_tag_const_e_CAN AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(TRUE);
 const char log_tag_const_v_GPADC AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(FALSE);
 const char log_tag_const_d_GPADC AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(FALSE);
 const char log_tag_const_i_GPADC AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(TRUE);
-const char log_tag_const_w_GPADC AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(FALSE);
+const char log_tag_const_w_GPADC AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(TRUE);
 const char log_tag_const_e_GPADC AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(TRUE);
 
 const char log_tag_const_v_RTC AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(FALSE);

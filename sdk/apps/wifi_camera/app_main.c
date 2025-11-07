@@ -244,6 +244,28 @@ static void power_off_timer_cb(void *p)
     //软关机
     sys_power_poweroff();
 }
+#ifdef CONFIG_UI_ENABLE
+//增加弱函数定义，防止客户使用空白模版编译时报错
+_WEAK_ void usb_page_show(int arg)
+{
+    return;
+}
+
+_WEAK_ void usb_page_hide(int arg)
+{
+    return;
+}
+
+_WEAK_ void parking_page_show(int arg)
+{
+    return;
+}
+
+_WEAK_ void parking_page_hide(int arg)
+{
+    return;
+}
+#endif
 
 static int device_event_handler(struct sys_event *e)
 {

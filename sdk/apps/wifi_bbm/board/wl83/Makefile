@@ -982,6 +982,7 @@ LFLAGS := \
 	../../../../cpu/wl83/liba/video_rec_server.a \
 	../../../../cpu/wl83/liba/video_dec_server.a \
 	../../../../cpu/wl83/liba/audio_server.a \
+	../../../../cpu/wl83/liba/lib_pitch_speed.a \
 	../../../../cpu/wl83/liba/libaec.a \
 	../../../../cpu/wl83/liba/libdns.a \
 	../../../../cpu/wl83/liba/libjlsp.a \

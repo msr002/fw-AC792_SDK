@@ -13,6 +13,10 @@
 #include "sock_api/sock_api.h"
 #include "ctp_server.h"
 #include "net_stream_info.h"
+#include "rt_stream_pkg.h"
+#include "udp_multicast.h"
+#include "pairing_data_model.h"
+#include "asm/usb.h"
 
 #define VIDEO_OSD_BUF_SIZE      64                  //水印缓存
 #define VIDEO_RT_BUF_SIZE       200 * 1024          //实时流缓存
@@ -23,34 +27,141 @@
 #define AUDIO_RT_INTERVAL_SIZE      2*640             //实时流音频包大小,尽量设置小一些降低延迟
 #define AUDIO_REC_INTERVAL_SIZE     8192            //录像音频包大小
 
-#define AUDIO_RT_RECV_PORT               9981            //接收数据端口
-#define AUDIO_DEC_BUF_MAX_LEN            AUDIO_RX_ENC_BUF_MAX_LEN
-#define AUDIO_RT_RECV_BUF_MAX_LEN        200*1024
+#define STREAM_RECV_BUF_SIZE        200 * 1024  //实时流socket接收缓存大小
+#define STREAM_PARSE_BUF_SIZE       200 * 1024  //实时流解析CTP包缓存大小
+#define STREAM_RECV_PORT            9981
+#define STREAM_RECV_TASK_NAME       "ctp_rt_recv_task"
+
+#define USB_CDC_BUF_SIZE            512
+#define USB_PAIR_PKG_MAX_SIZE       1024
+#define USB_PAIR_LBUF_SIZE          1024 * 3
+
+#define DISP_SMALL_WIDTH            320
+#define DISP_SMALL_HEIGHT           240
+#define MAX_WIN_MODE_NUM            4
+
+#define OFFLINE_TIMEOUT_MS           1000*10
+
+enum {
+    VIDEO_TYPE_PACKET = 10,
+    AUDIO_TYPE_PACKET,
+    CONTINUE_PARSE_TYPE_PACKET,
+    UNKNOW_TYPE_PACKET,
+};
+
+struct parse_info {
+    u8 *data_buf;        //解析出来的数据缓存
+    int data_len;
+    u8 packet_type;     //解析出的数据类型(视频/音频)
+    u32 old_frame_seq;  //媒体包序列
+};
 
 enum {
     WIFI_RAW_MODE = 0,
     WIFI_MODE,
 };
 
+
+static struct video_window disp_win[MAX_WIN_MODE_NUM][2] = {
+    {
+        {
+            .left   = 0,
+            .top    = 0,
+            .width  = LCD_W,
+            .height = LCD_H,
+            .combine = 1,
+        },
+        {
+            .left   = LCD_W - DISP_SMALL_WIDTH,
+            .top    = LCD_H - DISP_SMALL_HEIGHT,
+            .width  = DISP_SMALL_WIDTH,
+            .height = DISP_SMALL_HEIGHT,
+            .combine = 1,
+        },
+    },
+    {
+        {
+            .left   = LCD_W - DISP_SMALL_WIDTH,
+            .top    = LCD_H - DISP_SMALL_HEIGHT,
+            .width  = DISP_SMALL_WIDTH,
+            .height = DISP_SMALL_HEIGHT,
+            .combine = 1,
+        },
+        {
+            .left   = 0,
+            .top    = 0,
+            .width  = LCD_W,
+            .height = LCD_H,
+            .combine = 1,
+        },
+    },
+    {
+        {
+            .left   = 0,
+            .top    = 0,
+            .width  = LCD_W,
+            .height = LCD_H,
+            .combine = 1,
+        },
+        {
+            .left   = 0,
+            .top    = 0,
+            .width  = 0,
+            .height = 0,
+            .combine = 0,
+        },
+    },
+    {
+        {
+            .left   = 0,
+            .top    = 0,
+            .width  = 0,
+            .height = 0,
+            .combine = 0,
+        },
+        {
+            .left   = 0,
+            .top    = 0,
+            .width  = LCD_W,
+            .height = LCD_H,
+            .combine = 1,
+        },
+    },
+};
+
+enum {
+    SWITCH_VIDEO_WIN = 1,
+    SET_AUDIO_VOL,
+};
+
 struct video_rec_hdl {
     struct list_head dev_list_head;
     u8 cur_wifi_mode;
+
+    u8 *usb_cdc_buf;
+    u8 *usb_pair_lbuf_ptr;
+    struct lbuff_head *usb_pair_lbuf_hdl;
+    int usb_pair_task_pid;
+
+    void *disp_pipe_core;
+    int curr_win_mode;
+    OS_SEM wait_big_win_create;
+
+    u16 offline_timeout_timer;
 };
 struct video_rec_hdl rec_handler;
 #define __this 	(&rec_handler)
 
-struct audio_recv_hdl {
-    u8 *recv_buf;
-    u32 recv_buf_len;
-    void *recv_sockfd;
-    int recv_task_pid;
-    u8 task_exit;
-
-    u8 *audio_dec_buf;
-    cbuffer_t audio_dec_save_cbuf;
-    struct server *audio_dec_server;
+struct stream_recv_hdl {
+    int stream_recv_task_exit;
+    int stream_recv_task_pid;
+    void *stream_recv_sockfd;
+    void *pipe_core;
+    int video_is_running;
+    int video_width;
+    int video_height;
+    int  audio_init;
 };
-static u8 *tmp_buf = NULL;
 
 //id用于区别摄像头设备(板级对应)比如id0(video0)->MIPI摄像头
 //sub_id,在此工程中用于区别同一摄像头设备的实时流/录像
@@ -63,266 +174,12 @@ struct video_dev_hdl {
     struct video_rec_config config;
     void *file;
 
-    struct audio_recv_hdl *audio_recv_hdl;
+    struct stream_recv_hdl *stream_recv_hdl;
 };
 
+static int check_local_video_is_running(void);
+static int check_remote_video_is_running(void);
 
-static int vfs_audio_dec_fread(void *file, void *data, u32 len)
-{
-    u32 rlen = 0;
-    int ret;
-    struct audio_recv_hdl *hdl = file;
-
-    do {
-
-        rlen = cbuf_read(&hdl->audio_dec_save_cbuf, data, len);
-        if (rlen == len) {
-            break;
-        }
-    } while (rlen);
-
-    return rlen ? rlen : -2;
-}
-
-static int vfs_audio_dec_fclose(void *file)
-{
-    return 0;
-}
-
-static int vfs_audio_dec_flen(void *file)
-{
-    return 0;
-}
-
-static const struct audio_vfs_ops vfs_audio_dec_ops = {
-    .fwrite = NULL,
-    .fread  = vfs_audio_dec_fread,
-    .fclose = vfs_audio_dec_fclose,
-    .flen   = vfs_audio_dec_flen,
-};
-
-
-static int audio_dec_init(struct audio_recv_hdl *hdl)
-{
-    union audio_req req = {0};
-    int err;
-
-    if (!tmp_buf) {
-        tmp_buf = (u8 *)malloc(AUDIO_DEC_BUF_MAX_LEN);
-        if (tmp_buf == NULL) {
-            printf("tmp_buf malloc fail");
-            goto __err;
-        }
-    }
-
-    hdl->audio_dec_server = server_open("audio_server", "dec");
-    if (!hdl->audio_dec_server) {
-        printf("open audio_dec_server fail");
-        goto __err;
-    }
-
-    hdl->audio_dec_buf = (u8 *)malloc(AUDIO_DEC_BUF_MAX_LEN);
-    if (hdl->audio_dec_buf == NULL) {
-        printf("audio_dec_buf malloc fail");
-        goto __err;
-
-    }
-    cbuf_init(&hdl->audio_dec_save_cbuf, hdl->audio_dec_buf, AUDIO_DEC_BUF_MAX_LEN);
-
-
-    req.dec.cmd             = AUDIO_DEC_OPEN;
-    req.dec.volume          = 100;
-    req.dec.output_buf      = NULL;
-    req.dec.output_buf_len  = 4096;
-    //使用双通道,避免叠音卡顿
-    req.dec.channel         = 2;
-    req.dec.sample_rate     = AUDIO_RX_ENC_SAMPLE_RATE;
-    req.dec.priority        = 1;
-    req.dec.vfs_ops         = &vfs_audio_dec_ops;
-    req.dec.file            = hdl;
-    req.dec.dec_type 		= "pcm";
-    req.dec.sample_source   = "dac";
-
-    err = server_request(hdl->audio_dec_server, AUDIO_REQ_DEC, &req);
-    if (err) {
-        printf("audio server req open err\n");
-        goto __err;
-    }
-
-    req.dec.cmd = AUDIO_DEC_START;
-    err = server_request(hdl->audio_dec_server, AUDIO_REQ_DEC, &req);
-    if (err) {
-        printf("audio server req start err\n");
-        goto __err;
-    }
-
-    return 0;
-
-__err:
-    if (hdl->audio_dec_server) {
-        server_close(hdl->audio_dec_server);
-        hdl->audio_dec_server = NULL;
-    }
-    if (hdl->audio_dec_buf) {
-        free(hdl->audio_dec_buf);
-        hdl->audio_dec_buf = NULL;
-    }
-    if (tmp_buf) {
-        free(tmp_buf);
-        tmp_buf = NULL;
-    }
-    return -1;
-}
-
-static int audio_dec_exit(struct audio_recv_hdl *hdl)
-{
-    int ret;
-    union audio_req req = {0};
-
-
-    if (hdl->audio_dec_server) {
-        req.dec.cmd = AUDIO_DEC_STOP;
-        ret = server_request(hdl->audio_dec_server, AUDIO_REQ_DEC, &req);
-        if (ret) {
-            printf("audio server dec stop err %d \n", ret);
-        }
-
-        server_close(hdl->audio_dec_server);
-        hdl->audio_dec_server = NULL;
-    }
-    if (hdl->audio_dec_buf) {
-        free(hdl->audio_dec_buf);
-        hdl->audio_dec_buf = NULL;
-    }
-    if (tmp_buf) {
-        free(tmp_buf);
-        tmp_buf = NULL;
-    }
-
-    return 0;
-}
-
-static int audio_dec_write_cbuf(cbuffer_t *cbuf, u8 *buf, u32 size)
-{
-    u32 cur_size;
-    cur_size =  cbuf_get_data_size(cbuf);
-
-    if (cur_size + (size * 2) >= AUDIO_DEC_BUF_MAX_LEN) {
-        printf("audio dec clear cbuf \n");
-        cbuf_clear(cbuf);
-    }
-
-    u16 *data_in = (u16 *)buf;          // 原始单通道数据
-    u16 *data_out = (u16 *)tmp_buf;     // 扩展后的双通道数据
-
-    for (u32 i = 0; i < size / 2; i++) {
-        data_out[2 * i] = data_in[i];
-        data_out[2 * i + 1] = data_in[i];
-    }
-
-    cbuf_write(cbuf, data_out, size * 2);
-
-    return 0;
-}
-
-static int recv_sock_cb_func(enum sock_api_msg_type type, void *priv)
-{
-    struct audio_recv_hdl *hdl = priv;
-    if (hdl->task_exit) {
-        printf("cb func task exit\n");
-        return -1;
-    }
-
-    return 0;
-}
-
-static void rt_audio_recv_task(void *priv)
-{
-    int ret;
-    int recv_len = 0;
-
-    struct audio_recv_hdl *hdl = priv;
-
-    while (1) {
-        if (hdl->task_exit) {
-            printf("rt audio recv task exit\n");
-            break;
-        }
-
-        recv_len = sock_recvfrom(hdl->recv_sockfd, hdl->recv_buf, hdl->recv_buf_len, 0, NULL, NULL);
-        if (recv_len <= 0) {
-            printf("rt_audio_recv err\n");
-            continue;
-        }
-
-        audio_dec_write_cbuf(&hdl->audio_dec_save_cbuf, hdl->recv_buf, recv_len);
-    }
-
-}
-
-static int rt_audio_recv_init(struct audio_recv_hdl *hdl)
-{
-    int ret;
-    struct sockaddr_in conn_addr;
-    conn_addr.sin_family = AF_INET;
-    conn_addr.sin_addr.s_addr = htonl(INADDR_ANY) ;
-    conn_addr.sin_port = htons(AUDIO_RT_RECV_PORT);
-
-    ret = audio_dec_init(hdl);
-    if (ret) {
-        return -1;
-    }
-
-    hdl->recv_sockfd = sock_reg(AF_INET, SOCK_DGRAM, 0, recv_sock_cb_func, hdl);
-    if (hdl->recv_sockfd == NULL) {
-        printf("sock_reg err\n");
-        return -1;
-    }
-
-    ret = sock_bind(hdl->recv_sockfd, (struct sockaddr *)&conn_addr, sizeof(struct sockaddr));
-    if (ret) {
-        printf("sock_bind err:%d\n", ret);
-        return -1;
-    }
-
-    hdl->recv_buf_len = AUDIO_RT_RECV_BUF_MAX_LEN;
-    hdl->recv_buf = malloc(hdl->recv_buf_len);
-    if (!hdl->recv_buf) {
-        printf("ctp recv malloc recv buff err \n");
-        sock_unreg(hdl->recv_sockfd);
-        hdl->recv_sockfd = NULL;
-        return -1;
-    }
-
-    thread_fork("thread_socket_recv", 15, 2048, 2048, &hdl->recv_task_pid, rt_audio_recv_task, hdl);
-
-    return 0;
-}
-
-static int rt_audio_recv_exit(struct audio_recv_hdl *hdl)
-{
-
-    if (hdl->recv_task_pid) {
-        hdl->task_exit = 1;
-        thread_kill(&hdl->recv_task_pid, KILL_WAIT);
-        hdl->task_exit = 0;
-    }
-
-    audio_dec_exit(hdl);
-
-    if (hdl->recv_buf) {
-        free(hdl->recv_buf);
-        hdl->recv_buf = NULL;
-    }
-
-    if (hdl->recv_sockfd) {
-        sock_unreg(hdl->recv_sockfd);
-        hdl->recv_sockfd = NULL;
-    }
-
-
-    return 0;
-}
 
 static int video_rec_close_file(struct video_dev_hdl *dev_hdl)
 {
@@ -448,6 +305,316 @@ static int video_rec_create_file(struct video_dev_hdl *dev_hdl)
     return 0;
 }
 
+static int parse_recv_packet(u8 *recv_buf, int recv_len, struct parse_info *parse_info)
+{
+    static u32 total_payload_len = 0;
+
+    u32 position = 0;
+    struct frm_head  *head_info;
+    u32 frame_head_size = sizeof(struct frm_head);
+
+    if (recv_len < frame_head_size) {
+        printf(" recv_recv_len err\n");
+        return -1;
+    }
+
+    do {
+        head_info = (struct frm_head *)(recv_buf + position);
+
+        if ((head_info->type & JPEG_TYPE_VIDEO) || (head_info->type & PCM_TYPE_AUDIO)) {
+            if (head_info->frm_sz > STREAM_PARSE_BUF_SIZE) {
+                printf("jpeg frame size too large :%d \n", head_info->frm_sz);
+                return -1;
+            }
+            recv_len = recv_len - (frame_head_size + head_info->payload_size);
+            if (recv_len < 0) {
+                printf("remain recv_len err:%d \n", recv_len);
+                return -1;
+            }
+
+            //如果当前的seq小于旧的seq,说明是旧的数据包,跳过不处理
+            if (head_info->seq < parse_info->old_frame_seq) {
+                printf("old frame \n");
+                goto continue_deal;
+            }
+            //如果当前seq大于旧的seq,认为是新的数据包,组包重新初始
+            if (head_info->seq > parse_info->old_frame_seq) {
+                parse_info->old_frame_seq = head_info->seq;
+                total_payload_len = 0;
+            }
+
+            memcpy(parse_info->data_buf + head_info->offset,
+                   (recv_buf + position) + frame_head_size,
+                   head_info->payload_size);
+
+            total_payload_len += head_info->payload_size;
+
+            //接收到完整一帧
+            if (total_payload_len == head_info->frm_sz) {
+                parse_info->data_len = total_payload_len;
+                total_payload_len = 0;
+
+                if (head_info->type & JPEG_TYPE_VIDEO) {
+                    parse_info->packet_type =  VIDEO_TYPE_PACKET;
+                } else {
+                    parse_info->packet_type =  AUDIO_TYPE_PACKET;
+                }
+                return 0;
+            }
+        } else {
+            printf("recv type err:%d \n", head_info->type);
+            parse_info->packet_type = UNKNOW_TYPE_PACKET;
+            return 0;
+        }
+
+continue_deal:
+        position += (frame_head_size + head_info->payload_size);
+
+    } while (recv_len > 0);
+
+    parse_info->packet_type = CONTINUE_PARSE_TYPE_PACKET;
+    return 0;
+}
+
+static int stream_recv_sock_cb(enum sock_api_msg_type type, void *priv)
+{
+    struct stream_recv_hdl *recv_hdl  = priv;
+    if (recv_hdl->stream_recv_task_exit) {
+        printf("stream recv cb func exit\n");
+        return -1;
+    }
+    return 0;
+}
+
+static void stream_recv_task(void *priv)
+{
+    struct sockaddr_in dstaddr;
+    u32 addrlen = sizeof(dstaddr);
+    u8 *recv_buf;
+    int recv_len;
+    int ret;
+
+    int res;
+    int msg[8];
+    int time;
+    int fps = 0;
+    int abr = 0;
+    int total = 0;
+    char text[128];
+
+    struct stream_recv_hdl *recv_hdl = priv;
+    struct video_window  *win =  &disp_win[__this->curr_win_mode][1];
+
+    recv_buf = malloc(STREAM_RECV_BUF_SIZE);
+    if (!recv_buf) {
+        printf("stream recv task malloc recv buff err \n");
+        goto exit;
+    }
+
+    struct parse_info parse_info = {0};
+    struct frm_head  frame_head;
+    parse_info.data_buf = malloc(STREAM_PARSE_BUF_SIZE);
+    if (!parse_info.data_buf) {
+        printf("malloc parse data buf err \n");
+        goto exit;
+    }
+
+    while (1) {
+        if (recv_hdl->stream_recv_task_exit) {
+            printf("stream recv task exit \n");
+            break;
+        }
+
+        if (os_taskq_accept(ARRAY_SIZE(msg), msg) == OS_TASKQ) {
+            /* int err = os_taskq_post_type(DECODE_TASK_NAME, Q_MSG, 3, msg); */
+            if (msg[0] == Q_MSG) {
+                switch (msg[1]) {
+                case SWITCH_VIDEO_WIN:
+                    printf("stream recv switch video win \n");
+                    win =  &disp_win[__this->curr_win_mode][1];
+
+                    if (win) {
+                        printf("remote win left:%d top:%d width:%d height:%d \n",
+                               win->left, win->top, win->width, win->height);
+                    }
+
+                    bbm_video_pipe_exit(&recv_hdl->pipe_core);
+                    recv_hdl->pipe_core = NULL;
+                    break;
+                default:
+                    break;
+                }
+            }
+        }
+
+        recv_len = sock_recvfrom(recv_hdl->stream_recv_sockfd,
+                                 recv_buf, STREAM_RECV_BUF_SIZE, 0, &dstaddr, &addrlen);
+        if (recv_len <= 0) {
+            printf("rt recv err:%d \n", recv_len);
+            continue;
+        }
+
+        if ((timer_get_ms() - time) >= 1000) {
+            //调试信息
+            sprintf(text, "total:%d abr:%d  fps:%d", total / 1024, abr / 1024, fps);
+            time = timer_get_ms();
+            fps = 0;
+            abr = 0;
+            total = 0;
+
+            //debug
+            printf("%s \n", text);
+
+        }
+        total += recv_len;
+        ret = parse_recv_packet(recv_buf, recv_len, &parse_info);
+        if (ret) {
+            printf("parse_recv_packet err \n");
+            continue;
+        }
+
+        if (parse_info.packet_type == VIDEO_TYPE_PACKET) {
+            //8字节头部
+            u8 *jpeg_buf = parse_info.data_buf + 8;
+            int jpeg_len = parse_info.data_len - 8;
+
+            while (jpeg_len > 32) {
+                if (jpeg_buf[jpeg_len - 2] == 0xFF && jpeg_buf[jpeg_len - 1] == 0XD9) {
+                    break;
+                }
+                jpeg_len--;
+            }
+            if (jpeg_len < 32 || jpeg_buf[0] != 0xFF || jpeg_buf[1] != 0xD8 ||
+                jpeg_buf[jpeg_len - 2] != 0xFF || jpeg_buf[jpeg_len - 1] != 0XD9) {
+                printf("err jpeg !!! \n");
+                continue;
+            }
+            fps++;
+            abr += jpeg_len;
+
+            if (!recv_hdl->pipe_core) {
+                recv_hdl->video_is_running = 1;
+                int width = recv_hdl->video_width;
+                int height = recv_hdl->video_height;
+
+                if (win && win->width && win->height) {
+                    struct video_format f = {0};
+                    struct video_window *local_win = &disp_win[__this->curr_win_mode][0];
+                    int need_post_sem = 1;
+
+                    //判断是否是小窗, 如果是小窗需要等大窗口先创建,否者小窗口会被大窗口覆盖
+                    int local_video_is_running = check_local_video_is_running();
+                    if (win->width < local_win->width && local_video_is_running) {
+                        printf("remote need wait big win create \n");
+                        if (os_sem_pend(&__this->wait_big_win_create, 50) != 0) {
+                            printf("wait big win create err \n");
+                        }
+                        need_post_sem = 0;
+                    } else if (win->width > local_win->width && local_win->width != 0 && local_video_is_running) {
+
+                        need_post_sem = 1;
+
+                    } else {
+                        need_post_sem = 0;
+                    }
+
+                    bbm_video_pipe_init_format(&f, win, width, height, NULL);
+                    bbm_video_pipe_init(&recv_hdl->pipe_core, &f);
+
+                    if (need_post_sem) {
+                        os_sem_post(&__this->wait_big_win_create);
+                    }
+
+                } else {
+                    continue;
+                }
+            }
+            bbm_pipe_disp_one_frame(recv_hdl->pipe_core, jpeg_buf, jpeg_len);
+            /* printf("v:%d\n",jpeg_len); */
+        } else if (parse_info.packet_type == AUDIO_TYPE_PACKET) {
+            if (!recv_hdl->audio_init) {
+                bbm_audio_dec_init();
+                recv_hdl->audio_init = 1;
+            }
+            bbm_audio_dec_one_frame(parse_info.data_buf, parse_info.data_len);
+            /* printf("a:%d\n",parse_info.data_len); */
+        } else {
+            //continue parse
+            /* printf("c\n"); */
+        }
+    }
+
+exit:
+    recv_hdl->video_is_running = 0;
+
+    if (recv_hdl->pipe_core) {
+        bbm_video_pipe_exit(&recv_hdl->pipe_core);
+        recv_hdl->pipe_core = NULL;
+    }
+    if (recv_hdl->audio_init) {
+        bbm_audio_dec_exit();
+        recv_hdl->audio_init = 0;
+    }
+
+    if (recv_buf) {
+        free(recv_buf);
+    }
+    if (parse_info.data_buf) {
+        free(parse_info.data_buf);
+    }
+}
+
+static int stream_recv_init(struct stream_recv_hdl *recv_hdl)
+{
+    printf("-----bbm_stream_recv_init----\n");
+    int ret;
+
+    struct sockaddr_in conn_addr;
+    conn_addr.sin_family = AF_INET;
+    conn_addr.sin_addr.s_addr = htonl(INADDR_ANY);
+    conn_addr.sin_port = htons(STREAM_RECV_PORT);
+
+    recv_hdl->stream_recv_sockfd = sock_reg(AF_INET, SOCK_DGRAM, 0, stream_recv_sock_cb, recv_hdl);
+    if (recv_hdl->stream_recv_sockfd == NULL) {
+        printf("sock_reg err\n");
+        return -1;
+    }
+
+    ret = sock_bind(recv_hdl->stream_recv_sockfd, (struct sockaddr *)&conn_addr, sizeof(struct sockaddr));
+    if (ret) {
+        printf("sock_bind err:%d\n", ret);
+        sock_unreg(recv_hdl->stream_recv_sockfd);
+        recv_hdl->stream_recv_sockfd = NULL;
+        return -1;
+    }
+
+    struct ip_mreq McastAdrr;
+    McastAdrr.imr_multiaddr.s_addr = inet_addr(UDP_MULTICAST_ADDR);
+    McastAdrr.imr_interface.s_addr = htonl(INADDR_ANY);
+    ret = sock_setsockopt(recv_hdl->stream_recv_sockfd, IPPROTO_IP, IP_ADD_MEMBERSHIP, &McastAdrr, sizeof(McastAdrr));
+    if (ret) {
+        printf("%s %d->Error in sock_setsockopt\n", __func__, __LINE__);
+        sock_unreg(recv_hdl->stream_recv_sockfd);
+        recv_hdl->stream_recv_sockfd = NULL;
+        return -1;
+    }
+
+    thread_fork(STREAM_RECV_TASK_NAME, 12, 2048, 2048, &recv_hdl->stream_recv_task_pid, stream_recv_task, recv_hdl);
+
+    return 0;
+}
+
+static int stream_recv_exit(struct stream_recv_hdl *recv_hdl)
+{
+    printf("-----bbm_rt_recv_exit----\n");
+    recv_hdl->stream_recv_task_exit = 1;
+    thread_kill(&recv_hdl->stream_recv_task_pid, KILL_WAIT);
+    recv_hdl->stream_recv_task_exit = 0;
+
+    sock_unreg(recv_hdl->stream_recv_sockfd);
+    return 0;
+}
+
 static int video_savefile(struct video_dev_hdl *dev_hdl)
 {
     union video_req req = {0};
@@ -534,14 +701,14 @@ static int video_start(struct video_rec_config *config)
         req.rec.audio.aud_interval_size =
             config->aud_interval_size ? config->aud_interval_size : AUDIO_RT_INTERVAL_SIZE;
 
-        //双向语音
-        dev_hdl->audio_recv_hdl = malloc(sizeof(struct audio_recv_hdl));
-        if (!dev_hdl->audio_recv_hdl) {
-            printf("audio_recv_hdl malloc err\n");
-            goto err;
+        dev_hdl->stream_recv_hdl = malloc(sizeof(struct stream_recv_hdl));
+        if (dev_hdl->stream_recv_hdl) {
+            memset(dev_hdl->stream_recv_hdl, 0x00, sizeof(struct stream_recv_hdl));
+            //宽高默认和发送端一致
+            dev_hdl->stream_recv_hdl->video_width = config->width;
+            dev_hdl->stream_recv_hdl->video_height = config->height;
+            stream_recv_init(dev_hdl->stream_recv_hdl);
         }
-        memset(dev_hdl->audio_recv_hdl, 0x00, sizeof(struct audio_recv_hdl));
-        rt_audio_recv_init(dev_hdl->audio_recv_hdl);
 
     } else {
         //录像
@@ -700,9 +867,9 @@ err:
         if (dev_hdl->audio_buf) {
             free(dev_hdl->audio_buf);
         }
-        if (dev_hdl->audio_recv_hdl) {
-            rt_audio_recv_exit(dev_hdl->audio_recv_hdl);
-            free(dev_hdl->audio_recv_hdl);
+        if (dev_hdl->stream_recv_hdl) {
+            stream_recv_exit(dev_hdl->stream_recv_hdl);
+            free(dev_hdl->stream_recv_hdl);
         }
 
         server_close(dev_hdl->video_server);
@@ -754,12 +921,12 @@ static int video_stop(struct video_rec_config *config)
     if (dev_hdl->video_osd_buf) {
         free(dev_hdl->video_osd_buf);
     }
-    if (dev_hdl ->audio_buf) {
+    if (dev_hdl->audio_buf) {
         free(dev_hdl->audio_buf);
     }
-    if (dev_hdl->audio_recv_hdl) {
-        rt_audio_recv_exit(dev_hdl->audio_recv_hdl);
-        free(dev_hdl->audio_recv_hdl);
+    if (dev_hdl->stream_recv_hdl) {
+        stream_recv_exit(dev_hdl->stream_recv_hdl);
+        free(dev_hdl->stream_recv_hdl);
     }
 
 
@@ -799,9 +966,9 @@ static int video_stop_all(void)
             free(dev_hdl->audio_buf);
         }
 
-        if (dev_hdl->audio_recv_hdl) {
-            rt_audio_recv_exit(dev_hdl->audio_recv_hdl);
-            free(dev_hdl->audio_recv_hdl);
+        if (dev_hdl->stream_recv_hdl) {
+            stream_recv_exit(dev_hdl->stream_recv_hdl);
+            free(dev_hdl->stream_recv_hdl);
         }
         free(dev_hdl);
     }
@@ -845,9 +1012,9 @@ static int video_stop_all_rec(void)
             free(dev_hdl->audio_buf);
         }
 
-        if (dev_hdl->audio_recv_hdl) {
-            rt_audio_recv_exit(dev_hdl->audio_recv_hdl);
-            free(dev_hdl->audio_recv_hdl);
+        if (dev_hdl->stream_recv_hdl) {
+            stream_recv_exit(dev_hdl->stream_recv_hdl);
+            free(dev_hdl->stream_recv_hdl);
         }
         free(dev_hdl);
     }
@@ -969,16 +1136,190 @@ static int video_get_status(struct video_rec_config *config, int *status)
 static int switch_wifi_mode(void)
 {
     if (__this->cur_wifi_mode == WIFI_RAW_MODE) {
+        usb_pair_stop();
+        video_stop_all();
+        if (__this->offline_timeout_timer) {
+            sys_timeout_del(__this->offline_timeout_timer);
+            __this->offline_timeout_timer = 0;
+        }
+
         wifi_raw_exit();
         wifi_init();
         __this->cur_wifi_mode = WIFI_MODE;
-        video_stop_all();
+
     } else {
+        video_stop_all();
         wifi_exit();
         wifi_raw_init();
+        usb_pair_start();
         __this->cur_wifi_mode = WIFI_RAW_MODE;
-        video_stop_all();
     }
+}
+
+static int usb_pair_start(void)
+{
+    __this->usb_pair_lbuf_ptr = malloc(USB_PAIR_LBUF_SIZE);
+    if (!__this->usb_pair_lbuf_ptr) {
+        printf("usb pair lbuf ptr malloc fail \n");
+        goto err;
+    }
+    __this->usb_pair_lbuf_hdl = lbuf_init(__this->usb_pair_lbuf_ptr, USB_PAIR_LBUF_SIZE,
+                                          8, sizeof(struct lbuf_pair_data_head));
+    if (!__this->usb_pair_lbuf_hdl) {
+        printf("usb pair lbuf init fail \n");
+        goto err;
+    }
+
+    extern void usb_cdc_pair_task(void *priv);
+    int ret = thread_fork("bbm_tx_usb_pair_task", 10, 2048, 2048, &__this->usb_pair_task_pid,
+                          usb_cdc_pair_task, __this->usb_pair_lbuf_hdl);
+    if (ret) {
+        printf("bbm tx usb pair task create fail :%d \n", ret);
+        goto err;
+    }
+
+    return 0;
+err:
+    if (__this->usb_pair_lbuf_ptr) {
+        free(__this->usb_pair_lbuf_ptr);
+        __this->usb_pair_lbuf_ptr = NULL;
+        __this->usb_pair_lbuf_hdl = NULL;
+    }
+    return -1;
+}
+
+static int usb_pair_stop(void)
+{
+    if (__this->usb_pair_task_pid) {
+        thread_kill(&__this->usb_pair_task_pid, KILL_WAIT);
+    }
+
+    if (__this->usb_pair_lbuf_ptr) {
+        free(__this->usb_pair_lbuf_ptr);
+        __this->usb_pair_lbuf_ptr = NULL;
+        __this->usb_pair_lbuf_hdl = NULL;
+    }
+}
+
+static int local_video_disp_start(void)
+{
+    int camera_src_w = 640;
+    int camera_src_h = 480;
+    int camera_src_id = 1;
+    int remote_video_is_running = 0;
+    int need_post_sem = 0;
+
+    struct video_format f = {0};
+    struct video_window *win = &disp_win[__this->curr_win_mode][0];
+    if (!win) {
+        printf("err win ptr !\n");
+        return -1;
+    }
+
+    printf("local win left:%d top:%d width:%d height:%d \n",
+           win->left, win->top, win->width, win->height);
+
+    if (win->width == 0 || win->height == 0) {
+        return 0;
+    }
+
+    struct video_window *remote_win = &disp_win[__this->curr_win_mode][1];
+    remote_video_is_running = check_remote_video_is_running();
+    if (win->width < remote_win->width && remote_video_is_running) {
+        printf("local need wait big win create \n");
+        if (os_sem_pend(&__this->wait_big_win_create, 50) != 0) {
+            printf("wait big win create err \n");
+        }
+        need_post_sem = 0;
+    } else if (win->width > remote_win->width && remote_win->width != 0 && remote_video_is_running) {
+
+        need_post_sem = 1;
+
+    } else {
+        need_post_sem = 0;
+    }
+
+    bbm_video_pipe_init_format(&f, win, camera_src_w, camera_src_h, NULL);
+    if (need_post_sem) {
+        os_sem_post(&__this->wait_big_win_create);
+    }
+
+    if (bbm_video_pipe_disp_init(&__this->disp_pipe_core, &f, camera_src_id)) {
+        printf("bbm tx disp init err \n");
+        return -1;
+    }
+    return 0;
+}
+
+static int local_video_disp_stop(void)
+{
+    return bbm_video_pipe_exit(&__this->disp_pipe_core);
+}
+
+static int check_local_video_is_running(void)
+{
+#if BBM_LOCAL_CAMERA_DISP_ENABLE
+    return 1;
+#else
+    return 0;
+#endif
+}
+
+static int check_remote_video_is_running(void)
+{
+    struct video_dev_hdl *dev_hdl = NULL;
+    list_for_each_entry(dev_hdl, &__this->dev_list_head, entry) {
+        struct stream_recv_hdl *recv_hdl = dev_hdl->stream_recv_hdl;
+        if (recv_hdl) {
+            return recv_hdl->video_is_running;
+        }
+    }
+}
+
+static int switch_disp_win(void)
+{
+    int msg[2];
+    __this->curr_win_mode = (__this->curr_win_mode + 1) % MAX_WIN_MODE_NUM;
+    printf("switch disp win curr win :%d \n", __this->curr_win_mode);
+
+    msg[0] = SWITCH_VIDEO_WIN;
+    int err = os_taskq_post_type(STREAM_RECV_TASK_NAME, Q_MSG, ARRAY_SIZE(msg), msg);
+    if (err) {
+        printf("taskq post task:%s  err:%d", STREAM_RECV_TASK_NAME, err);
+    }
+
+    local_video_disp_stop();
+    local_video_disp_start();
+}
+
+static void video_rec_main_init(void)
+{
+    memset(__this, 0, sizeof(struct video_rec_hdl));
+    INIT_LIST_HEAD(&__this->dev_list_head);
+    os_sem_create(&__this->wait_big_win_create, 0);
+    usb_pair_start();
+
+
+#if BBM_LOCAL_CAMERA_DISP_ENABLE
+    local_video_disp_start();
+#else
+    __this->curr_win_mode = 3;
+#endif
+}
+
+void offline_timeout_cb(void *priv)
+{
+    if (__this->cur_wifi_mode != WIFI_RAW_MODE) {
+        return;
+    }
+    printf("bbm rx device offline \n");
+
+    if (__this->offline_timeout_timer) {
+        sys_timeout_del(__this->offline_timeout_timer);
+        __this->offline_timeout_timer = 0;
+    }
+
+    video_stop_all();
 }
 
 static int video_rec_state_machine(struct application *app, enum app_state state, struct intent *it)
@@ -988,7 +1329,6 @@ static int video_rec_state_machine(struct application *app, enum app_state state
     switch (state) {
     case APP_STA_CREATE:
         log_d("\n >>>>>>> video_rec: create\n");
-        memset(__this, 0, sizeof(struct video_rec_hdl));
         break;
     case APP_STA_START:
         if (!it) {
@@ -996,8 +1336,8 @@ static int video_rec_state_machine(struct application *app, enum app_state state
         }
         switch (it->action) {
         case ACTION_VIDEO_REC_MAIN:
-            INIT_LIST_HEAD(&__this->dev_list_head);
             puts("ACTION_VIDEO_REC_MAIN\n");
+            video_rec_main_init();
             break;
         case ACTION_VIDEO_START:
             puts("ACTION_VIDEO_START\n");
@@ -1056,11 +1396,17 @@ static int video_rec_key_event_handler(struct key_event *key)
         printf("KEY2\n");
         break;
     case KEY_UP:
-        printf("KEY3\n");
+        if (key->action == KEY_EVENT_CLICK) {
+            printf("KEY3\n");
+#if BBM_LOCAL_CAMERA_DISP_ENABLE
+            ret = true;
+            switch_disp_win();
+#endif
+        }
         break;
     case KEY_DOWN:
-        printf("KEY4\n");
         if (key->action == KEY_EVENT_CLICK) {
+            printf("KEY4\n");
             ret = true;
             switch_wifi_mode();
         }
@@ -1088,6 +1434,7 @@ static int video_rec_key_event_handler(struct key_event *key)
 static int video_rec_device_event_handler(struct sys_event *e)
 {
     int ret = false;
+    int rlen = 0;
     char buf[16];
     struct device_event *device_eve = (struct device_event *)e->payload;
 
@@ -1107,8 +1454,61 @@ static int video_rec_device_event_handler(struct sys_event *e)
         default:
             break;
         }
-    }
+    } else if (e->from == DEVICE_EVENT_FROM_CFG_TOOL) {
+#if BBM_USB_PAIR_ENABLE
+        printf("DEVICE_EVENT_FROM_CFG_TOOL \n");
+        if (!__this->usb_cdc_buf) {
+            __this->usb_cdc_buf = malloc(USB_CDC_BUF_SIZE);
+            if (!__this->usb_cdc_buf) {
+                printf("usb_cdc_buf malloc fail \n");
+                return false;
+            }
+        }
 
+        const usb_dev usb_id = device_eve->value;
+        rlen = cdc_read_data(usb_id, __this->usb_cdc_buf, USB_CDC_BUF_SIZE);
+        if (__this->cur_wifi_mode == WIFI_RAW_MODE && __this->usb_pair_lbuf_hdl) {
+            static struct lbuf_pair_data_head *lbuf_data = NULL;
+            static int total_len = 0;
+
+            package_head *head = __this->usb_cdc_buf;
+
+            if (head->magic == PACKAGE_MAGIC) {
+                printf("head len:%d ", head->len);
+
+                if (!lbuf_data) {
+                    lbuf_data = lbuf_alloc(__this->usb_pair_lbuf_hdl, USB_PAIR_PKG_MAX_SIZE);
+                    if (!lbuf_data) {
+                        printf("bbm usb pair lbuf_alloc err \n");
+                        return false;
+                    }
+                }
+
+                lbuf_data->usb_id = usb_id;
+                lbuf_data->len = 0;
+
+                total_len = head->len;
+            }
+
+            if (lbuf_data) {
+                if (lbuf_data->len + rlen > USB_PAIR_PKG_MAX_SIZE) {
+                    printf("usb pair pkg over \n");
+                    lbuf_data->len = 0;
+                }
+
+                memcpy(lbuf_data->data + lbuf_data->len, __this->usb_cdc_buf, rlen);
+                lbuf_data->len += rlen;
+
+                if (lbuf_data->len == total_len + sizeof(package_head)) {
+                    lbuf_push(lbuf_data, BIT(0));
+                    lbuf_data = NULL;
+                }
+            }
+
+        }
+        ret = true;
+#endif
+    }
 
     return ret;
 }
@@ -1155,10 +1555,26 @@ static int video_rec_event_handler(struct application *app, struct sys_event *ev
     }
 }
 
+static int video_rec_msg_handler(struct application *app, int *msg)
+{
+    switch (msg[0]) {
+    case ACTION_BBM_ONLINE:
+        if (!__this->offline_timeout_timer) {
+            __this->offline_timeout_timer =  sys_timeout_add(NULL, offline_timeout_cb, OFFLINE_TIMEOUT_MS);
+        } else {
+            sys_timer_modify(__this->offline_timeout_timer, OFFLINE_TIMEOUT_MS);
+        }
+        break;
+    default:
+        break;
+    }
+    return 0;
+}
 
 static const struct application_operation video_rec_ops = {
     .state_machine  = video_rec_state_machine,
     .event_handler 	= video_rec_event_handler,
+    .msg_handler    = video_rec_msg_handler,
 };
 
 REGISTER_APPLICATION(app_video_rec) = {

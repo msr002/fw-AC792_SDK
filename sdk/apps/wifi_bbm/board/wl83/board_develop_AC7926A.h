@@ -728,7 +728,7 @@
 //                                USB从机配置                                      //
 //*********************************************************************************//
 #define TCFG_PC_ENABLE                      1              //使用USB从机功能一定要打开
-#define USB_PC_NO_APP_MODE                  0
+#define USB_PC_NO_APP_MODE                  1
 #define USB_MALLOC_ENABLE                   1
 #if TCFG_EQ_ONLINE_ENABLE
 #define USB_DEVICE_CLASS_CONFIG             (CDC_CLASS)
@@ -760,7 +760,7 @@
 //                                USB主机配置                                      //
 //*********************************************************************************//
 #define TCFG_UDISK_ENABLE                   0              //U盘主机功能
-#define TCFG_HOST_CDC_ENABLE                0              //CDC主机功能
+#define TCFG_HOST_CDC_ENABLE                1              //CDC主机功能
 #define TCFG_HID_HOST_ENABLE                0              //HID主机功能
 #if defined CONFIG_AUDIO_ENABLE
 #define TCFG_HOST_AUDIO_ENABLE              0              //uac主机功能，用户需要自己补充uac_host_demo.c里面的两个函数

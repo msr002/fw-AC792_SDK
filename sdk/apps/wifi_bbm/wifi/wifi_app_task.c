@@ -29,6 +29,7 @@
 #include "json_c/json_tokener.h"
 #include "net_event.h"
 #include "pairing_data_model.h"
+#include "baby_monitor.h"
 
 #define RSSI_HIGH_THRESHOLD     0
 #define RSSI_LOW_THRESHOLD      -5
@@ -474,6 +475,123 @@ exit:
     }
 }
 
+void usb_cdc_pair_task(void *priv)
+{
+    struct lbuff_head *usb_pair_lbuf_hdl = priv;
+
+    struct parse_recv_info recv_pair_info = {0};
+    int recv_len, send_len, payload_len;
+    u8 *recv_buf = NULL, *send_buf = NULL, *tem_buf = NULL, *payload_buf = NULL;
+
+    send_buf = malloc(PACKAGE_MAX_SIZE);
+    tem_buf = malloc(PACKAGE_MAX_SIZE);
+    if ((!send_buf) || (!tem_buf)) {
+        printf("package buf malloc fail \n");
+        goto exit;
+    }
+
+    while (1) {
+        if (thread_kill_req()) {
+            break;
+        }
+
+        struct lbuf_pair_data_head *lbuf_data = lbuf_pop(usb_pair_lbuf_hdl, BIT(0));
+        if (!lbuf_data) {
+            os_time_dly(4);
+            continue;
+        }
+        recv_len = lbuf_data->len;
+        recv_buf = lbuf_data->data;
+
+        printf("usb pair recv:%d \n", recv_len);
+
+        payload_len = get_package_payload_len(recv_buf);
+        if (payload_len < 0) {
+            printf("package head err \n");
+            lbuf_free(lbuf_data);
+            continue;
+        }
+
+        payload_buf = recv_buf + (recv_len - payload_len);
+        if (!strstr(payload_buf, "pair_req")) {
+            printf("no pair req package \n");
+            lbuf_free(lbuf_data);
+            continue;
+        }
+
+        //关闭实时流发送
+        struct intent it;
+        init_intent(&it);
+        it.name = "video_rec";
+        it.action = ACTION_VIDEO_STOP_ALL;
+        start_app(&it);
+
+        deal_pair_request_package(payload_buf, &recv_pair_info);
+        wifi_raw_set_static(recv_pair_info.bbm_tx_ip, recv_pair_info.bbm_tx_mac,
+                            recv_pair_info.bbm_rx_ip, recv_pair_info.bbm_rx_mac);
+        fill_respone_data(tem_buf);
+        send_len = package_assembly(tem_buf, strlen(tem_buf), send_buf, PACKAGE_MAX_SIZE);
+
+        //send
+        if (cdc_write_data(lbuf_data->usb_id, send_buf, send_len) != send_len) {
+            printf("usb pair cdc write fail \n");
+            lbuf_free(lbuf_data);
+            continue;
+        }
+
+        lbuf_free(lbuf_data);
+
+        int timeout_cnt = 10;
+        do {
+            lbuf_data = lbuf_pop(usb_pair_lbuf_hdl, BIT(0));
+            if (!lbuf_data) {
+                os_time_dly(2);
+                timeout_cnt--;
+            }
+        } while (!lbuf_data && timeout_cnt);
+
+        if (!lbuf_data) {
+            printf("recv pair ack fail \n");
+            continue;
+        }
+        recv_len = lbuf_data->len;
+        recv_buf = lbuf_data->data;
+
+        payload_len = get_package_payload_len(recv_buf);
+        if (payload_len < 0) {
+            printf("package head err \n");
+            lbuf_free(lbuf_data);
+            continue;
+        }
+        payload_buf = recv_buf + (recv_len - payload_len);
+        if (!strstr(payload_buf, "pair_ack")) {
+            printf("no pair ack \n");
+            lbuf_free(lbuf_data);
+            continue;
+        }
+
+        //pair success
+        lbuf_free(lbuf_data);
+        int ret = syscfg_write(BBM_TX_MAC_INDEX, &recv_pair_info, sizeof(struct parse_recv_info));
+        if (ret <= 0) {
+            printf("syscfg_write err :%d \n", ret);
+            continue;
+        }
+        bbm_tx_pair_config();
+        printf("bbm TX pair success !\n");
+    }
+
+exit:
+    printf("usb pair exit\n");
+
+    if (tem_buf) {
+        free(tem_buf);
+    }
+    if (send_buf) {
+        free(send_buf);
+    }
+}
+
 //修改发送包头部信息、及arp映射
 int wifi_raw_set_static(u32 src_ip_addr, u8 *src_mac, u32 dest_ip_addr, u8 *dest_mac)
 {
@@ -497,6 +615,46 @@ int wifi_raw_set_static(u32 src_ip_addr, u8 *src_mac, u32 dest_ip_addr, u8 *dest
 
     return 0;
 }
+void adjust_wifi_pwr(struct bbm_online_packet *recv_pkg)
+{
+#if BBM_WIFI_PA_ENABLE
+    static u32 prev_rand_magic = 0;
+    static u8 timeout_cnt = 0;
+    if (recv_pkg->magic[0] != PACKAGE_MAGIC) {
+        return;
+    }
+
+    //online_cnt未更新,没收到对端发来的包
+    if (recv_pkg->magic[1] == prev_rand_magic) {
+        timeout_cnt++;
+        //多次未收到,调整到最大,防止增益过低导致收不到包
+        if (timeout_cnt > 100) {
+            printf("set wifi pwr max \n");
+            cur_pwr = WIFI_PWR_MAX;
+            wifi_set_pwr(cur_pwr);
+            timeout_cnt = 0;
+        }
+        return;
+    } else {
+        timeout_cnt = 0;
+    }
+    prev_rand_magic = recv_pkg->magic[1];
+
+    //带PA时需要调整防止近距离卡顿
+    //根据rssi调整wifi模拟增益
+    if (recv_pkg->rssi >= RSSI_HIGH_THRESHOLD) {
+        cur_pwr = --cur_pwr < WIFI_PWR_MIN ? WIFI_PWR_MIN : cur_pwr;
+        wifi_set_pwr(cur_pwr);
+        /* printf("set pwr val:%d \n", cur_pwr); */
+    } else if (recv_pkg->rssi <= RSSI_LOW_THRESHOLD) {
+        cur_pwr = ++cur_pwr > WIFI_PWR_MAX ? WIFI_PWR_MAX : cur_pwr;
+        wifi_set_pwr(cur_pwr);
+        /* printf("set pwr val:%d \n", cur_pwr); */
+    }
+#endif
+}
+
+
 
 void config_send_pkg_head(u8 *src_mac, u8 *dest_mac)
 {
@@ -570,13 +728,10 @@ void bbm_tx_exit_pairing(void)
 static void bbm_tx_online_task(void)
 {
     void *multi_sock = NULL;
-    u8 send_buf[32];
-    int send_len = sizeof(send_buf);
-    u8 recv_buf[32];
-    int recv_len = sizeof(recv_buf);
+    int send_len, recv_len;
     struct bbm_online_packet send_pkg = {0};
     struct bbm_online_packet recv_pkg = {0};
-    struct bbm_online_packet old_pkg = {0};
+    int pkg_size = sizeof(struct bbm_online_packet);
 
     multi_sock = sock_reg(AF_INET, SOCK_DGRAM, 0, NULL, NULL);
     if (multi_sock == NULL) {
@@ -601,49 +756,33 @@ static void bbm_tx_online_task(void)
         send_pkg.magic[1] = rand32();
         send_pkg.online_cnt++;
         send_pkg.rssi = wifi_raw_rssi_get();
-
-        memcpy(send_buf, &send_pkg, sizeof(send_pkg));
-
-        send_len = sock_sendto(multi_sock, send_buf, send_len, 0, &dest_addr, sizeof(dest_addr));
-        if (send_len < 0) {
+        send_len = sock_sendto(multi_sock, &send_pkg, pkg_size, 0, &dest_addr, sizeof(dest_addr));
+        if (send_len != pkg_size) {
             printf("online sock send err\n");
-            continue;
+            goto __adjust;
         }
 
-        //200ms
-        os_time_dly(20);
+        int delay_ms = 200;
+        int delay_tick = delay_ms / 10;
+        os_time_dly(delay_tick);
 
         /*================recv=================*/
-        recv_len = sock_recvfrom(multi_sock, recv_buf, 32, MSG_DONTWAIT, &dest_addr, &addrlen);
-        if (recv_len <= 0) {
-            continue;
+        recv_len = sock_recvfrom(multi_sock, &recv_pkg, pkg_size, MSG_DONTWAIT, &dest_addr, &addrlen);
+        if (recv_len != pkg_size) {
+            goto __adjust;
         }
 
-        memcpy(&recv_pkg, recv_buf, sizeof(recv_pkg));
-        if (recv_pkg.magic[0] != PACKAGE_MAGIC) {
-            printf("magic err\n");
-            continue;
+        int msg[8];
+        msg[0] = "video_rec";
+        msg[1] = ACTION_BBM_ONLINE;
+        int err = os_taskq_post_type("app_core", Q_MSG + 1, ARRAY_SIZE(msg), msg);
+        if (err == OS_Q_FULL) {
+            printf("post msg err \n");
+            os_taskq_del_type("app_core", Q_MSG + 1);
         }
 
-        //过滤重发包
-        if (!memcmp(&recv_pkg, &old_pkg, sizeof(recv_pkg))) {
-            printf("recv same data \n");
-            continue;
-        }
-        memcpy(&old_pkg, &recv_pkg, sizeof(recv_pkg));
-
-#if BBM_WIFI_PA_ENABLE
-        //带PA时需要调整防止近距离卡顿
-        //根据rssi调整wifi模拟增益
-        //TODO粗略值
-        if (recv_pkg.rssi >= RSSI_HIGH_THRESHOLD) {
-            cur_pwr = --cur_pwr < WIFI_PWR_MIN ? WIFI_PWR_MIN : cur_pwr;
-            wifi_set_pwr(cur_pwr);
-        } else if (recv_pkg.rssi <= RSSI_LOW_THRESHOLD) {
-            cur_pwr = ++cur_pwr > WIFI_PWR_MAX ? WIFI_PWR_MAX : cur_pwr;
-            wifi_set_pwr(cur_pwr);
-        }
-#endif
+__adjust:
+        adjust_wifi_pwr(&recv_pkg);
     }
 
     sock_unreg(multi_sock);
@@ -655,80 +794,58 @@ static void bbm_tx_online_task(void)
 static void bbm_rx_online_task(void)
 {
     int multi_sock = 0;
-    u8 recv_buf[32];
-    int recv_len = sizeof(recv_buf);
-    u8 send_buf[32];
-    int send_len = sizeof(send_buf);
+    int recv_len, send_len;
     struct bbm_online_packet send_pkg = {0};
     struct bbm_online_packet recv_pkg = {0};
-    struct bbm_online_packet old_pkg = {0};
-
     struct sockaddr_in dstaddr;
     u32 addrlen = sizeof(dstaddr);
-
-    struct intent it;
-    init_intent(&it);
-    it.name	= "baby_monitor";
-    it.action = ACTION_BBM_ONLINE;
+    int pkg_size = sizeof(struct bbm_online_packet);
 
     multi_sock = CreateUdpMulticast(MULTICAST_ONLINE_PORT);
     if (multi_sock < 0) {
-        printf("CreateUdpMulticast err \n");
+        printf("rx online task CreateUdpMulticast err \n");
         return;
     }
+    sock_set_recv_timeout(multi_sock, 200);
 
     while (1) {
         /*================recv=================*/
-        recv_len = sock_recvfrom(multi_sock, recv_buf, 32, 0, &dstaddr, &addrlen);
-        if (recv_len <= 0) {
-            continue;
+        recv_len = sock_recvfrom(multi_sock, &recv_pkg, pkg_size, 0, &dstaddr, &addrlen);
+        if (recv_len !=  pkg_size) {
+            /* printf("rx online socket recv fail recv_len:%d \n", recv_len); */
+            goto __adjust;
         }
-
-        memcpy(&recv_pkg, recv_buf, sizeof(recv_pkg));
         if (recv_pkg.magic[0] != PACKAGE_MAGIC) {
-            printf("magic err\n");
-            continue;
+            printf("online packet magic err\n");
+            goto __adjust;
         }
 
-        //过滤重发包
-        if (!memcmp(&recv_pkg, &old_pkg, sizeof(recv_pkg))) {
-            printf("same data \n");
-            continue;
+        int msg[8];
+        msg[0] = "baby_monitor";
+        msg[1] = ACTION_BBM_ONLINE;
+        msg[2] = dstaddr.sin_addr.s_addr;
+        msg[3] = recv_pkg.online_cnt;
+
+        int err = os_taskq_post_type("app_core", Q_MSG + 1, ARRAY_SIZE(msg), msg);
+        if (err == OS_Q_FULL) {
+            printf("post msg err \n");
+            os_taskq_del_type("app_core", Q_MSG + 1);
         }
-        memcpy(&old_pkg, &recv_pkg, sizeof(recv_pkg));
-
-#if BBM_WIFI_PA_ENABLE
-        //带PA时需要调整防止近距离卡顿
-        //根据rssi调整wifi模拟增益
-        //TODO粗略值
-        if (recv_pkg.rssi >= RSSI_HIGH_THRESHOLD) {
-            cur_pwr = --cur_pwr < WIFI_PWR_MIN ? WIFI_PWR_MIN : cur_pwr;
-            wifi_set_pwr(cur_pwr);
-            /* printf("set pwr val:%d \n", cur_pwr); */
-        } else if (recv_pkg.rssi <= RSSI_LOW_THRESHOLD) {
-            cur_pwr = ++cur_pwr > WIFI_PWR_MAX ? WIFI_PWR_MAX : cur_pwr;
-            wifi_set_pwr(cur_pwr);
-            /* printf("set pwr val:%d \n", cur_pwr); */
-        }
-#endif
-
-        it.data = dstaddr.sin_addr.s_addr;
-        it.exdata = recv_pkg.online_cnt;
-        start_app_async(&it, NULL, NULL);
-
 
         /*================send=================*/
         send_pkg.magic[0] = PACKAGE_MAGIC;
         send_pkg.magic[1] = rand32();
         send_pkg.online_cnt++;
         send_pkg.rssi = wifi_raw_rssi_get();
-        memcpy(send_buf, &send_pkg, sizeof(send_pkg));
 
-        send_len = sock_sendto(multi_sock, send_buf, send_len, 0, &dstaddr, sizeof(dstaddr));
-        if (send_len < 0) {
+        send_len = sock_sendto(multi_sock, &send_pkg, pkg_size, 0, &dstaddr, sizeof(dstaddr));
+        if (send_len != pkg_size) {
             printf("online sock send err\n");
-            continue;
+            goto __adjust;
         }
+
+__adjust:
+        adjust_wifi_pwr(&recv_pkg);
     }
 }
 #endif
@@ -894,7 +1011,7 @@ void wifi_raw_init(void)
 
     //模拟增益
 #if BBM_WIFI_PA_ENABLE
-    cur_pwr = WIFI_PWR_MIN;
+    cur_pwr = WIFI_PWR_MAX / 2;
     wifi_set_pwr(cur_pwr);
 #else
     //不带PA时不需要调整该值,默认最大
@@ -939,6 +1056,7 @@ void wifi_raw_exit(void *priv)
 
     //Wifi Raw关闭
     wifi_raw_off();
+    wifi_set_frame_cb(NULL, NULL);  //取消底层数据接收回调注册
     lwip_netif_remove(WIFI_RAW_NETIF);
     struct netif *netif = net_get_netif_handle(WIFI_RAW_NETIF);
     memset(netif, 0x00, sizeof(struct netif));

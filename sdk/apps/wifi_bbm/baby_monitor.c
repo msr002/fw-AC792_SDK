@@ -50,6 +50,7 @@ struct wifi_bbm_hdl {
     int last_opened_ch;                     //上一次开启的通道
     u8 bbm_cur_mode;                        //当前模式,实时流/文件预览/视频文件播放
     u8 is_pairing;
+    u8 cdc_usb_id;
 
     struct bbm_client_hdl *bbm_client_hdl[MAX_PAIR_NUM + 1];        //设备client管理句柄
 };
@@ -921,6 +922,7 @@ static int state_machine(struct application *app, enum app_state state, struct i
     switch (state) {
     case APP_STA_CREATE:
         log_d("\n>>>>> baby_monitor_init <<<<<\n");
+        __this->cdc_usb_id = -1;
         break;
     case APP_STA_START:
         if (!it) {
@@ -1142,11 +1144,18 @@ static int baby_monitor_key_event_handler(struct key_event *key)
             //设置码率
             /* bbm_ctp_set_abr(__this->bbm_client_hdl[1], 1000); */
             //开启全部TX设备录像
-            bbm_tx_start_rec_all();
+            /* bbm_tx_start_rec_all(); */
             //开启全部RX录像
-            bbm_rx_start_rec_all();
+            /* bbm_rx_start_rec_all(); */
             //RX设备拍照
             //bbm_ctp_take_photo(__this->bbm_client_hdl[1]);
+            //USB配对
+            /* bbm_set_enter_usb_pairing(1, __this->cdc_usb_id); */
+#if BBM_LOCAL_CAMERA_DISP_ENABLE
+            //窗口切换,只支持一台设备连接时切换.
+            int pair_ch = 1;
+            bbm_switch_video_win(__this->bbm_client_hdl[pair_ch]);
+#endif
             break;
         case KEY_OK:
             printf("KEY5\n");
@@ -1161,9 +1170,9 @@ static int baby_monitor_key_event_handler(struct key_event *key)
             //设置码率
             /* bbm_ctp_set_abr(__this->bbm_client_hdl[1], 4000); */
             //关闭全部TX设备录像
-            bbm_tx_stop_rec_all();
+            /* bbm_tx_stop_rec_all(); */
             //关闭全部RX录像
-            bbm_rx_stop_rec_all();
+            /* bbm_rx_stop_rec_all(); */
             break;
         default:
             printf("Unknow KEY\n");
@@ -1208,7 +1217,21 @@ static int baby_monitor_device_event_handler(struct sys_event *e)
             break;
         }
 
-
+    } else if (e->from == DEVICE_EVENT_FROM_USB_HOST) {
+        if (device_eve->event == DEVICE_EVENT_IN) {
+            if (!strncmp((const char *)device_eve->value, "cdc", 3)) {
+                __this->cdc_usb_id = ((const char *)device_eve->arg)[8] - '0';
+                printf("bbm usb host cdc[%d] in \n", __this->cdc_usb_id);
+            }
+        } else if (device_eve->event == DEVICE_EVENT_OUT) {
+            if (!strncmp((const char *)device_eve->value, "cdc", 3)) {
+                u8 cdc_usb_id = ((const char *)device_eve->arg)[8] - '0';
+                printf("bbm usb host cdc[%d] out \n", cdc_usb_id);
+                if (cdc_usb_id == __this->cdc_usb_id) {
+                    __this->cdc_usb_id = -1;
+                }
+            }
+        }
     }
 
 
@@ -1228,10 +1251,28 @@ static int event_handler(struct application *app, struct sys_event *event)
     }
 }
 
+static int msg_handler(struct application *app, int *msg)
+{
+    switch (msg[0]) {
+    case ACTION_BBM_ONLINE:
+        struct intent it;
+        it.data = msg[1];
+        it.exdata = msg[2];
+        bbm_online_event_hander(&it);
+        break;
+    default:
+        break;
+    }
+    return 0;
+}
+
+
+
 
 static const struct application_operation baby_monitor_ops = {
     .state_machine  = state_machine,
     .event_handler  = event_handler,
+    .msg_handler    = msg_handler,
 };
 
 REGISTER_APPLICATION(app_baby_monitor) = {

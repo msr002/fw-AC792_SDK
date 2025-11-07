@@ -5,16 +5,33 @@
 #include "baby_monitor.h"
 #include "rt_stream_pkg.h"
 #include "video_ioctl.h"
-
+#include "server/video_server.h"
+#include "server/audio_server.h"
+#include "net_stream_info.h"
+#include "stream_core.h"
 #include "avilib.h"
-#define RT_AUDIO_SEND_ENABLE       1
+#include "vrec_osd.h"
+#include "udp_multicast.h"
+#include "app_config.h"
+
+#define STREAM_VIDEO_BUF_SIZE      (512 * 1024)
+#define STREAM_AUDIO_BUF_SIZE      (128 * 1024)
+
+//发送方式二选一,都为零时不发送数据包给TX设备
+#if (RX_STREAM_SEND_ENABLE==1) && (RX_AUDIO_SEND_ENABLE==1)
+#error "Only one method can be selected! (Only Audio) or (Audio+Video)"
+#endif
 
 #define CTP_RT_RECV_PORT            2224        //实时流接收数据端口
 #define CTP_RT_SEND_PORT            9981        //图传(音频)发送数据端口
-#define CTP_RT_RECV_BUF_SIZE        100 * 1024  //实时流socket接收缓存大小
-#define CTP_RT_PARSE_BUF_SIZE       100 * 1024  //实时流解析CTP包缓存大小
+#define CTP_RT_RECV_BUF_SIZE        200 * 1024  //实时流socket接收缓存大小
+#define CTP_RT_PARSE_BUF_SIZE       200 * 1024  //实时流解析CTP包缓存大小
 #define RT_LBUF_SIZE                200 * 1024  //LBUF
 #define CTP_RT_RECV_TIMEOUT         300         //实时流socket接收超时时间设置,单位ms
+
+#define DISP_SMALL_WIDTH            320
+#define DISP_SMALL_HEIGHT           240
+#define MAX_WIN_MODE_NUM            4
 
 #define OPEN_RT_TOPIC "OPEN_RT_STREAM"
 #define OPEN_RT_CONTENT \
@@ -96,10 +113,18 @@ static int ctp_rt_send_task_pid;   //实时流发送线程PID
 static void *ctp_rt_send_sockfd;   //实时流发送socket
 static u8 ctp_rt_send_task_exit;   //实时流发送线程退出标记
 
+//实时流发送(音频+视频)
+static void *video_server = NULL;
+static u8 *stream_video_buf = NULL;
+static u8 *stream_audio_buf = NULL;
+static u8 send_ref_count = 0;
+
 static u8 rt_stream_init = 0;
 
-static struct list_head send_dev_list_head;
-static OS_MUTEX send_mutex;
+static int curr_win_mode;
+static void *local_pipe_core;
+static OS_SEM wait_big_win_create;
+
 
 /* 1台设备：全屏 */
 struct video_window disp_win_1[1] = {
@@ -187,6 +212,76 @@ struct video_window disp_win_4[4] = {
     },
 };
 
+
+//双向视频窗口切换
+static struct video_window disp_win[MAX_WIN_MODE_NUM][2] = {
+    {
+        {
+            .left   = 0,
+            .top    = 0,
+            .width  = LCD_W,
+            .height = LCD_H,
+            .combine = 1,
+        },
+        {
+            .left   = LCD_W - DISP_SMALL_WIDTH,
+            .top    = LCD_H - DISP_SMALL_HEIGHT,
+            .width  = DISP_SMALL_WIDTH,
+            .height = DISP_SMALL_HEIGHT,
+            .combine = 1,
+        },
+    },
+    {
+        {
+            .left   = LCD_W - DISP_SMALL_WIDTH,
+            .top    = LCD_H - DISP_SMALL_HEIGHT,
+            .width  = DISP_SMALL_WIDTH,
+            .height = DISP_SMALL_HEIGHT,
+            .combine = 1,
+        },
+        {
+            .left   = 0,
+            .top    = 0,
+            .width  = LCD_W,
+            .height = LCD_H,
+            .combine = 1,
+        },
+    },
+    {
+        {
+            .left   = 0,
+            .top    = 0,
+            .width  = LCD_W,
+            .height = LCD_H,
+            .combine = 1,
+        },
+        {
+            .left   = 0,
+            .top    = 0,
+            .width  = 0,
+            .height = 0,
+            .combine = 0,
+        },
+    },
+    {
+        {
+            .left   = 0,
+            .top    = 0,
+            .width  = 0,
+            .height = 0,
+            .combine = 0,
+        },
+        {
+            .left   = 0,
+            .top    = 0,
+            .width  = LCD_W,
+            .height = LCD_H,
+            .combine = 1,
+        },
+    },
+};
+
+
 enum {
     VIDEO_TYPE_PACKET = 10,
     AUDIO_TYPE_PACKET,
@@ -198,6 +293,7 @@ enum {
     Q_USER_EXIT = 1,
     Q_USER_START_REC,
     Q_USER_STOP_REC,
+    Q_USER_SWITCH_VIDEO_WIN,
 };
 
 struct parse_info {
@@ -234,6 +330,8 @@ struct rt_stream_dev {
     //rec
     avi_t *rec_out_fd;
 };
+
+static int check_local_video_is_running(void);
 
 static int ctp_recv_sock_cb(enum sock_api_msg_type type, void *priv)
 {
@@ -381,8 +479,10 @@ static void ctp_rt_send_task(void)
     int ret;
     int data_size;
     u8 *data_buf  = NULL;
+    u32 seq = 0;
+    int frm_head_size = sizeof(struct frm_head);
 
-    data_buf = malloc(AUDIO_RX_ENC_FRAME_SIZE);
+    data_buf = malloc(AUDIO_RX_ENC_FRAME_SIZE + frm_head_size);
     if (!data_buf) {
         printf("ctp send malloc data buf err \n");
         goto exit;
@@ -397,6 +497,7 @@ static void ctp_rt_send_task(void)
     struct sockaddr_in dest_addr;
     dest_addr.sin_family = AF_INET;
     dest_addr.sin_port = htons(CTP_RT_SEND_PORT);
+    dest_addr.sin_addr.s_addr = inet_addr(UDP_MULTICAST_ADDR);
 
     while (1) {
         if (ctp_rt_send_task_exit) {
@@ -404,22 +505,26 @@ static void ctp_rt_send_task(void)
             break;
         }
 
-        data_size = bbm_audio_enc_get_data(data_buf);
+        data_size = bbm_audio_enc_get_data(data_buf + frm_head_size);
         if (data_size <= 0) {
             continue;
         }
 
-        os_mutex_pend(&send_mutex, 0);
-        struct rt_stream_dev *rt_dev;
-        list_for_each_entry(rt_dev, &send_dev_list_head, send_entry) {
-            dest_addr.sin_addr.s_addr = rt_dev->ip_addr;
-            ret = sock_sendto(ctp_rt_send_sockfd, data_buf, data_size, 0, &dest_addr, sizeof(dest_addr));
-            if (ret < 0) {
-                printf("rt stream sock send err\n");
-                continue;
-            }
+        struct frm_head *frame_head = (struct frm_head *)data_buf;
+        memset(frame_head, 0x00, frm_head_size);
+        frame_head->offset = 0;
+        frame_head->frm_sz = data_size;
+        frame_head->type |= LAST_FREG_MAKER;
+        frame_head->type |=  1;  //audio=1
+        frame_head->timestamp = 0;
+        frame_head->seq = seq++;
+        frame_head->payload_size = data_size;
+
+        ret = sock_sendto(ctp_rt_send_sockfd, data_buf, data_size + frm_head_size, 0, &dest_addr, sizeof(dest_addr));
+        if (ret < 0) {
+            printf("rt audio sock send err\n");
+            continue;
         }
-        os_mutex_post(&send_mutex);
     }
 
 exit:
@@ -468,7 +573,6 @@ static void rt_stream_dev_task(void *priv)
 {
     struct rt_stream_dev *rt_dev = priv;
     struct parse_info parse_info = {0};
-    struct frm_head  frame_head;
 
     int res;
     int msg[8];
@@ -512,16 +616,8 @@ static void rt_stream_dev_task(void *priv)
                 }
                 total += lbuf_data->len;
 
-                //相同包不处理
-                if (!memcmp(&frame_head, lbuf_data->data, sizeof(struct frm_head))) {
-                    /* printf("old data \n"); */
-                    lbuf_free(lbuf_data);
-                    continue;
-                }
-
                 ret = parse_recv_packet(lbuf_data->data, lbuf_data->len,
                                         &parse_info);
-                memcpy(&frame_head, lbuf_data->data, sizeof(struct frm_head));
 
                 if (ret) {
                     printf("parse_recv_packet err \n");
@@ -557,7 +653,9 @@ static void rt_stream_dev_task(void *priv)
 
                     fps++;
                     abr += jpeg_len;
-                    bbm_pipe_disp_one_frame(rt_dev->pipe_core, jpeg_buf, jpeg_len);
+                    if (rt_dev->pipe_core) {
+                        bbm_pipe_disp_one_frame(rt_dev->pipe_core, jpeg_buf, jpeg_len);
+                    }
 
                     if (rt_dev->rec_out_fd) {
                         AVI_write_frame(rt_dev->rec_out_fd, jpeg_buf, jpeg_len, 1);
@@ -606,6 +704,52 @@ static void rt_stream_dev_task(void *priv)
                     } else {
                         printf("rx rec not recording \n");
                     }
+                } else if (msg[1] == Q_USER_SWITCH_VIDEO_WIN) {
+                    printf("switch video win \n");
+                    struct video_window *win =  &disp_win[curr_win_mode][1];
+                    if (win) {
+                        printf("remote win left:%d top:%d width:%d height:%d \n",
+                               win->left, win->top, win->width, win->height);
+                    }
+
+                    bbm_video_pipe_exit(&rt_dev->pipe_core);
+                    rt_dev->pipe_core = NULL;
+
+                    if (win && win->width && win->height) {
+                        int width = rt_dev->src_width;
+                        int height = rt_dev->src_height;
+                        struct video_format f = {0};
+                        struct video_window *local_win = &disp_win[curr_win_mode][0];
+                        int need_post_sem = 1;
+
+                        //判断是否是小窗, 如果是小窗需要等大窗口先创建,否者小窗口会被大窗口覆盖
+                        int local_video_is_running = check_local_video_is_running();
+                        if (win->width < local_win->width && local_video_is_running) {
+                            printf("remote need wait big win create \n");
+                            if (os_sem_pend(&wait_big_win_create, 50) != 0) {
+                                printf("wait big win create err \n");
+                            }
+                            need_post_sem = 0;
+                        } else if (win->width > local_win->width && local_win->width != 0 && local_video_is_running) {
+
+                            need_post_sem = 1;
+
+                        } else {
+                            need_post_sem = 0;
+                        }
+
+                        bbm_video_pipe_init_format(&f, win, width, height, NULL);
+                        bbm_video_pipe_init(&rt_dev->pipe_core, &f);
+
+                        if (need_post_sem) {
+                            os_sem_post(&wait_big_win_create);
+                        }
+
+                    } else {
+                        continue;
+                    }
+
+
                 } else {
                     printf("unknow user msg:%d \n", msg[1]);
                 }
@@ -631,14 +775,15 @@ exit:
     printf("rt_stream_dev_task exit\n");
 }
 
-static int bbm_rt_send_init(void)
+static int bbm_rt_send_only_audio_init(void)
 {
-    printf("-----ctp_rt_send_init----\n");
     int ret;
-    struct sockaddr_in conn_addr;
-    conn_addr.sin_family = AF_INET;
-    conn_addr.sin_addr.s_addr = htonl(INADDR_ANY);
-    conn_addr.sin_port = htons(CTP_RT_SEND_PORT);
+    if (++send_ref_count > 1) {
+        printf("-----send audio ref[%d], do not init----\n", send_ref_count);
+        return 0;
+    }
+
+    printf("-----ctp_rt_audio_send_init----\n");
 
     ctp_rt_send_sockfd = sock_reg(AF_INET, SOCK_DGRAM, 0, NULL, NULL);
     if (ctp_rt_send_sockfd == NULL) {
@@ -646,17 +791,19 @@ static int bbm_rt_send_init(void)
         return -1;
     }
 
-    INIT_LIST_HEAD(&send_dev_list_head);
-    os_mutex_create(&send_mutex);
-
     thread_fork("thread_socket_send", 11, 2048, 2048, &ctp_rt_send_task_pid, ctp_rt_send_task, NULL);
 
     return 0;
 }
 
-static int bbm_rt_send_exit(void)
+static int bbm_rt_send_only_audio_exit(void)
 {
-    printf("-----ctp_rt_send_exit----\n");
+    if (--send_ref_count > 0) {
+        printf("-----send audio ref[%d], do not exit----\n", send_ref_count);
+        return 0;
+    }
+
+    printf("-----ctp_rt_audio_send_exit----\n");
 
     ctp_rt_send_task_exit = 1;
     thread_kill(&ctp_rt_send_task_pid, KILL_WAIT);
@@ -664,7 +811,198 @@ static int bbm_rt_send_exit(void)
 
     sock_unreg(ctp_rt_send_sockfd);
 
-    os_mutex_del(&send_mutex, OS_DEL_ALWAYS);
+    return 0;
+}
+
+static void rec_dev_server_event_handler(void *priv, int argc, int *argv)
+{
+    switch (argv[0]) {
+    case VIDEO_SERVER_UVM_ERR:
+        printf("APP_UVM_DEAL_ERR\n");
+        break;
+    case VIDEO_SERVER_PKG_ERR:
+        printf("VIDEO_SERVER_PKG_ERR\n");
+        break;
+    case VIDEO_SERVER_PKG_END:
+        printf("VIDEO_SERVER_PKG_END\n");
+        break;
+    case VIDEO_SERVER_NET_ERR:
+        printf("VIDEO_SERVER_NET_ERR\n");
+        break;
+    default :
+        printf("unknow rec server cmd %x , %x!\n", argv[0], (int)priv);
+        break;
+    }
+}
+
+static int bbm_rt_send_stream_init(void)
+{
+    if (++send_ref_count > 1) {
+        printf("-----send stream ref > 1, do not init----\n");
+        return 0;
+    }
+
+    printf("-----ctp_rt_send_stream_init----\n");
+    int ret;
+    union video_req req = {0};
+    struct video_text_osd text_osd;
+    struct video_graph_osd graph_osd;
+    u16 max_one_line_strnum;
+    u16 osd_line_num;
+    u16 osd_max_heigh;
+
+    static u8 osd_buf[64];
+    char dev_name[10];
+
+    sprintf(dev_name, "video%d.%d", default_rt_config.id, default_rt_config.sub_id);
+
+    video_server = server_open("video_server", dev_name);
+    if (!video_server) {
+        printf("video_server open err \n");
+        goto err;
+    }
+    server_register_event_handler(video_server, NULL, rec_dev_server_event_handler);
+
+    stream_video_buf = malloc(STREAM_VIDEO_BUF_SIZE);
+    if (!stream_video_buf) {
+        printf("malloc video rt buf err\n");
+        goto err;
+    }
+    req.rec.buf = stream_video_buf;
+    req.rec.buf_len = STREAM_VIDEO_BUF_SIZE;
+
+    req.rec.channel     = default_rt_config.sub_id;
+    req.rec.state       = VIDEO_STATE_START;
+    req.rec.quality     = VIDEO_MID_Q;
+
+    req.rec.width       = default_rt_config.width;
+    req.rec.height      = default_rt_config.height;
+    req.rec.fps         = 0;
+    req.rec.real_fps    = default_rt_config.fps;
+    req.rec.abr_kbps    = default_rt_config.abr_kbps;
+
+    req.rec.format  = USER_VIDEO_FMT_AVI;
+    req.rec.online  = 1;
+    req.rec.cycle_time = 5 * 60;
+    req.rec.audio.aud_interval_size = 2 * 640;
+    req.rec.camera_type = VIDEO_CAMERA_NORMAL;
+    req.rec.audio.sample_rate = VIDEO_REC_AUDIO_SAMPLE_RATE;
+    req.rec.audio.channel   = 1;
+    req.rec.audio.volume    = 100;
+
+    stream_audio_buf = malloc(STREAM_AUDIO_BUF_SIZE);
+    if (!stream_audio_buf) {
+        printf("malloc audio rt buf err \n");
+        goto err;
+    }
+    req.rec.audio.buf = stream_audio_buf;
+    req.rec.audio.buf_len = STREAM_AUDIO_BUF_SIZE;
+
+    req.rec.audio.aec_enable = 1;
+    struct aec_s_attr aec_param = {0};
+    req.rec.audio.aec_attr = &aec_param;
+
+    extern void get_cfg_file_aec_config(struct aec_s_attr * aec_param);
+    get_cfg_file_aec_config(&aec_param);
+
+    if (aec_param.EnableBit == 0) {
+        req.rec.audio.aec_enable = 0;
+        req.rec.audio.aec_attr = NULL;
+    }
+    aec_param.wideband = 0;
+    aec_param.hw_delay_offset = 75;
+
+    struct net_stream_info s_info = {0};
+    s_info.sample_rate = req.rec.audio.sample_rate;
+    s_info.fps = default_rt_config.fps;
+    s_info.abr_kbps = default_rt_config.abr_kbps;
+
+    char net_path[128];
+    sprintf(net_path, "udp://%s:%d", UDP_MULTICAST_ADDR, CTP_RT_SEND_PORT);
+    printf("\n @@@@@@ path = %s\n", net_path);
+
+    req.rec.target = VIDEO_TO_OUT;
+    req.rec.out.path = net_path;
+    req.rec.out.arg  = &s_info;
+    req.rec.out.open = stream_open;
+    req.rec.out.send = stream_write;
+    req.rec.out.close = stream_close;
+
+    memset(osd_buf, ' ', 8);
+    osd_buf[8] = '\\';
+    memcpy(osd_buf + 9, osd_str_buf, strlen(osd_str_buf));
+    text_osd.font_w = 16;
+    text_osd.font_h = 32;
+    max_one_line_strnum = strlen(osd_buf);
+    osd_line_num = 1;
+    osd_max_heigh = (req.rec.height == 1088) ? 1080 : req.rec.height ;
+    text_osd.x = (req.rec.width - max_one_line_strnum * text_osd.font_w) / 64 * 64;
+    text_osd.y = (osd_max_heigh - text_osd.font_h * osd_line_num) / 16 * 16;
+    text_osd.color[0] = 0x057d88;
+    text_osd.color[1] = 0xe20095;
+    text_osd.color[2] = 0xe20095;
+    text_osd.bit_mode = 2;
+    text_osd.text_format = osd_buf;
+    text_osd.font_matrix_table = osd_str_total;
+    text_osd.font_matrix_base = osd2_str_matrix;
+    text_osd.font_matrix_len = sizeof(osd2_str_matrix);
+    text_osd.direction = 1;
+    /* req.rec.text_osd = &text_osd; */
+
+    ret = server_request(video_server, VIDEO_REQ_REC, &req);
+    if (ret) {
+        puts("\n\n\nstart rec err\n\n\n");
+        goto err;
+    }
+
+    req.rec.state = VIDEO_STATE_RESET_BITS_RATE;
+    server_request(video_server, VIDEO_REQ_REC, &req);
+
+    return 0;
+
+err:
+    if (video_server) {
+        server_close(video_server);
+        video_server = NULL;
+    }
+    if (stream_video_buf) {
+        free(stream_video_buf);
+        stream_video_buf = NULL;
+    }
+    if (stream_audio_buf) {
+        free(stream_audio_buf);
+        stream_audio_buf = NULL;
+    }
+    --send_ref_count;
+    return -1;
+}
+
+static int bbm_rt_send_stream_exit(void)
+{
+    if (--send_ref_count > 0) {
+        printf("-----send stream ref > 0, do not exit----\n");
+        return 0;
+    }
+
+    printf("-----ctp_rt_send_stream_exit----\n");
+
+    if (video_server) {
+        union video_req req = {0};
+        req.rec.channel = default_rt_config.sub_id;
+        req.rec.state = VIDEO_STATE_STOP;
+        server_request(video_server, VIDEO_REQ_REC, &req);
+        server_close(video_server);
+        video_server = NULL;
+    }
+
+    if (stream_video_buf) {
+        free(stream_video_buf);
+        stream_video_buf = NULL;
+    }
+    if (stream_audio_buf) {
+        free(stream_audio_buf);
+        stream_audio_buf = NULL;
+    }
 
     return 0;
 }
@@ -717,6 +1055,7 @@ static int bbm_rt_dev_init(u32 ip_addr, struct video_window *win, int src_w, int
 {
     int ret;
     u8 audio_dec_init = 0;
+    u8 send_init = 0;
 
     printf("---bbm_rt_dev_init---\n");
 
@@ -730,10 +1069,31 @@ static int bbm_rt_dev_init(u32 ip_addr, struct video_window *win, int src_w, int
     //param
     rt_dev->ip_addr = ip_addr;
 
+#if RX_AUDIO_SEND_ENABLE
+    bbm_rt_send_only_audio_init();
+#endif
+#if RX_STREAM_SEND_ENABLE
+    bbm_rt_send_stream_init();
+#endif
+    send_init = 1;
+
     //video pipe
-    ret = bbm_video_pipe_init(&rt_dev->pipe_core, win, src_w, src_h);
-    if (ret) {
-        goto err;
+    if (win && win->width && win->height) {
+        struct video_format f = {0};
+        struct video_window *local_win = &disp_win[curr_win_mode][0];
+        //判断是否是小窗, 如果是小窗需要等大窗口先创建,否者小窗口会被大窗口覆盖
+        int local_video_is_running = check_local_video_is_running();
+        if (win->width < local_win->width && local_video_is_running) {
+            printf("remote need wait big win create \n");
+            if (os_sem_pend(&wait_big_win_create, 50) != 0) {
+                printf("wait big win create err \n");
+            }
+        }
+        bbm_video_pipe_init_format(&f, win, src_w, src_h, NULL);
+        ret = bbm_video_pipe_init(&rt_dev->pipe_core, &f);
+        if (ret) {
+            goto err;
+        }
     }
     rt_dev->src_width = src_w;
     rt_dev->src_height = src_h;
@@ -762,13 +1122,6 @@ static int bbm_rt_dev_init(u32 ip_addr, struct video_window *win, int src_w, int
     list_add_tail(&rt_dev->recv_entry, &recv_dev_list_head);
     os_mutex_post(&recv_mutex);
 
-#if RT_AUDIO_SEND_ENABLE
-    //send list
-    os_mutex_pend(&send_mutex, 0);
-    list_add_tail(&rt_dev->send_entry, &send_dev_list_head);
-    os_mutex_post(&send_mutex);
-#endif
-
     return 0;
 
 err:
@@ -781,6 +1134,14 @@ err:
         }
         if (audio_dec_init) {
             bbm_audio_dec_exit();
+        }
+        if (send_init) {
+#if RX_AUDIO_SEND_ENABLE
+            bbm_rt_send_only_audio_exit();
+#endif
+#if RX_STREAM_SEND_ENABLE
+            bbm_rt_send_stream_exit();
+#endif
         }
         free(rt_dev);
     }
@@ -816,19 +1177,14 @@ static int bbm_rt_dev_exit(u32 ip_addr)
         free(rt_dev->lbuf_ptr);
     }
 
-#if RT_AUDIO_SEND_ENABLE
-    os_mutex_pend(&send_mutex, 0);
-    list_for_each_entry_safe(rt_dev, n, &send_dev_list_head, send_entry) {
-        if (rt_dev->ip_addr == ip_addr) {
-            list_del(&rt_dev->send_entry);
-            break;
-        }
-    }
-    os_mutex_post(&send_mutex);
-#endif
-
-
     free(rt_dev);
+
+#if RX_AUDIO_SEND_ENABLE
+    bbm_rt_send_only_audio_exit();
+#endif
+#if RX_STREAM_SEND_ENABLE
+    bbm_rt_send_stream_exit();
+#endif
 
     return 0;
 }
@@ -867,6 +1223,9 @@ int bbm_ctp_rt_start(void *priv, struct video_window *win)
 
     memcpy(&bbm_hdl->rt_config, &default_rt_config, sizeof(default_rt_config));
 
+#if BBM_LOCAL_CAMERA_DISP_ENABLE
+    win = &disp_win[curr_win_mode][1];
+#else
     //半屏降低摄像头分辨率分辨率
     if (win != &disp_win_1[0]) {
         bbm_hdl->rt_config.width = win->width;
@@ -875,6 +1234,7 @@ int bbm_ctp_rt_start(void *priv, struct video_window *win)
         /* bbm_hdl->rt_config.height = 160; */
         bbm_hdl->rt_config.abr_kbps = 1000;
     }
+#endif
 
     snprintf(topic_3, sizeof(topic_3), OPEN_RT_TOPIC);
     snprintf(content_3, sizeof(content_3), OPEN_RT_CONTENT,
@@ -938,14 +1298,13 @@ int bbm_rt_stream_init(void)
     if (ret) {
         return -1;
     }
-#if RT_AUDIO_SEND_ENABLE
-    ret = bbm_rt_send_init();
-    if (ret) {
-        bbm_rt_recv_exit();
-        return -1;
-    }
-#endif
     rt_stream_init = 1;
+
+
+#if BBM_LOCAL_CAMERA_DISP_ENABLE
+    os_sem_create(&wait_big_win_create, 0);
+    local_video_disp_start();
+#endif
 
 
     return 0;
@@ -961,11 +1320,13 @@ int bbm_rt_stream_exit(void)
 
     ret = bbm_rt_recv_exit();
 
-#if RT_AUDIO_SEND_ENABLE
-    ret = bbm_rt_send_exit();
-#endif
 
     rt_stream_init = 0;
+
+#if BBM_LOCAL_CAMERA_DISP_ENABLE
+    os_sem_del(&wait_big_win_create, OS_DEL_ALWAYS);
+    local_video_disp_stop();
+#endif
 
     return 0;
 }
@@ -1033,43 +1394,6 @@ int bbm_rt_stream_digital_zomm(void *priv, int factor)
 
     return bbm_video_pipe_set_zoom(rt_dev->pipe_core, &crop);
 }
-
-#if 0
-int bbm_rt_stream_reset_pipe(void *priv, int disp_mode)
-{
-    struct rt_stream_dev *rt_dev, *n;
-    int msg;
-
-    struct bbm_client_hdl *bbm_hdl = priv;
-
-    os_mutex_pend(&recv_mutex, 0);
-    list_for_each_entry(rt_dev, &recv_dev_list_head, recv_entry) {
-        if (rt_dev->ip_addr == bbm_hdl->ip_addr) {
-            list_del(&rt_dev->recv_entry);
-            break;
-        }
-    }
-    os_mutex_post(&recv_mutex);
-
-    os_taskq_del_type(rt_dev->task_name, Q_MSG);
-    os_taskq_post_type(rt_dev->task_name, Q_USER, 1, &msg);
-    thread_kill(&rt_dev->task_pid, KILL_WAIT);
-
-    lbuf_clear(rt_dev->lbuf_handle);
-
-    bbm_video_pipe_exit(&rt_dev->pipe_core);
-
-    bbm_video_pipe_init(&rt_dev->pipe_core, &disp_win[disp_mode], bbm_hdl->rt_config.width, bbm_hdl->rt_config.height);
-
-    thread_fork(rt_dev->task_name, 11, 2048, 2048, &rt_dev->task_pid, rt_stream_dev_task, rt_dev);
-
-    os_mutex_pend(&recv_mutex, 0);
-    list_add_tail(&rt_dev->recv_entry, &recv_dev_list_head);
-    os_mutex_post(&recv_mutex);
-
-    return 0;
-}
-#endif
 
 int bbm_ctp_rec_start(void *priv)
 {
@@ -1201,6 +1525,97 @@ int bbm_ctp_set_abr(void *priv, int abr_val)
 
     bbm_hdl->rt_config.abr_kbps = abr_val;
 
+    return 0;
+}
+
+static int check_local_video_is_running(void)
+{
+#if BBM_LOCAL_CAMERA_DISP_ENABLE
+    return 1;
+#else
+    return 0;
+#endif
+}
+
+
+static int local_video_disp_start(void)
+{
+    int camera_src_w = 640;
+    int camera_src_h = 480;
+    int camera_src_id = 1;
+    int need_post_sem = 0;
+
+    struct video_format f = {0};
+    struct video_window *win = &disp_win[curr_win_mode][0];
+    if (!win) {
+        printf("err win ptr !\n");
+        return -1;
+    }
+
+    printf("local win left:%d top:%d width:%d height:%d \n",
+           win->left, win->top, win->width, win->height);
+
+    if (win->width == 0 || win->height == 0) {
+        return 0;
+    }
+
+    struct video_window *remote_win = &disp_win[curr_win_mode][1];
+    if (win->width < remote_win->width) {
+        printf("local need wait big win create \n");
+        if (os_sem_pend(&wait_big_win_create, 50) != 0) {
+            printf("wait big win create err \n");
+        }
+        need_post_sem = 0;
+    } else if (win->width > remote_win->width && remote_win->width != 0) {
+
+        need_post_sem = 1;
+
+    } else {
+        need_post_sem = 0;
+    }
+
+    bbm_video_pipe_init_format(&f, win, camera_src_w, camera_src_h, NULL);
+    if (bbm_video_pipe_disp_init(&local_pipe_core, &f, camera_src_id)) {
+        printf("bbm tx disp init err \n");
+        return -1;
+    }
+
+    if (need_post_sem) {
+        os_sem_post(&wait_big_win_create);
+    }
+    return 0;
+}
+
+static int local_video_disp_stop(void)
+{
+    return bbm_video_pipe_exit(&local_pipe_core);
+}
+
+
+//只支持一台设备连接
+int bbm_switch_video_win(void *priv)
+{
+#if BBM_LOCAL_CAMERA_DISP_ENABLE
+    int msg[2];
+    curr_win_mode = (curr_win_mode + 1) % MAX_WIN_MODE_NUM;
+    printf("switch disp win curr win :%d \n", curr_win_mode);
+
+    struct rt_stream_dev *rt_dev;
+
+    struct bbm_client_hdl *bbm_hdl = priv;
+
+    os_mutex_pend(&recv_mutex, 0);
+    list_for_each_entry(rt_dev, &recv_dev_list_head, recv_entry) {
+        if (rt_dev->ip_addr == bbm_hdl->ip_addr) {
+            int msg = Q_USER_SWITCH_VIDEO_WIN;
+            os_taskq_post_type(rt_dev->task_name, Q_USER, 1, &msg);
+        }
+    }
+    os_mutex_post(&recv_mutex);
+
+    local_video_disp_stop();
+    local_video_disp_start();
+#endif
     return 0;
 }
 

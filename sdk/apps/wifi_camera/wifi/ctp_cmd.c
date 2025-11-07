@@ -307,6 +307,10 @@ void ctp_cmd_socket_unregister(void *priv)
 //添加命令回调
 extern void in_app_stop_display(u8 state);
 extern void out_app_start_display();
+_WEAK_ bool get_usb_app_flag(void)
+{
+    return false;
+}
 int cmd_put_app_access(void *priv, char *content)
 {
     json_object *new_obj = NULL; //

@@ -1,13 +1,26 @@
 #include "system/includes.h"
 #include "server/audio_server.h"
+#include "app_config.h"
+#include "ps_api.h"
 
-#define AUDIO_DEC_BUF_MAX_LEN        8 * 1024   //解码音频缓存
+#define AUDIO_DEC_BUF_MAX_LEN               16 * 1024   //解码音频缓存
 
-static u8 *audio_dec_buf;
-static u8 *tmp_buf;
-static cbuffer_t audio_dec_save_cbuf;
-static struct server *audio_dec_server;
-static int ref = 0;
+struct audio_ps {
+    PS_audio_IO ps_IO;
+    PS_CONTEXT_CONF ps_config_obj;
+    PS_API_CONTEXT *ps_ops;
+    void *ps_buf;
+};
+
+static u8 *audio_dec_buf;                   //解码cbuf实际内存指针
+static u8 *tmp_buf;                         //临时buf,用于单声道扩展成双声道存储转换数据.
+static cbuffer_t audio_dec_save_cbuf;       //cbuf句柄
+static struct server *audio_dec_server;     //解码服务
+static int ref = 0;                         //init/exit 引用次数
+
+static struct audio_ps audio_ps;                //变音变调处理
+volatile static u8 audio_ps_enable = 0;         //变音变调使能
+static int g_pitchV = 32768;                    /*!< >32768是音调变高，<32768音调变低，建议范围20000到50000 */
 
 static int vfs_audio_dec_fread(void *file, void *data, u32 len)
 {
@@ -66,11 +79,73 @@ static int audio_dec_write_cbuf(u8 *buf, u32 size)
 
 int bbm_audio_dec_one_frame(u8 *buf, u32 size)
 {
-    audio_dec_write_cbuf(buf, size);
+    struct audio_ps *ps = &audio_ps;
+    if (audio_ps_enable) {
+        /* printf("ps input:%d \n",size); */
+        ps->ps_ops->run(ps->ps_buf, buf, size);
+    } else {
+        audio_dec_write_cbuf(buf, size);
+    }
 
     return 0;
 }
 
+static u32 ps_output(void *priv, u8 *buf, int len)
+{
+    /* printf("ps_output:%d \n",len); */
+    audio_dec_write_cbuf(buf, len);
+    return len;
+}
+
+int bbm_audio_ps_init(void)
+{
+    struct audio_ps *ps = &audio_ps;
+    memset(ps, 0x00, sizeof(struct audio_ps));
+
+    ps->ps_ops = get_ps_cal_api();
+    if (!ps->ps_ops) {
+        printf("get ps cal api fail \n");
+        return -1;
+    }
+
+    ps->ps_buf = malloc(ps->ps_ops->need_size());
+    if (!ps->ps_buf) {
+        free(ps->ps_buf);
+        return -1;
+    } else {
+        ps->ps_config_obj.speedV = 80;      //默认值,不可变速
+        ps->ps_config_obj.pitchV = g_pitchV;
+        ps->ps_config_obj.sr = VIDEO_REC_AUDIO_SAMPLE_RATE;
+        ps->ps_config_obj.chn = 1;
+        ps->ps_IO.outpriv = ps;
+        ps->ps_IO.output = ps_output;
+        ps->ps_ops->open(ps->ps_buf, &ps->ps_IO);
+        ps->ps_ops->dconfig(ps->ps_buf, &ps->ps_config_obj);
+    }
+
+    audio_ps_enable = 1;
+    return 0;
+}
+
+void bbm_audio_ps_exit(void)
+{
+    struct audio_ps *ps = &audio_ps;
+    audio_ps_enable = 0;
+    free(ps->ps_buf);
+}
+
+/*!< >32768是音调变高，<32768音调变低，建议范围20000到50000 */
+void bbm_audio_ps_set_pitch(int pitchV)
+{
+    struct audio_ps *ps = &audio_ps;
+    if (audio_ps_enable) {
+        g_pitchV = pitchV;
+        ps->ps_config_obj.pitchV = g_pitchV;
+        if (ps->ps_ops) {
+            ps->ps_ops->dconfig(ps->ps_buf, &ps->ps_config_obj);
+        }
+    }
+}
 
 int bbm_audio_dec_init(void)
 {
@@ -110,7 +185,7 @@ int bbm_audio_dec_init(void)
     req.dec.output_buf_len  = 4096;
     //使用双通道,避免叠音卡顿
     req.dec.channel         = 2;
-    req.dec.sample_rate     = 8000;
+    req.dec.sample_rate     = VIDEO_REC_AUDIO_SAMPLE_RATE;
     req.dec.priority        = 1;
     req.dec.vfs_ops         = &vfs_audio_dec_ops;
     req.dec.dec_type 		= "pcm";

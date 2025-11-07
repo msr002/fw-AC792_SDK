@@ -863,10 +863,24 @@ static const struct otg_dev_data otg_data = {
 #endif
     .detect_mode            = OTG_CHARGE_MODE
 #if TCFG_USB_SLAVE_ENABLE
-                            | OTG_SLAVE_MODE
+
+//BBM启用USB配对时只能SLAVE/HOST二选一. RX端HOST_MODE TX端SLAVE_MODE
+#if BBM_USB_PAIR_ENABLE && defined CONFIG_BBM_RX
+
+#else
+        | OTG_SLAVE_MODE
+#endif
+
 #endif
 #if TCFG_USB_HOST_ENABLE
-                            | OTG_HOST_MODE
+
+//BBM启用USB配对时只能SLAVE/HOST二选一. RX端HOST_MODE TX端SLAVE_MODE
+#if BBM_USB_PAIR_ENABLE && defined CONFIG_BBM_TX
+
+#else
+        | OTG_HOST_MODE
+#endif
+
 #endif
                               ,
     .detect_time_interval   = 50,
