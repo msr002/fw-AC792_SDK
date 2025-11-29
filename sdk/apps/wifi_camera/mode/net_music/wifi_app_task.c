@@ -649,11 +649,4 @@ static int wireless_net_init(void)   //主要是create wifi 线程的
 /* late_initcall(wireless_net_init); */
 #endif
 
-#if !defined CONFIG_WIFI_IDLE_RESUME_BASEBAND_ENABLE && TCFG_LOWPOWER_LOWPOWER_SEL == 0
-void wf_low_power_request(void *priv, u32 usec)
-{
-
-}
-#endif
-
 #endif

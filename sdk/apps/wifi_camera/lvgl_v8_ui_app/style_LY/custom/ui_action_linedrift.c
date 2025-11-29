@@ -38,7 +38,7 @@ int gui_src_action_lane(int action)
         lv_obj_set_style_bg_opa(ui_scr->line_drift, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
 #endif
         if (FALSE == current_app_in_mode(APP_MODE_REC)) {
-            app_msg_handler(NULL, APP_MSG_STOP);
+            /* app_msg_handler(NULL, APP_MSG_STOP); */
             app_mode_change_replace(APP_MODE_REC);
         }
         app_send_message(APP_MSG_REC_MAIN, 0);

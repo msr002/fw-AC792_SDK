@@ -489,6 +489,17 @@ void sys_mbox_set_invalid(sys_mbox_t *mbox)
     }
 }
 
+int sys_mbox_full(sys_mbox_t *mbox)
+{
+    return os_q_is_full(&mbox->pQ);
+}
+
+int sys_mbox_query(sys_mbox_t *mbox)
+{
+    return os_q_query(&mbox->pQ);
+}
+
+
 /*-----------------------------------------------------------------------------------*/
 /*
   Initialize sys arch

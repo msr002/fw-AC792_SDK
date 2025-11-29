@@ -863,6 +863,12 @@ void extract_number_str(const char *src, char *dest, unsigned int dest_size)
 }
 
 int get_in_ui_navi_flag();
+#ifdef CONFIG_UI_ENABLE
+_WEAK_ void update_ui_remain_mileage_time_data(const char *mileage_buf, const char *time_buf)
+{
+    return;
+}
+#endif
 /* 接收导航数据信息 */
 static int cmd_notify_simple_navi_info(void *priv, void *content)
 {
@@ -882,10 +888,11 @@ static int cmd_notify_simple_navi_info(void *priv, void *content)
     temp = json_object_object_get(parm, "remain_time");
     const char *remain_time = json_object_get_string(temp);
     extract_number_str(remain_time, remain_time_data, sizeof(remain_time_data));
+#ifdef CONFIG_UI_ENABLE
     if (get_in_ui_navi_flag()) {
-        update_text_lbl_2(remain_mileage_data);
-        update_text_lbl_3(remain_time_data);
+        update_ui_remain_mileage_time_data(remain_mileage_data, remain_time);
     }
+#endif
 
 
     temp = json_object_object_get(parm, "arrival_time");

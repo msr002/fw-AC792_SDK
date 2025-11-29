@@ -116,5 +116,17 @@ void update_text_lbl_9(const char *str)
     lvgl_rpc_post_func(lv_label_set_text, 2, ui_scr->page_map_lbl_9, str);
 }
 
+void update_ui_remain_mileage_time_data(const char *mileage_buf, const char *time_buf)
+{
+    update_text_lbl_2(mileage_buf);
+    update_text_lbl_3(time_buf);
+}
+
+void update_ui_fps_bitrate(const char *fps_buf, const char *bitrate_buf)
+{
+    update_text_lbl_7(fps_buf);
+    update_text_lbl_9(bitrate_buf);
+}
+
 #endif
 #endif

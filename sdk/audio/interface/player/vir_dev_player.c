@@ -934,6 +934,8 @@ static const struct stream_file_ops virtual_dev_ops = {
 
 typedef struct {
     struct vir_player *player;
+    u8 stop_flag;
+    void *net_buf;
 } vir_music_hdl;
 
 static vir_music_hdl vir_hdl;
@@ -941,7 +943,7 @@ static vir_music_hdl vir_hdl;
 #define __this (&vir_hdl)
 
 
-static void virtual_thread(void *net_buf)
+static void virtual_thread()
 {
     FILE *vfd = fopen("storage/sd0/C/2.mp3", "r");
     /* FILE *vfd = fopen("storage/sd0/C/2.opu", "r"); */
@@ -959,10 +961,14 @@ static void virtual_thread(void *net_buf)
                 fclose(vfd);
                 vfd = NULL;
                 //写入完数据需要set end,让read那边把最后剩余数据全部读出
-                net_buf_set_file_end(net_buf);
+                net_buf_set_file_end(__this->net_buf);
                 break;
             }
-            nwlen = net_buf_write(wbuf, wlen, net_buf);
+            if (!__this->stop_flag) {
+                nwlen = net_buf_write(wbuf, wlen, __this->net_buf);
+            } else {
+                break;
+            }
         }
     }
 }
@@ -987,32 +993,46 @@ static int virtual_music_player_decode_event_callback(void *priv, int parm, enum
     return 0;
 }
 
-//如果是只使用pcm的数据，可去掉net_buf进行管理的过程,在virtual_dev_ops的read中进行喂入数据解码即可
-//net_buf管理是为了带格式的音频数据可以进行seek解码使用
+static void virtual_test_stop()
+{
+    printf("----------virtual_test_stop----------");
+    __this->stop_flag = 1;
+
+    virtual_dev_player_stop(__this->player);
+
+    net_buf_uninit(__this->net_buf);
+    __this->net_buf = NULL;
+}
+
+//统一使用net_audio_buf作为音频数据缓存可支持pcm和带格式音频数据解码
 void virtual_test()
 {
+    printf("------------virtual_test----------------");
     //初始化net buf
     u32 bufsize = 32 * 1024;
-    u8 *net_buf = net_buf_init(&bufsize, NULL);
+    __this->net_buf = net_buf_init(&bufsize, NULL);
 
-    net_buf = net_buf_init(&bufsize, NULL);
-    if (!net_buf) {
+    __this->net_buf = net_buf_init(&bufsize, NULL);
+    if (!__this->net_buf) {
         printf("virtual_test net_buf_init fail");
     }
-    net_buf_active(net_buf);
-    net_buf_set_time_out(100, net_buf);
+    net_buf_active(__this->net_buf);
+    //设置读取net_buf等待超时时间
+    net_buf_set_time_out(100, __this->net_buf);
 
     extern int storage_device_ready(void);
     while (!storage_device_ready()) {//等待sd文件系统挂载完成
         os_time_dly(2);
     }
     //net_buf_write写入数据
-    thread_fork("virtual_thread", 20, 1024, 0, 0, virtual_thread, net_buf);
+    thread_fork("virtual_thread", 20, 1024, 0, 0, virtual_thread, NULL);
 
     os_time_dly(10);
 
     //虚拟源输入读取net buf数据解码
-    __this->player = virtual_dev_play_callback((FILE *)net_buf, &virtual_dev_ops, NULL, virtual_music_player_decode_event_callback, NULL, AUDIO_CODING_MP3);
+    __this->player = virtual_dev_play_callback((FILE *)__this->net_buf, &virtual_dev_ops, NULL, virtual_music_player_decode_event_callback, NULL, AUDIO_CODING_MP3);
+
+    /* sys_timeout_add(NULL, virtual_test_stop, 5*1000); */
 }
 
 #endif //VIRTUAL_PLAY_TEST

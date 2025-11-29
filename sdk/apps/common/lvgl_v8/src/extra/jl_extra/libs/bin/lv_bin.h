@@ -19,7 +19,7 @@ extern "C" {
 /*********************
  *      DEFINES
  *********************/
-
+extern const uint8_t flash_src_use_crc;
 /**********************
  *      TYPEDEFS
  **********************/
@@ -60,6 +60,18 @@ typedef struct _header_info {
  */
 lv_res_t lv_check_header_info_file(const char *info_file_name);
 lv_res_t lv_close_header_info_file(void);
+
+/**
+ * 检查并加载UIPACKRES,存在则内部资源从UIPACKRES中解析
+ * src:UIPACKRES路径
+ * return:被打包文件个数+2
+ */
+uint16_t lv_load_pack_sdfile(const char *src);
+/**
+ * 通过资源路径在UIPACKRES中定位位置以及该资源长度
+ * 为了兼容flash_src_use_malloc,约定资源路径都以's'开头即可,例如s/xxx.bin
+ */
+lv_res_t lv_sdfile_get_src_info(const char *src, uint32_t *pos, uint32_t *len);
 /*******************JL************************/
 /**********************
  * GLOBAL PROTOTYPES

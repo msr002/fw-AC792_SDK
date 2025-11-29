@@ -4,18 +4,6 @@
 #define UART_NUM 			5
 
 /**
- * \name UART clk source
- * \{
- */
-typedef enum {
-    STD_48M = 1,        /*!< STD48M时钟  */
-    STD_24M,            /*!< STD24M时钟  */
-    EXT_CLK,            /*!< 外部时钟  */
-    LSB_CLK,            /*!< 低速时钟  */
-} uart_clk_src_t;
-/* \} name */
-
-/**
  * \name UART parity
  * \{
  */

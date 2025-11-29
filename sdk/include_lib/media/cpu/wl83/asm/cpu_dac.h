@@ -148,6 +148,7 @@ struct dac_platform_data {
     u16 pa_unmute_delay_ms;     /*!< 功放解MUTE延迟 */
     u16 pa_mute_delay_ms;       /*!< 功放MUTE延迟 */
     int pa_mute_port;           /*!< 功放MUTE IO */
+    void (*pa_mute_cb)(u8 mute);/*!< 功放mute用户操作回调 */
 };
 
 struct analog_module {

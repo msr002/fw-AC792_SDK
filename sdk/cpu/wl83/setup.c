@@ -31,6 +31,8 @@ void setup_arch(void)
 
     clk_early_init();
 
+    uart_clk_src_set(STD_24M, 0);
+
     interrupt_init();
 
 #ifdef CONFIG_DEBUG_ENABLE

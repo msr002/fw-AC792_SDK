@@ -368,6 +368,15 @@ static void vir_audio_close()
     os_sem_set(&__this->r_sem, 0);
     os_sem_post(&__this->r_sem);
     virtual_dev_player_stop(__this->player);
+
+    os_sem_del(&__this->r_sem, OS_DEL_ALWAYS);
+    os_sem_del(&__this->start_dec_sem, OS_DEL_ALWAYS);
+
+    if (__this->net_buf) {
+        net_buf_inactive(__this->net_buf);
+        net_buf_uninit(__this->net_buf);
+        __this->net_buf = NULL;
+    }
 }
 
 //通过 编码 - net_buf - 解码 实现编码虚拟源输出和解码虚拟源输入测试

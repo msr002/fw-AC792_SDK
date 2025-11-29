@@ -324,6 +324,12 @@ void lv_img_cache_invalidate_src(const void *src)
 
             } else {
                 if (lv_img_cache_match(src, cache[i].dec_dsc.src)) {
+#if LV_IMG_CACHE_DEF_SIZE
+                    if (cache[i].bin_src) {
+                        lv_mem_free(cache[i].bin_src);
+                        cache[i].bin_src = NULL;
+                    }
+#endif
                     lv_img_decoder_close(&cache[i].dec_dsc);
                     lv_memset_00(&cache[i], sizeof(_lv_img_cache_entry_t));
                 }

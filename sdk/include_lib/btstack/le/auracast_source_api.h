@@ -69,6 +69,7 @@ extern int auracast_source_uninit();
 extern uint16_t auracast_source_get_bis_hdl(uint8_t bis_index);
 extern u32 auracast_source_read_iso_tx_sync(uint8_t bis_index);
 extern u32 auracast_source_get_sync_delay(void);
+extern int auracast_source_user_send_iso_packet(uint8_t bis_index, uint8_t bis_sub_event_counter, u8 *data, u8 len);
 
 #endif
 

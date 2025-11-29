@@ -17,7 +17,7 @@ extern "C" {
 /*********************
  *      DEFINES
  *********************/
-
+extern const uint8_t flash_src_use_crc;
 /**********************
  *      TYPEDEFS
  **********************/

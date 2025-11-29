@@ -45,6 +45,9 @@ const int dmm_memory_protection = 1;
 const int dmm_memory_protection = 0;
 #endif
 
+const int dmm_use_assert = 1;//是否在dmm中使用断言
+
+const int config_husb_host_force_full_speed = 0;
 //config_otg_slave_detect_method_2为1时，从机检测的方式使用方法2
 const int config_otg_slave_detect_method_2 = 0;
 const u32 otg_slave_detect_dm_delay = 50;
@@ -330,9 +333,15 @@ const char log_tag_const_e_IIC_API AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(TRUE);
 
 const char log_tag_const_v_WLC AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(FALSE);
 const char log_tag_const_d_WLC AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(FALSE);
-const char log_tag_const_i_WLC AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(TRUE);
+const char log_tag_const_i_WLC AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(FALSE);
 const char log_tag_const_w_WLC AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(FALSE);
 const char log_tag_const_e_WLC AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(TRUE);
+
+const char log_tag_const_v_PLCNT AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(FALSE);
+const char log_tag_const_d_PLCNT AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(FALSE);
+const char log_tag_const_i_PLCNT AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(TRUE);
+const char log_tag_const_w_PLCNT AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(TRUE);
+const char log_tag_const_e_PLCNT AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(TRUE);
 
 const char log_tag_const_v_AUDIO_ADC AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(FALSE);
 const char log_tag_const_d_AUDIO_ADC AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(FALSE);

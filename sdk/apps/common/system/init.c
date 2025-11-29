@@ -598,9 +598,3 @@ void sys_local_irq_enable(void)
     __local_irq_enable();
 }
 
-// just fix build&link
-#if !defined CONFIG_NET_ENABLE && !defined CONFIG_BT_ENABLE
-__attribute__((weak)) void wf_set_phcom_cnt(u32 phcom_cnt)
-{
-}
-#endif

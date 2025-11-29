@@ -38,4 +38,6 @@ void source_node_push_data(struct stream_snode *snode, struct stream_note *note)
 
 int pcm_stream_data_write(u8 *data, u32 data_len); //pcm流写入数据接口，返回非0为成功写入数据长度
 
+void source_plug_set_node_state(void *_hdl, u16 node_state);
+
 #endif

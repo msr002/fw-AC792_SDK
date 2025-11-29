@@ -86,6 +86,18 @@ enum CLK_OUT3_DIV {
     CLK_OUT3_DIV8 = 3 << 2,
 };
 
+/**
+ * \name UART clk source
+ * \{
+ */
+typedef enum {
+    STD_48M = 1,        /*!< STD48M时钟  */
+    STD_24M,            /*!< STD24M时钟  */
+    EXT_CLK,            /*!< 外部时钟  */
+    LSB_CLK,            /*!< 低速时钟  */
+} uart_clk_src_t;
+/* \} name */
+
 /*
  * system enter critical and exit critical handle
  * */
@@ -133,6 +145,18 @@ void clk_out2(u32 gpio, enum CLK_OUT2_SOURCE index, enum CLK_OUT2_DIV div);
 void clk_out_disable(u32 gpio, u8 clock_out_ch);
 
 u32 clk_get_osc_cap(void);
+
+
+/**
+ * @brief uart_clk_src_set 设置UART的时钟源。所有UART都是同一个时钟源（包括log）。
+ *
+ * @Params src 时钟源。可选时钟源见结构体uart_clk_src_t
+ * @Params clk_of_ext ext时钟的频率。时钟源为EXT_CLK(外部时钟)时，需要根据
+ *         实际输入的频率填入该参数。
+ *
+ * @return 0-设置成功; 非0-设置失败.
+ */
+int uart_clk_src_set(uart_clk_src_t src, u32 clk_of_ext);
 
 #endif
 

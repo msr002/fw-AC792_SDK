@@ -196,6 +196,7 @@ void audio_adc_file_init(void)  //通话的ADC节点配置
 
         adc_file_log(" %s len %d, sizeof(cfg) %d", __func__,  len, (int)sizeof(struct adc_file_cfg));
 
+        log_info("esco_adc_f.cfg.mic_en_map = %x\n", esco_adc_f.cfg.mic_en_map);
 #if 0
         adc_file_log(" esco_adc_f.cfg.mic_en_map = %x\n", esco_adc_f.cfg.mic_en_map);
         for (i = 0; i < AUDIO_ADC_MAX_NUM; i++) {
@@ -250,6 +251,9 @@ static void audio_adc_cfg_init(struct adc_file_common *adc_f)  //通话外其他
 
         memcpy(&adc_f->platform_cfg, adc_platform_cfg_table, sizeof(struct adc_platform_cfg) * AUDIO_ADC_MAX_NUM);
         adc_file_log("%s len %d, sizeof(cfg) %d", __func__,  len, (int)sizeof(struct adc_file_cfg));
+
+        audio_adc_file_set_mic_en_map(adc_f->cfg.mic_en_map);
+        log_info("adc_f->cfg.mic_en_map = %x\n", adc_f->cfg.mic_en_map);
 
         u32 i;
 #if 0
@@ -404,7 +408,8 @@ static void adc_mic_output_handler(void *_hdl, s16 *data, int len)
     //cvp读dac 参考数据
     if ((hdl->scene == STREAM_SCENE_ESCO) ||
         (hdl->scene == STREAM_SCENE_PC_MIC) ||
-        (hdl->scene == STREAM_SCENE_LEA_CALL)) {
+        (hdl->scene == STREAM_SCENE_LEA_CALL) ||
+        (hdl->scene == STREAM_SCENE_VIR_DATA_TX)) {
 
 #if TCFG_AUDIO_CVP_OUTPUT_WAY_IIS_ENABLE && TCFG_IIS_NODE_ENABLE
         /*对齐iis外部参考数据延时*/

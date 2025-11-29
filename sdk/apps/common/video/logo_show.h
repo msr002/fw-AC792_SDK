@@ -6,6 +6,11 @@
 #include "server/video_dec_server.h"
 #include "lcd_config.h"
 #include "audio_server.h"
+
+#ifndef MAX_FILE_NAME_LEN
+#define MAX_FILE_NAME_LEN 64
+#endif
+
 struct logo_dec {
     u8 file_type;
     u8 fname[MAX_FILE_NAME_LEN];

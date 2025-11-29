@@ -78,6 +78,12 @@ static void audio_adc_irq_hdl(void)
     asm("csync");
 }
 
+static void user_pa_mute_ext_todo(u8 mute)
+{
+    printf("%s , mute: %d", __func__, mute);
+    //todo external pa mute
+}
+
 struct dac_platform_data dac_data = {
     .output             = TCFG_AUDIO_DAC_CONNECT_MODE,                //DAC输出配置，和具体硬件连接有关，需根据硬件来设置
     .output_mode        = TCFG_AUDIO_DAC_MODE,
@@ -89,6 +95,7 @@ struct dac_platform_data dac_data = {
     .pa_mute_port       = TCFG_AUDIO_DAC_PA_MUTE_PORT,
     .pa_mute_value      = TCFG_AUDIO_DAC_PA_MUTE_LEVEL,
     .pa_mute_delay_ms   = TCFG_AUDIO_DAC_PA_MUTE_DELAY_MS,
+    /* .pa_mute_cb         = user_pa_mute_ext_todo, */
 };
 
 #if TCFG_AUDIO_ADC_ENABLE

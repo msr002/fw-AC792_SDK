@@ -17,7 +17,6 @@ UART0_PLATFORM_DATA_BEGIN(uart0_data)
     .rx_pin                 = TCFG_UART0_RX_IO,
     .max_continue_recv_cnt  = 1024,
     .idle_sys_clk_cnt       = 500000,
-    .clk_src                = STD_24M,
     .flags                  = UART_DEBUG,
     .parity                 = TCFG_UART0_PARITY,
 UART0_PLATFORM_DATA_END();
@@ -37,7 +36,6 @@ UART1_PLATFORM_DATA_BEGIN(uart1_data)
     .rx_thresh              = TCFG_UART1_RTS_RX_THRESH,
     .max_continue_recv_cnt  = TCFG_UART1_MAX_CONTINUE_RECV_CNT,
     .idle_sys_clk_cnt       = 500000,
-    .clk_src                = STD_24M,
     .parity                 = TCFG_UART1_PARITY,
 UART1_PLATFORM_DATA_END();
 #endif

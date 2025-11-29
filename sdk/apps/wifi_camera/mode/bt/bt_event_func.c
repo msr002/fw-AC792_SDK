@@ -190,6 +190,12 @@ static void ms_to_time(u8 *info, u16 len)
     log_info("music_time: %02d : %02d", time / 1000 / 60, (time % 60000) / 1000);
 }
 
+#ifdef CONFIG_UI_ENABLE
+_WEAK_ void lv_example_lyrics_text_input(char *buf)
+{
+    return;
+}
+
 static void lv_example_lyrics_input_dynamic(char *buf)
 {
     if (buf == NULL) {
@@ -200,6 +206,7 @@ static void lv_example_lyrics_input_dynamic(char *buf)
 
     free(buf);
 }
+#endif
 
 static void user_get_bt_music_info(u8 type, u32 time, u8 *info, u16 len)
 {
@@ -219,11 +226,13 @@ static void user_get_bt_music_info(u8 type, u32 time, u8 *info, u16 len)
             memcpy(title_buf, info, len);
             title_buf[len] = '\0';
             log_info("title: %s", title_buf);
+#ifdef CONFIG_UI_ENABLE
             ret = lvgl_rpc_post_func(lv_example_lyrics_input_dynamic, 1, title_buf);
             if (ret == -1) {
                 log_info("lyrics post fail");
                 free(title_buf);
             }
+#endif
         } else if (type == 2) {
             log_info("artist: %s", info);
         } else if (type == 3) {

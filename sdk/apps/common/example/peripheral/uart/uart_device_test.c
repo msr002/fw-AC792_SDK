@@ -47,7 +47,6 @@ UART2_PLATFORM_DATA_BEGIN(uart2_data)
     .max_continue_recv_cnt  = 1024,
 	.tx_pin_hd_level		= GPIO_DRIVE_STRENGTH_8p0mA,
     .idle_sys_clk_cnt       = 500000,
-    .clk_src                = STD_24M,
     .parity                 = UART_PARITY_DISABLE,
 UART2_PLATFORM_DATA_END();
 

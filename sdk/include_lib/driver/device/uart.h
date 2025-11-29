@@ -41,7 +41,6 @@ struct uart_platform_data {
 
     u32 max_continue_recv_cnt;				  ///<  连续接收最大字节，范围：0 ~ 0xFFFFFFFF
     u32 idle_sys_clk_cnt;     				  ///<  超时计数器。在指定时间里没有收到数据，则产生超时中断，范围：0 ~ 0xFFFFFFFF
-    uart_clk_src_t clk_src;     			  ///<  选择时钟源。可选：STD_48M、STD_24M、EXT_CLK、LSB_CLK
     uart_parity_t parity;       		 	  ///<  奇偶校验位。可选：UART_PARITY_DISABLE、UART_PARITY_EVEN、UART_PARITY_ODD
 };
 /* \} name */

@@ -9,6 +9,9 @@
  */
 const uint8_t flash_src_use_malloc = 0;
 
+//flash资源使用crc校验
+const uint8_t flash_src_use_crc = 0;
+
 //临时用法，写1时 使用可视化音频接口播放AVI音频
 const uint8_t jlffmpeg_use_media_interface = 1;
 const uint8_t lv_jlffmpeg_debug_time = 0;    //读卡时间debug

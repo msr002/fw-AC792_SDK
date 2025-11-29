@@ -324,7 +324,17 @@ static void reset_scr_state(void)
     g_scr_state.cnt = 0;
 }
 
-int get_in_ui_navi_flag();
+#ifdef CONFIG_UI_ENABLE
+_WEAK_ int get_in_ui_navi_flag(void)
+{
+    return 0;
+}
+
+_WEAK_ void update_ui_fps_bitrate(const char *fps_buf, const char *bitrate_buf)
+{
+    return;
+}
+#endif
 
 static void statistic_socket_fps(void *priv)
 {
@@ -336,6 +346,8 @@ static void statistic_socket_fps(void *priv)
     u8 cur_fps = hdl->sock_fps;
     float cur_jpg_sz = (hdl->jpg_size + 1023) / 1024.0f;
     log_info("sock fps: %d, disp fps: %d\n", hdl->sock_fps, hdl->disp_fps);
+
+#ifdef CONFIG_UI_ENABLE
     if (get_in_ui_navi_flag()) { 	//只有在导航界面才能更新导航UI数据
         if (cur_fps < g_scr_state.fps_min) {
             g_scr_state.fps_min = cur_fps;
@@ -364,14 +376,14 @@ static void statistic_socket_fps(void *priv)
         snprintf(fps_buf, sizeof(fps_buf), "%d, %d, %.1f", g_scr_state.fps_max, g_scr_state.fps_min, fps_avg);
         snprintf(jpg_sz_buf, sizeof(jpg_sz_buf), "%.1f, %.1f, %.1f", g_scr_state.jpg_sz_max, g_scr_state.jpg_sz_min, jpg_sz_avg);
 
-        update_text_lbl_7(fps_buf);
-        update_text_lbl_9(jpg_sz_buf);
+        update_ui_fps_bitrate(fps_buf, jpg_sz_buf);
         if (timer_cnt >= 100) {
             log_info("the average fps over 100 samples is: %.2f", fps_avg);
             reset_scr_state();
             timer_cnt = 0;
         }
     }
+#endif
     hdl->sock_fps = 0;
     hdl->disp_fps = 0;
     timer_cnt++;

@@ -57,13 +57,13 @@ int gui_src_action_video_rec(int action)
         }
 
         // printf("--->%s()----->%d\n", __func__, __LINE__);
-        app = get_current_app();
+        /* app = get_current_app(); */
         key_event_disable();
-        if (app) {
-            printf("[chili] %s %d   \n", app->name, __LINE__);
-            printf("\n -[function] %s -[line] %d\n", __FUNCTION__, __LINE__);
-            app_mode_go_back();
-        }
+        /* if (app) { */
+        /* printf("[chili] %s %d   \n", app->name, __LINE__); */
+        /* printf("\n -[function] %s -[line] %d\n", __FUNCTION__, __LINE__); */
+        /* app_mode_go_back(); */
+        /* } */
         //} else {
         // printf("--->%s()----->%d\n", __func__, __LINE__);
         //	video_rec_get_remain_time();

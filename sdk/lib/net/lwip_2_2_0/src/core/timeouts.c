@@ -235,6 +235,13 @@ lwip_cyclic_timer(void *arg)
     u32_t next_timeout_time;
     const struct lwip_cyclic_timer *cyclic = (const struct lwip_cyclic_timer *)arg;
 
+    //modify by whr
+    int wf_low_power_get_sleeping_status(void);
+    if (wf_low_power_get_sleeping_status()) {
+        // 低功耗期间跳过定时器执行
+        return;
+    }
+
 #if LWIP_DEBUG_TIMERNAMES
     LWIP_DEBUGF(TIMERS_DEBUG, ("tcpip: %s()\n", cyclic->handler_name));
 #endif

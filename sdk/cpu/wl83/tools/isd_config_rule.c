@@ -10,6 +10,7 @@
 BR22_TWS_DB=YES;
 BR22_TWS_VERSION=0;
 DB_UPDATE_DATA=YES;
+DB_UPDATE_APP_TYPE=0;                   [0-app_area+res, 1-app_area]
 #if defined (CONFIG_SUPPORT_DOUBLE_UBOOT)
 UBOOT_AREA_SIZE=64K,64K;
 #endif
@@ -94,8 +95,9 @@ EX_FLASH_IO=4_PA09_PA10_PA05_PA06_PA08;
 EX_FLASH_IO=2_PA09_PA10_PA05_PA06_PA08;
 #endif
 #endif
-SPI_IO_HD=1_1_1_0_0_1;[主控SPI口IO驱动档位,0-3档可配,clk_d0_d1_d2_d3_cs]
-FLASH_QE_POS=0;[QE的位置:0-SR2的BIT1, 1-SR1的BIT6]
+SPI_IO_HD=1_1_1_0_0_1;[主控Flash_SPI_IO强驱档位,0-3档可配,clk_d0_d1_d2_d3_cs]
+FLASH_QE_POS=0;[QE位置:0-常规(SR2-BIT1), 1-特殊(SR1-BIT6)。FLASH_QE_POS和FLASH_SPEC_QE_ID为'或'关系]
+FLASH_SPEC_QE_ID=C220XX_9D70XX_1C7019;[QE在SR1_BIT6的FlashID列表]
 
 //###时钟配置====================================================================
 #if defined TCFG_OSC_FREQUENCY
@@ -125,7 +127,11 @@ SFC_CLK=24MHz;                          [160M,120M,96M,48M,24M,其他值时通�
 #endif
 #if defined TCFG_UBOOT_DEBUG_PORT
 UTTX=TCFG_UBOOT_DEBUG_PORT;             [配置UBOOT调试输出Pin]
+#if defined TCFG_DEBUG_BAUDRATE
+UTBD=TCFG_DEBUG_BAUDRATE;               [配置UBOOT调试波特率]
+#else
 UTBD=1000000;                           [配置UBOOT调试波特率]
+#endif
 #endif
 //#############################################################################################################################################
 

@@ -270,135 +270,10 @@ INCLUDES := \
 	-I../../../../include_lib/media/aispeech/enc \
 	-I../../../../audio/cpu/wl83/audio_dai \
 	-I../../../../audio/cpu/wl83/audio_common \
-	-I../../../../apps/common/LLM/audio \
-	-I../../../../apps/common/LLM/volc/inc \
-	-I../../../../apps/common/LLM/volc \
-	-I../../../../apps/common/LLM/extra \
-	-I../../../../include_lib/net/cJSON_common \
-	-I../../../../include_lib/net/curl \
-	-I../../../../include_lib/net/lwip_2_2_0/lwip/src/include/compat/posix \
-	-I../../../../include_lib/net/lwip_2_2_0/lwip/src/include/compat/stdc \
-	-I../../../../include_lib/system/os \
-	-I../../../../include_lib/net/libwebsockets/include \
-	-I../../../../include_lib/net/libwebsockets/include/libwebsockets \
-	-I../../../../apps/common/LLM/onesdk/src \
-	-I../../../../apps/common/LLM/onesdk/src/aigw \
-	-I../../../../apps/common/LLM/onesdk/src/util \
-	-I../../../../apps/common/LLM/onesdk/src/aws \
-	-I../../../../apps/common/LLM/onesdk/include \
-	-I../../../../apps/common/LLM/onesdk/include/iot \
-	-I../../../../apps/common/LLM/onesdk/include/protocols \
-	-I../../../../apps/common/LLM/onesdk/include/thing_model \
-	-I../../../../apps/common/LLM/onesdk/include/platform/plat \
-	-I../../../../apps/common/LLM/onesdk/platform \
-	-I../../../../apps/common/LLM/onesdk \
-	-I../../../../apps/common/LLM/duer/intelligent_duer \
-	-I../../../../apps/common/LLM/duer/my_platform \
-	-I../../../../include_lib/net/web_socket \
-	-I../../../../include_lib/net/network_download \
 
 
 # 需要编译的 .c 文件
 c_SRC_FILES := \
-	../../../../apps/common/LLM/audio/audio_input.c \
-	../../../../apps/common/LLM/duer/intelligent_duer/duer_auth_algorithm.c \
-	../../../../apps/common/LLM/duer/intelligent_duer/duer_http_req.c \
-	../../../../apps/common/LLM/duer/intelligent_duer/duer_json_parse.c \
-	../../../../apps/common/LLM/duer/intelligent_duer/duer_json_request.c \
-	../../../../apps/common/LLM/duer/intelligent_duer/duer_record.c \
-	../../../../apps/common/LLM/duer/intelligent_duer/duer_socket.c \
-	../../../../apps/common/LLM/duer/intelligent_duer/test_demo.c \
-	../../../../apps/common/LLM/duer/my_platform/my_platform_http.c \
-	../../../../apps/common/LLM/duer/my_platform/my_platform_http_api.c \
-	../../../../apps/common/LLM/duer/my_platform/my_platform_list_download.c \
-	../../../../apps/common/LLM/duer/my_platform/my_platform_record.c \
-	../../../../apps/common/LLM/duer/my_platform/my_platform_url_list.c \
-	../../../../apps/common/LLM/extra/g711.c \
-	../../../../apps/common/LLM/onesdk/examples/onesdk_realtime/chat_agent/realtime_demo.c \
-	../../../../apps/common/LLM/onesdk/platform/plat/alloc.c \
-	../../../../apps/common/LLM/onesdk/platform/plat/platform.c \
-	../../../../apps/common/LLM/onesdk/platform/plat/util.c \
-	../../../../apps/common/LLM/onesdk/src/aigw/auth.c \
-	../../../../apps/common/LLM/onesdk/src/aigw/llm.c \
-	../../../../apps/common/LLM/onesdk/src/aws/common/allocator.c \
-	../../../../apps/common/LLM/onesdk/src/aws/common/array_list.c \
-	../../../../apps/common/LLM/onesdk/src/aws/common/assert.c \
-	../../../../apps/common/LLM/onesdk/src/aws/common/atomics.c \
-	../../../../apps/common/LLM/onesdk/src/aws/common/byte_buf.c \
-	../../../../apps/common/LLM/onesdk/src/aws/common/byte_order.c \
-	../../../../apps/common/LLM/onesdk/src/aws/common/clock.c \
-	../../../../apps/common/LLM/onesdk/src/aws/common/common.c \
-	../../../../apps/common/LLM/onesdk/src/aws/common/data_time.c \
-	../../../../apps/common/LLM/onesdk/src/aws/common/encoding.c \
-	../../../../apps/common/LLM/onesdk/src/aws/common/error.c \
-	../../../../apps/common/LLM/onesdk/src/aws/common/hash_table.c \
-	../../../../apps/common/LLM/onesdk/src/aws/common/json.c \
-	../../../../apps/common/LLM/onesdk/src/aws/common/linked_list.c \
-	../../../../apps/common/LLM/onesdk/src/aws/common/math.c \
-	../../../../apps/common/LLM/onesdk/src/aws/common/string.c \
-	../../../../apps/common/LLM/onesdk/src/aws/common/time.c \
-	../../../../apps/common/LLM/onesdk/src/aws/common/zero.c \
-	../../../../apps/common/LLM/onesdk/src/infer_inner_chat.c \
-	../../../../apps/common/LLM/onesdk/src/infer_realtime_ws.c \
-	../../../../apps/common/LLM/onesdk/src/iot/dynreg.c \
-	../../../../apps/common/LLM/onesdk/src/iot/iot_kv.c \
-	../../../../apps/common/LLM/onesdk/src/iot/iot_mqtt.c \
-	../../../../apps/common/LLM/onesdk/src/iot/iot_popen.c \
-	../../../../apps/common/LLM/onesdk/src/iot/iot_utils.c \
-	../../../../apps/common/LLM/onesdk/src/iot/log/iot_log.c \
-	../../../../apps/common/LLM/onesdk/src/iot/log/iot_log_report.c \
-	../../../../apps/common/LLM/onesdk/src/iot/ota/iot_ota_api.c \
-	../../../../apps/common/LLM/onesdk/src/iot/ota/iot_ota_utils.c \
-	../../../../apps/common/LLM/onesdk/src/iot/thingmodel/custom_topic.c \
-	../../../../apps/common/LLM/onesdk/src/iot/thingmodel/device_delay.c \
-	../../../../apps/common/LLM/onesdk/src/iot/thingmodel/event.c \
-	../../../../apps/common/LLM/onesdk/src/iot/thingmodel/gateway.c \
-	../../../../apps/common/LLM/onesdk/src/iot/thingmodel/iot_ntp.c \
-	../../../../apps/common/LLM/onesdk/src/iot/thingmodel/iot_tm_api.c \
-	../../../../apps/common/LLM/onesdk/src/iot/thingmodel/property.c \
-	../../../../apps/common/LLM/onesdk/src/iot/thingmodel/service.c \
-	../../../../apps/common/LLM/onesdk/src/iot/thingmodel/shadow.c \
-	../../../../apps/common/LLM/onesdk/src/iot/thingmodel/webshell.c \
-	../../../../apps/common/LLM/onesdk/src/iot_basic.c \
-	../../../../apps/common/LLM/onesdk/src/onesdk.c \
-	../../../../apps/common/LLM/onesdk/src/onesdk_chat.c \
-	../../../../apps/common/LLM/onesdk/src/onesdk_iot.c \
-	../../../../apps/common/LLM/onesdk/src/onesdk_rt.c \
-	../../../../apps/common/LLM/onesdk/src/protocols/http.c \
-	../../../../apps/common/LLM/onesdk/src/protocols/http_libs.c \
-	../../../../apps/common/LLM/onesdk/src/protocols/lws_http_client.c \
-	../../../../apps/common/LLM/onesdk/src/protocols/lws_http_download.c \
-	../../../../apps/common/LLM/onesdk/src/protocols/lws_http_upload.c \
-	../../../../apps/common/LLM/onesdk/src/util/aes.c \
-	../../../../apps/common/LLM/onesdk/src/util/aes_decode.c \
-	../../../../apps/common/LLM/onesdk/src/util/aws_json.c \
-	../../../../apps/common/LLM/onesdk/src/util/hmac_sha256.c \
-	../../../../apps/common/LLM/onesdk/src/util/md5.c \
-	../../../../apps/common/LLM/onesdk/src/util/sha256.c \
-	../../../../apps/common/LLM/onesdk/src/util/util.c \
-	../../../../apps/common/LLM/volc/VolcEngineRTCLiteDemo.c \
-	../../../../apps/common/LLM/volc/access_token.c \
-	../../../../apps/common/LLM/volc/net_request.c \
-	../../../../apps/common/LLM/volc/src/common/volc_crypto.c \
-	../../../../apps/common/LLM/volc/src/common/volc_sprintf.c \
-	../../../../apps/common/LLM/volc/src/common/volc_string.c \
-	../../../../apps/common/LLM/volc/src/common/volc_tls.c \
-	../../../../apps/common/LLM/volc/src/platform/volc_atomic.c \
-	../../../../apps/common/LLM/volc/src/platform/volc_cond.c \
-	../../../../apps/common/LLM/volc/src/platform/volc_device.c \
-	../../../../apps/common/LLM/volc/src/platform/volc_device_finger_print.c \
-	../../../../apps/common/LLM/volc/src/platform/volc_directory.c \
-	../../../../apps/common/LLM/volc/src/platform/volc_errno.c \
-	../../../../apps/common/LLM/volc/src/platform/volc_fileio.c \
-	../../../../apps/common/LLM/volc/src/platform/volc_log.c \
-	../../../../apps/common/LLM/volc/src/platform/volc_memory.c \
-	../../../../apps/common/LLM/volc/src/platform/volc_mutex.c \
-	../../../../apps/common/LLM/volc/src/platform/volc_network.c \
-	../../../../apps/common/LLM/volc/src/platform/volc_socket.c \
-	../../../../apps/common/LLM/volc/src/platform/volc_thread.c \
-	../../../../apps/common/LLM/volc/src/platform/volc_time.c \
-	../../../../apps/common/LLM/volc/src/platform/volc_uuid.c \
-	../../../../apps/common/LLM/volc/src/platform/volc_zlib.c \
 	../../../../apps/common/asr/jlkws/jlkws.c \
 	../../../../apps/common/audio_music/audio_enc_aec_data.c \
 	../../../../apps/common/c++/cpp_run_init.c \
@@ -412,6 +287,7 @@ c_SRC_FILES := \
 	../../../../apps/common/camera/SP140A_dvp/sp140a_dvp_awb.c \
 	../../../../apps/common/camera/SP140A_dvp/sp140a_dvp_iq.c \
 	../../../../apps/common/camera/TVP5150A_DVP.c \
+	../../../../apps/common/camera/bf20a6/bf20a6.c \
 	../../../../apps/common/camera/gc0308/gc0308.c \
 	../../../../apps/common/camera/gc1084_mipi/gc1084_mipi.c \
 	../../../../apps/common/camera/gc1084_mipi/gc1084_mipi_ae.c \
@@ -427,6 +303,7 @@ c_SRC_FILES := \
 	../../../../apps/common/camera/h63p_mipi/h63p_mipi_iq.c \
 	../../../../apps/common/camera/isp_scenes.c \
 	../../../../apps/common/camera/isp_tools.c \
+	../../../../apps/common/camera/ov2659/ov2659.c \
 	../../../../apps/common/camera/sc1245_dvp/sc1245.c \
 	../../../../apps/common/camera/sc1245_dvp/sc1245_ae.c \
 	../../../../apps/common/camera/sc1245_dvp/sc1245_awb.c \
@@ -539,6 +416,7 @@ c_SRC_FILES := \
 	../../../../apps/common/lcd/lcd_driver/lcd_tools.c \
 	../../../../apps/common/lcd/lcd_driver/mcu_lcd/lcd_mcu_ili9481_320x480.c \
 	../../../../apps/common/lcd/lcd_driver/mcu_lcd/lcd_mcu_ili9488_320x480.c \
+	../../../../apps/common/lcd/lcd_driver/mcu_lcd/lcd_mcu_st7789v_240x320.c \
 	../../../../apps/common/lcd/lcd_driver/mipi_lcd/lcd_mipi_fl7707_480x1280.c \
 	../../../../apps/common/lcd/lcd_driver/mipi_lcd/lcd_mipi_ili9881c_800x1280.c \
 	../../../../apps/common/lcd/lcd_driver/mipi_lcd/lcd_mipi_jd9165ba_1024x600.c \
@@ -1082,11 +960,16 @@ c_SRC_FILES := \
 	../../../../apps/common/usb/usb_config.c \
 	../../../../apps/common/usb/usb_epbuf_manager.c \
 	../../../../apps/common/usb/usb_host_config.c \
+	../../../../apps/common/video/decoder_one_jpeg.c \
+	../../../../apps/common/video/encoder_one_jpeg.c \
 	../../../../apps/common/video/jpg2avi.c \
 	../../../../apps/common/video/logo_show.c \
 	../../../../apps/common/video/quick_show_uvc.c \
+	../../../../apps/common/video/sharpen_adapter.c \
 	../../../../apps/common/video/simple_avi_unpkg.c \
 	../../../../apps/common/video/user_video_rec.c \
+	../../../../apps/common/video/video_dec_demo.c \
+	../../../../apps/common/video/video_rec_demo.c \
 	../../../../apps/wifi_camera/app_database.c \
 	../../../../apps/wifi_camera/app_main.c \
 	../../../../apps/wifi_camera/app_msg.c \
@@ -1185,7 +1068,6 @@ c_SRC_FILES := \
 	../../../../apps/wifi_camera/mode/video_photo/video_photo.c \
 	../../../../apps/wifi_camera/mode/video_rec/video_rec.c \
 	../../../../apps/wifi_camera/mode/video_rec/video_rec_cfg.c \
-	../../../../apps/wifi_camera/show_h264.c \
 	../../../../apps/wifi_camera/wifi/ctp_cmd.c \
 	../../../../apps/wifi_camera/wifi/ftpd_vfs_reg.c \
 	../../../../apps/wifi_camera/wifi/media_file_list.c \
@@ -1619,13 +1501,6 @@ LFLAGS := \
 	../../../../cpu/wl83/liba/lib_sig_mesh.a  \
 	../../../../cpu/wl83/liba/rcsp_stack.a \
 	../../../../cpu/wl83/liba/lvgl_v8_extend.a \
-	../../../../cpu/wl83/liba/libVolcEngineRTCLite.a \
-	../../../../cpu/wl83/liba/libcurl.a \
-	../../../../cpu/wl83/liba/libmbedtls_3_4_0.a  \
-	../../../../cpu/wl83/liba/libwebsockets.a \
-	../../../../cpu/wl83/liba/cJSON.a  \
-	../../../../cpu/wl83/liba/libmbedtls_3_4_0.a   \
-	../../../../cpu/wl83/liba/cJSON.a   \
 	../../../../include_lib/newlib/pi32v2-lib/libm.a \
 	../../../../include_lib/newlib/pi32v2-lib/libc.a \
 	../../../../include_lib/newlib/pi32v2-lib/libcompiler_rt.a \

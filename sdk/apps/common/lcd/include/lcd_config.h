@@ -109,6 +109,11 @@
 #define LCD_H 428
 #endif
 
+#if TCFG_LCD_MCU_ST7789V_240x320
+#define LCD_W 240
+#define LCD_H 320
+#endif
+
 #define LCD_ID  0
 
 #else /* TCFG_LCD_SUPPORT_MULTI_DRIVER_EN */

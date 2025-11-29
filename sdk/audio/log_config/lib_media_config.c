@@ -658,6 +658,12 @@ const char log_tag_const_i_AUD_DAC = CONFIG_DEBUG_LIB(TRUE);
 const char log_tag_const_w_AUD_DAC = CONFIG_DEBUG_LIB(TRUE);
 const char log_tag_const_e_AUD_DAC = CONFIG_DEBUG_LIB(TRUE);
 
+const char log_tag_const_v_AUD_COM = CONFIG_DEBUG_LIB(FALSE);
+const char log_tag_const_d_AUD_COM = CONFIG_DEBUG_LIB(FALSE);
+const char log_tag_const_i_AUD_COM = CONFIG_DEBUG_LIB(TRUE);
+const char log_tag_const_w_AUD_COM = CONFIG_DEBUG_LIB(TRUE);
+const char log_tag_const_e_AUD_COM = CONFIG_DEBUG_LIB(TRUE);
+
 const char log_tag_const_v_APP_DAC = CONFIG_DEBUG_LIB(FALSE);
 const char log_tag_const_d_APP_DAC = CONFIG_DEBUG_LIB(FALSE);
 const char log_tag_const_i_APP_DAC = CONFIG_DEBUG_LIB(FALSE);

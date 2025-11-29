@@ -293,6 +293,29 @@ static void power_off_timer_cb(void *p)
     sys_power_poweroff();
 }
 
+#ifdef CONFIG_UI_ENABLE
+//增加弱函数定义，防止客户使用空白模版编译时报错
+_WEAK_ void usb_page_show(int arg)
+{
+    return;
+}
+
+_WEAK_ void usb_page_hide(int arg)
+{
+    return;
+}
+
+_WEAK_ void parking_page_show(int arg)
+{
+    return;
+}
+
+_WEAK_ void parking_page_hide(int arg)
+{
+    return;
+}
+#endif
+
 static int device_event_handler(struct sys_event *e)
 {
     struct device_event *event = (struct device_event *)e->payload;
@@ -566,6 +589,12 @@ void app_main()
 #endif
     app_mode_change(APP_MODE_SYSTEM);
 
+#ifdef CONFIG_BT_ENABLE
+    app_mode_change(APP_MODE_BT);
+#endif
+
+
+
 #ifdef USE_LVGL_V8_UI_DEMO
     int lvgl_main_task_init(void);
     u8 time_out = 2; //播放开机动画时间
@@ -604,8 +633,10 @@ void app_main()
 
     app_mode_change(APP_MODE_REC);
     app_send_message(APP_MSG_REC_MAIN, 0);
-    /* app_mode_change(APP_MODE_BT); */
+
 #endif
+
+
 
 #if defined CONFIG_ENABLE_VLIST
     /*生成文件列表*/

@@ -363,18 +363,15 @@ int eq_update_tab_base(u8 mode_index, char *node_name, u8 cfg_index, u8 by_pass)
 
         //运行时，直接设置更新
         struct eq_adj eff = {0};
-        eff.type = EQ_IS_BYPASS_CMD;
-        eff.param.is_bypass = tab->is_bypass;
-        if (by_pass != 0xff) {
-            eff.param.is_bypass = by_pass; //重写by_pass状态
-        }
-        ret = jlstream_set_node_param(NODE_UUID_EQ, node_name, &eff, sizeof(eff)); //更新bypass 标志
-        //运行时，直接设置更新
         eff.type = EQ_TAB_CMD;
+        eff.param.tab.is_bypass = tab->is_bypass;
+        if (by_pass != 0xff) {
+            eff.param.tab.is_bypass = by_pass; //重写by_pass状态
+        }
         eff.param.tab.global_gain = tab->global_gain;
         eff.param.tab.seg_num = tab->seg_num;
         eff.param.tab.seg = tab->seg; //系数表指针赋值
-        jlstream_set_node_param(NODE_UUID_EQ, node_name, &eff, sizeof(eff));
+        ret = jlstream_set_node_param(NODE_UUID_EQ, node_name, &eff, sizeof(eff));
 
         free(tab);
     }

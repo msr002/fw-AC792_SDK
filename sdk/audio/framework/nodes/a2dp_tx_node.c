@@ -35,6 +35,7 @@
 #define TIMESTAMP_USE_AUDIO_JIFFIES                 0   // 是否用杰理时间戳
 #if TCFG_WIFI_ENABLE && TCFG_USER_EMITTER_ENABLE
 #define A2DP_SEND_ONCE_PACKET_NUM                   4
+#define WIFI_PSM_ENABLE                             1
 #else
 #define A2DP_SEND_ONCE_PACKET_NUM                   0
 #endif
@@ -119,9 +120,11 @@ void bredr_tx_prepare_callback(void *conn, void *bulk, int err)
         return;
     }
 
+#if WIFI_PSM_ENABLE
     if (get_rf_coexistence_config_index() != 10) {
         switch_rf_coexistence_config_table(10);
     }
+#endif
 }
 
 void bredr_tx_result_callback(void *conn, void *bulk, int err)
@@ -131,11 +134,13 @@ void bredr_tx_result_callback(void *conn, void *bulk, int err)
     }
 
     if (++tx_ok_num == A2DP_SEND_ONCE_PACKET_NUM) {
+#if WIFI_PSM_ENABLE
         if (get_rf_coexistence_config_index() != 4) {
             switch_rf_coexistence_config_table(4);
         }
-        tx_ok_num = 0;
         wifi_psm_run_notify(0);
+#endif
+        tx_ok_num = 0;
     }
 }
 #endif
@@ -259,7 +264,7 @@ static void a2dp_tx_handle_frame(struct stream_iport *iport, struct stream_note 
         hdl->num++;
         hdl->offset += hdl->frame->len;
         if (hdl->num >= hdl->tx_param.frame_num) {
-            /* g_printf("send2 : %d, %d\n", hdl->num, hdl->offset); */
+            /* log_debug("send2 : %d, %d\n", hdl->num, hdl->offset); */
             hdl->packet_sn++;
             hdl->timestamp = hdl->packet_sn * (128 * hdl->num);
 #if A2DP_SEND_ONCE_PACKET_NUM > 1
@@ -280,7 +285,9 @@ static void a2dp_tx_handle_frame(struct stream_iport *iport, struct stream_note 
                 ++hdl->temp_packet_num;
 #if TCFG_WIFI_ENABLE && TCFG_USER_EMITTER_ENABLE
                 if (hdl->temp_packet_num == A2DP_SEND_ONCE_PACKET_NUM - 1) {
+#if WIFI_PSM_ENABLE
                     sys_hi_timeout_add((void *)1, (void (*)(void *))wifi_psm_run_notify, hdl->sbc_input_len * 1000 * hdl->tx_param.frame_num / hdl->sample_rate / 2 / hdl->channel - 5);
+#endif
                 }
 #endif
             }
@@ -412,15 +419,14 @@ static int a2dp_tx_ioc_fmt_nego(struct stream_iport *iport)
 
     u32 bit_rate = ((sbc_param->bitpool) | (sbc_param->mode << 8) | (sbc_param->blocks << 16) | (sbc_param->subbands << 20) | (sbc_param->allocation << 24) | (sbc_param->endian << 28));
     if (in_fmt->bit_rate != bit_rate) {//sbc编码使用
-        log_info("bit_rate 0x%x, 0x%x", in_fmt->bit_rate, bit_rate);
-        //TODO
-        /* in_fmt->bit_rate = bit_rate; */
-        /* ret = NEGO_STA_CONTINUE; */
+        /* log_info("bit_rate 0x%x, 0x%x", in_fmt->bit_rate, bit_rate); */
+        in_fmt->bit_rate = bit_rate;
+        ret = NEGO_STA_CONTINUE;
     }
 
     hdl->sample_rate = in_fmt->sample_rate;
-    /* printf("====bit_rate %x\n", bit_rate); */
-    /* printf("a2dp_tx frequency %d, sr %d, bitpool %d, mode %d, channle_mode %x,allocation %d, blocks %d, subbands %d, endian %d\n", sbc_param->frequency, sample_rate, sbc_param->bitpool, sbc_param->mode, channel_mode, sbc_param->allocation, sbc_param->blocks, sbc_param->subbands, sbc_param->endian); */
+
+    log_info("a2dp_tx frequency %d, sr %d, bitpool %d, mode %d, channle_mode %x,allocation %d, blocks %d, subbands %d, endian %d", sbc_param->frequency, sample_rate, sbc_param->bitpool, sbc_param->mode, channel_mode, sbc_param->allocation, sbc_param->blocks, sbc_param->subbands, sbc_param->endian);
 
     // 调整sbc编码参数与耳机sbc参数一致
     stream_node_ioctl(iport->prev->node, NODE_UUID_ENCODER, NODE_IOC_SET_PARAM, (int)sbc_param);
@@ -555,7 +561,9 @@ static int a2dp_tx_stop(struct a2dp_tx_hdl *hdl)
 
 #if TCFG_WIFI_ENABLE && TCFG_USER_EMITTER_ENABLE
     rf_coexistence_scene_exit(RF_COEXISTENCE_SCENE_A2DP_SOURCE);
+#if WIFI_PSM_ENABLE
     wifi_psm_run_notify(0);
+#endif
 #endif
 
     return 0;

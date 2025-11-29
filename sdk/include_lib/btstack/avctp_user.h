@@ -137,6 +137,9 @@ typedef enum {
     USER_CTRL_HFP_CMD_FUNCTION1,            //预留HFP命令位置
     USER_CTRL_HFP_CMD_FUNCTION2,            //预留HFP命令位置
     USER_CTRL_HFP_CMD_END,
+    USER_CTRL_HFP_MIC_VOLUME_UP,
+    USER_CTRL_HFP_MIC_VOLUME_DOWN,
+    USER_CTRL_HFP_MIC_SET_VOLUME,
 
     //音乐控制部分
     USER_CTRL_AVCTP_CMD_BEGIN       = 0x40,
@@ -450,6 +453,7 @@ typedef enum {
 
     BT_STATUS_TRIM_OVER,        /*测试盒TRIM完成*/
     BT_STATUS_PHONE_NAME,   /*获取来电号码name*/
+    BT_STATUS_CALL_MIC_VOL_CHANGE,
 } STATUS_FOR_USER;
 
 typedef enum {
@@ -538,8 +542,10 @@ extern u32 bt_cmd_prepare_for_addr(u8 *addr, USER_CMD_TYPE cmd, u16 param_len, u
 extern u32 bt_cmd_prepare(USER_CMD_TYPE cmd, u16 param_len, u8 *param);
 //作为发射器时操作命令的接口
 extern u32 bt_emitter_cmd_prepare(USER_CMD_TYPE cmd, u16 param_len, u8 *param);
+extern u32 bt_emitter_cmd_prepare_for_addr(u8 *addr, USER_CMD_TYPE cmd, u16 param_len, u8 *param);
 /*根据规则生产BLE的随机地址*/
 extern void bt_make_ble_address(u8 *ble_address, u8 *edr_address);
+extern void set_start_search_spp_device(u8 spp);
 
 
 /****************蓝牙的一些状态获取接口*************************/
@@ -779,8 +785,8 @@ typedef struct {
     u8  *data_ptr;
 } hid_s_param_t;
 
-extern u16 bt_sdp_create_diy_device_ID_service(u8 *buffer, u16 buffer_size);
-extern u16 bt_sdp_create_diy_hid_service(u8 *buffer, u16 buffer_size, const u8 *hid_descriptor, u16 hid_descriptor_size);
+u16 bt_sdp_create_diy_device_ID_service(u8 *buffer, u16 buffer_size);
+u16 bt_sdp_create_diy_hid_service(u8 *buffer, u16 buffer_size, const u8 *hid_descriptor, u16 hid_descriptor_size);
 /************用户自定义HID的一些接口 end*******************/
 
 /*该接口会直接操作VM，可以读取蓝牙记录列表中的蓝牙地址信息
@@ -886,5 +892,11 @@ void make_rand_num(u8 *buf);
 //获取另一个设备的a2dp状态
 u8 bt_a2dp_get_status_for_other_addr(bd_addr_t addr);
 u32 unactice_device_cmd_prepare(USER_CMD_TYPE cmd, u16 param_len, u8 *param);
+void set_temp_link_key(u8 *linkkey);
+void bredr_adt_init();
+void bt_set_support_3M_size(u8 en);
+void delete_link_key(u8 *bd_addr, u8 id);
+//获取另一个设备的a2dp状态
+u8 bt_a2dp_get_status_for_other_addr(bd_addr_t addr);
 
 #endif

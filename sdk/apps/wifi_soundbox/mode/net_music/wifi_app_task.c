@@ -1,4 +1,5 @@
 #include "system/init.h"
+#include "system/timer.h"
 #include "wifi/wifi_connect.h"
 #include "lwip/sockets.h"
 #include "lwip/netdb.h"
@@ -30,14 +31,13 @@
 #define CONNECT_TIMEOUT_SEC 60
 
 static struct {
-    u32 use_static_ipaddr_flag : 1;
-    u32 net_app_init_flag : 1;
-    u32 request_connect_flag : 1;
-    u32 save_ssid_flag : 1;
-    u32 mac_addr_succ_flag : 1;
-    u32 udp_recv_test_exit_flag : 1;
-    u32 rf_test_mode : 3;
-    u32 reserved : 23;
+    u8 use_static_ipaddr_flag : 1;
+    u8 net_app_init_flag : 1;
+    u8 request_connect_flag : 1;
+    u8 save_ssid_flag : 1;
+    u8 mac_addr_succ_flag : 1;
+    u8 udp_recv_test_exit_flag : 1;
+    u16 psm_timer;
 } wifi_app_hdl;
 
 #define __this	(&wifi_app_hdl)
@@ -651,6 +651,19 @@ static void wifi_psm_fast_rsp_task(void *p)
     }
 }
 
+static void __wifi_psm_run_callback(int power_save)
+{
+    __this->psm_timer = 0;
+
+    if (get_cur_wifi_info()->mode == STA_MODE && wifi_get_sta_connect_state() == WIFI_STA_NETWORK_STACK_DHCP_SUCC) {
+        void RTMPSTAPowerSave(int power_save);
+        RTMPSTAPowerSave(power_save);
+    } else if (get_cur_wifi_info()->mode == P2P_MODE && wifi_get_sta_connect_state() == WIFI_STA_NETWORK_STACK_DHCP_SUCC) {
+        void RTMPP2PPowerSave(int power_save);
+        /* RTMPP2PPowerSave(power_save); */
+    }
+}
+
 static void wifi_psm_run_callback(int power_save)
 {
     if (get_cur_wifi_info()->mode == STA_MODE && wifi_get_sta_connect_state() == WIFI_STA_NETWORK_STACK_DHCP_SUCC) {
@@ -667,6 +680,9 @@ void wifi_psm_run_notify(int power_save)
     int msg[3] = {(int)wifi_psm_run_callback, 1, power_save};
     int err = os_taskq_post_type("wifi_psm_fast_rsp", Q_CALLBACK, ARRAY_SIZE(msg), msg);
     if (err) {
+        if (power_save == 0 && !__this->psm_timer) {
+            __this->psm_timer = sys_timeout_add_to_task("wifi_psm_fast_rsp", NULL, (void (*)(void *))__wifi_psm_run_callback, 50);
+        }
         log_error("psm notify error");
     }
 }
@@ -684,13 +700,6 @@ static int wireless_net_init(void)   //主要是create wifi 线程的
     return thread_fork("wifi_app_task", 10, 1792, 0, 0, wifi_app_task, NULL);
 }
 late_initcall(wireless_net_init);
-#endif
-
-#if !defined CONFIG_WIFI_IDLE_RESUME_BASEBAND_ENABLE && TCFG_LOWPOWER_LOWPOWER_SEL == 0
-void wf_low_power_request(void *priv, u32 usec)
-{
-
-}
 #endif
 
 #endif

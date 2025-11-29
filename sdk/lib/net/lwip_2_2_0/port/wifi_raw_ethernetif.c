@@ -16,6 +16,37 @@
 #define IFNAME0 'w'
 #define IFNAME1 'l'
 
+#define MAC_ADDR_LEN 6
+#define HEAD_802_11_OFFSET 20
+typedef struct _head_802_11 {
+    unsigned short  fc;
+    unsigned short  duration;
+    unsigned char   addr1[MAC_ADDR_LEN];
+    unsigned char   addr2[MAC_ADDR_LEN];
+    unsigned char	addr3[MAC_ADDR_LEN];
+    unsigned short	frag: 4;
+    unsigned short	sequence: 12;
+    unsigned char 	data[0];
+} head_802_11, *phead_802_11;
+
+static u8 user_head[10];
+static u32 user_head_len = 10;
+static u16 last_seq = 0;    //用来判断重复包
+static u8  last_frag = 0;
+
+//接收到非本机mac地址包时调用
+static void (*wifi_raw_svae_not_my_pkt)(u8 *data, int len);
+
+
+void wifi_raw_set_user_head(u8 *data, int len)
+{
+    if (len > user_head_len) {
+        printf("err! The data len exceeds the maximum limit(%d) \n", user_head_len);
+        return;
+    }
+    memcpy(user_head, data, len);
+}
+
 /**
  * Helper struct to hold private data used to operate your ethernet interface.
  * Keeping the ethernet address of the MAC in this struct is not necessary
@@ -43,7 +74,6 @@ static void low_level_init(struct netif *netif)
     /* device capabilities */
     /* don't set NETIF_FLAG_ETHARP if this device is not an ethernet one */
     netif->flags = NETIF_FLAG_BROADCAST | NETIF_FLAG_ETHARP | NETIF_FLAG_LINK_UP | NETIF_FLAG_IGMP;
-
 #if LWIP_IPV6
     netif->flags |= NETIF_FLAG_MLD6;
     netif->output_ip6 = ethip6_output;
@@ -93,14 +123,20 @@ static err_t low_level_output(struct netif *netif, struct pbuf *p)
     pbuf_header(p, -ETH_PAD_SIZE); /* drop the padding word */
 #endif
 
+    phead_802_11 pHdr = wifi_get_wifi_send_pkg_ptr() + HEAD_802_11_OFFSET;
+    pHdr->sequence++;
+
     u8 *pos = wifi_get_payload_ptr();
+    //添加自定义数据头部
+    memcpy(pos, user_head, user_head_len);
+    pos += user_head_len;
 
     for (struct pbuf *q = p; q != NULL; q = q->next) {
         memcpy(pos, q->payload, q->len);
         pos += (int)q->len;
     }
 
-    wifi_send_data(p->tot_len, TxRate);
+    wifi_send_data(p->tot_len + user_head_len, TxRate);
 
 #if ETH_PAD_SIZE
     pbuf_header(p, ETH_PAD_SIZE); /* reclaim the padding word */
@@ -257,11 +293,17 @@ char wifi_raw_rssi_get(void)
     return rssi0;
 }
 
-_WEAK_ void check_wifi_mac(const u8 *mac)
+_WEAK_ void wifi_raw_check_user_head(u8 *user_head, int len)
 {
     //在外层定义
     //检查一些特定的包头
 }
+
+void wifi_raw_save_no_my_pkt_set_cb(void (*cb)(u8 *data, int len))
+{
+    wifi_raw_svae_not_my_pkt = cb;
+}
+
 
 static void wifi_rx_cb(void *rxwi, struct ieee80211_frame *wh, void *data, u32 len, struct netif *netif)
 {
@@ -270,24 +312,48 @@ static void wifi_rx_cb(void *rxwi, struct ieee80211_frame *wh, void *data, u32 l
         return;
     }
 
-    //过滤调目标MAC地址不是自己MAC地址的包
-    if (memcmp(&((u8 *)data)[28], pkg_head_fill_magic, sizeof(pkg_head_fill_magic))) {
+    struct wifi_store_info *info = get_cur_wifi_info();
+    if (info->mode == AP_MODE) {
+        //AP模式传进来的数据偏移不一样
+        data -= 24;
+    }
 
-        check_wifi_mac(&((u8 *)data)[34]);
+    //check dest addr = src addr ?
+    if (memcmp(&((u8 *)data)[28], pkg_head_fill_magic, sizeof(pkg_head_fill_magic))) {
+        wifi_raw_check_user_head(((u32)data + 48), user_head_len);
+
+        if (wifi_raw_svae_not_my_pkt) {
+            phead_802_11 pHdr  = (phead_802_11)((u32)data + 24);
+            if (pHdr->sequence == last_seq) {
+                //重复包
+                return;
+            }
+            last_seq = pHdr->sequence;
+
+            wifi_raw_svae_not_my_pkt(((u32)data + 28), len - 28);
+        }
 
         rssi0 = -99;
         return;
     }
+
+    phead_802_11 pHdr  = (phead_802_11)((u32)data + 24);
+    if (pHdr->sequence == last_seq) {
+        //重复包
+        return;
+    }
+    last_seq = pHdr->sequence;
+
 
     PRXWI_STRUC	pRxWI = (PRXWI_STRUC)rxwi;
     rssi0 = pRxWI->RSSI0;
     /* rssi1 = pRxWI->RSSI1; */
     /* rssi2 = pRxWI->RSSI2; */
 
-    u8 *payload = &((u8 *)data)[48];
-    u32 payload_len = len - 24;
+    u8 *payload = &((u8 *)data)[48] + user_head_len;
+    u32 payload_len = len - 24 - user_head_len;
 
-    /*printf("len = %d,%d\r\n", payload_len, payload[payload_len - 1]);*/
+    /* printf("len = %d,%d\r\n", payload_len, payload[payload_len - 1]); */
     /*put_buf(payload, payload_len);*/
 
     ethernetif_input(netif, payload, payload_len);
@@ -336,13 +402,6 @@ err_t wireless_raw_ethernetif_init(struct netif *netif)
     low_level_init(netif);
 
     wifi_set_rts_threshold(0xffff);//配置即使长包也不发送RTS
-
-    //配置WIFI RF 通信信道
-    wifi_set_channel(1);
-
-    //配置底层重传次数
-    wifi_set_long_retry(1);
-    wifi_set_short_retry(1);
 
     wifi_set_frame_cb(wifi_rx_cb, netif); //注册接收802.11数据帧回调
 

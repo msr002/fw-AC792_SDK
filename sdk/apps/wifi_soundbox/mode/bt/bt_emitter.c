@@ -166,10 +166,9 @@ static u8 search_bd_addr_filt(const u8 *addr)
 
 #if (SEARCH_LIMITED_MODE == SEARCH_BD_NAME_LIMITED)
 static const char *bd_name_filt[] = {
-    "Xiaomi Speaker Portable-0024",
+    "wifi_soundbox_487B",
     "JL-AC79XX-AF0B",
-    "JL-AC79XX-FFAA",
-    "JL-AC79XX-AAFF",
+    "Xiaomi Speaker Portable-0024",
     "CAR MULTIMEDIA",
     "MTU-Android",
     "GEELY_BT",
@@ -182,6 +181,8 @@ static const char *bd_name_filt[] = {
     "S16",
     "887",
     "Mi True Wireless Earphones",
+    "Redmi AirDots 3 Pro",
+    "NSVE T6 Pro",
 };
 
 /*----------------------------------------------------------------------------*/

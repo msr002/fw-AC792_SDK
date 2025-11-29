@@ -32,6 +32,31 @@ const u8 config_rf_test_enable = 0;
 #endif
 #endif
 
+// Listening policy
+/* 策略共四种情况：
+	1、只监听 DTIM (默认)；不启用 2、3 时，默认使用策略 1；
+	2、每个 TIM 都监听；优先级最高
+	3、自定义监听间隔；
+	4、以上三个都不启用则按照默认监听间隔监听；优先级最低
+
+    void wifi_psmode_enable_listen_dtim(void);
+    void wifi_psmode_disable_listen_dtim(void);
+    void wifi_psmode_enable_listen_customized_intervals(void);
+    void wifi_psmode_disable_listen_customized_intervals(void);
+    void wl_enable_listen_each_tim(void);
+    void wifi_psmode_disable_listen_each_tim(void);
+*/
+const u8 config_wifi_psmode_customized_listen_interval = 10;
+const u8 config_wifi_psmode_default_listen_interval = 3;
+const u8 config_wifi_psmode_pspoll_keep_awake_100ms = 0;
+const u8 config_wifi_keep_awake_100ms_before_psm = 12;
+
+#if TCFG_LOWPOWER_FUNCTION
+const u8 config_wifi_lowpower_enable = 1;
+#else
+const u8 config_wifi_lowpower_enable = 0;
+#endif
+
 const char WL_TX_DEBUG = 0; //WIFI底层发送数据FIFO繁忙打印
 const char WL_RX_DEBUG = 0; //WIFI底层接收FIFO塞满导致丢包打印
 
@@ -116,12 +141,6 @@ const u8 MAX_LEN_OF_BSS_TABLE = 6; //BSS table 个数设置用于存放扫描结
 #endif
 
 const u8 wifi_recv_poll = 0; //wifi接收数据方式，0为中断方式接收，1为轮询方式接收
-
-#if defined CONFIG_WIFI_IDLE_RESUME_BASEBAND_ENABLE
-u8 wifi_lowpower_mode = 1;
-#else
-u8 wifi_lowpower_mode = 0;
-#endif
 
 const u8 CONFIG_WIFI_USE_TLSF_MEM = 0; //配置wifi使用独立的内存管理，与系统内存管理分割开
 const unsigned int CONFIG_WIFI_MAX_MEM_LIMIT = 200 * 1024; //允许wifi使用的内存大小
@@ -525,10 +544,8 @@ PMFMFPR=0\n\
 PMFSHA256=0"
 };
 
-#if defined CONFIG_LOW_POWER_ENABLE
+#if TCFG_LOWPOWER_FUNCTION
 #define WL_STA_SLEEP	1
-#elif defined CONFIG_WIFI_IDLE_RESUME_BASEBAND_ENABLE
-#define WL_STA_SLEEP	1//2
 #else
 #define WL_STA_SLEEP	0
 #endif

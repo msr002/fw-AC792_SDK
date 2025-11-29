@@ -258,8 +258,8 @@ struct stream_fmt {
     u8 bit_wide;        //数据流中数据的位宽。
     u8 channel_mode;
     u8 chconfig_id;
-    u32 frame_dms : 12;		//帧长时间，单位 deci-ms (ms/10)
-    u32 bit_rate : 20;
+    u32 frame_dms;		//帧长时间，单位 deci-ms (ms/10)
+    u32 bit_rate;
     u32 sample_rate;
     u32 coding_type;
     u8 quality;
@@ -344,6 +344,10 @@ enum frame_flags : u16 {
     FRAME_FLAG_PULL_AGAIN               = 0x1000    //frame被pull过之后被重新加回iport->frame
 };
 
+#define TIMESTAMP_STATE_START  0x1
+#define TIMESTAMP_STATE_RUN    0x2
+
+
 enum audio_Qval : u8 {
     AUDIO_QVAL_16BIT = 15,
     AUDIO_QVAL_24BIT = 23,
@@ -402,6 +406,7 @@ struct stream_oport {
     s16 d_sample_rate;
     enum frame_flags flags;
     u8 id;
+    u8 timestamp_state;
     u16 buffered_pcms;
     struct stream_fmt fmt;
     u32 offset;

@@ -317,4 +317,8 @@ int tws_api_listen_on_connect_req(u8 *mac_addr, void (*conn_req_cb)(u8 *addr));
 
 void tws_traffic_statistics(int reset);
 
+int tws_api_pure_monitor_enable(bool enable);
+
+void tws_api_cancel_all(void);
+
 #endif

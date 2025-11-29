@@ -66,7 +66,9 @@ enum WIFI_MODULE_EVENT {
     AP_ON_ASSOC = 0x5,
     PM_SUSPEND = 0x6,
     PM_RESUME = 0x7,
-    P2P_WSC_OPERATION = 0x8,
+    P2P_GO_STA_CONNECTED = 0x8,
+    P2P_GO_STA_DISCONNECTED = 0x9,
+    P2P_WSC_OPERATION = 0xA,
 };
 
 struct netdev_ssid_info {

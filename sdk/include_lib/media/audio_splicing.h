@@ -264,4 +264,11 @@ void pcm_single_l_r_2_dual(void *out, void *in_l, void *in_r, u16 in_len);
  * */
 void pcm_single_l_r_2_dual_32bit(void *out, void *in_l, void *in_r, u16 in_len);
 
+/*
+ *立体声左右声道数据互换
+ *len:总的输入长度，单位byte
+ *bit_width: 0:16bit 1:32bit
+ * */
+void channel_swap_run(void *ptr, int len, int bit_width);
+
 #endif/*_AUDIO_SPLICING_H_*/

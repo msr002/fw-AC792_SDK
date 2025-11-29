@@ -4153,7 +4153,8 @@
           "defaultValue": [
            "CDC_CLASS",
            "MASSSTORAGE_CLASS",
-           "UVC_CLASS"
+           "UVC_CLASS",
+           "SPEAKER_CLASS"
           ],
           "span": 24,
           "showLabel": true,
@@ -4236,7 +4237,8 @@
           "defaultValue": [
            "CDC_CLASS",
            "MASSSTORAGE_CLASS",
-           "UVC_CLASS"
+           "UVC_CLASS",
+           "SPEAKER_CLASS"
           ],
           "span": 24,
           "showLabel": true,

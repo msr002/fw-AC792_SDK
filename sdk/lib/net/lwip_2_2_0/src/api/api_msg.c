@@ -249,6 +249,14 @@ recv_udp(void *arg, struct udp_pcb *pcb, struct pbuf *p,
         return;
     }
 
+    if (sys_mbox_full(&conn->recvmbox)) {
+        //情况一.对端发送太猛，recvmbox设置太少导致,适当加大邮箱
+        //情况二.应用层没有及时读取导致邮箱堆积导致, 排查应用层是否读取不及时或阻塞导致
+        pbuf_free(p);
+        LWIP_DEBUGF(API_MSG_DEBUG, ("recv_udp: mbox full, %d message not fetch\n", sys_mbox_query(&conn->recvmbox)));
+        return;
+    }
+
     buf = (struct netbuf *)memp_malloc(MEMP_NETBUF);
     if (buf == NULL) {
         pbuf_free(p);
@@ -557,7 +565,7 @@ accept_function(void *arg, struct tcp_pcb *newpcb, err_t err)
     LWIP_ASSERT("expect newpcb == NULL or err == ERR_OK", err == ERR_OK);
     LWIP_UNUSED_ARG(err); /* for LWIP_NOASSERT */
 
-    LWIP_DEBUGF(API_MSG_DEBUG, ("accept_function: newpcb->state: %s\n", tcp_debug_state_str(newpcb->state)));
+    //LWIP_DEBUGF(API_MSG_DEBUG, ("accept_function: newpcb->state: %s\n", tcp_debug_state_str(newpcb->state)));
 
     /* We have to set the callback here even though
      * the new socket is unknown. newconn->socket is marked as -1. */

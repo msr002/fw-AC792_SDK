@@ -1468,10 +1468,6 @@
          "__slot__": {
           "options": [
            {
-            "label": -1,
-            "value": "id_1752065355135_0"
-           },
-           {
             "label": "IO_PORTA_00",
             "value": "id_1647485267192_66"
            },
@@ -2367,10 +2363,6 @@
          "__slot__": {
           "options": [
            {
-            "label": -1,
-            "value": "id_1752065355135_0"
-           },
-           {
             "label": "IO_PORTA_00",
             "value": "id_1647485267192_66"
            },
@@ -2852,8 +2844,10 @@
          "__slot__": {
           "options": [
            {
-            "label": -1,
-            "value": "id_1752065355135_0"
+            "label": "DISABLE",
+            "value": "id_1752065355135_0",
+            "hide": false,
+            "disabled": false
            },
            {
             "label": "IO_PORTA_00",
@@ -3311,8 +3305,10 @@
          "__slot__": {
           "options": [
            {
-            "label": -1,
-            "value": "id_1752065355135_0"
+            "label": "DISABLE",
+            "value": "id_1752065355135_0",
+            "hide": false,
+            "disabled": false
            },
            {
             "label": "IO_PORTA_00",
@@ -3726,8 +3722,10 @@
          "__slot__": {
           "options": [
            {
-            "label": -1,
-            "value": "id_1752065355135_0"
+            "label": "DISABLE",
+            "value": "id_1752065355135_0",
+            "hide": false,
+            "disabled": false
            },
            {
             "label": "IO_PORTA_00",
@@ -4509,7 +4507,7 @@
        "label": "通话下行固定16K",
        "tag": "el-switch",
        "tagIcon": "switch",
-       "defaultValue": 0,
+       "defaultValue": 1,
        "span": 5,
        "showLabel": true,
        "labelWidth": 140,

@@ -61,8 +61,6 @@
 #define LL_FEAT_POWER_CONTROL_REQUEST               (UINT64_C(1) << (33))   /*!< Power control requests supported. */
 #define LL_FEAT_POWER_CHANGE_IND                    (UINT64_C(1) << (34))   /*!< Power control power change indication supported. */
 #define LL_FEAT_PATH_LOSS_MONITOR                   (UINT64_C(1) << (35))   /*!< Path loss monitoring supported. */
-
-#define LL_FEAT_PATH_LOSS_MONITOR                   (UINT64_C(1) << (35))   /*!< Path loss monitoring supported. */
 #define LL_FEAT_PERIODIC_ADV_ADI_SUPPORT            (UINT64_C(1) << (36))   /*!< Periodic Advertising ADI supported. */
 #define LL_FEAT_CONN_SUBRATE                        (UINT64_C(1) << (37))   /*!< Connection subrating supported. */
 #define LL_FEAT_CONN_SUBRATE_HOST_SUPPORT           (UINT64_C(1) << (38))   /*!< Connection subratingHost supported. */
@@ -131,13 +129,9 @@
 #define LE_FEATURES_PAST                (LL_FEAT_PAST_SENDER | \
                                             LL_FEAT_PAST_RECIPIENT)
 
-#define LE_FEATURES_CIS                 (LL_FEAT_CIS_MASTER_ROLE | \
-                                            LL_FEAT_CIS_SLAVE_ROLE | \
-                                            LL_FEAT_ISO_HOST_SUPPORT)
+#define LE_FEATURES_CIS                 (LL_FEAT_CIS_MASTER_ROLE | LL_FEAT_CIS_SLAVE_ROLE)
 
-#define LE_FEATURES_BIS                 (LL_FEAT_ISO_BROADCASTER | \
-                                            LL_FEAT_ISO_SYNC | \
-                                            LL_FEAT_ISO_HOST_SUPPORT)
+#define LE_FEATURES_BIS                 (LL_FEAT_ISO_BROADCASTER | LL_FEAT_ISO_SYNC)
 
 #define LE_FEATURES_ISO                 (LE_FEATURES_BIS|LE_FEATURES_CIS)
 
@@ -234,6 +228,36 @@ extern const int config_rf_oob;
 extern const int config_bb_optimized_ctrl;
 
 //config_bb_optimized_ctrl 控制变量说明
+#define LE_BB_OPT_FEAT_PKT_UNFILT		BIT(0)
+#define LE_BB_OPT_FEAT_EXT_UPLOAD_EN 	BIT(1)
+#define LE_BB_OPT_FEAT_CC_CODE_EN		BIT(2)
+#define LE_BB_OPT_FEAT_RESERVED0		BIT(3)
+#define LE_BB_OPT_FEAT_HARD_CMB_EN		BIT(4)
+#define LE_BB_OPT_FEAT_RX_LOG_EN		BIT(5) //only for big rx
+#define LE_BB_OPT_FEAT_RSSI_AFH_EN		BIT(6)
+#define LE_BB_OPT_FEAT_PWR_CTRL_EN		BIT(7)
+#define LE_BB_OPT_FEAT_RX_PRE_CLOSE		BIT(8)
+#define LE_BB_OPT_FEAT_TX_PWR_LOW_SEL	BIT(9) //only for br29
+#define LE_BB_OPT_FEAT_PER_AFH_EN		BIT(10)
+#define LE_BB_OPT_FEAT_RESERVED1		BIT(11)|BIT(12)
+#define LE_BB_OPT_FEAT_CIG_ENC_DIS		BIT(13)
+#define LE_BB_OPT_FEAT_CIG_SEVT_CLOSE	BIT(14)
+#define LE_BB_OPT_FEAT_CIG_PACK_MODE	BIT(16) //sequential or interleved
+#define LE_BB_OPT_FEAT_CODE_OPTIMIZED	BIT(17)
+#define LE_BB_OPT_FEAT_CIG_RSSI_GET_EN	BIT(18)
+#define LE_BB_OPT_FEAT_PKT_V3_EN		BIT(18)
+#define LE_BB_OPT_FEAT_PKT_V3_DYNAMIC   BIT(19) //only for rx
+#define LE_BB_OPT_FEAT_ISO_DIRECT_PUSH  BIT(21)
+#define LE_BB_OPT_FEAT_BCTRL_DISABLE    BIT(22)
+#define LE_BB_OPT_FEAT_PKT_V3_PLUS_EN   BIT(23)
+#define LE_BB_OPT_FEAT_RX_HMPR_EN   	BIT(24)
+#define LE_BB_OPT_FEAT_DUAL_BD_SWITCH   BIT(25)
+#define LE_BB_OPT_FEAT_SC_ULL           BIT(26)
+#define LE_BB_OPT_FEAT_BIG_CHMAP_EN     BIT(27)
+#define LE_BB_OPT_FEAT_DYNAMIC_RTN_EN   BIT(28)
+#define LE_BB_OPT_FEAT_MERGE_HW_EN      BIT(29)
+#define LE_BB_OPT_FEAT_WIFI_DETEC       BIT(30)
+
 #define VENDOR_BB_ISO_DIRECT_PUSH BIT(21)
 #define VENDOR_BB_DUAL_BD_SWITCH  BIT(22)
 

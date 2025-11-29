@@ -38,10 +38,12 @@ int gui_src_action_video_photo(int action)
 #endif
         // printf("--->%s()----->%d\n", __func__, __LINE__);
         key_event_disable();
+#if 0
         app = get_current_app();
         if (app) {
             app_mode_go_back();
         }
+#endif
         app_mode_change_replace(APP_MODE_PHOTO);
         app_send_message(APP_MSG_PHOTO_TAKE_MAIN, 0);
         key_event_enable();

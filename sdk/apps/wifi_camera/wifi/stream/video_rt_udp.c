@@ -221,8 +221,12 @@ int net_rt_send_frame(struct rt_stream_info *info, char *buffer, size_t len, u8 
     frame_head.type &= ~LAST_FREG_MAKER;
     frame_head.type |=  type;
     if (frame_head.type == H264_TYPE_VIDEO || frame_head.type == JPEG_TYPE_VIDEO) {
+        if (frame_head.type == JPEG_TYPE_VIDEO) {
+            buffer += 8;
+        }
+
         if (len == 512) {
-            if (buffer[8] == 0xab & buffer[9] == 0x56) {
+            if (buffer[0] == 0xab & buffer[1] == 0x56) {
                 os_mutex_post(&info->mutex);
                 return len;
             }

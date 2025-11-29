@@ -786,4 +786,10 @@ s8 le_hb_rssi();
 void ll_hci_remove_iso_data_path(uint8_t *data, size_t size);
 
 void ll_set_ext_scan_priority(uint8_t priority);
+
+uint8_t ble_vendor_priv_get_case_user();
+
+int ll_hci_vendor_send_priv_cmd(u16 conn_handle, u8 *data, u16 size); //通过hci命令发
+void ble_vendor_priv_cmd_handle_register(u16(*handle)(u16 hdl, u8 *cmd, u8 len, u8 *rsp));
+
 #endif

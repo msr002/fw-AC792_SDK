@@ -47,6 +47,7 @@ static u8_t ipaddr_tab[254];
 static u8_t netif;
 static u8_t is_offer_dns;
 static OS_MUTEX dhcps_mtx;
+static u8_t is_dhcps_initalized;
 
 static u8_t *add_msg_type(u8_t *optptr, u8_t type)
 {
@@ -534,10 +535,16 @@ void dhcps_init(u8_t lwip_netif)
 
 //    tcpip_timeout(LEASE_TMR_INTERVAL, dhcps_lease_timer, NULL);
     os_mutex_create(&dhcps_mtx);
+    is_dhcps_initalized = 1;
 }
 
 void dhcps_uninit(void)
 {
+    if (!is_dhcps_initalized) {
+        printf("dhcps not start!!!");
+        return;
+    }
+
     struct _dhcps_cli *cli;
     struct _dhcps_cli *n;
 
@@ -569,6 +576,7 @@ void dhcps_uninit(void)
     os_mutex_post(&dhcps_mtx);
 
     os_mutex_del(&dhcps_mtx, OS_DEL_ALWAYS);
+    is_dhcps_initalized = 0;
 }
 
 void dhcps_offer_dns(void)

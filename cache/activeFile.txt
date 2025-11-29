@@ -1,9 +1,10 @@
 {
  "activeFile": {
-  "type": 1,
-  "fileName": "src\\板级配置.json",
-  "binName": "boardcfg.bin",
-  "showName": "板级配置"
+  "type": 4,
+  "fileName": "src\\音频流程\\recoder_vir_tx.x6flow",
+  "binName": "stream.bin",
+  "showName": "recoder_vir_tx",
+  "data": ""
  },
  "currentVariant": {
   "name": "wifi_camera"

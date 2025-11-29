@@ -124,6 +124,10 @@ uint8_t lv_img_cf_get_px_size(lv_img_cf_t cf)
     case LV_IMG_CF_INDEXED_8BIT:
     case LV_IMG_CF_ALPHA_8BIT:
         px_size = 8;
+    case LV_IMG_CF_RGB565:
+    case LV_IMG_CF_RGB565A8:
+        px_size = 16;
+        break;
         break;
     default:
         px_size = 0;
@@ -294,6 +298,8 @@ static lv_res_t LV_ATTRIBUTE_FAST_MEM decode_and_draw(lv_draw_ctx_t *draw_ctx,
             cf = LV_IMG_CF_ALPHA_8BIT;
         } else if (LV_IMG_CF_RGB565A8 == cdsc->dec_dsc.header.cf) {
             cf = LV_IMG_CF_RGB565A8;
+        } else if (LV_IMG_CF_RGB565 == cdsc->dec_dsc.header.cf) {
+            cf = LV_IMG_CF_RGB565;
         } else if (lv_img_cf_has_alpha(cdsc->dec_dsc.header.cf)) {
             cf = LV_IMG_CF_TRUE_COLOR_ALPHA;
         } else {

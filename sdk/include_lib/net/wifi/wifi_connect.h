@@ -23,6 +23,12 @@ enum P2P_ROLE {
     P2P_GO_MODE,
 };
 
+typedef struct {
+    u8 ssid[33];
+    u8 password[65];
+    enum WIFI_MODE mode;
+} wifi_p2p_config_t;
+
 enum WSC_CFG_MODE {
     STA_ENROLLEE_PIN_MODE,
     STA_REGISTRAR_PIN_MODE,

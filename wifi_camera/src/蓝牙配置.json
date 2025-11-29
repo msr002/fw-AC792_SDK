@@ -2825,7 +2825,7 @@
           "label": "TWS本地音乐音量同步",
           "tag": "el-switch",
           "tagIcon": "switch",
-          "defaultValue": 1,
+          "defaultValue": 0,
           "span": 6,
           "showLabel": true,
           "labelWidth": 200,
@@ -2875,7 +2875,7 @@
     "enableUuid": "TCFG_USER_TWS_ENABLE",
     "saveWay": "macro",
     "tipAlways": false,
-    "disable": true,
+    "disable": false,
     "showResetBtn": false,
     "hideAddTemplate": false
    },
@@ -3283,7 +3283,7 @@
      }
     ],
     "eventField": [],
-    "disable": true,
+    "disable": false,
     "saveWay": "macro"
    },
    "type": "default",

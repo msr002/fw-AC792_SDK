@@ -217,10 +217,10 @@ struct vfs_operations {
     int (*fread)(FILE *, void *buf, u32 len);
     int (*fread_fast)(FILE *, void *buf, u32 len);
     int (*fwrite)(FILE *, void *buf, u32 len);
-    int (*fseek)(FILE *, int offset, int);
-    int (*fseek_fast)(FILE *, int offset, int);
-    int (*flen)(FILE *);
-    int (*fpos)(FILE *);
+    int (*fseek)(FILE *, u32 offset, int);
+    int (*fseek_fast)(FILE *, u32 offset, int);
+    u32(*flen)(FILE *);
+    u32(*fpos)(FILE *);
     int (*fget_name)(FILE *, u8 *name, int len);
     int (*fget_path)(FILE *, struct vfscan *, u8 *name, int len, u8 is_relative_path);
     int (*frename)(FILE *, const char *path);
@@ -371,7 +371,7 @@ int fwrite(void *buf, u32 size, u32 count, FILE *file);
  *
  * @return 成功返回0
  */
-int fseek(FILE *file, int offset, int orig);
+int fseek(FILE *file, u32 offset, int orig);
 
 /**
  * @brief 快速设置文件指针的位置
@@ -382,7 +382,7 @@ int fseek(FILE *file, int offset, int orig);
  * @note 一般手表case使用,去除互斥,设置ram里面跑
  * @return 成功返回0
  */
-int fseek_fast(FILE *file, int offset, int orig);
+int fseek_fast(FILE *file, u32 offset, int orig);
 
 /**
  * @brief 从文件中快速读取数据
@@ -403,7 +403,7 @@ int fread_fast(void *buf, u32 size, u32 count, FILE *file);
  *
  * @return 文件大小(负值表示获取失败)
  */
-int flen(FILE *file);
+u32 flen(FILE *file);
 
 /**
  * @brief 获取文件指针的当前位置
@@ -412,7 +412,7 @@ int flen(FILE *file);
  *
  * @return 文件指针的位置
  */
-int ftell(FILE *file);
+u32 ftell(FILE *file);
 
 /**
  * @brief 获取文件名(不包含目录)

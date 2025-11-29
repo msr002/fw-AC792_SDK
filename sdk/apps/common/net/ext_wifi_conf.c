@@ -213,6 +213,42 @@ wpa_pairwise=CCMP\n\
 max_num_sta=4\n\
 wpa_group_rekey=86400\n";
 
+#define MAC_ADDR_LEN 6
+
+int set_flash_mac_addr(const char mac[6])
+{
+    int ret;
+
+    /* 参数检查 */
+    if (!mac) {
+        printf("set_flash_mac_addr: mac is NULL\r\n");
+        return -1;
+    }
+
+    /* 写入 Flash */
+    ret = syscfg_write(EXT_WIFI_MAC_IDX, mac, MAC_ADDR_LEN);
+    if (ret == MAC_ADDR_LEN) {
+        printf("set_flash_mac_addr success [%02x:%02x:%02x:%02x:%02x:%02x]\r\n",
+               mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
+        return 0;
+    } else {
+        printf("set_flash_mac_addr failed (ret=%d)\r\n", ret);
+        return -1;
+    }
+}
+
+int get_flash_mac_addr(char mac[6])
+{
+    if (syscfg_read(EXT_WIFI_MAC_IDX, mac, MAC_ADDR_LEN) == MAC_ADDR_LEN) {
+        printf("get_flash_mac_addr valid [%02x:%02x:%02x:%02x:%02x:%02x] \r\n",
+               (unsigned char)mac[0], (unsigned char)mac[1], (unsigned char)mac[2], (unsigned char)mac[3], (unsigned char)mac[4], (unsigned char)mac[5]);
+
+        return 0;
+    }
+
+    return -1;
+
+}
 
 const char *get_hostapd_config_file(unsigned char enable_wps)
 {
@@ -319,19 +355,6 @@ static char rtw_8822cs_cache_efuse[1024] = {
 
 #define PATHA_BW20_1S_DIFF_OFDM_1_POWER_IDX_DIFF_OFFSET 0x1B
 #define PATHA_BW20_1S_DIFF_OFDM_1_POWER_IDX_DIFF_LEN 1
-
-static int get_flash_mac_addr(char mac[6])
-{
-    if (syscfg_read(EXT_WIFI_MAC_IDX, mac, MAC_ADDR_LEN) == MAC_ADDR_LEN) {
-        printf("get_flash_mac_addr valid [%x:%x:%x:%x:%x:%x] \r\n",
-               (unsigned char)mac[0], (unsigned char)mac[1], (unsigned char)mac[2], (unsigned char)mac[3], (unsigned char)mac[4], (unsigned char)mac[5]);
-
-        return 0;
-    }
-
-    return -1;
-
-}
 
 char *get_rtw_cache_efuse(void)
 {

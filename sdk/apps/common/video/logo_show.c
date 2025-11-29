@@ -178,9 +178,12 @@ int logo_show(char *logo_path, char *audio_path, int time_out, void (*func)())
             sys_timeout_add_to_task("sys_timer", func, logo_stop, time_out * 1000);
         }
     } else { /* 非视频文件 */
-        FILE *voice_file = fopen(audio_path, "r"); /* 先读取logo 音频文件 */
-        if (!voice_file) {
-            printf("-------------error audio file not open-----------------");
+        FILE *voice_file = NULL;
+        if (audio_path) {
+            voice_file = fopen(audio_path, "r"); /* 先读取logo 音频文件 */
+            if (!voice_file) {
+                printf("-------------error audio file not open-----------------");
+            }
         }
         __this->video_buf = malloc(LOGO_VIDEO_DEC_BUF_SIZE);
         struct video_dec_arg arg = {0};

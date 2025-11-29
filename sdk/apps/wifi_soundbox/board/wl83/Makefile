@@ -246,6 +246,11 @@ INCLUDES := \
 	-I../../../../include_lib/media/aispeech/enc \
 	-I../../../../audio/cpu/wl83/audio_dai \
 	-I../../../../audio/cpu/wl83/audio_common \
+	-I../../../../apps/common/LLM/duer/intelligent_duer \
+	-I../../../../apps/common/LLM/duer/my_platform \
+	-I../../../../include_lib/net/web_socket \
+	-I../../../../include_lib/net/network_download \
+	-I../../../../include_lib/net/cJSON_common \
 	-I../../../../apps \
 	-I../../../../apps/wifi_soundbox \
 	-I../../../../apps/wifi_soundbox/include \
@@ -265,6 +270,18 @@ INCLUDES := \
 
 # 需要编译的 .c 文件
 c_SRC_FILES := \
+	../../../../apps/common/LLM/duer/intelligent_duer/duer_auth_algorithm.c \
+	../../../../apps/common/LLM/duer/intelligent_duer/duer_http_req.c \
+	../../../../apps/common/LLM/duer/intelligent_duer/duer_json_parse.c \
+	../../../../apps/common/LLM/duer/intelligent_duer/duer_json_request.c \
+	../../../../apps/common/LLM/duer/intelligent_duer/duer_record.c \
+	../../../../apps/common/LLM/duer/intelligent_duer/duer_socket.c \
+	../../../../apps/common/LLM/duer/intelligent_duer/test_demo.c \
+	../../../../apps/common/LLM/duer/my_platform/my_platform_http.c \
+	../../../../apps/common/LLM/duer/my_platform/my_platform_http_api.c \
+	../../../../apps/common/LLM/duer/my_platform/my_platform_list_download.c \
+	../../../../apps/common/LLM/duer/my_platform/my_platform_record.c \
+	../../../../apps/common/LLM/duer/my_platform/my_platform_url_list.c \
 	../../../../apps/common/audio_music/audio_enc_aec_data.c \
 	../../../../apps/common/c++/cpp_run_init.c \
 	../../../../apps/common/camera/GC1084_DVP/GC1084_DVP.c \
@@ -277,6 +294,7 @@ c_SRC_FILES := \
 	../../../../apps/common/camera/SP140A_dvp/sp140a_dvp_awb.c \
 	../../../../apps/common/camera/SP140A_dvp/sp140a_dvp_iq.c \
 	../../../../apps/common/camera/TVP5150A_DVP.c \
+	../../../../apps/common/camera/bf20a6/bf20a6.c \
 	../../../../apps/common/camera/gc0308/gc0308.c \
 	../../../../apps/common/camera/gc1084_mipi/gc1084_mipi.c \
 	../../../../apps/common/camera/gc1084_mipi/gc1084_mipi_ae.c \
@@ -292,6 +310,7 @@ c_SRC_FILES := \
 	../../../../apps/common/camera/h63p_mipi/h63p_mipi_iq.c \
 	../../../../apps/common/camera/isp_scenes.c \
 	../../../../apps/common/camera/isp_tools.c \
+	../../../../apps/common/camera/ov2659/ov2659.c \
 	../../../../apps/common/camera/sc1245_dvp/sc1245.c \
 	../../../../apps/common/camera/sc1245_dvp/sc1245_ae.c \
 	../../../../apps/common/camera/sc1245_dvp/sc1245_awb.c \
@@ -392,6 +411,7 @@ c_SRC_FILES := \
 	../../../../apps/common/lcd/lcd_driver/lcd_tools.c \
 	../../../../apps/common/lcd/lcd_driver/mcu_lcd/lcd_mcu_ili9481_320x480.c \
 	../../../../apps/common/lcd/lcd_driver/mcu_lcd/lcd_mcu_ili9488_320x480.c \
+	../../../../apps/common/lcd/lcd_driver/mcu_lcd/lcd_mcu_st7789v_240x320.c \
 	../../../../apps/common/lcd/lcd_driver/mipi_lcd/lcd_mipi_fl7707_480x1280.c \
 	../../../../apps/common/lcd/lcd_driver/mipi_lcd/lcd_mipi_ili9881c_800x1280.c \
 	../../../../apps/common/lcd/lcd_driver/mipi_lcd/lcd_mipi_jd9165ba_1024x600.c \
@@ -1479,6 +1499,7 @@ LFLAGS := \
 	--whole-archive      \
 	../../../../apps/common/third_party_profile/upay_t_head_v2/app/antchain/lib/libapp_antchain_JL_gcc.a \
 	--no-whole-archive      \
+	../../../../cpu/wl83/liba/cJSON.a  \
 	../../../../include_lib/newlib/pi32v2-lib/libm.a \
 	../../../../include_lib/newlib/pi32v2-lib/libc.a \
 	../../../../include_lib/newlib/pi32v2-lib/libcompiler_rt.a \

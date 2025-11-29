@@ -217,7 +217,7 @@ int gui_scr_action_video_file_cb(int action)
         if ((__this->file_fd != NULL) && (__this->err_file == 0) && (__this->type == 1)) {
             __this->file_fd = NULL;
         }
-        app_msg_handler(NULL, APP_MSG_STOP);
+        /* app_msg_handler(NULL, APP_MSG_STOP); */
         app_mode_change_replace(APP_MODE_DEC);
         app_send_message(APP_MSG_DEC_MAIN, 0);
         break;

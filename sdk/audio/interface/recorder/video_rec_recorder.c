@@ -88,7 +88,7 @@ void *video_mic_recorder_open(u16 sample_rate, u8 code_type, void *priv, void (*
     }
 
     //设置ADC的中断点数
-    err = jlstream_node_ioctl(recorder->stream, NODE_UUID_SOURCE, NODE_IOC_SET_PRIV_FMT, 320);
+    err = jlstream_node_ioctl(recorder->stream, NODE_UUID_SOURCE, NODE_IOC_SET_PRIV_FMT, 256);
     if (err) {
         goto __exit1;
     }
