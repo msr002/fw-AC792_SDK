@@ -567,7 +567,7 @@ void wifi_and_network_off(void)
     wifi_off();
 }
 
-void wifi_sta_connect(char *ssid, char *pwd, char save)
+static void wifi_sta_connect(char *ssid, char *pwd, char save)
 {
     if (!wifi_is_on()) {
         wifi_on();

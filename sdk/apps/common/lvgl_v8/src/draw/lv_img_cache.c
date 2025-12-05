@@ -156,7 +156,7 @@ _lv_img_cache_entry_t *_lv_img_cache_open(const void *src, lv_color_t color, int
     /*Close the decoder to reuse if it was opened (has a valid source)*/
     if (cached_src->dec_dsc.src) {
         lv_img_decoder_close(&cached_src->dec_dsc);
-        if (src_type == LV_IMG_SRC_BIN && cached_src->bin_src) {
+        if (cached_src->bin_src) {
             lv_mem_free(cached_src->bin_src);
             cached_src->bin_src = NULL;
         }

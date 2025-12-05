@@ -298,6 +298,13 @@ void led1_toggle(void *priv)
 }
 #endif //CONFIG_BOARD_AC7925B
 
+static void logo_poweron_play_end(void)
+{
+    lvgl_main_task_init();
+    key_event_enable();
+    touch_event_enable();
+}
+
 /*
  * 应用程序主函数
  */
@@ -317,11 +324,28 @@ void app_main(void)
     /* const char *audio_path = "mnt/sdfile/EXT_RESERVED/logopackres/logo/poweron.mp3"; */
     /* const char *audio_path = "mnt/sdfile/EXT_RESERVED/logopackres/logo/silence.mp3"; */
     /* play_tone_file(audio_path); */
+#ifdef USE_LVGL_V8_UI_DEMO
+    const char *image_path = "mnt/sdfile/EXT_RESERVED/logopackres/logo/poweron.jpg";
+    const char *audio_path = NULL;
+    int time_out = 1;
 
+    int ret = logo_show(image_path, audio_path, time_out, (void *)logo_poweron_play_end);
+    if (ret < 0) { //开机logo播放失败,则直接显示lvgl ui
+        lvgl_main_task_init();
+        key_event_enable();
+        touch_event_enable();
+    }
+#else
     touch_event_enable();
     key_event_enable();
+#endif
 
     app_mode_change(APP_MODE_VIDEO_CALL);
     app_send_message(APP_MSG_VIDEO_CALL_MAIN, 0);
+}
+
+__attribute__((weak))void a2dp_energy_detect_handler(int *arg)
+{
+
 }
 

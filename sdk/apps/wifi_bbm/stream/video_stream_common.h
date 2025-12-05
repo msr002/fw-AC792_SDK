@@ -50,7 +50,7 @@
 #endif
 
 #define DISP_ROTATE           270                               //窗口旋转角度 0/90/180/270
-#define DISP_MIRROR           VIDEO_HOR_MIRROR                  //窗口镜像 NOR/HOR/VER
+#define DISP_MIRROR           VIDEO_DIR_NONE                   //窗口镜像 NOR/HOR/VER
 
 struct video_stream_info {
     int img_width;

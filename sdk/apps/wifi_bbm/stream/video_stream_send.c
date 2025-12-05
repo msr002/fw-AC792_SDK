@@ -237,7 +237,7 @@ int video_stream_send_start(struct video_stream_send_hdl *hdl)
     return 0;
 }
 
-static int video_stream_send_stop(struct video_stream_send_hdl *hdl)
+int video_stream_send_stop(struct video_stream_send_hdl *hdl)
 {
     int ret = 0;
     union video_req req = {0};

@@ -7,6 +7,12 @@ const char log_tag_const_i_WIFI_RAW AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(TRUE);
 const char log_tag_const_w_WIFI_RAW AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(TRUE);
 const char log_tag_const_e_WIFI_RAW AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(TRUE);
 
+const char log_tag_const_v_WIFI_AP_STA AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(TRUE);
+const char log_tag_const_d_WIFI_AP_STA AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(TRUE);
+const char log_tag_const_i_WIFI_AP_STA AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(TRUE);
+const char log_tag_const_w_WIFI_AP_STA AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(TRUE);
+const char log_tag_const_e_WIFI_AP_STA AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(TRUE);
+
 const char log_tag_const_v_ONLINE_MANAGER AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(TRUE);
 const char log_tag_const_d_ONLINE_MANAGER AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(FALSE);
 const char log_tag_const_i_ONLINE_MANAGER AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(TRUE);
@@ -48,6 +54,12 @@ const char log_tag_const_d_CTP_CLIENT AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(TRUE
 const char log_tag_const_i_CTP_CLIENT AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(TRUE);
 const char log_tag_const_w_CTP_CLIENT AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(TRUE);
 const char log_tag_const_e_CTP_CLIENT AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(TRUE);
+
+const char log_tag_const_v_CDP_CLIENT AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(TRUE);
+const char log_tag_const_d_CDP_CLIENT AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(TRUE);
+const char log_tag_const_i_CDP_CLIENT AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(TRUE);
+const char log_tag_const_w_CDP_CLIENT AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(TRUE);
+const char log_tag_const_e_CDP_CLIENT AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(TRUE);
 
 const char log_tag_const_v_VIDEO_STREAM_REQUEST AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(TRUE);
 const char log_tag_const_d_VIDEO_STREAM_REQUEST AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(TRUE);

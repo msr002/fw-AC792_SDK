@@ -43,6 +43,12 @@ static const app_mode_table_t app_mode_table[] = {
 #endif
 };
 
+__attribute__((weak))
+void ai_app_local_event_notify(u8 status)
+{
+
+}
+
 int app_send_message(int msg, int argc, ...)
 {
     int argv[8] = {0,};

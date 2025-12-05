@@ -64,6 +64,23 @@ int ctp_init(u8 use_alive)
     return 0;
 }
 
+int ctp_exit(void)
+{
+    if (g_ctp_hdl.ctp_server) {
+        server_close(g_ctp_hdl.ctp_server);
+        g_ctp_hdl.ctp_server = NULL;
+    }
+
+    if (g_ctp_hdl.server_msg_handler_pid) {
+        os_taskq_post_type(CTP_SERVER_TASK_NAME, Q_USER, 0, NULL);
+        thread_kill(&g_ctp_hdl.server_msg_handler_pid, KILL_WAIT);
+    }
+
+    ctp_cli_exit();
+
+    return 0;
+}
+
 static void ctp_server_msg_handler(void *priv)
 {
     struct ctp_cmd_handler *hdl = (struct ctp_cmd_handler *)priv;

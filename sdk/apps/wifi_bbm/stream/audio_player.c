@@ -84,7 +84,7 @@ int audio_player_init(void)
     vir_source_player_start(player);
 
     void app_audio_set_volume(u8 state, s16 volume, u8 fade);
-    app_audio_set_volume(app_audio_get_state(), 50, 0);
+    app_audio_set_volume(app_audio_get_state(), 70, 0);
 
     return 0;
 __err:

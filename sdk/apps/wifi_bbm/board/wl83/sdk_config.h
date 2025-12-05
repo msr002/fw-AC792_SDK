@@ -24,7 +24,7 @@
 #define TCFG_COMM_TYPE TCFG_USB_COMM // 通信方式
 #endif // TCFG_CFG_TOOL_ENABLE
 
-#define TCFG_SD0_ENABLE 1 // SD0配置
+#define TCFG_SD0_ENABLE 0 // SD0配置
 #if TCFG_SD0_ENABLE
 #define TCFG_SD0_DAT_WIDTH 4 // 线数设置
 #define TCFG_SD0_DET_MODE SD_CLK_DECT // 检测方式
@@ -119,13 +119,13 @@
 // ------------板级配置.json------------
 
 // ------------功能配置.json------------
-#define TCFG_APP_BT_EN 1 // 蓝牙模式
-#define TCFG_APP_MUSIC_EN 1 // 音乐模式
+#define TCFG_APP_BT_EN 0 // 蓝牙模式
+#define TCFG_APP_MUSIC_EN 0 // 音乐模式
 #define TCFG_APP_LINEIN_EN 0 // LINEIN模式
-#define TCFG_APP_NET_MUSIC_EN 1 // 网络播放模式
-#define TCFG_APP_PC_EN 1 // PC模式
-#define TCFG_APP_RECORD_EN 1 // 录音模式
-#define TCFG_MIC_EFFECT_ENABLE 1 // 混响使能
+#define TCFG_APP_NET_MUSIC_EN 0 // 网络播放模式
+#define TCFG_APP_PC_EN 0 // PC模式
+#define TCFG_APP_RECORD_EN 0 // 录音模式
+#define TCFG_MIC_EFFECT_ENABLE 0 // 混响使能
 #define TCFG_MIX_RECORD_ENABLE 0 // 混合录音使能
 #define TCFG_RECORD_AUDIO_REPLAY_EN 0 // 录音回播使能
 #define TCFG_REC_FOLDER_NAME "RECORDER" // 录音文件夹名称
@@ -149,9 +149,9 @@
 #define TCFG_BT_TIMEOUT_PAGE_TIME 120 // 超距断开回连超时(s)
 #define TCFG_DUAL_CONN_INQUIRY_SCAN_TIME 120 // 开机可被发现时间 (s)
 #define TCFG_DUAL_CONN_PAGE_SCAN_TIME 0 // 等待第二台连接时间(s)
-#define TCFG_BT_VOL_SYNC_ENABLE 1 // 音量同步
-#define TCFG_BT_DISPLAY_BAT_ENABLE 1 // 电量显示
-#define TCFG_BT_MUSIC_INFO_ENABLE 1 // 歌曲信息显示
+#define TCFG_BT_VOL_SYNC_ENABLE 0 // 音量同步
+#define TCFG_BT_DISPLAY_BAT_ENABLE 0 // 电量显示
+#define TCFG_BT_MUSIC_INFO_ENABLE 0 // 歌曲信息显示
 #define TCFG_A2DP_PREEMPTED_ENABLE 0 // 音频抢播
 #define TCFG_A2DP_DELAY_TIME_SBC 300 // A2DP延时SBC(msec)
 #define TCFG_A2DP_DELAY_TIME_SBC_LO 100 // A2DP低延时SBC(msec)
@@ -166,9 +166,9 @@
 #define TCFG_BT_SUPPORT_LHDC_V5 0 // LHDC_V5
 #define TCFG_BT_SUPPORT_LDAC 0 // LDAC
 #define TCFG_BT_BACKGROUND_DETECT_TIME 1940 // 音乐检测时间
-#define TCFG_A2DP_SILENCE_DETECT_ENABLE 1 // A2DP静音检测使能
-#define TCFG_A2DP_SBC_SILENCE_DETECT_ENABLE 1 // A2DP-SBC静音检测使能
-#define TCFG_A2DP_AAC_SILENCE_DETECT_ENABLE 1 // A2DP-AAC静音检测使能
+#define TCFG_A2DP_SILENCE_DETECT_ENABLE 0 // A2DP静音检测使能
+#define TCFG_A2DP_SBC_SILENCE_DETECT_ENABLE 0 // A2DP-SBC静音检测使能
+#define TCFG_A2DP_AAC_SILENCE_DETECT_ENABLE 0 // A2DP-AAC静音检测使能
 #define TCFG_BT_SUPPORT_PROFILE_SPP 1 // SPP
 #define TCFG_BT_SUPPORT_PROFILE_HFP 1 // HFP
 #define TCFG_BT_SUPPORT_PROFILE_A2DP 1 // A2DP
@@ -198,7 +198,7 @@
 #define TCFG_BACKGROUND_WITHOUT_EDR_CONNECT 0 // 后台关闭经典蓝牙连接
 #endif // TCFG_USER_TWS_ENABLE
 
-#define TCFG_BT_SNIFF_ENABLE 1 // sniff
+#define TCFG_BT_SNIFF_ENABLE 0 // sniff
 #if TCFG_BT_SNIFF_ENABLE
 #define TCFG_BT_SNIFF_CHECK_TIME 5 // 检测时间
 #define TCFG_LRC_WIN_SIZE 400 // LRC窗口初值
@@ -252,15 +252,15 @@
 // ------------CIS配置.json------------
 
 // ------------网络配置.json------------
-#define TCFG_IPERF_ENABLE 1 // iperf测试
-#define TCFG_SERVER_ASSIGN_PROFILE 1 // 第三方平台profile由杰理服务器分配
+#define TCFG_IPERF_ENABLE 0 // iperf测试
+#define TCFG_SERVER_ASSIGN_PROFILE 0 // 第三方平台profile由杰理服务器分配
 #define TCFG_PROFILE_UPDATE 0 // 第三方平台profile更新
 #define TCFG_AI_SERVER TCFG_AI_SERVER_DISABLE // 第三方平台选择
 #define TCFG_HTTP_SERVER_ENABLE 0 // HTTP服务器
 #define TCFG_FTP_SERVER_ENABLE 0 // FTP服务器
-#define TCFG_DLNA_SDK_ENABLE 1 // DLNA音乐播放
+#define TCFG_DLNA_SDK_ENABLE 0 // DLNA音乐播放
 #define TCFG_STATIC_IPADDR_ENABLE 0 // 静态IP地址使能
-#define TCFG_ASSIGN_MACADDR_ENABLE 1 // 初始MAC地址分配
+#define TCFG_ASSIGN_MACADDR_ENABLE 0 // 初始MAC地址分配
 // ------------网络配置.json------------
 
 // ------------音频配置.json------------
@@ -310,7 +310,7 @@
 #define TCFG_AUDIO_GLOBAL_SAMPLE_RATE 48000 // 全局采样率
 #define TCFG_AEC_TOOL_ONLINE_ENABLE 0 // 手机APP在线调试
 #define TCFG_AUDIO_CVP_SYNC 0 // 通话上行同步
-#define TCFG_AUDIO_DMS_DUT_ENABLE 1 // 通话产测
+#define TCFG_AUDIO_DMS_DUT_ENABLE 0 // 通话产测
 #define TCFG_ESCO_DL_CVSD_SR_USE_16K 1 // 通话下行固定16K
 #define TCFG_TWS_ESCO_MODE TWS_ESCO_MASTER_AND_SLAVE // 通话模式
 #define TCFG_AUDIO_SMS_SEL SMS_TDE // 1mic算法选择
@@ -327,7 +327,7 @@
 #define TCFG_DEC_WMA_ENABLE 1 // WMA
 #define TCFG_DEC_FLAC_ENABLE 0 // FLAC
 #define TCFG_DEC_APE_ENABLE 0 // APE
-#define TCFG_DEC_AAC_ENABLE 1 // AAC
+#define TCFG_DEC_AAC_ENABLE 0 // AAC
 #define TCFG_DEC_AMR_ENABLE 0 // AMR
 #define TCFG_DEC_AMR_16K_ENABLE 0 // AMR_16K
 #define TCFG_DEC_DTS_ENABLE 0 // DTS
@@ -336,8 +336,8 @@
 #define TCFG_DEC_OGG_OPUS_ENABLE 0 // OGG_OPUS
 #define TCFG_DEC_OGG_VORBIS_ENABLE 0 // OGG_VORBIS
 #define TCFG_DEC_CVSD_ENABLE 0 // CVSD
-#define TCFG_DEC_SBC_SW_ENABLE 1 // SBC
-#define TCFG_DEC_MSBC_SW_ENABLE 1 // MSBC
+#define TCFG_DEC_SBC_SW_ENABLE 0 // SBC
+#define TCFG_DEC_MSBC_SW_ENABLE 0 // MSBC
 #define TCFG_DEC_JLA_ENABLE 0 // JLA
 #define TCFG_DEC_SPEEX_ENABLE 0 // SPEEX
 #define TCFG_DEC_LC3_ENABLE 0 // LC3
@@ -355,7 +355,7 @@
 #define TCFG_ENC_PCM_ENABLE 1 // PCM
 #define TCFG_ENC_AMR_ENABLE 0 // AMR
 #define TCFG_ENC_AMR_16K_ENABLE 0 // AMR_16K
-#define TCFG_ENC_OPUS_ENABLE 1 // OPUS
+#define TCFG_ENC_OPUS_ENABLE 0 // OPUS
 #define TCFG_ENC_SPEEX_ENABLE 0 // SPEEX
 #define TCFG_ENC_MP3_ENABLE 1 // MP3
 #define TCFG_ENC_MP3_TYPE 1 // MP3格式选择

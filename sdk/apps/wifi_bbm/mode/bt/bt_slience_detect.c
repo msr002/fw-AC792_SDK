@@ -415,6 +415,11 @@ bool bt_slience_get_detect_addr(u8 *bt_addr)
 
 #else
 
+u8 bt_a2dp_slience_detect_num(void)
+{
+
+    return 0;
+}
 void bt_start_a2dp_slience_detect(u8 *bt_addr, int ingore_packet_num)
 {
 
@@ -427,7 +432,7 @@ void bt_stop_a2dp_slience_detect(u8 *bt_addr)
 
 bool bt_slience_get_detect_addr(u8 *bt_addr)
 {
-    return FALSE
+    return FALSE;
 }
 
 int bt_slience_detect_get_result(u8 *bt_addr)

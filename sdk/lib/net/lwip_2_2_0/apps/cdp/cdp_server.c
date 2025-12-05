@@ -254,7 +254,8 @@ static void cdp_recv_thread(void *arg)
             os_mutex_pend(&cdp_srv.mutex, 0);
             list_for_each(pos, &cdp_srv.cli_list_head) {
                 cli_exist = list_entry(pos, struct cdp_cli_t, entry);
-                if (cli_exist->dest_addr.sin_addr.s_addr == dest_addr.sin_addr.s_addr) {
+                if (cli_exist->dest_addr.sin_addr.s_addr == dest_addr.sin_addr.s_addr &&
+                    cli_exist->dest_addr.sin_port == dest_addr.sin_port) {
                     find_flag = 1;
                     break;
                 }

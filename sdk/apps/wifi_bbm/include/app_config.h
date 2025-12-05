@@ -152,9 +152,9 @@
 #endif
 #endif
 
-// #define  CONFIG_LOGO_FILE_SAVE_IN_RESERVED_EXPAND_ZONE
+#define  CONFIG_LOGO_FILE_SAVE_IN_RESERVED_EXPAND_ZONE
 #if defined CONFIG_LOGO_FILE_SAVE_IN_RESERVED_EXPAND_ZONE
-#define CONFIG_LOGO_PACKRES_LEN 0xC800
+#define CONFIG_LOGO_PACKRES_LEN 0x025800
 #define CONFIG_LOGO_PACKRES_ADR ((__FLASH_SIZE__) - (CONFIG_UI_PACKRES_LEN) - 0x1000 - CONFIG_AUDIO_PACKRES_LEN - CONFIG_LOGO_PACKRES_LEN)
 #endif
 
@@ -484,7 +484,7 @@
 
 #define TCFG_POWER_ON_ENABLE_EMITTER            0   //开机自动打开发射器
 #define TCFG_POWER_ON_ENABLE_BLE                0   //开机自动打开BLE
-#define TCFG_USER_BT_CLASSIC_ENABLE             1   //经典蓝牙功能
+#define TCFG_USER_BT_CLASSIC_ENABLE             0   //经典蓝牙功能
 #define TCFG_USER_BLE_ENABLE                    1   //BLE功能使能
 #define TCFG_BT_DUAL_CONN_ENABLE                1   //经典蓝牙支持同时连接2台设备
 
@@ -628,8 +628,11 @@
  * 1:表示 LVGL UI 单独申请1块帧buffer
  * 2:表示 LVGL UI 单独申请2块帧buffer
  * */
-#define LV_DISP_UI_FB_NUM      2
+#define LV_DISP_UI_FB_NUM      1
 #define FB_LCD_BUF_NUM         2
+#if (LV_DISP_UI_FB_NUM)
+#define LV_COLOR_DEPTH_EXTEN   24 //24-适配ARGB8565,需要把LV_DISP_UI_FB_NUM 1/2
+#endif
 #endif
 
 

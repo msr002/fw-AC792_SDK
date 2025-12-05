@@ -11,11 +11,16 @@ void filt_not_my_bssid(void)
 }
 
 //example
+/* void filt_pack_not_need(void) */
+/* { */
+/* wf_rx_filt_set(DROP_CRC_ERR | DROP_PHY_ERR | DROP_UC_NOME | DROP_VER_ERR | DROP_DROP_MC | DROP_BC \ */
+/* | DROP_CFACK | DROP_CFEND | DROP_CTS | DROP_RTS | DROP_BA | DROP_BAR | DROP_CTRL_RSV */
+/* | DROP_PSPOLL); */
+/* } */
 void filt_pack_not_need(void)
 {
-    wf_rx_filt_set(DROP_CRC_ERR | DROP_PHY_ERR | DROP_UC_NOME | DROP_VER_ERR | DROP_DROP_MC | DROP_BC \
-                   | DROP_CFACK | DROP_CFEND | DROP_ACK | DROP_CTS | DROP_RTS | DROP_BA | DROP_BAR | DROP_CTRL_RSV
-                   | DROP_PSPOLL);
+    wf_rx_filt_set(DROP_CRC_ERR | DROP_PHY_ERR \
+                   | DROP_CFACK | DROP_CFEND | DROP_CTS | DROP_PSPOLL | DROP_RTS | DROP_BA | DROP_BAR | DROP_CTRL_RSV);
 }
 
 //example

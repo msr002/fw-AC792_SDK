@@ -1,8 +1,12 @@
-#include "system/includes.h"
 #include "lwip/sockets.h"
 #include "lwip.h"
 #include "sock_api/sock_api.h"
 #include "app_msg.h"
+#include "cdp_client.h"
+#include "wifi/online_manager.h"
+#include "action.h"
+#include "wifi_raw.h"
+#include "app_config.h"
 
 #define LOG_TAG_CONST       ONLINE_MANAGER
 #define LOG_TAG             "[ONLINE_MANAGER]"
@@ -24,21 +28,8 @@
 struct online_pkg {
     u32 magic;
     u32 active_cnt;
+    char rssi;
 };
-
-typedef enum {
-    DEVICE_STATUS_OFFLINE = 0,  // 离线
-    DEVICE_STATUS_ONLINE = 1,   // 在线
-} device_status_e;
-
-typedef struct online_device {
-    u32 ip_addr;                    // 设备IP地址
-    char ip_str[16];                // IP字符串
-    u32 last_seen_time;             // 最后一次在线时间(ms)
-    u32 active_cnt;                 // 活动计数
-    device_status_e status;         // 设备状态
-    struct list_head entry;         // 链表节点
-} online_device_t;
 
 struct online_task_manager {
     int broadcast_task_pid;
@@ -78,6 +69,7 @@ static void free_device_node(online_device_t *dev);
 static void ip_to_string(u32 ip, char *str);
 static int online_task_init(void);
 static void online_task_exit(void);
+static void adjust_tx_power_based_on_rssi(char rssi);
 
 int online_manager_init(void)
 {
@@ -129,6 +121,53 @@ void online_manager_exit(void)
     os_mutex_del(&device_mgr->mutex, OS_DEL_ALWAYS);
 }
 
+static int dev_online_notify_action(online_device_t *dev)
+{
+    struct intent it;
+    init_intent(&it);
+
+    int ret;
+    it.name	= "video_call";
+    it.data = (void *)dev;
+    it.action = ACTION_VIDEO_CALL_DEV_ONLINE;
+    ret = start_app_async(&it, NULL, NULL);
+
+    if (ret != 0) {
+        log_error("video call dev online action start app fail :%d \n", ret);
+        return -1;
+    }
+
+    return 0;
+}
+
+static void offline_free_device_cb(void *p, int err)
+{
+    log_info("offline free device cb \n");
+    struct online_handler *hdl = &g_online_hdl;
+    struct online_device_manager *device_mgr = &hdl->device_mgr;
+    online_device_t *dev = (online_device_t *)p;
+    free_device_node(dev);
+    device_mgr->device_count--;
+}
+
+static int dev_offline_notify_action(online_device_t *dev)
+{
+    struct intent it;
+    init_intent(&it);
+
+    int ret;
+    it.name	= "video_call";
+    it.data = (void *)dev;
+    it.action = ACTION_VIDEO_CALL_DEV_OFFLINE;
+    ret = start_app_async(&it, offline_free_device_cb, dev);
+    if (ret != 0) {
+        log_error("video call dev offline action start app fail :%d \n", ret);
+        return -1;
+    }
+
+    return 0;
+}
+
 
 static void online_manager_cleanup_timeout(void *priv)
 {
@@ -143,9 +182,8 @@ static void online_manager_cleanup_timeout(void *priv)
         u32 elapsed = current_time - dev->last_seen_time;
         if (elapsed > DEVICE_TIMEOUT_MS) {
             log_info("Device timeout removed: %s, elapsed=%u ms\n", dev->ip_str, elapsed);
-            app_send_message(APP_MSG_VIDEO_CALL_DEVICE_OFFLINE, 1, dev->ip_addr);
-            free_device_node(dev);
-            device_mgr->device_count--;
+            //TODO 失败处理
+            dev_offline_notify_action(dev);
         }
     }
     os_mutex_post(&device_mgr->mutex);
@@ -175,7 +213,8 @@ static int online_manager_add_device(u32 ip_addr, u32 active_cnt)
         os_mutex_post(&device_mgr->mutex);
         return -1;
     }
-    app_send_message(APP_MSG_VIDEO_CALL_DEVICE_ONLINE, 1, ip_addr);
+
+    dev_online_notify_action(dev);
 
     list_add_tail(&dev->entry, &device_mgr->device_list);
     device_mgr->device_count++;
@@ -200,6 +239,14 @@ static online_device_t *alloc_device_node(u32 ip_addr, u32 active_cnt)
     dev->last_seen_time = timer_get_ms();
     dev->status = DEVICE_STATUS_ONLINE;
     ip_to_string(ip_addr, dev->ip_str);
+
+    dev->cdp_hdl = cdp_cli_reg(ip_addr, NULL);
+    if (!dev->cdp_hdl) {
+        log_error("Failed to register cdp client for device: %s\n", dev->ip_str);
+        free(dev);
+        return NULL;
+    }
+
     INIT_LIST_HEAD(&dev->entry);
 
     return dev;
@@ -209,6 +256,10 @@ static void free_device_node(online_device_t *dev)
 {
     if (dev) {
         list_del(&dev->entry);
+        if (dev->cdp_hdl) {
+            cdp_cli_unreg(dev->cdp_hdl);
+            dev->cdp_hdl = NULL;
+        }
         free(dev);
     }
 }
@@ -301,6 +352,7 @@ static void online_broadcast_task(void *priv)
     while (!task_mgr->broadcast_task_exit) {
         online_pkg.magic = ONLINE_PKG_MAGIC;
         online_pkg.active_cnt = task_mgr->broadcast_active_cnt++;
+        online_pkg.rssi = wifi_raw_rssi_get();
         int ret = sock_sendto(sockfd, (char *)&online_pkg, sizeof(online_pkg), 0, (struct sockaddr *)&dest_addr, sizeof(dest_addr));
         if (ret <= 0) {
             log_error(" wifi raw broadcast sock sendto err :%d \n", ret);
@@ -362,8 +414,35 @@ static void online_recv_task(void *priv)
         log_debug(" online recv ip:%s active_cnt:%d \n", inet_ntoa(src_addr.sin_addr), online_pkg.active_cnt);
 
         online_manager_add_device(src_addr.sin_addr.s_addr, online_pkg.active_cnt);
+
+        //根据对端的RSSI值，调整本地的发送功率
+        adjust_tx_power_based_on_rssi(online_pkg.rssi);
     }
     log_debug("wifi raw recv task exit \n");
+}
+
+static void adjust_tx_power_based_on_rssi(char rssi)
+{
+    const char rssi_high_threshold = -20; // RSSI高阈值
+    const char rssi_low_threshold = -40;  // RSSI低阈值
+    const u8 tx_power_step = 1;           // 每次调整的功率
+
+    u8 current_tx_power = wifi_raw_get_pwr();
+    if (rssi > rssi_high_threshold) {
+        // RSSI较高，降低发送功率
+        if (current_tx_power > WIFI_MIN_PWR) {
+            current_tx_power -= tx_power_step;
+            wifi_raw_set_pwr(current_tx_power);
+            log_debug("Decreased TX power to %d due to high RSSI %d\n", current_tx_power, rssi);
+        }
+    } else if (rssi < rssi_low_threshold) {
+        // RSSI较低，增加发送功率
+        if (current_tx_power < WIFI_MAX_PWR) {
+            current_tx_power += tx_power_step;
+            wifi_raw_set_pwr(current_tx_power);
+            log_debug("Increased TX power to %d due to low RSSI %d\n", current_tx_power, rssi);
+        }
+    }
 }
 
 static int sock_cb(enum sock_api_msg_type type, void *priv)
@@ -375,4 +454,5 @@ static int sock_cb(enum sock_api_msg_type type, void *priv)
     }
     return 0;
 }
+
 

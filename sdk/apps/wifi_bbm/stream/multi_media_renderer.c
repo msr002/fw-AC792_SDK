@@ -297,6 +297,9 @@ static void video_render_task(void *priv)
 
             if (timer_get_ms() - display_time_ms > 1000) {
                 log_debug("channel[%d] fps:%d kbps:%d\n", ch->channel_id, frame_count, frame_kbps);
+                //UI DEBUG
+                void gui_video_call_set_video_fps_label(int fps);
+                gui_video_call_set_video_fps_label(frame_count);
                 display_time_ms = timer_get_ms();
                 frame_count = 0;
                 frame_kbps = 0;

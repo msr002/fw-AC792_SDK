@@ -8,6 +8,7 @@
 #include "app_msg.h"
 #include "online_manager.h"
 #include "wifi_raw.h"
+#include "wifi_ap_sta.h"
 #include "video_stream_send.h"
 #include "video_stream_recv.h"
 #include "multi_media_renderer.h"
@@ -15,6 +16,7 @@
 #include "ctp_client.h"
 #include "video_stream_common.h"
 #include "video_window_manager.h"
+#include "wifi/wifi_connect.h"
 
 #define LOG_TAG_CONST       VIDEO_CALL
 #define LOG_TAG             "[VIDEO_CALL]"
@@ -23,19 +25,26 @@
 #define LOG_DUMP_ENABLE
 #include "debug.h"
 
+enum {
+    WIFI_RAW_MODE,
+    WIFI_AP_STA_MODE,
+};
+
 struct video_call_handler {
     struct video_stream_send_hdl *stream_send;
     struct video_stream_recv_hdl *stream_recv;
     struct multi_media_renderer *renderer;
     char net_path[32];
 
-    u32 online_ip_table[10];
+    struct list_head device_list;
     int online_ip_count;
 
     int render_table[10];
     int render_count;
     int render_layout_mode;
     int recv_stream_count;
+
+    int wifi_mode;
 };
 struct video_call_handler g_video_call_hdl = {0};
 
@@ -61,16 +70,26 @@ static int video_call_is_render_device(u32 ip_addr);
 
 static int video_call_wifi_raw_init(void)
 {
+    INIT_LIST_HEAD(&g_video_call_hdl.device_list);
+
     wifi_raw_init();
     ctp_init(0);
     online_manager_init();
+    g_video_call_hdl.wifi_mode = WIFI_RAW_MODE;
     return 0;
 }
 static void video_call_wifi_raw_exit(void)
 {
     online_manager_exit();
-    //ctp_exit();
+    ctp_exit();
     wifi_raw_exit();
+}
+
+static int video_call_wifi_init(void)
+{
+    wifi_ap_init();
+    ctp_init(0);
+    g_video_call_hdl.wifi_mode = WIFI_AP_STA_MODE;
 }
 
 static int video_call_open_stream_send(void)
@@ -226,28 +245,34 @@ static void video_call_close_stream_main(void)
     }
 }
 
-static void video_call_add_online_device(u32 ip_addr)
+static void video_call_add_online_device(online_device_t *dev)
 {
-    int i;
-    for (i = 0; i < g_video_call_hdl.online_ip_count; i++) {
-        if (g_video_call_hdl.online_ip_table[i] == ip_addr) {
+    //避免重复添加
+    online_device_t *exist_dev = NULL;
+    list_for_each_entry(exist_dev, &g_video_call_hdl.device_list, entry) {
+        if (exist_dev->ip_addr == dev->ip_addr) {
+            log_info("Device already in online list\n");
             return;
         }
     }
-    if (g_video_call_hdl.online_ip_count < sizeof(g_video_call_hdl.online_ip_table) / sizeof(g_video_call_hdl.online_ip_table[0])) {
-        g_video_call_hdl.online_ip_table[g_video_call_hdl.online_ip_count++] = ip_addr;
+    online_device_t *copy_dev = malloc(sizeof(online_device_t));
+    if (!copy_dev) {
+        log_error("Failed to allocate memory for online device\n");
+        return;
     }
+    memcpy(copy_dev, dev, sizeof(online_device_t));
+
+    list_add_tail(&copy_dev->entry, &g_video_call_hdl.device_list);
+    g_video_call_hdl.online_ip_count++;
 }
 
-static void video_call_remove_offline_device(u32 ip_addr)
+static void video_call_remove_offline_device(online_device_t *dev)
 {
-    int i;
-    for (i = 0; i < g_video_call_hdl.online_ip_count; i++) {
-        if (g_video_call_hdl.online_ip_table[i] == ip_addr) {
-            //移除该IP地址
-            for (int j = i; j < g_video_call_hdl.online_ip_count - 1; j++) {
-                g_video_call_hdl.online_ip_table[j] = g_video_call_hdl.online_ip_table[j + 1];
-            }
+    online_device_t *exist_dev, *tmp;
+    list_for_each_entry_safe(exist_dev, tmp, &g_video_call_hdl.device_list, entry) {
+        if (exist_dev->ip_addr == dev->ip_addr) {
+            list_del(&exist_dev->entry);
+            free(exist_dev);
             g_video_call_hdl.online_ip_count--;
             return;
         }
@@ -358,20 +383,32 @@ static int video_call_remove_render(u32 ip_addr)
 static int video_call_request_stream_open(void)
 {
     int ret = -1;
-    int device_num = g_video_call_hdl.online_ip_count + 1; // TODO? 告诉对方即将接收多少路流
-    for (int i = 0; i < g_video_call_hdl.online_ip_count; i++) {
-        u32 ip_addr = g_video_call_hdl.online_ip_table[i];
-        int err = video_stream_open_request(NULL, &default_stream_info, device_num, ip_addr);
-        if (err) {
-            log_error("request stream open failed for device ip:%s \n", ipaddr_ntoa((const ip_addr_t *)&ip_addr));
-            //请求失败减少一路流
-            device_num--;
+    if (g_video_call_hdl.wifi_mode == WIFI_RAW_MODE) {
+        int device_num = g_video_call_hdl.online_ip_count + 1; // TODO? 告诉对方即将接收多少路流
+        online_device_t *dev;
+        list_for_each_entry(dev, &g_video_call_hdl.device_list, entry) {
+            int err = video_stream_open_request(dev->cdp_hdl, &default_stream_info, device_num);
+            if (err) {
+                device_num--;
+                log_error("request stream open failed for device ip:%s \n", dev->ip_str);
+                continue;
+            }
         }
-    }
-    log_info("request success count:%d ", device_num - 1);
+        log_info("request success count:%d ", device_num - 1);
 
-    if (device_num > 1) {
-        ret = video_call_open_stream_main(device_num);
+        if (device_num > 1) {
+            ret = video_call_open_stream_main(device_num);
+        }
+    } else if (g_video_call_hdl.wifi_mode == WIFI_AP_STA_MODE) {
+        // int device_num = 2;
+        // const char *ip_addr = "192.168.1.1";
+        // int err = video_stream_open_request(NULL, &default_stream_info, device_num, ipaddr_addr(ip_addr));
+        // if (err) {
+        //     log_error("request stream open failed for device ip:%s \n", ip_addr);
+        //     return -1;
+        // }
+        // ret = video_call_open_stream_main(device_num);
+
     }
 
     return ret;
@@ -449,6 +486,36 @@ static int video_call_switch_render_window(void)
     return 0;
 }
 
+//循环设置wifi发送速率,调试使用
+static void video_call_txrate_loop_set(void)
+{
+    static u8 txrate = WIFI_TXRATE_1M;
+    wifi_raw_set_txrate_val(txrate);
+
+    txrate++;
+    if (txrate > WIFI_TXRATE_72M) {
+        txrate = WIFI_TXRATE_1M;
+    }
+}
+
+//循环设置wifi重发次数,调试使用
+static void video_call_wifi_retry_loop_set(void)
+{
+    static u8 short_retry = 0;
+    static u8 long_retry = 0;
+    wifi_raw_set_short_retry(short_retry);
+    wifi_raw_set_long_retry(long_retry);
+
+    short_retry++;
+    long_retry++;
+    if (short_retry > 10) {
+        short_retry = 0;
+    }
+    if (long_retry > 10) {
+        long_retry = 0;
+    }
+}
+
 static int video_call_msg_handler(struct application *app, int *msg)
 {
     u32 ip_addr;
@@ -456,16 +523,7 @@ static int video_call_msg_handler(struct application *app, int *msg)
     case APP_MSG_VIDEO_CALL_MAIN:
         log_debug("APP_MSG_VIDEO_CALL_MAIN\n");
         video_call_wifi_raw_init();
-        break;
-    case APP_MSG_VIDEO_CALL_DEVICE_ONLINE:
-        ip_addr = msg[1];
-        log_debug("Device Online: IP=%s\n", ipaddr_ntoa((const ip_addr_t *)&ip_addr));
-        video_call_add_online_device(ip_addr);
-        break;
-    case APP_MSG_VIDEO_CALL_DEVICE_OFFLINE:
-        ip_addr = msg[1];
-        log_debug("Device Offline: IP=%s\n", ipaddr_ntoa((const ip_addr_t *)&ip_addr));
-        video_call_remove_offline_device(ip_addr);
+        // video_call_wifi_init();
         break;
     case APP_MSG_VIDEO_CALL_ADD_STREAM_RECV:
         ip_addr = msg[1];
@@ -492,6 +550,7 @@ static int video_call_msg_handler(struct application *app, int *msg)
 static int video_call_state_machine(struct application *app, enum app_state state, struct intent *it)
 {
     int ret = 0;
+    online_device_t *dev = NULL;
 
     switch (state) {
     case APP_STA_CREATE:
@@ -512,6 +571,16 @@ static int video_call_state_machine(struct application *app, enum app_state stat
         case ACTION_VIDEO_CALL_CLOSE_STREAM:
             log_debug("ACTION_VIDEO_CALL_CLOSE_STREAM\n");
             video_call_close_stream_main();
+            break;
+        case ACTION_VIDEO_CALL_DEV_ONLINE:
+            log_debug("ACTION_VIDEO_CALL_DEV_ONLINE\n");
+            dev = (online_device_t *)it->data;
+            video_call_add_online_device(dev);
+            break;
+        case ACTION_VIDEO_CALL_DEV_OFFLINE:
+            log_debug("ACTION_VIDEO_CALL_DEV_OFFLINE\n");
+            dev = (online_device_t *)it->data;
+            video_call_remove_offline_device(dev);
             break;
         default:
             break;
@@ -544,30 +613,14 @@ static int video_call_key_event_handler(struct key_event *key)
         ret = true;
         if (key->action == KEY_EVENT_CLICK) {
             log_debug("KEY1 CLICK\n");
+            video_call_wifi_retry_loop_set();
         }
         break;
     case KEY_MENU:
         ret = true;
         if (key->action == KEY_EVENT_CLICK) {
             log_debug("KEY2 CLICK\n");
-            //测试例子
-#if 0
-            video_call_open_stream_send();
-            video_call_open_stream_render();
-            video_window_manager_init();
-            g_video_call_hdl.render_layout_mode = 1;
-            video_window_manager_update_layout_mode(g_video_call_hdl.render_layout_mode);
-            if (video_call_is_render_device(0)) {
-                log_info("Local device already in render list\n");
-                return 0;
-            }
-            struct video_window *local_window = video_window_manager_get_window_next();
-            if (local_window) {
-                video_call_add_render(0, local_window);
-            }
-            int audio_player_init(void);
-            audio_player_init();
-#endif
+            video_call_txrate_loop_set();
         }
         break;
     case KEY_UP:
