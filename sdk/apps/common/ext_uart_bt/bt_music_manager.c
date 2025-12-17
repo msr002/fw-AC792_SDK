@@ -8,7 +8,7 @@
 #define LOG_INFO_ENABLE
 #include "debug.h"
 
-#if TCFG_INSTR_DEV_UART_ENABLE
+#if INSTR_DEV_UART_ENABLE
 
 /**
  * @brief 蓝牙音乐音量增加控制
@@ -115,6 +115,29 @@ void bt_pair_rsp_control(u8 confirm)
 }
 
 /**
+ * @brief 发送专辑就是确认
+ *
+ * @param confirm 确认标志：0-crc检验通过确认结束，非0-crc检验失败
+ */
+void bt_music_album_finish_control(u8 confirm)
+{
+    printf("%s %d\n", __func__, __LINE__);
+
+    if (confirm) {
+        printf("bt music album recv fail!!!\n");
+    }
+
+    u8 data[2] = {0};
+
+    data[0] = PROTOCOL_TAG_BT_ALBUM_END;
+    data[1] = confirm;
+
+    if (INTSR_TASK_UART_API) {
+        INTSR_TASK_UART_API->custom_uart_send_cmd_handle(OP_CODE_BT_MUSIC_ALBUM, 1, RSP_CMD_TYPE_REQUEST, data, sizeof(data));
+    }
+}
+
+/**
  * @brief 回复从机专辑相关命令
  *
  * @param cmd_status 命令状态码
@@ -131,4 +154,5 @@ void bt_music_album_rsp_control(u8 sn, UART_ErrorCode cmd_status, u8 *data, u32 
 }
 
 #endif
+
 

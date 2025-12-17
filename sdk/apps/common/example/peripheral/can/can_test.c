@@ -11,21 +11,30 @@
 #define CAN_REINIT_MODIFY_PARAMETERS	///< 演示demo-代码运行后修改can的参数
 #define CAN_RECV_BLOCK_ENABLE			///< 演示can阻塞式接收
 
+#ifdef CAN_RECV_BLOCK_ENABLE
 #define CAN_RX_CNT	5
+#else
+#define CAN_RX_CNT	10
+#endif
 
 static void *can_hdl = NULL;
 
 // 定义中断回调函数，非阻塞式接收数据完成会回调该函数
 // 回调的can_rx_data指针实际上与IOCTL_CAN_SET_RECV_NON_BLOCK_ENABLE传递的指针是一致的
-static int can_irq_cb(void *priv, can_data_t *can_rx_data)
+static int can_irq_cb(void *priv, can_data_t *can_rx_data, can_event_isr_t event)
 {
-    printf("\n\n--------can non block recv run---------\n\n");
-    printf("data_format is --%d", can_rx_data->data_format);
-    printf("rtr is --%d", can_rx_data->rtr);
-    printf("id is --0x%x", can_rx_data->id);
-    printf("dlc is --%d", can_rx_data->dlc);
-    for (int i = 0; i < can_rx_data->dlc; i++) {
-        printf("0x%x", can_rx_data->data[i]);
+    switch (event) {
+    case CAN_EVENT_RECEIVE_INTERRUPT:
+        printf("\n\n--------can non block recv run---------\n\n");
+        printf("data_format is -- %d", can_rx_data->data_format);
+        printf("rtr is -- %d", can_rx_data->rtr);
+        printf("id is -- %d  0x%x", can_rx_data->id, can_rx_data->id);
+        printf("dlc is -- %d", can_rx_data->dlc);
+        put_buf(can_rx_data->data, can_rx_data->dlc);
+        break;
+    default:
+        printf("%s: 0x%x", __func__, event);
+        break;
     }
     return 0;
 }
@@ -55,6 +64,7 @@ static void can_test_task(void *arg)
     cb.cb_func = can_irq_cb;
     cb.cb_priv = NULL;
     dev_ioctl(can_hdl, IOCTL_CAN_SET_IRQ_CB, (u32)&cb);
+    dev_ioctl(can_hdl, IOCTL_CAN_SET_DMA_FRAMES, CAN_RX_CNT);
     dev_ioctl(can_hdl, IOCTL_CAN_SET_RECV_NON_BLOCK_ENABLE, (u32)&can_rx_data);
 #endif
 
@@ -142,7 +152,6 @@ static void can_test_task(void *arg)
 
 #endif
 
-    /* dev_ioctl(can_hdl, IOCTL_CAN_INTERRUPT_ENABLE, RECEIVE_INTERRUPT); */
     while (1) {
 
 #ifdef CAN_RECV_BLOCK_ENABLE
@@ -163,8 +172,8 @@ static void can_test_task(void *arg)
         }
 #else
         os_time_dly(100);
-        dev_write(can_hdl, &can_tx_data[1], 2);
         printf("waiting recv...");
+        dev_write(can_hdl, &can_tx_data[1], 1);
 #endif
 
 #ifdef CAN_REINIT_MODIFY_PARAMETERS
@@ -206,8 +215,8 @@ static void can_test_task(void *arg)
         }
 #else
         os_time_dly(100);
-        dev_write(can_hdl, &can_tx_data[1], 2);
         printf("waiting recv...");
+        dev_write(can_hdl, &can_tx_data[1], 2);
 #endif
 
     }

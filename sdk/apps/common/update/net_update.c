@@ -103,6 +103,15 @@ void test_update_process_notify_callback(void *priv)
     if (percent != tmp || tmp == 0) {
         printf("update[%s] >> %d%% \n", info->FileName, tmp);
         percent = tmp;
+        if (0 == memcmp(info->FileName, "uboot_core", strlen("uboot_core"))) {
+            if (percent == 0) {
+                dual_bank_uboot_protect_disable();
+                printf("dual_bank_uboot_protect_disable\n");
+            } else if (percent == 100) {
+                printf("dual_bank_uboot_protect_en\n");
+                dual_bank_uboot_protect_en();
+            }
+        }
     }
 
     if (percent == 100) {

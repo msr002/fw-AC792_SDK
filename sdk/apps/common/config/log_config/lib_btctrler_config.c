@@ -203,6 +203,10 @@ const int config_btctler_le_slave_multilink         = 1;
 #ifndef TCFG_TRANS_MULTI_BLE_MASTER_NUMS
 #define TCFG_TRANS_MULTI_BLE_MASTER_NUMS            0
 #endif
+#if (THIRD_PARTY_PROTOCOLS_SEL & ANCS_CLIENT_EN) && TCFG_TRANS_MULTI_BLE_MASTER_NUMS == 0
+#undef  TCFG_TRANS_MULTI_BLE_MASTER_NUMS            0
+#define TCFG_TRANS_MULTI_BLE_MASTER_NUMS            1
+#endif
 
 #if (TCFG_LEA_BIG_CTRLER_TX_EN || TCFG_LEA_BIG_CTRLER_RX_EN)
 const int config_btctler_le_hw_nums                 = 6;

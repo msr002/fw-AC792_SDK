@@ -342,6 +342,11 @@ static void multi_protocol_profile_init(void)
 #endif
 #endif
 
+#if (THIRD_PARTY_PROTOCOLS_SEL & ANCS_CLIENT_EN)
+    void ancs_client_all_init(void);
+    ancs_client_all_init();
+#endif
+
 #if (THIRD_PARTY_PROTOCOLS_SEL & GFPS_EN)
     gfps_ble_profile_init();
     gfps_is_tws_master_callback_register(check_tws_master_role);
@@ -457,6 +462,11 @@ void multi_protocol_bt_exit(void)
 #if (THIRD_PARTY_PROTOCOLS_SEL & RCSP_MODE_EN)
     rcsp_bt_ble_exit();
     bt_rcsp_interface_exit();
+#endif
+
+#if (THIRD_PARTY_PROTOCOLS_SEL & ANCS_CLIENT_EN)
+    void ancs_client_all_exit(void);
+    ancs_client_all_exit();
 #endif
 
 #if (THIRD_PARTY_PROTOCOLS_SEL & ALIPAY_EN)

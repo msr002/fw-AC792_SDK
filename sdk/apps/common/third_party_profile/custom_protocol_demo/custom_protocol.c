@@ -19,6 +19,9 @@
 #if TCFG_USER_BT_CLASSIC_ENABLE
 #define CUSTOM_DEMO_SPP_ENABLE
 #endif
+#if TCFG_ATT_OVER_EDR_DEMO_EN
+#define CUSTOM_DEMO_ATT_OVER_EDR_ENABLE
+#endif
 
 #ifdef CUSTOM_DEMO_BLE_ENABLE
 static void *custom_demo_ble_hdl = NULL;
@@ -26,7 +29,12 @@ static void *custom_demo_ble_hdl = NULL;
 #ifdef CUSTOM_DEMO_SPP_ENABLE
 static void *custom_demo_spp_hdl = NULL;
 #endif
-
+#ifdef CUSTOM_DEMO_ATT_OVER_EDR_ENABLE
+static void *att_over_edr_hdl = NULL;
+#define EDR_ATT_HDL_UUID \
+	(((u8)('E' + 'D' + 'R') << (1 * 8)) | \
+	 ((u8)('A' + 'T' + 'T') << (0 * 8)))
+#endif
 /*************************************************
                   BLE 相关内容
 *************************************************/
@@ -166,7 +174,15 @@ static int custom_att_write_callback(void *hdl, hci_con_handle_t connection_hand
         log_info("rx(%d):", buffer_size);
         log_info_hexdump(buffer, buffer_size);
         // test
-        custom_demo_ble_send(buffer, buffer_size);
+#ifdef CUSTOM_DEMO_ATT_OVER_EDR_ENABLE
+        if (hdl == att_over_edr_hdl) {
+            log_info("gatt over edr send data");
+            custom_demo_gatt_over_edr_send(buffer, buffer_size);
+        } else
+#endif
+        {
+            custom_demo_ble_send(buffer, buffer_size);
+        }
         break;
     case ATT_CHARACTERISTIC_ae02_01_CLIENT_CONFIGURATION_HANDLE:
         log_info("write ccc:%04x, %02x", handle, buffer[0]);
@@ -235,7 +251,19 @@ int custom_demo_ble_send(u8 *data, u32 len)
 
     return ret;
 }
+#endif
 
+#ifdef CUSTOM_DEMO_ATT_OVER_EDR_ENABLE
+int custom_demo_gatt_over_edr_send(u8 *data, u32 len)
+{
+    log_info("custom_demo_gatt_over_edr_send len = %d", len);
+    put_buf(data, len);
+    int ret = app_ble_att_send_data(att_over_edr_hdl, ATT_CHARACTERISTIC_ae02_01_VALUE_HANDLE, data, len, ATT_OP_AUTO_READ_CCC);
+    if (ret) {
+        log_error("gatt_over_edr_send send fail %d", ret);
+    }
+    return ret;
+}
 #endif
 /*************************************************
                   BLE 相关内容 end
@@ -284,6 +312,13 @@ void custom_demo_all_init(void)
 {
     log_info("custom_demo_all_init");
     const uint8_t *edr_addr = bt_get_mac_addr();
+    uint8_t ble_addr[6] = {0};
+#ifdef CUSTOM_DEMO_ATT_OVER_EDR_ENABLE
+    //gatt over edr test
+    memcpy(ble_addr, edr_addr, sizeof(ble_addr));
+#else
+    bt_make_ble_address(ble_addr, edr_addr);
+#endif
 
 #ifdef CUSTOM_DEMO_BLE_ENABLE
     // BLE init
@@ -293,7 +328,7 @@ void custom_demo_all_init(void)
             log_error("custom_demo_ble_hdl alloc err !");
             return;
         }
-        app_ble_set_mac_addr(custom_demo_ble_hdl, (void *)edr_addr);
+        app_ble_set_mac_addr(custom_demo_ble_hdl, (void *)ble_addr);
         app_ble_profile_set(custom_demo_ble_hdl, custom_demo_profile_data);
         app_ble_att_read_callback_register(custom_demo_ble_hdl, custom_att_read_callback);
         app_ble_att_write_callback_register(custom_demo_ble_hdl, custom_att_write_callback);
@@ -320,6 +355,26 @@ void custom_demo_all_init(void)
     }
     // SPP init end
 #endif
+
+#ifdef CUSTOM_DEMO_ATT_OVER_EDR_ENABLE
+    if (att_over_edr_hdl == NULL) {
+        att_over_edr_hdl = app_ble_hdl_alloc();
+        if (att_over_edr_hdl == NULL) {
+            log_error("att_over_edr_hdl alloc err");
+            return;
+        }
+        app_ble_profile_set(att_over_edr_hdl, custom_demo_profile_data);
+        app_ble_adv_address_type_set(att_over_edr_hdl, 0);
+        app_ble_gatt_over_edr_connect_type_set(att_over_edr_hdl, 1);
+        app_ble_hdl_uuid_set(att_over_edr_hdl, EDR_ATT_HDL_UUID);
+        app_ble_att_read_callback_register(att_over_edr_hdl, custom_att_read_callback);
+        app_ble_att_write_callback_register(att_over_edr_hdl, custom_att_write_callback);
+        app_ble_att_server_packet_handler_register(att_over_edr_hdl, custom_cbk_packet_handler);
+        app_ble_hci_event_callback_register(att_over_edr_hdl, custom_cbk_packet_handler);
+        app_ble_l2cap_packet_handler_register(att_over_edr_hdl, custom_cbk_packet_handler);
+        bredr_adt_init();
+    }
+#endif
 }
 
 void custom_demo_all_exit(void)
@@ -342,6 +397,15 @@ void custom_demo_all_exit(void)
     }
     app_spp_hdl_free(custom_demo_spp_hdl);
     custom_demo_spp_hdl = NULL;
+#endif
+
+#ifdef CUSTOM_DEMO_ATT_OVER_EDR_ENABLE
+    // GATT over edr exit
+    if (app_ble_get_hdl_con_handle(att_over_edr_hdl)) {
+        app_ble_disconnect(att_over_edr_hdl);
+    }
+    app_ble_hdl_free(att_over_edr_hdl);
+    att_over_edr_hdl = NULL;
 #endif
 }
 

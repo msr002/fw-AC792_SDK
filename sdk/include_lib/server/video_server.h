@@ -298,6 +298,7 @@ struct vs_image_capture {
     u8 *exif;
     int exif_size;
     u32 mirror;
+    int rotate;
     char *file_name;
     char save_cap_buf;
     u32 jaggy;

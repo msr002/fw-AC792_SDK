@@ -173,6 +173,11 @@ int file_recorder_set_fmt(struct file_recorder *recorder, struct stream_enc_fmt 
     return jlstream_ioctl(recorder->stream, NODE_IOC_SET_ENC_FMT, (int)fmt);
 }
 
+int file_recorder_set_priv_fmt(struct file_recorder *recorder, struct encoder_fmt *enc_fmt)
+{
+    return jlstream_node_ioctl(recorder->stream, NODE_UUID_ENCODER, NODE_IOC_SET_PRIV_FMT, (int)(enc_fmt));
+}
+
 void file_recorder_set_callback(struct file_recorder *recorder, void *priv,
                                 file_recorder_cb_t callback)
 {

@@ -235,10 +235,22 @@ static void send_offer(struct pbuf *p)
 
     DHCP_DBG_SEND(p->payload, p->len);
 
+
     ip_addr_t dst_ip = IPADDR4_INIT(0x0);
     ip4_addr_set(ip_2_ip4(&dst_ip), &broadcast_dhcps);
+#if 1
     udp_sendto(pcb_dhcps, p, &dst_ip, DHCP_CLIENT_PORT);
     /* udp_sendto(pcb_dhcps, p, &dst_ip, DHCP_CLIENT_PORT);//减缓wifi信号不好导致DHCP分配不到的情况 */
+#else
+    struct pbuf *np1 = pbuf_alloc(PBUF_RAW, p->tot_len, PBUF_RAM);
+    pbuf_copy(np1, p);
+
+    udp_sendto(pcb_dhcps, p, &dst_ip, DHCP_CLIENT_PORT);
+    udp_sendto(pcb_dhcps, np1, &dst_ip, DHCP_CLIENT_PORT);
+    udp_sendto(pcb_dhcps, np1, &dst_ip, DHCP_CLIENT_PORT);
+    udp_sendto(pcb_dhcps, np1, &dst_ip, DHCP_CLIENT_PORT);
+    pbuf_free(np1);
+#endif
 }
 
 static void send_nak(struct pbuf *p)

@@ -2,11 +2,11 @@
 #include "system/includes.h"
 #include "uart_manager.h"
 
-#if TCFG_INSTR_DEV_UART_ENABLE
+#if INSTR_DEV_UART_ENABLE
 /**** *************
 蓝牙测试项例子参考文件
 *******************/
-//#define BT_ON_OFF_TEST_ENABLE      //设置蓝牙开关闭测试项   OK
+// #define BT_ON_OFF_TEST_ENABLE      //设置蓝牙开关闭测试项   OK
 // #define BT_NAME_SET_TEST_ENABLE    //设置蓝牙名测试项       OK
 // #define BT_NAME_GET_TEST_ENABLE    //获取蓝牙名测试项       OK
 // #define BT_MAC_GET_TEST_ENABLE     //获取蓝牙MAC地址测试项  OK
@@ -113,6 +113,7 @@ void bt_get_remote_name_test()
 
 void bt_pair_rsp_test()
 {
+    printf("%s %d\n", __func__, __LINE__);
     static u8 flag = 0;
 
     if (!flag) {
@@ -265,4 +266,5 @@ void bt_list_test_func()
 #endif
 }
 #endif
+
 

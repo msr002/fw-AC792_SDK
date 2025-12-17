@@ -97,7 +97,6 @@ typedef enum {
     ALINK_FRAME_32SCLK, 	//32 sclk/frame
 } ALINK_FRAME_MODE;
 
-//SDK默认PLL是192M,仅支持44100,22050,11025采样率,如需其他采样率,需设置PLL为240M,可支持所有采样率
 typedef enum {
     ALINK_SR_192000 = 192000,
     ALINK_SR_176400 = 176400,

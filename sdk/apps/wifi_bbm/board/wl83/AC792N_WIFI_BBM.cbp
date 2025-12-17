@@ -162,6 +162,7 @@
 <Add directory="../../../../apps/common/third_party_profile/mijia/mijia_ble_api" />
 <Add directory="../../../../apps/common/third_party_profile/mijia/mijia_ble_libs" />
 <Add directory="../../../../apps/common/third_party_profile/alipay" />
+<Add directory="../../../../apps/common/third_party_profile/ancs_client_demo" />
 <Add directory="../../../../apps/common/lcd/include" />
 <Add directory="../../../../apps/wifi_bbm/mode/bt/le_audio/include" />
 <Add directory="../../../../apps/wifi_bbm/mode/bt/le_audio/include/big" />
@@ -791,6 +792,7 @@
 <Unit filename="../../../../apps/common/example/third_party/sqlite/sqlite3.h" />
 <Unit filename="../../../../apps/common/example/third_party/sqlite/sqlite_test_main.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/common/example/video/image/jpeg/jpeg_disp_frame.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="../../../../apps/common/ext_uart_bt/bt_album_manager.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/common/ext_uart_bt/bt_device_manager.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/common/ext_uart_bt/bt_music_manager.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/common/ext_uart_bt/bt_ota_manager.c"><Option compilerVer="CC"/></Unit>
@@ -1578,6 +1580,8 @@
 <Unit filename="../../../../apps/common/system/version.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/common/third_party_profile/alipay/le_alipay.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/common/third_party_profile/alipay/le_alipay.h" />
+<Unit filename="../../../../apps/common/third_party_profile/ancs_client_demo/le_ancs_client.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="../../../../apps/common/third_party_profile/ancs_client_demo/le_ancs_client.h" />
 <Unit filename="../../../../apps/common/third_party_profile/custom_protocol_demo/custom_protocol.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/common/third_party_profile/custom_protocol_demo/custom_protocol.h" />
 <Unit filename="../../../../apps/common/third_party_profile/jieli/hid_user.c"><Option compilerVer="CC"/></Unit>
@@ -1794,8 +1798,8 @@
 <Unit filename="../../../../apps/wifi_bbm/stream/audio_player.h" />
 <Unit filename="../../../../apps/wifi_bbm/stream/multi_media_renderer.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/wifi_bbm/stream/multi_media_renderer.h" />
-<Unit filename="../../../../apps/wifi_bbm/stream/net_stream_info.h" />
 <Unit filename="../../../../apps/wifi_bbm/stream/udp_stream.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="../../../../apps/wifi_bbm/stream/udp_stream.h" />
 <Unit filename="../../../../apps/wifi_bbm/stream/video_pipeline.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/wifi_bbm/stream/video_pipeline.h" />
 <Unit filename="../../../../apps/wifi_bbm/stream/video_stream_common.h" />
@@ -1807,6 +1811,8 @@
 <Unit filename="../../../../apps/wifi_bbm/stream/video_stream_send.h" />
 <Unit filename="../../../../apps/wifi_bbm/stream/video_window_manager.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/wifi_bbm/stream/video_window_manager.h" />
+<Unit filename="../../../../apps/wifi_bbm/stream/vir_audio_recoder.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="../../../../apps/wifi_bbm/stream/vir_audio_recoder.h" />
 <Unit filename="../../../../apps/wifi_bbm/ui_action.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/wifi_bbm/wifi/online_manager.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/wifi_bbm/wifi/online_manager.h" />
@@ -2590,6 +2596,7 @@
 <Unit filename="../../../../include_lib/server/video_engine.h" />
 <Unit filename="../../../../include_lib/server/video_server.h" />
 <Unit filename="../../../../include_lib/server/vpkg_server.h" />
+<Unit filename="../../../../include_lib/server/vunpkg_server.h" />
 <Unit filename="../../../../include_lib/system/app_core.h" />
 <Unit filename="../../../../include_lib/system/bank_switch.h" />
 <Unit filename="../../../../include_lib/system/boot.h" />

@@ -596,6 +596,8 @@
 #define THIRD_PARTY_PROTOCOLS_SEL               0
 #endif
 
+#define TCFG_ATT_OVER_EDR_DEMO_EN               0
+
 
 //*********************************************************************************//
 //                                UI DEMO配置                                      //
@@ -607,7 +609,7 @@
  * 1:表示 LVGL UI 单独申请1块帧buffer
  * 2:表示 LVGL UI 单独申请2块帧buffer
  * */
-#define LV_DISP_UI_FB_NUM      2
+#define LV_DISP_UI_FB_NUM      2//注意当修改为0时,需要设置lv_conf.h:LV_COLOR_DEPTH_EXTEN = LV_COLOR_DEPTH
 #define FB_LCD_BUF_NUM         2
 #endif
 

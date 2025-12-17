@@ -147,6 +147,7 @@ INCLUDES := \
 	-I../../../../../apps/common/third_party_profile/mijia/mijia_ble_api \
 	-I../../../../../apps/common/third_party_profile/mijia/mijia_ble_libs \
 	-I../../../../../apps/common/third_party_profile/alipay \
+	-I../../../../../apps/common/third_party_profile/ancs_client_demo \
 	-I../../../../../apps/common/third_party_profile \
 	-I../../../../../apps/common/ble/include \
 
@@ -174,6 +175,7 @@ c_SRC_FILES := \
 	../../../../../apps/common/system/perf_counter/perf_counter.c \
 	../../../../../apps/common/system/version.c \
 	../../../../../apps/common/third_party_profile/alipay/le_alipay.c \
+	../../../../../apps/common/third_party_profile/ancs_client_demo/le_ancs_client.c \
 	../../../../../apps/common/third_party_profile/custom_protocol_demo/custom_protocol.c \
 	../../../../../apps/common/third_party_profile/jieli/hid_user.c \
 	../../../../../apps/common/third_party_profile/le_hogp/le_hogp.c \

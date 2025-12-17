@@ -55,6 +55,39 @@ struct video_dec_hdl dec_handler;
 _WEAK_ void video_dec_post_msg(const char *msg, ...)
 {
 }
+
+static void *unpkg_open(const char *p, const char *mode)
+{
+    printf("user unpkg open \n");
+    return (void *)p;
+}
+
+static int unpkg_fread(void *buf, u32 size, u32 count, void *file)
+{
+    printf("user unpkg fread \n");
+    return fread(buf, size, count, file);
+}
+
+static int unpkg_fseek(void *file, u32 offset, int orig)
+{
+    printf("user unpkg fseek \n");
+    return fseek(file, offset, orig);
+}
+
+static int unpkg_ftell(void *file)
+{
+    printf("user unpkg ftell \n");
+    return ftell(file);
+}
+
+static struct vunpkg_sys_ops user_video_unpkg_ops = {
+    .fopen = unpkg_open,
+    .fread = unpkg_fread,
+    .fseek = unpkg_fseek,
+    .ftell = unpkg_ftell,
+};
+
+
 char *video_dec_get_file_name(void)
 {
     return __this->fname;
@@ -347,6 +380,7 @@ static int video_dec_start(void *p)
         server_register_event_handler(__this->video_dec, NULL, dec_server_event_handler);
     }
 
+    /* __this->req.dec.vunpkg_ops = &user_video_unpkg_ops; */
     __this->req.dec.fb 		= "fb1";
     /*
      * 下面4个参数为解码出来的视频在屏幕上的起始坐标和长宽, 长宽配0即为显示屏大小
@@ -627,6 +661,8 @@ int dec_open_file()
         video_dec_post_msg("noFile");
         return -ENOENT;
     }
+
+    /* __this->req.dec.vunpkg_ops = &user_video_unpkg_ops; */
 
     __this->req.dec.fb 		= "fb1";
     /*

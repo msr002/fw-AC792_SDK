@@ -145,7 +145,7 @@ const u8 wifi_recv_poll = 0; //wifi接收数据方式，0为中断方式接收�
 const u8 CONFIG_WIFI_USE_TLSF_MEM = 0; //配置wifi使用独立的内存管理，与系统内存管理分割开
 const unsigned int CONFIG_WIFI_MAX_MEM_LIMIT = 200 * 1024; //允许wifi使用的内存大小
 const unsigned char CONFIG_AP_TXQ_PRI = 0;  //AP模式下tx和rx队列分配,tx占最大比重，用于改善发送为主的性能
-
+const u8 rf_halt_check_enable = 1; //rf挂起检测, 0:disable 1:enable
 
 #if TCFG_RF_FCC_TEST_ENABLE
 //WIFI Adaptivity

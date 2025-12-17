@@ -64,7 +64,44 @@ static void recorder_start(void)
         return;
     }
 
-    log_info("recorder_fmt: ch %d, sample rate %d", fmt.channel, fmt.sample_rate);
+    if (fmt.coding_type == AUDIO_CODING_OPUS || fmt.coding_type == AUDIO_CODING_SPEEX) {
+        struct encoder_fmt enc_fmt = {0};
+        switch (fmt.coding_type) {
+        case AUDIO_CODING_OPUS:
+            //  bitrate
+            //     16000,32000,64000 这三个码率分别对应非ogg解码库
+            //     的 OPUS_SRINDEX 值为0,1,2
+            //  format
+            //     0:百度_无头.
+            //     1:酷狗_eng+range.
+            //     2:ogg封装,pc软件可播放.
+            //     3:size+rangeFinal. 源码可兼容版本.
+            //  complexity
+            //     0|1|2|3     3质量最好.速度要求最高.
+            //  frame_ms (由frame_dms / 10得出)
+            //     20|40|60|80|100 ms.
+            //  sample_rate
+            //     sample_rate=16k         ignore
+            //
+            //   注意
+            //   1. struct encoder_fmt是配置编码器私有参数
+            //   有效的参数：
+            //   complexity, format, frame_dms
+            //   不起效的参数：
+            //   bit_rate, sample_rate, ch_num, bit_width
+            enc_fmt.complexity = 0;
+            enc_fmt.format = 0;
+            enc_fmt.frame_dms = 20 * 10;    //与工具保持一致，要乘以10,20*10表示20ms
+            break;
+        case AUDIO_CODING_SPEEX:
+            enc_fmt.quality = 5; //建议配置成4-5,使用5
+            enc_fmt.complexity = 2; //建议值0-2,2音质最好
+            break;
+        }
+        file_recorder_set_priv_fmt(recorder, &enc_fmt);
+    }
+
+    log_info("recorder_fmt: ch %d, sample rate %d enc_type %x", fmt.channel, fmt.sample_rate, fmt.coding_type);
 
     switch (fmt.coding_type) {
     case AUDIO_CODING_PCM:
@@ -73,6 +110,12 @@ static void recorder_start(void)
         break;
     case AUDIO_CODING_MP3:
         suffix = "mp3";
+        break;
+    case AUDIO_CODING_OPUS:
+        suffix = "opu";
+        break;
+    case AUDIO_CODING_SPEEX:
+        suffix = "spx";
         break;
     default:
         suffix = "bin";

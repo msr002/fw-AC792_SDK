@@ -1,0 +1,41 @@
+{
+ "cells": [
+  {
+   "shape": "vue-shape",
+   "width": 1200,
+   "height": 600,
+   "component": "node-parent",
+   "zIndex": 0,
+   "group": "hardware",
+   "attrs": {
+    "pointer-events": "visiblePainted",
+    "body": {
+     "pointer-events": "visiblePainted"
+    }
+   },
+   "data": {
+    "showText": true,
+    "describe": "Describe",
+    "parent": true,
+    "enable": true,
+    "name": "Name",
+    "group": "分组",
+    "uuid": "0X8026",
+    "type": 0,
+    "fun": 0,
+    "cmd": {
+     "exe": "",
+     "args": "",
+     "workplace": ""
+    },
+    "formFile": "",
+    "childrenGroup": "[{\"id\":1765354223882,\"title\":\"默认分组\",\"select\":true,\"tabs\":[{\"id\":\"id_1765354242142_0\",\"title\":\"参数组1\"}],\"curTab\":\"id_1765354242142_0\"}]",
+    "zIndex": 0
+   }
+  }
+ ],
+ "version": {
+  "code": 1,
+  "tool": "4.4.0"
+ }
+}

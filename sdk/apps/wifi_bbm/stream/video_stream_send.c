@@ -3,7 +3,8 @@
 #include "app_config.h"
 #include "stream_core.h"
 #include "video_stream_send.h"
-#include "net_stream_info.h"
+#include "vir_audio_recoder.h"
+#include "udp_stream.h"
 
 
 #define LOG_TAG_CONST       VIDEO_STREAM_SEND
@@ -116,6 +117,21 @@ static void video_text_osd_init(struct video_text_osd *text_osd, char *osd_buf, 
 
 }
 
+static void audio_recoder_data_cb(void *priv, u8 *data, u32 len)
+{
+    //log_debug("audio len:%d \n", len);
+    u8 type = 1;
+    net_rt_send_frame(data, len, type);
+}
+
+static void video_recoder_data_cb(u8 type, u8 *data, u32 len)
+{
+    //log_debug("audio len:%d \n", len);
+    net_rt_send_frame(data, len, type);
+}
+
+
+
 int video_stream_send_create(struct video_stream_send_hdl **hdl)
 {
     struct video_stream_send_hdl *stream_hdl;
@@ -203,30 +219,28 @@ int video_stream_send_start(struct video_stream_send_hdl *hdl)
         req.rec.text_osd = &text_osd;
     }
 
-    //audio
-    if (audio_cfg->audio_enable) {
-        req.rec.audio.sample_rate     = audio_cfg->sample_rate;
-        req.rec.audio.channel         = audio_cfg->channel;
-        req.rec.audio.volume          =  audio_cfg->volume;
-        req.rec.audio.aud_interval_size   = audio_cfg->interval_size;
-        req.rec.audio.buf                 = buffer_cfg->audio_buf;
-        req.rec.audio.buf_len             = buffer_cfg->audio_buf_size;
-    }
-
     struct net_stream_info s_info = {0};
-    s_info.sample_rate = req.rec.audio.sample_rate;
+    s_info.sample_rate = audio_cfg->sample_rate;
     s_info.fps = video_cfg->fps;
     s_info.abr_kbps = video_cfg->abr_kbps;
 
+    ret = net_rt_vpkg_open(hdl->net_path, &s_info);
+    if (ret) {
+        log_error("open udp stream fail \n");
+        return -1;
+    }
+
     req.rec.format  = USER_VIDEO_FMT_AVI;
+    req.rec.packet_cb = video_recoder_data_cb;      //视频数据回调
     req.rec.cycle_time = 5 * 60;
-    strcpy(req.rec.net_par.netpath, hdl->net_path);
-    req.rec.target = VIDEO_TO_OUT;
-    req.rec.out.path = req.rec.net_par.netpath;
-    req.rec.out.arg  = &s_info;
-    req.rec.out.open = stream_open;
-    req.rec.out.send = stream_write;
-    req.rec.out.close = stream_close;
+
+    //audio
+    if (audio_cfg->audio_enable) {
+        hdl->audio_recoder = vir_audio_recoder_open(audio_cfg->sample_rate,
+                             AUDIO_CODING_OPUS,
+                             NULL,
+                             audio_recoder_data_cb);    //音频数据回调
+    }
 
     ret = server_request(hdl->video_server, VIDEO_REQ_REC, &req);
     if (ret) {
@@ -246,6 +260,11 @@ int video_stream_send_stop(struct video_stream_send_hdl *hdl)
         return -1;
     }
 
+    if (hdl->audio_recoder) {
+        vir_audio_recoder_close(hdl->audio_recoder);
+        hdl->audio_recoder = NULL;
+    }
+
     req.rec.channel = 0;
     req.rec.state = VIDEO_STATE_STOP;
     ret = server_request(hdl->video_server, VIDEO_REQ_REC, &req);
@@ -253,6 +272,8 @@ int video_stream_send_stop(struct video_stream_send_hdl *hdl)
         log_error("stop video stream send err :%d \n", ret);
         return -1;
     }
+
+    net_rt_vpkg_close();
 
     return 0;
 }

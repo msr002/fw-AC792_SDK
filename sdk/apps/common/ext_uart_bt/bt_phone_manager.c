@@ -17,6 +17,8 @@
 #define LOG_DUMP_ENABLE
 #include "debug.h"
 
+#if INSTR_DEV_UART_ENABLE
+
 /**
  * @brief 电话本数据结构体（小端序，序列号占1字节）
  */
@@ -30,7 +32,7 @@ typedef struct {
 } PhonebookData;
 #pragma pack()
 
-#if TCFG_INSTR_DEV_UART_ENABLE
+#define FIELD_SEPARATOR 0x1F  /**< Unit Separator ASCII字符，字段分隔符 */
 
 /**
  * @brief 获取蓝牙电话本信息
@@ -102,8 +104,6 @@ void bt_phone_hfp_rsp_slave(uint8_t cmd_stats, u8 *data, u32 len)
     }
 }
 
-#define FIELD_SEPARATOR 0x1F  /**< Unit Separator ASCII字符，字段分隔符 */
-
 /**
  * @brief 解析电话本通话记录原始数据
  *
@@ -112,10 +112,8 @@ void bt_phone_hfp_rsp_slave(uint8_t cmd_stats, u8 *data, u32 len)
  * @param result 解析结果结构体指针
  * @return int 0成功，负数表示错误码
  */
-int parse_phonebook_data(const u8 *data, u16 data_len, PhonebookData *result)
+static int parse_phonebook_data(const u8 *data, u16 data_len, PhonebookData *result)
 {
-    printf("%s %d\n", __func__, __LINE__);
-
     /* 参数检查 */
     if (data == NULL || result == NULL || data_len < 5) {
         return -1; // 无效参数或数据长度不足
@@ -128,24 +126,19 @@ int parse_phonebook_data(const u8 *data, u16 data_len, PhonebookData *result)
 
     /* 解析类型 (1字节) */
     result->type = data[pos++];
-    printf("%s %d\n", __func__, __LINE__);
 
     /* 检查第一个分隔符 */
-    printf("pos : %d  data_len : %d\n", pos, data_len);
-    printf("data[%d] : %d\n", pos, data[pos]);
     if (pos >= data_len || data[pos] != FIELD_SEPARATOR) {
-        printf("%s %d\n", __func__, __LINE__);
         return -2; // 分隔符错误
     }
     pos++;
-    printf("%s %d\n", __func__, __LINE__);
 
     /* 解析姓名 (直到下一个分隔符或数据结束) */
     u8 *field_start = (u8 *)&data[pos];
     while (pos < data_len && data[pos] != FIELD_SEPARATOR) {
         pos++;
     }
-    printf("%s %d\n", __func__, __LINE__);
+
     if (pos >= data_len) {
         return -3; // 数据不完整
     }
@@ -153,7 +146,6 @@ int parse_phonebook_data(const u8 *data, u16 data_len, PhonebookData *result)
     u16 name_len = pos - (field_start - data);
     if (name_len > 0) {
         result->name = (u8 *)malloc(name_len + 1);
-        printf("result->name : 0x%x\n", result->name);
         memcpy(result->name, field_start, name_len);
         result->name[name_len] = '\0'; // 添加字符串结束符
     } else {
@@ -166,7 +158,6 @@ int parse_phonebook_data(const u8 *data, u16 data_len, PhonebookData *result)
     while (pos < data_len && data[pos] != FIELD_SEPARATOR) {
         pos++;
     }
-    printf("%s %d\n", __func__, __LINE__);
     if (pos >= data_len) {
         /* 清理已分配的内存 */
         if (result->name) {
@@ -184,7 +175,6 @@ int parse_phonebook_data(const u8 *data, u16 data_len, PhonebookData *result)
         result->number = NULL;
     }
     pos++; // 跳过分隔符
-    printf("%s %d\n", __func__, __LINE__);
 
     /* 解析日期 (直到数据结束) */
     field_start = (u8 *)&data[pos];
@@ -196,7 +186,6 @@ int parse_phonebook_data(const u8 *data, u16 data_len, PhonebookData *result)
     } else {
         result->date = NULL;
     }
-    printf("%s %d\n", __func__, __LINE__);
 
     return 0; // 成功
 }
@@ -206,7 +195,7 @@ int parse_phonebook_data(const u8 *data, u16 data_len, PhonebookData *result)
  *
  * @param data 电话本数据结构体指针
  */
-void free_phonebook_data(PhonebookData *data)
+static void free_phonebook_data(PhonebookData *data)
 {
     if (data->name) {
         free(data->name);
@@ -228,19 +217,33 @@ void free_phonebook_data(PhonebookData *data)
  *
  * @param data 电话本数据结构体指针
  */
-void print_phonebook_data(PhonebookData *data)
+static void print_phonebook_data(PhonebookData *data)
 {
     if (data == NULL) {
         log_debug("结构体指针为空\n");
         return;
     }
 
-    log_debug("  sequence_number: %d\n", data->sequence_number);  // 十进制打印
-    log_debug("  type: %d\n", data->type);                      // 十进制打印
-    printf("data->name:0x%x\n", data->name);
-    log_debug("  name: %s\n", data->name ? data->name : "NULL");   // 字符串打印
-    log_debug("  number: %s\n", data->number ? data->number : "NULL");
-    log_debug("  date: %s\n", data->date ? data->date : "NULL");
+    printf("sequence_number: %d\n", data->sequence_number);  // 十进制打印
+    printf("type: %d\n", data->type);                      // 十进制打印
+
+    if (data->name) {
+        printf("name: %s\n", data->name);   // 字符串打印
+    } else {
+        log_error("data->name is null\n");
+    }
+
+    if (data->number) {
+        printf("number: %s\n", data->number);
+    } else {
+        log_error("data->number is null\n");
+    }
+
+    if (data->date) {
+        printf("date: %s\n", data->date);
+    } else {
+        log_error("data->date is null\n");
+    }
 }
 
 /**
@@ -252,15 +255,16 @@ void print_phonebook_data(PhonebookData *data)
 void bt_phone_pack_parse_handle(const u8 *data, u16 data_len)
 {
     PhonebookData *pbap_result = (PhonebookData *)malloc(sizeof(PhonebookData));
-    printf("sizeof(PhonebookData) : %d\n", sizeof(PhonebookData));
     if (!pbap_result) {
         printf("malloc pabp result fail.\n");
         return;
     }
 
-    printf("pbap_result->name : 0x%x\n", pbap_result);
-    put_buf(data, data_len);
-    parse_phonebook_data(data, data_len, pbap_result);
+    int ret = parse_phonebook_data(data, data_len, pbap_result);
+    if (ret) {
+        return;
+    }
+
     print_phonebook_data(pbap_result);
 
     free_phonebook_data(pbap_result);
@@ -268,4 +272,5 @@ void bt_phone_pack_parse_handle(const u8 *data, u16 data_len)
 }
 
 #endif
+
 

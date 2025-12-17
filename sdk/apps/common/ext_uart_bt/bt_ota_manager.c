@@ -18,7 +18,7 @@
 #define LOG_DUMP_ENABLE
 #include "debug.h"
 
-#if TCFG_INSTR_DEV_UART_ENABLE
+#if INSTR_DEV_UART_ENABLE
 
 /* 全局变量定义 */
 int ota_pid = 0;                /**< OTA任务ID */
@@ -29,6 +29,7 @@ static OS_SEM psem;             /**< 信号量 */
 #define ALIGNMENT_4K 4096       /**< 4K对齐大小 */
 
 #define OTA_FILE_PATH CONFIG_ROOT_PATH"db_update_data_v1.2.bin"
+
 /**
  * @brief 判断u32值是否是4096的整数倍（除法方法）
  * @param value 要判断的u32值
@@ -131,7 +132,6 @@ int bt_ota_start(const u8 *ota_path)
     // 读取固件文件
     FILE *file = fopen(ota_path, "r");
     printf("ota_path : %s\n", ota_path);
-
     if (!file) {
         printf("无法打开固件文件\n");
         return -1;
@@ -377,4 +377,5 @@ void bt_ota_start_update(void)
 }
 
 #endif
+
 

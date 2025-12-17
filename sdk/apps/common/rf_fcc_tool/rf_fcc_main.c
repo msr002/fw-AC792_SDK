@@ -1235,7 +1235,30 @@ __get:
                     wl_anl_actl_init(0);
                 }
 
-                wifi_set_channel(tx->channel);
+                if (tx->bandwidth) {
+                    u8 channel_select = tx->channel;
+                    //check channel
+
+                    if (channel_select < 2) {
+                        channel_select += 2;
+                    } else if (channel_select > 9) {
+
+                        channel_select -= 2;
+                    } else {
+                        channel_select += 2;
+                    }
+
+                    printf("Tx 40M MHz select, PrimaryChannel: %d, CentralChannel: %d\n", tx->channel, channel_select);
+                    wifi_set_channel(channel_select);
+
+                    BW40MLowerSelect();
+                    //BW40MUpperSelect();
+                } else {
+                    printf("Tx 20M MHz select, Central Channel: %d\n", tx->channel);
+                    wifi_set_channel(tx->channel);
+                }
+
+
                 mp_test_pa_mcs_dgain_set(__THIS->tx_rate_tab[tx->rate].phy, __THIS->tx_rate_tab[tx->rate].mcs, tx->pathx_txpower);
 
                 if (tx->cw_flag) {

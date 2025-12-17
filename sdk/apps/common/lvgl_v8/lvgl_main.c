@@ -1003,6 +1003,8 @@ _WEAK_ void jl_gui_init(void)
 #endif
 }
 
+
+
 static void lvgl_v8_main_task(void *priv)
 {
     lv_init();
@@ -1010,10 +1012,9 @@ static void lvgl_v8_main_task(void *priv)
     lv_port_indev_init();
     lv_port_fs_init();
 
-
-
     lvgl_suspend_flag = 0;
     jl_gui_init();
+
 #ifdef GUI_MSG_MAX_ID
     ASSERT((GUI_MSG_MAX_ID > 0xFFFF), "gui model max id is bigger than 0xFFFF, please fix it!!!!");
 #endif

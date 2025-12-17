@@ -1,4 +1,5 @@
 #include "../../lv_examples.h"
+#include "app_config.h"
 #if LV_BUILD_EXAMPLES
 #if LV_USE_RLOTTIE
 

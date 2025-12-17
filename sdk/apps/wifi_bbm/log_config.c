@@ -78,3 +78,9 @@ const char log_tag_const_d_AUDIO_PLAYER AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(TR
 const char log_tag_const_i_AUDIO_PLAYER AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(TRUE);
 const char log_tag_const_w_AUDIO_PLAYER AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(TRUE);
 const char log_tag_const_e_AUDIO_PLAYER AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(TRUE);
+
+const char log_tag_const_v_VIR_AUDIO_RECODER AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(TRUE);
+const char log_tag_const_d_VIR_AUDIO_RECODER AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(TRUE);
+const char log_tag_const_i_VIR_AUDIO_RECODER AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(TRUE);
+const char log_tag_const_w_VIR_AUDIO_RECODER AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(TRUE);
+const char log_tag_const_e_VIR_AUDIO_RECODER AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(TRUE);

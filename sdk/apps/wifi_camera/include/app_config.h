@@ -820,7 +820,8 @@
 #define TCFG_USER_BLE_ENABLE                    0   //BLE功能使能
 #endif
 
-#define TCFG_INSTR_DEV_UART_ENABLE              0	//拓展串口-蓝牙协议使能
+#define INSTR_DEV_UART_ENABLE                   1	//拓展串口-蓝牙协议使能
+#define INSTR_DEV_SPI_ENABLE                    0
 //*********************************************************************************//
 //                                     TWS配置                                     //
 //*********************************************************************************//
@@ -976,11 +977,8 @@
  * 3:表示 LCD开3块帧显存,其中2块通过交换的方式来更新推屏数据,另外1块用做合成输出
  * */
 /* 2个宏组合更多详细说明,请移步开源文档 */
-#define LV_DISP_UI_FB_NUM      1
+#define LV_DISP_UI_FB_NUM      1 //注意当修改为0时,需要设置lv_conf.h:LV_COLOR_DEPTH_EXTEN = LV_COLOR_DEPTH
 #define FB_LCD_BUF_NUM         2
-#if (LV_DISP_UI_FB_NUM)
-#define LV_COLOR_DEPTH_EXTEN   24 //24-适配ARGB8565,需要把LV_DISP_UI_FB_NUM 1/2
-#endif
 #endif
 
 //描述当前SDK能够兼容的UI项目模板最低版本

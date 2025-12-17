@@ -372,11 +372,10 @@ static void statistic_socket_fps(void *priv)
 
         log_info("max fps: %d, min fps: %d, avg fps: %.2f\n", g_scr_state.fps_max, g_scr_state.fps_min, fps_avg);
         log_info("max jpg_size: %.2f, min jpg_size: %.2f, avg jpg_size: %.2f\n", g_scr_state.jpg_sz_max, g_scr_state.jpg_sz_min, jpg_sz_avg);
-
         snprintf(fps_buf, sizeof(fps_buf), "%d, %d, %.1f", g_scr_state.fps_max, g_scr_state.fps_min, fps_avg);
         snprintf(jpg_sz_buf, sizeof(jpg_sz_buf), "%.1f, %.1f, %.1f", g_scr_state.jpg_sz_max, g_scr_state.jpg_sz_min, jpg_sz_avg);
 
-        update_ui_fps_bitrate(fps_buf, jpg_sz_buf);
+        //update_ui_fps_bitrate(fps_buf, jpg_sz_buf);
         if (timer_cnt >= 100) {
             log_info("the average fps over 100 samples is: %.2f", fps_avg);
             reset_scr_state();

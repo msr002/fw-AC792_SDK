@@ -4397,6 +4397,8 @@ void events_init_video_dec_options(lv_ui *ui)
     lv_obj_add_event_cb(ui_scr->video_dec_options_btn_2, video_dec_options_btn_2_event_handler, LV_EVENT_ALL, ui);
 }
 
+
+
 static void page_map_event_handler(lv_event_t *e)
 {
     lv_event_code_t code = lv_event_get_code(e);
@@ -4488,6 +4490,8 @@ static void page_map_btn_1_event_handler(lv_event_t *e)
     lv_event_code_t code = lv_event_get_code(e);
     switch (code) {
     case LV_EVENT_CLICKED: {
+
+        set_in_ui_navi_flag(0);
         gui_scr_t *screen = ui_get_scr(GUI_SCREEN_USB_SLAVE);
         if (screen != NULL) {
             ui_load_scr_anim(&guider_ui, screen, LV_SCR_LOAD_ANIM_NONE, 0, 0, false, true, false);
@@ -4504,6 +4508,10 @@ static void page_map_btn_2_event_handler(lv_event_t *e)
     lv_event_code_t code = lv_event_get_code(e);
     switch (code) {
     case LV_EVENT_CLICKED: {
+
+
+        set_in_ui_navi_flag(0);
+
         gui_scr_t *screen = ui_get_scr(GUI_SCREEN_PAGE_METER);
         if (screen != NULL) {
             ui_load_scr_anim(&guider_ui, screen, LV_SCR_LOAD_ANIM_NONE, 0, 0, true, true, false);
@@ -4514,15 +4522,26 @@ static void page_map_btn_2_event_handler(lv_event_t *e)
         break;
     }
 }
+
+lv_obj_t *page_map_simple_navi_view = NULL;
 static void page_map_screen_event_handler(lv_event_t *e)
 {
     lv_event_code_t code = lv_event_get_code(e);
+    page_map_simple_navi_view = get_page_map_view_3_in_map();
+
+
     switch (code) {
-    case LV_EVENT_SCREEN_LOAD_START: {
+    case LV_EVENT_SCREEN_LOADED: {
+        if (page_map_simple_navi_view) {
+            lv_obj_clear_flag(page_map_simple_navi_view, LV_OBJ_FLAG_HIDDEN);
+        }
         gui_scr_action_cb(GUI_SCREEN_PAGE_MAP, GUI_SCREEN_ACTION_LOAD);
         break;
     }
     case LV_EVENT_SCREEN_UNLOADED: {
+        if (page_map_simple_navi_view) {
+            lv_obj_add_flag(page_map_simple_navi_view, LV_OBJ_FLAG_HIDDEN);
+        }
         gui_scr_action_cb(GUI_SCREEN_PAGE_MAP, GUI_SCREEN_ACTION_UNLOAD);
         break;
     }

@@ -7,7 +7,7 @@
 // 发送缓存配置
 #define STREAM_SEND_OSD_BUF_SIZE         64                  //发送水印缓存
 #define STREAM_SEND_VIDEO_BUF_SIZE       200*1024            //发送视频缓存
-#define STREAM_SEND_AUDIO_BUF_SIZE       64*1024             //发送音频缓存
+#define STREAM_SEND_AUDIO_BUF_SIZE       0 //video_server音频才需要buff                  //发送音频缓存
 
 struct video_config {
     int fps;
@@ -39,6 +39,7 @@ struct stream_buffer_config {
 struct video_stream_send_hdl {
     char *net_path;
     void *video_server;
+    void *audio_recoder;
 
     struct stream_buffer_config buffer_cfg;
     struct video_config video_cfg;

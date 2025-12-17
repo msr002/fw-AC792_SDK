@@ -1,9 +1,10 @@
 {
  "activeFile": {
-  "type": 4,
-  "fileName": "src\\音频流程\\recoder_vir_tx.x6flow",
+  "showName": "video_call_tx",
+  "fileName": "src\\音频流程\\video_call_tx.x6flow",
+  "folder": false,
   "binName": "stream.bin",
-  "showName": "recoder_vir_tx",
+  "type": 4,
   "data": ""
  },
  "currentVariant": {

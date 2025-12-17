@@ -160,6 +160,15 @@ const int const_audio_codec_wma_dec_supoort_POS_play = 1; //是否支持指定�
 //***********************
 const int config_opus_srindex = 0; //选择opus解码文件的帧大小，0代表一帧40字节，1代表一帧80字节，2代表一帧160字节
 
+#if defined(TCFG_ENCODER_CHANNEL_NUM) && (TCFG_ENCODER_CHANNEL_NUM & BIT(1)) //双声道opus编码
+const u8 OPUS_ENC_CELT_EN = 1; //是否使能opus celt 编码，仅支持10ms,20ms帧长，支持8k,16k,24k,48k采样率,支持单双声道编码
+#else
+const u8 OPUS_ENC_CELT_EN = 0; //是否使能opus celt 编码，仅支持10ms,20ms帧长，支持8k,16k,24k,48k采样率,支持单双声道编码
+#endif
+
+const int OPUS_LONGFRAME_ENABLE = 0; //1:支持opus silk编码60ms帧长, 0:使用20ms多帧组成对应帧长
+
+
 //***********************
 //*     SPEEX Codec     *
 //***********************

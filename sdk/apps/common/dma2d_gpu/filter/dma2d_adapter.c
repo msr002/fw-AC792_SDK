@@ -57,6 +57,7 @@ struct dma2d_filter_handle {
     u8 *dma2d_out_buf;
 
     void *sticker;
+    int rotate;
 };
 
 
@@ -172,6 +173,7 @@ static void dma2d_filter_task(void *arg)
         return ;
     }
     struct image_sticker *sticker = NULL;
+    sticker = hdl->sticker;
 
     while (1) {
 
@@ -183,15 +185,41 @@ static void dma2d_filter_task(void *arg)
         }
         //dma2d处理
         u8 *image_data = buffer_get_memory_address(buffer_in);
-        sticker = hdl->sticker;
-        log_info("dma2d filter data: %s  %x\n", (char *)sticker->addr, (unsigned int)image_data);
 
 #ifdef USE_LVGL_V8_UI_DEMO
-        lv_img_dsc_t bin_dsc = {0};
-        __get_sticker(sticker->addr, &bin_dsc);
-        dma2d_filter_image_combine(sticker->x, sticker->y, bin_dsc.data, bin_dsc.header.w, bin_dsc.header.h,
-                                   image_data, hdl->output_width, hdl->output_height);
-        /* dma2d_fliter_buffer_dump(image_data,hdl->output_width*hdl->output_height * 2); */
+        if (hdl->rotate) {
+            log_debug("run dma2d rotate %d\n", hdl->rotate);
+            int format = VGHW_FORMAT_YUV422_BT601;
+
+            if (hdl->dma2d_out_buf == NULL) {
+                hdl->dma2d_out_buf = malloc(hdl->output_width * hdl->output_height * 2);
+                if (hdl->dma2d_out_buf == NULL) {
+                    log_error("dma2d out buf malloc failed\n");
+                    continue;
+                }
+            }
+
+            err = fb_frame_buf_rotate(image_data, hdl->dma2d_out_buf,
+                                      hdl->input_width, hdl->input_height, 0,
+                                      hdl->output_width, hdl->output_height, 0,
+                                      hdl->rotate, 0, 0,
+                                      format, format, 0);
+            if (err == -1) {
+                log_error("dma2d rotate failed\n");
+            } else {
+                image_data = hdl->dma2d_out_buf;
+            }
+        }
+
+        if (sticker) {
+            log_info("dma2d filter data: %s  %x\n", (char *)sticker->addr, (unsigned int)image_data);
+
+            lv_img_dsc_t bin_dsc = {0};
+            __get_sticker(sticker->addr, &bin_dsc);
+            dma2d_filter_image_combine(sticker->x, sticker->y, bin_dsc.data, bin_dsc.header.w, bin_dsc.header.h,
+                                       image_data, hdl->output_width, hdl->output_height);
+            /* dma2d_fliter_buffer_dump(image_data,hdl->output_width*hdl->output_height * 2); */
+        }
 #else
         log_error("dma2d fliter combine should open lvgl macro\n");
 #endif
@@ -201,6 +229,11 @@ static void dma2d_filter_task(void *arg)
         }
         hdl->dma2d_task_busy = 0;
 
+    }
+
+    if (hdl->dma2d_out_buf) {
+        free(hdl->dma2d_out_buf);
+        hdl->dma2d_out_buf = NULL;
     }
 
 }
@@ -306,9 +339,15 @@ static int dma2d_filter_connect(pipe_plugin_t *prev_plugin, pipe_plugin_t *plugi
     hdl->input_width = fmt_info.width;
     hdl->input_height = fmt_info.height;
     /* hdl->input_format = fmt_info.format; */
-    hdl->output_width = fmt_info.width;
-    hdl->output_height = fmt_info.height;
+    if (hdl->rotate == 90 || hdl->rotate == 270) {
+        hdl->output_width = fmt_info.height;
+        hdl->output_height = fmt_info.width;
+    } else {
+        hdl->output_width = fmt_info.width;
+        hdl->output_height = fmt_info.height;
+    }
     log_info("prepare input: %dx%d %d\n", hdl->input_width, hdl->input_height, hdl->input_format);
+    log_info("prepare output: %dx%d %d\n", hdl->output_width, hdl->output_height, hdl->output_format);
 
     info.buffer_type = GENERAL_BUFFER;
     info.memory_type = DDR_MEMORY;
@@ -448,6 +487,8 @@ static int dma2d_filter_set_parameter(pipe_plugin_t *plugin, int cmd, void *arg)
     case PIPELINE_SET_FORMAT:
         struct video_format *f = (struct video_format *)arg;
         hdl->sticker = f->sticker;
+        hdl->rotate = f->enc_rotate;
+        log_debug("dma2d rotate:%d\n", hdl->rotate);
         hdl->input_format = FORMAT_YUV422_YUYV;
         hdl->output_format = FORMAT_YUV422_YUYV;
         break;
@@ -521,4 +562,5 @@ REGISTER_PLUGIN(dma2d1) = {
     .set_parameter  = dma2d_filter_set_parameter,
     .msg_cb         = dma2d_filter_message_callback,
 };
+
 

@@ -8,7 +8,7 @@
 #include "sock_api/sock_api.h"
 #include "os/os_api.h"
 #include "stream_core.h"
-#include "net_stream_info.h"
+#include "udp_stream.h"
 
 
 #define UDP_SEND_BUF_SIZE  (44*1460)
@@ -36,6 +36,8 @@ struct stream_info {
 
     struct sockaddr_in addr;
 };
+
+static struct stream_info *g_stream_info = NULL;
 
 static int net_write_data(struct stream_info *info, char *buffer, size_t len, u8 type);
 static int path_analyze(struct stream_info *info, const *path);
@@ -95,15 +97,21 @@ static int sock_cb_func(enum sock_api_msg_type type, void *priv)
     return 0;
 }
 
-static struct stream_info *net_rt_vpkg_open(const char *path, const char *mode)
+int net_rt_vpkg_open(const char *path, struct net_stream_info *s_info)
 {
     int flags = 0;
     int err;
+
+    if (g_stream_info) {
+        printf("stream already opened \n");
+        return 0;
+    }
+
     struct stream_info *info = (struct stream_info *)calloc(1, sizeof(struct stream_info));
 
     if (info == NULL) {
         printf("%s %d->Error in malloc()\n", __func__, __LINE__);
-        return NULL;
+        return -1;
     }
 
     if (path_analyze(info, path)) {
@@ -117,7 +125,6 @@ static struct stream_info *net_rt_vpkg_open(const char *path, const char *mode)
         goto err;
     }
 
-    struct net_stream_info *s_info = (struct net_stream_info *)mode;
     int sample_rate = s_info->sample_rate;
     int abr = s_info->abr_kbps * 1024;
     int fps = s_info->fps;
@@ -149,7 +156,9 @@ static struct stream_info *net_rt_vpkg_open(const char *path, const char *mode)
         goto err;
     }
 
-    return info;
+    g_stream_info = info;
+
+    return 0;
 err:
     if (info->fd) {
         sock_unreg(info->fd);
@@ -165,14 +174,17 @@ err:
     }
     free(info);
 
-    return NULL;
+    return -1;
 }
 
-static int net_rt_vpkg_close(struct stream_info *info)
+int net_rt_vpkg_close(void)
 {
-    if (!info) {
-        return -1;
+    if (!g_stream_info) {
+        printf("stream already close \n");
+        return 0;
     }
+
+    struct stream_info *info  = g_stream_info;
 
     if (info->task_pid) {
         info->task_exit = 1;
@@ -195,14 +207,17 @@ static int net_rt_vpkg_close(struct stream_info *info)
     return 0;
 }
 
-static int net_rt_send_frame(struct stream_info *info, char *buffer, size_t len, u8 type)
+int net_rt_send_frame(char *buffer, size_t len, u8 type)
 {
     struct lbuf_data_head *lbuf_data = NULL;
     u8 timeout = 0;
 
-    if (!info) {
+    if (!g_stream_info) {
+        printf("stream info null \n");
         return -1;
     }
+
+    struct stream_info *info = (struct stream_info *)g_stream_info;
 
     if (type == 1) {
         //audio
@@ -322,12 +337,5 @@ static int net_write_data(struct stream_info *info, char *buffer, size_t len, u8
 
     return len;
 }
-
-REGISTER_NET_VIDEO_STREAM_SUDDEV(udp_video_stream_sub) = {
-    .name = "udp",
-    .open = net_rt_vpkg_open,
-    .write = net_rt_send_frame,
-    .close = net_rt_vpkg_close,
-};
 
 

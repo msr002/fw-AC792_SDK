@@ -292,6 +292,19 @@ static void le_hogp_cbk_sm_packet_handler(void *hdl, uint8_t packet_type, uint16
             log_info("Passkey display: %06u", tmp32);
             ble_state_to_user(BLE_PRIV_MSG_PAIR_CONFIRM, 1);
             break;
+        case SM_EVENT_PAIR_PROCESS:
+            log_info("SM_PAIR_PROCESS: %02x", event->data[0]);
+            switch (event->data[0]) {
+            case SM_EVENT_PAIR_SUB_RECONNECT_START:
+                break;
+            case SM_EVENT_PAIR_SUB_PAIR_FAIL:
+            case SM_EVENT_PAIR_SUB_PIN_KEY_MISS:
+            case SM_EVENT_PAIR_SUB_PAIR_TIMEOUT:
+            case SM_EVENT_PAIR_SUB_ADD_LIST_SUCCESS:
+            case SM_EVENT_PAIR_SUB_ADD_LIST_FAILED:
+            default:
+                break;
+            }
         }
         break;
     }

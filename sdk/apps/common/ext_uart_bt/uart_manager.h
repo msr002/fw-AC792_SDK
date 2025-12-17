@@ -3,6 +3,8 @@
 
 #include "serial_packager.h"
 
+#define TCFG_UART_ALBUM_PARSER_ENBALE     1   //配置串口接收专辑解析功能宏定义
+
 /*************************************************************************************************/
 /**
  * @brief   指令协议标签枚举 - 主蓝牙控制
@@ -138,7 +140,7 @@ typedef enum {
  * @brief   自定义UART API接口结构体
  *************************************************************************************************/
 typedef struct {
-    void (*custom_uart_dev_init)(void);     /**< 串口初始化函数指针 */
+    int (*custom_uart_dev_init)(void);     /**< 串口初始化函数指针 */
     void (*custom_uart_send_cmd_handle)(u8 cmd, u8 sn, bt_cmd_type_t rsp_flag, u8 *data, u32 len);  /**< 发送命令处理函数指针 */
     void (*custom_uart_response_cmd_handle)(u8 cmd, u8 sn, bt_cmd_type_t rsp_flag, uint8_t cmd_stats, u8 *data, u32 len);  /**< 响应命令处理函数指针 */
     void (*custom_uart_send_data_handle)(u8 cmd, uint8_t sn, bt_data_type_t rsp_flag, uint8_t respon_code, uint8_t *buffer, uint32_t buffer_len);  /**< 发送数据处理函数指针 */
@@ -152,4 +154,5 @@ extern custom_uart_api_t custom_uart_api;
 #define INTSR_TASK_UART_API (&custom_uart_api)  /**< UART API接口指针宏 */
 
 #endif /* _UART_MANAGER_COMMON_H_ */
+
 

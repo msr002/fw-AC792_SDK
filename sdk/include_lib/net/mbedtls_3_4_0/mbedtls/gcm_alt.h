@@ -51,6 +51,7 @@ extern "C" {
 typedef struct mbedtls_gcm_context {
     /* Encryption/Decryption key */
     uint32_t gcm_key[8];
+    uint32_t iv_32B[4];
 
     CRYP_HandleTypeDef hcryp_gcm;      /* HW driver handle                    */
     uint32_t ctx_save_cr;              /* save context for multi-context  */
@@ -58,13 +59,12 @@ typedef struct mbedtls_gcm_context {
     int mode;                          /* The operation to perform:
                                                #MBEDTLS_GCM_ENCRYPT or
                                                #MBEDTLS_GCM_DECRYPT.          */
-}
-mbedtls_gcm_context;
+} mbedtls_gcm_context;
 
 /* Exported constants --------------------------------------------------------*/
 /* Uncomment if ADD (Additional Authentication Data) may have not a length    */
 /* over a multiple of 32 bits  (Hw implementation dependance)                 */
-#define STM32_AAD_ANY_LENGTH_SUPPORT
+#define JL_AAD_ANY_LENGTH_SUPPORT
 /* Exported macro ------------------------------------------------------------*/
 /* Exported functions --------------------------------------------------------*/
 

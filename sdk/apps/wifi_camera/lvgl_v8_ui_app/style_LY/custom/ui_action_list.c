@@ -17,6 +17,7 @@
 #include "pipeline_core.h"
 #include "video/fb.h"
 #include "asm/jldma2d.h"
+#include "lcd_config.h"
 // 动态展示部分
 #define interval_dir_x 210
 #define interval_dir_y 170

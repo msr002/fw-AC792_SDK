@@ -17,7 +17,7 @@
 #define LOG_DUMP_ENABLE
 #include "debug.h"
 
-#if TCFG_INSTR_DEV_UART_ENABLE
+#if INSTR_DEV_UART_ENABLE
 
 static cmd_send_header_t cmd_packet = {0};        /**< 命令发送包头结构体 */
 static cmd_response_header_t cmd_rsp_packet = {0}; /**< 命令回复包头结构体 */
@@ -138,7 +138,7 @@ static void serial_rsp_send_cmd(cmd_response_header_t *packet)
 
     uint8_t fixed_len = offsetof(cmd_response_header_t, data);
     // 计算总数据长度：固定包头 + 数据长度
-    uint16_t total_len = fixed_len + (packet->len);
+    uint16_t total_len = fixed_len + packet->len;
     uint8_t *send_buffer = (uint8_t *)malloc(total_len);
     //printf("offsetof(cmd_response_header_t, data) : %d packet->len :%d\n", offsetof(cmd_response_header_t, data), packet->len);
 
@@ -175,12 +175,12 @@ static void serial_rsp_send_cmd(cmd_response_header_t *packet)
         offset += packet->len;
     }
 
-    printf("offset : %d\n", offset);
+    // printf("offset : %d\n", offset);
     // 计算CRC范围（从OpCode字段开始到数据结束）
     uint16_t crc_data_length = 1 + 2 + 1 + packet->len;
     // put_buf(&send_buffer[crc_data_pos], crc_data_length);
     uint16_t crc = calculate_crc(&send_buffer[crc_data_pos], crc_data_length, 0);
-    printf("\ncrc : 0x%x\n", crc);
+    printf("\nsend crc : 0x%x\n", crc);
 
     // 更新CRC到缓冲区
     send_buffer[5] = crc & 0xFF;        // CRC低字节
@@ -313,7 +313,8 @@ int instr_send_cmd(u8 op_cmd, u8 sn, bt_cmd_type_t rsp_flag, u8 *data, u32 len)
  */
 int instr_rsp_send_cmd(u8 op_cmd, u8 sn, bt_cmd_type_t rsp_flag, uint8_t cmd_stats, u8 *data, u32 len)
 {
-    printf("%s op_cmd:%d\n", __func__, op_cmd);
+    printf("[%s] op_cmd:%d\n", __func__, op_cmd);
+
     int ret = 0;
 
     switch (op_cmd) {
@@ -345,4 +346,5 @@ int instr_rsp_send_cmd(u8 op_cmd, u8 sn, bt_cmd_type_t rsp_flag, uint8_t cmd_sta
     return ret;
 }
 #endif
+
 

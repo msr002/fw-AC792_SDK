@@ -26,11 +26,6 @@
 #include <stdint.h>
 #include "asm/dpi.h"
 
-//FIXME:不要包含app层的头文件，不利于后期打包库
-#ifndef BUILD_LVGL_V9_EXTEND
-#include "lcd_config.h"
-#endif
-
 #define LVGL_TASK_NAME  "lvgl_v9_main_task"
 
 
@@ -44,19 +39,7 @@
  *====================*/
 
 /** Color depth: 1 (I1), 8 (L8), 16 (RGB565), 24 (RGB888), 32 (XRGB8888) */
-#ifndef CONFIG_UI_ENABLE
-#define LV_COLOR_DEPTH 32
-#elif !defined TCFG_LCD_INPUT_FORMAT
-#error "MUST DEFINE TCFG_LCD_INPUT_FORMAT"
-#elif TCFG_LCD_INPUT_FORMAT == LCD_IN_RGB565
 #define LV_COLOR_DEPTH 16
-#elif TCFG_LCD_INPUT_FORMAT == LCD_IN_RGB888
-#define LV_COLOR_DEPTH 24
-#elif TCFG_LCD_INPUT_FORMAT == LCD_IN_ARGB888
-#define LV_COLOR_DEPTH 32
-#else
-#error "LVGL_V9 NOT SUPPORT TCFG_LCD_INPUT_FORMAT"
-#endif
 
 
 /*=========================

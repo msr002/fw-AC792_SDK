@@ -71,6 +71,7 @@
 <Add directory="../../../../../apps/common/third_party_profile/mijia/mijia_ble_api" />
 <Add directory="../../../../../apps/common/third_party_profile/mijia/mijia_ble_libs" />
 <Add directory="../../../../../apps/common/third_party_profile/alipay" />
+<Add directory="../../../../../apps/common/third_party_profile/ancs_client_demo" />
 <Add directory="../../../../../apps/common/third_party_profile" />
 <Add directory="../../../../../apps/common/ble/include" />
 </Compiler>
@@ -161,6 +162,8 @@
 <Unit filename="../../../../../apps/common/system/version.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../../apps/common/third_party_profile/alipay/le_alipay.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../../apps/common/third_party_profile/alipay/le_alipay.h" />
+<Unit filename="../../../../../apps/common/third_party_profile/ancs_client_demo/le_ancs_client.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="../../../../../apps/common/third_party_profile/ancs_client_demo/le_ancs_client.h" />
 <Unit filename="../../../../../apps/common/third_party_profile/custom_protocol_demo/custom_protocol.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../../apps/common/third_party_profile/custom_protocol_demo/custom_protocol.h" />
 <Unit filename="../../../../../apps/common/third_party_profile/jieli/hid_user.c"><Option compilerVer="CC"/></Unit>

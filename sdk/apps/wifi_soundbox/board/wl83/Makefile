@@ -166,6 +166,7 @@ INCLUDES := \
 	-I../../../../apps/common/third_party_profile/mijia/mijia_ble_api \
 	-I../../../../apps/common/third_party_profile/mijia/mijia_ble_libs \
 	-I../../../../apps/common/third_party_profile/alipay \
+	-I../../../../apps/common/third_party_profile/ancs_client_demo \
 	-I../../../../apps/common/third_party_profile \
 	-I../../../../apps/common/ble/include \
 	-I../../../../apps/common/lcd/include \
@@ -246,11 +247,6 @@ INCLUDES := \
 	-I../../../../include_lib/media/aispeech/enc \
 	-I../../../../audio/cpu/wl83/audio_dai \
 	-I../../../../audio/cpu/wl83/audio_common \
-	-I../../../../apps/common/LLM/duer/intelligent_duer \
-	-I../../../../apps/common/LLM/duer/my_platform \
-	-I../../../../include_lib/net/web_socket \
-	-I../../../../include_lib/net/network_download \
-	-I../../../../include_lib/net/cJSON_common \
 	-I../../../../apps \
 	-I../../../../apps/wifi_soundbox \
 	-I../../../../apps/wifi_soundbox/include \
@@ -270,18 +266,6 @@ INCLUDES := \
 
 # 需要编译的 .c 文件
 c_SRC_FILES := \
-	../../../../apps/common/LLM/duer/intelligent_duer/duer_auth_algorithm.c \
-	../../../../apps/common/LLM/duer/intelligent_duer/duer_http_req.c \
-	../../../../apps/common/LLM/duer/intelligent_duer/duer_json_parse.c \
-	../../../../apps/common/LLM/duer/intelligent_duer/duer_json_request.c \
-	../../../../apps/common/LLM/duer/intelligent_duer/duer_record.c \
-	../../../../apps/common/LLM/duer/intelligent_duer/duer_socket.c \
-	../../../../apps/common/LLM/duer/intelligent_duer/test_demo.c \
-	../../../../apps/common/LLM/duer/my_platform/my_platform_http.c \
-	../../../../apps/common/LLM/duer/my_platform/my_platform_http_api.c \
-	../../../../apps/common/LLM/duer/my_platform/my_platform_list_download.c \
-	../../../../apps/common/LLM/duer/my_platform/my_platform_record.c \
-	../../../../apps/common/LLM/duer/my_platform/my_platform_url_list.c \
 	../../../../apps/common/audio_music/audio_enc_aec_data.c \
 	../../../../apps/common/c++/cpp_run_init.c \
 	../../../../apps/common/camera/GC1084_DVP/GC1084_DVP.c \
@@ -884,6 +868,7 @@ c_SRC_FILES := \
 	../../../../apps/common/system/power_manage.c \
 	../../../../apps/common/system/version.c \
 	../../../../apps/common/third_party_profile/alipay/le_alipay.c \
+	../../../../apps/common/third_party_profile/ancs_client_demo/le_ancs_client.c \
 	../../../../apps/common/third_party_profile/custom_protocol_demo/custom_protocol.c \
 	../../../../apps/common/third_party_profile/jieli/hid_user.c \
 	../../../../apps/common/third_party_profile/le_hogp/le_hogp.c \
@@ -1383,7 +1368,6 @@ LFLAGS := \
 	../../../../cpu/wl83/liba/media/lib_amr_wb_enc.a \
 	../../../../cpu/wl83/liba/media/lib_mp3_enc.a \
 	../../../../cpu/wl83/liba/media/lib_opus_enc.a \
-	../../../../cpu/wl83/liba/media/lib_opus_stenc.a \
 	../../../../cpu/wl83/liba/media/lib_sbc_eng.a \
 	../../../../cpu/wl83/liba/media/lib_bt_hash_enc.a \
 	../../../../cpu/wl83/liba/media/lib_advaudio_plc.a \
@@ -1499,7 +1483,6 @@ LFLAGS := \
 	--whole-archive      \
 	../../../../apps/common/third_party_profile/upay_t_head_v2/app/antchain/lib/libapp_antchain_JL_gcc.a \
 	--no-whole-archive      \
-	../../../../cpu/wl83/liba/cJSON.a  \
 	../../../../include_lib/newlib/pi32v2-lib/libm.a \
 	../../../../include_lib/newlib/pi32v2-lib/libc.a \
 	../../../../include_lib/newlib/pi32v2-lib/libcompiler_rt.a \

@@ -241,6 +241,7 @@ INCLUDES := \
 	-I../../../../apps/common/third_party_profile/mijia/mijia_ble_api \
 	-I../../../../apps/common/third_party_profile/mijia/mijia_ble_libs \
 	-I../../../../apps/common/third_party_profile/alipay \
+	-I../../../../apps/common/third_party_profile/ancs_client_demo \
 	-I../../../../apps/common/lcd/include \
 	-I../../../../apps/wifi_bbm/mode/bt/le_audio/include \
 	-I../../../../apps/wifi_bbm/mode/bt/le_audio/include/big \
@@ -375,6 +376,7 @@ c_SRC_FILES := \
 	../../../../apps/common/example/third_party/sqlite/sqlite3.c \
 	../../../../apps/common/example/third_party/sqlite/sqlite_test_main.c \
 	../../../../apps/common/example/video/image/jpeg/jpeg_disp_frame.c \
+	../../../../apps/common/ext_uart_bt/bt_album_manager.c \
 	../../../../apps/common/ext_uart_bt/bt_device_manager.c \
 	../../../../apps/common/ext_uart_bt/bt_music_manager.c \
 	../../../../apps/common/ext_uart_bt/bt_ota_manager.c \
@@ -896,6 +898,7 @@ c_SRC_FILES := \
 	../../../../apps/common/system/power_manage.c \
 	../../../../apps/common/system/version.c \
 	../../../../apps/common/third_party_profile/alipay/le_alipay.c \
+	../../../../apps/common/third_party_profile/ancs_client_demo/le_ancs_client.c \
 	../../../../apps/common/third_party_profile/custom_protocol_demo/custom_protocol.c \
 	../../../../apps/common/third_party_profile/jieli/hid_user.c \
 	../../../../apps/common/third_party_profile/le_hogp/le_hogp.c \
@@ -1026,6 +1029,7 @@ c_SRC_FILES := \
 	../../../../apps/wifi_bbm/stream/video_stream_request.c \
 	../../../../apps/wifi_bbm/stream/video_stream_send.c \
 	../../../../apps/wifi_bbm/stream/video_window_manager.c \
+	../../../../apps/wifi_bbm/stream/vir_audio_recoder.c \
 	../../../../apps/wifi_bbm/ui_action.c \
 	../../../../apps/wifi_bbm/wifi/online_manager.c \
 	../../../../apps/wifi_bbm/wifi/wifi_adapter.c \

@@ -539,6 +539,8 @@ lv_obj_t *setup_scr_page_map(lv_ui *ui)
     ui_scr->page_map_timer_1 = lv_timer_create(page_map_timer_1_timer_cb, 50, "");
     lv_timer_set_repeat_count(ui_scr->page_map_timer_1, -1);
 
+#if 0  //move to ui_action_page_map.c
+
     //Write codes page_map_view_3
     ui_scr->page_map_view_3 = lv_obj_create(ui_scr->page_map);
     lv_obj_set_pos(ui_scr->page_map_view_3, 27, 125);
@@ -625,6 +627,9 @@ lv_obj_t *setup_scr_page_map(lv_ui *ui)
     lv_obj_add_flag(ui_scr->page_map_img_1, LV_OBJ_FLAG_CLICKABLE);
     ui_style_set(ui_scr->page_map_img_1, GUI_CTRL_IMG);
 
+#endif
+
+
     // Write Timer page_map_timer_2
     if (ui_scr->page_map_timer_2 != NULL) {
         lv_timer_del(ui_scr->page_map_timer_2);
@@ -668,6 +673,8 @@ lv_obj_t *setup_scr_page_map(lv_ui *ui)
     lv_obj_set_style_pad_all(ui_scr->page_map_btn_2, 0, LV_STATE_DEFAULT);
     lv_obj_align(ui_scr->page_map_btn_2_label, LV_ALIGN_CENTER, 0, 0);
 
+
+#if 0   //Instrument cluster screen-casting performance information is not displayed
     //Write codes page_map_view_4
     ui_scr->page_map_view_4 = lv_obj_create(ui_scr->page_map);
     lv_obj_set_pos(ui_scr->page_map_view_4, 540, 74);
@@ -772,6 +779,8 @@ lv_obj_t *setup_scr_page_map(lv_ui *ui)
     lv_obj_set_style_text_color(ui_scr->page_map_lbl_10, lv_color_make(0x00, 0x00, 0x00), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_font(ui_scr->page_map_lbl_10, &lv_font_montserratMedium_16, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_pad_top(ui_scr->page_map_lbl_10, 8, LV_PART_MAIN | LV_STATE_DEFAULT);
+#endif
+
 
     //Write codes page_map_img_2
     ui_scr->page_map_img_2 = lv_img_create(ui_scr->page_map);

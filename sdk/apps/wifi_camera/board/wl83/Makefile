@@ -236,11 +236,13 @@ INCLUDES := \
 	-I../../../../apps/common/product_test_tool/includes \
 	-I../../../../apps/common/gsensor \
 	-I../../../../apps/common/ext_uart_bt \
+	-I../../../../apps/common/ext_spi_bt \
 	-I../../../../apps/common/net/testbox/include \
 	-I../../../../apps/common/third_party_profile/mijia \
 	-I../../../../apps/common/third_party_profile/mijia/mijia_ble_api \
 	-I../../../../apps/common/third_party_profile/mijia/mijia_ble_libs \
 	-I../../../../apps/common/third_party_profile/alipay \
+	-I../../../../apps/common/third_party_profile/ancs_client_demo \
 	-I../../../../apps/common/lcd/include \
 	-I../../../../apps/wifi_camera/mode/bt/le_audio/include \
 	-I../../../../apps/wifi_camera/mode/bt/le_audio/include/big \
@@ -375,6 +377,17 @@ c_SRC_FILES := \
 	../../../../apps/common/example/third_party/sqlite/sqlite3.c \
 	../../../../apps/common/example/third_party/sqlite/sqlite_test_main.c \
 	../../../../apps/common/example/video/image/jpeg/jpeg_disp_frame.c \
+	../../../../apps/common/ext_spi_bt/bt_album_manager.c \
+	../../../../apps/common/ext_spi_bt/bt_device_manager.c \
+	../../../../apps/common/ext_spi_bt/bt_music_manager.c \
+	../../../../apps/common/ext_spi_bt/bt_ota_manager.c \
+	../../../../apps/common/ext_spi_bt/bt_phone_manager.c \
+	../../../../apps/common/ext_spi_bt/bt_test_example.c \
+	../../../../apps/common/ext_spi_bt/serial_packager.c \
+	../../../../apps/common/ext_spi_bt/serial_unpackager.c \
+	../../../../apps/common/ext_spi_bt/spi_bt_driver.c \
+	../../../../apps/common/ext_spi_bt/spi_manager.c \
+	../../../../apps/common/ext_uart_bt/bt_album_manager.c \
 	../../../../apps/common/ext_uart_bt/bt_device_manager.c \
 	../../../../apps/common/ext_uart_bt/bt_music_manager.c \
 	../../../../apps/common/ext_uart_bt/bt_ota_manager.c \
@@ -896,6 +909,7 @@ c_SRC_FILES := \
 	../../../../apps/common/system/power_manage.c \
 	../../../../apps/common/system/version.c \
 	../../../../apps/common/third_party_profile/alipay/le_alipay.c \
+	../../../../apps/common/third_party_profile/ancs_client_demo/le_ancs_client.c \
 	../../../../apps/common/third_party_profile/custom_protocol_demo/custom_protocol.c \
 	../../../../apps/common/third_party_profile/jieli/hid_user.c \
 	../../../../apps/common/third_party_profile/le_hogp/le_hogp.c \

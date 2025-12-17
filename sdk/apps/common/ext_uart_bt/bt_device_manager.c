@@ -8,7 +8,7 @@
 #define LOG_INFO_ENABLE
 #include "debug.h"
 
-#if TCFG_INSTR_DEV_UART_ENABLE
+#if INSTR_DEV_UART_ENABLE
 
 // 信道范围：2402~2480 MHz，共79个信道
 #define CHANNEL_COUNT 79
@@ -358,4 +358,5 @@ void bt_set_rf_frequency_control()
     free(channel_info);
 }
 #endif
+
 

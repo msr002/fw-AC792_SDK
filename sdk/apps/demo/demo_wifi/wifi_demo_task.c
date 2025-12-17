@@ -295,20 +295,20 @@ static int wifi_event_callback(void *network_ctx, enum WIFI_EVENT event)
         u32  tx_rate_control_tab = // 不需要哪个速率就删除掉,可以动态设定
             0
             | BIT(0) //0:CCK 1M
-            /* | BIT(1) //1:CCK 2M */
-            /* | BIT(2) //2:CCK 5.5M */
+            | BIT(1) //1:CCK 2M
+            | BIT(2) //2:CCK 5.5M
             | BIT(3) //3:OFDM 6M
-            /* | BIT(4) //4:MCS0/7.2M */
-            /* | BIT(5) //5:OFDM 9M */
-            /* | BIT(6) //6:CCK 11M */
-            /* | BIT(7) //7:OFDM 12M */
-            /* | BIT(8) //8:MCS1/14.4M */
-            /* | BIT(9) //9:OFDM 18M */
-            /* | BIT(10) //10:MCS2/21.7M */
-            /* | BIT(11) //11:OFDM 24M */
-            /* | BIT(12) //12:MCS3/28.9M */
-            /* | BIT(13) //13:OFDM 36M */
-            /* | BIT(14) //14:MCS4/43.3M */
+            | BIT(4) //4:MCS0/7.2M
+            | BIT(5) //5:OFDM 9M
+            | BIT(6) //6:CCK 11M
+            | BIT(7) //7:OFDM 12M
+            | BIT(8) //8:MCS1/14.4M
+            | BIT(9) //9:OFDM 18M
+            | BIT(10) //10:MCS2/21.7M
+            | BIT(11) //11:OFDM 24M
+            | BIT(12) //12:MCS3/28.9M
+            | BIT(13) //13:OFDM 36M
+            | BIT(14) //14:MCS4/43.3M
             | BIT(15) //15:OFDM 48M
             | BIT(16) //16:OFDM 54M
             | BIT(17) //17:MCS5/57.8M

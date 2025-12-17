@@ -61,5 +61,15 @@ typedef struct boot_device_info {
 
 extern BOOT_INFO boot_info;
 
+/**
+ * @brief get_uboot_version 获取uboot版本(字符串)
+ *
+ * @Params buf 存放版本的buf
+ * @Params len buf长度
+ *
+ * @return 获取到的字符串长度。如果返回负数，表示获取失败。
+ */
+int get_uboot_version(u8 *buf, u32 len);
+
 #endif
 

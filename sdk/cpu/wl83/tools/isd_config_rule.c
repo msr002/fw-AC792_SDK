@@ -133,6 +133,7 @@ UTBD=TCFG_DEBUG_BAUDRATE;               [配置UBOOT调试波特率]
 UTBD=1000000;                           [配置UBOOT调试波特率]
 #endif
 #endif
+DB_VERIFY=0;                            [双备份开启uboot校验app_core, 0-关,1-开]
 //#############################################################################################################################################
 
 //###SDRAM/DDR配置===================================================================
@@ -182,6 +183,7 @@ SDRAM_REFRESH_CYCLES=8K;                [4K|8K]
 #endif
 SDRAM_IO_HD=2;                          [SDRAM_IO_HIGH_DRIVE_LEVEL]
 SDRAM_TRIM_ENABLE=1;                    [SDRAM_TRIM_ENABLE]
+SDRAM_FULL_TEST=0;                      [SDRAM_FULL_TEST]
 #if __SDRAM_SIZE__ >= (16 * 1024 * 1024)
 SDRAM_COLUM=1;                          [THE_COLUMN_ADDRESS_ENABLE]
 #else
@@ -189,11 +191,7 @@ SDRAM_COLUM=0;                          [THE_COLUMN_ADDRESS_ENABLE]
 #endif
 SDRAM_CL=3;
 #if TCFG_SDRAM_MODE == 1
-#if TCFG_SDRAM_CLK == 250000000
-SDRAM_TRFC=68;                          [REFRESH_CYCLE_TIME_UNIT_IS_NS]
-#else
 SDRAM_TRFC=70;                          [REFRESH_CYCLE_TIME_UNIT_IS_NS]
-#endif
 SDRAM_TRP=16;                           [ROW_PRECHARGE_TIME_UNIT_IS_NS]
 SDRAM_TRCD=16;                          [ROW_TO_COLUMN_DELAY_UNIT_IS_NS]
 SDRAM_TRRD=8;                           [ACT_TO_ACT_DELAY_TIME_UNIT_IS_NS]

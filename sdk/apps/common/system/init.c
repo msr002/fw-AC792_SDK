@@ -184,6 +184,20 @@ static void malloc_debug_dump(void *p)
 }
 #endif
 
+extern void norflash_protect_opt_register(int (*protect_opt_func)(u32, u32));
+extern int norflash_key_addr_info_init(void);
+extern int norflash_key_addr_judge(u32 opt_addr, u32 opt_len);
+int norflash_protect_opt(u32 opt_addr, u32 opt_len)
+{
+    if (norflash_key_addr_judge(opt_addr, opt_len)) {
+        ASSERT(0, "you are operating norflash key addr!!");
+        // cpu_reset();
+        // return -1; //如果只希望跳过操作，不重启，返回-1
+    }
+    return 0;
+}
+
+
 extern void setup_arch(void);
 extern int sys_timer_init(void);
 extern void app_main(void);
@@ -215,6 +229,11 @@ static void app_task_handler(void *p)
     malloc_debug_start();
     sys_timer_add(NULL, malloc_debug_dump, 60 * 1000);
 #endif
+
+    // norflash关键区域添加擦写保护
+    norflash_key_addr_info_init();
+    norflash_protect_opt_register(norflash_protect_opt);
+    puts("flash core area protect init\n");
 
     __do_initcall(early_initcall);
     board_early_init();

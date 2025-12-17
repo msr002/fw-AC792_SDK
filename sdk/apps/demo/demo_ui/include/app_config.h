@@ -102,7 +102,7 @@
 #define USE_LVGL_V9_UI_DEMO
 
 /*#define USE_LVGL_V8_UI_DEMO*/
-#define LV_DISP_UI_FB_NUM 2
+#define LV_DISP_UI_FB_NUM 2//注意当修改为0时,需要设置lv_conf.h:LV_COLOR_DEPTH_EXTEN = LV_COLOR_DEPTH
 #define FB_LCD_BUF_NUM    0
 
 // #define USE_AWTK_UI_DEMO

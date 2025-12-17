@@ -22,9 +22,6 @@
 #ifndef LV_USE_GUIBUILDER_SIMULATOR
 #define BOOL_DEFINE_CONFLICT
 #include "asm/dpi.h"
-#ifndef BUILD_LVGL_V8_EXTEND
-#include "lcd_config.h"
-#endif
 #endif
 
 #define LVGL_TASK_NAME  "lvgl_v8_main_task"
@@ -39,20 +36,13 @@
  *====================*/
 
 /*Color depth: 1 (1 byte per pixel), 8 (RGB332), 16 (RGB565), 32 (ARGB8888)*/
-#ifndef CONFIG_UI_ENABLE
 #define LV_COLOR_DEPTH 16
-#elif !defined TCFG_LCD_INPUT_FORMAT
-#error "MUST DEFINE TCFG_LCD_INPUT_FORMAT"
-#elif TCFG_LCD_INPUT_FORMAT == LCD_IN_RGB565
-#define LV_COLOR_DEPTH 16
-#elif TCFG_LCD_INPUT_FORMAT == LCD_IN_ARGB888
-#define LV_COLOR_DEPTH 32
-#elif TCFG_LCD_INPUT_FORMAT == LCD_IN_YUV422
-#define LV_COLOR_DEPTH 16
-#else
-#error "LVGL_V8 NOT SUPPORT TCFG_LCD_INPUT_FORMAT"
-#endif
 
+/*
+ *LV_COLOR_DEPTH_EXTEN = 24:适配ARGB8565,需要把LV_DISP_UI_FB_NUM 1/2,用于有透视场景需求;
+ *无透视需求时请注释或者配置LV_COLOR_DEPTH_EXTEN == LV_COLOR_DEPTH;
+ */
+#define LV_COLOR_DEPTH_EXTEN 16
 #ifndef LV_COLOR_DEPTH_EXTEN
 #define LV_COLOR_DEPTH_EXTEN LV_COLOR_DEPTH
 #endif

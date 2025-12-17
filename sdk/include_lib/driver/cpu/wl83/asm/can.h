@@ -178,7 +178,7 @@ struct can_platform_data {
  * \{
  */
 typedef struct {
-    int (*cb_func)(void *priv, can_data_t *data);
+    int (*cb_func)(void *priv, can_data_t *data, can_event_isr_t event_isr);
     void *cb_priv;
 } can_cb_t;
 /* \} name */

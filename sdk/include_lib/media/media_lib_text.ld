@@ -300,6 +300,11 @@
     *(.ogg.text.const)
     *(.ogg_vorbis_dec.text)
 
+    *(.opus_comb_enc.data.bss)
+    *(.opus_comb_enc.data)
+    *(.opus_comb_enc.text.cache.L2.const)
+    *(.opus_comb_enc.text.cache.L2.run)
+
     *(.ape_dec.text)
     *(.ape_dec.text.const)
     *(.ape.text)

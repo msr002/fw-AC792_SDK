@@ -316,7 +316,7 @@
 //*********************************************************************************//
 #ifdef CONFIG_UI_ENABLE
 #define TCFG_LCD_ENABLE                     1
-#define TCFG_LCD_INPUT_FORMAT               LCD_IN_RGB565
+#define TCFG_LCD_INPUT_FORMAT               LCD_IN_RGB565//注意修改后需要同步修改lv_conf.h:LV_COLOR_DEPTH
 #define TCFG_LCD_SUPPORT_MULTI_DRIVER_EN    0 ///< 多屏驱支持(目前仅支持具有相同分辨率的屏, 适用于
 ///< 一个case有多款屏混用的情况，比如因为缺货)
 

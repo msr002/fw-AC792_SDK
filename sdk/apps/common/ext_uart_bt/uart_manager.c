@@ -2,7 +2,7 @@
 #include "app_config.h"
 #include "uart_manager.h"
 
-#if TCFG_INSTR_DEV_UART_ENABLE
+#if INSTR_DEV_UART_ENABLE
 
 #define LOG_TAG         "[UART_MANAGER]"
 #define LOG_ERROR_ENABLE
@@ -83,10 +83,14 @@ static void uart_response_data_deal(u8 cmd, uint8_t sn, bt_data_type_t rsp_flag,
  * @param {void}
  * @return {void}
  */
-static void uart_dev_init(void)
+static int uart_dev_init(void)
 {
     printf("uart dev init\n");
-    uart_driver_init();
+    int ret = 0;
+
+    ret = uart_driver_init();
+
+    return ret;
 }
 
 custom_uart_api_t custom_uart_api = {
@@ -101,12 +105,22 @@ static int instr_uart_test(void)
 {
     log_info("instr_uart_test\n");
 
+    int ret = 0;
     if (INTSR_TASK_UART_API) {
-        INTSR_TASK_UART_API->custom_uart_dev_init();
+        ret = INTSR_TASK_UART_API->custom_uart_dev_init();
+        if (ret) {
+            return -1;
+        }
     }
+
+    uart_parse_init();  //串口解析任务初始化
+    bt_album_recv_init();   //专辑接收任务初始化
 
     return 0;
 }
 late_initcall(instr_uart_test);
 #endif
+
+
+
 

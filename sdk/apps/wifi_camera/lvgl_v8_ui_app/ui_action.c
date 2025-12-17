@@ -36,5 +36,8 @@ void jl_gui_init(void)
 #endif
     setup_ui(&guider_ui);
     events_init(&guider_ui);
+
+    extern void lv_page_map_view_3_create(void);
+    lv_page_map_view_3_create();
 }
 #endif //CONFIG_UI_ENABLE

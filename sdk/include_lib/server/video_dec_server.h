@@ -3,6 +3,7 @@
 
 
 #include "server/server_core.h"
+#include "vunpkg_server.h"
 #include "fs/fs.h"
 
 
@@ -100,6 +101,7 @@ struct video_dec_param {
     struct vds_image_info image;
     struct vds_video_info info;
     struct imc_presca_ctl *pctl;
+    struct vunpkg_sys_ops *vunpkg_ops;
     u8 *dec_frame_buf;
     u32 dec_frame_size;
     u32 mirror;
@@ -132,6 +134,7 @@ struct video_dec_preview {
     struct vds_image_info image;
     struct vds_video_info info;
     struct imc_presca_ctl *pctl;
+    struct vunpkg_sys_ops *vunpkg_ops;
     u32 mirror;
     u32 jaggy;
 

@@ -11533,7 +11533,11 @@
      "bitConsistency": true,
      "inBit": 2,
      "outBit": 2,
-     "subId": 1
+     "subId": 1,
+     "configs": {
+      "name": "",
+      "list": []
+     }
     },
     "ports": {
      "groups": {
@@ -12000,7 +12004,11 @@
      "bitConsistency": false,
      "inBit": 2,
      "outBit": 2,
-     "subId": 1
+     "subId": 1,
+     "configs": {
+      "name": "",
+      "list": []
+     }
     },
     "ports": {
      "groups": {

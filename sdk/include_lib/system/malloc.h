@@ -19,12 +19,14 @@ extern void kfree(void *p);
 
 extern void malloc_stats(void);
 extern void malloc_dump(void);
+extern int get_malloc_remain_heap_size(void);
 
 extern void ram_free(void *rmem);
 extern void *ram_malloc(unsigned long size);
 extern void *ram_realloc(void *rmem, unsigned long newsize);
 extern void *ram_zalloc(unsigned long size);
 extern void *ram_calloc(unsigned long count, unsigned long size);
+extern u32 get_ram_free_heap_size(void);
 
 extern void mmu_free(void *rmem);
 extern void *mmu_malloc(size_t size);

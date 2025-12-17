@@ -43,7 +43,7 @@ ICACHE1_RAM_SIZE = FREE_ICACHE1_WAY*4K;
 MEMORY
 {
     rom(rx)             : ORIGIN =  CODE_BEG, LENGTH = __FLASH_SIZE__
-    sdram(rwx)          : ORIGIN =  0x1800120, LENGTH = SDRAM_SIZE
+    sdram(rwx)          : ORIGIN =  0x18000000, LENGTH = SDRAM_SIZE
     ram0(rwx)           : ORIGIN =  0x100000, LENGTH = RAM0_SIZE
     boot_info(rwx)      : ORIGIN =  0x100000 + RAM0_SIZE, LENGTH = BOOT_INFO_SIZE
     dcache_ram(rw)      : ORIGIN =  0x378000-((FREE_DCACHE_WAY)*4K), LENGTH = FREE_DCACHE_WAY*4K - TLB_SIZE

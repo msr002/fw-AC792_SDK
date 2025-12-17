@@ -452,10 +452,10 @@ u32 H63P_MIPI_calc_shutter(isp_ae_shutter_t *shutter, u32 exp_time_us, u32 gain)
     u32 texp_align = 0;
     u32 ratio = 0;
     texp = exp_time_us * PCLK / FRAME_W;
-    texp_align = texp * FRAME_W / PCLK;
     if (texp < 4) {
         texp = 4;
     }
+    texp_align = texp * FRAME_W / PCLK;
     if (texp_align < exp_time_us) {
         ratio = (exp_time_us) * (1 << 10) / texp_align;
 

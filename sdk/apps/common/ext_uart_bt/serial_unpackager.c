@@ -8,7 +8,34 @@
 #define LOG_INFO_ENABLE
 #include "debug.h"
 
-#if TCFG_INSTR_DEV_UART_ENABLE
+#if INSTR_DEV_UART_ENABLE
+
+/**
+ * @brief   将两个字节转换为16位无符号整数
+ *
+ * @param[in] high_byte 高字节
+ * @param[in] low_byte  低字节
+ *
+ * @return  转换后的16位无符号整数
+ */
+static uint16_t bytes_to_u16(uint8_t high_byte, uint8_t low_byte)
+{
+    return (uint16_t)(((uint16_t)high_byte << 8) | (uint16_t)low_byte);
+}
+
+/**
+ * 将4个字节组合成32位无符号整数（小端模式）
+ * @param bytes 包含4个字节的数组，索引0为最低位，索引3为最高位
+ * @return 组合后的32位无符号整数
+ */
+uint32_t bytes_to_u32_le(const uint8_t bytes[4])
+{
+    // 小端模式：每个字节依次左移0位、8位、16位和24位
+    return ((uint32_t)bytes[0] <<  0) |
+           ((uint32_t)bytes[1] <<  8) |
+           ((uint32_t)bytes[2] << 16) |
+           ((uint32_t)bytes[3] << 24);
+}
 
 /**
  * @brief 验证协议头是否正确
@@ -16,7 +43,7 @@
  * @param head 协议头数据指针
  * @return int 1-正确，0-错误
  */
-int verify_protocol_head(const uint8_t *head)
+static int verify_protocol_head(const uint8_t *head)
 {
     return (head[0] == SERIAL_PROTOCOL_HEADER_0 &&
             head[1] == SERIAL_PROTOCOL_HEADER_1 &&
@@ -101,7 +128,7 @@ int cmd_rsp_verify_crc(u8 *raw_data, size_t total_length)
  * @param packet 输出的结构体指针
  * @param raw_data 原始数据指针
  */
-void constru_cmd_send_packet_from_raw(cmd_send_header_t *packet, const uint8_t *raw_data)
+static void constru_cmd_send_packet_from_raw(cmd_send_header_t *packet, const uint8_t *raw_data)
 {
     int offset = 0;
 
@@ -133,7 +160,7 @@ void constru_cmd_send_packet_from_raw(cmd_send_header_t *packet, const uint8_t *
  * @param packet 输出的结构体指针
  * @param raw_data 原始数据指针
  */
-void constru_cmd_response_packet_from_raw(cmd_response_header_t *packet, const uint8_t *raw_data)
+static void constru_cmd_response_packet_from_raw(cmd_response_header_t *packet, const uint8_t *raw_data)
 {
     printf("%s %d\n", __func__, __LINE__);
 
@@ -164,17 +191,38 @@ void constru_cmd_response_packet_from_raw(cmd_response_header_t *packet, const u
     }
 }
 
+// 将蓝牙数据推送到UI
+#ifdef CONFIG_UI_ENABLE
+_WEAK_ void lv_example_lyrics_text_input(char *buf)
+{
+    return;
+}
+
+static void lv_example_lyrics_input_dynamic(char *buf)
+{
+    if (buf == NULL) {
+        return;
+    }
+    extern void lv_example_lyrics_text_input(char *new_text);
+    lv_example_lyrics_text_input(buf);
+
+    free(buf);
+}
+#endif
+
+
 /**
  * @brief 解析从机发送的命令包（需要回复）
  *
  * @param raw_data 原始数据
  * @param length 数据长度
  */
-void parse_slave_command_with_rsp(const uint8_t *raw_data, int length)
+static void parse_slave_command_with_rsp(const uint8_t *raw_data, int length)
 {
     printf("%s %d length : %d\n", __func__, __LINE__, length);
     // put_buf(raw_data, length);
 
+    int msg[4] = {0}, err = 0;
     u8 flag = false;
 
     // 1. 首先，检查最基本的数据长度
@@ -197,11 +245,11 @@ void parse_slave_command_with_rsp(const uint8_t *raw_data, int length)
     }
 
     constru_cmd_send_packet_from_raw(packet, raw_data); //封装成cmd_send_header_t结构
-    printf("%s %d packet->code : %d\n", __func__, __LINE__, packet->code);
+
+    y_printf("[%s] packet->code = 0x%x packet->data[0] = 0x%x\n", __func__, packet->code, packet->data[0]);
 
     switch (packet->code) {
     case OP_CODE_BT_CONCTRL:    //经典蓝牙控制回复
-        printf("packet->data[0]:%d line:%d\n", packet->data[0], __LINE__);
         if (packet->data) {
             switch (packet->data[0]) {
             case PROTOCOL_TAG_SEND_BT_STATUS:    //从机发送蓝牙状态过来，主机需要回复命令
@@ -230,15 +278,42 @@ void parse_slave_command_with_rsp(const uint8_t *raw_data, int length)
         }
         break;
     case OP_CODE_BT_MUSIC_ALBUM:    //专辑处理回复
-        printf("packet->data[0]:%d line:%d\n", packet->data[0], __LINE__);
         switch (packet->data[0]) {
         case PROTOCOL_TAG_BT_ALBUM_START:    //开始专辑传输
             log_debug("bt music alum transport start:\n");
+            uint32_t album_total_len = bytes_to_u32_le(&packet->data[1]);
+            g_printf("album_total_len = 0x%04x\n", album_total_len);
+
+            memset(msg, 0x00, sizeof(msg) / msg[0]);
+
+            msg[0] = PROTOCOL_TAG_BT_ALBUM_START;
+            msg[1] = album_total_len;
+
+            err = os_taskq_post_type("album_recv_task", Q_USER, ARRAY_SIZE(msg), msg);
+            if (err) {
+                printf("album msg recv err = %d\n", err);
+            } else {
+                bt_album_sem_pending();
+            }
             //TO DO 需要在这里回复从机
             bt_music_album_rsp_control(packet->sn, UART_ERR_SUCCESS, &packet->data[0], packet->len);
             break;
         case PROTOCOL_TAG_BT_ALBUM_TRANSFER_DATA_END:    //专辑数据发送完成
             log_debug("bt music alum transport end:\n");
+            uint16_t album_file_crc = bytes_to_u16(packet->data[2], packet->data[1]);
+            g_printf("album_file_crc = 0x%04x\n", album_file_crc);
+
+            memset(msg, 0x00, sizeof(msg) / msg[0]);
+
+            msg[0] = PROTOCOL_TAG_BT_ALBUM_TRANSFER_DATA_END;
+            msg[3] = album_file_crc;
+
+            err = os_taskq_post_type("album_recv_task", Q_USER, ARRAY_SIZE(msg), msg);
+            if (err) {
+                printf("album msg recv err = %d\n", err);
+            } else {
+                bt_album_sem_pending();
+            }
             //TO DO 需要在这里回复专辑确认结束命令
             bt_music_album_rsp_control(packet->sn, UART_ERR_SUCCESS, &packet->data[0], packet->len);
             break;
@@ -247,7 +322,6 @@ void parse_slave_command_with_rsp(const uint8_t *raw_data, int length)
         }
         break;
     case OP_CODE_HFP_CALL_CONCTRL:    //通话状态，需要回复手机
-        printf("packet->data[0]:%d line:%d\n", packet->data[0], __LINE__);
         switch (packet->data[0]) {
         case PROTOCOL_TAG_HFP_CALL_STATUS_CHANGE:   //通话状态改变
             printf("HFP_CALL_STATUS_CHANGE...\n");
@@ -276,7 +350,6 @@ void parse_slave_command_with_rsp(const uint8_t *raw_data, int length)
         }
         break;
     case OP_CODE_BT_PABP:    //获取通话记录
-        printf("packet->data[0]:%d line:%d\n", packet->data[0], __LINE__);
         switch (packet->data[0]) {
         case PROTOCOL_TAG_BT_PBAP_LIST_READ_END:    //获取电话本结束
             printf("PROTOCOL_TAG_BT_PBAP_LIST_READ_END...\n");
@@ -290,7 +363,6 @@ void parse_slave_command_with_rsp(const uint8_t *raw_data, int length)
     case OP_CODE_BT_MUSIC_INFO:    //歌曲信息处理
         break;
     case OP_CODE_OTA_CONCTRL:    //蓝牙OTA相关从机回复
-        printf("packet->data[0]:%d line:%d\n", packet->data[0], __LINE__);
         switch (packet->data[0]) {
         case PROTOCOL_TAG_OTA_DATA_CAN_SEND:    //(从机收到4K数据)，校验通过后可继续发送升级文件
             printf("PROTOCOL_TAG_OTA_DATA_CAN_SEND...\n");
@@ -301,7 +373,6 @@ void parse_slave_command_with_rsp(const uint8_t *raw_data, int length)
         }
         break;
     case OP_CODE_BT_MCU_CONTROL:    //MCU控制回复
-        printf("packet->data[0]:%d line:%d\n", packet->data[0], __LINE__);
         switch (packet->data[0]) {
         case PROTOCOL_TAG_MCU_POWERON_STATUS:    //从机发送开机状态回复
             printf("PROTOCOL_TAG_MCU_POWERON_STATUS...\n");
@@ -325,10 +396,12 @@ void parse_slave_command_with_rsp(const uint8_t *raw_data, int length)
  * @param raw_data 原始数据
  * @param length 数据长度
  */
-void parse_slave_command_without_rsp(const uint8_t *raw_data, int length)
+static void parse_slave_command_without_rsp(const uint8_t *raw_data, int length)
 {
     printf("%s %d length : %d\n", __func__, __LINE__, length);
     // put_buf(raw_data, length);
+
+    int msg[4] = {0}, err = 0;
 
     // 检查最基本的数据长度,固定头部长度,data字节之前的长度为固定长度
     if (length < offsetof(cmd_send_header_t, data)) {
@@ -351,7 +424,8 @@ void parse_slave_command_without_rsp(const uint8_t *raw_data, int length)
 
     constru_cmd_send_packet_from_raw(packet, raw_data); //封装成cmd_send_header_t结构
 
-    y_printf("packet->code = 0x%x", packet->code);
+    y_printf("[%s] packet->code = 0x%x packet->data[0] = 0x%x\n", __func__, packet->code, packet->data[0]);
+
     switch (packet->code) {
     case OP_CODE_BT_CONCTRL:    //经典蓝牙控制
         break;
@@ -359,7 +433,21 @@ void parse_slave_command_without_rsp(const uint8_t *raw_data, int length)
         switch (packet->data[0]) {
         case PROTOCOL_TAG_BT_ALBUM_TRANSFER_DATA:    //接收到专辑数据
             log_debug("bt music album data:\n");
-            put_buf(&packet->data[1], packet->len - 1);
+            char *ptr = NULL;
+
+            memset(msg, 0x00, sizeof(msg) / msg[0]);
+            ptr = &(packet->data[1]);
+            msg[0] = PROTOCOL_TAG_BT_ALBUM_TRANSFER_DATA;
+            msg[1] = packet->len - 1;
+            msg[2] = (int)ptr;
+
+            err = os_taskq_post_type("album_recv_task", Q_USER, ARRAY_SIZE(msg), msg);
+            if (err) {
+                printf("album msg recv err = %d\n", err);
+            } else {
+                bt_album_sem_pending();
+            }
+            // put_buf(&packet->data[1], packet->len - 1);
             break;
         default:
             break;
@@ -377,17 +465,16 @@ void parse_slave_command_without_rsp(const uint8_t *raw_data, int length)
         }
         break;
     case OP_CODE_BT_PABP:    //获取通话记录
-        log_debug("packet->data[0]:%d line:%d\n", packet->data[0], __LINE__);
         switch (packet->data[0]) {
         case PROTOCOL_TAG_BT_PBAP_LIST_READ_RESP:   //返回联系人信息
             log_debug("PROTOCOL_TAG_BT_PBAP_LIST_READ_RESP...\n");
+            bt_phone_pack_parse_handle(&packet->data[1], packet->len - 1);
             break;
         default:
             break;
         }
         break;
     case OP_CODE_BT_MUSIC_INFO:    //歌曲信息处理
-        log_debug("packet->data[0]:%d line:%d\n", packet->data[0], __LINE__);
         switch (packet->data[0]) {
         case PROTOCOL_TAG_RCV_BT_MUSIC_NAME:   //歌曲名字处理
             log_debug("PROTOCOL_TAG_RCV_BT_MUSIC_NAME...\n");
@@ -400,6 +487,24 @@ void parse_slave_command_without_rsp(const uint8_t *raw_data, int length)
         case PROTOCOL_TAG_RCV_BT_MUSIC_LYRIC:   //歌词
             log_debug("PROTOCOL_TAG_RCV_BT_MUSIC_LYRIC...\n");
             put_buf(&packet->data[0], packet->len);
+#ifdef CONFIG_UI_ENABLE		//将歌词显示到UI
+
+            int lyric_len = packet->len - 1;
+            char *lyric_buf = (char *)malloc(lyric_len + 1);
+            if (!lyric_buf) {
+                log_error("malloc failed for lyric buffer");
+                break;
+            }
+            memcpy(lyric_buf, &packet->data[1], lyric_len);
+            lyric_buf[lyric_len] = '\0';
+            log_debug("lyric: %s\n", lyric_buf);
+
+            u8 ret = lvgl_rpc_post_func(lv_example_lyrics_input_dynamic, 1, lyric_buf);
+            if (ret == -1) {
+                log_info("lyrics post fail");
+                free(lyric_buf);
+            }
+#endif
             break;
         case PROTOCOL_TAG_RCV_BT_MUSIC_ALBUM:   //音乐专辑
             log_debug("PROTOCOL_TAG_RCV_BT_MUSIC_ALBUM...\n");
@@ -418,7 +523,6 @@ void parse_slave_command_without_rsp(const uint8_t *raw_data, int length)
         }
         break;
     case OP_CODE_OTA_CONCTRL:    //蓝牙OTA相关从机回复
-        log_debug("packet->data[0]:%d line:%d\n", packet->data[0], __LINE__);
         switch (packet->data[0]) {
         case PROTOCOL_TAG_OTA_END:
             log_debug("收到从机的升级结束命令，结束升级\n");
@@ -441,7 +545,7 @@ void parse_slave_command_without_rsp(const uint8_t *raw_data, int length)
  * @param raw_data 原始数据
  * @param length 数据长度
  */
-void parse_slave_rsp_command_without_rsp(const uint8_t *raw_data, int length)
+static void parse_slave_rsp_command_without_rsp(const uint8_t *raw_data, int length)
 {
     printf("%s %d length : %d\n", __func__, __LINE__, length);
     // put_buf(raw_data, length);
@@ -466,7 +570,8 @@ void parse_slave_rsp_command_without_rsp(const uint8_t *raw_data, int length)
 
     constru_cmd_response_packet_from_raw(packet, raw_data);
 
-    printf("%s %d packet->code : %d\n", __func__, __LINE__, packet->code);
+    y_printf("[%s] packet->code = 0x%x packet->data[0] = 0x%x\n", __func__, packet->code, packet->data[0]);
+
     switch (packet->code) {
     case OP_CODE_BT_CONCTRL:    //经典蓝牙控制回复
         printf("packet->cmd_status:%d [line:%d]\n", packet->cmd_status, __LINE__);
@@ -477,7 +582,7 @@ void parse_slave_rsp_command_without_rsp(const uint8_t *raw_data, int length)
         if (packet->data) {
             switch (packet->data[0]) {
             case PROTOCOL_TAG_SET_BT_ON_OFF:    //蓝牙开关回复
-                log_debug("bt contrl set on of success.\n");
+                log_debug("bt contrl set on off success.\n");
                 break;
             case PROTOCOL_TAG_SET_BT_NAME:    //设置蓝牙名
                 log_debug("bt name set name success\n");
@@ -548,7 +653,6 @@ void parse_slave_rsp_command_without_rsp(const uint8_t *raw_data, int length)
             log_debug("bt music cmd_status fail!!!\n");
             break;
         }
-        printf("packet->data[0]:%d line:%d\n", packet->data[0], __LINE__);
         switch (packet->data[0]) {
         default:
             break;
@@ -559,7 +663,6 @@ void parse_slave_rsp_command_without_rsp(const uint8_t *raw_data, int length)
             log_debug("bt ota contrl fail!!!\n");
             break;
         }
-        log_debug("packet->data[0]:%d line:%d\n", packet->data[0], __LINE__);
         switch (packet->data[0]) {
         case PROTOCOL_TAG_OTA_START:   //开始升级OTA
             log_debug("RECV PROTOCOL_TAG_OTA_START...\n");
@@ -587,7 +690,6 @@ void parse_slave_rsp_command_without_rsp(const uint8_t *raw_data, int length)
             log_debug("bt phone call fail!!!\n");
             break;
         }
-        printf("packet->data[0]:%d line:%d\n", packet->data[0], __LINE__);
         switch (packet->data[0]) {
         case PROTOCOL_TAG_HFP_CALL_CTRL:  //通话控制
             log_debug("PROTOCOL_TAG_HFP_CALL_CTRL...\n");
@@ -605,7 +707,6 @@ void parse_slave_rsp_command_without_rsp(const uint8_t *raw_data, int length)
             log_debug("bt pabp cmd_status fail!!!\n");
             break;
         }
-        printf("packet->data[0]:%d line:%d\n", packet->data[0], __LINE__);
         switch (packet->data[0]) {
         case PROTOCOL_TAG_BT_PBAP_LIST_READ:   //返回联系人信息
             log_debug("PROTOCOL_TAG_BT_PBAP_LIST_READ...\n");
@@ -618,7 +719,6 @@ void parse_slave_rsp_command_without_rsp(const uint8_t *raw_data, int length)
             log_debug("bt pabp cmd_status fail!!!\n");
             break;
         }
-        printf("packet->data[0]:%d line:%d\n", packet->data[0], __LINE__);
         switch (packet->data[0]) {
         case PROTOCOL_TAG_BT_ALBUM_END:    //专辑数据发送完成
             log_debug("PROTOCOL_TAG_BT_ALBUM_END:\n");
@@ -633,7 +733,6 @@ void parse_slave_rsp_command_without_rsp(const uint8_t *raw_data, int length)
             log_debug("bt mcu ctrl cmd_status fail!!!\n");
             break;
         }
-        log_debug("packet->data[0]:%d line:%d\n", packet->data[0], __LINE__);
         switch (packet->data[0]) {
         case PROTOCOL_TAG_MCU_SHUTOFF:    //关机
             log_debug("PROTOCOL_TAG_MCU_SHUTOFF:\n");
@@ -663,7 +762,7 @@ void parse_slave_rsp_command_without_rsp(const uint8_t *raw_data, int length)
  * @param length 数据长度
  * @return int 0-成功，负数-错误码
  */
-int pack_parserread(u8 *data, u32 length)
+int pack_parseread(u8 *data, u32 length)
 {
     g_printf("pack_parserread, length: %d", length);
 
@@ -672,7 +771,7 @@ int pack_parserread(u8 *data, u32 length)
         return -UART_ERR_UNDEFINED;
     }
 
-    put_buf(data, length);
+    //put_buf(data, length);
 
     // 验证协议头
     if (!verify_protocol_head(data)) {
@@ -684,19 +783,16 @@ int pack_parserread(u8 *data, u32 length)
     // 解析第一个字节的各个字段,是命令包回复还是数据包回复
     uint8_t type = data[3];
 
-    log_debug("type:0x%x", type);
+    y_printf("type: = 0x%x", type);
 
     switch (type) {
     case NO_RSP_CMD_TYPE_REQUEST:   //收到从机的命令包，无需回复,无cmd_status位
-        y_printf("recv cmd type@ 1\n");
         parse_slave_command_without_rsp(data, length);
         break;
     case RSP_CMD_TYPE_REQUEST:  //收到从机的命令包，需要回复,无cmd_status位
-        y_printf("recv cmd type@ 2\n");
         parse_slave_command_with_rsp(data, length);
         break;
     case RSP_CMD_TYPE_RSP:      //收到从机的命令回复包，无需回复,带status位
-        y_printf("recv cmd type@ 3 type : %d\n", type);
         parse_slave_rsp_command_without_rsp(data, length);
         break;
     default:
@@ -707,4 +803,5 @@ int pack_parserread(u8 *data, u32 length)
     return 0;
 }
 #endif
+
 

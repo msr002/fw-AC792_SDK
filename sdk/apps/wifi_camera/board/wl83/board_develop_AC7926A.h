@@ -83,9 +83,10 @@
 #define TCFG_UART1_PARITY                   UART_PARITY_DISABLE
 
 #define TCFG_UART2_ENABLE                   1
-#define TCFG_UART2_TX_IO                    IO_PORT_USB_DPA
-#define TCFG_UART2_RX_IO                    IO_PORT_USB_DMA
-#define TCFG_UART2_BAUDRATE                 1000000
+
+#define TCFG_UART2_TX_IO                    IO_PORTE_04
+#define TCFG_UART2_RX_IO                    IO_PORTE_05
+#define TCFG_UART2_BAUDRATE                 115200
 #define TCFG_UART2_FLOW_CTL_ENABLE          0
 #define TCFG_UART2_RTS_HW_ENABLE            0
 #define TCFG_UART2_RTS_RX_THRESH            80
@@ -258,12 +259,12 @@
 
 #define TCFG_SPI1_ENABLE                    1
 #define TCFG_SPI1_CS_IO                     -1
-#define TCFG_SPI1_CLK_IO                    IO_PORTC_06
-#define TCFG_SPI1_DO_IO                     IO_PORTB_08
-#define TCFG_SPI1_DI_IO                     IO_PORTB_09
-#define TCFG_SPI1_D2_IO                     IO_PORTA_04
-#define TCFG_SPI1_D3_IO                     IO_PORTA_05
-#define TCFG_SPI1_BAUDRATE                  10000000
+#define TCFG_SPI1_CLK_IO                    IO_PORTE_02
+#define TCFG_SPI1_DO_IO                     IO_PORTE_03
+#define TCFG_SPI1_DI_IO                     IO_PORTE_01
+#define TCFG_SPI1_D2_IO                     -1
+#define TCFG_SPI1_D3_IO                     -1
+#define TCFG_SPI1_BAUDRATE                  2000000
 #define TCFG_SPI1_HD_LEVEL                  0
 #define TCFG_SPI1_MODE                      SPI_STD_MODE//SPI_QUAD_MODE
 #define TCFG_SPI1_ATTR                      SPI_SCLK_L_UPL_SMPH
@@ -323,7 +324,7 @@
 //*********************************************************************************//
 // #ifdef CONFIG_UI_ENABLE
 #define TCFG_LCD_ENABLE                     1
-#define TCFG_LCD_INPUT_FORMAT               LCD_IN_RGB565
+#define TCFG_LCD_INPUT_FORMAT               LCD_IN_RGB565//注意修改后需要同步修改lv_conf.h:LV_COLOR_DEPTH
 #define TCFG_LCD_SUPPORT_MULTI_DRIVER_EN    0 ///< 多屏驱支持(目前仅支持具有相同分辨率的屏, 适用于
 ///< 一个case有多款屏混用的情况，比如因为缺货)
 

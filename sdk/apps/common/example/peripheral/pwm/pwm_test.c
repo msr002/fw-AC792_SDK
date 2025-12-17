@@ -5,129 +5,194 @@
 #include "device/device.h"
 
 /*********************************PWM设备例子****************************************************
-  支持使用board.h板级配置初始化、自定义配置初始化，IOCTL命令基本支持多通道控制
-  PWM通过dev_ioctl控制，cmd命令查看pwm.h，形参arg类型查看pwm.h
+  支持使用board.c板级配置初始化、自定义配置初始化，IOCTL命令基本支持多通道控制
+  PWM通过dev_ioctl控制，cmd命令见pwm.h
 ************************************************************************************************/
 
 #ifdef USE_PWM_TEST_DEMO
 
+
+#define PWM_CHANNEL       (PWMCH3_H | PWMCH3_L)
+// #define PWM_CHANNEL       (PWMCH3_H)
+// #define PWM_CHANNEL       (PWM_TIMER4_OPCH)
+#define PWM_FREQ          4800
+// #define PWM_FREQ          (2 * 1000 * 1000)
+#define PWM_DUTY          80
+#define PWM_POINT_BIT     2
+
+struct pwm_platform_data pwm = {
+    .timer_pwm_port    = {-1/*TMR2*/, -1/*TMR3*/, IO_PORTA_04/*TMR4*/, -1/*TMR5*/},
+    .mcpwm_port        = {
+        -1/*MCPWM0H*/, -1/*MCPWM1H*/, -1/*MCPWM2H*/, IO_PORTA_04/*MCPWM3H*/,
+        -1/*MCPWM0L*/, -1/*MCPWM1L*/, -1/*MCPWM2L*/, IO_PORTA_06/*MCPWM3L*/,
+    },
+
+    .pwm_config        = {
+        .pwm_ch        = PWM_CHANNEL,
+        .freq          = PWM_FREQ,
+        .duty          = PWM_DUTY,
+        .point_bit     = PWM_POINT_BIT,
+    },
+};
+
+#define PWM_CFG_PRINTF(cfg) \
+    printf("pwm: ch=0x%x, duty=%2.2f%%, point_bit=%d, freq=%dHz\n", \
+           (cfg)->pwm_ch, \
+           (cfg)->duty, \
+           (cfg)->point_bit, \
+           (cfg)->freq \
+          );
+
 static void pwm_test_task(void *arg)
 {
-    void *pwm_dev_handl = NULL;
+    void *pwm_hdl = NULL;
 
-    struct pwm_platform_data pwm = {
-        .timer_pwm_port             = {-1, -1, IO_PORTA_04, -1},
-        .mcpwm_port                 = {-1, -1, -1, IO_PORTA_04, -1, -1, -1, -1},
-        .pwm_config = {
-            .pwm_ch                 = PWM_TIMER4_OPCH,
-            .freq                   = 300000,
-            .duty                   = 80,
-            .point_bit              = 0,
-        },
-    };
-    // 1.open 第二个传参为NULL则使用board.h板级文件进行初始化，若不为NULL按照自定义配置进行初始化
-    pwm_dev_handl = dev_open("pwm1", &pwm);
-    // pwm_dev_handl = dev_open("pwm1", NULL);
-    if (!pwm_dev_handl) {
+    // open时第二个参数为NULL则使用board.c板级注册的参数进行初始化，
+    // 若不为NULL则按照所传参数配置进行初始化。
+    pwm_hdl = dev_open("pwm1", &pwm); // 使用传入的pwm参数进行初始化
+    // pwm_hdl = dev_open("pwm1", NULL); // 使用board.c中注册的配置进行初始化
+
+    if (!pwm_hdl) {
         printf("open pwm err !!!\n\n");
         return;
     }
-    printf("pwm: ch=0x%x,duty=%2.2f%%,pbit=%d,freq=%dhz\n", pwm.pwm_config.pwm_ch, \
-           pwm.pwm_config.duty, \
-           pwm.pwm_config.point_bit, \
-           pwm.pwm_config.freq);
-    os_time_dly(500);
 
-    /*
-     * open PWM设备之后就会初始化PWM，PWM相关参数为board.c配置，在不需要更改参数
-     * 时，只需要open就行，不需要进行以下操作。当改参数时，需要注意的是，除开
-     * ADD和REMOVE通道，其余CMD命令传入参数均为pwm_config_t *，主要区分该结构体
-     * 成员的pwm_ch，修改哪个通道的参数就要配置好对应的pwm_ch
-     */
+    PWM_CFG_PRINTF(&pwm.pwm_config);
 
-#if 1
-    /*2.ioctl 配置与获取占空比*/
-    pwm.pwm_config.duty = 80;
-    dev_ioctl(pwm_dev_handl, IOCTL_PWM_SET_DUTY, (u32)&pwm.pwm_config);//设置占空比
-    pwm.pwm_config.duty = 0;
-    dev_ioctl(pwm_dev_handl, IOCTL_PWM_GET_DUTY, (u32)&pwm.pwm_config);//获取占空比，返回数值在传入形参的pwm_config.duty
-    printf("pwm1 read duty : %.2f \n", pwm.pwm_config.duty);
-    os_time_dly(200);
-
-    /* 3.ioctl控制PWM暂停、运行、正反向，均支持多通道控制 */
-    printf("----pwm1 ioctl-------\n\n");
-    dev_ioctl(pwm_dev_handl, IOCTL_PWM_SET_STOP, (u32)&pwm.pwm_config);//PWM停止
-    os_time_dly(200);
-    dev_ioctl(pwm_dev_handl, IOCTL_PWM_SET_RUN, (u32)&pwm.pwm_config);//PWM运行
-    os_time_dly(200);
-    dev_ioctl(pwm_dev_handl, IOCTL_PWM_SET_REVDIRC, (u32)&pwm.pwm_config);//PWM正向
-    os_time_dly(200);
-    dev_ioctl(pwm_dev_handl, IOCTL_PWM_SET_FORDIRC, (u32)&pwm.pwm_config);//PWM反向
-
-    /* pwm.pwm_config.deathtime = 6;//最大值31 死区时间为系统时钟的(deathtime+1)倍,使用PWMCHx_H/L有效 */
-    /* dev_ioctl(pwm_dev_handl, IOCTL_PWM_SET_DEATH_TIME, (u32)&pwm.pwm_config);//PWM死区时间设置 */
-
-    os_time_dly(200);
-    printf("----pwm1 set freq-------\n\n");
-    /*4.ioctl配置频率和占空比，以下传参如果没有额外修改pwm_ch就是修改PWMCH0_H和PWMCH0_L的参数*/
-    pwm.pwm_config.pwm_ch = PWMCH0_H | PWMCH0_L;
-    pwm.mcpwm_port[0] = IO_PORTC_00;
-    pwm.mcpwm_port[1] = IO_PORTC_01;
-    pwm.pwm_config.freq = 2000;
-    pwm.pwm_config.duty = 20;
-    dev_ioctl(pwm_dev_handl, IOCTL_PWM_SET_FREQ, (u32)&pwm.pwm_config);//设置频率
-    os_time_dly(200);
-
-    pwm.pwm_config.duty = 50;
-    dev_ioctl(pwm_dev_handl, IOCTL_PWM_SET_DUTY, (u32)&pwm.pwm_config);//设置占空比
-    os_time_dly(200);
-
-    pwm.pwm_config.duty = 80;
-    dev_ioctl(pwm_dev_handl, IOCTL_PWM_SET_DUTY, (u32)&pwm.pwm_config);//设置占空比
-    os_time_dly(200);
-
-    /*5.中途可以添加TIMER2 PWM 任意IO,添加通道后关闭前必须删除 */
-    printf("----timer add channel-------\n\n");
-    pwm.timer_pwm_port[0] = IO_PORTB_15;
-    pwm.pwm_config.pwm_ch = PWM_TIMER2_OPCH;
-    pwm.pwm_config.duty = 10;
-    pwm.pwm_config.freq = 1500;
-    dev_ioctl(pwm_dev_handl, IOCTL_PWM_SET_ADD_CHANNEL, (u32)&pwm);//中途添加通道，可以是PWMCHx_H/L和PWM_TIMER2_OPCH2或PWM_TIMER3_OPCH3
-
-    pwm.pwm_config.duty = 60;
-    dev_ioctl(pwm_dev_handl, IOCTL_PWM_SET_DUTY, (u32)&pwm.pwm_config);//设置占空比
-    pwm.pwm_config.duty = 0;
-    dev_ioctl(pwm_dev_handl, IOCTL_PWM_GET_DUTY, (u32)&pwm.pwm_config);
-    printf("pwm1 read duty : %.2f \n", pwm.pwm_config.duty);
-
-    os_time_dly(200);
-
-
-    printf("----timer ioctl pwm.pwm_ch = 0x%x-------\n\n", pwm.pwm_config.pwm_ch);
-    /*6.ioctl控制PWM暂停、运行、正反向,调用1次ioctl只支持1组通道PWMCH_H/L控制*/
+    pwm_config_t pwm_cfg;
+    pwm_cfg.pwm_ch = PWM_CHANNEL; // 选择需要控制的通道
+    // 早期版本dev_open后，IO直接输出信号。现改为dev_open后需要使用IOCTL_PWM_SET_RUN才输出信号。-2025.12.05
+    dev_ioctl(pwm_hdl, IOCTL_PWM_SET_RUN, (u32)&pwm_cfg);//PWM运行
     os_time_dly(300);
-    dev_ioctl(pwm_dev_handl, IOCTL_PWM_SET_STOP, (u32)&pwm.pwm_config);//PWM停止
 
-    os_time_dly(200);
-    dev_ioctl(pwm_dev_handl, IOCTL_PWM_SET_RUN, (u32)&pwm.pwm_config);//PWM运行
-    os_time_dly(200);
 
-    pwm.pwm_config.freq = 2000;
-    pwm.pwm_config.duty = 20;
-    printf("----timer set freq-------\n\n");
-    dev_ioctl(pwm_dev_handl, IOCTL_PWM_SET_FREQ, (u32)&pwm.pwm_config);//设置频率
-    os_time_dly(200);
-    pwm.pwm_config.duty = 50;
-    dev_ioctl(pwm_dev_handl, IOCTL_PWM_SET_DUTY, (u32)&pwm.pwm_config);//设置占空比
-    os_time_dly(200);
-    pwm.pwm_config.duty = 80;
-    dev_ioctl(pwm_dev_handl, IOCTL_PWM_SET_DUTY, (u32)&pwm.pwm_config);//设置占空比
-    os_time_dly(200);
 
-    /*7.关闭前把添加通道删除,*/
-    dev_ioctl(pwm_dev_handl, IOCTL_PWM_SET_REMOV_CHANNEL, (u32)&pwm);
+#if 0 /* 配置与获取占空比 */
+    // 注意:
+    // 1.设置占空比时，所传参数的pwm_ch需匹配。
+    // 2.且point_bit和duty都需要根据需求配置。
+    pwm_cfg.pwm_ch    = PWM_CHANNEL;
+    pwm_cfg.duty      = 60;
+    pwm_cfg.point_bit = 2;
+    // float tmp_duty = 100.0;
+    double tmp_duty = 100.0;
+    while (1) {
+        printf("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+        tmp_duty = (tmp_duty <= 0.0) ? 100.0 : (tmp_duty - 0.01);
+        printf("tmp_duty = %f\n", tmp_duty);
+        pwm_cfg.duty = tmp_duty;
+        printf("pwm set duty  : %f\n", pwm_cfg.duty);
+        PWM_CFG_PRINTF(&pwm_cfg);
+        dev_ioctl(pwm_hdl, IOCTL_PWM_SET_DUTY, (u32)&pwm_cfg);//设置占空比
+        dev_ioctl(pwm_hdl, IOCTL_PWM_GET_DUTY, (u32)&pwm_cfg);//获取实际的占空比，读回的值在.duty中
+        printf("pwm read duty : %f\n", pwm_cfg.duty);
+        os_time_dly(200);
+    }
 #endif
-    dev_close(pwm_dev_handl);
+
+
+#if 0 /* 设置PWM输出频率 */
+    // 注意:
+    // 1.设置输出频率时，所传参数的pwm_ch需匹配。
+    // 2.duty和point_bit也需要是目标占空比。
+    pwm_cfg.pwm_ch    = PWM_CHANNEL;
+    pwm_cfg.point_bit = PWM_POINT_BIT;
+    pwm_cfg.duty      = PWM_DUTY;
+    pwm_cfg.freq      = 3000;
+    while (1) {
+        printf("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+        pwm_cfg.freq = (pwm_cfg.freq <= 0) ? PWM_FREQ : (pwm_cfg.freq - 100);
+        printf("pwm set freq : %d\n", pwm_cfg.freq);
+        PWM_CFG_PRINTF(&pwm_cfg);
+        dev_ioctl(pwm_hdl, IOCTL_PWM_SET_FREQ, (u32)&pwm_cfg);//设置频率
+        os_time_dly(200);
+    }
+#endif
+
+
+#if 0 /* 设置MCPWM死区时间 */
+    // 注意:
+    // 1.设置死区时间时，所传参数的pwm_ch需匹配（H或L通道至少匹配一个）。
+    pwm_cfg.pwm_ch    = PWM_CHANNEL;
+    pwm_cfg.deathtime = 0;
+    while (1) {
+        printf("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+        printf("deathtime = %d\n", pwm_cfg.deathtime);
+        dev_ioctl(pwm_hdl, IOCTL_PWM_SET_DEATH_TIME, (u32)&pwm_cfg);//PWM死区时间设置
+        // dev_ioctl(pwm_hdl, IOCTL_PWM_SET_RUN, (u32)&pwm_cfg);//实际使用时应该配置完死区时间后才RUN
+        pwm_cfg.deathtime = (pwm_cfg.deathtime >= 31) ? 0 : (pwm_cfg.deathtime + 1);
+        os_time_dly(100);
+    }
+#endif
+
+
+#if 0 /* 控制PWM暂停、运行 */
+    // 注意:
+    // 1.所传参数的pwm_ch需匹配。
+    pwm_cfg.pwm_ch    = PWM_CHANNEL;
+    while (1) {
+        printf("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+        printf("pwm stop\n");
+        dev_ioctl(pwm_hdl, IOCTL_PWM_SET_STOP, (u32)&pwm_cfg);//PWM停止
+        os_time_dly(300);
+        printf("pwm run\n");
+        dev_ioctl(pwm_hdl, IOCTL_PWM_SET_RUN, (u32)&pwm_cfg);//PWM运行
+        os_time_dly(300);
+    }
+#endif
+
+
+#if 0 /* 设置输出波形反向、正向 */
+    // 注意:
+    // 1.所传参数的pwm_ch需匹配。
+    pwm_cfg.pwm_ch    = PWM_CHANNEL;
+    while (1) {
+        printf("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+        printf("pwm set REVDIRC\n");
+        dev_ioctl(pwm_hdl, IOCTL_PWM_SET_REVDIRC, (u32)&pwm_cfg);//PWM反向
+        os_time_dly(300);
+        printf("pwm set FORDIRC\n");
+        dev_ioctl(pwm_hdl, IOCTL_PWM_SET_FORDIRC, (u32)&pwm_cfg);//PWM正向
+        os_time_dly(300);
+    }
+#endif
+
+
+#if 0 /* 添加、删除输出通道 */
+    // 注意:
+    // 1.添加的通道在dev_close前必须通过命令删除。
+    struct pwm_platform_data pwm_temp = {
+        .timer_pwm_port    = {-1/*TMR2*/, -1/*TMR3*/, -1/*TMR4*/, -1/*TMR5*/},
+        .mcpwm_port        = {
+            -1/*MCPWM0H*/, -1/*MCPWM1H*/, IO_PORTA_08/*MCPWM2H*/, -1/*MCPWM3H*/,
+            -1/*MCPWM0L*/, -1/*MCPWM1L*/, IO_PORTA_10/*MCPWM2L*/, -1/*MCPWM3L*/,
+        },
+        .pwm_config        = {
+            .pwm_ch        = PWMCH2_H | PWMCH2_L,
+            .freq          = 9600,
+            .duty          = 50,
+            .point_bit     = 1,
+        },
+    };
+    while (1) {
+        printf("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+        PWM_CFG_PRINTF(&pwm_temp.pwm_config);
+        printf("pwm add channel\n");
+        dev_ioctl(pwm_hdl, IOCTL_PWM_SET_ADD_CHANNEL, (u32)&pwm_temp);
+        dev_ioctl(pwm_hdl, IOCTL_PWM_SET_RUN, (u32)&pwm_temp.pwm_config);
+        os_time_dly(300);
+
+        // 关闭前把添加通道删除
+        printf("pwm remove channel\n");
+        // dev_ioctl(pwm_hdl, IOCTL_PWM_SET_STOP, (u32)&pwm_temp.pwm_config);
+        dev_ioctl(pwm_hdl, IOCTL_PWM_SET_REMOV_CHANNEL, (u32)&pwm_temp);
+        os_time_dly(300);
+    }
+#endif
+
+
+
+    dev_close(pwm_hdl);
     printf("pwm test end\n\n");
 
     while (1) {
