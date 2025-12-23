@@ -5,6 +5,7 @@
  */
 
 #include "../../lv_examples.h"
+#include "app_config.h"
 #if LV_USE_LYRICS && LV_BUILD_EXAMPLES
 
 #include "os/os_api.h"

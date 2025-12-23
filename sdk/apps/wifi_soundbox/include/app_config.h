@@ -150,6 +150,7 @@
 // #define CONFIG_DCACHE_EFFICIENCY_CALCULATE_ENABLE
 #endif
 
+// #define CONFIG_IPMASK_ENABLE                 //使能不可屏蔽中断
 #define CONFIG_CXX_SUPPORT                      //使能C++支持
 #define CONFIG_MPU_DEBUG_ENABLE
 #define CONFIG_LZ4_COMPRESS_APP_CODE_ENABLE     //使用LZ4压缩代码

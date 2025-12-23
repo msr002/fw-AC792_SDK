@@ -160,6 +160,8 @@ extern volatile char cpu1_run_flag;
 extern void __local_irq_disable(void);
 extern void __local_irq_enable(void);
 extern int __local_irq_lock_cnt(void);
+extern void irq_unmask_suspend(void);
+extern void irq_unmask_resume(void);
 extern void local_irq_disable(void);
 extern void local_irq_enable(void);
 extern void sys_local_irq_disable(void);

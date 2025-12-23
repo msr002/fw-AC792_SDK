@@ -48,10 +48,8 @@
 #endif
 
 #if (LV_COLOR_DEPTH == 32)
-#if (LV_COLOR_DEPTH_EXTEN== 24)
 #undef LV_COLOR_DEPTH_EXTEN
 #define LV_COLOR_DEPTH_EXTEN LV_COLOR_DEPTH
-#endif
 #endif
 
 #ifndef LV_COLOR_KEY

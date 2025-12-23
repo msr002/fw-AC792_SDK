@@ -158,6 +158,10 @@
 <Add directory="../../../../apps/common/gsensor" />
 <Add directory="../../../../apps/common/ext_uart_bt" />
 <Add directory="../../../../apps/common/ext_spi_bt" />
+<Add directory="../../../../include_lib/net/curl" />
+<Add directory="../../../../include_lib/net/lwip_2_2_0/lwip/src/include/compat/posix" />
+<Add directory="../../../../include_lib/net/lwip_2_2_0/lwip/src/include/compat/stdc" />
+<Add directory="../../../../apps/common/video/net_avi_player" />
 <Add directory="../../../../apps/common/net/testbox/include" />
 <Add directory="../../../../apps/common/third_party_profile/mijia" />
 <Add directory="../../../../apps/common/third_party_profile/mijia/mijia_ble_api" />
@@ -384,6 +388,8 @@
 <Add option="../../../../cpu/wl83/liba/lib_sig_mesh.a " />
 <Add option="../../../../cpu/wl83/liba/rcsp_stack.a" />
 <Add option="../../../../cpu/wl83/liba/lvgl_v8_extend.a" />
+<Add option="../../../../cpu/wl83/liba/libcurl.a" />
+<Add option="../../../../cpu/wl83/liba/libmbedtls_3_4_0.a " />
 <Add option="../../../../include_lib/newlib/pi32v2-lib/libm.a" />
 <Add option="../../../../include_lib/newlib/pi32v2-lib/libc.a" />
 <Add option="../../../../include_lib/newlib/pi32v2-lib/libcompiler_rt.a" />
@@ -1723,6 +1729,17 @@
 <Unit filename="../../../../apps/common/video/jpg2avi.h" />
 <Unit filename="../../../../apps/common/video/logo_show.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/common/video/logo_show.h" />
+<Unit filename="../../../../apps/common/video/net_avi_player/avi_parse.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="../../../../apps/common/video/net_avi_player/avi_parse.h" />
+<Unit filename="../../../../apps/common/video/net_avi_player/avi_player.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="../../../../apps/common/video/net_avi_player/avi_player.h" />
+<Unit filename="../../../../apps/common/video/net_avi_player/curl_get_data.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="../../../../apps/common/video/net_avi_player/curl_get_data.h" />
+<Unit filename="../../../../apps/common/video/net_avi_player/net_avi_player.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="../../../../apps/common/video/net_avi_player/net_avi_player.h" />
+<Unit filename="../../../../apps/common/video/net_avi_player/pipeline_jpeg_dec.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="../../../../apps/common/video/net_avi_player/pipeline_jpeg_dec.h" />
+<Unit filename="../../../../apps/common/video/net_avi_player/play_demo.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/common/video/quick_show_uvc.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/common/video/sharpen_adapter.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/common/video/simple_avi_unpkg.c"><Option compilerVer="CC"/></Unit>
@@ -2539,6 +2556,15 @@
 <Unit filename="../../../../include_lib/media/tech_lib/jlsp_vad.h" />
 <Unit filename="../../../../include_lib/media/tech_lib/spatial_imp_ctrl.h" />
 <Unit filename="../../../../include_lib/media/tws/jl_tws.h" />
+<Unit filename="../../../../include_lib/net/curl/curl/curl.h" />
+<Unit filename="../../../../include_lib/net/curl/curl/curlver.h" />
+<Unit filename="../../../../include_lib/net/curl/curl/easy.h" />
+<Unit filename="../../../../include_lib/net/curl/curl/header.h" />
+<Unit filename="../../../../include_lib/net/curl/curl/multi.h" />
+<Unit filename="../../../../include_lib/net/curl/curl/options.h" />
+<Unit filename="../../../../include_lib/net/curl/curl/system.h" />
+<Unit filename="../../../../include_lib/net/curl/curl/urlapi.h" />
+<Unit filename="../../../../include_lib/net/curl/curl/websockets.h" />
 <Unit filename="../../../../include_lib/net/ftpserver/stupid-ftpd.h" />
 <Unit filename="../../../../include_lib/net/http/http_cli.h" />
 <Unit filename="../../../../include_lib/net/http/http_server.h" />
@@ -2564,6 +2590,7 @@
 <Unit filename="../../../../include_lib/net/lwip_2_2_0/lwip/port/arch/cpu.h" />
 <Unit filename="../../../../include_lib/net/lwip_2_2_0/lwip/port/lwip.h" />
 <Unit filename="../../../../include_lib/net/lwip_2_2_0/lwip/port/lwipopts.h" />
+<Unit filename="../../../../include_lib/net/lwip_2_2_0/lwip/src/include/compat/posix/sys/socket.h" />
 <Unit filename="../../../../include_lib/net/lwip_2_2_0/lwip/src/include/lwip/arch.h" />
 <Unit filename="../../../../include_lib/net/lwip_2_2_0/lwip/src/include/lwip/debug.h" />
 <Unit filename="../../../../include_lib/net/lwip_2_2_0/lwip/src/include/lwip/def.h" />
@@ -2666,6 +2693,8 @@
 <Unit filename="../../../../include_lib/net/wifi/wifi_def.h" />
 <Unit filename="../../../../include_lib/newlib/include/_ansi.h" />
 <Unit filename="../../../../include_lib/newlib/include/assert.h" />
+<Unit filename="../../../../include_lib/newlib/include/machine/_default_types.h" />
+<Unit filename="../../../../include_lib/newlib/include/machine/_types.h" />
 <Unit filename="../../../../include_lib/newlib/include/machine/ieeefp.h" />
 <Unit filename="../../../../include_lib/newlib/include/machine/malloc.h" />
 <Unit filename="../../../../include_lib/newlib/include/machine/time.h" />
@@ -2676,8 +2705,11 @@
 <Unit filename="../../../../include_lib/newlib/include/sys/_stdint.h" />
 <Unit filename="../../../../include_lib/newlib/include/sys/_timespec.h" />
 <Unit filename="../../../../include_lib/newlib/include/sys/_timeval.h" />
+<Unit filename="../../../../include_lib/newlib/include/sys/_types.h" />
+<Unit filename="../../../../include_lib/newlib/include/sys/cdefs.h" />
 <Unit filename="../../../../include_lib/newlib/include/sys/config.h" />
 <Unit filename="../../../../include_lib/newlib/include/sys/features.h" />
+<Unit filename="../../../../include_lib/newlib/include/sys/lock.h" />
 <Unit filename="../../../../include_lib/newlib/include/sys/time.h" />
 <Unit filename="../../../../include_lib/newlib/include/sys/timespec.h" />
 <Unit filename="../../../../include_lib/newlib/include/sys/types.h" />

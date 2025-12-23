@@ -85,6 +85,20 @@ u32 get_update_file_size(void)
 }
 #endif
 
+// type : 0 - 读 / 1 - 写 / 2 - 擦
+// 频繁操作flash会引起频繁开关中断，从而导致wifi被挡引起socket断开，适当延时释放cpu
+int dev_upgrade_cpu_release(u32 addr, u8 type)
+{
+#define FLASH_PAGE_SIZE 256
+    u32 step = 32 * 1024;
+    addr = addr / FLASH_PAGE_SIZE * FLASH_PAGE_SIZE;
+    if (0 == (addr % step)) { //每32K释放一下cpu
+        os_time_dly(1);
+        printf("delay 10ms, release cpu\n");
+    }
+    return 0;
+}
+
 static struct net_update *net_update_info = NULL;
 int storage_device_ready(void);
 u32 get_target_udate_addr(void);

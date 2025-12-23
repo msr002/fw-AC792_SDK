@@ -1,4 +1,5 @@
 #include "../../lv_examples.h"
+#include "app_config.h"
 #if LV_USE_TINY_TTF && LV_TINY_TTF_FILE_SUPPORT && LV_BUILD_EXAMPLES
 
 /**

@@ -11,7 +11,6 @@ typedef struct __spinlock spinlock_t;
 
 #if CPU_CORE_NUM > 1
 
-
 #define preempt_disable() \
 	__local_irq_disable()
 
@@ -25,9 +24,6 @@ typedef struct __spinlock spinlock_t;
 
 #define preempt_enable() \
 	local_irq_enable()
-
-
-
 
 #endif
 
@@ -88,6 +84,19 @@ static inline void spin_unlock(spinlock_t *lock)
     preempt_enable();
 }
 
+__attribute__((always_inline))
+static inline void spin_lock_irq_unmark(spinlock_t *lock)
+{
+    irq_unmask_suspend();
+    spin_acquire(lock);
+}
+
+__attribute__((always_inline))
+static inline void spin_unlock_irq_unmark(spinlock_t *lock)
+{
+    spin_release(lock);
+    irq_unmask_resume();
+}
 
 #endif
 

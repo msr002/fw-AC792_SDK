@@ -5,39 +5,116 @@
 #include "asm/gpio.h"
 #include "irq.h"
 
-
 #ifdef	USE_CAN_TEST_DEMO
 
-#define CAN_REINIT_MODIFY_PARAMETERS	///< 演示demo-代码运行后修改can的参数
+/* #define CAN_REINIT_MODIFY_PARAMETERS	///< 演示demo-代码运行后修改can的参数 */
 #define CAN_RECV_BLOCK_ENABLE			///< 演示can阻塞式接收
 
-#ifdef CAN_RECV_BLOCK_ENABLE
-#define CAN_RX_CNT	5
-#else
-#define CAN_RX_CNT	10
-#endif
+#define CAN_RX_CNT	3
 
+static u32 *data_priv = NULL;
+static int *rxcnt_priv = NULL;  //当前can已接收数据计数，内部指针，实时更新
 static void *can_hdl = NULL;
 
-// 定义中断回调函数，非阻塞式接收数据完成会回调该函数
-// 回调的can_rx_data指针实际上与IOCTL_CAN_SET_RECV_NON_BLOCK_ENABLE传递的指针是一致的
-static int can_irq_cb(void *priv, can_data_t *can_rx_data, can_event_isr_t event)
+extern const u8 config_can_soft_enhanced_rx_mode_en;
+extern const u16 config_can_dma_ram_malloc_size;
+
+// 定义中断回调函数，非阻塞式接收关闭config_can_soft_enhanced_rx_mode_en时，hdl指针会传回can_data_t指针
+// 开启config_can_soft_enhanced_rx_mode_en时，hdl指针会返回can_addr_t类型指针，包含内部指针数据，包括数据缓冲地址以及已接受数据计数变量地址。并且应用层中断回调只会执行一次，甚至不执行。由下方的can_rx_task回调数据
+// 回调的can_data_t指针实际上与IOCTL_CAN_SET_RECV_NON_BLOCK_ENABLE传递的指针是一致的
+static SEC_USED(.volatile_ram_code) int can_irq_cb(void *priv, void *hdl, can_event_isr_t event)
 {
-    switch (event) {
-    case CAN_EVENT_RECEIVE_INTERRUPT:
-        printf("\n\n--------can non block recv run---------\n\n");
-        printf("data_format is -- %d", can_rx_data->data_format);
-        printf("rtr is -- %d", can_rx_data->rtr);
-        printf("id is -- %d  0x%x", can_rx_data->id, can_rx_data->id);
-        printf("dlc is -- %d", can_rx_data->dlc);
-        put_buf(can_rx_data->data, can_rx_data->dlc);
-        break;
-    default:
-        printf("%s: 0x%x", __func__, event);
-        break;
+    if (config_can_soft_enhanced_rx_mode_en) {
+        can_addr_t *adr_hdl = (can_addr_t *)hdl;
+        if (!adr_hdl) {
+            //hdl 为NULL则说明底层收数已经回滚，注意此时应用层是否有及时取数，否则会出现回滚覆盖的问题
+            //如果打开不可屏蔽中断，则不可添加打印，可以在此处增加变量标志位判断。
+            return 0;
+        }
+        if (!rxcnt_priv && !data_priv) {
+            rxcnt_priv = adr_hdl->rxcnt_addr;
+            data_priv = adr_hdl->rxdata_addr;
+        }
+    } else {
+        switch (event) {
+        case CAN_EVENT_RECEIVE_INTERRUPT:
+            if (!hdl) {
+                //hdl 为NULL则说明底层收数已经回滚，注意此时应用层是否有及时取数，否则会出现回滚覆盖的问题
+                printf("dma ram buffer rollback!!");
+                return 0;
+            }
+            can_data_t *can_rx_data = (can_data_t *)hdl;
+            printf("\n\n--------can non block recv run---------\n\n");
+            printf("data_format is -- %d", can_rx_data->data_format);
+            printf("rtr is -- %d", can_rx_data->rtr);
+            printf("id is -- %d  0x%x", can_rx_data->id, can_rx_data->id);
+            printf("dlc is -- %d", can_rx_data->dlc);
+            put_buf(can_rx_data->data, can_rx_data->dlc);
+            break;
+        default:
+            printf("%s: 0x%x", __func__, event);
+            break;
+        }
     }
     return 0;
 }
+
+#ifndef  CAN_RECV_BLOCK_ENABLE
+void __can_receive_data_operation(u32 *p_rx_packet, can_data_t *can_rxdata);
+static void can_rx_task(void *arg)
+{
+    can_data_t can_rxbuf = {0};
+    int res = 0;
+    int new_rxcnt = 0;      //当前can已接收数据计数，实时更新
+    int old_rxcnt = 0;     //应用层已处理的can数据计数，应用层管理。
+    int diff_rxcnt = 0;      //cur与lost的差值，应用层管理。
+    u16 i = 0;
+    while (1) {
+        udelay(100);
+        if (rxcnt_priv && data_priv) {
+            new_rxcnt = *rxcnt_priv;
+            if (new_rxcnt > old_rxcnt) {
+                diff_rxcnt = new_rxcnt - old_rxcnt;
+                for (i = 0; i < diff_rxcnt; i++) {
+                    __can_receive_data_operation(&data_priv[4 * (old_rxcnt + i)], &can_rxbuf);
+                    /* g_printf("%d: new_rxcnt = %d; old_rxcnt = %d; i = %d", __LINE__, new_rxcnt, old_rxcnt, i); */
+                    printf("id is -- %d  0x%x", can_rxbuf.id, can_rxbuf.id);
+                    /* printf("dlc is -- %d", can_rxbuf.dlc); */
+                    /* printf("rx_data: "); */
+                    /* put_buf(can_rxbuf.data, can_rxbuf.dlc); */
+                }
+                old_rxcnt = new_rxcnt;
+            } else if (old_rxcnt > new_rxcnt) {    //上一次接收帧数大于当前帧数，帧数回滚
+                diff_rxcnt = config_can_dma_ram_malloc_size - old_rxcnt;       //dma l2级缓存固定帧数
+                for (i = 0; i < diff_rxcnt; i++) {
+                    __can_receive_data_operation(&data_priv[4 * (old_rxcnt + i)], &can_rxbuf);
+                    /* g_printf("%d: new_rxcnt = %d; old_rxcnt = %d; i = %d", __LINE__, new_rxcnt, old_rxcnt, i); */
+                    printf("id is -- %d  0x%x", can_rxbuf.id, can_rxbuf.id);
+                    /* printf("dlc is -- %d", can_rxbuf.dlc); */
+                    /* printf("rx_data: "); */
+                    /* put_buf(can_rxbuf.data, can_rxbuf.dlc); */
+                }
+                old_rxcnt = 0;
+                diff_rxcnt = new_rxcnt;
+                for (i = 0; i < diff_rxcnt; i++) {
+                    __can_receive_data_operation(&data_priv[4 * (old_rxcnt + i)], &can_rxbuf);
+                    /* g_printf("%d: new_rxcnt = %d; old_rxcnt = %d; i = %d", __LINE__, new_rxcnt, old_rxcnt, i); */
+                    printf("id is -- %d  0x%x", can_rxbuf.id, can_rxbuf.id);
+                    /* printf("dlc is -- %d", can_rxbuf.dlc); */
+                    /* printf("rx_data: "); */
+                    /* put_buf(can_rxbuf.data, can_rxbuf.dlc); */
+                }
+                old_rxcnt = new_rxcnt;
+            } else {
+                //二者相等则说明此时dma无数据，不处理
+                mdelay(10);
+            }
+        } else {
+            mdelay(10);
+        }
+    }
+}
+#endif
 
 static void can_test_task(void *arg)
 {
@@ -56,7 +133,7 @@ static void can_test_task(void *arg)
         goto exit;
     }
 #ifdef CAN_RECV_BLOCK_ENABLE
-    dev_ioctl(can_hdl, IOCTL_CAN_SET_DMA_FRAMES, CAN_RX_CNT);
+    dev_ioctl(can_hdl, IOCTL_CAN_SET_DMA_FRAMES, 1);
     /* dev_ioctl(can_hdl, IOCTL_CAN_SET_RECV_WAIT_WHILE, 0); */
     dev_ioctl(can_hdl, IOCTL_CAN_SET_RECV_WAIT_SEM, 0);
 #else
@@ -64,7 +141,11 @@ static void can_test_task(void *arg)
     cb.cb_func = can_irq_cb;
     cb.cb_priv = NULL;
     dev_ioctl(can_hdl, IOCTL_CAN_SET_IRQ_CB, (u32)&cb);
-    dev_ioctl(can_hdl, IOCTL_CAN_SET_DMA_FRAMES, CAN_RX_CNT);
+    if (config_can_soft_enhanced_rx_mode_en) {
+        dev_ioctl(can_hdl, IOCTL_CAN_SET_DMA_FRAMES, 2);
+    } else {
+        dev_ioctl(can_hdl, IOCTL_CAN_SET_DMA_FRAMES, 1);
+    }
     dev_ioctl(can_hdl, IOCTL_CAN_SET_RECV_NON_BLOCK_ENABLE, (u32)&can_rx_data);
 #endif
 
@@ -153,7 +234,6 @@ static void can_test_task(void *arg)
 #endif
 
     while (1) {
-
 #ifdef CAN_RECV_BLOCK_ENABLE
         os_time_dly(1);
         ///接收数据
@@ -165,13 +245,12 @@ static void can_test_task(void *arg)
             printf("data_format is [%d]-%d", cnt, can_rx_data[cnt].data_format);
             printf("rtr is [%d]-%d", cnt, can_rx_data[cnt].rtr);
             printf("id is [%d]-0x%x", cnt, can_rx_data[cnt].id);
-            printf("dlc is [%d]-%d", cnt, can_rx_data[cnt].dlc);
-            for (int i = 0; i < can_rx_data[cnt].dlc; i++) {
-                printf("[%d]-0x%x", cnt, can_rx_data[cnt].data[i]);
-            }
+            printf("dlc is [%d]-%d; data: ", cnt, can_rx_data[cnt].dlc);
+            put_buf(can_rx_data[cnt].data, can_rx_data[cnt].dlc);
         }
 #else
         os_time_dly(100);
+        /* dev_ioctl(can_hdl, IOCTL_CAN_GET_PUT_REGISTER_INFO, 0); */
         printf("waiting recv...");
         dev_write(can_hdl, &can_tx_data[1], 1);
 #endif
@@ -218,7 +297,6 @@ static void can_test_task(void *arg)
         printf("waiting recv...");
         dev_write(can_hdl, &can_tx_data[1], 2);
 #endif
-
     }
 #endif
 exit:
@@ -246,11 +324,15 @@ static int c_main_can(void)
     /* request_irq(IRQ_CAN_IDX, 5, can_isr, 1); */
     printf("\n\n-----------------CAN_TEST_DEMO run %s---------------- \n\n", __TIME__);
     os_task_create(can_test_task, NULL, 10, 1000, 0, "can_test_task");
+#ifndef  CAN_RECV_BLOCK_ENABLE
+    if (config_can_soft_enhanced_rx_mode_en) {
+        thread_fork("can_rx_task", 24, 1024, 0, NULL, can_rx_task, NULL);
+    }
+#endif
     return 0;
 }
 
 late_initcall(c_main_can);
 
 #endif // USE_CAN_TEST_DEMO
-
 

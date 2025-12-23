@@ -125,6 +125,12 @@ const u32 config_pd_flash_dly_up_us = 0; // pdown退出时flash延时上电时�
 const u8 config_flash_block2sector_erase = 0; // 0:normal 1:block擦除强制改sector
 /*****************************/
 
+/*****************************/
+//CAN
+const u8 config_can_soft_enhanced_rx_mode_en = 0;
+const u16 config_can_dma_ram_malloc_size = 300; // can-dma内部申请缓存帧大小，申请地址内部ram，必须是IOCTL_CAN_SET_DMA_FRAMES的整数倍，建议小于300帧，实际申请大小config_can_dma_l1_frames_max * 16 byte;
+/*****************************/
+
 /**
  * @brief Log (Verbose/Info/Debug/Warn/Error)
  */

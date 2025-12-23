@@ -492,27 +492,19 @@ void media_irq_enable(void)
 
 #ifdef CONFIG_IPMASK_ENABLE
 
+static volatile u8 unmask_suspend[2] SEC_USED(.volatile_ram) = {0};
+
 //外部用到宏控制的函数, 库里面不能够内联
 SEC_USED(.volatile_ram_code)
 __attribute__((noinline))
 void __local_irq_disable(void)
 {
     __builtin_pi32v2_cli();
-    q32DSP(current_cpu_id())->IPMASK = 7;//把中断优先级大于等于7的中断设定为不可屏蔽中断
-    irq_lock_cnt[current_cpu_id()]++;
+    int cpu_id = current_cpu_id();
+    q32DSP(cpu_id)->IPMASK = 7;//把中断优先级大于等于7的中断设定为不可屏蔽中断
+    irq_lock_cnt[cpu_id]++;
     __asm_csync();
-    __builtin_pi32v2_sti();
-}
-
-//外部用到宏控制的函数, 库里面不能够内联
-SEC_USED(.volatile_ram_code)
-__attribute__((noinline))
-void __local_irq_enable(void)
-{
-    if (--irq_lock_cnt[current_cpu_id()] == 0) {
-        __builtin_pi32v2_cli();
-        q32DSP(current_cpu_id())->IPMASK = 0;
-        __asm_csync();
+    if (0 == unmask_suspend[cpu_id]) {
         __builtin_pi32v2_sti();
     }
 }
@@ -520,21 +512,57 @@ void __local_irq_enable(void)
 //外部用到宏控制的函数, 库里面不能够内联
 SEC_USED(.volatile_ram_code)
 __attribute__((noinline))
+void __local_irq_enable(void)
+{
+    __builtin_pi32v2_cli();
+    int cpu_id = current_cpu_id();
+    if (--irq_lock_cnt[cpu_id] == 0) {
+        q32DSP(cpu_id)->IPMASK = 0;
+    }
+    __asm_csync();
+    if (0 == unmask_suspend[cpu_id]) {
+        __builtin_pi32v2_sti();
+    }
+}
+
+SEC_USED(.volatile_ram_code)
+__attribute__((noinline))
+void irq_unmask_suspend(void)
+{
+    __builtin_pi32v2_cli();
+    int cpu_id = current_cpu_id();
+    irq_lock_cnt[cpu_id]++;
+    unmask_suspend[cpu_id] = 1;
+    __asm_csync();
+}
+
+SEC_USED(.volatile_ram_code)
+__attribute__((noinline))
+void irq_unmask_resume(void)
+{
+    int cpu_id = current_cpu_id();
+    unmask_suspend[cpu_id] = 0;
+    if (--irq_lock_cnt[cpu_id] == 0) {
+        q32DSP(cpu_id)->IPMASK = 0;
+    }
+    __asm_csync();
+    __builtin_pi32v2_sti();
+}
+
+//外部用到宏控制的函数, 库里面不能够内联
+SEC_USED(.volatile_ram_code)
+__attribute__((noinline))
 int cpu_irq_disabled(void)
 {
-#ifdef CONFIG_WL82_ENABLE
     int flag, flag2;
     __asm__ volatile("%0 = icfg" : "=r"(flag));
-    int first = ((flag & 0x300) != 0x300) || (q32DSP(current_cpu_id())->IPMASK == 7);//不可屏蔽中断
+    /* int first = ((flag & 0x300) != 0x300) || (q32DSP(current_cpu_id())->IPMASK == 7);//不可屏蔽中断 */
+    int first = ((flag & 0x300) != 0x300) || irq_lock_cnt[current_cpu_id()] > 0;
+    __asm_csync();
     //只读一遍有可能出现实际上没关中断但又条件成立的情况，需要再读一次确保正确，读取前使用ssync也没效果，原因未知
     __asm__ volatile("%0 = icfg" : "=r"(flag2));
-    int second = ((flag2 & 0x300) != 0x300) || (q32DSP(current_cpu_id())->IPMASK == 7);//不可屏蔽中断
+    int second = ((flag2 & 0x300) != 0x300) || irq_lock_cnt[current_cpu_id()] > 0;
     return (first && second);
-#else    //WL83 不应该再出现 FIXME
-    int flag;
-    __asm__ volatile("%0 = icfg" : "=r"(flag));
-    return (((flag & 0x300) != 0x300) || (q32DSP(current_cpu_id())->IPMASK == 7));//不可屏蔽中断
-#endif
 }
 
 #else
@@ -558,6 +586,18 @@ void __local_irq_enable(void)
         __asm_csync();
         __builtin_pi32v2_sti();
     }
+}
+
+SEC(.volatile_ram_code)
+void irq_unmask_suspend(void)
+{
+    __local_irq_disable();
+}
+
+SEC(.volatile_ram_code)
+void irq_unmask_resume(void)
+{
+    __local_irq_enable();
 }
 
 //外部用到宏控制的函数, 库里面不能够内联

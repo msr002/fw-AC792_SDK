@@ -41,8 +41,6 @@ const struct irq_info irq_info_table[] = {
     /* { IRQ_ISC_IDX,		7,	0}, */
 #ifdef CONFIG_IPMASK_ENABLE
     //不可屏蔽中断方法：支持写flash，但中断函数和调用函数和const要全部放在内部ram
-    { IRQ_SOFT5_IDX,      6,   0    }, //此中断强制注册到cpu0
-    { IRQ_SOFT4_IDX,      6,   1    }, //此中断强制注册到cpu1
 #if 0 //如下，SPI1使用不可屏蔽中断设置
     { IRQ_SPI1_IDX,      7,   1    },//中断强制注册到cpu0/1
 #endif

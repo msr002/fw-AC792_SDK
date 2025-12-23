@@ -116,6 +116,7 @@ void Init_LwIP(u8_t lwip_netif);
 void lwip_netif_set_up(u8_t lwip_netif);
 void lwip_netif_set_down(u8_t lwip_netif);
 void lwip_set_default_netif(u8_t lwip_netif);
+u8_t lwip_get_default_netif(void);
 void lwip_renew(u8_t lwip_netif, u8_t dhcp);
 void lwip_netif_remove(u8_t lwip_netif);
 int lwip_dhcp_bound(void);

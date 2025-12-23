@@ -7,6 +7,7 @@
 
 #include "lvgl.h"
 #include "../../lv_examples.h"
+#include "app_config.h"
 #if LV_USE_LYRICS && LV_BUILD_EXAMPLES
 
 #define CONFIG_UI_RES_PATH CONFIG_ROOT_PATH // SD 路径

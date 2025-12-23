@@ -9,14 +9,14 @@
  * \{
  */
 #define CAN_MAGIC								'C'
-#define IOCTL_CAN_SET_DMA_FRAMES				_IOW(CAN_MAGIC,1,u8)				///<  设置can-dma缓存数据
+#define IOCTL_CAN_SET_DMA_FRAMES				_IOW(CAN_MAGIC,1,u8)				///<  设置can-dma缓存数据, 基础can不能设置大于6，增强型can不能设置大于4，can dma中断将根据该设置生效，没有接收到对应帧数无法起中断。
 #define IOCTL_CAN_SET_INTERRUPT_ENABLE			_IOW(CAN_MAGIC,2,can_event_isr_t)	///<  中断使能
 #define IOCTL_CAN_SET_INTERRUPT_DISABLE			_IOW(CAN_MAGIC,3,can_event_isr_t)	///<  中断失能
 #define IOCTL_CAN_SET_MODE						_IOW(CAN_MAGIC,4,can_mode_t *)		///<  修改can参数
 #define IOCTL_CAN_SET_FILTER					_IOW(CAN_MAGIC,5,can_rx_filter_t *)	///<  修改can参数
 #define IOCTL_CAN_SET_RATE						_IOW(CAN_MAGIC,6,can_baudrate_t *)	///<  修改can参数
-#define IOCTL_CAN_SET_RECV_WAIT_SEM  			_IO(CAN_MAGIC,7)					///<  阻塞式接收-使用信号量,占用中断
-#define IOCTL_CAN_SET_RECV_WAIT_WHILE			_IO(CAN_MAGIC,8)					///<  阻塞式接收-使用查询中断标志位，内部会清除中断
+#define IOCTL_CAN_SET_RECV_WAIT_SEM  			_IO(CAN_MAGIC,7)                    ///<  阻塞式接收-使用信号量,占用中断
+#define IOCTL_CAN_SET_RECV_WAIT_WHILE			_IO(CAN_MAGIC,8)                    ///<  阻塞式接收-使用查询中断标志位，内部会清除中断
 #define IOCTL_CAN_SET_RECV_NON_BLOCK_ENABLE		_IOR(CAN_MAGIC,9,can_data_t *)		///<  非阻塞式接收-使用中断接收，需要配置IOCTL_CAN_SET_IRQ_CB
 #define IOCTL_CAN_SET_RECV_NON_BLOCK_DISABLE	_IO(CAN_MAGIC,10)					///<  非阻塞式接收-使用中断接收，需要配置IOCTL_CAN_SET_IRQ_CB
 #define IOCTL_CAN_SET_IRQ_CB					_IOW(CAN_MAGIC,11,can_cb_t *)		///<  非阻塞式接收会占用一个can接收中断，需要配置回调函数进行接收数据获取
@@ -84,6 +84,7 @@ typedef enum {
     CAN_FILTER_DOUBLE_EXTEND,    	///<  2 x 16bit filters
     CAN_FILTER_SINGLE_STAND,     	///<  1 x 32bit filter
     CAN_FILTER_SINGLE_EXTEND,    	///<  1 x 32bit filter
+    CAN_FILTER_STAND_AND_EXTEND,    ///<  2 x 16bit filters 1-STAND(id1) 1-EXTEND(id0)
     CAN_FILTER_MAX
 } can_filter_t;
 /* \} name */
@@ -178,9 +179,19 @@ struct can_platform_data {
  * \{
  */
 typedef struct {
-    int (*cb_func)(void *priv, can_data_t *data, can_event_isr_t event_isr);
+    int (*cb_func)(void *priv, void *hdl, can_event_isr_t event_isr);
     void *cb_priv;
 } can_cb_t;
+/* \} name */
+
+/**
+ * \name CAN inside addr
+ * \{
+ */
+typedef struct {
+    u32 *rxdata_addr;
+    int *rxcnt_addr;
+} can_addr_t;
 /* \} name */
 
 //*********************************************************************************************//

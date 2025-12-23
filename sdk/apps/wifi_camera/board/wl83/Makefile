@@ -237,6 +237,10 @@ INCLUDES := \
 	-I../../../../apps/common/gsensor \
 	-I../../../../apps/common/ext_uart_bt \
 	-I../../../../apps/common/ext_spi_bt \
+	-I../../../../include_lib/net/curl \
+	-I../../../../include_lib/net/lwip_2_2_0/lwip/src/include/compat/posix \
+	-I../../../../include_lib/net/lwip_2_2_0/lwip/src/include/compat/stdc \
+	-I../../../../apps/common/video/net_avi_player \
 	-I../../../../apps/common/net/testbox/include \
 	-I../../../../apps/common/third_party_profile/mijia \
 	-I../../../../apps/common/third_party_profile/mijia/mijia_ble_api \
@@ -978,6 +982,12 @@ c_SRC_FILES := \
 	../../../../apps/common/video/encoder_one_jpeg.c \
 	../../../../apps/common/video/jpg2avi.c \
 	../../../../apps/common/video/logo_show.c \
+	../../../../apps/common/video/net_avi_player/avi_parse.c \
+	../../../../apps/common/video/net_avi_player/avi_player.c \
+	../../../../apps/common/video/net_avi_player/curl_get_data.c \
+	../../../../apps/common/video/net_avi_player/net_avi_player.c \
+	../../../../apps/common/video/net_avi_player/pipeline_jpeg_dec.c \
+	../../../../apps/common/video/net_avi_player/play_demo.c \
 	../../../../apps/common/video/quick_show_uvc.c \
 	../../../../apps/common/video/sharpen_adapter.c \
 	../../../../apps/common/video/simple_avi_unpkg.c \
@@ -1515,6 +1525,8 @@ LFLAGS := \
 	../../../../cpu/wl83/liba/lib_sig_mesh.a  \
 	../../../../cpu/wl83/liba/rcsp_stack.a \
 	../../../../cpu/wl83/liba/lvgl_v8_extend.a \
+	../../../../cpu/wl83/liba/libcurl.a \
+	../../../../cpu/wl83/liba/libmbedtls_3_4_0.a  \
 	../../../../include_lib/newlib/pi32v2-lib/libm.a \
 	../../../../include_lib/newlib/pi32v2-lib/libc.a \
 	../../../../include_lib/newlib/pi32v2-lib/libcompiler_rt.a \
