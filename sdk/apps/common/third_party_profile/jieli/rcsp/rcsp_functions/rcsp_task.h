@@ -2,6 +2,7 @@
 #define __RCSP_TASK_H__
 
 #include "typedef.h"
+#include "app_msg.h"
 #include "app_config.h"
 
 enum {

@@ -7,7 +7,7 @@ extern "C" {
 
 #include "../gui_guider.h"
 
-extern void i18n_refresh_texts(const char *page_name);
+extern void i18n_refresh_texts(int32_t scr_id);
 extern void i18n_refresh_all_texts();
 
 #ifdef __cplusplus

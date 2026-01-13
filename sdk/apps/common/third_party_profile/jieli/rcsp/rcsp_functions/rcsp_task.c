@@ -1,4 +1,4 @@
-#ifdef MEDIA_SUPPORT_MS_EXTENSIONS
+#ifdef RCSP_SUPPORT_MS_EXTENSIONS
 #pragma bss_seg(".rcsp_task.data.bss")
 #pragma data_seg(".rcsp_task.data")
 #pragma const_seg(".rcsp_task.text.const")
@@ -8,6 +8,7 @@
 #include "app_config.h"
 #include "rcsp.h"
 #include "rcsp_extra_flash_opt.h"
+#include "custom_cfg.h"
 #include "file_transfer.h"
 #include "file_delete.h"
 #include "dev_format.h"
@@ -16,19 +17,20 @@
 #include "sport_data_func.h"
 #include "ble_rcsp_server.h"
 #include "timer.h"
-#include "rcsp_define.h"
-/* #include "app_task.h" */
 
-#if (RCSP_MODE)
+#if (RCSP_MODE && (RCSP_MODE != RCSP_MODE_EARPHONE))
+
+#define LOG_TAG_CONST	  APP_RCSP
+#define LOG_TAG             "[APP_RCSP]"
+#define LOG_ERROR_ENABLE
+#define LOG_DEBUG_ENABLE
+#define LOG_INFO_ENABLE
+#include "system/debug.h"
 
 /* #define RCSP_DEBUG_EN */
 #ifdef RCSP_DEBUG_EN
-#define rcsp_putchar(x)                	putchar(x)
-#define rcsp_printf                    	printf
 #define rcsp_put_buf(x,len)				put_buf(x,len)
 #else
-#define rcsp_putchar(...)
-#define rcsp_printf(...)
 #define rcsp_put_buf(...)
 #endif
 
@@ -52,7 +54,7 @@ void set_rcsp_watch_upgrade_flag(u8 flag);
 
 static void app_rcsp_task_get_ready(void)
 {
-    rcsp_printf("%s\n", __FUNCTION__);
+    log_info("%s\n", __FUNCTION__);
     notify_update_connect_parameter(3);
     if (action_prepare.type) {
         JL_CMD_response_send(JL_OPCODE_ACTION_PREPARE, JL_PRO_STATUS_SUCCESS, action_prepare.OpCode_SN, NULL, 0, 0, NULL);
@@ -69,25 +71,45 @@ static int app_rcsp_action_mode(void)
     return 0;
 }
 
-__attribute__((weak))
-int app_goto_prev_mode()
+__attribute__((weak)) u16 get_vid_pid_ver_from_cfg_file(u8 type)
 {
-    rcsp_printf("%s not implement", __func__);
+    log_info("%s: user define....", __FUNCTION__);
+    switch (type) {
+    case GET_VID_FROM_EX_CFG:
+        return ((u16)'J' << 8 | (u16)'L');
+    case GET_PID_FROM_EX_CFG:
+        return ((u16)'7' << 8 | (u16)'9');
+    case GET_VER_FROM_EX_CFG:
+        return ((u16)'J' | (u16)'L');
+    }
+
+    return ((u16) - 1);
+}
+
+__attribute__((weak))
+int app_goto_prev_mode(void)
+{
+    log_info("%s not implement", __func__);
     return 0;
 }
 
+__attribute__((weak))
+void app_task_switch_back(void)
+{
+    log_info("%s not implement", __func__);
+}
 
 __attribute__((weak))
 int app_task_switch_to(u8 app_task, int priv)
 {
-    rcsp_printf("%s not implement", __func__);
+    log_info("%s not implement", __func__);
     return false;
 }
 
 __attribute__((weak))
 u8 app_get_curr_task(void)
 {
-    rcsp_printf("%s not implement", __func__);
+    log_info("%s not implement", __func__);
     return 0;
 }
 
@@ -98,13 +120,10 @@ static void app_rcsp_action_end_callback(void)
     if (app_rcsp_action_mode()) {
         return;
     }
-    printf("=======RCSP TODO==%s=%d========\n\r", __func__, __LINE__);
-#if 0 ///RCSP TODO
     if (app_get_curr_task() == APP_RCSP_ACTION_TASK) {
-        rcsp_printf("action end callback!!\n");
+        log_info("action end callback!!\n");
         app_task_switch_back();
     }
-#endif
 }
 
 static void app_rcsp_bluk_trans_end_callback(void)
@@ -130,6 +149,7 @@ static void app_rcsp_task_start(void)
 #endif
     app_rcsp_task_get_ready();
     //根据不同的场景， 做不同的处理， 例如：初始化不同的UI显示
+    log_debug("%s: action-%d", __func__, action_prepare.action);
     switch (action_prepare.action)		{
 #if TCFG_DEV_MANAGER_ENABLE
     case RCSP_TASK_ACTION_FILE_TRANSFER:
@@ -142,7 +162,7 @@ static void app_rcsp_task_start(void)
 #endif
 #endif
         }
-        rcsp_file_transfer_init(app_rcsp_action_end_callback);
+        rcsp_file_transfer_init(app_rcsp_action_end_callback, 0, NULL);
         break;
     case RCSP_TASK_ACTION_FILE_DELETE:
         //cppcheck-suppress knownConditionTrueFalse
@@ -242,8 +262,10 @@ static void app_rcsp_task_stop(void)
         set_rcsp_watch_upgrade_flag(0);
     }
     bt_set_a2dp_en_status(temp_a2dp_en_flag);
+#if JL_RCSP_SENSORS_DATA_OPT
     sport_data_func_get_finish_deal();
-    rcsp_printf("app_rcsp_task_stop\n");
+#endif
+    log_info("app_rcsp_task_stop\n");
 #if UI_UPGRADE_RES_ENABLE   //升级界面功能
     UI_WINDOW_PREEMPTION_POP(ID_WINDOW_UPGRADE);
 #endif
@@ -294,19 +316,16 @@ static void app_rcsp_task_switch(void *priv)
 {
     u16 flag = (u16)priv;
     if (flag != task_switch_flag) {
-        rcsp_printf("\n\n %s, %d \n\n", __func__, __LINE__);
-        rcsp_printf("flag:%d, %d \n", flag, task_switch_flag);
+        log_info("\n\n %s, %d \n\n", __func__, __LINE__);
+        log_info("flag:%d, %d \n", flag, task_switch_flag);
         return ;
     }
     task_switch_flag ++;
-    printf("=======RCSP TODO==%s=%d========\n\r", __func__, __LINE__);
-#if 0 ///RCSP TODO
-    int ret = app_task_switch_to(APP_RCSP_ACTION_TASK, NULL_VALUE);
+    int ret = app_task_switch_to(APP_RCSP_ACTION_TASK, NULL);
     if (ret == false) {
-        /* rcsp_printf("\n\n %s, %d \n\n", __func__, __LINE__); */
+        /* log_info("\n\n %s, %d \n\n", __func__, __LINE__); */
         sys_timeout_add((void *)(long)task_switch_flag, app_rcsp_task_switch, 500);
     }
-#endif
 }
 
 void app_rcsp_task_switch_stop(void)
@@ -323,22 +342,28 @@ void app_rcsp_task_prepare(u8 type, u8 action, u8 OpCode_SN)
     task_switch_flag ++;
 
     //切换模式
-    printf("=======RCSP TODO==%s=%d========\n\r", __func__, __LINE__);
-#if 0 //TODO
+#if 0
     if (app_get_curr_task() != APP_RCSP_ACTION_TASK) {
-#if (RCSP_MODE == RCSP_MODE_WATCH)
+        //btsdk的app模式切换，与wifisdk不一样，而且混乱，暂时不对齐
+        //而且流程不明，按理解来说应该是切换到rcsp-mode然后app-core切换为下发的app_rcsp_task去执行task_start
+        //但是btsdk中找不到任何调用app_rcsp_task的地方，指针赋值跳转都没有，缺乏debug方法，不对齐这部分。
+#if JL_RCSP_SENSORS_DATA_OPT
         sport_data_func_get_prepare_deal();
 #endif
-        int ret = app_task_switch_to(APP_RCSP_ACTION_TASK, NULL_VALUE);
+        int ret = app_task_switch_to(APP_RCSP_ACTION_TASK, NULL);
         if (ret == false) {
-            /* rcsp_printf("\n\n %s, %d \n\n", __func__, __LINE__); */
+            /* log_info("\n\n %s, %d \n\n", __func__, __LINE__); */
             sys_timeout_add((void *)(long)task_switch_flag, app_rcsp_task_switch, 500);
         }
     } else if (app_rcsp_action_mode()) {
+        //不理解这个流程，app_rcsp_action_mode是升级异常才会进，那就意味着升级异常才能跑文件传输流程？
         app_rcsp_task_start();
     } else {
+        //只是一个强制发送准备流程完成的函数，意义不大
         app_rcsp_task_get_ready();
     }
+#else
+    app_rcsp_task_start();
 #endif
 }
 
@@ -350,13 +375,20 @@ void app_rcsp_task_disable_opt(void)
 __attribute__((weak))
 void app_task_get_msg(int *msg, int msg_size, int block)
 {
-    rcsp_printf("%s not implement", __func__);
+    log_info("%s not implement", __func__);
 }
 
 __attribute__((weak))
 void app_default_event_deal(struct sys_event *event)
 {
-    rcsp_printf("%s not implement", __func__);
+    log_info("%s not implement", __func__);
+}
+
+__attribute__((weak))
+u8 app_task_exitting(void)
+{
+    log_info("%s not implement", __func__);
+    return 0;
 }
 
 void app_rcsp_task(void)
@@ -367,7 +399,6 @@ void app_rcsp_task(void)
         app_task_get_msg(msg, ARRAY_SIZE(msg), 1);
 
         switch (msg[0]) {
-        /* case APP_MSG_SYS_EVENT: */
         case Q_EVENT:
             if (app_rcsp_task_event_handle((struct sys_event *)(msg + 1)) == false) {
                 app_default_event_deal((struct sys_event *)(&msg[1]));
@@ -376,12 +407,11 @@ void app_rcsp_task(void)
         default:
             break;
         }
-#if 0 ///RCSP TODO
+
         if (app_task_exitting()) {
             app_rcsp_task_stop();
             return;
         }
-#endif
     }
 }
 

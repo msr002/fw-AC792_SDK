@@ -2,13 +2,13 @@
 
 |序号|音效名|节点名|备注|
 |---|---|---|---|
-|1|虚拟低音|[VBass 🔗](./VirtualBass_manual.md)|
-|2|变声|[Voice Changer 🔗](./VoiceChanger_manual.md)|
-|3|分频器|[CrossOver 🔗](./CrossOver_manual.md)|
-|4|动态范围压缩|[DRC 🔗](./DRC_manual.md)|
-|5|动态EQ|[DynEQ 🔗](./Dynamic_EQ_manual.md)|
-|6|回声|[ECHO 🔗](./Echo_manual.md)|
-|7|混响|[Plate Reverb 🔗](./PlateReverb_manual.md)|
+|1|虚拟低音|[Virtual Bass 🔗](./VirtualBass_manual.md)<br>[Virtual Bass Pro🔗](./virtual_bass_pro_manual.md)|
+|2|分频器|[CrossOver 🔗](./CrossOver_manual.md)|
+|3|限幅器|[Limter 🔗](./limiter_manual.md)<br>[MBLimter 🔗](./limiter_manual.md)|
+|4|动态范围压缩|[DRC 🔗](./DRC_manual.md)<br>[MDRC 🔗](./MDRC_manual.md)|
+|5|动态EQ|[DynamicEQ 🔗](./Dynamic_EQ_manual.md)<br>[DynamicEQ Pro🔗](./Dynamic_EQ_manual.md)|
+|6|回声|[ECHO 🔗](./Echo_manual.md)<br>[StereoMtapsEcho 🔗](./StereoMtapsEcho_manua.md)|
+|7|混响|[Plate Reverb 🔗](./PlateReverb_manual.md)<br>[Plate Reverb Advance🔗](./PlateReverb_manual.md)<br>[Reverb 🔗](./Reverb_manual.md)|
 |8|移频|[Frequency Shift 🔗](./HowlingFrequencyShift_manual.md)|
 |9|啸叫抑制|[Howling Suppress 🔗](./HowlingSuppress_manual.md)|
 |10|立体声扩展器|[Stereo Widener 🔗](./StereoWidener_manual.md)|
@@ -27,6 +27,7 @@
 |23|噪声门|[NoiseGate 🔗](./NoiseGate_manual.md)|
 |24|自动闪避|[AutoDuck 🔗](./AutoDuck_manual.md)|
 |25|空间音效|[SpatialEffects 🔗](./SpatialEffect.md)|
+|26|变声|[Voice Changer 🔗](./VoiceChanger_manual.md)|
 
 **脚注：**
 

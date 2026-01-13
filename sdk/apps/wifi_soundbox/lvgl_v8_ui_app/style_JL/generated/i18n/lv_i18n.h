@@ -22,16 +22,11 @@ typedef enum {
 } lv_i18n_plural_type_t;
 
 typedef struct {
-    const char *msg_id;
-    const char *translation;
-    const char *font_name;
-} lv_i18n_phrase_t;
-
-typedef struct {
     const char *locale_name;
-    lv_i18n_phrase_t *singulars;
-    lv_i18n_phrase_t *plurals[_LV_I18N_PLURAL_TYPE_NUM];
+    const char *const *singulars;
+    const char *const *plurals[_LV_I18N_PLURAL_TYPE_NUM];
     uint8_t (*locale_plural_fn)(int32_t num);
+    const lv_font_t *font;
 } lv_i18n_lang_t;
 
 // Null-terminated list of languages. First one used as default.

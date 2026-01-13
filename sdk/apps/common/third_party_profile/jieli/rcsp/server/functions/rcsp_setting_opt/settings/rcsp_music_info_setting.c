@@ -1,9 +1,12 @@
-#ifdef MEDIA_SUPPORT_MS_EXTENSIONS
+#ifdef RCSP_SUPPORT_MS_EXTENSIONS
 #pragma bss_seg(".rcsp_music_info_setting.data.bss")
 #pragma data_seg(".rcsp_music_info_setting.data")
 #pragma const_seg(".rcsp_music_info_setting.text.const")
 #pragma code_seg(".rcsp_music_info_setting.text")
 #endif
+
+#include "app_config.h"
+#include "rcsp_cfg.h"
 #include "rcsp_music_info_setting.h"
 #include "rcsp_config.h"
 #include "syscfg_id.h"
@@ -14,7 +17,7 @@
 #include "rcsp_setting_opt.h"
 #include "rcsp_bt_manage.h"
 #include "btstack/avctp_user.h"
-/* #include "bt_tws.h" */
+#include "bt_tws.h"
 
 #if (RCSP_MODE && RCSP_ADV_MUSIC_INFO_ENABLE)
 struct music_info_t {
@@ -177,7 +180,7 @@ u8 get_music_player_state(void)
 void rcsp_update_player_state(void)
 {
     struct RcspModel *rcspModel = rcsp_handle_get();
-    if (1 == rcspModel->A_platform && rcsp_adv_music_info_vaild()) {
+    if (rcspModel && (1 == rcspModel->A_platform) && rcsp_adv_music_info_vaild()) {
         return;
     }
     JL_rcsp_event_to_user(DEVICE_EVENT_FROM_RCSP, MSG_JL_UPDATE_PLAYER_STATE, NULL, 0);
@@ -423,11 +426,10 @@ void rcsp_adv_music_info_set_state(u8 state, u32 time)
 
 void rcsp_adv_music_info_deal(u8 type, u32 time, u8 *info, u16 len)
 {
-    printf("=====================%s=%d=yuring=\n\r", __func__, __LINE__);
     //printf("info len \n");
     //put_buf(info,len);
     struct RcspModel *rcspModel = rcsp_handle_get();
-    if (1 == rcspModel->A_platform && rcsp_adv_music_info_vaild()) {
+    if (rcspModel && (1 == rcspModel->A_platform) && rcsp_adv_music_info_vaild()) {
         return;
     }
 #if RCSP_ADV_FIND_DEVICE_ENABLE

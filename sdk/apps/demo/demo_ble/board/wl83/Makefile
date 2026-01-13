@@ -150,6 +150,8 @@ INCLUDES := \
 	-I../../../../../apps/common/third_party_profile/ancs_client_demo \
 	-I../../../../../apps/common/third_party_profile \
 	-I../../../../../apps/common/ble/include \
+	-I../../../../../apps/common/third_party_profile/jieli/rcsp \
+	-I../../../../../include_lib/btstack/third_party \
 
 
 # 需要编译的 .c 文件

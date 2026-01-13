@@ -1,28 +1,28 @@
-#ifdef MEDIA_SUPPORT_MS_EXTENSIONS
+#ifdef RCSP_SUPPORT_MS_EXTENSIONS
 #pragma bss_seg(".rcsp_eq_setting.data.bss")
 #pragma data_seg(".rcsp_eq_setting.data")
 #pragma const_seg(".rcsp_eq_setting.text.const")
 #pragma code_seg(".rcsp_eq_setting.text")
 #endif
 #include "app_config.h"
-#include "syscfg/syscfg_id.h"
+#include "syscfg_id.h"
 #include "ble_rcsp_server.h"
 
 #include "rcsp_setting_sync.h"
 #include "rcsp_setting_opt.h"
 
-#if (TCFG_EQ_ENABLE && RCSP_MODE && RCSP_ADV_EQ_SET_ENABLE)
+#if (RCSP_MODE && TCFG_EQ_ENABLE && RCSP_ADV_EQ_SET_ENABLE)
 
 #if RCSP_MODE == RCSP_MODE_EARPHONE
 #include "media/effects/audio_eq.h"
 #include "media/effects/eq_config.h"
 #else
-/* #ifndef CONFIG_MEDIA_NEW_ENABLE */
-/* #include "media/eq_config.h" */
-/* #else */
+#ifndef CONFIG_MEDIA_NEW_ENABLE
+#include "media/eq_config.h"
+#else
 #include "effects/audio_eq.h"
 #include "effects/eq_config.h"
-/* #endif */
+#endif
 #endif
 
 
@@ -38,6 +38,28 @@ u8 eq_get_table_nsection(EQ_MODE mode)
 
 static u8 g_eq_setting_info[11] = {0};
 
+static void rcsp_eq_clock_refurbishi_in_app_core()
+{
+    r_printf("%s==%d: TODO", __func__, __LINE__);
+    /* clock_refurbish(); */
+}
+
+static void rcsp_eq_clock_refurbish()
+{
+    if (strcmp(os_current_task(), "app_core")) {
+        int argv[2];
+        argv[0] = (int)rcsp_eq_clock_refurbishi_in_app_core;
+        argv[1] = 0;
+        int ret = os_taskq_post_type("app_core", Q_CALLBACK, sizeof(argv) / sizeof(int), argv);
+        if (ret) {
+            log_e("taskq post err \n");
+        }
+    } else {
+        /* clock_refurbish(); */
+        r_printf("%s==%d: TODO", __func__, __LINE__);
+    }
+}
+
 static void eq_setting_info_deal(u8 *eq_info_data)
 {
     u8 data;
@@ -50,12 +72,12 @@ static void eq_setting_info_deal(u8 *eq_info_data)
     }
     mode = eq_info_data[0] & 0x7F;
     if (mode < EQ_MODE_CUSTOM) {
-        /* clock_refurbish(); */
+        rcsp_eq_clock_refurbish();
         eq_mode_set(mode);
     } else {
         // 自定义修改EQ参数
         if (EQ_MODE_CUSTOM == mode) {
-            /* clock_refurbish(); */
+            rcsp_eq_clock_refurbish();
             if (status != 0x7F)	{
                 u8 i;
                 for (i = 0; i < eq_get_table_nsection(0); i++) {
@@ -88,8 +110,7 @@ static void update_eq_vm_value(u8 *eq_setting)
 {
     u8 status = *(((u8 *)eq_setting) + 1);
 
-    printf("====RCSP-TODO=================%s=%d=yuring=\n\r", __func__, __LINE__);
-    /* syscfg_write(CFG_RCSP_ADV_EQ_MODE_SETTING, eq_setting, 1); */
+    syscfg_write(CFG_RCSP_ADV_EQ_MODE_SETTING, eq_setting, 1);
 
     /*自定义修改EQ参数*/
     if (EQ_MODE_CUSTOM == (eq_setting[0] & 0x7F)) {
@@ -98,8 +119,7 @@ static void update_eq_vm_value(u8 *eq_setting)
             status = eq_setting[2];
         }
         if (status != 0x7F) {
-            printf("====RCSP-TODO=================%s=%d=yuring=\n\r", __func__, __LINE__);
-            /* syscfg_write(CFG_RCSP_ADV_EQ_DATA_SETTING, &eq_setting[1], 10); */
+            syscfg_write(CFG_RCSP_ADV_EQ_DATA_SETTING, &eq_setting[1], 10);
         }
     }
 
@@ -225,17 +245,13 @@ static int eq_opt_init(void)
     u8 eq_setting_info[10] = {0};
     u8 eq_setting_mode = 0;
     u8 i;
-    printf("====RCSP-TODO=================%s=%d=yuring=\n\r", __func__, __LINE__);
-#if 0
-    if (rcsp_read_data_from_vm(CFG_RCSP_ADV_EQ_DATA_SETTING, eq_setting_info, sizeof(eq_setting_info))) {
-        if (rcsp_read_data_from_vm(CFG_RCSP_ADV_EQ_MODE_SETTING, &eq_setting_mode, sizeof(eq_setting_mode))) {
-            eq_setting_vm_info[0] = eq_setting_mode;
-            memcpy(&eq_setting_vm_info[1], eq_setting_info, 10);
-            set_eq_setting(eq_setting_vm_info);
-            deal_eq_setting(NULL, 0, 0);
-        }
+    rcsp_read_data_from_vm(CFG_RCSP_ADV_EQ_DATA_SETTING, eq_setting_info, sizeof(eq_setting_info));
+    if (rcsp_read_data_from_vm(CFG_RCSP_ADV_EQ_MODE_SETTING, &eq_setting_mode, sizeof(eq_setting_mode))) {
+        eq_setting_vm_info[0] = eq_setting_mode;
+        memcpy(&eq_setting_vm_info[1], eq_setting_info, 10);
+        set_eq_setting(eq_setting_vm_info);
+        deal_eq_setting(NULL, 0, 0);
     }
-#endif
     return 0;
 }
 
@@ -253,8 +269,7 @@ static int eq_get_setting_extra_handle(void *setting_data, void *setting_data_le
 static RCSP_SETTING_OPT eq_opt = {
     .data_len = 11,
     .setting_type = ATTR_TYPE_EQ_SETTING,
-    ///RCSP TODO
-    /* .syscfg_id = CFG_RCSP_ADV_EQ_DATA_SETTING, */
+    .syscfg_id = CFG_RCSP_ADV_EQ_DATA_SETTING,
     .deal_opt_setting = deal_eq_setting,
     .set_setting = set_eq_setting,
     .get_setting = get_eq_setting,

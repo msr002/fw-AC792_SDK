@@ -129,7 +129,7 @@ static void music_player_play_start(void)
         break;
     case MUSIC_TASK_START_BY_SCLUST:
         log_info("MUSIC_TASK_START_BY_SCLUST");
-        app_send_message(APP_MSG_LOCAL_MUSIC_PLAY_START_BY_SCLUST, 0);
+        app_send_message(APP_MSG_LOCAL_MUSIC_PLAY_START_BY_SCLUST, 1, __this->task_parm.val);
         break;
     default:
         break;
@@ -1261,7 +1261,7 @@ static int local_music_msg_handler(struct application *app, int *msg)
         err = local_music_play_start(msg[1]);
         break;
     case APP_MSG_LOCAL_MUSIC_PLAY_START_BY_SCLUST:
-        log_info("play start by sclust");
+        log_info("play start by sclust %d", msg[1]);
         logo = dev_manager_get_logo(dev_manager_find_active(1));
         err = music_player_play_by_sclust(__this->player_hd, logo, msg[1]);
         break;

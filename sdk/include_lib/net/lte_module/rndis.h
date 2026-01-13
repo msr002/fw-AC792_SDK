@@ -3,6 +3,13 @@
 
 #include "lte_module.h"
 
+/* 目前调试过的4G模组列表 */
+// 移远模组：EG800K-CN, EC800K-CN, EC801E-CN,
+//           EC800M-CN, EC800G-CN, EC800E-CN
+// 中移模组：ML307C, ML307A
+// 其他模组：SLM332, LYNL511CN, YM310, TC10E,
+//           CTL103-CE, HQ308, P102WU, P102H,NT26
+
 typedef struct {
     s32(*init)(struct lte_module_data *);
     void (*dev_in)(int id);

@@ -10,9 +10,12 @@ extern "C" {
 #include "src/font/lv_font.h"
 #endif
 
-
+extern lv_font_t lv_font_FangZhengKaiTiJianTi_1_12;
+extern lv_font_t lv_font_FangZhengKaiTiJianTi_1_24;
+extern lv_font_t lv_font_FangZhengKaiTiJianTi_1_32;
 
 void init_gui_fonts();
+void free_gui_fonts();
 
 #ifdef __cplusplus
 }

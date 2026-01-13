@@ -92,6 +92,7 @@ static void audio_energy_det_handler(void *prive, u8 event, u8 ch, u8 ch_total)
         printf(">>>>name:%s ch_total %s\n", name,  event ? ("MUTE") : ("UNMUTE"));
     }
 }
+
 //注册频谱能量计算的回调函数，有注册则可以通过该回调返回频谱值，
 //没注册的情况下,也可直接通过jlstream_get_node_param接口获取,例子见user_spectrum_advance_get_param()
 //每次输出一帧频点的频谱值
@@ -111,20 +112,23 @@ static void audio_spectrum_advance_handler(void *prive, void *param)
     }
 #endif
 
-#if 0
-    char name[16];
-    memcpy(name, prive, strlen(prive));
+#if 1
+    //char name[16];
+    //memcpy(name, prive, strlen(prive));
     //name 模块名称，唯一标识
-    printf("%s\n",  name);//节点名
+    //printf("%s\n",  name);//节点名
     //可在此获取当前的频谱值
     //频点的个数,频谱值的摆放见结构体struct spectrum_advance_parm
     struct spectrum_advance_parm *par = (struct spectrum_advance_parm *)param;
     for (int i = 0; i < par->section; i++) {
-        printf("left:dB[%d] %d, right:dB[%d] %d\n", i, (int)par->db_data[0][i], i, (int)par->db_data[1][i]);//dB值是浮点
+        if ((int)par->db_data[0][i] == 0x80000000 || (int)par->db_data[1][i] == 0x80000000) {
+            return;
+        }
+        //printf("left:dB[%d] %x, right:dB[%d] %x\n", i, (int)par->db_data[0][i], i, (int)par->db_data[1][i]);//dB值是浮点
     }
+    bt_music_post_msg_to_ui("music_spectrum", par->db_data);
 #endif
 }
-
 
 /*
  *获取需要指定得默认配置
@@ -409,7 +413,7 @@ int get_eff_default_param(int arg)
     if (!strncmp(name->name, "SpectrumAdv", strlen("SpectrumAdv"))) {//频谱检测 回调接口配置
         struct spectrum_advance_set_handler *get_handler = (struct spectrum_advance_set_handler *)arg;
         if (get_handler->type == SET_SPECTRUM_ADVANCE_HANDLER) {
-            get_handler->fps  = 60;//1秒内输出的帧数
+            get_handler->fps  = 5;//1秒内输出的帧数
             get_handler->cbuf_len = 4096 * 4;
             get_handler->read_len = 4096;
             get_handler->handler = audio_spectrum_advance_handler;

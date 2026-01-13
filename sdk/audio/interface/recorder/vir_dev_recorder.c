@@ -20,11 +20,14 @@ struct vir_voice_param {
     u8 quality;
     u8 complexity;
     u8 format_mode;
+    u8 vir_input_data_ch_mode;
     u32 frame_ms;
     int sample_rate;
     void *priv;
     int code_type;
+    int vir_input_data_sr;
     int (*output)(void *priv, void *data, u32 len);
+    int (*vir_input)(void *priv, void *data, u32 len);
 };
 
 struct vir_dev_recorder {
@@ -53,8 +56,36 @@ static int vir_recorder_data_output(void *priv, u8 *buf, int len)
     return len;
 }
 
+static int vir_recorder_data_input_read(void *priv, u8 *buf, int len)
+{
+    struct vir_dev_recorder *recorder = (struct vir_dev_recorder *)priv;
+
+    if (recorder->param.vir_input) {
+        return recorder->param.vir_input(recorder->param.priv, buf, len);
+    }
+
+    return 0;
+}
+
+static int vir_recorder_data_input_get_fmt(void *priv, struct stream_fmt *fmt)
+{
+    struct vir_dev_recorder *recorder = (struct vir_dev_recorder *)priv;
+
+    fmt->sample_rate = recorder->param.vir_input_data_sr;
+    fmt->coding_type = AUDIO_CODING_PCM;
+    fmt->channel_mode = recorder->param.vir_input_data_ch_mode;
+    fmt->virtual_enc_input_enable = 1;
+
+    return 0;
+}
+
 static const struct stream_file_ops vir_tx_ops = {
     .write = vir_recorder_data_output,
+};
+
+static const struct stream_file_ops vir_rx_ops = {
+    .read  = vir_recorder_data_input_read,
+    .get_fmt = vir_recorder_data_input_get_fmt,
 };
 
 void *vir_dev_recorder_open(struct vir_voice_param *param)
@@ -75,7 +106,17 @@ void *vir_dev_recorder_open(struct vir_voice_param *param)
 
     memcpy(&recorder->param, param, sizeof(*param));
 
+    u8 use_vir_source_input = 0;
+
     recorder->stream = jlstream_pipeline_parse(uuid, NODE_UUID_ADC);
+
+    if (!recorder->stream) {
+        recorder->stream = jlstream_pipeline_parse(uuid, NODE_UUID_VIR_DATA_RX);
+        if (recorder->stream) {
+            use_vir_source_input = 1;
+        }
+    }
+
     if (!recorder->stream) {
         goto __exit0;
     }
@@ -122,10 +163,21 @@ void *vir_dev_recorder_open(struct vir_voice_param *param)
         }
     }
 
-    //设置ADC的中断点数
-    err = jlstream_node_ioctl(recorder->stream, NODE_UUID_SOURCE, NODE_IOC_SET_PRIV_FMT, AUDIO_ADC_IRQ_POINTS_MUSIC_MODE);
-    if (err) {
-        goto __exit1;
+    if (!use_vir_source_input) {
+        //设置ADC的中断点数
+        err = jlstream_node_ioctl(recorder->stream, NODE_UUID_SOURCE, NODE_IOC_SET_PRIV_FMT, AUDIO_ADC_IRQ_POINTS_MUSIC_MODE);
+        if (err) {
+            goto __exit1;
+        }
+    } else {
+        struct stream_file_info input_info = {
+            .file = (void *)recorder,
+            .ops = &vir_rx_ops
+        };
+        err = stream_node_ioctl((struct stream_node *)recorder->stream->snode, NODE_UUID_SOURCE, NODE_IOC_SET_FILE, (int)&input_info);
+        if (err) {
+            goto __exit1;
+        }
     }
 
     struct stream_file_info info = {
@@ -193,6 +245,10 @@ typedef struct {
     u8 odata_flag;
     u32 enc_len;
     u8 stop_flag;
+    FILE *in_file;
+    FILE *out_file;
+    void *inbuf_cache;
+    cbuffer_t in_cbuf;
 } vir_music_hdl;
 
 static vir_music_hdl vir_hdl;
@@ -411,6 +467,110 @@ void virtual_audio_test()
     thread_fork("virtual_dec_thread", 20, 2 * 1024, 0, 0, virtual_dec_thread, NULL);
 
     /* sys_timeout_add(NULL, vir_audio_close, 5*1000); */
+}
+
+static int vir_input_enc_vfs_fwrite(void *priv, void *data, u32 len)
+{
+    if (__this->out_file) {
+        fwrite(data, len, 1, __this->out_file);
+    }
+
+    return len;
+}
+
+//读取数据到data送至编码器编码
+static int vir_input_enc_vfs_fread(void *priv, void *data, u32 len)
+{
+    int dlen, rlen;
+    dlen = cbuf_get_data_size(&__this->in_cbuf);
+    if (dlen) {
+        rlen = dlen > len ? len : dlen;
+        rlen = cbuf_read(&__this->in_cbuf, data, rlen);
+    }
+
+    return rlen;
+}
+
+static void virtual_input_data()
+{
+    u8 wbuf[512];
+    u32 wlen, nwlen;
+    while (1) {
+        if (__this->in_file) {
+            wlen = fread(wbuf, 1, 512, __this->in_file);
+            if (wlen == 0) {
+                fclose(__this->in_file);
+                __this->in_file = NULL;
+                break;
+            }
+            nwlen = cbuf_write(&__this->in_cbuf, wbuf, wlen);
+            if (nwlen != wlen) {
+                log_error("write in_cbuf full");
+            }
+
+            if (__this->recorder) {
+                //让rx源节点去读cbuf数据推送至编码
+                jlstream_node_ioctl(__this->recorder->stream, NODE_UUID_SOURCE, NODE_IOC_SET_VIR_ENC_INPUT, NULL);
+            }
+
+            os_time_dly(1);
+        }
+    }
+
+    if (__this->out_file) {
+        fclose(__this->out_file);
+        __this->out_file = NULL;
+    }
+
+    log_info("----virtual_input_data_test_end----");
+}
+
+//读取sd文件pcm数据模拟外部 虚拟源输入rx-> 编码器 -> 虚拟源输出tx
+void virtual_input_enc_test()
+{
+    log_info("---virtual_input_enc_test---");
+
+    //等待sd挂载，打开输入文件和创建输出文件
+    extern int storage_device_ready(void);
+    while (!storage_device_ready()) {//等待sd文件系统挂载完成
+        printf("wait sd mount in");
+        os_time_dly(2);
+    }
+
+    __this->in_file = fopen(CONFIG_ROOT_PATH"1sin16k.pcm", "r");
+    if (__this->in_file == NULL) {
+        printf("open  in_file  fail!!!!");
+    }
+
+    __this->out_file = fopen(CONFIG_ROOT_PATH"test.opu", "w+");
+    if (__this->out_file == NULL) {
+        printf("open  out_file  fail!!!!");
+    }
+
+    //测试的外部数据缓存cbuf
+    __this->inbuf_cache = malloc(10 * 1024);
+    if (!__this->inbuf_cache) {
+        printf("inbuf_cache malloc fail");
+    }
+    cbuf_init(&__this->in_cbuf, __this->inbuf_cache, 10 * 1024);
+
+    //使用读取sd卡文件模拟外部虚拟源数据输入
+    thread_fork("virtual_input_data", 20, 1024, 0, 0, virtual_input_data, NULL);
+
+    //编码参数和回调数据设置
+    struct vir_voice_param param = {0};
+    param.output = vir_input_enc_vfs_fwrite;
+    param.vir_input = vir_input_enc_vfs_fread;
+    param.vir_input_data_sr = 16000;
+    param.vir_input_data_ch_mode = AUDIO_CH_L;
+    param.code_type = AUDIO_CODING_OPUS;
+    param.complexity = 0;
+    param.format_mode = 0;
+    param.frame_ms = 60;
+    param.quality = 0;
+
+    //编码虚拟源输出
+    __this->recorder = vir_dev_recorder_open(&param);
 }
 
 #endif //VIRTUAL_AUDIO_TEST

@@ -28,19 +28,19 @@ const struct irq_info irq_info_table[] = {
     { IRQ_SPI1_IDX,      7,   1    },//中断强制注册到cpu0/1
 #endif
 #endif
+
+    { IRQ_BT_TIMEBASE_IDX,  5,  0 },
+    { IRQ_BLE_RX_IDX,       5,  0 },
+    { IRQ_BLE_EVENT_IDX,    5,  0 },
+    { IRQ_BT_CLKN_IDX,      5,  0 },
+    { IRQ_BREDR_IDX,        5,  0 },
+
 #if CPU_CORE_NUM == 1
-    { IRQ_SOFT5_IDX,      7,   0    }, //此中断强制注册到cpu0
-    { IRQ_SOFT4_IDX,      7,   1    }, //此中断强制注册到cpu1
-    { -2,     			-2,   -2   },//如果加入了该行, 那么只有该行之前的中断注册到对应核, 其他所有中断强制注册到CPU0
+    { IRQ_SOFT5_IDX,        6,  0 }, //此中断强制注册到cpu0
+    { IRQ_SOFT4_IDX,        6,  1 }, //此中断强制注册到cpu1
+    { -2,                  -2, -2 }, //如果加入了该行, 那么只有该行之前的中断注册到对应核, 其他所有中断强制注册到CPU0
 #endif
-
-    { IRQ_BT_TIMEBASE_IDX,  5,   0 },
-    { IRQ_BLE_RX_IDX,       5,   0 },
-    { IRQ_BLE_EVENT_IDX,    5,   0 },
-    { IRQ_BT_CLKN_IDX,      5,   0 },
-    { IRQ_BREDR_IDX,        5,   0 },
-
-    { -1,     -1,   -1    },
+    { -1,                  -1, -1 },
 };
 
 
@@ -93,8 +93,8 @@ const struct task_info task_info_table[] = {
     { "aec_dbg",             13,     512,    128 },
     { "aud_capture",         24,     512,    256 },
     { "dac",                 22,     256,    128 },
-    { "spec",                23,     512,      0 },
-    { "spec_adv",            23,     512,      0 },
+    { "spec",                 6,     512,      0 },
+    { "spec_adv",             6,     512,      0 },
     { "kws",                  3,     256,     64 },
     { "smart_voice",         11,     512,    128 },
     { "audio_vad",           11,     768,      0 },
@@ -108,6 +108,13 @@ const struct task_info task_info_table[] = {
     { "dw_update",           21,     512,     32 },
     { "uac_play",            26,     512,     32 },
     { "uac_record",          26,     512,      0 },
+#if RCSP_MODE
+    {"rcsp",                 17,     768,    128 },
+#if RCSP_FILE_OPT
+    {"rcsp_file_bs",         10,     768,    128 },
+    {"ftran_back",           10,     768,    128 },
+#endif
+#endif
 
 #ifdef CONFIG_NET_ENABLE
     { "update_rtc_task",      1,     512,      0 },

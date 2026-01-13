@@ -1,4 +1,4 @@
-#ifdef MEDIA_SUPPORT_MS_EXTENSIONS
+#ifdef RCSP_SUPPORT_MS_EXTENSIONS
 #pragma bss_seg(".sport_info_continuous_heart_rate.data.bss")
 #pragma data_seg(".sport_info_continuous_heart_rate.data")
 #pragma const_seg(".sport_info_continuous_heart_rate.text.const")

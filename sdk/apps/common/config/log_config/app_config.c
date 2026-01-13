@@ -104,12 +104,33 @@ const char log_tag_const_i_APP_SPP AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(FALSE);
 const char log_tag_const_w_APP_SPP AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(FALSE);
 const char log_tag_const_e_APP_SPP AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(TRUE);
 
+const char log_tag_const_v_APP_RCSP AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(FALSE);
+const char log_tag_const_c_APP_RCSP AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(FALSE);
+const char log_tag_const_d_APP_RCSP AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(FALSE);
+const char log_tag_const_i_APP_RCSP AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(TRUE);
+const char log_tag_const_w_APP_RCSP AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(FALSE);
+const char log_tag_const_e_APP_RCSP AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(TRUE);
+
 const char log_tag_const_v_RCSP_ADV AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(FALSE);
 const char log_tag_const_c_RCSP_ADV AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(FALSE);
 const char log_tag_const_d_RCSP_ADV AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(FALSE);
-const char log_tag_const_i_RCSP_ADV AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(FALSE);
+const char log_tag_const_i_RCSP_ADV AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(TRUE);
 const char log_tag_const_w_RCSP_ADV AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(FALSE);
 const char log_tag_const_e_RCSP_ADV AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(TRUE);
+
+const char log_tag_const_v_LE_RCSP_SER AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(FALSE);
+const char log_tag_const_c_LE_RCSP_SER AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(FALSE);
+const char log_tag_const_d_LE_RCSP_SER AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(FALSE);
+const char log_tag_const_i_LE_RCSP_SER AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(TRUE);
+const char log_tag_const_w_LE_RCSP_SER AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(FALSE);
+const char log_tag_const_e_LE_RCSP_SER AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(TRUE);
+
+const char log_tag_const_v_LE_RCSP_CLI AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(FALSE);
+const char log_tag_const_c_LE_RCSP_CLI AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(FALSE);
+const char log_tag_const_d_LE_RCSP_CLI AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(FALSE);
+const char log_tag_const_i_LE_RCSP_CLI AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(TRUE);
+const char log_tag_const_w_LE_RCSP_CLI AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(FALSE);
+const char log_tag_const_e_LE_RCSP_CLI AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(TRUE);
 
 const char log_tag_const_v_ALIPAY AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(FALSE);
 const char log_tag_const_d_ALIPAY AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(FALSE);

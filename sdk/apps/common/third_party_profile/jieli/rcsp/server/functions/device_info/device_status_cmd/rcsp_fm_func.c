@@ -1,4 +1,4 @@
-#ifdef MEDIA_SUPPORT_MS_EXTENSIONS
+#ifdef RCSP_SUPPORT_MS_EXTENSIONS
 #pragma bss_seg(".rcsp_fm_func.data.bss")
 #pragma data_seg(".rcsp_fm_func.data")
 #pragma const_seg(".rcsp_fm_func.text.const")
@@ -9,12 +9,10 @@
 #include "rcsp_device_status.h"
 #include "rcsp_config.h"
 #include "rcsp_event.h"
-/* #include "app_action.h" */
-/* #include "key_event_deal.h" */
 #include "JL_rcsp_api.h"
 #include "JL_rcsp_attr.h"
 
-#if (RCSP_MODE && TCFG_APP_FM_EN)
+#if (RCSP_MODE && 0) //TCFG_APP_FM_EN)
 #include "fm_api.h"
 #include "fm_rw.h"
 
@@ -298,3 +296,4 @@ void rcsp_fm_func_stop(void)
 }
 
 #endif
+

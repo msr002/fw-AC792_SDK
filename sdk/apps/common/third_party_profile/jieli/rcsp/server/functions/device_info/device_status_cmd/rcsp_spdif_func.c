@@ -1,4 +1,4 @@
-#ifdef SUPPORT_MS_EXTENSIONS
+#ifdef RCSP_SUPPORT_MS_EXTENSIONS
 #pragma bss_seg(".rcsp_spdif_func.data.bss")
 #pragma data_seg(".rcsp_spdif_func.data")
 #pragma const_seg(".rcsp_spdif_func.text.const")
@@ -9,13 +9,11 @@
 #include "rcsp_device_status.h"
 #include "rcsp_config.h"
 #include "rcsp_event.h"
-#include "app_action.h"
-#include "key_event_deal.h"
 #include "JL_rcsp_api.h"
 #include "JL_rcsp_attr.h"
 #include "audio_config.h"
 
-#if (RCSP_MODE && TCFG_APP_SPDIF_EN)
+#if (RCSP_MODE && 0) //TCFG_APP_SPDIF_EN)
 #include "spdif_file.h"
 #include "spdif_player.h"
 
@@ -101,3 +99,4 @@ void rcsp_spdif_func_stop(void)
 }
 
 #endif
+

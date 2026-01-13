@@ -672,7 +672,7 @@ REGISTER_TWS_TONE_CALLBACK(tws_low_latency_entry) = {
     .callback = tws_low_latency_tone_cb,
 };
 
-static void bt_set_low_latency_mode(int enable, u8 tone_play_enable, int delay_ms)
+void bt_set_low_latency_mode(int enable, u8 tone_play_enable, int delay_ms)
 {
     /*
      * 未连接手机,操作无效

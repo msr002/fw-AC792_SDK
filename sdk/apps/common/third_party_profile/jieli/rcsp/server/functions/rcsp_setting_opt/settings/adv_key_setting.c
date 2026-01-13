@@ -1,4 +1,4 @@
-#ifdef MEDIA_SUPPORT_MS_EXTENSIONS
+#ifdef RCSP_SUPPORT_MS_EXTENSIONS
 #pragma bss_seg(".adv_key_setting.data.bss")
 #pragma data_seg(".adv_key_setting.data")
 #pragma const_seg(".adv_key_setting.text.const")
@@ -6,16 +6,15 @@
 #endif
 #include "app_config.h"
 #include "syscfg_id.h"
-/* #include "key_event_deal.h" */
 #include "ble_rcsp_server.h"
 
 #include "rcsp_setting_sync.h"
 #include "rcsp_setting_opt.h"
 #include "adv_anc_voice_key.h"
 #include "app_msg.h"
-#include "key/key_driver.h"
+#include "event/key_event.h"
 #if TCFG_USER_TWS_ENABLE
-/* #include "bt_tws.h" */
+#include "bt_tws.h"
 #endif
 
 #if (RCSP_MODE && RCSP_ADV_EN)

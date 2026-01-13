@@ -1,4 +1,4 @@
-#ifdef MEDIA_SUPPORT_MS_EXTENSIONS
+#ifdef RCSP_SUPPORT_MS_EXTENSIONS
 #pragma bss_seg(".rcsp_vol_setting.data.bss")
 #pragma data_seg(".rcsp_vol_setting.data")
 #pragma const_seg(".rcsp_vol_setting.text.const")
@@ -13,8 +13,10 @@
 #include "ble_rcsp_server.h"
 #include "rcsp_device_status.h"
 
-/* #include "key_event_deal.h" */
 #include "audio_config.h"
+#if TCFG_AI_PLAYER_ENABLE
+#include "ai_player.h"
+#endif
 
 #if (RCSP_MODE && RCSP_ADV_EQ_SET_ENABLE)
 
@@ -53,9 +55,8 @@ bool rcsp_set_volume(s8 volume)
 #if TCFG_APP_LINEIN_EN
     if (LINEIN_FUNCTION == rcspModel->cur_app_mode) {
         cur_flag = 1;
-        printf("====RCSP-TODO=================%s=%d=yuring=\n\r", __func__, __LINE__);
-        /* extern int linein_volume_set(u8 vol); */
-        /* linein_volume_set(volume); */
+        extern int linein_volume_set(u8 vol);
+        linein_volume_set(volume);
         cur_flag = 0;
         return true;
     }
@@ -74,9 +75,8 @@ bool rcsp_key_volume_down(u8 value)
     }
 #if TCFG_APP_LINEIN_EN
     if (LINEIN_FUNCTION == rcspModel->cur_app_mode) {
-        printf("====RCSP-TODO=================%s=%d=yuring=\n\r", __func__, __LINE__);
-        /* extern void linein_key_vol_down(); */
-        /* linein_key_vol_down(); */
+        extern void linein_key_vol_down();
+        linein_key_vol_down();
         return true;
     }
 #endif
@@ -94,9 +94,8 @@ bool rcsp_key_volume_up(u8 value)
     }
 #if TCFG_APP_LINEIN_EN
     if (LINEIN_FUNCTION == rcspModel->cur_app_mode) {
-        printf("====RCSP-TODO=================%s=%d=yuring=\n\r", __func__, __LINE__);
-        /* extern void linein_key_vol_up(); */
-        /* linein_key_vol_up(); */
+        extern void linein_key_vol_up();
+        linein_key_vol_up();
         true;
     }
 #endif
@@ -169,14 +168,19 @@ static void vol_state_update(void)
         return ;
     }
     u8 vol = vol_setting[0];
+#if 0
     if (LINEIN_FUNCTION == rcspModel->cur_app_mode) {
 #if TCFG_APP_LINEIN_EN
-        printf("====RCSP-TODO=================%s=%d=yuring=\n\r", __func__, __LINE__);
-        /* extern int linein_volume_set(u8 vol); */
-        /* linein_volume_set(vol); */
+        extern int linein_volume_set(u8 vol);
+        linein_volume_set(vol);
 #endif
-    } else {
+    } else
+#endif
+    {
         app_audio_set_volume(app_audio_get_state(), vol, 1);
+#if TCFG_AI_PLAYER_ENABLE
+        ai_player_set_play_volume(vol);
+#endif
     }
 }
 

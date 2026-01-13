@@ -329,14 +329,14 @@ const int CONFIG_SPATIAL_EFFECT_VERSION = 0;
 /*变声模式使能*/
 const int config_voicechanger_effect_v_config   = (0
         | BIT(EFFECT_VOICECHANGE_PITCHSHIFT)
-        /* | BIT(EFFECT_VOICECHANGE_CARTOON) */
-        /* | BIT(EFFECT_VOICECHANGE_SPECTRUM) */
-        /* | BIT(EFFECT_VOICECHANGE_ROBORT) */
-        /* | BIT(EFFECT_VOICECHANGE_MELODY) */
-        /* | BIT(EFFECT_VOICECHANGE_WHISPER) */
-        /* | BIT(EFFECT_VOICECHANGE_F0_DOMAIN) */
-        /* | BIT(EFFECT_VOICECHANGE_F0_TD) */
-        /* | BIT(EFFECT_VOICECHANGE_FEEDBACK) */
+        | BIT(EFFECT_VOICECHANGE_CARTOON)
+        | BIT(EFFECT_VOICECHANGE_SPECTRUM)
+        | BIT(EFFECT_VOICECHANGE_ROBORT)
+        | BIT(EFFECT_VOICECHANGE_MELODY)
+        | BIT(EFFECT_VOICECHANGE_WHISPER)
+        | BIT(EFFECT_VOICECHANGE_F0_DOMAIN)
+        | BIT(EFFECT_VOICECHANGE_F0_TD)
+        | BIT(EFFECT_VOICECHANGE_FEEDBACK)
                                                   );
 
 /*mb drc/limiter 3带使能(1.2k) */

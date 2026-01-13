@@ -4,8 +4,6 @@
 #include "app_core.h"
 #include "os/os_api.h"
 
-#define MSG_FROM_APP  (Q_MSG + 1)
-
 typedef enum {
     APP_MODE_IDLE,
     APP_MODE_BT,
@@ -23,6 +21,18 @@ typedef enum {
     APP_MODE_SPDIF,
     APP_MODE_MAX,
 } app_mode_t;
+
+typedef enum {
+    APP_TASK_NULL = 0,
+    APP_RCSP_ACTION_TASK,
+    APP_TASK_MAX,
+} app_task_t;
+
+typedef enum {
+    MSG_FROM_APP = (Q_MSG + 1),
+    MSG_FROM_RCSP,
+    MSG_FROM_RCSP_BT,
+} app_msg_t;
 
 struct app_event_handler {
     int event;

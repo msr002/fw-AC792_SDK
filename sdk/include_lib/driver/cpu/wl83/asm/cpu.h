@@ -34,7 +34,8 @@ typedef unsigned long long      u64, uint64_t;
 #endif
 #define CPU_ENDIAN 			LITTLE_ENDIAN
 
-#define CPU_CORE_NUM     2
+#define MAX_CPU_CORE_NUM    2
+#define CPU_CORE_NUM        2
 
 #define __NONCPU_ADDR__         ((u8 *)0x18000000)
 #define __SFC0_ADDR_BEGIN__			((u32)0x8000000)

@@ -1012,6 +1012,14 @@ static void lvgl_v8_main_task(void *priv)
     lv_port_indev_init();
     lv_port_fs_init();
 
+#ifdef CONFIG_WIFI_SOUNDBOX_PROJECT_ENABLE
+    //等待sd文件系统挂载完成
+    while (!storage_device_ready()) {
+        os_time_dly(2);
+        printf("waitting sd mount... ");
+    }
+#endif
+
     lvgl_suspend_flag = 0;
     jl_gui_init();
 

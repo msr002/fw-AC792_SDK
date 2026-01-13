@@ -3,7 +3,6 @@
 #include "generic/circular_buf.h"
 #include "app_config.h"
 
-//TODO MEDIA DEFINE
 #if defined CONFIG_AUDIO_ENC_AEC_DATA_CHECK
 
 #ifdef CONFIG_MEDIA_ENABLE
@@ -29,24 +28,23 @@ static struct {
 
 #define __this (&audio_aec_to_sd)
 
-void check_aec_mix_data_to_sd()
+static void check_aec_mix_data_to_sd(void *priv)
 {
     u8 data[MIX_DATA_LEN];
     u8 dac_data[DAC_DATA_LEN];
+
     while (1) {
-        if (__this->fd && __this->fd1) {
-            os_sem_pend(&__this->w_sem, 0);
-            if (__this->stop_flag == 1) {
-                os_sem_del(&__this->w_sem, OS_DEL_ALWAYS);
-                __this->stop_flag++;
-                break;
-            }
-            cbuf_read(&__this->save_cbuf, data, MIX_DATA_LEN);
-            fwrite(data, MIX_DATA_LEN, 1, __this->fd);
-            cbuf_read(&__this->dac_save_cbuf, dac_data, DAC_DATA_LEN);
-            fwrite(dac_data, DAC_DATA_LEN, 1, __this->fd1);
-        } else {
+        os_sem_pend(&__this->w_sem, 0);
+        if (__this->stop_flag == 1) {
+            os_sem_del(&__this->w_sem, OS_DEL_ALWAYS);
+            __this->stop_flag++;
             break;
+        }
+        if (MIX_DATA_LEN == cbuf_read(&__this->save_cbuf, data, MIX_DATA_LEN)) {
+            fwrite(data, MIX_DATA_LEN, 1, __this->fd);
+        }
+        if (DAC_DATA_LEN == cbuf_read(&__this->dac_save_cbuf, dac_data, DAC_DATA_LEN)) {
+            fwrite(dac_data, DAC_DATA_LEN, 1, __this->fd1);
         }
     }
 }
@@ -76,12 +74,12 @@ void aec_mix_data_set_cb(s16 *data, int step)
                 cbuf_clear(&__this->save_cbuf);
             }
 
-            memset(__this->cache, 0, sizeof(__this->cache));
             os_sem_set(&__this->w_sem, 0);
             os_sem_post(&__this->w_sem);
+
+            memset(__this->cache, 0, sizeof(__this->cache));
         }
     }
-
 }
 
 void aec_soft_mix_data_set_cb(s16 *data, int step)
@@ -112,10 +110,10 @@ void aec_soft_mix_data_set_cb(s16 *data, int step)
                 cbuf_clear(&__this->save_cbuf);
             }
 
-            memset(__this->cache, 0, sizeof(__this->cache));
             os_sem_set(&__this->w_sem, 0);
             os_sem_post(&__this->w_sem);
 
+            memset(__this->cache, 0, sizeof(__this->cache));
         }
     }
 
@@ -131,10 +129,9 @@ void aec_soft_mix_data_set_cb(s16 *data, int step)
             }
         }
     }
-
 }
 
-static void audio_aec_enc_data_to_sd()
+static void audio_aec_enc_data_to_sd(void *p)
 {
     extern int storage_device_ready(void);
     while (!storage_device_ready()) {//等待sd文件系统挂载完成
@@ -142,13 +139,19 @@ static void audio_aec_enc_data_to_sd()
     }
 
     if (__this->cache_buf) {
-        return ;
+        return;
     }
 
     __this->stop_flag = 0;
+    os_sem_create(&__this->w_sem, 0);
+
     __this->fd = fopen("storage/sd0/C/aec.pcm", "w+");
     __this->fd1 = fopen("storage/sd0/C/dac.pcm", "w+");
-    os_sem_create(&__this->w_sem, 0);
+
+    if (!__this->fd || !__this->fd1) {
+        return;
+    }
+
     __this->cache_buf = malloc(1024 * 128);
     if (__this->cache_buf == NULL) {
         printf("aec_data_to_sd_malloc_fail!");
@@ -159,23 +162,24 @@ static void audio_aec_enc_data_to_sd()
         printf("aec_data_to_sd_malloc_fail!");
         return;
     }
+
     cbuf_init(&__this->save_cbuf, __this->cache_buf, 1024 * 128);
     cbuf_init(&__this->dac_save_cbuf, __this->dac_orig_buf, 1024 * 128);
 
-    thread_fork("check_aec_mix_data_to_sd", 4, 256 * 1024, 0, 0, check_aec_mix_data_to_sd, NULL);
+    thread_fork("check_aec_mix_data_to_sd", 4, 4 * 1024, 0, 0, check_aec_mix_data_to_sd, NULL);
 }
 
-void aec_data_to_sd_open()
+void aec_data_to_sd_open(void)
 {
-    thread_fork("audio_aec_enc_data_to_sd", 4, 256 * 1024, 0, 0, audio_aec_enc_data_to_sd, NULL);
+    thread_fork("audio_aec_enc_data_to_sd", 4, 1024, 0, 0, audio_aec_enc_data_to_sd, NULL);
 }
 
-
-void aec_data_to_sd_close()
+void aec_data_to_sd_close(void)
 {
     if (__this->stop_flag == 2) {
         return;
     }
+
     __this->stop_flag = 1;
     os_sem_set(&__this->w_sem, 0);
     os_sem_post(&__this->w_sem);
@@ -199,19 +203,16 @@ void aec_data_to_sd_close()
         free(__this->dac_orig_buf);
         __this->dac_orig_buf = NULL;
     }
-
 }
-
 
 #else
 
-void aec_data_to_sd_open()
+void aec_data_to_sd_open(void)
 {
 
 }
 
-
-void aec_data_to_sd_close()
+void aec_data_to_sd_close(void)
 {
 
 }

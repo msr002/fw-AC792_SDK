@@ -240,6 +240,24 @@ void wifi_sta_connect(char *ssid, char *pwd, char save)
     wifi_enter_sta_mode(ssid, pwd);
 }
 
+int wifi_enter_go_mode(const char *dev_name, const char *ssid, const char *pwd)
+{
+    static wifi_p2p_config_t p2p_config;
+    if (!ssid || strncmp(ssid, "DIRECT-", 7) != 0) {
+        printf("[P2P] error! GO SSID must start with \"DIRECT-\", ssid=\"%s\"\r\n",
+               ssid ? ssid : "NULL");
+        return -1;
+    }
+
+    memset(&p2p_config, 0, sizeof(p2p_config));
+    strncpy((char *)p2p_config.ssid, ssid, sizeof(p2p_config.ssid) - 1);
+    strncpy((char *)p2p_config.password, pwd, sizeof(p2p_config.password) - 1);
+
+    wifi_p2p_set_config(&p2p_config);
+    return wifi_enter_p2p_mode(P2P_GO_MODE, dev_name);
+}
+
+
 static int wifi_event_callback(void *network_ctx, enum WIFI_EVENT event)
 {
     struct net_event net = {0};
@@ -503,7 +521,6 @@ static int wifi_event_callback(void *network_ctx, enum WIFI_EVENT event)
         break;
     case WIFI_EVENT_P2P_GO_STA_DISCONNECTED:
         log_info("network_user_callback->WIFI_EVENT_P2P_GO_STA_DISCONNECTED");
-        wifi_enter_p2p_mode(P2P_GO_MODE, WIFI_P2P_DEVICE_NAME);
         break;
 
     case WIFI_EVENT_P2P_WSC_OPERATION:
@@ -647,14 +664,13 @@ static void wifi_demo_task(void *priv)
     extern void iperf_test(void);
     iperf_test();
 #endif
-
     //wifi p2p
 #if 0
     //注意：p2p对mac地址有一定格式要求，在assign_macaddr.c已经做了更改，需要在download.c中通过-format all
     //擦除一下flash，重新生成mac地址
     wifi_enter_p2p_mode(P2P_GO_MODE, WIFI_P2P_DEVICE_NAME);
     /* wifi_enter_p2p_mode(P2P_GC_MODE, WIFI_P2P_DEVICE_NAME); */
-
+    /* wifi_enter_go_mode(WIFI_P2P_DEVICE_NAME, "DIRECT-xxx", "12345678"); */
     while (1) {
         os_time_dly(500);
     }

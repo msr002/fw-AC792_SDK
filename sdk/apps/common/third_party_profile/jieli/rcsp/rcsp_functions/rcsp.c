@@ -1,4 +1,4 @@
-#ifdef MEDIA_SUPPORT_MS_EXTENSIONS
+#ifdef RCSP_SUPPORT_MS_EXTENSIONS
 #pragma bss_seg(".rcsp.data.bss")
 #pragma data_seg(".rcsp.data")
 #pragma const_seg(".rcsp.text.const")
@@ -11,7 +11,6 @@
 #include "string.h"
 #include "system/timer.h"
 #include "spp_user.h"
-/* #include "app_task.h" */
 #include "system/task.h"
 #include "rcsp_config.h"
 #include "rcsp_event.h"
@@ -21,14 +20,11 @@
 #include "rcsp_ch_loader_download.h"
 
 #if TCFG_USER_TWS_ENABLE
-/* #include "bt_tws.h" */
+#include "bt_tws.h"
 #endif
 
 #if (RCSP_MODE)
 #define RCSP_TASK_NAME   "rcsp"
-
-#define RCSP_SPP_INTERACTIVE_SUPPORT	1
-#define RCSP_BLE_INTERACTIVE_SUPPORT	1
 
 #define RCSP_DEBUG_EN
 #ifdef RCSP_DEBUG_EN
@@ -87,7 +83,7 @@ void JL_rcsp_resume_do(void)
 
 bool JL_rcsp_protocol_can_send(void)
 {
-#if 0//TCFG_USER_TWS_ENABLE
+#if TCFG_USER_TWS_ENABLE && !TCFG_THIRD_PARTY_PROTOCOLS_SIMPLIFIED
     if (get_bt_tws_connect_status() && (tws_api_get_role() == TWS_ROLE_SLAVE)) {
         // 从机不允许发rcsp数据
         /* printf("rcsp slave cant send data!\n"); */
@@ -100,7 +96,6 @@ bool JL_rcsp_protocol_can_send(void)
 }
 
 
-extern void rcsp_clean_update_hdl_for_end_update(u16 ble_con_handle, u8 *spp_remote_addr);
 static void rcsp_process(void *p)
 {
     ///从vm获取相关配置
@@ -108,7 +103,10 @@ static void rcsp_process(void *p)
 #if TCFG_RCSP_DUAL_CONN_ENABLE
     rcsp_1t2_setting_reset();
 #endif
+
+#if RCSP_UPDATE_EN
     rcsp_clean_update_hdl_for_end_update(0, NULL);
+#endif
 
     while (1) {
         os_sem_pend(&__this->sem, 0);
@@ -166,6 +164,11 @@ static JL_PRO_CB bt_rcsp_callback = {
     .wait_resp_timeout = NULL,
 };
 
+void rcsp_clear_all_buffer(void)
+{
+    JL_protocol_dev_switch(&bt_rcsp_callback);
+}
+
 void rcsp_init(void)
 {
     if (__this) {
@@ -213,6 +216,9 @@ void rcsp_init(void)
     if (err) {
         rcsp_printf("rcsp create fail %x\n", err);
     }
+#if ((TCFG_LE_AUDIO_APP_CONFIG & (LE_AUDIO_UNICAST_SINK_EN | LE_AUDIO_JL_UNICAST_SINK_EN)))
+    rcsp_cis_update_init();
+#endif
 }
 
 static void rcsp_exit_in_app_core_task(void)
@@ -223,6 +229,8 @@ static void rcsp_exit_in_app_core_task(void)
     }
     JL_protocol_exit();
     task_kill(RCSP_TASK_NAME);
+
+    // rcsp代码简化
     if (__this->rcsp_buf) {
         free(__this->rcsp_buf);
         __this->rcsp_buf = NULL;
@@ -232,7 +240,9 @@ static void rcsp_exit_in_app_core_task(void)
         __this = NULL;
     }
     rcsp_opt_release();
+#if RCSP_UPDATE_EN
     rcsp_update_resume();
+#endif
 }
 
 void rcsp_exit(void)

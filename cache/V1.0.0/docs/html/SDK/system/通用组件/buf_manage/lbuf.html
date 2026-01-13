@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>11.3.2. lbuf &mdash; JL Project Documentation</title>
+  <title>lbuf &mdash; JL Project Documentation</title>
       <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="https://doc.zh-jieli.com/static/css/custom.css" type="text/css" />
@@ -15,16 +15,12 @@
         <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
         <script src="../../../../_static/jquery.js"></script>
         <script src="../../../../_static/underscore.js"></script>
-        <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../../../_static/doctools.js"></script>
-        <script src="../../../../_static/sphinx_highlight.js"></script>
         <script src="https://doc.zh-jieli.com/static/js/custom.js"></script>
         <script src="../../../../_static/js/custom.js"></script>
     <script src="../../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../../genindex.html" />
-    <link rel="search" title="Search" href="../../../../search.html" />
-    <link rel="next" title="11.4. 配置项管理" href="../cfg_user/index.html" />
-    <link rel="prev" title="11.3.1. cbuf" href="cbuf.html" /> 
+    <link rel="search" title="Search" href="../../../../search.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -44,57 +40,17 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">SDK入门</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../../%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8/index.html">1. 快速入门</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../framework/index.html">1. 技术框架</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8/index.html">2. 快速入门</a></li>
 </ul>
-<p class="caption" role="heading"><span class="caption-text">SDK Reference</span></p>
+<p class="caption" role="heading"><span class="caption-text">音频功能进阶</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../soundbox/index.html">1. SDK 详细介绍</a></li>
-</ul>
-<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
-<ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../../../audio/index.html">1. 音频播放</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../btstack/index.html">2. 蓝牙协议栈</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../driver/index.html">3. 外设驱动</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../driver/pmu/index.html">4. 电源管理</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../led_ui/index.html">5. LED状态显示</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../file_system/index.html">6. 文件系统</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../os/index.html">7. 操作系统</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../timer/index.html">8. 定时器</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../clock_manage/index.html">9. 时钟管理</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../dev_manager/index.html">10. 设备管理</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="../index.html">11. 通用组件</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="../heap/index.html">11.1. 动态内存申请</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../update/index.html">11.2. 固件升级</a></li>
-<li class="toctree-l2 current"><a class="reference internal" href="index.html">11.3. Buffer管理</a><ul class="current">
-<li class="toctree-l3"><a class="reference internal" href="cbuf.html">11.3.1. cbuf</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">11.3.2. lbuf</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#lbuf-init">11.3.2.1. lbuf_init</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#lbuf-alloc">11.3.2.2. lbuf_alloc</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#lbuf-realloc">11.3.2.3. lbuf_realloc</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#lbuf-empty">11.3.2.4. lbuf_empty</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#lbuf-push">11.3.2.5. lbuf_push</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#lbuf-pop">11.3.2.6. lbuf_pop</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#lbuf-free">11.3.2.7. lbuf_free</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#lbuf-free-space">11.3.2.8. lbuf_free_space</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#lbuf-state">11.3.2.9. lbuf_state</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#lbuf-avaliable">11.3.2.10. lbuf_avaliable</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#lbuf-real-size">11.3.2.11. lbuf_real_size</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#lbuf-remain-space">11.3.2.12. lbuf_remain_space</a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="../cfg_user/index.html">11.4. 配置项管理</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../debug/index.html">11.5. 软件调试</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="../../../audio_config/index.html">12. 音频配置</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../audio_flow/index.html">13. 音频流程</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../audio_effects/index.html">14. 音效调试</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../audio_cvp/index.html">15. 通话清晰语音</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../report/index.html">16. 系统状态报告</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../ui/index.html">17. UI 框架</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../mic_effect/index.html">18. 麦克风音效</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../audio_config/index.html">2. 音频配置</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../audio_flow/index.html">3. 音频流程</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../audio_effects/index.html">4. 音效调试</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../audio_cvp/index.html">5. 通话清晰语音</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../audio_FAQ/index.html">6. 音频FAQ</a></li>
 </ul>
 
         </div>
@@ -110,10 +66,8 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../../../../index.html" class="icon icon-home"></a></li>
-          <li class="breadcrumb-item"><a href="../index.html"><span class="section-number">11. </span>通用组件</a></li>
-          <li class="breadcrumb-item"><a href="index.html"><span class="section-number">11.3. </span>Buffer管理</a></li>
-      <li class="breadcrumb-item active"><span class="section-number">11.3.2. </span>lbuf</li>
+      <li><a href="../../../../index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>lbuf</li>
       <li class="wy-breadcrumbs-aside">
       </li>
   </ul>
@@ -123,7 +77,7 @@
            <div itemprop="articleBody">
              
   <section id="lbuf">
-<h1><span class="section-number">11.3.2. </span>lbuf<a class="headerlink" href="#lbuf" title="Permalink to this heading"></a></h1>
+<h1>lbuf<a class="headerlink" href="#lbuf" title="Permalink to this headline"></a></h1>
 <p>lbuf，又名链表 buf，以链式模型对数据包的输入和输出作缓冲管理，具有如下特性：</p>
 <ul class="simple">
 <li><p>以链表的方式对读取和写入的数据进行管理；</p></li>
@@ -132,11 +86,11 @@
 <li><p>适合用于以数据包为单位读写的应用。</p></li>
 </ul>
 <section id="lbuf-init">
-<h2><span class="section-number">11.3.2.1. </span>lbuf_init<a class="headerlink" href="#lbuf-init" title="Permalink to this heading"></a></h2>
+<h2>lbuf_init<a class="headerlink" href="#lbuf-init" title="Permalink to this headline"></a></h2>
 <ul>
 <li><p>函数原型：</p>
 <blockquote>
-<div><div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">struct</span><span class="w"> </span><span class="nc">lbuff_head</span><span class="w"> </span><span class="o">*</span><span class="n">lbuf_init</span><span class="p">(</span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">buf</span><span class="p">,</span><span class="w"> </span><span class="n">u32</span><span class="w"> </span><span class="n">len</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">align</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">priv_head_len</span><span class="p">);</span>
+<div><div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">struct</span><span class="w"> </span><span class="nc">lbuff_head</span><span class="w"> </span><span class="o">*</span><span class="n">lbuf_init</span><span class="p">(</span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">buf</span><span class="p">,</span><span class="w"> </span><span class="n">u32</span><span class="w"> </span><span class="n">len</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">align</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">priv_head_len</span><span class="p">);</span><span class="w"></span>
 </pre></div>
 </div>
 </div></blockquote>
@@ -186,12 +140,12 @@
 </li>
 <li><p>示例：</p>
 <blockquote>
-<div><div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="kt">int</span><span class="w"> </span><span class="n">lbuf</span><span class="p">[</span><span class="mi">512</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mi">0</span><span class="p">};</span>
-<span class="linenos">2</span><span class="k">struct</span><span class="w"> </span><span class="nc">lbuff_head</span><span class="w"> </span><span class="o">*</span><span class="n">lbuf_hdl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span>
-<span class="linenos">3</span><span class="kt">void</span><span class="w"> </span><span class="nf">lbuf_user_demo</span><span class="p">()</span>
-<span class="linenos">4</span><span class="p">{</span>
-<span class="linenos">5</span><span class="w">    </span><span class="n">lbuf_hdl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">lbuf_init</span><span class="p">(</span><span class="n">lbuf</span><span class="p">,</span><span class="w"> </span><span class="k">sizeof</span><span class="p">(</span><span class="n">lbuf</span><span class="p">),</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span>
-<span class="linenos">6</span><span class="p">}</span>
+<div><div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="kt">int</span><span class="w"> </span><span class="n">lbuf</span><span class="p">[</span><span class="mi">512</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mi">0</span><span class="p">};</span><span class="w"></span>
+<span class="linenos">2</span><span class="k">struct</span><span class="w"> </span><span class="nc">lbuff_head</span><span class="w"> </span><span class="o">*</span><span class="n">lbuf_hdl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span><span class="w"></span>
+<span class="linenos">3</span><span class="kt">void</span><span class="w"> </span><span class="nf">lbuf_user_demo</span><span class="p">()</span><span class="w"></span>
+<span class="linenos">4</span><span class="p">{</span><span class="w"></span>
+<span class="linenos">5</span><span class="w">    </span><span class="n">lbuf_hdl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">lbuf_init</span><span class="p">(</span><span class="n">lbuf</span><span class="p">,</span><span class="w"> </span><span class="k">sizeof</span><span class="p">(</span><span class="n">lbuf</span><span class="p">),</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span><span class="w"></span>
+<span class="linenos">6</span><span class="p">}</span><span class="w"></span>
 </pre></div>
 </div>
 </div></blockquote>
@@ -199,11 +153,11 @@
 </ul>
 </section>
 <section id="lbuf-alloc">
-<h2><span class="section-number">11.3.2.2. </span>lbuf_alloc<a class="headerlink" href="#lbuf-alloc" title="Permalink to this heading"></a></h2>
+<h2>lbuf_alloc<a class="headerlink" href="#lbuf-alloc" title="Permalink to this headline"></a></h2>
 <ul>
 <li><p>函数原型：</p>
 <blockquote>
-<div><div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">lbuf_alloc</span><span class="p">(</span><span class="k">struct</span><span class="w"> </span><span class="nc">lbuff_head</span><span class="w"> </span><span class="o">*</span><span class="n">head</span><span class="p">,</span><span class="w"> </span><span class="n">u32</span><span class="w"> </span><span class="n">len</span><span class="p">)</span>
+<div><div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">lbuf_alloc</span><span class="p">(</span><span class="k">struct</span><span class="w"> </span><span class="nc">lbuff_head</span><span class="w"> </span><span class="o">*</span><span class="n">head</span><span class="p">,</span><span class="w"> </span><span class="n">u32</span><span class="w"> </span><span class="n">len</span><span class="p">)</span><span class="w"></span>
 </pre></div>
 </div>
 </div></blockquote>
@@ -247,16 +201,16 @@
 </li>
 <li><p>示例：</p>
 <blockquote>
-<div><div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kt">int</span><span class="w"> </span><span class="n">lbuf</span><span class="p">[</span><span class="mi">512</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mi">0</span><span class="p">};</span>
-<span class="linenos"> 2</span><span class="k">struct</span><span class="w"> </span><span class="nc">lbuff_head</span><span class="w"> </span><span class="o">*</span><span class="n">lbuf_hdl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span>
-<span class="linenos"> 3</span><span class="kt">void</span><span class="w"> </span><span class="nf">lbuf_user_demo</span><span class="p">()</span>
-<span class="linenos"> 4</span><span class="p">{</span>
-<span class="linenos"> 5</span><span class="w">    </span><span class="n">u32</span><span class="w"> </span><span class="n">ret</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
-<span class="linenos"> 6</span><span class="w">    </span><span class="n">u8</span><span class="w"> </span><span class="o">*</span><span class="n">wptr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span>
-<span class="linenos"> 7</span><span class="w">    </span><span class="n">u8</span><span class="w"> </span><span class="o">*</span><span class="n">rptr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span>
-<span class="linenos"> 8</span><span class="w">    </span><span class="n">lbuf_hdl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">lbuf_init</span><span class="p">(</span><span class="n">lbuf</span><span class="p">,</span><span class="w"> </span><span class="k">sizeof</span><span class="p">(</span><span class="n">lbuf</span><span class="p">),</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span>
-<span class="linenos"> 9</span><span class="w">    </span><span class="n">wptr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">lbuf_alloc</span><span class="p">(</span><span class="n">lbuf_hdl</span><span class="p">,</span><span class="w"> </span><span class="mi">100</span><span class="p">);</span>
-<span class="linenos">10</span><span class="p">}</span>
+<div><div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kt">int</span><span class="w"> </span><span class="n">lbuf</span><span class="p">[</span><span class="mi">512</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mi">0</span><span class="p">};</span><span class="w"></span>
+<span class="linenos"> 2</span><span class="k">struct</span><span class="w"> </span><span class="nc">lbuff_head</span><span class="w"> </span><span class="o">*</span><span class="n">lbuf_hdl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span><span class="w"></span>
+<span class="linenos"> 3</span><span class="kt">void</span><span class="w"> </span><span class="nf">lbuf_user_demo</span><span class="p">()</span><span class="w"></span>
+<span class="linenos"> 4</span><span class="p">{</span><span class="w"></span>
+<span class="linenos"> 5</span><span class="w">    </span><span class="n">u32</span><span class="w"> </span><span class="n">ret</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+<span class="linenos"> 6</span><span class="w">    </span><span class="n">u8</span><span class="w"> </span><span class="o">*</span><span class="n">wptr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span><span class="w"></span>
+<span class="linenos"> 7</span><span class="w">    </span><span class="n">u8</span><span class="w"> </span><span class="o">*</span><span class="n">rptr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span><span class="w"></span>
+<span class="linenos"> 8</span><span class="w">    </span><span class="n">lbuf_hdl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">lbuf_init</span><span class="p">(</span><span class="n">lbuf</span><span class="p">,</span><span class="w"> </span><span class="k">sizeof</span><span class="p">(</span><span class="n">lbuf</span><span class="p">),</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span><span class="w"></span>
+<span class="linenos"> 9</span><span class="w">    </span><span class="n">wptr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">lbuf_alloc</span><span class="p">(</span><span class="n">lbuf_hdl</span><span class="p">,</span><span class="w"> </span><span class="mi">100</span><span class="p">);</span><span class="w"></span>
+<span class="linenos">10</span><span class="p">}</span><span class="w"></span>
 </pre></div>
 </div>
 </div></blockquote>
@@ -264,11 +218,11 @@
 </ul>
 </section>
 <section id="lbuf-realloc">
-<h2><span class="section-number">11.3.2.3. </span>lbuf_realloc<a class="headerlink" href="#lbuf-realloc" title="Permalink to this heading"></a></h2>
+<h2>lbuf_realloc<a class="headerlink" href="#lbuf-realloc" title="Permalink to this headline"></a></h2>
 <ul>
 <li><p>函数原型：</p>
 <blockquote>
-<div><div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">lbuf_realloc</span><span class="p">(</span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">lbuf</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">size</span><span class="p">)</span>
+<div><div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">lbuf_realloc</span><span class="p">(</span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">lbuf</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">size</span><span class="p">)</span><span class="w"></span>
 </pre></div>
 </div>
 </div></blockquote>
@@ -315,17 +269,17 @@
 </li>
 <li><p>示例：</p>
 <blockquote>
-<div><div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kt">int</span><span class="w"> </span><span class="n">lbuf</span><span class="p">[</span><span class="mi">512</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mi">0</span><span class="p">};</span>
-<span class="linenos"> 2</span><span class="k">struct</span><span class="w"> </span><span class="nc">lbuff_head</span><span class="w"> </span><span class="o">*</span><span class="n">lbuf_hdl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span>
-<span class="linenos"> 3</span><span class="kt">void</span><span class="w"> </span><span class="nf">lbuf_user_demo</span><span class="p">()</span>
-<span class="linenos"> 4</span><span class="p">{</span>
-<span class="linenos"> 5</span><span class="w">    </span><span class="n">u32</span><span class="w"> </span><span class="n">ret</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
-<span class="linenos"> 6</span><span class="w">    </span><span class="n">u8</span><span class="w"> </span><span class="o">*</span><span class="n">wptr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span>
-<span class="linenos"> 7</span><span class="w">    </span><span class="n">u8</span><span class="w"> </span><span class="o">*</span><span class="n">rptr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span>
-<span class="linenos"> 8</span><span class="w">    </span><span class="n">lbuf_hdl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">lbuf_init</span><span class="p">(</span><span class="n">lbuf</span><span class="p">,</span><span class="w"> </span><span class="k">sizeof</span><span class="p">(</span><span class="n">lbuf</span><span class="p">),</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span>
-<span class="linenos"> 9</span><span class="w">    </span><span class="n">wptr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">lbuf_alloc</span><span class="p">(</span><span class="n">lbuf_hdl</span><span class="p">,</span><span class="w"> </span><span class="mi">100</span><span class="p">);</span>
-<span class="linenos">10</span><span class="w">    </span><span class="n">wptr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">lbuf_realloc</span><span class="p">(</span><span class="n">wptr</span><span class="p">,</span><span class="w"> </span><span class="mi">200</span><span class="p">);</span>
-<span class="linenos">11</span><span class="p">}</span>
+<div><div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kt">int</span><span class="w"> </span><span class="n">lbuf</span><span class="p">[</span><span class="mi">512</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mi">0</span><span class="p">};</span><span class="w"></span>
+<span class="linenos"> 2</span><span class="k">struct</span><span class="w"> </span><span class="nc">lbuff_head</span><span class="w"> </span><span class="o">*</span><span class="n">lbuf_hdl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span><span class="w"></span>
+<span class="linenos"> 3</span><span class="kt">void</span><span class="w"> </span><span class="nf">lbuf_user_demo</span><span class="p">()</span><span class="w"></span>
+<span class="linenos"> 4</span><span class="p">{</span><span class="w"></span>
+<span class="linenos"> 5</span><span class="w">    </span><span class="n">u32</span><span class="w"> </span><span class="n">ret</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+<span class="linenos"> 6</span><span class="w">    </span><span class="n">u8</span><span class="w"> </span><span class="o">*</span><span class="n">wptr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span><span class="w"></span>
+<span class="linenos"> 7</span><span class="w">    </span><span class="n">u8</span><span class="w"> </span><span class="o">*</span><span class="n">rptr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span><span class="w"></span>
+<span class="linenos"> 8</span><span class="w">    </span><span class="n">lbuf_hdl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">lbuf_init</span><span class="p">(</span><span class="n">lbuf</span><span class="p">,</span><span class="w"> </span><span class="k">sizeof</span><span class="p">(</span><span class="n">lbuf</span><span class="p">),</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span><span class="w"></span>
+<span class="linenos"> 9</span><span class="w">    </span><span class="n">wptr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">lbuf_alloc</span><span class="p">(</span><span class="n">lbuf_hdl</span><span class="p">,</span><span class="w"> </span><span class="mi">100</span><span class="p">);</span><span class="w"></span>
+<span class="linenos">10</span><span class="w">    </span><span class="n">wptr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">lbuf_realloc</span><span class="p">(</span><span class="n">wptr</span><span class="p">,</span><span class="w"> </span><span class="mi">200</span><span class="p">);</span><span class="w"></span>
+<span class="linenos">11</span><span class="p">}</span><span class="w"></span>
 </pre></div>
 </div>
 </div></blockquote>
@@ -333,11 +287,11 @@
 </ul>
 </section>
 <section id="lbuf-empty">
-<h2><span class="section-number">11.3.2.4. </span>lbuf_empty<a class="headerlink" href="#lbuf-empty" title="Permalink to this heading"></a></h2>
+<h2>lbuf_empty<a class="headerlink" href="#lbuf-empty" title="Permalink to this headline"></a></h2>
 <ul>
 <li><p>函数原型：</p>
 <blockquote>
-<div><div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="kt">int</span><span class="w"> </span><span class="nf">lbuf_empty</span><span class="p">(</span><span class="k">struct</span><span class="w"> </span><span class="nc">lbuff_head</span><span class="w"> </span><span class="o">*</span><span class="n">head</span><span class="p">);</span>
+<div><div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="kt">int</span><span class="w"> </span><span class="nf">lbuf_empty</span><span class="p">(</span><span class="k">struct</span><span class="w"> </span><span class="nc">lbuff_head</span><span class="w"> </span><span class="o">*</span><span class="n">head</span><span class="p">);</span><span class="w"></span>
 </pre></div>
 </div>
 </div></blockquote>
@@ -381,19 +335,19 @@
 </li>
 <li><p>示例：</p>
 <blockquote>
-<div><div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kt">int</span><span class="w"> </span><span class="n">lbuf</span><span class="p">[</span><span class="mi">512</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mi">0</span><span class="p">};</span>
-<span class="linenos"> 2</span><span class="k">struct</span><span class="w"> </span><span class="nc">lbuff_head</span><span class="w"> </span><span class="o">*</span><span class="n">lbuf_hdl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span>
-<span class="linenos"> 3</span><span class="kt">void</span><span class="w"> </span><span class="nf">lbuf_user_demo</span><span class="p">()</span>
-<span class="linenos"> 4</span><span class="p">{</span>
-<span class="linenos"> 5</span><span class="w">    </span><span class="n">u32</span><span class="w"> </span><span class="n">ret</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
-<span class="linenos"> 6</span><span class="w">    </span><span class="n">lbuf_hdl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">lbuf_init</span><span class="p">(</span><span class="n">lbuf</span><span class="p">,</span><span class="w"> </span><span class="k">sizeof</span><span class="p">(</span><span class="n">lbuf</span><span class="p">),</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span>
-<span class="linenos"> 7</span><span class="w">    </span><span class="n">ret</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">lbuf_empty</span><span class="p">(</span><span class="n">lbuf_hdl</span><span class="p">);</span>
-<span class="linenos"> 8</span><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">ret</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="linenos"> 9</span><span class="w">        </span><span class="n">printf</span><span class="p">(</span><span class="s">&quot;lbuf empty&quot;</span><span class="p">);</span>
-<span class="linenos">10</span><span class="w">    </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
-<span class="linenos">11</span><span class="w">        </span><span class="n">printf</span><span class="p">(</span><span class="s">&quot;lbuf have data&quot;</span><span class="p">);</span>
-<span class="linenos">12</span><span class="w">    </span><span class="p">}</span>
-<span class="linenos">13</span><span class="p">}</span>
+<div><div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kt">int</span><span class="w"> </span><span class="n">lbuf</span><span class="p">[</span><span class="mi">512</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mi">0</span><span class="p">};</span><span class="w"></span>
+<span class="linenos"> 2</span><span class="k">struct</span><span class="w"> </span><span class="nc">lbuff_head</span><span class="w"> </span><span class="o">*</span><span class="n">lbuf_hdl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span><span class="w"></span>
+<span class="linenos"> 3</span><span class="kt">void</span><span class="w"> </span><span class="nf">lbuf_user_demo</span><span class="p">()</span><span class="w"></span>
+<span class="linenos"> 4</span><span class="p">{</span><span class="w"></span>
+<span class="linenos"> 5</span><span class="w">    </span><span class="n">u32</span><span class="w"> </span><span class="n">ret</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+<span class="linenos"> 6</span><span class="w">    </span><span class="n">lbuf_hdl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">lbuf_init</span><span class="p">(</span><span class="n">lbuf</span><span class="p">,</span><span class="w"> </span><span class="k">sizeof</span><span class="p">(</span><span class="n">lbuf</span><span class="p">),</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span><span class="w"></span>
+<span class="linenos"> 7</span><span class="w">    </span><span class="n">ret</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">lbuf_empty</span><span class="p">(</span><span class="n">lbuf_hdl</span><span class="p">);</span><span class="w"></span>
+<span class="linenos"> 8</span><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">ret</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="linenos"> 9</span><span class="w">        </span><span class="n">printf</span><span class="p">(</span><span class="s">&quot;lbuf empty&quot;</span><span class="p">);</span><span class="w"></span>
+<span class="linenos">10</span><span class="w">    </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="linenos">11</span><span class="w">        </span><span class="n">printf</span><span class="p">(</span><span class="s">&quot;lbuf have data&quot;</span><span class="p">);</span><span class="w"></span>
+<span class="linenos">12</span><span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="linenos">13</span><span class="p">}</span><span class="w"></span>
 </pre></div>
 </div>
 </div></blockquote>
@@ -401,11 +355,11 @@
 </ul>
 </section>
 <section id="lbuf-push">
-<h2><span class="section-number">11.3.2.5. </span>lbuf_push<a class="headerlink" href="#lbuf-push" title="Permalink to this heading"></a></h2>
+<h2>lbuf_push<a class="headerlink" href="#lbuf-push" title="Permalink to this headline"></a></h2>
 <ul>
 <li><p>函数原型：</p>
 <blockquote>
-<div><div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="n">lbuf_push</span><span class="p">(</span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">lbuf</span><span class="p">,</span><span class="w"> </span><span class="n">u8</span><span class="w"> </span><span class="n">channel_map</span><span class="p">)</span>
+<div><div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="n">lbuf_push</span><span class="p">(</span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">lbuf</span><span class="p">,</span><span class="w"> </span><span class="n">u8</span><span class="w"> </span><span class="n">channel_map</span><span class="p">)</span><span class="w"></span>
 </pre></div>
 </div>
 </div></blockquote>
@@ -435,18 +389,18 @@
 <li><p>返回值：无</p></li>
 <li><p>示例：</p>
 <blockquote>
-<div><div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kt">int</span><span class="w"> </span><span class="n">lbuf</span><span class="p">[</span><span class="mi">512</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mi">0</span><span class="p">};</span>
-<span class="linenos"> 2</span><span class="k">struct</span><span class="w"> </span><span class="nc">lbuff_head</span><span class="w"> </span><span class="o">*</span><span class="n">lbuf_hdl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span>
-<span class="linenos"> 3</span><span class="kt">void</span><span class="w"> </span><span class="nf">lbuf_user_demo</span><span class="p">()</span>
-<span class="linenos"> 4</span><span class="p">{</span>
-<span class="linenos"> 5</span><span class="w">    </span><span class="n">u32</span><span class="w"> </span><span class="n">ret</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
-<span class="linenos"> 6</span><span class="w">    </span><span class="n">u8</span><span class="w"> </span><span class="o">*</span><span class="n">wptr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span>
-<span class="linenos"> 7</span><span class="w">    </span><span class="n">lbuf_hdl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">lbuf_init</span><span class="p">(</span><span class="n">lbuf</span><span class="p">,</span><span class="w"> </span><span class="k">sizeof</span><span class="p">(</span><span class="n">lbuf</span><span class="p">),</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span>
-<span class="linenos"> 8</span><span class="w">    </span><span class="n">wptr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">lbuf_alloc</span><span class="p">(</span><span class="n">lbuf_hdl</span><span class="p">,</span><span class="w"> </span><span class="mi">100</span><span class="p">);</span>
+<div><div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kt">int</span><span class="w"> </span><span class="n">lbuf</span><span class="p">[</span><span class="mi">512</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mi">0</span><span class="p">};</span><span class="w"></span>
+<span class="linenos"> 2</span><span class="k">struct</span><span class="w"> </span><span class="nc">lbuff_head</span><span class="w"> </span><span class="o">*</span><span class="n">lbuf_hdl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span><span class="w"></span>
+<span class="linenos"> 3</span><span class="kt">void</span><span class="w"> </span><span class="nf">lbuf_user_demo</span><span class="p">()</span><span class="w"></span>
+<span class="linenos"> 4</span><span class="p">{</span><span class="w"></span>
+<span class="linenos"> 5</span><span class="w">    </span><span class="n">u32</span><span class="w"> </span><span class="n">ret</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+<span class="linenos"> 6</span><span class="w">    </span><span class="n">u8</span><span class="w"> </span><span class="o">*</span><span class="n">wptr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span><span class="w"></span>
+<span class="linenos"> 7</span><span class="w">    </span><span class="n">lbuf_hdl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">lbuf_init</span><span class="p">(</span><span class="n">lbuf</span><span class="p">,</span><span class="w"> </span><span class="k">sizeof</span><span class="p">(</span><span class="n">lbuf</span><span class="p">),</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span><span class="w"></span>
+<span class="linenos"> 8</span><span class="w">    </span><span class="n">wptr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">lbuf_alloc</span><span class="p">(</span><span class="n">lbuf_hdl</span><span class="p">,</span><span class="w"> </span><span class="mi">100</span><span class="p">);</span><span class="w"></span>
 <span class="linenos"> 9</span><span class="w">    </span><span class="c1">//写入数据</span>
-<span class="linenos">10</span><span class="w">    </span><span class="n">memset</span><span class="p">(</span><span class="n">wptr</span><span class="p">,</span><span class="w"> </span><span class="mh">0x5A</span><span class="p">,</span><span class="w"> </span><span class="mi">100</span><span class="p">);</span>
+<span class="linenos">10</span><span class="w">    </span><span class="n">memset</span><span class="p">(</span><span class="n">wptr</span><span class="p">,</span><span class="w"> </span><span class="mh">0x5A</span><span class="p">,</span><span class="w"> </span><span class="mi">100</span><span class="p">);</span><span class="w"></span>
 <span class="linenos">11</span><span class="w">    </span><span class="n">lbuf_push</span><span class="p">(</span><span class="n">wptr</span><span class="p">,</span><span class="w"> </span><span class="n">BIT</span><span class="p">(</span><span class="mi">0</span><span class="p">));</span><span class="w"> </span><span class="c1">//channel_map， 使用者为 1 个</span>
-<span class="linenos">12</span><span class="p">}</span>
+<span class="linenos">12</span><span class="p">}</span><span class="w"></span>
 </pre></div>
 </div>
 </div></blockquote>
@@ -454,11 +408,11 @@
 </ul>
 </section>
 <section id="lbuf-pop">
-<h2><span class="section-number">11.3.2.6. </span>lbuf_pop<a class="headerlink" href="#lbuf-pop" title="Permalink to this heading"></a></h2>
+<h2>lbuf_pop<a class="headerlink" href="#lbuf-pop" title="Permalink to this headline"></a></h2>
 <ul>
 <li><p>函数原型：</p>
 <blockquote>
-<div><div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">lbuf_pop</span><span class="p">(</span><span class="k">struct</span><span class="w"> </span><span class="nc">lbuff_head</span><span class="w"> </span><span class="o">*</span><span class="n">head</span><span class="p">,</span><span class="w"> </span><span class="n">u8</span><span class="w"> </span><span class="n">channel</span><span class="p">)</span>
+<div><div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">lbuf_pop</span><span class="p">(</span><span class="k">struct</span><span class="w"> </span><span class="nc">lbuff_head</span><span class="w"> </span><span class="o">*</span><span class="n">head</span><span class="p">,</span><span class="w"> </span><span class="n">u8</span><span class="w"> </span><span class="n">channel</span><span class="p">)</span><span class="w"></span>
 </pre></div>
 </div>
 </div></blockquote>
@@ -508,20 +462,20 @@
 </li>
 <li><p>示例：</p>
 <blockquote>
-<div><div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kt">int</span><span class="w"> </span><span class="n">lbuf</span><span class="p">[</span><span class="mi">512</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mi">0</span><span class="p">};</span>
-<span class="linenos"> 2</span><span class="k">struct</span><span class="w"> </span><span class="nc">lbuff_head</span><span class="w"> </span><span class="o">*</span><span class="n">lbuf_hdl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span>
-<span class="linenos"> 3</span><span class="kt">void</span><span class="w"> </span><span class="nf">lbuf_user_demo</span><span class="p">()</span>
-<span class="linenos"> 4</span><span class="p">{</span>
-<span class="linenos"> 5</span><span class="w">    </span><span class="n">u32</span><span class="w"> </span><span class="n">ret</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
-<span class="linenos"> 6</span><span class="w">    </span><span class="n">u8</span><span class="w"> </span><span class="o">*</span><span class="n">wptr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span>
-<span class="linenos"> 7</span><span class="w">    </span><span class="n">u8</span><span class="w"> </span><span class="o">*</span><span class="n">rptr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span>
-<span class="linenos"> 8</span><span class="w">    </span><span class="n">lbuf_hdl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">lbuf_init</span><span class="p">(</span><span class="n">lbuf</span><span class="p">,</span><span class="w"> </span><span class="k">sizeof</span><span class="p">(</span><span class="n">lbuf</span><span class="p">),</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span>
-<span class="linenos"> 9</span><span class="w">    </span><span class="n">wptr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">lbuf_alloc</span><span class="p">(</span><span class="n">lbuf_hdl</span><span class="p">,</span><span class="w"> </span><span class="mi">100</span><span class="p">);</span>
+<div><div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kt">int</span><span class="w"> </span><span class="n">lbuf</span><span class="p">[</span><span class="mi">512</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mi">0</span><span class="p">};</span><span class="w"></span>
+<span class="linenos"> 2</span><span class="k">struct</span><span class="w"> </span><span class="nc">lbuff_head</span><span class="w"> </span><span class="o">*</span><span class="n">lbuf_hdl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span><span class="w"></span>
+<span class="linenos"> 3</span><span class="kt">void</span><span class="w"> </span><span class="nf">lbuf_user_demo</span><span class="p">()</span><span class="w"></span>
+<span class="linenos"> 4</span><span class="p">{</span><span class="w"></span>
+<span class="linenos"> 5</span><span class="w">    </span><span class="n">u32</span><span class="w"> </span><span class="n">ret</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+<span class="linenos"> 6</span><span class="w">    </span><span class="n">u8</span><span class="w"> </span><span class="o">*</span><span class="n">wptr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span><span class="w"></span>
+<span class="linenos"> 7</span><span class="w">    </span><span class="n">u8</span><span class="w"> </span><span class="o">*</span><span class="n">rptr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span><span class="w"></span>
+<span class="linenos"> 8</span><span class="w">    </span><span class="n">lbuf_hdl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">lbuf_init</span><span class="p">(</span><span class="n">lbuf</span><span class="p">,</span><span class="w"> </span><span class="k">sizeof</span><span class="p">(</span><span class="n">lbuf</span><span class="p">),</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span><span class="w"></span>
+<span class="linenos"> 9</span><span class="w">    </span><span class="n">wptr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">lbuf_alloc</span><span class="p">(</span><span class="n">lbuf_hdl</span><span class="p">,</span><span class="w"> </span><span class="mi">100</span><span class="p">);</span><span class="w"></span>
 <span class="linenos">10</span><span class="w">    </span><span class="c1">//写入数据</span>
-<span class="linenos">11</span><span class="w">    </span><span class="n">memset</span><span class="p">(</span><span class="n">wptr</span><span class="p">,</span><span class="w"> </span><span class="mh">0x5A</span><span class="p">,</span><span class="w"> </span><span class="mi">100</span><span class="p">);</span>
-<span class="linenos">12</span><span class="w">    </span><span class="n">lbuf_push</span><span class="p">(</span><span class="n">wptr</span><span class="p">,</span><span class="w"> </span><span class="n">BIT</span><span class="p">(</span><span class="mi">0</span><span class="p">));</span>
-<span class="linenos">13</span><span class="w">    </span><span class="n">rptr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">lbuf_pop</span><span class="p">(</span><span class="n">lbuf_hdl</span><span class="p">,</span><span class="w"> </span><span class="n">BIT</span><span class="p">(</span><span class="mi">0</span><span class="p">));</span>
-<span class="linenos">14</span><span class="p">}</span>
+<span class="linenos">11</span><span class="w">    </span><span class="n">memset</span><span class="p">(</span><span class="n">wptr</span><span class="p">,</span><span class="w"> </span><span class="mh">0x5A</span><span class="p">,</span><span class="w"> </span><span class="mi">100</span><span class="p">);</span><span class="w"></span>
+<span class="linenos">12</span><span class="w">    </span><span class="n">lbuf_push</span><span class="p">(</span><span class="n">wptr</span><span class="p">,</span><span class="w"> </span><span class="n">BIT</span><span class="p">(</span><span class="mi">0</span><span class="p">));</span><span class="w"></span>
+<span class="linenos">13</span><span class="w">    </span><span class="n">rptr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">lbuf_pop</span><span class="p">(</span><span class="n">lbuf_hdl</span><span class="p">,</span><span class="w"> </span><span class="n">BIT</span><span class="p">(</span><span class="mi">0</span><span class="p">));</span><span class="w"></span>
+<span class="linenos">14</span><span class="p">}</span><span class="w"></span>
 </pre></div>
 </div>
 </div></blockquote>
@@ -529,11 +483,11 @@
 </ul>
 </section>
 <section id="lbuf-free">
-<h2><span class="section-number">11.3.2.7. </span>lbuf_free<a class="headerlink" href="#lbuf-free" title="Permalink to this heading"></a></h2>
+<h2>lbuf_free<a class="headerlink" href="#lbuf-free" title="Permalink to this headline"></a></h2>
 <ul>
 <li><p>函数原型：</p>
 <blockquote>
-<div><div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="kt">int</span><span class="w"> </span><span class="n">lbuf_free</span><span class="p">(</span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">lbuf</span><span class="p">)</span>
+<div><div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="kt">int</span><span class="w"> </span><span class="n">lbuf_free</span><span class="p">(</span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">lbuf</span><span class="p">)</span><span class="w"></span>
 </pre></div>
 </div>
 </div></blockquote>
@@ -580,21 +534,21 @@
 </li>
 <li><p>示例：</p>
 <blockquote>
-<div><div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kt">int</span><span class="w"> </span><span class="n">lbuf</span><span class="p">[</span><span class="mi">512</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mi">0</span><span class="p">};</span>
-<span class="linenos"> 2</span><span class="k">struct</span><span class="w"> </span><span class="nc">lbuff_head</span><span class="w"> </span><span class="o">*</span><span class="n">lbuf_hdl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span>
-<span class="linenos"> 3</span><span class="kt">void</span><span class="w"> </span><span class="nf">lbuf_user_demo</span><span class="p">()</span>
-<span class="linenos"> 4</span><span class="p">{</span>
-<span class="linenos"> 5</span><span class="w">    </span><span class="n">u32</span><span class="w"> </span><span class="n">ret</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
-<span class="linenos"> 6</span><span class="w">    </span><span class="n">u8</span><span class="w"> </span><span class="o">*</span><span class="n">wptr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span>
-<span class="linenos"> 7</span><span class="w">    </span><span class="n">u8</span><span class="w"> </span><span class="o">*</span><span class="n">rptr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span>
-<span class="linenos"> 8</span><span class="w">    </span><span class="n">lbuf_hdl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">lbuf_init</span><span class="p">(</span><span class="n">lbuf</span><span class="p">,</span><span class="w"> </span><span class="k">sizeof</span><span class="p">(</span><span class="n">lbuf</span><span class="p">),</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span>
-<span class="linenos"> 9</span><span class="w">    </span><span class="n">wptr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">lbuf_alloc</span><span class="p">(</span><span class="n">lbuf_hdl</span><span class="p">,</span><span class="w"> </span><span class="mi">100</span><span class="p">);</span>
+<div><div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kt">int</span><span class="w"> </span><span class="n">lbuf</span><span class="p">[</span><span class="mi">512</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mi">0</span><span class="p">};</span><span class="w"></span>
+<span class="linenos"> 2</span><span class="k">struct</span><span class="w"> </span><span class="nc">lbuff_head</span><span class="w"> </span><span class="o">*</span><span class="n">lbuf_hdl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span><span class="w"></span>
+<span class="linenos"> 3</span><span class="kt">void</span><span class="w"> </span><span class="nf">lbuf_user_demo</span><span class="p">()</span><span class="w"></span>
+<span class="linenos"> 4</span><span class="p">{</span><span class="w"></span>
+<span class="linenos"> 5</span><span class="w">    </span><span class="n">u32</span><span class="w"> </span><span class="n">ret</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+<span class="linenos"> 6</span><span class="w">    </span><span class="n">u8</span><span class="w"> </span><span class="o">*</span><span class="n">wptr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span><span class="w"></span>
+<span class="linenos"> 7</span><span class="w">    </span><span class="n">u8</span><span class="w"> </span><span class="o">*</span><span class="n">rptr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span><span class="w"></span>
+<span class="linenos"> 8</span><span class="w">    </span><span class="n">lbuf_hdl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">lbuf_init</span><span class="p">(</span><span class="n">lbuf</span><span class="p">,</span><span class="w"> </span><span class="k">sizeof</span><span class="p">(</span><span class="n">lbuf</span><span class="p">),</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span><span class="w"></span>
+<span class="linenos"> 9</span><span class="w">    </span><span class="n">wptr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">lbuf_alloc</span><span class="p">(</span><span class="n">lbuf_hdl</span><span class="p">,</span><span class="w"> </span><span class="mi">100</span><span class="p">);</span><span class="w"></span>
 <span class="linenos">10</span><span class="w">    </span><span class="c1">//写入数据</span>
-<span class="linenos">11</span><span class="w">    </span><span class="n">memset</span><span class="p">(</span><span class="n">wptr</span><span class="p">,</span><span class="w"> </span><span class="mh">0x5A</span><span class="p">,</span><span class="w"> </span><span class="mi">100</span><span class="p">);</span>
-<span class="linenos">12</span><span class="w">    </span><span class="n">lbuf_push</span><span class="p">(</span><span class="n">wptr</span><span class="p">,</span><span class="w"> </span><span class="n">BIT</span><span class="p">(</span><span class="mi">0</span><span class="p">));</span>
-<span class="linenos">13</span><span class="w">    </span><span class="n">rptr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">lbuf_pop</span><span class="p">(</span><span class="n">lbuf_hdl</span><span class="p">,</span><span class="w"> </span><span class="n">BIT</span><span class="p">(</span><span class="mi">0</span><span class="p">));</span>
+<span class="linenos">11</span><span class="w">    </span><span class="n">memset</span><span class="p">(</span><span class="n">wptr</span><span class="p">,</span><span class="w"> </span><span class="mh">0x5A</span><span class="p">,</span><span class="w"> </span><span class="mi">100</span><span class="p">);</span><span class="w"></span>
+<span class="linenos">12</span><span class="w">    </span><span class="n">lbuf_push</span><span class="p">(</span><span class="n">wptr</span><span class="p">,</span><span class="w"> </span><span class="n">BIT</span><span class="p">(</span><span class="mi">0</span><span class="p">));</span><span class="w"></span>
+<span class="linenos">13</span><span class="w">    </span><span class="n">rptr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">lbuf_pop</span><span class="p">(</span><span class="n">lbuf_hdl</span><span class="p">,</span><span class="w"> </span><span class="n">BIT</span><span class="p">(</span><span class="mi">0</span><span class="p">));</span><span class="w"></span>
 <span class="linenos">14</span><span class="w">    </span><span class="n">lbuf_free</span><span class="p">(</span><span class="n">wptr</span><span class="p">);</span><span class="w"> </span><span class="c1">//释放 buf</span>
-<span class="linenos">15</span><span class="p">}</span>
+<span class="linenos">15</span><span class="p">}</span><span class="w"></span>
 </pre></div>
 </div>
 </div></blockquote>
@@ -602,11 +556,11 @@
 </ul>
 </section>
 <section id="lbuf-free-space">
-<h2><span class="section-number">11.3.2.8. </span>lbuf_free_space<a class="headerlink" href="#lbuf-free-space" title="Permalink to this heading"></a></h2>
+<h2>lbuf_free_space<a class="headerlink" href="#lbuf-free-space" title="Permalink to this headline"></a></h2>
 <ul>
 <li><p>函数原型：</p>
 <blockquote>
-<div><div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">u32</span><span class="w"> </span><span class="n">lbuf_free_space</span><span class="p">(</span><span class="k">struct</span><span class="w"> </span><span class="nc">lbuff_head</span><span class="w"> </span><span class="o">*</span><span class="n">head</span><span class="p">)</span>
+<div><div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">u32</span><span class="w"> </span><span class="n">lbuf_free_space</span><span class="p">(</span><span class="k">struct</span><span class="w"> </span><span class="nc">lbuff_head</span><span class="w"> </span><span class="o">*</span><span class="n">head</span><span class="p">)</span><span class="w"></span>
 </pre></div>
 </div>
 </div></blockquote>
@@ -650,20 +604,20 @@
 </li>
 <li><p>示例：</p>
 <blockquote>
-<div><div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kt">int</span><span class="w"> </span><span class="n">lbuf</span><span class="p">[</span><span class="mi">512</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mi">0</span><span class="p">};</span>
-<span class="linenos"> 2</span><span class="k">struct</span><span class="w"> </span><span class="nc">lbuff_head</span><span class="w"> </span><span class="o">*</span><span class="n">lbuf_hdl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span>
-<span class="linenos"> 3</span><span class="kt">void</span><span class="w"> </span><span class="nf">lbuf_user_demo</span><span class="p">()</span>
-<span class="linenos"> 4</span><span class="p">{</span>
-<span class="linenos"> 5</span><span class="w">    </span><span class="n">u32</span><span class="w"> </span><span class="n">ret</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
-<span class="linenos"> 6</span><span class="w">    </span><span class="n">u8</span><span class="w"> </span><span class="o">*</span><span class="n">wptr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span>
-<span class="linenos"> 7</span><span class="w">    </span><span class="n">u8</span><span class="w"> </span><span class="o">*</span><span class="n">rptr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span>
-<span class="linenos"> 8</span><span class="w">    </span><span class="n">lbuf_hdl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">lbuf_init</span><span class="p">(</span><span class="n">lbuf</span><span class="p">,</span><span class="w"> </span><span class="k">sizeof</span><span class="p">(</span><span class="n">lbuf</span><span class="p">),</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span>
-<span class="linenos"> 9</span><span class="w">    </span><span class="n">wptr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">lbuf_alloc</span><span class="p">(</span><span class="n">lbuf_hdl</span><span class="p">,</span><span class="w"> </span><span class="mi">100</span><span class="p">);</span>
+<div><div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kt">int</span><span class="w"> </span><span class="n">lbuf</span><span class="p">[</span><span class="mi">512</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mi">0</span><span class="p">};</span><span class="w"></span>
+<span class="linenos"> 2</span><span class="k">struct</span><span class="w"> </span><span class="nc">lbuff_head</span><span class="w"> </span><span class="o">*</span><span class="n">lbuf_hdl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span><span class="w"></span>
+<span class="linenos"> 3</span><span class="kt">void</span><span class="w"> </span><span class="nf">lbuf_user_demo</span><span class="p">()</span><span class="w"></span>
+<span class="linenos"> 4</span><span class="p">{</span><span class="w"></span>
+<span class="linenos"> 5</span><span class="w">    </span><span class="n">u32</span><span class="w"> </span><span class="n">ret</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+<span class="linenos"> 6</span><span class="w">    </span><span class="n">u8</span><span class="w"> </span><span class="o">*</span><span class="n">wptr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span><span class="w"></span>
+<span class="linenos"> 7</span><span class="w">    </span><span class="n">u8</span><span class="w"> </span><span class="o">*</span><span class="n">rptr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span><span class="w"></span>
+<span class="linenos"> 8</span><span class="w">    </span><span class="n">lbuf_hdl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">lbuf_init</span><span class="p">(</span><span class="n">lbuf</span><span class="p">,</span><span class="w"> </span><span class="k">sizeof</span><span class="p">(</span><span class="n">lbuf</span><span class="p">),</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span><span class="w"></span>
+<span class="linenos"> 9</span><span class="w">    </span><span class="n">wptr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">lbuf_alloc</span><span class="p">(</span><span class="n">lbuf_hdl</span><span class="p">,</span><span class="w"> </span><span class="mi">100</span><span class="p">);</span><span class="w"></span>
 <span class="linenos">10</span><span class="w">    </span><span class="c1">//写入数据</span>
-<span class="linenos">11</span><span class="w">    </span><span class="n">memset</span><span class="p">(</span><span class="n">wptr</span><span class="p">,</span><span class="w"> </span><span class="mh">0x5A</span><span class="p">,</span><span class="w"> </span><span class="mi">100</span><span class="p">);</span>
-<span class="linenos">12</span><span class="w">    </span><span class="n">lbuf_push</span><span class="p">(</span><span class="n">wptr</span><span class="p">,</span><span class="w"> </span><span class="n">BIT</span><span class="p">(</span><span class="mi">0</span><span class="p">));</span>
-<span class="linenos">13</span><span class="w">    </span><span class="n">ret</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">lbuf_free_space</span><span class="p">(</span><span class="n">lbuf_hdl</span><span class="p">);</span>
-<span class="linenos">14</span><span class="p">}</span>
+<span class="linenos">11</span><span class="w">    </span><span class="n">memset</span><span class="p">(</span><span class="n">wptr</span><span class="p">,</span><span class="w"> </span><span class="mh">0x5A</span><span class="p">,</span><span class="w"> </span><span class="mi">100</span><span class="p">);</span><span class="w"></span>
+<span class="linenos">12</span><span class="w">    </span><span class="n">lbuf_push</span><span class="p">(</span><span class="n">wptr</span><span class="p">,</span><span class="w"> </span><span class="n">BIT</span><span class="p">(</span><span class="mi">0</span><span class="p">));</span><span class="w"></span>
+<span class="linenos">13</span><span class="w">    </span><span class="n">ret</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">lbuf_free_space</span><span class="p">(</span><span class="n">lbuf_hdl</span><span class="p">);</span><span class="w"></span>
+<span class="linenos">14</span><span class="p">}</span><span class="w"></span>
 </pre></div>
 </div>
 </div></blockquote>
@@ -671,11 +625,11 @@
 </ul>
 </section>
 <section id="lbuf-state">
-<h2><span class="section-number">11.3.2.9. </span>lbuf_state<a class="headerlink" href="#lbuf-state" title="Permalink to this heading"></a></h2>
+<h2>lbuf_state<a class="headerlink" href="#lbuf-state" title="Permalink to this headline"></a></h2>
 <ul>
 <li><p>函数原型：</p>
 <blockquote>
-<div><div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="n">lbuf_state</span><span class="p">(</span><span class="k">struct</span><span class="w"> </span><span class="nc">lbuff_head</span><span class="w"> </span><span class="o">*</span><span class="n">head</span><span class="p">,</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="nc">lbuff_state</span><span class="w"> </span><span class="o">*</span><span class="n">state</span><span class="p">)</span>
+<div><div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="n">lbuf_state</span><span class="p">(</span><span class="k">struct</span><span class="w"> </span><span class="nc">lbuff_head</span><span class="w"> </span><span class="o">*</span><span class="n">head</span><span class="p">,</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="nc">lbuff_state</span><span class="w"> </span><span class="o">*</span><span class="n">state</span><span class="p">)</span><span class="w"></span>
 </pre></div>
 </div>
 </div></blockquote>
@@ -729,11 +683,11 @@
 </ul>
 </section>
 <section id="lbuf-avaliable">
-<h2><span class="section-number">11.3.2.10. </span>lbuf_avaliable<a class="headerlink" href="#lbuf-avaliable" title="Permalink to this heading"></a></h2>
+<h2>lbuf_avaliable<a class="headerlink" href="#lbuf-avaliable" title="Permalink to this headline"></a></h2>
 <ul>
 <li><p>函数原型：</p>
 <blockquote>
-<div><div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="kt">int</span><span class="w"> </span><span class="n">lbuf_avaliable</span><span class="p">(</span><span class="k">struct</span><span class="w"> </span><span class="nc">lbuff_head</span><span class="w"> </span><span class="o">*</span><span class="n">head</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">size</span><span class="p">)</span>
+<div><div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="kt">int</span><span class="w"> </span><span class="n">lbuf_avaliable</span><span class="p">(</span><span class="k">struct</span><span class="w"> </span><span class="nc">lbuff_head</span><span class="w"> </span><span class="o">*</span><span class="n">head</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">size</span><span class="p">)</span><span class="w"></span>
 </pre></div>
 </div>
 </div></blockquote>
@@ -801,11 +755,11 @@
 </ul>
 </section>
 <section id="lbuf-real-size">
-<h2><span class="section-number">11.3.2.11. </span>lbuf_real_size<a class="headerlink" href="#lbuf-real-size" title="Permalink to this heading"></a></h2>
+<h2>lbuf_real_size<a class="headerlink" href="#lbuf-real-size" title="Permalink to this headline"></a></h2>
 <ul>
 <li><p>函数原型：</p>
 <blockquote>
-<div><div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="kt">int</span><span class="w"> </span><span class="n">lbuf_real_size</span><span class="p">(</span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">lbuf</span><span class="p">)</span>
+<div><div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="kt">int</span><span class="w"> </span><span class="n">lbuf_real_size</span><span class="p">(</span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">lbuf</span><span class="p">)</span><span class="w"></span>
 </pre></div>
 </div>
 </div></blockquote>
@@ -871,11 +825,11 @@
 </ul>
 </section>
 <section id="lbuf-remain-space">
-<h2><span class="section-number">11.3.2.12. </span>lbuf_remain_space<a class="headerlink" href="#lbuf-remain-space" title="Permalink to this heading"></a></h2>
+<h2>lbuf_remain_space<a class="headerlink" href="#lbuf-remain-space" title="Permalink to this headline"></a></h2>
 <ul>
 <li><p>函数原型：</p>
 <blockquote>
-<div><div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="kt">int</span><span class="w"> </span><span class="n">lbuf_remain_space</span><span class="p">(</span><span class="k">struct</span><span class="w"> </span><span class="nc">lbuff_head</span><span class="w"> </span><span class="o">*</span><span class="n">head</span><span class="p">)</span>
+<div><div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="kt">int</span><span class="w"> </span><span class="n">lbuf_remain_space</span><span class="p">(</span><span class="k">struct</span><span class="w"> </span><span class="nc">lbuff_head</span><span class="w"> </span><span class="o">*</span><span class="n">head</span><span class="p">)</span><span class="w"></span>
 </pre></div>
 </div>
 </div></blockquote>
@@ -944,17 +898,12 @@
 
            </div>
           </div>
-          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="cbuf.html" class="btn btn-neutral float-left" title="11.3.1. cbuf" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="../cfg_user/index.html" class="btn btn-neutral float-right" title="11.4. 配置项管理" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-    </div>
+          <footer>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2010-2023, 杰理科技股份有限公司.
-      <span class="lastupdated">Last updated on Aug 24, 2023.
-      </span></p>
+    <p>&#169; Copyright 2010-2026, 杰理科技股份有限公司.</p>
   </div>
 
    

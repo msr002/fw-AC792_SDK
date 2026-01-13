@@ -32,6 +32,12 @@ static inline uint32_t op_t(uint32_t val)
     return 0;
 }
 
+
+const char *msg_id_array_singulars[] = { NULL };
+
+const char *msg_id_array_plurals_other[] = { NULL };
+
+
 const lv_i18n_language_pack_t lv_i18n_language_pack[] = {
 
     NULL // End mark
@@ -94,14 +100,15 @@ int lv_i18n_set_locale(const char *l_name)
 }
 
 
-static const char *__lv_i18n_get_text_core(lv_i18n_phrase_t *trans, const char *msg_id)
+static const char *__lv_i18n_get_text_core(const char *const *msg_id_array, const char *const *trans_array,
+        const char *msg_id)
 {
     uint16_t i;
-    for (i = 0; trans[i].msg_id != NULL; i++) {
-        if (strcmp(trans[i].msg_id, msg_id) == 0) {
+    for (i = 0; msg_id_array[i] != NULL; i++) {
+        if (strcmp(msg_id_array[i], msg_id) == 0) {
             /*The msg_id has found. Check the translation*/
-            if (trans[i].translation) {
-                return trans[i].translation;
+            if (trans_array[i]) {
+                return trans_array[i];
             }
         }
     }
@@ -126,7 +133,7 @@ const char *lv_i18n_get_text(const char *msg_id)
 
     // Search in current locale
     if (lang->singulars != NULL) {
-        txt = __lv_i18n_get_text_core(lang->singulars, msg_id);
+        txt = __lv_i18n_get_text_core(msg_id_array_singulars, lang->singulars, msg_id);
         if (txt != NULL) {
             return txt;
         }
@@ -140,7 +147,7 @@ const char *lv_i18n_get_text(const char *msg_id)
 
     // Repeat search for default locale
     if (lang->singulars != NULL) {
-        txt = __lv_i18n_get_text_core(lang->singulars, msg_id);
+        txt = __lv_i18n_get_text_core(msg_id_array_singulars, lang->singulars, msg_id);
         if (txt != NULL) {
             return txt;
         }
@@ -170,7 +177,7 @@ const char *lv_i18n_get_text_plural(const char *msg_id, int32_t num)
         ptype = lang->locale_plural_fn(num);
 
         if (lang->plurals[ptype] != NULL) {
-            txt = __lv_i18n_get_text_core(lang->plurals[ptype], msg_id);
+            txt = __lv_i18n_get_text_core(msg_id_array_plurals_other, lang->plurals[ptype], msg_id);
             if (txt != NULL) {
                 return txt;
             }
@@ -188,7 +195,7 @@ const char *lv_i18n_get_text_plural(const char *msg_id, int32_t num)
         ptype = lang->locale_plural_fn(num);
 
         if (lang->plurals[ptype] != NULL) {
-            txt = __lv_i18n_get_text_core(lang->plurals[ptype], msg_id);
+            txt = __lv_i18n_get_text_core(msg_id_array_plurals_other, lang->plurals[ptype], msg_id);
             if (txt != NULL) {
                 return txt;
             }
@@ -196,31 +203,6 @@ const char *lv_i18n_get_text_plural(const char *msg_id, int32_t num)
     }
 
     return msg_id;
-}
-
-typedef struct {
-    const char *font_name;
-    const lv_font_t *font_ptr;
-} font_mapping_t;
-
-static const font_mapping_t font_mapping[] = {
-
-    {NULL, NULL} // End mark
-};
-
-const lv_font_t *lv_i18n_get_font_by_name(const char *font_name)
-{
-    if (font_name == NULL) {
-        return NULL;
-    }
-
-    for (uint16_t i = 0; font_mapping[i].font_name != NULL; i++) {
-        if (strcmp(font_mapping[i].font_name, font_name) == 0) {
-            return font_mapping[i].font_ptr;
-        }
-    }
-
-    return NULL;
 }
 
 /*
@@ -233,43 +215,7 @@ const lv_font_t *lv_i18n_get_font(const char *msg_id)
         return NULL;
     }
 
-    const lv_i18n_lang_t *lang = current_lang;
-    const lv_font_t *font = NULL;
-
-    // Search in current locale singulars
-    if (lang->singulars != NULL) {
-        for (uint16_t i = 0; lang->singulars[i].msg_id != NULL; i++) {
-            if (strcmp(lang->singulars[i].msg_id, msg_id) == 0) {
-                const char *font_name = lang->singulars[i].font_name;
-                font = lv_i18n_get_font_by_name(font_name);
-                return font;
-            }
-        }
-    }
-
-    // Search in current locale plurals for type ONE
-    if (lang->plurals[LV_I18N_PLURAL_TYPE_ONE] != NULL) {
-        for (uint16_t i = 0; lang->plurals[LV_I18N_PLURAL_TYPE_ONE][i].msg_id != NULL; i++) {
-            if (strcmp(lang->plurals[LV_I18N_PLURAL_TYPE_ONE][i].msg_id, msg_id) == 0) {
-                const char *font_name = lang->plurals[LV_I18N_PLURAL_TYPE_ONE][i].font_name;
-                font = lv_i18n_get_font_by_name(font_name);
-                return font;
-            }
-        }
-    }
-
-    // Search in current locale plurals for type OTHER
-    if (lang->plurals[LV_I18N_PLURAL_TYPE_OTHER] != NULL) {
-        for (uint16_t i = 0; lang->plurals[LV_I18N_PLURAL_TYPE_OTHER][i].msg_id != NULL; i++) {
-            if (strcmp(lang->plurals[LV_I18N_PLURAL_TYPE_OTHER][i].msg_id, msg_id) == 0) {
-                const char *font_name = lang->plurals[LV_I18N_PLURAL_TYPE_OTHER][i].font_name;
-                font = lv_i18n_get_font_by_name(font_name);
-                return font;
-            }
-        }
-    }
-
-    return NULL;
+    return current_lang->font;
 }
 
 /**

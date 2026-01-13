@@ -1,9 +1,12 @@
-#ifdef MEDIA_SUPPORT_MS_EXTENSIONS
+#ifdef RCSP_SUPPORT_MS_EXTENSIONS
 #pragma bss_seg(".file_transfer.data.bss")
 #pragma data_seg(".file_transfer.data")
 #pragma const_seg(".file_transfer.text.const")
 #pragma code_seg(".file_transfer.text")
 #endif
+
+#include "app_config.h"
+#include "rcsp_cfg.h"
 #include "file_transfer.h"
 #include "system/includes.h"
 #include "fs/fs.h"
@@ -11,10 +14,12 @@
 #include "rcsp_browser.h"
 #include "rcsp_config.h"
 #include "rcsp_extra_flash_opt.h"
-#include "btstack/third_party/rcsp/JL_rcsp_protocol.h"
+#include "rcsp/JL_rcsp_protocol.h"
+#include "pub_mutual_set_cmd_opt.h"
+#include "fs/resfile.h"
+#include "file_transfer_sync.h"
 
-
-#if (RCSP_MODE && TCFG_DEV_MANAGER_ENABLE && RCSP_FILE_OPT)
+#if (RCSP_MODE && ((TCFG_DEV_MANAGER_ENABLE && RCSP_FILE_OPT) || RCSP_TONE_FILE_TRANSFER_ENABLE))
 #define FTP_FILE_DATA_UNIT						(512)     //(234)//不能超过RCSP协议的MTU大小
 #define FTP_FILE_DATA_RECIEVE_REMAIN_SIZE		(128) 	  //接收缓存预留
 #define FTP_FILE_DATA_RECIEVE_BUF_MIN_SIZE		(FTP_FILE_DATA_UNIT + FTP_FILE_DATA_RECIEVE_REMAIN_SIZE)
@@ -26,6 +31,12 @@
 #define FTP_FILE_PACKET_CRC_CHECK_EN			1 		  //文件内容每一包校验使能
 #define FTP_FILE_PACKET_CRC_ERR_CONTINUE_EN		0		  //出现包crc错之后是否需要继续传输， 如果是测试， 可以设置为0, 会通知APP停止传输
 
+#define LOG_TAG_CONST	  APP_RCSP
+#define LOG_TAG             "[APP_RCSP]"
+#define LOG_ERROR_ENABLE
+#define LOG_DEBUG_ENABLE
+#define LOG_INFO_ENABLE
+#include "system/debug.h"
 /* #define FTP_DEBUG_ENABLE */
 #ifdef FTP_DEBUG_ENABLE
 #define ftp_printf	printf
@@ -46,6 +57,11 @@ struct __file_check {
     u32  remain;
 };
 
+struct __ftp_reserved_fp {
+    u32 start_addr;
+    u32 total_len;
+    u32 file_offset;
+};
 
 struct __ftp_download {
     u32  file_size;
@@ -56,6 +72,7 @@ struct __ftp_download {
     u8	 last_packet;
     u8	 packet_crc_err;
     u8	 packet_crc_check;
+    u8   special_flag;
     u32  dev_handle;
     u16  mark_timer;
     u16  get_timeout;
@@ -63,14 +80,238 @@ struct __ftp_download {
     u16  file_crc;
     struct __file_check check;
     char *filepath;
-    FILE *file;
+    union {
+        struct __ftp_reserved_fp *file;
+        FILE *file_src;
+        RESFILE *res_file;
+    };
     struct __dev *dev;
     void (*end_callback)(void);
+    u8 *spp_remote_addr;
+    u16 ble_con_handle;
 };
 static struct __ftp_download *ftp_d = NULL;
 
 static void file_transfer_download_get_data(void);
 static void __file_transfer_download_file_check_caculate(void *priv);
+
+#ifdef TONE_FILE_RESERVED_AREA_NAME
+extern u32 sfc_write(const u8 *buf, u32 addr, u32 len);
+extern u32 sfc_read(u8 *buf, u32 addr, u32 len);
+extern int reserve_file_gain(char *file_name, u32 *start_addr, u32 *date_len);
+RESFILE *cfg_private_open_by_maxsize(const char *path, const char *mode, int file_maxsize);
+extern int cfg_private_read(RESFILE *file, void *buf, u32 len);
+extern int cfg_private_write(RESFILE *file, void *buf, u32 len);
+extern int cfg_private_close(RESFILE *file);
+extern int cfg_private_seek(RESFILE *file, int offset, int fromwhere);
+extern int cfg_private_init(int file_num, const char *part_path);
+#endif
+
+enum {
+    FILE_TRANSFER_TONE_FILE = 0x1,
+};
+
+static int file_t_fclose(void *file)
+{
+#ifdef TONE_FILE_RESERVED_AREA_NAME
+    if (ftp_d && (RCSPDevMapRESERVE == ftp_d->dev_handle)) {
+        if (file) {
+            return cfg_private_close(file);
+        }
+        return 0;
+    } else if (ftp_d && (FILE_TRANSFER_TONE_FILE == ftp_d->special_flag)) {
+        if (file) {
+            free(file);
+            file = NULL;
+        }
+        return 0;
+    }
+#endif
+    return fclose(file);
+}
+
+static void *file_t_open(const char *path, const char *mode)
+{
+    void *file_ptr = NULL;
+    if (NULL == ftp_d) {
+        return file_ptr;
+    }
+#if TCFG_USER_TWS_ENABLE
+    // 触发tws从机open
+    file_trans_open_tws_sync_to_slave(path, mode);
+#endif
+
+#ifdef TONE_FILE_RESERVED_AREA_NAME
+    if (ftp_d && (RCSPDevMapRESERVE == ftp_d->dev_handle)) {
+        if (ftp_d->filepath) {
+            char *file_path = zalloc(strlen(ftp_d->filepath) + strlen(TONE_FILE_RESERVED_AREA_NAME) + 1 + strlen(path) + 1 + 1);
+            strcat(file_path, ftp_d->filepath);
+            strcat(file_path, TONE_FILE_RESERVED_AREA_NAME);
+            strcat(file_path, "/");
+            strcat(file_path, path);
+            file_ptr = cfg_private_open_by_maxsize(file_path, mode, TONE_EATCH_FILE_MAX_SIZE);
+            if (file_path) {
+                free(file_path);
+            }
+        }
+    } else if (ftp_d && (FILE_TRANSFER_TONE_FILE == ftp_d->special_flag)) {
+        struct __ftp_reserved_fp *fp = (struct __ftp_reserved_fp *)zalloc(sizeof(struct __ftp_reserved_fp));
+        if (NULL == fp) {
+            goto _ERR_RET;
+        }
+        fp->file_offset = 0;
+        if (reserve_file_gain(TONE_FILE_RESERVED_AREA_NAME, &fp->start_addr, &fp->total_len)) {
+            free(fp);
+            fp = NULL;
+        }
+        file_ptr = fp;
+    } else
+#endif
+    {
+        file_ptr = fopen(path, mode);
+    }
+_ERR_RET:
+#if TCFG_USER_TWS_ENABLE
+    // pend住，等待从机open完成
+    if (file_trans_open_tws_sync_pend()) {
+        file_t_fclose(file_ptr);
+        file_ptr = NULL;
+    }
+#endif
+    return file_ptr;
+}
+
+static int file_t_fread(void *buf, u32 size, u32 count, void *file)
+{
+    int ret = 0;
+#ifdef TONE_FILE_RESERVED_AREA_NAME
+    if (ftp_d && (RCSPDevMapRESERVE == ftp_d->dev_handle)) {
+        ret = cfg_private_read(file, buf, size);
+    } else if (ftp_d && (FILE_TRANSFER_TONE_FILE == ftp_d->special_flag)) {
+        struct __ftp_reserved_fp *fp = (struct __ftp_reserved_fp *)file;
+        ret = sfc_read(buf, fp->start_addr + fp->file_offset, size);
+        fp->file_offset += size;
+    } else
+#endif
+    {
+        ret = fread(buf, size, count, file);
+    }
+    return ret;
+}
+
+#ifdef TONE_FILE_RESERVED_AREA_NAME
+#define FILE_TRANS_BLOCK_SIZE	(64*1024)
+#define FILE_TRANS_SECTOR_SIZE	(4*1024)
+extern int flash_erase_addr_n_len_witout_align(u32 start_addr, u32 len, u32 align_bytes);
+static int file_t_erase(void *file, u32 erase_addr, u32 erase_size)
+{
+    if (NULL == file) {
+        return 0;
+    }
+    if (ftp_d && (RCSPDevMapRESERVE == ftp_d->dev_handle)) {
+        goto _ERR_RET;
+    }
+#if TCFG_USER_TWS_ENABLE
+    // 触发tws从机擦除
+    file_trans_erase_tws_sync_to_slave(erase_addr, erase_size);
+#endif
+
+    struct __ftp_reserved_fp *fp = (struct __ftp_reserved_fp *)file;
+    erase_addr += fp->start_addr;
+    if (0 == erase_size) {
+        erase_size = fp->total_len;
+    }
+
+    for (u32 data_len = 0, end_addr = erase_addr + erase_size; erase_addr < end_addr;) {
+        if ((end_addr - erase_addr) > FILE_TRANS_BLOCK_SIZE) {
+            if (erase_addr % FILE_TRANS_BLOCK_SIZE)	{
+                data_len = (erase_addr / FILE_TRANS_BLOCK_SIZE + 1) * FILE_TRANS_BLOCK_SIZE - erase_addr;
+            } else {
+                data_len = FILE_TRANS_BLOCK_SIZE;
+            }
+            flash_erase_addr_n_len_witout_align(erase_addr, data_len, FILE_TRANS_BLOCK_SIZE);
+        } else if ((end_addr - erase_addr) > FILE_TRANS_SECTOR_SIZE) {
+            if (erase_addr % FILE_TRANS_SECTOR_SIZE) {
+                data_len = (erase_addr / FILE_TRANS_SECTOR_SIZE + 1) * FILE_TRANS_SECTOR_SIZE - erase_addr;
+            } else {
+                data_len = FILE_TRANS_SECTOR_SIZE;
+            }
+            flash_erase_addr_n_len_witout_align(erase_addr, data_len, FILE_TRANS_SECTOR_SIZE);
+        } else {
+            data_len = end_addr - erase_addr;
+            flash_erase_addr_n_len_witout_align(erase_addr, data_len, FILE_TRANS_SECTOR_SIZE);
+        }
+        erase_addr += data_len;
+    }
+#if TCFG_USER_TWS_ENABLE
+    // pend住，等待从机擦除完成
+    if (file_trans_erase_tws_sync_pend()) {
+        return -1;
+    }
+#endif
+_ERR_RET:
+    return 0;
+}
+#endif
+
+static int file_t_fwrite(void *buf, u32 size, u32 count, void *file)
+{
+    int ret = 0;
+#if TCFG_USER_TWS_ENABLE
+    file_trans_write_tws_sync_to_slave(buf, size, count);
+#endif
+
+#ifdef TONE_FILE_RESERVED_AREA_NAME
+    if (ftp_d && (RCSPDevMapRESERVE == ftp_d->dev_handle)) {
+        ret = cfg_private_write(file, buf, size);
+    } else if (ftp_d && (FILE_TRANSFER_TONE_FILE == ftp_d->special_flag)) {
+        struct __ftp_reserved_fp *fp = (struct __ftp_reserved_fp *)file;
+        ret = sfc_write(buf, fp->start_addr + fp->file_offset, size);
+        fp->file_offset += size;
+    } else
+#endif
+    {
+        ret = fwrite(buf, size, count, file);
+    }
+#if TCFG_USER_TWS_ENABLE
+    if (file_trans_write_tws_sync_pend()) {
+        ret = -1;
+    }
+#endif
+    return ret;
+}
+
+static int file_t_fseek(void *file, int offset, int orig)
+{
+#ifdef TONE_FILE_RESERVED_AREA_NAME
+    if (ftp_d && (RCSPDevMapRESERVE == ftp_d->dev_handle)) {
+        cfg_private_seek(file, offset, orig);
+    } else if (ftp_d && (FILE_TRANSFER_TONE_FILE == ftp_d->special_flag)) {
+        struct __ftp_reserved_fp *fp = (struct __ftp_reserved_fp *)file;
+        fp->file_offset = offset;
+    } else
+#endif
+    {
+        fseek(file, offset, orig);
+    }
+    return 0;
+}
+
+static int file_t_frename(void *file, const char *path)
+{
+#ifdef TONE_FILE_RESERVED_AREA_NAME
+    return 0;
+#endif
+    return frename(file, path);
+}
+
+static int file_t_fdelete(void *file)
+{
+#ifdef TONE_FILE_RESERVED_AREA_NAME
+    return file_t_fclose(file);
+#endif
+    return fdelete(file);
+}
 
 //*----------------------------------------------------------------------------*/
 /**@brief    校验分次处理消息发送处理
@@ -85,7 +326,8 @@ static void file_transfer_download_file_check_continue(void)
     msg[0] = (int)__file_transfer_download_file_check_caculate;
     msg[1] = 1;
     msg[2] = 0;
-    os_taskq_post_type("app_core", Q_CALLBACK, 3, msg);
+    /* os_taskq_post_type("app_core", Q_CALLBACK, 3, msg); */
+    os_taskq_post_type(os_current_task(), Q_CALLBACK, 3, msg);
 }
 
 //*----------------------------------------------------------------------------*/
@@ -101,6 +343,7 @@ static void __file_transfer_download_file_check_caculate(void *priv)
         return ;
     }
     wdt_clear();
+    u8 reason = 0;
     JL_ERR err = 0;
     u32 cnt;
     if (ftp_d->check.counter >= FTP_FILE_CRC_CAC_MAX_COUNTER)		{
@@ -108,41 +351,52 @@ static void __file_transfer_download_file_check_caculate(void *priv)
     } else {
         cnt = ftp_d->check.counter;
     }
-    printf("cnt = %d, check.counter = %d, crc_tmp = %x\n", cnt, ftp_d->check.counter, ftp_d->check.crc_tmp);
+    log_info("cnt = %d, check.counter = %d, crc_tmp = %x", cnt, ftp_d->check.counter, ftp_d->check.crc_tmp);
     for (int i = 0; i < cnt; i++) {
-        fread(ftp_d->win, sizeof(ftp_d->win), 1, ftp_d->file);
+        file_t_fread(ftp_d->win, sizeof(ftp_d->win), 1, ftp_d->file);
         ftp_d->check.crc_tmp = CRC16_with_initval(ftp_d->win, sizeof(ftp_d->win), ftp_d->check.crc_tmp);
     }
     ftp_d->check.counter -= cnt;
     if (ftp_d->check.counter == 0) {
         if (ftp_d->check.remain) {
-            fread(ftp_d->win, ftp_d->check.remain, 1, ftp_d->file);
-            printf("remain\n");
+            file_t_fread(ftp_d->win, ftp_d->check.remain, 1, ftp_d->file);
+            log_info("remain");
             put_buf(ftp_d->win, ftp_d->check.remain);
             ftp_d->check.crc_tmp = CRC16_with_initval(ftp_d->win, ftp_d->check.remain, ftp_d->check.crc_tmp);
         }
+#if TCFG_USER_TWS_ENABLE
+        // pend住等待从机验完成
+        if (file_trans_calc_crc_tws_sync_pend()) {
+            log_info("slave crc check err, master crc:%x, %x", ftp_d->check.crc_tmp, ftp_d->file_crc);
+            ftp_d->check.crc_tmp = 0;
+        }
+#endif
         //crc_check end
         if (ftp_d->check.crc_tmp == ftp_d->file_crc) {
-            printf("crc check ok!!, start rename\n");
-            fseek(ftp_d->file, ftp_d->file_size, SEEK_SET);
+            log_debug("crc check ok!!, start rename");
+            file_t_fseek(ftp_d->file, ftp_d->file_size, SEEK_SET);
             //进入重命名流程
-            err = JL_CMD_send(JL_OPCODE_FILE_RENAME, NULL, 0, 1, 0, NULL);
+            err = JL_CMD_send(JL_OPCODE_FILE_RENAME, NULL, 0, 1, ftp_d->ble_con_handle, ftp_d->spp_remote_addr);
             if (err) {
                 //命令发送失败， 直接停止
                 rcsp_file_transfer_close();
             }
-            return ;
+            /* return ; */
         } else {
-            printf("crc check fail, crc_tmp = %x, file_crc = %x!!\n", ftp_d->check.crc_tmp, ftp_d->file_crc);
-            u8 reason = FTP_END_REASON_DATA_CRC_ERR;
-            fdelete(ftp_d->file);
+            log_error("crc check fail, crc_tmp = %x, file_crc = %x!!", ftp_d->check.crc_tmp, ftp_d->file_crc);
+            reason = FTP_END_REASON_DATA_CRC_ERR;
+            file_t_fdelete(ftp_d->file);
             ftp_d->file = NULL;
-            JL_ERR err = JL_CMD_send(JL_OPCODE_FILE_TRANSFER_END, &reason, 1, 1, 0, NULL);
+            JL_ERR err = JL_CMD_send(JL_OPCODE_FILE_TRANSFER_END, &reason, 1, 1, ftp_d->ble_con_handle, ftp_d->spp_remote_addr);
             if (err) {
                 //命令发送失败， 直接停止
                 rcsp_file_transfer_close();
             }
         }
+#if TCFG_USER_TWS_ENABLE
+        // 从机把结果发送给主机，并解除pend状态
+        file_trans_slave_calc_crc_tws_sync_post(reason);
+#endif
     } else {
         file_transfer_download_file_check_continue();
     }
@@ -157,12 +411,16 @@ static void __file_transfer_download_file_check_caculate(void *priv)
 /*----------------------------------------------------------------------------*/
 static void file_transfer_download_file_check(void)
 {
+#if TCFG_USER_TWS_ENABLE
+    // 触发tws从机校验的流程
+    file_trans_calc_crc_tws_sync_to_slave(ftp_d->file_crc, ftp_d->file_size);
+#endif
     ftp_d->check.crc_tmp = 0;
     ftp_d->check.counter = ftp_d->file_size / sizeof(ftp_d->win);
     ftp_d->check.remain = ftp_d->file_size % sizeof(ftp_d->win);
     ftp_d->file_offset = ftp_d->file_size;
-    printf("crc_tmp = %x, counter = %d, remain = %d\n", ftp_d->check.crc_tmp, ftp_d->check.counter, ftp_d->check.remain);
-    fseek(ftp_d->file, 0, SEEK_SET);
+    log_info("crc_tmp = %x, counter = %d, remain = %d", ftp_d->check.crc_tmp, ftp_d->check.counter, ftp_d->check.remain);
+    file_t_fseek(ftp_d->file, 0, SEEK_SET);
     file_transfer_download_file_check_continue();
 }
 
@@ -175,25 +433,31 @@ static void file_transfer_download_file_check(void)
 /*----------------------------------------------------------------------------*/
 static int file_rename(const char *rename)
 {
+#ifdef TONE_FILE_RESERVED_AREA_NAME
+    /* if (RCSPDevMapRESERVE == ftp_d->dev_handle) { */
+    if ((FILE_TRANSFER_TONE_FILE == ftp_d->special_flag) || (RCSPDevMapRESERVE == ftp_d->dev_handle)) {
+        return 0;
+    }
+#endif
     if (ftp_d && ftp_d->file) {
         //rename之前先关闭文件
-        fclose(ftp_d->file);
+        file_t_fclose(ftp_d->file);
         ftp_d->file = NULL;
         //重新打开文件
-        //printf("ftp_d->filepath:%s, rename:%s\n", ftp_d->filepath, rename);
-        ftp_d->file = fopen(ftp_d->filepath, "r");
+        //log_info("ftp_d->filepath:%s, rename:%s", ftp_d->filepath, rename);
+        ftp_d->file = file_t_open(ftp_d->filepath, "r");
         //free(path);
         if (ftp_d->file) {
             //文件打开成功， 重命名
-            int ret = frename(ftp_d->file, rename);
+            int ret = file_t_frename(ftp_d->file, rename);
             if (ret) {
-                printf("rename fail\n");
+                log_error("rename fail");
             } else {
-                printf("rename ok\n");
+                log_info("rename ok");
             }
             return ret;
         } else {
-            printf("rename file open err!!");
+            log_error("rename file open err!!");
         }
     }
     return -1;
@@ -206,17 +470,23 @@ static int file_rename(const char *rename)
    @note	 文件传输过程， 定时会触发断点续传信息保存处理
 */
 /*----------------------------------------------------------------------------*/
-static void file_transfer_download_vaild_mark_fill(FILE *file, u8 *win, u32 offset, u8 vaild)
+static void file_transfer_download_vaild_mark_fill(void *file, u8 *win, u32 offset, u8 vaild)
 {
     if (file) {
-        fseek(file, 0, SEEK_SET);
+        file_t_fseek(file, 0, SEEK_SET);
+#if TCFG_USER_TWS_ENABLE
+        file_trans_seek_tws_sync(0, SEEK_SET);
+#endif
         memset(win, 0, FTP_FILE_DATA_UNIT);
         memcpy(win, FTP_FILE_VAILD_MARK, strlen(FTP_FILE_VAILD_MARK));
         memcpy(win + strlen(FTP_FILE_VAILD_MARK), &offset, sizeof(offset));
         memcpy(win + strlen(FTP_FILE_VAILD_MARK) + sizeof(offset), &vaild, sizeof(vaild));
-        fwrite(win, FTP_FILE_DATA_UNIT, 1, file);
-        fseek(file, offset, SEEK_SET);
-        /* printf("============================================%s, offset = %d, pos = %d\n", __FUNCTION__, offset, fpos(file)); */
+        file_t_fwrite(win, FTP_FILE_DATA_UNIT, 1, file);
+        file_t_fseek(file, offset, SEEK_SET);
+#if TCFG_USER_TWS_ENABLE
+        file_trans_seek_tws_sync(offset, SEEK_SET);
+#endif
+        /* log_error("============================================%s, offset = %d, pos = %d", __FUNCTION__, offset, fpos(file)); */
     }
 }
 
@@ -228,28 +498,28 @@ static void file_transfer_download_vaild_mark_fill(FILE *file, u8 *win, u32 offs
    @note	 在文件传输开始的时候进行解析， 目的是找到续传文件偏移
 */
 /*----------------------------------------------------------------------------*/
-static void file_transfer_download_intermittent_parse(FILE *file, u32 *offset)
+static void file_transfer_download_intermittent_parse(void *file, u32 *offset)
 {
     if (file) {
         char mark[10] = {0};
-        fseek(file, 0, SEEK_SET);
-        int rlen = fread(mark, strlen(FTP_FILE_VAILD_MARK), 1, file);
+        file_t_fseek(file, 0, SEEK_SET);
+        int rlen = file_t_fread(mark, strlen(FTP_FILE_VAILD_MARK), 1, file);
         if (rlen) {
             if (strcmp(mark, FTP_FILE_VAILD_MARK) == 0) {
-                printf("find VAILD_MARK !!\n");
-                rlen = fread(offset, sizeof(u32), 1, file);
+                log_info("find VAILD_MARK !!");
+                rlen = file_t_fread(offset, sizeof(u32), 1, file);
                 if (rlen) {
                     u8 vaild = 0;
-                    rlen = fread(&vaild, 1, 1, file);
+                    rlen = file_t_fread(&vaild, 1, 1, file);
                     if (rlen && vaild) {
-                        printf("read offset ok, %d!!\n", *offset);
-                        fseek(file, *offset, SEEK_SET);
+                        log_info("read offset ok, %d!!", *offset);
+                        file_t_fseek(file, *offset, SEEK_SET);
                         return ;
                     } else {
-                        printf("read offset ok, but not vaild\n");
+                        log_info("read offset ok, but not vaild");
                     }
                 } else {
-                    printf("read offset fail!!\n");
+                    log_error("read offset fail!!");
                 }
             }
         }
@@ -267,7 +537,7 @@ static void file_transfer_download_intermittent_parse(FILE *file, u32 *offset)
 static void file_transfer_download_get_timeout(void *priv)
 {
     if (ftp_d) {
-        ftp_printf("timeout!!!\n");
+        log_info("timeout!!!");
         ftp_d->get_timeout = 0;
         //在超时时间内没有收完所需要的数据， 重新拉取数据
         file_transfer_download_get_data();
@@ -298,15 +568,21 @@ static void file_transfer_download_vaild_mark_scan(void *priv)
 static void file_transfer_download_get_data(void)
 {
     if (ftp_d == NULL || ftp_d->file == NULL) {
-        ftp_printf("file not ready %d!!\n", __LINE__);
+        log_error("file not ready %d!!", __LINE__);
         return;
     }
 
     u32 file_remain = 0;
     u32 file_offset = 0;
     u16 recieve_max = rcsp_packet_write_alloc_len();
+#ifdef TONE_FILE_RESERVED_AREA_NAME
+    if ((FILE_TRANSFER_TONE_FILE == ftp_d->special_flag) || (RCSPDevMapRESERVE == ftp_d->dev_handle)) {
+        // 防止边听歌边大文件传输会卡顿
+        recieve_max = FTP_FILE_DATA_UNIT + FTP_FILE_DATA_RECIEVE_REMAIN_SIZE;
+    }
+#endif
     if (recieve_max < FTP_FILE_DATA_RECIEVE_BUF_MIN_SIZE) {
-        ftp_printf("not enough buf to recieve!!\n");
+        log_error("not enough buf to recieve!!");
         return;
     } else {
         ///预留些接收缓存给其他通信使用
@@ -331,14 +607,14 @@ static void file_transfer_download_get_data(void)
     } else {
         file_offset = ftp_d->file_offset;
     }
-    printf("[get]recieve_max:%d, file_offset %d\n", recieve_max, file_offset);
+    log_info("[get]recieve_max:%d, file_offset %d", recieve_max, file_offset);
     u8 parm[7] = {0};
     parm[0] = 0;
     WRITE_BIG_U16(parm + 1, recieve_max);
     WRITE_BIG_U32(parm + 3, file_offset);
-    JL_ERR err = JL_CMD_send(JL_OPCODE_FILE_TRANSFER, parm, sizeof(parm), 0, 0, NULL);
+    JL_ERR err = JL_CMD_send(JL_OPCODE_FILE_TRANSFER, parm, sizeof(parm), 0, ftp_d->ble_con_handle, ftp_d->spp_remote_addr);
     if (err) {
-        ftp_printf("%s fail!!! %d\n", __FUNCTION__, err);
+        log_error("%s fail!!! %d", __FUNCTION__, err);
         return;
     }
     if (ftp_d->get_timeout == 0) {
@@ -379,7 +655,7 @@ static void creat_file_path(char *path, char *root_path, const char *folder, u8 
     }
     //strcat(path, name);
     memcpy(path + strlen(path), name, name_len);
-    //printf("path = %s\n", path);
+    //log_info("path = %s", path);
 }
 
 //*----------------------------------------------------------------------------*/
@@ -389,12 +665,15 @@ static void creat_file_path(char *path, char *root_path, const char *folder, u8 
    @note
 */
 /*----------------------------------------------------------------------------*/
-#if (RCSP_MODE && JL_RCSP_EXTRA_FLASH_OPT)
-void rcsp_file_transfer_download_parm_extra(u8 OpCode_SN, u8 *data, u16 len)
+#if (RCSP_MODE && ((TCFG_DEV_MANAGER_ENABLE && RCSP_FILE_OPT) || JL_RCSP_EXTRA_FLASH_OPT || RCSP_TONE_FILE_TRANSFER_ENABLE))
+void rcsp_file_transfer_download_parm_extra(u8 OpCode_SN, u8 *data, u16 len, u16 ble_con_handle, u8 *spp_remote_addr)
 {
     u8 resp[2] = {0};
     u8 status = 0;
 
+#if TCFG_USER_TWS_ENABLE
+    file_trans_parm_extra_tws_sync(data, len);
+#endif
     resp[0] = data[0];//op
 
     if (ftp_d) {
@@ -402,18 +681,34 @@ void rcsp_file_transfer_download_parm_extra(u8 OpCode_SN, u8 *data, u16 len)
         ftp_d->dev_handle = READ_BIG_U32(data);//占用4byte
         u8 en = *(data + 4);
         if (FTP_FILE_PACKET_CRC_CHECK_EN && en) {
-            printf("packet_crc_check enable !!!!!\n");
+            log_info("packet_crc_check enable !!!!!");
             ftp_d->packet_crc_check = 1;
         } else {
-            printf("packet_crc_check disable !!!!!\n");
+            log_error("packet_crc_check disable !!!!!");
             ftp_d->packet_crc_check = 0;
         }
         resp[1] = ftp_d->packet_crc_check;
         status = JL_PRO_STATUS_SUCCESS;
     } else {
+        log_error("%s: JL_PRO_STATUS_FAIL!", __FUNCTION__);
         status = JL_PRO_STATUS_FAIL;
     }
-    JL_CMD_response_send(JL_OPCODE_DEVICE_PARM_EXTRA, status, OpCode_SN, resp, sizeof(resp), 0, NULL, 0, NULL);
+#ifdef TONE_FILE_RESERVED_AREA_NAME
+    if ((0 == status) && ftp_d && (FILE_TRANSFER_TONE_FILE == ftp_d->special_flag)) {
+        char *path = zalloc(strlen(SDFILE_APP_ROOT_PATH) + strlen(TONE_FILE_RESERVED_AREA_NAME) + 1);
+        strcat(path, SDFILE_APP_ROOT_PATH);
+        strcat(path, TONE_FILE_RESERVED_AREA_NAME);
+        if (cfg_private_init(TONE_FILE_NUM, path)) {
+            status = JL_PRO_STATUS_FAIL;
+        } else {
+            ftp_d->filepath = SDFILE_APP_ROOT_PATH;
+        }
+        if (path) {
+            free(path);
+        }
+    }
+#endif
+    JL_CMD_response_send(JL_OPCODE_DEVICE_PARM_EXTRA, status, OpCode_SN, resp, sizeof(resp), ble_con_handle, spp_remote_addr);
 }
 #endif
 
@@ -441,8 +736,10 @@ static int file_transfer_watch_opt(u8 flag, u8 OpCode_SN)
 
     if (ret) {
         u16 reason = READ_BIG_U16(&ret);
+        u16 ble_con_handle = ftp_d->ble_con_handle;
+        u16 spp_remote_addr = ftp_d->spp_remote_addr;
         rcsp_file_transfer_close();
-        JL_CMD_response_send(JL_OPCODE_FILE_TRANSFER_START, JL_PRO_STATUS_FAIL, OpCode_SN, (u8 *)&reason, sizeof(reason), 0, NULL, 0, NULL);
+        JL_CMD_response_send(JL_OPCODE_FILE_TRANSFER_START, JL_PRO_STATUS_FAIL, OpCode_SN, (u8 *)&reason, sizeof(reason), 0, NULL, ble_con_handle, spp_remote_addr);
     }
 
     return ret;
@@ -450,7 +747,7 @@ static int file_transfer_watch_opt(u8 flag, u8 OpCode_SN)
 #endif
 
 // rcsp文件下载开始命令处理
-void rcsp_file_transfer_download_start(void *priv, u8 OpCode_SN, u8 *data, u16 len)
+void rcsp_file_transfer_download_start(void *priv, u8 OpCode_SN, u8 *data, u16 len, u16 ble_con_handle, u8 *spp_remote_addr)
 {
     struct RcspModel *rcspModel = (struct RcspModel *)priv;
     if (rcspModel == NULL) {
@@ -475,62 +772,95 @@ void rcsp_file_transfer_download_start(void *priv, u8 OpCode_SN, u8 *data, u16 l
     if (ftp_d == NULL) {
         ftp_d = zalloc(sizeof(struct __ftp_download));
         if (NULL == ftp_d) {
-            printf("%s, no mem\n", __FUNCTION__);
-            JL_CMD_response_send(JL_OPCODE_FILE_TRANSFER_START, JL_PRO_STATUS_FAIL, OpCode_SN, NULL, 0, 0, NULL);
+            log_error("%s, no mem", __FUNCTION__);
+            JL_CMD_response_send(JL_OPCODE_FILE_TRANSFER_START, JL_PRO_STATUS_FAIL, OpCode_SN, NULL, 0, ftp_d->ble_con_handle, ftp_d->spp_remote_addr);
             return ;
         }
         ftp_d->dev_handle = (u32) - 1;
     }
 
-    ftp_printf("file_size = %d, file_crc = %x\n", file_size, file_crc);
-    struct __dev *dev = NULL;
-    if (ftp_d->dev_handle == (u32) - 1) {
-        dev = dev_manager_find_spec("sd1", 0);
-    } else {
-        dev = dev_manager_find_spec(rcsp_browser_dev_remap(ftp_d->dev_handle), 0);
+    if ((0 == ftp_d->ble_con_handle) && (NULL == ftp_d->spp_remote_addr)) {
+        ftp_d->ble_con_handle = ble_con_handle;
+        ftp_d->spp_remote_addr = spp_remote_addr;
     }
-    if (!dev) {
-        rcsp_file_transfer_close();
-        ftp_printf("no dev online !!\n");
-        JL_CMD_response_send(JL_OPCODE_FILE_TRANSFER_START, JL_PRO_STATUS_FAIL, OpCode_SN, NULL, 0, 0, NULL);
-        return ;
-    }
-    char *root_path = dev_manager_get_root_path(dev);
-    char *folder = NULL;
-    if (RCSPDevMapSD1 == ftp_d->dev_handle
-        || RCSPDevMapSD0 == ftp_d->dev_handle) {
-        folder = FTP_DOWNLOAD_FOLDER_NAME;
-    }
-    char *path = zalloc(creat_path_len(root_path, folder, file_name, file_name_len));
 
+    log_info("file_size = %d, file_crc = %x", file_size, file_crc);
     u8 new_file = 0;
-    ASSERT(path);
-    creat_file_path(path, root_path, folder, file_name, file_name_len);
-    ftp_d->dev = dev;
-    ftp_d->file = fopen(path, "r");
-    if (ftp_d->file) {
-        printf("file exist\n");
-        new_file = 0;
-        fclose(ftp_d->file);
-        ftp_d->file = NULL;
-    } else {
-        printf("file new\n");
+#ifdef TONE_FILE_RESERVED_AREA_NAME
+    if (RCSPDevMapRESERVE == ftp_d->dev_handle) {
         new_file = 1;
+        u8 *tmp_file_name = zalloc(file_name_len + 1);
+        memcpy(tmp_file_name, file_name, file_name_len);
+        ftp_d->file = file_t_open((const char *)tmp_file_name, "w+");
+        if (tmp_file_name) {
+            free(tmp_file_name);
+        }
+    } else if (FILE_TRANSFER_TONE_FILE == ftp_d->special_flag) {
+        new_file = 1;
+        ftp_d->filepath = TONE_FILE_RESERVED_AREA_NAME;
+        ftp_d->file = file_t_open(ftp_d->filepath, "w+");
+        if (ftp_d->file) {
+            // 全擦
+            file_t_erase(ftp_d->file, 0, 0);
+        }
+    } else
+#endif
+    {
+#if TCFG_DEV_MANAGER_ENABLE
+        struct __dev *dev = NULL;
+        if (ftp_d->dev_handle == (u32) - 1) {
+            dev = dev_manager_find_spec("sd1", 0);
+        } else {
+            dev = dev_manager_find_spec(rcsp_browser_dev_remap(ftp_d->dev_handle), 0);
+        }
+        if (!dev) {
+            u16 ble_con_handle = ftp_d->ble_con_handle;
+            u8 *spp_remote_addr = ftp_d->spp_remote_addr;
+            rcsp_file_transfer_close();
+            log_info("no dev online !!");
+            JL_CMD_response_send(JL_OPCODE_FILE_TRANSFER_START, JL_PRO_STATUS_FAIL, OpCode_SN, NULL, 0, ble_con_handle, spp_remote_addr);
+            return ;
+        }
+        char *root_path = dev_manager_get_root_path(dev);
+        char *folder = NULL;
+        if (RCSPDevMapSD1 == ftp_d->dev_handle
+            || RCSPDevMapSD0 == ftp_d->dev_handle) {
+            folder = FTP_DOWNLOAD_FOLDER_NAME;
+        }
+        char *path = zalloc(creat_path_len(root_path, folder, file_name, file_name_len));
+
+        ASSERT(path);
+        creat_file_path(path, root_path, folder, file_name, file_name_len);
+        ftp_d->dev = dev;
+        ftp_d->file = fopen(path, "r");
+        if (ftp_d->file) {
+            log_info("file exist");
+            new_file = 0;
+            fclose(ftp_d->file);
+            ftp_d->file = NULL;
+        } else {
+            log_info("file new");
+            new_file = 1;
+        }
+
+        ftp_d->filepath = path;
+#if (RCSP_MODE == RCSP_MODE_WATCH)
+        if (file_transfer_watch_opt(new_file, OpCode_SN)) {
+            return;
+        }
+#endif
+        ftp_d->file = file_t_open(path, "w+");
+#endif
+        //free(path);
     }
 
-    ftp_d->filepath = path;
-#if (RCSP_MODE == RCSP_MODE_WATCH)
-    if (file_transfer_watch_opt(new_file, OpCode_SN)) {
-        return;
-    }
-#endif
-    ftp_d->file = fopen(path, "w+");
-    //free(path);
     if (ftp_d->file == NULL) {
-        ftp_printf("file create err\n");
+        log_error("file create err");
+        u16 ble_con_handle = ftp_d->ble_con_handle;
+        u8 *spp_remote_addr = ftp_d->spp_remote_addr;
         rcsp_file_transfer_close();
         ///文件打开失败， 回复APP文件传输失败
-        JL_CMD_response_send(JL_OPCODE_FILE_TRANSFER_START, JL_PRO_STATUS_FAIL, OpCode_SN, NULL, 0, 0, NULL);
+        JL_CMD_response_send(JL_OPCODE_FILE_TRANSFER_START, JL_PRO_STATUS_FAIL, OpCode_SN, NULL, 0, ble_con_handle, spp_remote_addr);
         return ;
     }
     ftp_d->file_offset = 0;
@@ -543,12 +873,12 @@ void rcsp_file_transfer_download_start(void *priv, u8 OpCode_SN, u8 *data, u16 l
             file_transfer_download_intermittent_parse(ftp_d->file, &ftp_d->file_offset);
         }
         if (ftp_d->file_offset == 0 || ftp_d->file_offset > file_size) {
-            printf("file offset err !! reset offset \n");
+            log_error("file offset err !! reset offset ");
             ftp_d->file_offset = sizeof(ftp_d->win);
             file_transfer_download_vaild_mark_fill(ftp_d->file, ftp_d->win, ftp_d->file_offset, 0);
         } else if (ftp_d->file_offset == file_size) {
             //上次文件已经收完, 进入校验流程
-            printf("file aready download end \n");
+            log_info("file aready download end ");
             file_transfer_download_file_check();
             return ;
         }
@@ -558,16 +888,18 @@ void rcsp_file_transfer_download_start(void *priv, u8 OpCode_SN, u8 *data, u16 l
     ///回复APP文件传输准备就绪
     u16 file_data_unit = 0;
     WRITE_BIG_U16(&file_data_unit, FTP_FILE_DATA_UNIT);
-    err = JL_CMD_response_send(JL_OPCODE_FILE_TRANSFER_START, JL_PRO_STATUS_SUCCESS, OpCode_SN, (u8 *)&file_data_unit, sizeof(u16), 0, NULL);
+    err = JL_CMD_response_send(JL_OPCODE_FILE_TRANSFER_START, JL_PRO_STATUS_SUCCESS, OpCode_SN, (u8 *)&file_data_unit, sizeof(u16), ftp_d->ble_con_handle, ftp_d->spp_remote_addr);
     if (err == 0) {
-        printf("%s ok!! file_offset: %d, data unit = %d\n", __FUNCTION__, ftp_d->file_offset, FTP_FILE_DATA_UNIT);
+        log_info("%s ok!! file_offset: %d, data unit = %d", __FUNCTION__, ftp_d->file_offset, FTP_FILE_DATA_UNIT);
         ///回复启动成功之后，启动数据拉取操作(这里是第一次)
         //fseek(ftp_d->file, ftp_d->file_offset, SEEK_SET);//重定位下文件位置
         file_transfer_download_get_data();
+#if (0 == RCSP_TONE_FILE_TRANSFER_ENABLE)
         ftp_d->mark_timer = sys_timer_add(NULL, file_transfer_download_vaild_mark_scan, FTP_FILE_VAILD_MARK_TIMER_UNIT);
+#endif
         return ;
     } else {
-        ftp_printf("%s resp fail!!\n", __FUNCTION__);
+        log_error("%s resp fail!!", __FUNCTION__);
         rcsp_file_transfer_close();
         ftp_d = NULL;
     }
@@ -581,39 +913,41 @@ void rcsp_file_transfer_download_start(void *priv, u8 OpCode_SN, u8 *data, u16 l
    @note
 */
 /*----------------------------------------------------------------------------*/
-void rcsp_file_transfer_file_rename(u8 status, u8 *data, u16 len)
+void rcsp_file_transfer_file_rename(u8 status, u8 *data, u16 len, u16 ble_con_handle, u8 *spp_remote_addr)
 {
     if (ftp_d)	{
         if (status == JL_PRO_STATUS_SUCCESS)	{
-            printf("%s !!, %d\n", __FUNCTION__, __LINE__);
-            put_buf(data, len);
+            /* log_info("%s !!, %d", __FUNCTION__, __LINE__); */
+            /* put_buf(data, len); */
 #if (RCSP_MODE == RCSP_MODE_WATCH)
             file_transfer_watch_opt(-1, 0);
 #endif
             //重命名
             if (file_rename((const char *)data) == 0) {
                 u8 reason = FTP_END_REASON_NONE;
-                int err = JL_CMD_send(JL_OPCODE_FILE_TRANSFER_END, &reason, 1, 1, 0, NULL);
+                int err = JL_CMD_send(JL_OPCODE_FILE_TRANSFER_END, &reason, 1, 1, ftp_d->ble_con_handle, ftp_d->spp_remote_addr);
                 if (err) {
                     rcsp_file_transfer_close();
                 }
+#if (TCFG_DEV_MANAGER_ENABLE)
                 dev_manager_set_valid(ftp_d->dev, 1);
 #if (RCSP_MODE == RCSP_MODE_WATCH)
                 file_transfer_watch_opt(2, 0);
 #endif
+#endif
             } else {
                 //有重名的， 重新获取新名称, 如:“xxx_n.mp3”,n为数字
-                int err = JL_CMD_send(JL_OPCODE_FILE_RENAME, NULL, 0, 1, 0, NULL);
+                int err = JL_CMD_send(JL_OPCODE_FILE_RENAME, NULL, 0, 1, ftp_d->ble_con_handle, ftp_d->spp_remote_addr);
                 if (err) {
                     rcsp_file_transfer_close();
                 }
             }
         } else {
-            ftp_printf("%s fail!! %d\n", __FUNCTION__, status);
+            log_error("%s fail!! %d", __FUNCTION__, status);
             if (ftp_d->file) {
                 //重命名失败，删除文件
-                printf("rename file fail, delete file\n");
-                fdelete(ftp_d->file);
+                log_error("rename file fail, delete file");
+                file_t_fdelete(ftp_d->file);
                 ftp_d->file = NULL;
             }
             rcsp_file_transfer_close();
@@ -629,10 +963,15 @@ void rcsp_file_transfer_file_rename(u8 status, u8 *data, u16 len)
    @note
 */
 /*----------------------------------------------------------------------------*/
-void rcsp_file_transfer_download_end(u8 status, u8 *data, u16 len)
+void rcsp_file_transfer_download_end(u8 status, u8 *data, u16 len, u16 ble_con_handle, u8 *spp_remote_addr)
 {
     if (ftp_d)	{
-        ftp_printf("%s status %d\n", __FUNCTION__, status);
+        log_info("%s status %d", __FUNCTION__, status);
+        if (FILE_TRANSFER_TONE_FILE == ftp_d->special_flag && (RCSPDevMapRESERVE != ftp_d->dev_handle)) {
+#ifdef TONE_FILE_RESERVED_AREA_NAME
+            public_settings_interaction_command_notify(PUB_MTUAL_SET_CMD_TONE_FUNCTION, 0, 0, ble_con_handle, spp_remote_addr);
+#endif
+        }
         rcsp_file_transfer_close();
     }
 }
@@ -649,9 +988,9 @@ static void rcsp_file_transfer_download_doing_last_packet(u8 *data, u16 len)
     u8 reason = FTP_END_REASON_NONE;
     JL_ERR err = 0;
     if (len > FTP_FILE_DATA_UNIT) {
-        printf("last packet data len err!!\n");
+        log_error("last packet data len err!!");
         reason = FTP_END_REASON_DATA_OVER_LIMIT;
-        err = JL_CMD_send(JL_OPCODE_FILE_TRANSFER_END, &reason, 1, 1, 0, NULL);
+        err = JL_CMD_send(JL_OPCODE_FILE_TRANSFER_END, &reason, 1, 1, ftp_d->ble_con_handle, ftp_d->spp_remote_addr);
         if (err) {
             //命令发送失败， 直接停止
             rcsp_file_transfer_close();
@@ -662,13 +1001,23 @@ static void rcsp_file_transfer_download_doing_last_packet(u8 *data, u16 len)
         sys_timeout_del(ftp_d->get_timeout);
         ftp_d->get_timeout = 0;
     }
-    printf("get last packet ok\n");
-    fseek(ftp_d->file, 0, SEEK_SET);
-    int wlen = fwrite(data, len, 1, ftp_d->file);
+    log_info("get last packet ok");
+    file_t_fseek(ftp_d->file, 0, SEEK_SET);
+
+#ifdef TONE_FILE_RESERVED_AREA_NAME
+#if TCFG_USER_TWS_ENABLE
+    file_trans_seek_tws_sync(0, SEEK_SET);
+#endif
+    if (FILE_TRANSFER_TONE_FILE == ftp_d->special_flag) {
+        file_t_erase(ftp_d->file, 0, len);
+    }
+#endif
+
+    int wlen = file_t_fwrite(data, len, 1, ftp_d->file);
     if (wlen != len) {
-        ftp_printf("%s err !! %d\n", __FUNCTION__, wlen);
+        log_error("%s err !! %d", __FUNCTION__, wlen);
         reason = FTP_END_REASON_WRITE_ERR;//文件写异常
-        err = JL_CMD_send(JL_OPCODE_FILE_TRANSFER_END, &reason, 1, 1, 0, NULL);
+        err = JL_CMD_send(JL_OPCODE_FILE_TRANSFER_END, &reason, 1, 1, ftp_d->ble_con_handle, ftp_d->spp_remote_addr);
         if (err) {
             //命令发送失败， 直接停止
             rcsp_file_transfer_close();
@@ -677,7 +1026,7 @@ static void rcsp_file_transfer_download_doing_last_packet(u8 *data, u16 len)
         //文件接收完成，文件校验
         file_transfer_download_file_check();
     }
-    //fseek(ftp_d->file, ftp_d->file_offset, SEEK_SET);
+    //file_t_fseek(ftp_d->file, ftp_d->file_offset, SEEK_SET);
 }
 
 //*----------------------------------------------------------------------------*/
@@ -687,17 +1036,17 @@ static void rcsp_file_transfer_download_doing_last_packet(u8 *data, u16 len)
    @note	 此过程接收的数据是实际文件传输的内容
 */
 /*----------------------------------------------------------------------------*/
-void rcsp_file_transfer_download_doing(u8 *data, u16 len)
+void rcsp_file_transfer_download_doing(u8 *data, u16 len, u16 ble_con_handle, u8 *spp_remote_addr)
 {
     if (ftp_d && ftp_d->file) {
-        printf("id = %d, len = %d\n", data[0], len - 1);
+        log_debug("id = %d, len = %d", data[0], len - 1);
 
         if (ftp_d->start_timerout) {
             sys_timer_re_run(ftp_d->start_timerout);
         }
 
         if (ftp_d->packet_id != data[0]) {
-            ftp_printf("warning !! packet_id err %d, %d\n", ftp_d->packet_id, data[0]);
+            log_error("warning !! packet_id err %d, %d", ftp_d->packet_id, data[0]);
             return ;
         }
 
@@ -710,7 +1059,7 @@ void rcsp_file_transfer_download_doing(u8 *data, u16 len)
             len -= 2;
             data += 2;
             if (packet_crc != CRC16(data, len)) {
-                printf("packet crc err !!!!!!!!!!!!!!!!!!!!!\n");
+                log_error("packet crc err !!!!!!!!!!!!!!!!!!!!!");
                 ftp_d->packet_crc_err = 1;
             }
             if (ftp_d->packet_crc_err) {
@@ -726,7 +1075,7 @@ void rcsp_file_transfer_download_doing(u8 *data, u16 len)
                 }
                 return ;
             }
-            ftp_printf("packet crc check done\n");
+            log_debug("packet crc check done");
         }
 
         u8 reason = FTP_END_REASON_NONE;
@@ -739,9 +1088,9 @@ void rcsp_file_transfer_download_doing(u8 *data, u16 len)
         }
 
         if (ftp_d->file_offset >= ftp_d->file_size) {
-            printf("err, file data is over limit!!\n");
+            log_error("err, file data is over limit!!");
             reason = FTP_END_REASON_DATA_OVER_LIMIT;//数据超范围
-            err = JL_CMD_send(JL_OPCODE_FILE_TRANSFER_END, &reason, 1, 1, 0, NULL);
+            err = JL_CMD_send(JL_OPCODE_FILE_TRANSFER_END, &reason, 1, 1, ftp_d->ble_con_handle, ftp_d->spp_remote_addr);
             if (err) {
                 //命令发送失败， 直接停止
                 rcsp_file_transfer_close();
@@ -749,23 +1098,23 @@ void rcsp_file_transfer_download_doing(u8 *data, u16 len)
             return ;
         }
 
-        wlen = fwrite(data, len, 1, ftp_d->file);
+        wlen = file_t_fwrite(data, len, 1, ftp_d->file);
         if (wlen != len) {
-            ftp_printf("%s err !! %d\n", __FUNCTION__, wlen);
+            log_error("%s err !! %d", __FUNCTION__, wlen);
             reason = FTP_END_REASON_WRITE_ERR;//文件写异常
-            err = JL_CMD_send(JL_OPCODE_FILE_TRANSFER_END, &reason, 1, 1, 0, NULL);
+            err = JL_CMD_send(JL_OPCODE_FILE_TRANSFER_END, &reason, 1, 1, ftp_d->ble_con_handle, ftp_d->spp_remote_addr);
             if (err) {
                 //命令发送失败， 直接停止
                 rcsp_file_transfer_close();
             }
         } else {
             if (len != FTP_FILE_DATA_UNIT) {
-                ftp_printf("data is not a normal unit !!\n");
+                log_error("data is not a normal unit !!");
             }
             ftp_d->file_offset += len;
-            ftp_printf("ftp_d->file_offset:%d, ftp_d->file_size:%d, len:%d\n", ftp_d->file_offset, ftp_d->file_size, len);
+            log_debug("ftp_d->file_offset:%d, ftp_d->file_size:%d, len:%d", ftp_d->file_offset, ftp_d->file_size, len);
             if (ftp_d->file_offset >= ftp_d->file_size) {
-                ftp_printf("file recieve end!! get file first packet\n");
+                log_info("file recieve end!! get file first packet");
                 if (ftp_d->mark_timer) {
                     sys_timer_del(ftp_d->mark_timer);
                     ftp_d->mark_timer = 0;
@@ -777,12 +1126,12 @@ void rcsp_file_transfer_download_doing(u8 *data, u16 len)
             ftp_d->last_packet = 0;
             if (ftp_d->get_timeout) {
                 //接收数据成功，重置一下超时
-                ftp_printf("reset timeout!!\n");
+                log_debug("reset timeout!!");
                 sys_timer_modify(ftp_d->get_timeout, FTP_FILE_DATA_RECIEVE_TIMEOUT);
             }
             if (ftp_d->packet_id >= ftp_d->packet_id_max) {
                 //该次数据包已经收完，拉取新的数据
-                ftp_printf("get more!!\n");
+                log_debug("get more!!");
                 file_transfer_download_get_data();
             }
         }
@@ -796,11 +1145,11 @@ void rcsp_file_transfer_download_doing(u8 *data, u16 len)
    @note
 */
 /*----------------------------------------------------------------------------*/
-void rcsp_file_transfer_download_passive_cancel(u8 OpCode_SN, u8 *data, u16 len)
+void rcsp_file_transfer_download_passive_cancel(u8 OpCode_SN, u8 *data, u16 len, u16 ble_con_handle, u8 *spp_remote_addr)
 {
     rcsp_file_transfer_close();
-    printf("passive_cancel answer\n");
-    JL_CMD_response_send(JL_OPCODE_FILE_TRANSFER_CANCEL, JL_PRO_STATUS_SUCCESS, OpCode_SN, NULL, 0, 0, NULL);
+    log_info("passive_cancel answer");
+    JL_CMD_response_send(JL_OPCODE_FILE_TRANSFER_CANCEL, JL_PRO_STATUS_SUCCESS, OpCode_SN, NULL, 0, ble_con_handle, spp_remote_addr);
 }
 
 //*----------------------------------------------------------------------------*/
@@ -813,8 +1162,10 @@ void rcsp_file_transfer_download_passive_cancel(u8 OpCode_SN, u8 *data, u16 len)
 void rcsp_file_transfer_download_active_cancel(void)
 {
     if (ftp_d) {
+        u16 ble_con_handle = ftp_d->ble_con_handle;
+        u8 *spp_remote_addr = ftp_d->spp_remote_addr;
         rcsp_file_transfer_close();
-        JL_CMD_send(JL_OPCODE_FILE_TRANSFER_CANCEL, NULL, 0, 1, 0, NULL);
+        JL_CMD_send(JL_OPCODE_FILE_TRANSFER_CANCEL, NULL, 0, 1, ble_con_handle, spp_remote_addr);
     }
 }
 
@@ -825,10 +1176,10 @@ void rcsp_file_transfer_download_active_cancel(void)
    @note
 */
 /*----------------------------------------------------------------------------*/
-void rcsp_file_transfer_download_active_cancel_response(u8 status, u8 *data, u16 len)
+void rcsp_file_transfer_download_active_cancel_response(u8 status, u8 *data, u16 len, u16 ble_con_handle, u8 *spp_remote_addr)
 {
     if (status == JL_PRO_STATUS_SUCCESS) {
-        printf("active_cancel_response ok!!");
+        log_info("active_cancel_response ok!!");
     }
 }
 
@@ -841,10 +1192,14 @@ void rcsp_file_transfer_download_active_cancel_response(u8 status, u8 *data, u16
 /*----------------------------------------------------------------------------*/
 void rcsp_file_transfer_close(void)
 {
+#if TCFG_USER_TWS_ENABLE
+    // 触发tws从机关闭
+    file_trans_close_tws_sync_to_slave();
+#endif
     if (ftp_d) {
         if (ftp_d->check.counter) {
-            printf("crc caculating !! close err\n");
-            return ;
+            log_error("crc caculating !! close err");
+            goto _ERR_RET;
         }
         if (ftp_d->start_timerout) {
             sys_timeout_del(ftp_d->start_timerout);
@@ -863,11 +1218,15 @@ void rcsp_file_transfer_close(void)
                 //文件没有传输完， 如果不是直接断电， 有机会执行更新断点续传的文件偏移信息
                 file_transfer_download_vaild_mark_fill(ftp_d->file, ftp_d->win, ftp_d->file_offset, 1);
             }
-            fclose(ftp_d->file);
+            file_t_fclose(ftp_d->file);
             ftp_d->file = NULL;
         }
-        if (ftp_d->filepath) {
-            free(ftp_d->filepath);
+        if ((FILE_TRANSFER_TONE_FILE != ftp_d->special_flag) && (RCSPDevMapRESERVE != ftp_d->dev_handle)) {
+#if TCFG_DEV_MANAGER_ENABLE
+            if (ftp_d->filepath) {
+                free(ftp_d->filepath);
+            }
+#endif
         }
 
 #if (RCSP_MODE == RCSP_MODE_WATCH)
@@ -879,8 +1238,14 @@ void rcsp_file_transfer_close(void)
         }
         free(ftp_d);
         ftp_d = NULL;
-        printf("rcsp_file_transfer_close!!!!!!\n");
+        log_info("rcsp_file_transfer_close...");
     }
+_ERR_RET:
+#if TCFG_USER_TWS_ENABLE
+    // pend住等待从机关闭结束
+    file_trans_close_tws_sync_pend();
+#endif
+    return;
 }
 
 //*----------------------------------------------------------------------------*/
@@ -892,7 +1257,7 @@ void rcsp_file_transfer_close(void)
 /*----------------------------------------------------------------------------*/
 static void file_transfer_start_timeout(void *priv)
 {
-    printf("%s\n", __FUNCTION__);
+    log_info("%s", __FUNCTION__);
     rcsp_file_transfer_close();
 }
 
@@ -904,12 +1269,19 @@ static void file_transfer_start_timeout(void *priv)
    @note
 */
 /*----------------------------------------------------------------------------*/
-void rcsp_file_transfer_init(void (*end_callback)(void))
+void rcsp_file_transfer_init(void (*end_callback)(void), u16 ble_con_handle, u8 *spp_remote_addr)
 {
     if (ftp_d) {
-        ftp_printf("file downloading err %d!!\n", __LINE__);
+        log_error("file downloading err %d!!", __LINE__);
         return ;
     }
+#if TCFG_USER_TWS_ENABLE
+    // 触发从机初始化，且从机初始化完才到主机，函数中pend
+    if (file_trans_init_tws_sync()) {
+        log_error("file downloading tws init fail %d!!", __LINE__);
+        return;
+    }
+#endif
     ftp_d = zalloc(sizeof(struct __ftp_download));
     if (ftp_d == NULL) {
         if (end_callback) {
@@ -927,9 +1299,83 @@ void rcsp_file_transfer_init(void (*end_callback)(void))
     ftp_d->end_callback = end_callback;
     //如果在超时时间内都没有发文件传输开始命令， 退出文件传输流程
     ftp_d->start_timerout = sys_timeout_add(NULL, file_transfer_start_timeout, 2000);
+
+    ftp_d->ble_con_handle = ble_con_handle;
+    ftp_d->spp_remote_addr = spp_remote_addr;
+}
+
+void rcsp_file_transfer_special_flag_set(u8 flag)
+{
+    if (ftp_d) {
+#if TCFG_USER_TWS_ENABLE
+        // 同步标志位，先从机后主机
+        if (file_trans_special_flag_tws_sync(flag)) {
+            return;
+        }
+#endif
+        ftp_d->special_flag = flag;
+    }
+}
+
+#if TCFG_USER_TWS_ENABLE
+static int rcsp_file_transfer_salve_file_check(u16 crc, u32 size)
+{
+    if (ftp_d == NULL) {
+        return -1;
+    }
+    ftp_d->file_crc = crc;
+    ftp_d->file_size = size;
+    file_transfer_download_file_check();
+    return 0;
+}
+
+static int rcsp_file_tws_info_fill_filp(void *file)
+{
+    if (NULL == ftp_d) {
+        return -1;
+    }
+    ftp_d->file = file;
+    return 0;
+}
+
+static int rcsp_file_tws_info_fill_last_packet_flag(u8 flag)
+{
+    if (NULL == ftp_d) {
+        return -1;
+    }
+    ftp_d->last_packet = flag;
+    return 0;
+}
+
+int rcsp_file_tws_info_fill(file_trans_tws_op *ft_tws_op)
+{
+    if (NULL == ftp_d) {
+        goto _ERR_RET;
+    }
+    if (NULL == ft_tws_op) {
+        goto _ERR_RET;
+    }
+    ft_tws_op->ft_open = file_t_open;
+    ft_tws_op->ft_erase = file_t_erase;
+    ft_tws_op->ft_write = file_t_fwrite;
+    ft_tws_op->ft_slave_file_check = rcsp_file_transfer_salve_file_check;
+    ft_tws_op->ft_close = rcsp_file_transfer_close;
+    ft_tws_op->ft_seek = file_t_fseek;
+    ft_tws_op->ft_fill_filp = rcsp_file_tws_info_fill_filp;
+    ft_tws_op->ft_last_pack_set = rcsp_file_tws_info_fill_last_packet_flag;
+    ft_tws_op->start_timerout = ftp_d->start_timerout;
+    return 0;
+_ERR_RET:
+    if (ftp_d) {
+        rcsp_file_transfer_close();
+    }
+    return -1;
 }
 
 #endif
+
+#endif
+
 
 
 

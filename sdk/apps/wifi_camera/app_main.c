@@ -45,19 +45,19 @@ const struct irq_info irq_info_table[] = {
     { IRQ_SPI1_IDX,      7,   1    },//中断强制注册到cpu0/1
 #endif
 #endif
+
+    { IRQ_BT_TIMEBASE_IDX,  5,  0 },
+    { IRQ_BLE_RX_IDX,       5,  0 },
+    { IRQ_BLE_EVENT_IDX,    5,  0 },
+    { IRQ_BT_CLKN_IDX,      5,  0 },
+    { IRQ_BREDR_IDX,        5,  0 },
+
 #if CPU_CORE_NUM == 1
-    { IRQ_SOFT5_IDX,      7,   0    }, //此中断强制注册到cpu0
-    { IRQ_SOFT4_IDX,      7,   1    }, //此中断强制注册到cpu1
-    { -2,     			-2,   -2   },//如果加入了该行, 那么只有该行之前的中断注册到对应核, 其他所有中断强制注册到CPU0
+    { IRQ_SOFT5_IDX,        6,  0 }, //此中断强制注册到cpu0
+    { IRQ_SOFT4_IDX,        6,  1 }, //此中断强制注册到cpu1
+    { -2,                  -2, -2 }, //如果加入了该行, 那么只有该行之前的中断注册到对应核, 其他所有中断强制注册到CPU0
 #endif
-
-    { IRQ_BT_TIMEBASE_IDX,  5,   0 },
-    { IRQ_BLE_RX_IDX,       5,   0 },
-    { IRQ_BLE_EVENT_IDX,    5,   0 },
-    { IRQ_BT_CLKN_IDX,      5,   0 },
-    { IRQ_BREDR_IDX,        5,   0 },
-
-    { -1,     -1,   -1    },
+    { -1,                  -1, -1 },
 };
 
 

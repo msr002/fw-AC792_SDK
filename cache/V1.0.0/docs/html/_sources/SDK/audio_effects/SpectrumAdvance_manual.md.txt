@@ -1,7 +1,10 @@
-# 频谱显示 
+# 高级频谱显示 
 
 ## 功能介绍
-- **频谱显示是对输入信号对应频段进行幅度显示的模块**。频谱显示采用高通和低通滤波器设计所需频段的滤波器系数，通过滤波获取对应频段的幅度输出，单位是dB,为归一化的dB数值，最大值为0dB。**16bit的计算公式：20*log10(input_value)-20*log10(2^15-1)。如16bit PCM满幅大小32767,对应0dB；同理24bit的计算公式为：20*log10(input_value)-20*log10(2^23-1)。**。最多支持32段可选频段。
+
+**频谱显示是对输入信号对应频段进行幅度显示的模块**。频谱显示采用高通和低通滤波器设计所需频段的滤波器系数，通过滤波获取对应频段的幅度输出，单位是dB，为归一化的dB数值，最大值为0dB。最多支持32段可选频段。
+- **16bit的计算公式**：20\*log10(input_value) - 20\*log10(2^15-1)。如16bit PCM满幅大小32767,对应0dB
+- **24bit的计算公式**：20\*log10(input_value) - 20\*log10(2^23-1)。
   
 
 ## 参数说明
@@ -15,6 +18,9 @@
 * **RMS时间**：rms检测时间，当选择RMS时才生效。
 
 ## 用法介绍
-频谱值获取方式：1、通过注册的回调函数获取。  2、直接调用接口获取。 2选1即可，sdk默认使用方法一
-方法一：见sdk audio/effect/effects_default_param.c内函数audio_spectrum_advance_handler
-方法二：见sdk aduio/effect/demo/spectrum_demo.c内函数user_spectrum_advance_get_param
+频谱获取方法有以下两种（二选一即可）
+- **方法1：通过注册的回调函数获取（default）**<br>
+见sdk audio/effect/effects_default_param.c内函数audio_spectrum_advance_handler
+- **方法2：直接调用接口获取**<br>
+见sdk aduio/effect/demo/spectrum_demo.c内函数user_spectrum_advance_get_param
+

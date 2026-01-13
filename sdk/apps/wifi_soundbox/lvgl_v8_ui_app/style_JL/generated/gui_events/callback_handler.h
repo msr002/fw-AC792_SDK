@@ -8,6 +8,9 @@ extern "C" {
 #include "lvgl.h"
 #include "../../custom/custom.h"
 
+// Generate music_player_timer_1 CallBack Handler
+extern void music_player_timer_1_timer_cb(lv_timer_t *src);
+
 #ifdef __cplusplus
 }
 #endif

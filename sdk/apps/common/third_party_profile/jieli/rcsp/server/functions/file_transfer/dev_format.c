@@ -1,4 +1,4 @@
-#ifdef MEDIA_SUPPORT_MS_EXTENSIONS
+#ifdef RCSP_SUPPORT_MS_EXTENSIONS
 #pragma bss_seg(".dev_format.data.bss")
 #pragma data_seg(".dev_format.data")
 #pragma const_seg(".dev_format.text.const")

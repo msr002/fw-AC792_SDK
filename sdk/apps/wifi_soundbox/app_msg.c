@@ -184,3 +184,21 @@ void app_mode_go_back(void)
     it.action = ACTION_BACK;
     start_app(&it);
 }
+
+//RCSP
+int app_goto_prev_mode(void)
+{
+    app_mode_go_back();
+    return 0;
+}
+
+int app_task_switch_to(u8 app_task, int priv)
+{
+    app_mode_change_replace(app_task);
+    return true;
+}
+
+u8 app_get_curr_task(void)
+{
+    return get_current_app_mode();
+}

@@ -1,4 +1,4 @@
-#ifdef MEDIA_SUPPORT_MS_EXTENSIONS
+#ifdef RCSP_SUPPORT_MS_EXTENSIONS
 #pragma bss_seg(".rcsp_data_respone.data.bss")
 #pragma data_seg(".rcsp_data_respone.data")
 #pragma const_seg(".rcsp_data_respone.text.const")
@@ -10,7 +10,7 @@
 
 ////>>>>>>>>>>>>>>>设备接收到上报数据的回复
 #if (RCSP_MODE)
-#define RCSP_DEBUG_EN
+/* #define RCSP_DEBUG_EN */
 #ifdef RCSP_DEBUG_EN
 #define rcsp_putchar(x)                	putchar(x)
 #define rcsp_printf                    	printf

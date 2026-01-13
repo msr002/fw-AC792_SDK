@@ -1,4 +1,4 @@
-#ifdef MEDIA_SUPPORT_MS_EXTENSIONS
+#ifdef RCSP_SUPPORT_MS_EXTENSIONS
 #pragma bss_seg(".rcsp_high_low_vol_setting.data.bss")
 #pragma data_seg(".rcsp_high_low_vol_setting.data")
 #pragma const_seg(".rcsp_high_low_vol_setting.text.const")
@@ -43,8 +43,7 @@ static void set_high_low_vol_info(u8 *vol_gain_param)
 
 static void update_high_low_vol_vm_value(u8 *vol_gain_param)
 {
-    printf("====RCSP-TODO=================%s=%d=yuring=\n\r", __func__, __LINE__);
-    /* syscfg_write(CFG_RCSP_ADV_HIGH_LOW_VOL, vol_gain_param, sizeof(struct _HIGH_LOW_VOL)); */
+    syscfg_write(CFG_RCSP_ADV_HIGH_LOW_VOL, vol_gain_param, sizeof(struct _HIGH_LOW_VOL));
 }
 
 static void high_low_vol_setting_sync(u8 *vol_gain_param)
@@ -127,8 +126,7 @@ static int high_low_get_setting_extra_handle(void *setting_data, void *setting_d
 static RCSP_SETTING_OPT high_low_vol_opt = {
     .data_len = 8,
     .setting_type = ATTR_TYPE_HIGH_LOW_VOL,
-    ///RCSP TODO
-    /* .syscfg_id = CFG_RCSP_ADV_HIGH_LOW_VOL, */
+    .syscfg_id = CFG_RCSP_ADV_HIGH_LOW_VOL,
     .deal_opt_setting = deal_high_low_vol,
     .set_setting = set_high_low_vol_info,
     .get_setting = get_high_low_vol_info,

@@ -1,4 +1,4 @@
-#ifdef MEDIA_SUPPORT_MS_EXTENSIONS
+#ifdef RCSP_SUPPORT_MS_EXTENSIONS
 #pragma bss_seg(".rcsp_update_master.data.bss")
 #pragma data_seg(".rcsp_update_master.data")
 #pragma const_seg(".rcsp_update_master.text.const")

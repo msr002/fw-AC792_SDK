@@ -9,7 +9,9 @@
 #include "event/event.h"
 #include "event/device_event.h"
 
+#ifndef TCFG_DEV_MANAGER_ENABLE
 #define TCFG_DEV_MANAGER_ENABLE 1
+#endif
 
 #if (TCFG_DEV_MANAGER_ENABLE)
 

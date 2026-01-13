@@ -7,3 +7,4 @@
 * **Ratio** ：增强的比例，越大越强
 * **Boost** : 勾选则启动自动增强控制
 * **Cutoff Frequency** ：进行增强的低音部分的上限
+* **Reserved Low Freq** : 是否保留原始数据的低频部分

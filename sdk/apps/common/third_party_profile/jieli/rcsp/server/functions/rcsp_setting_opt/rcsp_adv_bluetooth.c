@@ -1,4 +1,4 @@
-#ifdef MEDIA_SUPPORT_MS_EXTENSIONS
+#ifdef RCSP_SUPPORT_MS_EXTENSIONS
 #pragma bss_seg(".rcsp_adv_bluetooth.data.bss")
 #pragma data_seg(".rcsp_adv_bluetooth.data")
 #pragma const_seg(".rcsp_adv_bluetooth.text.const")
@@ -22,14 +22,17 @@
 
 #if (RCSP_MODE && RCSP_ADV_EN)
 
+#define LOG_TAG_CONST	  RCSP_ADV
+#define LOG_TAG             "[RCSP_ADV]"
+#define LOG_ERROR_ENABLE
+#define LOG_DEBUG_ENABLE
+#define LOG_INFO_ENABLE
+#include "system/debug.h"
+
 #define RCSP_DEBUG_EN
 #ifdef RCSP_DEBUG_EN
-#define rcsp_putchar(x)                putchar(x)
-#define rcsp_printf                    printf
 #define rcsp_printf_buf(x,len)         put_buf(x,len)
 #else
-#define rcsp_putchar(...)
-#define rcsp_printf(...)
 #define rcsp_printf_buf(...)
 #endif
 
@@ -42,7 +45,7 @@ static u8 adv_set_deal_one_attr(u8 *buf, u8 size, u8 offset)
 {
     u8 rlen = buf[offset];
     if ((offset + rlen + 1) > (size - offset)) {
-        rcsp_printf("\n\ndeal attr end!\n\n");
+        log_info("deal attr end!");
         return rlen;
     }
     u8 type = buf[offset + 1];
@@ -63,7 +66,7 @@ static u8 adv_set_deal_one_attr(u8 *buf, u8 size, u8 offset)
 
 static u32 JL_opcode_set_adv_info(void *priv, u8 OpCode, u8 OpCode_SN, u8 *data, u16 len, u16 ble_con_handle, u8 *spp_remote_addr)
 {
-    rcsp_printf("JL_opcode_set_adv_info:\n");
+    log_info("JL_opcode_set_adv_info:");
     rcsp_printf_buf(data, len);
     u8 offset = 0;
     while (offset < len) {
@@ -103,12 +106,12 @@ static u32 JL_opcode_get_adv_info(void *priv, u8 OpCode, u8 OpCode_SN, u8 *data,
 
     u32 ret = 0;
     u32 mask = READ_BIG_U32(data);
-    rcsp_printf("FEATURE MASK : %x\n", mask);
+    log_info("FEATURE MASK : %x", mask);
     /* #define ATTR_TYPE_BAT_VALUE      (0) */
     /* #define ATTR_TYPE_EDR_NAME       (1) */
     //get version
     if (mask & BIT(ATTR_TYPE_BAT_VALUE)) {
-        rcsp_printf("ATTR_TYPE_BAT_VALUE\n");
+        log_info("ATTR_TYPE_BAT_VALUE");
         u8 bat[3];
         bt_adv_get_bat(bat);
         offset += add_one_attr(buf, sizeof(buf), offset, ATTR_TYPE_BAT_VALUE, bat, 3);
@@ -116,46 +119,46 @@ static u32 JL_opcode_get_adv_info(void *priv, u8 OpCode, u8 OpCode_SN, u8 *data,
 
 #if RCSP_ADV_NAME_SET_ENABLE
     if (mask & BIT(ATTR_TYPE_EDR_NAME)) {
-        rcsp_printf("ATTR_TYPE_EDR_NAME\n");
+        log_info("ATTR_TYPE_EDR_NAME");
         offset += rcsp_adv_get_and_fill_adv_info(buf, sizeof(buf), offset, ATTR_TYPE_EDR_NAME);
     }
 #endif // RCSP_ADV_NAME_SET_ENABLE
 
 #if RCSP_ADV_KEY_SET_ENABLE
     if (mask & BIT(ATTR_TYPE_KEY_SETTING)) {
-        rcsp_printf("ATTR_TYPE_KEY_SETTING\n");
+        log_info("ATTR_TYPE_KEY_SETTING");
         offset += rcsp_adv_get_and_fill_adv_info(buf, sizeof(buf), offset, ATTR_TYPE_KEY_SETTING);
     }
     if (mask & BIT(ATTR_TYPE_ANC_VOICE_KEY)) {
-        rcsp_printf("ATTR_TYPE_ANC_VOICE_KEY\n");
+        log_info("ATTR_TYPE_ANC_VOICE_KEY");
         offset += rcsp_adv_get_and_fill_adv_info(buf, sizeof(buf), offset, ATTR_TYPE_ANC_VOICE_KEY);
     }
 #endif // RCSP_ADV_KEY_SET_ENABLE
 
 #if RCSP_ADV_LED_SET_ENABLE
     if (mask & BIT(ATTR_TYPE_LED_SETTING)) {
-        rcsp_printf("ATTR_TYPE_LED_SETTING\n");
+        log_info("ATTR_TYPE_LED_SETTING");
         offset += rcsp_adv_get_and_fill_adv_info(buf, sizeof(buf), offset, ATTR_TYPE_LED_SETTING);
     }
 #endif // RCSP_ADV_LED_SET_ENABLE
 
 #if RCSP_ADV_MIC_SET_ENABLE
     if (mask & BIT(ATTR_TYPE_MIC_SETTING)) {
-        rcsp_printf("ATTR_TYPE_MIC_SETTING\n");
+        log_info("ATTR_TYPE_MIC_SETTING");
         offset += rcsp_adv_get_and_fill_adv_info(buf, sizeof(buf), offset, ATTR_TYPE_MIC_SETTING);
     }
 #endif // RCSP_ADV_MIC_SET_ENABLE
 
 #if RCSP_ADV_WORK_SET_ENABLE
     if (mask & BIT(ATTR_TYPE_WORK_MODE)) {
-        rcsp_printf("ATTR_TYPE_WORK_MODE\n");
+        log_info("ATTR_TYPE_WORK_MODE");
         offset += rcsp_adv_get_and_fill_adv_info(buf, sizeof(buf), offset, ATTR_TYPE_WORK_MODE);
     }
 #endif // RCSP_ADV_WORK_SET_ENABLE
 
 #if RCSP_ADV_PRODUCT_MSG_ENABLE
     if (mask & BIT(ATTR_TYPE_PRODUCT_MESSAGE)) {
-        rcsp_printf("ATTR_TYPE_PRODUCT_MESSAGE\n");
+        log_info("ATTR_TYPE_PRODUCT_MESSAGE");
         u16 vid = get_vid_pid_ver_from_cfg_file(GET_VID_FROM_EX_CFG);
         u16 pid = get_vid_pid_ver_from_cfg_file(GET_PID_FROM_EX_CFG);
         u8 tversion[6];
@@ -169,6 +172,7 @@ static u32 JL_opcode_get_adv_info(void *priv, u8 OpCode, u8 OpCode_SN, u8 *data,
     }
 #endif // RCSP_ADV_PRODUCT_MSG_ENABLE
 
+    log_info("adv_data: ");
     rcsp_printf_buf(buf, offset);
 
     ret = JL_CMD_response_send(OpCode, JL_PRO_STATUS_SUCCESS, OpCode_SN, buf, offset, ble_con_handle, spp_remote_addr);
@@ -183,29 +187,29 @@ u8 adv_info_notify(u8 *buf, u16 len)
 
 u8 adv_info_device_request(u8 *buf, u16 len)
 {
-    printf("JL_OPCODE_ADV_DEVICE_REQUEST\n");
+    log_info("JL_OPCODE_ADV_DEVICE_REQUEST");
     return JL_CMD_send(JL_OPCODE_ADV_DEVICE_REQUEST, buf, len, JL_NEED_RESPOND, 0, NULL);
 }
 
 int JL_rcsp_adv_cmd_resp(void *priv, u8 OpCode, u8 OpCode_SN, u8 *data, u16 len, u16 ble_con_handle, u8 *spp_remote_addr)
 {
-    rcsp_printf("JL_rcsp_adv_cmd_resp\n");
+    log_info("JL_rcsp_adv_cmd_resp: %d", OpCode);
     switch (OpCode) {
     case JL_OPCODE_SET_ADV:
-        rcsp_printf(" JL_OPCODE_SET_ADV\n");
+        log_info(" JL_OPCODE_SET_ADV");
         JL_opcode_set_adv_info(priv, OpCode, OpCode_SN, data, len, ble_con_handle, spp_remote_addr);
         break;
     case JL_OPCODE_GET_ADV:
-        rcsp_printf(" JL_OPCODE_GET_ADV\n");
+        log_info(" JL_OPCODE_GET_ADV");
         JL_opcode_get_adv_info(priv, OpCode, OpCode_SN, data, len, ble_con_handle, spp_remote_addr);
         break;
     case JL_OPCODE_ADV_NOTIFY_SETTING:
-        rcsp_printf(" JL_OPCODE_ADV_NOTIFY_SETTING\n");
+        log_info(" JL_OPCODE_ADV_NOTIFY_SETTING");
         bt_ble_adv_ioctl(BT_ADV_SET_NOTIFY_EN, *((u8 *)data), 1);
         JL_CMD_response_send(OpCode, JL_PRO_STATUS_SUCCESS, OpCode_SN, NULL, 0, ble_con_handle, spp_remote_addr);
         break;
     case JL_OPCODE_ADV_DEVICE_REQUEST:
-        rcsp_printf("JL_OPCODE_ADV_DEVICE_REQUEST\n");
+        log_info("JL_OPCODE_ADV_DEVICE_REQUEST");
         break;
     default:
         return 1;
@@ -225,8 +229,11 @@ static void rcsp_wait_reboot_dev(void *priv)
 
 static void rcsp_rcsp_reboot_dev(void)
 {
+#if RCSP_ADV_NAME_SET_ENABLE
     extern void adv_edr_name_change_now(void);
     adv_edr_name_change_now();
+#endif
+
 #if TCFG_USER_TWS_ENABLE
     if (get_bt_tws_connect_status()) {
         modify_bt_name_and_reset(500);
@@ -250,7 +257,7 @@ int JL_rcsp_adv_event_handler(struct rcsp_event *rcsp)
         rcsp_rcsp_reboot_dev();
         break;
     case MSG_JL_UPDATE_SEQ:
-        printf("MSG_JL_UPDATE_SEQ\n");
+        log_info("MSG_JL_UPDATE_SEQ");
         adv_seq_vaule_sync();
         break;
     case MSG_JL_UPDAET_ADV_STATE_INFO:
@@ -265,38 +272,45 @@ int JL_rcsp_adv_event_handler(struct rcsp_event *rcsp)
     return 0;
 }
 
-// 下面是弹窗的其他设置
-int app_core_data_for_send(u8 *packet, u16 size)
+// 下面是adv的其他设置
+int app_core_data_for_send(u8 *packet, u16 size, u8 *tws_phone_addr)
 {
-    //printf("for app send size %d\n", size);
+    //log_info("for app send size %d\n", size);
 
-    if (JL_rcsp_get_auth_flag()) {
-        *packet = 1;
-    } else {
-        *packet = 0;
-    }
-
-    if (bt_rcsp_spp_conn_num() > 0) {
-        if (get_ble_adv_notify()) {
-            *(packet + 1) = 1;
+    if (size >= 4) {
+        if (JL_rcsp_get_auth_flag()) {
+            *packet = 1;
         } else {
-            *(packet + 1) = 0;
+            *packet = 0;
         }
+
+        if (bt_rcsp_spp_conn_num() > 0) {
+            if (get_ble_adv_notify()) {
+                *(packet + 1) = 1;
+            } else {
+                *(packet + 1) = 0;
+            }
 
 #if RCSP_ADV_MUSIC_INFO_ENABLE
-        if (get_player_time_en()) {
-            *(packet + 2) = 1;
-        } else {
-            *(packet + 2) = 0;
-        }
+            if (get_player_time_en()) {
+                *(packet + 2) = 1;
+            } else {
+                *(packet + 2) = 0;
+            }
 #else
-        *(packet + 2) = 0;
+            *(packet + 2) = 0;
 #endif
 
-        *(packet + 3) = get_connect_flag();
+            *(packet + 3) = get_connect_flag();
+        } else {
+            // 处理偶尔无法进入低功耗的问题
+            *(packet + 1) = 0;
+            *(packet + 2) = 0;
+            *(packet + 3) = 0;
+        }
+        return 4;
     }
-
-    return 4;
+    return 0;
 }
 
 #if TCFG_USER_TWS_ENABLE
@@ -306,12 +320,12 @@ int app_core_data_for_send(u8 *packet, u16 size)
 	 ((u8)('C' + 'O' + 'R' + 'E') << (1 * 8)) | \
 	 ((u8)('D' + 'A' + 'T' + 'A') << (0 * 8)))
 
-void app_core_data_for_set(u8 *packet, u16 size);
+void app_core_data_for_set(u8 *packet, u16 size, u8 *tws_phone_addr);
 static void rcsp_app_core_data_in_irq(void *_data, u16 len, bool rx)
 {
     if (rx) {
         u8 *data = (u8 *)_data;
-        app_core_data_for_set(data, len);
+        app_core_data_for_set(data, len, NULL);
     }
 }
 
@@ -321,9 +335,9 @@ REGISTER_TWS_FUNC_STUB(tws_rcsp_spp_status) = {
 };
 #endif
 
-void app_core_data_for_set(u8 *packet, u16 size)
+void app_core_data_for_set(u8 *packet, u16 size, u8 *tws_phone_addr)
 {
-    /* printf("%s, %s, %d\n", __FILE__, __FUNCTION__, __LINE__); */
+    /* log_info("%s, %s, %d\n", __FILE__, __FUNCTION__, __LINE__); */
     /* u8 rcsp_auth_flag =  *packet; */
     u8 ble_adv_notify =  *(packet + 1);
     u8 player_time_en =  *(packet + 2);

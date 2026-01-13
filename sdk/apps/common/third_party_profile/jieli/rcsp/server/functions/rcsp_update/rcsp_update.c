@@ -1,10 +1,11 @@
-#ifdef MEDIA_SUPPORT_MS_EXTENSIONS
+#ifdef RCSP_SUPPORT_MS_EXTENSIONS
 #pragma bss_seg(".rcsp_update.data.bss")
 #pragma data_seg(".rcsp_update.data")
 #pragma const_seg(".rcsp_update.text.const")
 #pragma code_seg(".rcsp_update.text")
 #endif
 #include "app_config.h"
+#include "rcsp_cfg.h"
 #include "rcsp_update.h"
 #if (RCSP_MODE && RCSP_UPDATE_EN && !RCSP_BLE_MASTER)
 #include "uart.h"
@@ -16,7 +17,6 @@
 #include "rcsp_manage.h"
 #include "rcsp_bt_manage.h"
 #include "update_loader_download.h"
-#include "ble_rcsp_server.h"
 #include "classic/tws_api.h"
 #include "rcsp_task.h"
 #include "rcsp_config.h"
@@ -31,8 +31,8 @@
 #include "rcsp_setting_opt.h"
 #endif
 
-#if (RCSP_MODE == RCSP_MODE_EARPHONE)
-/* #include "bt_tws.h" */
+#if	TCFG_USER_TWS_ENABLE
+#include "bt_tws.h"
 #endif
 
 #if (RCSP_MODE == RCSP_MODE_WATCH)
@@ -43,6 +43,10 @@
 #include "rcsp_misc_setting.h"
 #endif
 
+
+#if (TCFG_MIC_EFFECT_ENABLE)
+#include "mic_effect.h"
+#endif
 
 #define RCSP_DEBUG_EN
 #ifdef  RCSP_DEBUG_EN
@@ -100,10 +104,12 @@ static void rcsp_update_prepare()
     rcsp_device_status_setting_stop();
 #endif
 
+#if (RCSP_MODE && RCSP_REVERBERATION_SETTING && TCFG_MIC_EFFECT_ENABLE && RCSP_ADV_EQ_SET_ENABLE)
 #if (RCSP_MODE != RCSP_MODE_SOUNDBOX)
     // 关闭混响
     extern void rcsp_close_reverbrateion_state_and_update(void);
     rcsp_close_reverbrateion_state_and_update();
+#endif
 #endif
 
 #if (SOUNDCARD_ENABLE)
@@ -113,7 +119,9 @@ static void rcsp_update_prepare()
 #endif
 
 #if (TCFG_MIC_EFFECT_ENABLE && (0 == RCSP_REVERBERATION_SETTING))
-    mic_effect_player_close();
+    if (mic_effect_player_runing()) {
+        mic_effect_player_close();
+    }
 #endif
 
 }
@@ -275,7 +283,6 @@ static void rcsp_wait_reboot_dev(void *priv)
         return;
     }
     bt_cmd_prepare(USER_CTRL_POWER_OFF, 0, NULL);
-    extern void ble_module_enable(u8 en);
     ble_module_enable(0);
 #if CONFIG_UPDATE_JUMP_TO_MASK
     void latch_reset();
@@ -287,8 +294,11 @@ static void rcsp_wait_reboot_dev(void *priv)
 
 static void rcsp_rcsp_reboot_dev(void)
 {
+#if RCSP_ADV_NAME_SET_ENABLE
     extern void adv_edr_name_change_now(void);
     adv_edr_name_change_now();
+#endif
+
 #if TCFG_USER_TWS_ENABLE
     if (get_bt_tws_connect_status()) {
 #if RCSP_ADV_EN
@@ -315,12 +325,7 @@ u32 rcsp_update_data_read(void *priv, u32 offset_addr, u16 len);
 extern void rcsp_update_handle(u8 state, void *buf, int len);
 extern void rcsp_update_data_api_register(u32(*data_send_hdl)(void *priv, u32 offset, u16 len), u32(*send_update_handl)(void *priv, u8 state));
 extern void bt_ble_rcsp_adv_disable(void);
-
-#if RCSP_MODE == RCSP_MODE_EARPHONE
 extern void bt_set_low_latency_mode(int enable, u8 tone_play_enable, int delay_ms);
-#elif RCSP_MODE == RCSP_MODE_SOUNDBOX
-extern void bt_set_low_latency_mode(int enable);
-#endif
 
 void JL_resp_inquire_device_if_can_update(u8 OpCode, u8 OpCode_SN, u8 update_sta, u16 ble_con_handle, u8 *spp_remote_addr);
 void JL_rcsp_resp_dev_update_file_info_offest(u8 OpCode, u8 OpCode_SN, u16 ble_con_handle, u8 *spp_remote_addr);
@@ -339,7 +344,7 @@ int JL_rcsp_update_cmd_resp(void *priv, u8 OpCode, u8 OpCode_SN, u8 *data, u16 l
     }
     int ret = 0;
     u8 msg[5];
-    rcsp_printf("%s\n", __FUNCTION__);
+    rcsp_printf("%s: %d", __FUNCTION__, OpCode);
     switch (OpCode) {
     case JL_OPCODE_GET_DEVICE_UPDATE_FILE_INFO_OFFSET:
         if (0 == len) {
@@ -407,12 +412,13 @@ int JL_rcsp_update_cmd_resp(void *priv, u8 OpCode, u8 OpCode_SN, u8 *data, u16 l
                     r_printf("slave close adv...\n");
                     sys_timeout_add(NULL,  update_slave_adv_reopen, 1000 * 60);     //延迟一分钟再开广播
                 }
-                if (RCSP_USE_SPP == get_curr_device_type()) {
-#if TCFG_USER_TWS_ENABLE
-                    tws_api_detach(TWS_DETACH_BY_LOCAL, 5000); //单备份升级断开tws
-                    tws_cancle_all_noconn();
-#endif
-                }
+                // 断开tws会导致spp断连，不断开也可以正常升级
+                /*                 if (RCSP_USE_SPP == get_curr_device_type()) { */
+                /* #if TCFG_USER_TWS_ENABLE */
+                /*                     tws_api_detach(TWS_DETACH_BY_LOCAL, 5000); //单备份升级断开tws */
+                /*                     tws_cancle_all_noconn(); */
+                /* #endif */
+                /*                 } */
 
 #else
 
@@ -436,12 +442,8 @@ int JL_rcsp_update_cmd_resp(void *priv, u8 OpCode, u8 OpCode_SN, u8 *data, u16 l
         break;
     case JL_OPCODE_ENTER_UPDATE_MODE:
         rcsp_printf("JL_OPCODE_ENTER_UPDATE_MODE\n");
-#if RCSP_MODE == RCSP_MODE_EARPHONE
+#if (RCSP_MODE == RCSP_MODE_EARPHONE || RCSP_MODE == RCSP_MODE_SOUNDBOX)
         bt_set_low_latency_mode(0, 0, 0);
-#elif RCSP_MODE == RCSP_MODE_SOUNDBOX
-        printf("====RCSP-TODO=================%s=%d=yuring=\n\r", __func__, __LINE__);
-        //RCSP TODO
-        /* bt_set_low_latency_mode(0); */
 #endif
 
 #if TCFG_USER_TWS_ENABLE
@@ -780,6 +782,9 @@ int JL_rcsp_update_msg_deal(void *hdl, u8 event, u8 *msg)
         if ((10 == wait_cnt) || (rcsp_send_list_is_empty() && check_ble_all_packet_sent())) {
             wait_cnt = 0;
             ble_app_disconnect();
+#if TCFG_USER_TWS_ENABLE && !TCFG_THIRD_PARTY_PROTOCOLS_SIMPLIFIED
+            rcsp_clear_ble_hdl_and_tws_sync();
+#endif
             if (check_edr_is_disconnct()) {
                 puts("-need discon edr\n");
                 bt_cmd_prepare(USER_CTRL_POWER_OFF, 0, NULL);
@@ -920,4 +925,5 @@ u8 rcsp_get_update_flag(void)
 }
 
 #endif // (RCSP_MODE && RCSP_UPDATE_EN && !RCSP_BLE_MASTER)
+
 

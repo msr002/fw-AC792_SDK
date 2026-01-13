@@ -122,6 +122,29 @@ printf("run_time:%d(us)\n",run_time);
 <p>单次运算长度越长，效率越接近1：4，长度越短，硬件FFT配置启动关闭消耗占比会变大，甚至超过硬件FFT真实运行时间</p>
 </div>
 
+### EQ加速模块
+- **（1）demo路径**<br>
+  - SDK\audio\common\demo\audio_eq_demo.c
+
+- **（2）EQ Features**
+
+|Version|Platforms|Features|
+|---|---|---|
+|V0|695N、696N、897N、698N|IN:16bit<br>OUT:16/32bit|
+|V1|700N、701N、703N、706N、708N、709N|IN:16bit/32bit/单精度浮点<br>OUT:16bit/32bit/单精度浮点|
+
+### SRC加速模块
+芯片硬件实现的重采样（resample）模块
+- **（1）demo路径**<br>
+  - SDK\audio\common\demo\audio_resample_demo.c
+- **（2）SRC Features**
+
+|Version|Platforms|Features|
+|---|---|---|
+|V2|700N、701N、706N|16/24bit `√`|
+|V3|703N、708N|16/24bit`√`<br>单精度浮点`√`|
+
+
 ### 数学函数加速模块
 - **引用路径**<br>
 SDK\interface\utils\math\cpu\ `brxx` \asm\math_fast_function.h （其中`brxx`为cpu目录下的一个通配文件夹）
@@ -129,6 +152,18 @@ SDK\interface\utils\math\cpu\ `brxx` \asm\math_fast_function.h （其中`brxx`�
     ```C
     #include "asm/math_fast_function.h"
     ```
+
+### 加速指令
+#### 浮点运算
+- **单精度加速指令**：支持√<br>
+单精度浮点直接用C语言写编译器就会编译出对应的浮点指令<br>
+<mark>浮点立即数，处理过程如果没有加上f后缀，默认按照双精度处理，如果是单精度，注意加上f后缀，比如</mark>
+  ```
+  float var0 = var1 * 0.5f;
+  ```
+
+- **双精度加速指令**：不支持
+
 
 ## 异常跟踪
 ***
@@ -138,3 +173,7 @@ SDK\interface\utils\math\cpu\ `brxx` \asm\math_fast_function.h （其中`brxx`�
 ## 算法授权
 ***
 算法移植完成，如有需要通过授权方式许可芯片，请参考：[🔗多算法授权使用说明](https://doc.zh-jieli.com/Tools/zh-cn/mass_prod_tools/multi_auth/index.html)
+
+## 算法库编译打包
+
+算法移植完成，如需要将算法打包成库，请参考：[🔗算法库编译指引](https://doc.zh-jieli.com/Tools/zh-cn/dev_tools/faqs/howto_convert_sdk_to_lib.html)

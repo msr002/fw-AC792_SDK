@@ -13,7 +13,7 @@ typedef unsigned int    OS_CPU_DATA;                 /* Unsigned 32 bit quantity
 #endif
 
 #define	OS_CPU_EXT      	extern
-#define	OS_CPU_CORE     	CPU_CORE_NUM
+#define	OS_CPU_CORE     	MAX_CPU_CORE_NUM
 
 #define OS_CPU_ID       	current_cpu_id()
 #define OS_STK_GROWTH   	1         /* Stack grows from HIGH to LOW memory*/

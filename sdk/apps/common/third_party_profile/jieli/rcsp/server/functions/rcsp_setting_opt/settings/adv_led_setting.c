@@ -1,12 +1,11 @@
-#ifdef MEDIA_SUPPORT_MS_EXTENSIONS
+#ifdef RCSP_SUPPORT_MS_EXTENSIONS
 #pragma bss_seg(".adv_led_setting.data.bss")
 #pragma data_seg(".adv_led_setting.data")
 #pragma const_seg(".adv_led_setting.text.const")
 #pragma code_seg(".adv_led_setting.text")
 #endif
 #include "app_config.h"
-#include "syscfg_id.h"
-#include "user_cfg.h"
+#include "syscfg/syscfg_id.h"
 #include "ble_rcsp_server.h"
 
 #include "rcsp_setting_sync.h"

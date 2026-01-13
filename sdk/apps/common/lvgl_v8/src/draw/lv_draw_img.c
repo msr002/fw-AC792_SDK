@@ -348,6 +348,9 @@ static lv_res_t LV_ATTRIBUTE_FAST_MEM decode_and_draw(lv_draw_ctx_t *draw_ctx,
         if (union_ok == false) {
             draw_cleanup(cdsc);
             LV_PROFILER_END;
+#if LV_USE_GPU_RLE
+            draw_ctx->compress_type = LV_COMPRESS_NONE;
+#endif
             return LV_RES_OK;
         }
 
@@ -365,6 +368,9 @@ static lv_res_t LV_ATTRIBUTE_FAST_MEM decode_and_draw(lv_draw_ctx_t *draw_ctx,
         if (union_ok == false) {
             draw_cleanup(cdsc);
             LV_PROFILER_END;
+#if LV_USE_GPU_RLE
+            draw_ctx->compress_type = LV_COMPRESS_NONE;
+#endif
             return LV_RES_OK;
         }
 
@@ -396,6 +402,9 @@ static lv_res_t LV_ATTRIBUTE_FAST_MEM decode_and_draw(lv_draw_ctx_t *draw_ctx,
                 draw_cleanup(cdsc);
                 draw_ctx->clip_area = clip_area_ori;
                 LV_PROFILER_END;
+#if LV_USE_GPU_RLE
+                draw_ctx->compress_type = LV_COMPRESS_NONE;
+#endif
                 return LV_RES_INV;
             }
 
@@ -410,6 +419,10 @@ static lv_res_t LV_ATTRIBUTE_FAST_MEM decode_and_draw(lv_draw_ctx_t *draw_ctx,
     }
 
     draw_cleanup(cdsc);
+#if LV_USE_GPU_RLE
+    draw_ctx->compress_type = LV_COMPRESS_NONE;
+#endif
+
     LV_PROFILER_END;
     return LV_RES_OK;
 }

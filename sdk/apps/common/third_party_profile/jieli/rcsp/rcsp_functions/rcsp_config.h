@@ -3,6 +3,7 @@
 
 #include "typedef.h"
 #include "app_config.h"
+#include "rcsp_cfg.h"
 #include "le_common.h"
 #include "spp_user.h"
 #include "ble_user.h"
@@ -17,11 +18,7 @@
 #include "rcsp_bt_manage.h"
 // #include "soundbox.h"
 // #include "ui/ui_api.h"
-#if RCSP_MSG_DISTRIBUTION_VER == RCSP_MSG_DISTRIBUTION_VER_DEFAULT
-// #include "music/music.h"
-#else
-#include "app_music.h"
-#endif
+// #include "app_music.h"
 #endif
 
 #define RCSP_USE_BLE      0

@@ -16,6 +16,7 @@
 #include "debug.h"
 
 struct vir_data_rx_hdl {
+    void *source_node;
     void *file;
     struct stream_node *node;
     const struct stream_file_ops *file_ops;
@@ -43,10 +44,12 @@ static int vir_data_rx_fread(void *_hdl, u8 *data, int size)
     return hdl->file_ops->read(hdl->file, data, size);
 }
 
-static void *vir_data_rx_init(void *priv, struct stream_node *node)
+static void *vir_data_rx_init(void *source_node, struct stream_node *node)
 {
     struct vir_data_rx_hdl *hdl = zalloc(sizeof(*hdl));
+    hdl->source_node = source_node;
     hdl->node = node;
+    //node->type |= NODE_TYPE_IRQ;
     return hdl;
 }
 
@@ -71,6 +74,30 @@ static int vir_data_rx_ioc_file_start(struct vir_data_rx_hdl *hdl)
     return err;
 }
 
+static int vir_data_rx_set_vir_enc_input(struct vir_data_rx_hdl *hdl)
+{
+    if (!hdl->file) {
+        return 0;
+    }
+
+    u8 data[2 * 1024];
+    int rlen = hdl->file_ops->read(hdl->file, data, sizeof(data));
+    if (rlen) {
+        struct stream_frame *frame;
+
+        frame = source_plug_get_output_frame(hdl->source_node, rlen);
+        memcpy(frame->data, data, rlen);
+
+        frame->len          = rlen;
+        frame->flags        = FRAME_FLAG_TIMESTAMP_ENABLE | FRAME_FLAG_PERIOD_SAMPLE | FRAME_FLAG_UPDATE_TIMESTAMP;
+        frame->timestamp    = audio_jiffies_usec() * TIMESTAMP_US_DENOMINATOR;//adc_hdl.timestamp * TIMESTAMP_US_DENOMINATOR;
+
+        source_plug_put_output_frame(hdl->source_node, frame);
+    }
+
+    return 0;
+}
+
 static int vir_data_rx_ioctl(void *_hdl, int cmd, int arg)
 {
     int ret = 0;
@@ -91,6 +118,9 @@ static int vir_data_rx_ioctl(void *_hdl, int cmd, int arg)
         vir_data_rx_ioc_file_start(hdl);
         break;
     case NODE_IOC_STOP:
+        break;
+    case NODE_IOC_SET_VIR_ENC_INPUT:
+        vir_data_rx_set_vir_enc_input(hdl);
         break;
     }
 

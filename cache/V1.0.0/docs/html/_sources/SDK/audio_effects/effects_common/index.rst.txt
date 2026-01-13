@@ -5,4 +5,5 @@
    :maxdepth: 1
 
    multi_config_manual.md
-   
+   preset_effects.md
+   Effects_delay_manual.md   

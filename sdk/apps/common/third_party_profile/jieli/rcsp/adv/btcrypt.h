@@ -30,8 +30,6 @@ extern void btcon_hash(unsigned char *pt, int ptlen, unsigned char *key, int key
 extern int yf_aes_start_enc(unsigned char key[16], unsigned char plaintext[16], unsigned char encrypt[16]);
 #endif
 
-extern void aes128_enc(unsigned char key[16], unsigned char pt[16], unsigned char ct[16]);
-
 #ifdef __cplusplus
 }
 #endif

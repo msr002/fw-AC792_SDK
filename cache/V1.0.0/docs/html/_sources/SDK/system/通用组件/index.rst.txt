@@ -10,6 +10,8 @@
    buf_manage/index.rst
    cfg_user/index.rst
    debug/index.rst
+   timer/index.rst
+   clock_manage/index.rst
 
 
 

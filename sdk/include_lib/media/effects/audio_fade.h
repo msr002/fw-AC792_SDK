@@ -21,14 +21,10 @@ struct fade_open_parm {
 
 typedef struct _fade_hdl {
     struct fade_open_parm fade_parm;
-    u8 update;
-    u8 status;
-    u8 fade_en; //使能淡入标志位
+    float value;
+    float step;
     u32 dump_len; //开头丢弃的数据长度（byte），对应dump_time
-    u32 fade_len; //需要淡入的数据长度（byte），对应fade_time
-    u32 fade_points; //记录淡入总点数，该值不会做递减操作
-    u32 fade_gain;
-    u8 bit_width;
+    u8 status;
 } fade_hdl;
 
 //打开
@@ -45,5 +41,20 @@ int audio_fade_run(fade_hdl *hdl, s16 *indata, s16 *outdata, int len);
 
 //暂停处理
 void audio_fade_bypass(fade_hdl *hdl, u8 bypass);
+
+
+struct audio_xfade {
+    float fin_value;
+    float fout_value;
+    float step;
+    u8 bit_width;
+    u8 ch_num;
+};
+
+void audio_xfade_run(struct audio_xfade *xfade, void *fin, void *fout, void *out, u32 len);
+
+float audio_fade_out(void *data, float step, float value, int channel, int per_channel_npoint, u8 bit_width);
+
+float audio_fade_in(void *data, float step, float value, int channel, int per_channel_npoint, u8 bit_width);
 
 #endif

@@ -1,10 +1,13 @@
-# SPK_EQ开发文档
+# SPK_EQ
 
 ## 开发背景
      同一型号的样机所配置的喇叭，由于产品批次、品控等原因，可能频响曲线会存在较大差异，从而导致同一型号的样机存在不同的听感。此时需要使用`Speaker EQ`弥补喇叭频响曲线，让不同喇叭的频响趋于统一（一般会使之接近于一条直线）。
 	 
 ## 实现过程
-    将SpeakerEQ节点拉到输出节点(DAC/IIS_TX)之前即可。可使用spp串口通信调节每一段eq的系数值
+将SpeakerEQ节点拉到输出节点(DAC/IIS_TX)之前即可。可使用spp串口通信调节每一段eq的系数值
+
+<mark>注意：如果流程有BitWidth Convert节点，需要串到BitWidth Convert节点之前，如下图所示</mark>
+
 ![Speaker_EQ1](./assets/Speaker_EQ1.png)
 ## 通信方式
 ### spp通信方式

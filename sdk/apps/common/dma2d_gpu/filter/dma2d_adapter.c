@@ -29,6 +29,7 @@
 #include "debug.h"
 
 #define DMA2D_MAX_CHANNEL  2
+#define DMA2D_MAX_BUF_NUM  1
 
 static int *g_dma2d_used[DMA2D_MAX_CHANNEL];
 
@@ -52,9 +53,15 @@ struct dma2d_filter_handle {
     u16 line_cnt;
 
     OS_SEM task_sem;
-    buffer_meta_t *buffer_meta;
+
+    buffer_meta_t buffer_meta[DMA2D_MAX_BUF_NUM];
+    u8 *buf_ptr[DMA2D_MAX_BUF_NUM];
+    u8 update_buf_index;
+    u8 cur_buf_index;
 
     u8 *dma2d_out_buf;
+
+    int block_num;
 
     void *sticker;
     int rotate;
@@ -184,7 +191,9 @@ static void dma2d_filter_task(void *arg)
             break;
         }
         //dma2d处理
-        u8 *image_data = buffer_get_memory_address(buffer_in);
+        /* u8 *image_data = buffer_get_memory_address(buffer_in); */
+        buffer_meta_t *buffer_meta = buffer_in->read_data(buffer_in, 0);
+        u8 *image_data = buffer_meta->ext_data;
 
 #ifdef USE_LVGL_V8_UI_DEMO
         if (hdl->rotate) {
@@ -304,6 +313,87 @@ static int dma2d_filter_prepare(pipe_plugin_t *plugin, int source_channel)
     return 0;
 }
 
+static buffer_meta_t *dma2d_get_write_able_addr(buffer_t *buffer, size_t size)
+{
+    int type = buffer->type;
+    struct dma2d_filter_handle *hdl = buffer->private_data;
+    char name[PLUGIN_NAME_MAX] = {0};
+
+    if (type == EXTERN_BUFFER) {
+        buffer_meta_t *buffer_meta = &hdl->buffer_meta[hdl->cur_buf_index];
+        buffer_meta->ext_data = hdl->buf_ptr[hdl->cur_buf_index];
+        //update时切换 cur_buf_index
+        /*         if (hdl->g_on_event) { */
+        /* sprintf(name, "dma2d%d", hdl->channel); */
+        /* hdl->g_on_event(name, EVENT_FRAME_DOING, hdl->g_on_event_arg); */
+        /* } */
+
+        return buffer_meta;
+    } else {
+        log_error("%s Not implemented", __FUNCTION__);
+        return NULL;
+    }
+    return NULL;
+}
+
+static int dma2d_update_data(buffer_t *buffer, buffer_meta_t *buffer_meta)
+{
+    int type = buffer->type;
+    struct dma2d_filter_handle *hdl = buffer->private_data;
+    char name[PLUGIN_NAME_MAX] = {0};
+
+    if (type == EXTERN_BUFFER) {
+        hdl->update_buf_index = hdl->cur_buf_index;
+        hdl->cur_buf_index = (hdl->cur_buf_index + 1) % hdl->block_num;
+        os_sem_post(&hdl->task_sem);
+        /*         if (hdl->g_on_event) { */
+        /* sprintf(name, "dma2d%d", hdl->channel); */
+        /* hdl->g_on_event(name, EVENT_FRAME_DONE, hdl->g_on_event_arg); */
+        /* } */
+        return 0;
+    } else {
+        log_error("%s Not implemented", __FUNCTION__);
+        return -1;
+    }
+    return -1;
+}
+
+static int dma2d_free_data_size(buffer_t *buffer)
+{
+    int type = buffer->type;
+    if (type == EXTERN_BUFFER) {
+    } else {
+        log_error("%s Not implemented", __FUNCTION__);
+        return -1;
+    }
+    return -1;
+}
+
+static buffer_meta_t *dma2d_get_read_data(buffer_t *buffer, int no_wait)
+{
+    int type = buffer->type;
+    struct dma2d_filter_handle *hdl = buffer->private_data;
+    if (type == EXTERN_BUFFER) {
+        buffer_meta_t *buffer_meta = &hdl->buffer_meta[hdl->update_buf_index];
+        return  buffer_meta;
+    } else {
+        log_error("%s Not implemented", __FUNCTION__);
+        return NULL;
+    }
+    return NULL;
+}
+
+static int dma2d_free_read_data(buffer_t *buffer, buffer_meta_t *buffer_meta)
+{
+    int type = buffer->type;
+    if (type == EXTERN_BUFFER) {
+        /* free(buffer_meta); */
+    } else {
+        log_error("%s Not implemented", __FUNCTION__);
+        return -1;
+    }
+    return -1;
+}
 
 static int dma2d_filter_connect(pipe_plugin_t *prev_plugin, pipe_plugin_t *plugin, int source_channel)
 {
@@ -321,16 +411,10 @@ static int dma2d_filter_connect(pipe_plugin_t *prev_plugin, pipe_plugin_t *plugi
     struct buffer_api api = {0};
 
     hdl->source_channel = source_channel;
-    buffer_info_t info = {0};
-    info.source_channel = hdl->source_channel;
-    buffer_t *buffer = buffer_init(plugin->name, &info);
+
 
     pipe_endpoint_t *out_endpoint = port_add_output_endpoint(prev_plugin->port, plugin->name, source_channel);
     pipe_endpoint_t *in_endpoint = port_add_input_endpoint(plugin->port, prev_plugin->name, source_channel);
-
-    out_endpoint->data_buffer = buffer;
-
-    in_endpoint->data_buffer = buffer;
 
     //set source info
     pipe_common_t fmt_info = {0};
@@ -349,14 +433,39 @@ static int dma2d_filter_connect(pipe_plugin_t *prev_plugin, pipe_plugin_t *plugi
     log_info("prepare input: %dx%d %d\n", hdl->input_width, hdl->input_height, hdl->input_format);
     log_info("prepare output: %dx%d %d\n", hdl->output_width, hdl->output_height, hdl->output_format);
 
-    info.buffer_type = GENERAL_BUFFER;
-    info.memory_type = DDR_MEMORY;
-    int block_size = hdl->input_width * hdl->input_height * ((hdl->input_format == FORMAT_YUV420P) ? (3.0 / 2) : 2);
-    info.buffer_size = block_size;//(block_size + sizeof(buffer_meta_t) + LBUF_RESERVE_LEN);
-    int ret = buffer_alloc_memory(buffer, &info);
-    if (ret == 0) {
-        log_debug("dma2d buffer %x len :%d ", buffer->mem.mem_addr, info.buffer_size);
+
+    api.private_data    = hdl;
+    api.get_write_addr  = dma2d_get_write_able_addr;
+    api.update_data     = dma2d_update_data;
+    api.get_free_size   = dma2d_free_data_size;
+    api.read_data       = dma2d_get_read_data;
+    api.free_read_data  = dma2d_free_read_data;
+
+    buffer_info_t info = {0};
+    info.buffer_type = EXTERN_BUFFER;
+    info.source_channel = hdl->source_channel;
+    info.ops = &api;
+    buffer_t *buffer = buffer_init(plugin->name, &info);
+    if (!buffer) {
+        return NULL;
     }
+    buffer->private_data = hdl;
+
+    int block_size = hdl->input_width * hdl->input_height * ((hdl->input_format == FORMAT_YUV420P) ? (3.0 / 2) : 2);
+    for (int i = 0; i < hdl->block_num; i++) {
+        hdl->buf_ptr[i] = malloc(block_size);
+        if (!hdl->buf_ptr[i]) {
+            printf("dma2d alloc buf fail \n");
+            return -1;
+        }
+    }
+
+
+
+    out_endpoint->data_buffer = buffer;
+
+    in_endpoint->data_buffer = buffer;
+
 
 
     return 0;
@@ -388,6 +497,8 @@ static int dma2d_filter_init(pipe_plugin_t *plugin)
 
     hdl->state = PLUGIN_INITED;
     plugin->private_data = hdl;
+
+    hdl->block_num = DMA2D_MAX_BUF_NUM;
 
     g_dma2d_used[hdl->channel] = hdl;
 
@@ -453,6 +564,12 @@ static int dma2d_filter_reset(pipe_plugin_t *plugin, int source_channel)
 
     os_sem_del(&hdl->task_sem, OS_DEL_ALWAYS);
 
+    for (int i = 0; i < hdl->block_num; i++) {
+        if (hdl->buf_ptr[i]) {
+            free(hdl->buf_ptr[i]);
+        }
+    }
+
     free(hdl);
 
     return 0;
@@ -513,6 +630,7 @@ static int dma2d_filter_message_callback(pipe_plugin_t *plugin, int cmd, void *a
                 info->format = hdl->output_format;
                 info->width = hdl->output_width;
                 info->height = hdl->output_height;
+                info->fps = 25;
             } else {
                 info->format = hdl->input_format;
                 info->width = hdl->input_width;
@@ -523,8 +641,8 @@ static int dma2d_filter_message_callback(pipe_plugin_t *plugin, int cmd, void *a
         ret = PIPE_MESSAGE_CONTINUE;
 
     case IMC_FRAME_DONE:
-        os_sem_set(&hdl->task_sem, 0);
-        os_sem_post(&hdl->task_sem);
+        /* os_sem_set(&hdl->task_sem, 0); */
+        /* os_sem_post(&hdl->task_sem); */
         break;
     default:
         ret = message_request(plugin->port, cmd, arg);

@@ -1,4 +1,4 @@
-#ifdef MEDIA_SUPPORT_MS_EXTENSIONS
+#ifdef RCSP_SUPPORT_MS_EXTENSIONS
 #pragma bss_seg(".sensors_data_opt.data.bss")
 #pragma data_seg(".sensors_data_opt.data")
 #pragma const_seg(".sensors_data_opt.text.const")

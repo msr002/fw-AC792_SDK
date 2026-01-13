@@ -17,6 +17,15 @@
 #if TCFG_LE_AUDIO_STREAM_ENABLE
 #include "wireless_trans.h"
 #endif
+#if ((THIRD_PARTY_PROTOCOLS_SEL & RCSP_MODE_EN) && RCSP_MODE)
+#include "rcsp.h"
+#endif
+
+
+_WEAK_ void bt_music_post_msg_to_ui(const char *msg, ...)
+{
+
+}
 
 static void multi_box_in_bis_start_notify(u8 role);
 
@@ -113,6 +122,9 @@ static void bt_status_init_ok(void)
     }
 #endif
 
+#if ((THIRD_PARTY_PROTOCOLS_SEL & RCSP_MODE_EN) && RCSP_MODE)
+    rcsp_init();
+#endif
 #if THIRD_PARTY_PROTOCOLS_SEL
     multi_protocol_bt_init();
 #endif
@@ -192,6 +204,7 @@ static void ms_to_time(u8 *info, u16 len)
     for (cnt = 0; cnt < len; cnt ++) {
         time += (info[len - 1 - cnt] - '0') * pow(10, cnt);
     }
+    bt_music_post_msg_to_ui("music_tol_time: %4", time);
     log_info("music_time: %02d : %02d", time / 1000 / 60, (time % 60000) / 1000);
 }
 
@@ -206,8 +219,10 @@ static void user_get_bt_music_info(u8 type, u32 time, u8 *info, u16 len)
     if ((info != NULL) && (len != 0) && (type != 7)) {
         if (type == 1) {
             log_info("title: %s", info);
+            bt_music_post_msg_to_ui("music_lyrics", info);
         } else if (type == 2) {
             log_info("artist: %s", info);
+            bt_music_post_msg_to_ui("music_artist", info);
         } else if (type == 3) {
             log_info("album: %s", info);
 #if TCFG_BT_SUPPORT_PROFILE_BIP == 1
@@ -227,9 +242,12 @@ static void user_get_bt_music_info(u8 type, u32 time, u8 *info, u16 len)
     if (time != 0) {
         min = time / 1000 / 60;
         sec = time / 1000 - (min * 60);
+        bt_music_post_msg_to_ui("music_cur_time %4", time);
         log_info("time %02d : %02d", min, sec);
     }
 }
+
+static void bip_file_request_update(u8 *bt_addr);
 
 static void user_get_bt_music_info_ext(u8 *addr, u8 type, u32 time, u32 total_time, u8 play_status, u8 *info, u16 len)
 {
@@ -242,8 +260,10 @@ static void user_get_bt_music_info_ext(u8 *addr, u8 type, u32 time, u32 total_ti
     if ((info != NULL) && (len != 0) && (type != 7)) {
         if (type == 1) {
             log_info("title: %s", info);
+            bt_music_post_msg_to_ui("music_lyrics", info);
         } else if (type == 2) {
             log_info("artist: %s", info);
+            bt_music_post_msg_to_ui("music_artist", info);
         } else if (type == 3) {
             log_info("album: %s", info);
 #if TCFG_BT_SUPPORT_PROFILE_BIP == 1
@@ -263,7 +283,13 @@ static void user_get_bt_music_info_ext(u8 *addr, u8 type, u32 time, u32 total_ti
     if (time != 0) {
         min = time / 1000 / 60;
         sec = time / 1000 - (min * 60);
+        bt_music_post_msg_to_ui("music_cur_time %4", time);
         log_info("time %02d : %02d", min, sec);
+#if TCFG_BT_SUPPORT_PROFILE_BIP
+        if (min == 0 && sec == 0) {
+            bip_file_request_update(addr);
+        }
+#endif
     }
 }
 
@@ -583,6 +609,8 @@ static void bt_function_select_init(void)
 
 #if TCFG_BT_SUPPORT_PROFILE_BIP == 1
 
+#include "fs/fs.h"
+
 /*************************************************************************/
 //			avrcp传输音乐图片
 /*************************************************************************/
@@ -607,13 +635,23 @@ enum {
 };
 
 struct bip_file_info {
+#if TCFG_BT_BIP_INFO_SAVE_FILE
     FILE *fp;                       //文件句柄
+#else
+    OS_MUTEX mutex;
+    u8 *buffer;
+    u32 buffer_size;
+    u32 buffer_offset;
+    u8 bt_addr[6];
+    u16 timer;
+#endif
     volatile u8 file_status;        //文件状态
 };
 
 static struct bip_file_info bip_file;
 #define __bip_info (&bip_file)
 
+#if TCFG_BT_BIP_INFO_SAVE_FILE
 const char *bip_file_path_get(void)
 {
     return BIP_FILE_PATH;
@@ -622,6 +660,72 @@ const char *bip_file_path_get(void)
 const char *bip_file_name_get(void)
 {
     return BIP_FILE_NAME;
+}
+#else
+const char *bip_file_path_get(void)
+{
+    if (!__bip_info->buffer_offset) {
+        return NULL;
+    }
+
+    return __bip_info->buffer;
+}
+
+u32 bip_file_size_get(void)
+{
+    return __bip_info->buffer_offset;
+}
+
+static void bip_file_data_update(u8 *data, u32 length)
+{
+    if (__bip_info->buffer) {
+        if (length + __bip_info->buffer_offset > __bip_info->buffer_size) {
+            __bip_info->buffer_size *= 2;
+            __bip_info->buffer = (u8 *)realloc(__bip_info->buffer, __bip_info->buffer_size);
+        }
+        if (__bip_info->buffer) {
+            memcpy(__bip_info->buffer + __bip_info->buffer_offset, data, length);
+            __bip_info->buffer_offset += length;
+        }
+    }
+}
+
+static int bip_file_mutex_init(void)
+{
+    return os_mutex_create(&__bip_info->mutex);
+}
+early_initcall(bip_file_mutex_init);
+
+int bip_file_mutex_lock(void)
+{
+    return os_mutex_pend(&__bip_info->mutex, 0);
+}
+
+int bip_file_mutex_unlock(void)
+{
+    return os_mutex_post(&__bip_info->mutex);
+}
+
+#endif
+
+static void __bip_file_request_update(void *p)
+{
+    __bip_info->timer = 0;
+
+    put_buf(__bip_info->bt_addr, 6);
+    bt_cmd_prepare_for_addr(__bip_info->bt_addr, USER_CTRL_BIP_GET_IMAGE, 0, NULL);
+}
+
+static void bip_file_request_update(u8 *bt_addr)
+{
+    if (a2dp_player_is_playing(bt_addr)) {
+        memcpy(__bip_info->bt_addr, bt_addr, 6);
+        if (__bip_info->timer) {
+            sys_timeout_del(__bip_info->timer);
+            __bip_info->timer = 0;
+        }
+        __bip_info->timer = sys_timeout_add(NULL, __bip_file_request_update, 500);
+    }
 }
 
 u8 bip_file_status_get(void)
@@ -646,6 +750,7 @@ void bip_rx_data_handle(u8 *packet, u16 body_len, u32 length, u8 bip_data_status
     switch (bip_data_status) {
     case BIP_DATA_STATUS_START: //收到第一包数据
         log_info("BIP_DATA_STATUS_START");
+#if TCFG_BT_BIP_INFO_SAVE_FILE
         const char *bit_file_path = bip_file_path_get();
         log_info("bip_file_path: %s", bit_file_path);
         //删除旧文件
@@ -663,20 +768,49 @@ void bip_rx_data_handle(u8 *packet, u16 body_len, u32 length, u8 bip_data_status
         } else {
             log_error("bip file open err");
         }
+#else
+        bip_file_mutex_lock();
+        if (!__bip_info->buffer) {
+            __bip_info->buffer_size = 50 * 1024;
+            __bip_info->buffer = (u8 *)malloc(__bip_info->buffer_size);
+        }
+        if (__bip_info->buffer) {
+            __bip_info->file_status = BIP_FILE_STATUS_UPDATE;
+        } else {
+            __bip_info->file_status = BIP_FILE_STATUS_ERR;
+        }
+        __bip_info->buffer_offset = 0;
+        bip_file_mutex_unlock();
+        bip_file_data_update(packet, body_len);
+#endif
         break;
     case BIP_DATA_STATUS_CONTINUE: //收到文件数据
+#if TCFG_BT_BIP_INFO_SAVE_FILE
         if (__bip_info->fp) {
             fwrite(packet, body_len, 1, __bip_info->fp);
         }
+#else
+        bip_file_data_update(packet, body_len);
+#endif
         break;
     case BIP_DATA_STATUS_STOP: //收到结束命令
         log_info("BIP_DATA_STATUS_STOP");
+#if TCFG_BT_BIP_INFO_SAVE_FILE
         if (__bip_info->fp) {
             fwrite(packet, body_len, 1, __bip_info->fp);
             fclose(__bip_info->fp);
             __bip_info->fp = NULL;
             __bip_info->file_status = BIP_FILE_STATUS_OK;
         }
+        //put_buf(packet, body_len);
+        bt_music_post_msg_to_ui("music_album_pic");
+#else
+        if (__bip_info->buffer) {
+            bip_file_data_update(packet, body_len);
+            __bip_info->file_status = BIP_FILE_STATUS_OK;
+            bt_music_post_msg_to_ui("music_album_pic");
+        }
+#endif
         break;
     case BIP_DATA_STATUS_ERR:
         log_info("BIP_DATA_STATUS_ERR");

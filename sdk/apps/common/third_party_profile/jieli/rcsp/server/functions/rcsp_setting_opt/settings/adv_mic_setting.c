@@ -1,4 +1,4 @@
-#ifdef MEDIA_SUPPORT_MS_EXTENSIONS
+#ifdef RCSP_SUPPORT_MS_EXTENSIONS
 #pragma bss_seg(".adv_mic_setting.data.bss")
 #pragma data_seg(".adv_mic_setting.data")
 #pragma const_seg(".adv_mic_setting.text.const")
@@ -12,7 +12,7 @@
 #include "rcsp_setting_sync.h"
 #include "rcsp_setting_opt.h"
 #include "classic/tws_api.h"
-/* #include "bt_tws.h" */
+#include "bt_tws.h"
 
 #if (RCSP_MODE && RCSP_ADV_EN)
 #if RCSP_ADV_MIC_SET_ENABLE

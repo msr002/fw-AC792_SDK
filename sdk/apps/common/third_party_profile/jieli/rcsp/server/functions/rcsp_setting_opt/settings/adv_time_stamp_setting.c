@@ -1,4 +1,4 @@
-#ifdef MEDIA_SUPPORT_MS_EXTENSIONS
+#ifdef RCSP_SUPPORT_MS_EXTENSIONS
 #pragma bss_seg(".adv_time_stamp_setting.data.bss")
 #pragma data_seg(".adv_time_stamp_setting.data")
 #pragma const_seg(".adv_time_stamp_setting.text.const")
@@ -6,6 +6,7 @@
 #endif
 #include "rcsp_config.h"
 #include "syscfg_id.h"
+#include "user_cfg_id.h"
 #include "ble_rcsp_server.h"
 
 #include "adv_time_stamp_setting.h"
@@ -64,9 +65,7 @@ void deal_adv_setting_gain_time_stamp(void)
 // 1、写入VM
 static void update_time_stamp_vm_value(u8 *time_stamp)
 {
-    printf("update_time_stamp_vm_value");
-    ///RCSP TODO
-    /* syscfg_write(CFG_RCSP_ADV_TIME_STAMP, time_stamp, 4); */
+    syscfg_write(CFG_RCSP_ADV_TIME_STAMP, time_stamp, 4);
 }
 // 2、同步对端
 static void adv_time_stamp_sync(u8 *time_stamp)
@@ -116,8 +115,7 @@ static int time_stamp_set_setting_extra_handle(void *setting_data, void *setting
 static RCSP_SETTING_OPT adv_time_stamp_opt = {
     .data_len = 4,
     .setting_type = ATTR_TYPE_TIME_STAMP,
-    ///RCSP TODO
-    /* .syscfg_id = CFG_RCSP_ADV_TIME_STAMP, */
+    .syscfg_id = CFG_RCSP_ADV_TIME_STAMP,
     .deal_opt_setting = deal_time_stamp_setting,
     .set_setting = set_adv_time_stamp,
     .get_setting = get_adv_time_stamp,

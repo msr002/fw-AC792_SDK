@@ -1,4 +1,4 @@
-#ifdef MEDIA_SUPPORT_MS_EXTENSIONS
+#ifdef RCSP_SUPPORT_MS_EXTENSIONS
 #pragma bss_seg(".file_bluk_trans_prepare.data.bss")
 #pragma data_seg(".file_bluk_trans_prepare.data")
 #pragma const_seg(".file_bluk_trans_prepare.text.const")

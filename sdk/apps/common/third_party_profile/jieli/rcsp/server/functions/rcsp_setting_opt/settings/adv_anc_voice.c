@@ -1,4 +1,4 @@
-#ifdef MEDIA_SUPPORT_MS_EXTENSIONS
+#ifdef RCSP_SUPPORT_MS_EXTENSIONS
 #pragma bss_seg(".adv_anc_voice.data.bss")
 #pragma data_seg(".adv_anc_voice.data")
 #pragma const_seg(".adv_anc_voice.text.const")
@@ -15,7 +15,7 @@
 #include "rcsp_manage.h"
 #include "rcsp_bt_manage.h"
 #if TCFG_USER_TWS_ENABLE
-/* #include "bt_tws.h" */
+#include "bt_tws.h"
 #endif
 
 #if (RCSP_MODE && RCSP_ADV_ANC_VOICE)

@@ -1,4 +1,4 @@
-#ifdef MEDIA_SUPPORT_MS_EXTENSIONS
+#ifdef RCSP_SUPPORT_MS_EXTENSIONS
 #pragma bss_seg(".ble_rcsp_adv.data.bss")
 #pragma data_seg(".ble_rcsp_adv.data")
 #pragma const_seg(".ble_rcsp_adv.text.const")
@@ -23,10 +23,9 @@
 #if RCSP_MODE != RCSP_MODE_OFF
 #include "system/includes.h"
 #include "rcsp_config.h"
-/* #include "app_action.h" */
 #include "btstack/btstack_task.h"
 #include "btstack/bluetooth.h"
-#include "user_cfg.h"
+#include "user_cfg_id.h"
 #include "vm.h"
 #include "app_power_manage.h"
 #include "btcontroller_modules.h"
@@ -37,27 +36,30 @@
 #include "btcrypt.h"
 #include "custom_cfg.h"
 #include "rcsp_music_info_setting.h"
-#include "classic/tws_api.h"
 #include "ble_rcsp_server.h"
 #include "rcsp_manage.h"
 #include "rcsp_bt_manage.h"
 #include "rcsp_adv_bluetooth.h"
 #include "rcsp_update.h"
 #include "btstack/avctp_user.h"
-/* #include "multi_protocol_main.h" */
+#include "multi_protocol_main.h"
 #include "JL_rcsp_api.h"
 #include "rcsp_config.h"
 #include "btstack_rcsp_user.h"
-#include "ble_rcsp_server.h"
-#include "rcsp_cfg.h"
+#include "update.h"
 
-#if (TCFG_LE_AUDIO_APP_CONFIG & (LE_AUDIO_UNICAST_SINK_EN | LE_AUDIO_JL_UNICAST_SINK_EN))
+#if	TCFG_USER_TWS_ENABLE
+#include "bt_tws.h"
+#include "classic/tws_api.h"
+#endif
+#if (TCFG_LE_AUDIO_RCSP_USE_SAME_ACL)
 #include "app_le_connected.h"
 #endif
 
 #if RCSP_MODE == RCSP_MODE_EARPHONE
-/* #include "bt_tws.h" */
-/* #include "earphone.h" */
+#include "earphone.h"
+#elif RCSP_MODE == RCSP_MODE_SOUNDBOX
+/* #include "soundbox.h" */
 #endif
 
 /* #include "asm/charge.h" */
@@ -70,16 +72,25 @@
 
 #define VER_FLAG_IOS_BLE_LINK_BREDR				BIT(1) // ios一次连接
 
+#define LOG_TAG_CONST	  RCSP_ADV
+#define LOG_TAG             "[RCSP_ADV]"
+#define LOG_ERROR_ENABLE
+#define LOG_DEBUG_ENABLE
+#define LOG_INFO_ENABLE
+#include "system/debug.h"
 #if 1
-#define log_info(x, ...)       printf("[BLE-RCSP-ADV]" x " ", ## __VA_ARGS__)
 #define log_info_hexdump       put_buf
 #else
-#define log_info(...)
 #define log_info_hexdump(...)
 #endif
 
+#if !TCFG_THIRD_PARTY_PROTOCOLS_SIMPLIFIED
 extern void *rcsp_server_ble_hdl;
 extern void *rcsp_server_ble_hdl1;
+extern void *rcsp_server_edr_att_hdl;
+extern void *rcsp_server_edr_att_hdl1;
+#endif
+extern int get_charge_online_flag(void);
 
 static u8 adv_data_len;
 static u8 adv_data[ADV_RSP_PACKET_MAX];//max is 31
@@ -120,9 +131,9 @@ static void rcsp_adv_fill_mac_addr(u8 *mac_addr_buf)
     swapX(bt_get_mac_addr(), mac_addr_buf, 6);
 }
 
-#if 1//(CONFIG_CPU_BR27 || CONFIG_CPU_BR28 || CONFIG_CPU_BR50) && ((RCSP_MODE == RCSP_MODE_SOUNDBOX) || (RCSP_MODE == RCSP_MODE_EARPHONE))
+#if (CONFIG_CPU_BR27 || CONFIG_CPU_BR28 || CONFIG_CPU_BR50 || CONFIG_CPU_BR56) && ((RCSP_MODE == RCSP_MODE_SOUNDBOX) || (RCSP_MODE == RCSP_MODE_EARPHONE))
 extern int JL_AES_BASE_BT;
-int JL_AES_BASE_BT = (int)JL_AES_ACC;	// add for btcon_hash, by lingxuanfeng, 20220517
+int JL_AES_BASE_BT = (int)JL_AES;	// add for btcon_hash, by lingxuanfeng, 20220517
 #endif
 int rcsp_make_set_adv_data(void)
 {
@@ -146,7 +157,7 @@ int rcsp_make_set_adv_data(void)
 
     buf[8] = 0x20;	//   2:TWS耳机类型   |  protocol verson
 
-#if (TCFG_LE_AUDIO_APP_CONFIG & (LE_AUDIO_UNICAST_SINK_EN | LE_AUDIO_JL_UNICAST_SINK_EN))
+#if (TCFG_LE_AUDIO_RCSP_USE_SAME_ACL)
     buf[8] |= 4;
 #else
     if (RCSP_USE_SPP == get_defalut_bt_channel_sel()) {
@@ -182,7 +193,7 @@ int rcsp_make_set_adv_data(void)
         buf[15] = 1;
     }
 #else
-    /* printf("connect_flag %s, %s, %d, flag:%d\n", __FILE__, __FUNCTION__, __LINE__, __this->connect_flag); */
+    /* log_debug("connect_flag %s, %s, %d, flag:%d\n", __FILE__, __FUNCTION__, __LINE__, __this->connect_flag); */
     buf[15] = __this->connect_flag;
 
     buf[16] = __this->bat_percent_L ? (((!!__this->bat_charge_L) << 7) | (__this->bat_percent_L & 0x7F)) : 0;
@@ -197,7 +208,7 @@ int rcsp_make_set_adv_data(void)
         buf[20] = 1;
     }
 
-#if (TCFG_LE_AUDIO_APP_CONFIG & (LE_AUDIO_UNICAST_SINK_EN | LE_AUDIO_JL_UNICAST_SINK_EN))
+#if (TCFG_LE_AUDIO_RCSP_USE_SAME_ACL)
     buf[20] |= BIT(2);  // 是否支持Le Audio功能
     if (is_cig_phone_conn()) {
         buf[20] |= BIT(3);  // Le Audio是否已连接
@@ -211,38 +222,14 @@ int rcsp_make_set_adv_data(void)
     }
 #endif // RCSP_MODE == RCSP_MODE_WATCH
 
-#if 0
-    buf[9] = 0xE7;
-    buf[10] = 0x0B;
-    buf[11] = 0xD4;
-    buf[12] = 0x96;
-    buf[13] = 0x00;
-    buf[14] = 0x22;
-#endif
-
-#if 0
-    buf[16] = 0x64;
-    buf[17] = 0x00;
-    buf[18] = 0x00;
-    buf[19] = 0x04;
-    buf[20] = 0x01;
-    buf[21] = 0x00;
-    buf[22] = 0x00;
-    buf[23] = 0x4d;
-    buf[24] = 0x13;
-    buf[25] = 0x8c;
-    buf[26] = 0xc3;
-    buf[27] = 0xa1;
-    buf[28] = 0x3d;
-    buf[29] = 0xc2;
-    buf[30] = 0xd0;
-#endif
-
     __this->modify_flag = 0;
     adv_data_len = 31;
-    /* ble_op_set_adv_data(31, buf); */
+#if !TCFG_THIRD_PARTY_PROTOCOLS_SIMPLIFIED
     app_ble_adv_data_set(rcsp_server_ble_hdl, buf, 31);
     app_ble_adv_data_set(rcsp_server_ble_hdl1, buf, 31);
+#else
+    ble_op_set_adv_data(31, buf);
+#endif
 
     log_info("ADV data():");
     log_info_hexdump(buf, 31);
@@ -270,9 +257,12 @@ int rcsp_make_set_rsp_data(void)
     scan_rsp_data_len = offset;
     log_info("rsp_data(%d):", offset);
     log_info_hexdump(buf, offset);
-    /* ble_op_set_rsp_data(offset, buf); */
+#if !TCFG_THIRD_PARTY_PROTOCOLS_SIMPLIFIED
     app_ble_rsp_data_set(rcsp_server_ble_hdl, buf, 31);
     app_ble_rsp_data_set(rcsp_server_ble_hdl1, buf, 31);
+#else
+    ble_op_set_rsp_data(offset, buf);
+#endif
     return 0;
 }
 
@@ -398,7 +388,7 @@ static u8 update_dev_battery_level(void)
     if (master_bat > 100) {
         master_bat = 100;
     }
-    /* master_charge = get_charge_online_flag(); */
+    master_charge = get_charge_online_flag();
 
 
 // Slave bat
@@ -565,7 +555,7 @@ int bt_ble_adv_ioctl(u32 cmd, u32 priv, u8 mode)
 {
     uint32_t rets_addr;
     __asm__ volatile("%0 = rets ;" : "=r"(rets_addr));
-    printf("%s, rets=0x%x\n", __FUNCTION__, rets_addr);
+    log_debug("%s, rets=0x%x\n", __FUNCTION__, rets_addr);
 
 #if RCSP_MODE == RCSP_MODE_WATCH
     return 0;
@@ -633,7 +623,7 @@ static void bt_ble_rcsp_adv_enable_do(void *priv)
 #if TCFG_USER_TWS_ENABLE
 
     if (tws_api_get_role() == TWS_ROLE_SLAVE) {
-        /* printf("%s, %s, it's slave\n", __FILE__, __FUNCTION__); */
+        /* log_debug("%s, %s, it's slave\n", __FILE__, __FUNCTION__); */
         return;
         /* if (bt_rcsp_spp_conn_num() == 0) { */
         /* 	// 如果从机不是spp连接，则返回 */
@@ -643,13 +633,12 @@ static void bt_ble_rcsp_adv_enable_do(void *priv)
 #endif
 
 #if RCSP_UPDATE_EN
-    extern u32 classic_update_task_exist_flag_get(void);
     if (classic_update_task_exist_flag_get()) {
         return;
     }
 #endif
 
-    /* printf("modify_flag:%d, ble_adv_notify:%d\n", __this->modify_flag, __this->ble_adv_notify); */
+    /* log_debug("modify_flag:%d, ble_adv_notify:%d\n", __this->modify_flag, __this->ble_adv_notify); */
 
     // battery
     if (update_dev_battery_level()) {
@@ -675,6 +664,8 @@ static void bt_ble_rcsp_adv_enable_do(void *priv)
         if (rcsp_conn_num >= max_con_dev) {
             __this->modify_flag = 0;
         }
+    }
+    if (__this->ble_adv_notify) {
         set_ble_adv_notify(0);
     }
 
@@ -735,7 +726,7 @@ u8 get_connect_flag(void)
 void set_connect_flag(u8 value)
 {
     __this->connect_flag = value;
-    /* printf("connect_flag %s, %s, %d, flag:%d\n", __FILE__, __FUNCTION__, __LINE__, __this->connect_flag); */
+    /* log_debug("connect_flag %s, %s, %d, flag:%d\n", __FILE__, __FUNCTION__, __LINE__, __this->connect_flag); */
 }
 
 void bt_ble_rcsp_adv_disable_timer(void)
@@ -774,7 +765,7 @@ static void deal_sibling_seq_rand_sync_in_task(void *data, u16 len)
             /* if(bt_tws_phone_connected()) { */
             /*     rcsp_update_set_role_switch(1); */
             /* } else {             */
-            /*     g_printf("rcsp_need role switch\n");                    //已经连接上手机在此处role_switch */
+            /*     log_info("rcsp_need role switch\n");                    //已经连接上手机在此处role_switch */
             /*     tws_conn_switch_role(); */
             /*     tws_api_auto_role_switch_disable(); */
             /* } */
@@ -784,11 +775,11 @@ static void deal_sibling_seq_rand_sync_in_task(void *data, u16 len)
         }
 
         break;
-#if RCSP_MODE == RCSP_MODE_EARPHONE
+#if RCSP_MODE == RCSP_MODE_EARPHONE && RCSP_UPDATE_EN
     case TWS_UPDATE_INFO:                                               //单备份升级走BLE主机需要要通过该消息来通知从机进入升级
         bt_ble_rcsp_adv_disable();
         ble_module_enable(0);                                           //关闭广播防止从机被手机误回连
-        g_printf("slave close adv...\n");
+        log_info("slave close adv...\n");
         sys_timeout_add(NULL,  update_slave_adv_reopen, 1000 * 60);     //延迟一分钟再开广播
         sibling_ver_info  = ((u8 *)data)[1] | ((u8 *)data)[2] << 8;
         cur_ver_info  = get_vid_pid_ver_from_cfg_file(GET_VER_FROM_EX_CFG);
@@ -820,18 +811,16 @@ REGISTER_TWS_FUNC_STUB(adv_seq_rand_sync) = {
 };
 void adv_seq_vaule_sync(void)
 {
-    printf("==============RCSP_TODO========%s==%d====", __func__, __LINE__);
-    /* syscfg_write(ADV_SEQ_RAND, &__this->seq_rand, sizeof(__this->seq_rand)); */
+    syscfg_write(CFG_RCSP_ADV_SEQ_RAND, &__this->seq_rand, sizeof(__this->seq_rand));
 }
 void bt_adv_seq_change(void)
 {
     u8 trand;
     u8 data[2];
-    printf("==============RCSP_TODO========%s==%d====", __func__, __LINE__);
-    /* syscfg_read(ADV_SEQ_RAND, &trand, 1); */
+    syscfg_read(CFG_RCSP_ADV_SEQ_RAND, &trand, 1);
     log_info("adv seq read: %x\n", trand);
     trand++;
-    /* syscfg_write(ADV_SEQ_RAND, &trand, 1); */
+    syscfg_write(CFG_RCSP_ADV_SEQ_RAND, &trand, 1);
     log_info("adv seq write: %x\n", trand);
     __this->seq_rand = trand;
     data[0] = TWS_ADV_SEQ_CHANGE;
@@ -863,7 +852,7 @@ static void rcsp_adv_notify_tws_sync_in_irq(void *_data, u16 len, bool rx)
 {
     if (rx) {
         __this->ble_adv_notify = *(u8 *)_data;
-        printf("%s, %d, adv_notify:%d\n", __FUNCTION__, __LINE__, __this->ble_adv_notify);
+        log_debug("%s, %d, adv_notify:%d\n", __FUNCTION__, __LINE__, __this->ble_adv_notify);
     }
 }
 REGISTER_TWS_FUNC_STUB(tws_rcsp_adv_notify_sync) = {
@@ -875,7 +864,7 @@ void set_ble_adv_notify(u8 en)
 {
     uint32_t rets_addr;
     __asm__ volatile("%0 = rets ;" : "=r"(rets_addr));
-    printf("%s, %d, rets=0x%x\n", __FUNCTION__, en, rets_addr);
+    log_debug("%s, %d, rets=0x%x\n", __FUNCTION__, en, rets_addr);
 #if TCFG_USER_TWS_ENABLE
     if (get_bt_tws_connect_status() && TWS_ROLE_MASTER == tws_api_get_role()) {
         u8 *buf = &en;
@@ -953,20 +942,49 @@ check_changes:
     return 0;
 }
 
+#if TCFG_USER_TWS_ENABLE && TCFG_THIRD_PARTY_PROTOCOLS_SIMPLIFIED
+
+extern u8 check_le_pakcet_sent_finish_flag(void);
+extern bool rcsp_send_list_is_empty(void);
+static u8 g_tws_disconn_try_cnt = 0;
+static void tws_disconn_ble(void *priv)
+{
+    if (!rcsp_handle_get()) {
+        return;
+    }
+    /* log_debug("%s, %s, %d, %d, %d, %d\n", __FILE__, __FUNCTION__, __LINE__, rcsp_send_list_is_empty(), check_le_pakcet_sent_finish_flag(), g_tws_disconn_try_cnt); */
+    if ((rcsp_send_list_is_empty() && check_le_pakcet_sent_finish_flag()) || (g_tws_disconn_try_cnt >= 10)) {
+        g_tws_disconn_try_cnt = 0;
+        ble_module_enable(0);
+    } else {
+        g_tws_disconn_try_cnt++;
+        sys_timeout_add(NULL, tws_disconn_ble, 50);
+    }
+}
+
+
+#endif
+
 // 切换后触发
 void adv_role_switch_handle(u8 role)
 {
 #if TCFG_USER_TWS_ENABLE
+#if !TCFG_THIRD_PARTY_PROTOCOLS_SIMPLIFIED
     // 当充电入仓的时候，入仓的主机设备role是1但tws_api_get_role()是0；
-    printf("adv_role_switch_handle rcsp role change:%d, %d, %d\n", role, tws_api_get_role(), bt_rcsp_device_conn_num());
+    log_debug("adv_role_switch_handle rcsp role change:%d, %d, %d\n", role, tws_api_get_role(), bt_rcsp_device_conn_num());
+    log_debug("tws state %x, spp num %x, ble num %x, att num %x\n", tws_api_get_tws_state(), bt_rcsp_spp_conn_num(), bt_rcsp_ble_conn_num(), bt_rcsp_edr_att_conn_num());
     if (tws_api_get_tws_state()) {
         // 设备连接后，主从切换需要spp手机app来请求固件信息
         if ((role == TWS_ROLE_MASTER) && \
-            ((bt_rcsp_spp_conn_num() > 0) || (bt_rcsp_ble_conn_num() > 0))) {
+            ((bt_rcsp_spp_conn_num() > 0) || (bt_rcsp_ble_conn_num() > 0) || (bt_rcsp_edr_att_conn_num() > 0))) {
             u8 adv_cmd = 0x4;
             adv_info_device_request(&adv_cmd, sizeof(adv_cmd));             //让手机来请求固件信息
         }
-
+        // 主从切换后, 新主机重新推送一次电量信息
+        if (role == TWS_ROLE_MASTER) {
+            set_ble_adv_notify(1);
+            bt_ble_rcsp_adv_enable();
+        }
         // 如果还需要开广播 并且 一拖二的时候ble还没有连接
         if (bt_rcsp_device_conn_num() < rcsp_max_support_con_dev_num()) {
             if (role == TWS_ROLE_MASTER) {
@@ -975,9 +993,43 @@ void adv_role_switch_handle(u8 role)
                 rcsp_bt_ble_adv_enable(0);
             }
         }
+        //有att连接中,从机切为主机，要开ble广播；主机切为从机，要关ble广播
+        if (bt_rcsp_edr_att_conn_num() > 0) {
+            if (role == TWS_ROLE_MASTER) {
+                rcsp_bt_ble_adv_enable(1);
+            } else {
+                rcsp_bt_ble_adv_enable(0);
+            }
+        }
     }
 
-#endif
+#else // !TCFG_THIRD_PARTY_PROTOCOLS_SIMPLIFIED
+
+    if (tws_api_get_tws_state()) {
+        if (!bt_rcsp_spp_conn_num() && (tws_api_get_role() != TWS_ROLE_SLAVE)) {
+            // 新主机开广播
+            ble_module_enable(1);
+        }
+        // 主从切换后, 新主机重新推送一次电量信息
+        if (role == TWS_ROLE_MASTER) {
+            set_ble_adv_notify(1);
+            bt_ble_rcsp_adv_enable();
+        }
+        if (rcsp_ble_con_handle_get() && (tws_api_get_role() == TWS_ROLE_SLAVE)) {
+            // 旧主机让手机回连同时断开ble
+            u8 adv_cmd = 0x3;
+            adv_info_device_request(&adv_cmd, sizeof(adv_cmd));
+            tws_disconn_ble(NULL);
+        }
+        if (bt_rcsp_spp_conn_num() && bt_rcsp_device_conn_num()) {
+            u8 adv_cmd = 0x4;
+            adv_info_device_request(&adv_cmd, sizeof(adv_cmd));             //主从切换spp让手机来请求固件信息
+        }
+    }
+
+#endif // !TCFG_THIRD_PARTY_PROTOCOLS_SIMPLIFIED
+
+#endif // TCFG_USER_TWS_ENABLE
 }
 
 void send_version_to_sibling(void)
@@ -1054,7 +1106,7 @@ u16 rebuild_adv_rcsp_info(u8 *adv_rsp_buf, u16 buf_size, u8 type, u8 *addr)
         rsp_adv_len += make_eir_packet_val(&adv_rsp_buf[rsp_adv_len], rsp_adv_len, HCI_EIR_DATATYPE_FLAGS, 0x06, 1);
         const char *edr_name = bt_get_local_name();
         rsp_adv_len += make_eir_packet_data(&adv_rsp_buf[rsp_adv_len], rsp_adv_len, HCI_EIR_DATATYPE_COMPLETE_LOCAL_NAME, (void *)edr_name, strlen(edr_name) > 26 ? 26 : strlen(edr_name));
-        printf("%s, strlen(edr_name):%d", edr_name, (int)strlen(edr_name));
+        log_debug("%s, strlen(edr_name):%d", edr_name, (int)strlen(edr_name));
         log_info("new rsp_data(%d):\n", rsp_adv_len);
         log_info_hexdump(adv_rsp_buf, rsp_adv_len);
         break;

@@ -57,7 +57,7 @@ const int CONFIG_BTSTACK_LE_AUDIO_ENABLE = 1;
 const int CONFIG_BTSTACK_LE_AUDIO_ENABLE = 0;
 #endif
 
-#if TCFG_BLE_BRIDGE_EDR_ENALBE || ((TCFG_LE_AUDIO_APP_CONFIG & (LE_AUDIO_UNICAST_SINK_EN | LE_AUDIO_JL_UNICAST_SINK_EN)))
+#if RCSP_MODE || (defined TCFG_BLE_BRIDGE_EDR_ENALBE && TCFG_BLE_BRIDGE_EDR_ENALBE) || ((TCFG_LE_AUDIO_APP_CONFIG & (LE_AUDIO_UNICAST_SINK_EN | LE_AUDIO_JL_UNICAST_SINK_EN)))
 const int config_le_sm_sub_sc_bridge_edr_enable = 1;
 const int config_le_sm_sub_sc_enable = 1;
 #else

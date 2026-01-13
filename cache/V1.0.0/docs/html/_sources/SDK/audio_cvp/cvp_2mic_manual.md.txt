@@ -298,8 +298,8 @@ windows自带计算器计算如下：
 
 ### 常见问题调试指引
 #### 出现吃音或者一句话某个字某个字变得很小声问题
-&emsp;&emsp;出现该问题时，首先要确认所处环境是不是信噪比很低(如小于-5db)，即噪声比人声大很多，这种情形下，优化空间有限，调试步骤如下：
-- 步骤1：通过调节mic的增益来缓解：如果mic的增益比较小(小于10db)，可以适当提高mic增益来缓解吃音问题，建议调节范围不要超过15db；提高mic增益可能会导致噪声增大，据实际情况调节。
+&emsp;&emsp;出现该问题时，首先要确认所处环境是不是信噪比很低(如小于-5dB)，即噪声比人声大很多，这种情形下，优化空间有限，调试步骤如下：
+- 步骤1：通过调节mic的增益来缓解：如果mic的增益比较小(小于10dB)，可以适当提高mic增益来缓解吃音问题，建议调节范围不要超过15dB；提高mic增益可能会导致噪声增大，据实际情况调节。
 - 步骤2：调节DNS_GainFloor和DNS_OverDrive参数：适当提高DNS_GainFloor 或 适当减小 DNS_OverDrive，可以通过配合gain_floor和over_drive适度调节。
 #### 远端听到声音不均匀，忽大忽小
 &emsp;&emsp;如果后处理开启了AGC模块，出现该问题时，请参照“章节十：常见问题FAQ”第二个问题进行确认调整。
@@ -325,11 +325,11 @@ windows自带计算器计算如下：
 1、在audio_cvp_dms.c里面把CONST_JLSP_WD_EN置1</br>
 2、在audio_cvp_dms.c里面配置参数</br>
 ![](./assets/cvp_tms/cvp_tms_7.png) </br>
-**wn_msc_th**: 双麦非相关性阈值，根据双麦采集到的音频相关性取值，相关性越小取值越大，取值范围（0~1），默认取值0.6</br>
-**ms_th**：麦增益能量阈值，用于衡量音频特定频段能量强度，需要根据实际风噪做确定；</br>
+- **WN_Correlation_Threshold**: 双麦非相关性阈值，根据双麦采集到的音频相关性取值，相关性越小取值越大，取值范围（0~1），默认取值0.6</br>
+- **WN_MassCenter_Threshold**：麦增益能量阈值，用于衡量音频特定频段能量强度，需要根据实际风噪做确定；</br>
 &emsp;&emsp;确定方法如下：如果需要在大于3m/s风速下做降风噪，需要用样机在3m/s的实际环境下测试，使用int jlsp_get_wind_detect_info(int *wd_flag, int *wd_val, int *wd_lev)接口实时获取当前的风噪强度wd_val，把这个风噪强度的值wd_val填给ms_th。</br>
 `注意：有无风是由wn_msc_th和ms_th两个参数共同决定的。`</br>
-**wn_gain_offset**：风噪能量增益偏移阈值，风噪参数确认后一般是不能修改mic增益的了，如果修改了mic的增益，mic数据变化的dB数需要填到wn_gain_offset这里</br>
+- **WN_Gain_Offset**：风噪能量增益偏移阈值，风噪参数确认后一般是不能修改mic增益的了，如果修改了mic的增益，mic数据变化的dB数需要填到wn_gain_offset这里</br>
 </br>
 在audio_aec_dms.c或者audio_cvp_3mic.c打开 WIND_DETECT_INFO_SPP_DEBUG_ENABLE可在通话是通过蓝牙spp工具查看看风噪值</br>
 ![](./assets/cvp_tms/cvp_jlsp_wnc_spp.png) </br>
@@ -338,12 +338,12 @@ windows自带计算器计算如下：
 功能介绍：使用双麦时，检测到其中一个麦克风异常（比如麦克风堵塞、麦克风坏了等），主动切换成单麦模式使用另一个正常的麦克风，保证通话能正常使用。</br>
 ### 参数说明
 ![](./assets/cvp_tms/mfdt_cfg.png) </br>
-**detect_time**：检测时间，单位：秒</br>
-**detect_eng_diff_thr**：麦克风能量差值，两个mic能量差异持续大于此阈值超过检测时间则会检测为故障，设置范围：0~90dB</br>
-**detect_eng_lowerbound**：检测阈值，当有麦克风能量低于此值时，才可是做检测</br>
-**MalfuncDet_MaxFrequency**：检测频率上限</br>
-**MalfuncDet_MinFrequency**：检测频率下限</br>
-**OnlyDetect**：是否之作检测不做单麦切换， 0 ：故障切换到单mic模式， 1：只检测不切换</br>
+- **Detect Time**：检测时间，单位：秒</br>
+- **Input Diff Threshold**：麦克风能量差值，两个mic能量差异持续大于此阈值超过检测时间则会检测为故障，设置范围：0~90dB</br>
+- **Input Lower Bound**：检测阈值，当有麦克风能量低于此值时，才可是做检测</br>
+- **MalfuncDet MaxFrequency**：检测频率上限</br>
+- **MalfuncDet MinFrequency**：检测频率下限</br>
+- **OnlyDetect**：是否之作检测不做单麦切换， 0 ：故障切换到单mic模式， 1：只检测不切换</br>
 
 ```C
 /*获取单双麦切换状态

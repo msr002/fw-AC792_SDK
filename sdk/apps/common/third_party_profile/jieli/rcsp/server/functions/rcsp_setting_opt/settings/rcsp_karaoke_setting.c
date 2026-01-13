@@ -1,4 +1,4 @@
-#ifdef MEDIA_SUPPORT_MS_EXTENSIONS
+#ifdef RCSP_SUPPORT_MS_EXTENSIONS
 #pragma bss_seg(".rcsp_karaoke_setting.data.bss")
 #pragma data_seg(".rcsp_karaoke_setting.data")
 #pragma const_seg(".rcsp_karaoke_setting.text.const")
@@ -14,7 +14,6 @@
 
 #if (SOUNDCARD_ENABLE && RCSP_MODE && RCSP_ADV_KARAOKE_SET_ENABLE)
 
-/* #include "key_event_deal.h" */
 #include "mic_effect.h"
 #include "JL_rcsp_packet.h"
 #include "soundcard/soundcard.h"

@@ -1,4 +1,4 @@
-#ifdef MEDIA_SUPPORT_MS_EXTENSIONS
+#ifdef RCSP_SUPPORT_MS_EXTENSIONS
 #pragma bss_seg(".rcsp_c_cmd_recieve_no_response.data.bss")
 #pragma data_seg(".rcsp_c_cmd_recieve_no_response.data")
 #pragma const_seg(".rcsp_c_cmd_recieve_no_response.text.const")

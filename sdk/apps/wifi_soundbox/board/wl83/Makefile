@@ -131,137 +131,7 @@ DEFINES += $(EXT_CFLAGS) # 额外的一些定义
 
 # 头文件搜索路径
 INCLUDES := \
-	-I../../../../include_lib/c++ \
-	-I../../../../include_lib/c++/include \
-	-I../../../../include_lib/newlib/include \
-	-I../../../../include_lib/c++/simple_pthread \
-	-I../../../../include_lib \
-	-I../../../../include_lib/driver \
-	-I../../../../include_lib/driver/device \
-	-I../../../../include_lib/driver/cpu/wl83 \
-	-I../../../../include_lib/system \
-	-I../../../../include_lib/system/generic \
-	-I../../../../include_lib/btctrler \
-	-I../../../../include_lib/btctrler/port/wl83 \
-	-I../../../../include_lib/update \
-	-I../../../../include_lib/btstack/third_party/common \
-	-I../../../../include_lib/btstack/third_party/rcsp \
-	-I../../../../include_lib/utils \
-	-I../../../../include_lib/utils/syscfg \
-	-I../../../../include_lib/utils/event \
-	-I../../../../include_lib/btstack \
-	-I../../../../apps/common \
-	-I../../../../apps/common/usb \
-	-I../../../../apps/common/usb/device \
-	-I../../../../apps/common/usb/host \
-	-I../../../../apps/common/usb/include/host \
-	-I../../../../apps/common/usb/include \
-	-I../../../../include_lib/driver/device/usb \
-	-I../../../../include_lib/driver/device/usb/device \
-	-I../../../../include_lib/driver/device/usb/host \
-	-I../../../../apps/common/net \
-	-I../../../../apps/common/net/testbox/include \
-	-I../../../../apps/common/rf_fcc_tool/include \
-	-I../../../../apps/common/third_party_profile/mijia \
-	-I../../../../apps/common/third_party_profile/mijia/mijia_ble_api \
-	-I../../../../apps/common/third_party_profile/mijia/mijia_ble_libs \
-	-I../../../../apps/common/third_party_profile/alipay \
-	-I../../../../apps/common/third_party_profile/ancs_client_demo \
-	-I../../../../apps/common/third_party_profile \
-	-I../../../../apps/common/ble/include \
-	-I../../../../apps/common/lcd/include \
-	-I../../../../include_lib/driver/device/video/pipeline \
-	-I../../../../include_lib/driver/device/video/pipeline/buffer \
-	-I../../../../include_lib/driver/device/video/pipeline/core \
-	-I../../../../apps/common/example/third_party/rlottie_impl/inc \
-	-I../../../../apps/common/example/third_party/rlottie_impl/src/vector \
-	-I../../../../apps/common/example/third_party/rlottie_impl/src/vector/freetype \
-	-I../../../../apps/common/example/third_party/freetype/include \
-	-I../../../../include_lib/system/ui \
-	-I../../../../include_lib/driver/cpu/wl83/asm \
-	-I../../../../apps/common/lvgl_v8 \
-	-I../../../../apps/common/lvgl_v8/src \
-	-I../../../../apps/common/lvgl_v8/src/extra \
-	-I../../../../apps/common/freetype/include \
-	-I../../../../apps/common/lvgl_v8/examples/porting \
-	-I../../../../apps/common/lvgl_v8/examples/libs/freetype \
-	-I../../../../apps/common/lvgl_v8/demos \
-	-I../../../../apps/common/lvgl_v8/demos/benchmark \
-	-I../../../../apps/common/lvgl_v8/demos/keypad_encoder \
-	-I../../../../apps/common/lvgl_v8/demos/music \
-	-I../../../../apps/common/lvgl_v8/demos/stress \
-	-I../../../../apps/common/lvgl_v8/demos/widgets \
-	-I../../../../apps/common/lvgl_v8/demos/amap/gps/map \
-	-I../../../../apps/common/lvgl_v8/demos/amap/gps \
-	-I../../../../apps/common/lvgl_v8/demos/amap \
-	-I../../../../apps/common/lvgl_v8/src/draw/jl/jl_dma2d \
-	-I../../../../apps/wifi_soundbox/lvgl_v8_ui_app/style_JL/generated \
-	-I../../../../apps/wifi_soundbox/lvgl_v8_ui_app/style_JL/generated/gui_events \
-	-I../../../../apps/wifi_soundbox/lvgl_v8_ui_app/style_JL/generated/gui_fonts \
-	-I../../../../apps/wifi_soundbox/lvgl_v8_ui_app/style_JL/generated/gui_images \
-	-I../../../../apps/wifi_soundbox/lvgl_v8_ui_app/style_JL/generated/gui_msg \
-	-I../../../../apps/wifi_soundbox/lvgl_v8_ui_app/style_JL/generated/gui_res \
-	-I../../../../apps/wifi_soundbox/lvgl_v8_ui_app/style_JL/generated/gui_src \
-	-I../../../../apps/wifi_soundbox/lvgl_v8_ui_app/style_JL/generated/gui_group \
-	-I../../../../apps/wifi_soundbox/lvgl_v8_ui_app/style_JL/generated/gui_timelines \
-	-I../../../../apps/wifi_soundbox/lvgl_v8_ui_app/style_JL/generated/i18n \
-	-I../../../../apps/wifi_soundbox/lvgl_v8_ui_app/style_JL/custom \
-	-I../../../../apps/common/third_party_profile/upay_t_head_v2 \
-	-I../../../../apps/common/third_party_profile/upay_t_head_v2/include \
-	-I../../../../apps/common/third_party_profile/upay_t_head_v2/app/bind_ble/inc \
-	-I../../../../apps/common/third_party_profile/upay_t_head_v2/hal/csi \
-	-I../../../../apps/common/third_party_profile/upay_t_head_v2/hal/csi/hsc32i1 \
-	-I../../../../apps/common/third_party_profile/upay_t_head_v2/hal/csi/inc \
-	-I../../../../apps/common/third_party_profile/upay_t_head_v2/share/common/inc \
-	-I../../../../apps/common/third_party_profile/upay_t_head_v2/app/trans_code/inc \
-	-I../../../../apps/common/third_party_profile/upay_t_head_v2/hal/network/inc \
-	-I../../../../apps/common/third_party_profile/upay_t_head_v2/hal/os/inc \
-	-I../../../../apps/common/third_party_profile/upay_t_head_v2/app/antchain/inc \
-	-I../../../../apps/common/third_party_profile/upay_t_head_v2/platform/alipay \
-	-I../../../../apps/common/third_party_profile/upay_t_head_v2/platform/timestamp \
-	-I../../../../apps/wifi_soundbox/mode/bt/le_audio/include \
-	-I../../../../apps/wifi_soundbox/mode/bt/le_audio/include/big \
-	-I../../../../apps/wifi_soundbox/mode/bt/le_audio/include/cig \
-	-I../../../../apps/wifi_soundbox/mode/bt/le_audio/include/auracast \
-	-I../../../../apps/common/dev_manager \
-	-I../../../../apps/common/file_operate \
-	-I../../../../apps/common/debug/online_db \
-	-I../../../../audio/interface \
-	-I../../../../audio/interface/includes \
-	-I../../../../audio \
-	-I../../../../audio/effect \
-	-I../../../../audio/framework/include \
-	-I../../../../audio/framework/plugs/source \
-	-I../../../../audio/CVP \
-	-I../../../../audio/test_tools \
-	-I../../../../audio/cpu/wl83 \
-	-I../../../../audio/common \
-	-I../../../../audio/common/config \
-	-I../../../../include_lib/media \
-	-I../../../../include_lib/media/cvp \
-	-I../../../../include_lib/media/cpu/wl83 \
-	-I../../../../include_lib/media/cpu/wl83/asm \
-	-I../../../../include_lib/media/framework/include \
-	-I../../../../audio/smart_voice \
-	-I../../../../audio/effect/spatial_effect \
-	-I../../../../include_lib/media/aispeech/enc \
-	-I../../../../audio/cpu/wl83/audio_dai \
-	-I../../../../audio/cpu/wl83/audio_common \
-	-I../../../../apps \
-	-I../../../../apps/wifi_soundbox \
-	-I../../../../apps/wifi_soundbox/include \
-	-I../../../../apps/wifi_soundbox/board/wl83 \
-	-I../../../../apps/common/include \
-	-I../../../../apps/common/config/include \
-	-I../../../../apps/common/system \
-	-I../../../../apps/common/system/perf_counter \
-	-I../../../../include_lib/driver/device/video \
-	-I../../../../include_lib/system/os \
-	-I../../../../include_lib/net \
-	-I../../../../include_lib/net/lwip_2_2_0/lwip/src/include \
-	-I../../../../include_lib/net/lwip_2_2_0/lwip/port \
-	-I../../../../include_lib/net/lwip_2_2_0/lwip/app \
-	-I../../../../include_lib/net/mbedtls_3_4_0 \
+	@include_dir.txt
 
 
 # 需要编译的 .c 文件
@@ -871,6 +741,110 @@ c_SRC_FILES := \
 	../../../../apps/common/third_party_profile/ancs_client_demo/le_ancs_client.c \
 	../../../../apps/common/third_party_profile/custom_protocol_demo/custom_protocol.c \
 	../../../../apps/common/third_party_profile/jieli/hid_user.c \
+	../../../../apps/common/third_party_profile/jieli/rcsp/adv/ble_rcsp_adv.c \
+	../../../../apps/common/third_party_profile/jieli/rcsp/ble_rcsp_client.c \
+	../../../../apps/common/third_party_profile/jieli/rcsp/ble_rcsp_multi_common.c \
+	../../../../apps/common/third_party_profile/jieli/rcsp/ble_rcsp_server.c \
+	../../../../apps/common/third_party_profile/jieli/rcsp/client/rcsp_c_cmd_recieve.c \
+	../../../../apps/common/third_party_profile/jieli/rcsp/client/rcsp_c_cmd_recieve_no_response.c \
+	../../../../apps/common/third_party_profile/jieli/rcsp/client/rcsp_c_cmd_response.c \
+	../../../../apps/common/third_party_profile/jieli/rcsp/client/rcsp_m_update/rcsp_update_master.c \
+	../../../../apps/common/third_party_profile/jieli/rcsp/rcsp_functions/rcsp.c \
+	../../../../apps/common/third_party_profile/jieli/rcsp/rcsp_functions/rcsp_bt_manage.c \
+	../../../../apps/common/third_party_profile/jieli/rcsp/rcsp_functions/rcsp_config.c \
+	../../../../apps/common/third_party_profile/jieli/rcsp/rcsp_functions/rcsp_event.c \
+	../../../../apps/common/third_party_profile/jieli/rcsp/rcsp_functions/rcsp_manage.c \
+	../../../../apps/common/third_party_profile/jieli/rcsp/rcsp_functions/rcsp_task.c \
+	../../../../apps/common/third_party_profile/jieli/rcsp/rcsp_interface.c \
+	../../../../apps/common/third_party_profile/jieli/rcsp/server/functions/browser/rcsp_browser.c \
+	../../../../apps/common/third_party_profile/jieli/rcsp/server/functions/device_info/device_status_cmd/rcsp_bt_func.c \
+	../../../../apps/common/third_party_profile/jieli/rcsp/server/functions/device_info/device_status_cmd/rcsp_fm_func.c \
+	../../../../apps/common/third_party_profile/jieli/rcsp/server/functions/device_info/device_status_cmd/rcsp_linein_func.c \
+	../../../../apps/common/third_party_profile/jieli/rcsp/server/functions/device_info/device_status_cmd/rcsp_music_func.c \
+	../../../../apps/common/third_party_profile/jieli/rcsp/server/functions/device_info/device_status_cmd/rcsp_pc_func.c \
+	../../../../apps/common/third_party_profile/jieli/rcsp/server/functions/device_info/device_status_cmd/rcsp_rtc_func.c \
+	../../../../apps/common/third_party_profile/jieli/rcsp/server/functions/device_info/device_status_cmd/rcsp_spdif_func.c \
+	../../../../apps/common/third_party_profile/jieli/rcsp/server/functions/device_info/rcsp_device_feature.c \
+	../../../../apps/common/third_party_profile/jieli/rcsp/server/functions/device_info/rcsp_device_status.c \
+	../../../../apps/common/third_party_profile/jieli/rcsp/server/functions/external_flash/rcsp_extra_flash_cmd.c \
+	../../../../apps/common/third_party_profile/jieli/rcsp/server/functions/external_flash/rcsp_extra_flash_opt.c \
+	../../../../apps/common/third_party_profile/jieli/rcsp/server/functions/file_transfer/dev_format.c \
+	../../../../apps/common/third_party_profile/jieli/rcsp/server/functions/file_transfer/file_bluk_trans_prepare.c \
+	../../../../apps/common/third_party_profile/jieli/rcsp/server/functions/file_transfer/file_delete.c \
+	../../../../apps/common/third_party_profile/jieli/rcsp/server/functions/file_transfer/file_simple_transfer.c \
+	../../../../apps/common/third_party_profile/jieli/rcsp/server/functions/file_transfer/file_trans_back.c \
+	../../../../apps/common/third_party_profile/jieli/rcsp/server/functions/file_transfer/file_transfer.c \
+	../../../../apps/common/third_party_profile/jieli/rcsp/server/functions/file_transfer/file_transfer_sync.c \
+	../../../../apps/common/third_party_profile/jieli/rcsp/server/functions/mass_data/mass_data.c \
+	../../../../apps/common/third_party_profile/jieli/rcsp/server/functions/pub_mutual_set_cmd/pub_mutual_set_cmd_opt.c \
+	../../../../apps/common/third_party_profile/jieli/rcsp/server/functions/rcsp_setting_opt/rcsp_adv_bluetooth.c \
+	../../../../apps/common/third_party_profile/jieli/rcsp/server/functions/rcsp_setting_opt/rcsp_setting_opt.c \
+	../../../../apps/common/third_party_profile/jieli/rcsp/server/functions/rcsp_setting_opt/rcsp_setting_sync.c \
+	../../../../apps/common/third_party_profile/jieli/rcsp/server/functions/rcsp_setting_opt/settings/adv_1t2_setting.c \
+	../../../../apps/common/third_party_profile/jieli/rcsp/server/functions/rcsp_setting_opt/settings/adv_adaptive_noise_reduction.c \
+	../../../../apps/common/third_party_profile/jieli/rcsp/server/functions/rcsp_setting_opt/settings/adv_ai_no_pick.c \
+	../../../../apps/common/third_party_profile/jieli/rcsp/server/functions/rcsp_setting_opt/settings/adv_anc_voice.c \
+	../../../../apps/common/third_party_profile/jieli/rcsp/server/functions/rcsp_setting_opt/settings/adv_anc_voice_key.c \
+	../../../../apps/common/third_party_profile/jieli/rcsp/server/functions/rcsp_setting_opt/settings/adv_bt_name_setting.c \
+	../../../../apps/common/third_party_profile/jieli/rcsp/server/functions/rcsp_setting_opt/settings/adv_hearing_aid_setting.c \
+	../../../../apps/common/third_party_profile/jieli/rcsp/server/functions/rcsp_setting_opt/settings/adv_key_setting.c \
+	../../../../apps/common/third_party_profile/jieli/rcsp/server/functions/rcsp_setting_opt/settings/adv_led_setting.c \
+	../../../../apps/common/third_party_profile/jieli/rcsp/server/functions/rcsp_setting_opt/settings/adv_mic_setting.c \
+	../../../../apps/common/third_party_profile/jieli/rcsp/server/functions/rcsp_setting_opt/settings/adv_scene_noise_reduction.c \
+	../../../../apps/common/third_party_profile/jieli/rcsp/server/functions/rcsp_setting_opt/settings/adv_time_stamp_setting.c \
+	../../../../apps/common/third_party_profile/jieli/rcsp/server/functions/rcsp_setting_opt/settings/adv_voice_enhancement_mode.c \
+	../../../../apps/common/third_party_profile/jieli/rcsp/server/functions/rcsp_setting_opt/settings/adv_wind_noise_detection.c \
+	../../../../apps/common/third_party_profile/jieli/rcsp/server/functions/rcsp_setting_opt/settings/adv_work_setting.c \
+	../../../../apps/common/third_party_profile/jieli/rcsp/server/functions/rcsp_setting_opt/settings/rcsp_color_led_setting.c \
+	../../../../apps/common/third_party_profile/jieli/rcsp/server/functions/rcsp_setting_opt/settings/rcsp_eq_setting.c \
+	../../../../apps/common/third_party_profile/jieli/rcsp/server/functions/rcsp_setting_opt/settings/rcsp_high_low_vol_setting.c \
+	../../../../apps/common/third_party_profile/jieli/rcsp/server/functions/rcsp_setting_opt/settings/rcsp_karaoke_eq_setting.c \
+	../../../../apps/common/third_party_profile/jieli/rcsp/server/functions/rcsp_setting_opt/settings/rcsp_karaoke_setting.c \
+	../../../../apps/common/third_party_profile/jieli/rcsp/server/functions/rcsp_setting_opt/settings/rcsp_misc_drc_setting.c \
+	../../../../apps/common/third_party_profile/jieli/rcsp/server/functions/rcsp_setting_opt/settings/rcsp_misc_reverbration_setting.c \
+	../../../../apps/common/third_party_profile/jieli/rcsp/server/functions/rcsp_setting_opt/settings/rcsp_misc_setting.c \
+	../../../../apps/common/third_party_profile/jieli/rcsp/server/functions/rcsp_setting_opt/settings/rcsp_music_info_setting.c \
+	../../../../apps/common/third_party_profile/jieli/rcsp/server/functions/rcsp_setting_opt/settings/rcsp_vol_setting.c \
+	../../../../apps/common/third_party_profile/jieli/rcsp/server/functions/rcsp_switch_device.c \
+	../../../../apps/common/third_party_profile/jieli/rcsp/server/functions/rcsp_update/rcsp_ch_loader_download.c \
+	../../../../apps/common/third_party_profile/jieli/rcsp/server/functions/rcsp_update/rcsp_update.c \
+	../../../../apps/common/third_party_profile/jieli/rcsp/server/functions/rcsp_update/rcsp_update_tws.c \
+	../../../../apps/common/third_party_profile/jieli/rcsp/server/functions/sensors/nfc_data_opt.c \
+	../../../../apps/common/third_party_profile/jieli/rcsp/server/functions/sensors/sensor_log_notify.c \
+	../../../../apps/common/third_party_profile/jieli/rcsp/server/functions/sensors/sensors_data_opt.c \
+	../../../../apps/common/third_party_profile/jieli/rcsp/server/functions/sensors/sport_data_func.c \
+	../../../../apps/common/third_party_profile/jieli/rcsp/server/functions/sensors/sport_data_info_opt/sport_info_bt_disconn.c \
+	../../../../apps/common/third_party_profile/jieli/rcsp/server/functions/sensors/sport_data_info_opt/sport_info_continuous_heart_rate.c \
+	../../../../apps/common/third_party_profile/jieli/rcsp/server/functions/sensors/sport_data_info_opt/sport_info_exercise_heart_rate.c \
+	../../../../apps/common/third_party_profile/jieli/rcsp/server/functions/sensors/sport_data_info_opt/sport_info_fall_detection.c \
+	../../../../apps/common/third_party_profile/jieli/rcsp/server/functions/sensors/sport_data_info_opt/sport_info_personal_info.c \
+	../../../../apps/common/third_party_profile/jieli/rcsp/server/functions/sensors/sport_data_info_opt/sport_info_pressure_detection.c \
+	../../../../apps/common/third_party_profile/jieli/rcsp/server/functions/sensors/sport_data_info_opt/sport_info_raise_wrist.c \
+	../../../../apps/common/third_party_profile/jieli/rcsp/server/functions/sensors/sport_data_info_opt/sport_info_sedentary.c \
+	../../../../apps/common/third_party_profile/jieli/rcsp/server/functions/sensors/sport_data_info_opt/sport_info_sensor_opt.c \
+	../../../../apps/common/third_party_profile/jieli/rcsp/server/functions/sensors/sport_data_info_opt/sport_info_sleep_detection.c \
+	../../../../apps/common/third_party_profile/jieli/rcsp/server/functions/sensors/sport_data_opt/sport_data_air_pressure.c \
+	../../../../apps/common/third_party_profile/jieli/rcsp/server/functions/sensors/sport_data_opt/sport_data_altitude.c \
+	../../../../apps/common/third_party_profile/jieli/rcsp/server/functions/sensors/sport_data_opt/sport_data_blood_oxygen.c \
+	../../../../apps/common/third_party_profile/jieli/rcsp/server/functions/sensors/sport_data_opt/sport_data_exercise_recovery_time.c \
+	../../../../apps/common/third_party_profile/jieli/rcsp/server/functions/sensors/sport_data_opt/sport_data_exercise_steps.c \
+	../../../../apps/common/third_party_profile/jieli/rcsp/server/functions/sensors/sport_data_opt/sport_data_heart_rate.c \
+	../../../../apps/common/third_party_profile/jieli/rcsp/server/functions/sensors/sport_data_opt/sport_data_max_oxygen_uptake.c \
+	../../../../apps/common/third_party_profile/jieli/rcsp/server/functions/sensors/sport_data_opt/sport_data_pressure_detection.c \
+	../../../../apps/common/third_party_profile/jieli/rcsp/server/functions/sensors/sport_data_opt/sport_data_sports_information.c \
+	../../../../apps/common/third_party_profile/jieli/rcsp/server/functions/sensors/sport_data_opt/sport_data_training_load.c \
+	../../../../apps/common/third_party_profile/jieli/rcsp/server/functions/sensors/sport_info_opt.c \
+	../../../../apps/common/third_party_profile/jieli/rcsp/server/functions/sensors/sport_info_sync.c \
+	../../../../apps/common/third_party_profile/jieli/rcsp/server/functions/sensors/sport_info_vm.c \
+	../../../../apps/common/third_party_profile/jieli/rcsp/server/functions/translator/rcsp_translator.c \
+	../../../../apps/common/third_party_profile/jieli/rcsp/server/rcsp_cmd_recieve.c \
+	../../../../apps/common/third_party_profile/jieli/rcsp/server/rcsp_cmd_recieve_no_respone.c \
+	../../../../apps/common/third_party_profile/jieli/rcsp/server/rcsp_cmd_respone.c \
+	../../../../apps/common/third_party_profile/jieli/rcsp/server/rcsp_cmd_user.c \
+	../../../../apps/common/third_party_profile/jieli/rcsp/server/rcsp_command.c \
+	../../../../apps/common/third_party_profile/jieli/rcsp/server/rcsp_data_recieve.c \
+	../../../../apps/common/third_party_profile/jieli/rcsp/server/rcsp_data_recieve_no_respone.c \
+	../../../../apps/common/third_party_profile/jieli/rcsp/server/rcsp_data_respone.c \
 	../../../../apps/common/third_party_profile/le_hogp/le_hogp.c \
 	../../../../apps/common/third_party_profile/mijia/mijia_api.c \
 	../../../../apps/common/third_party_profile/mijia/mijia_ble_api/mible_api.c \
@@ -948,6 +922,7 @@ c_SRC_FILES := \
 	../../../../apps/common/usb/usb_epbuf_manager.c \
 	../../../../apps/common/usb/usb_host_config.c \
 	../../../../apps/common/video/get_yuv_data.c \
+	../../../../apps/common/video/logo_show.c \
 	../../../../apps/common/video/page_turning_detect.c \
 	../../../../apps/common/video/qr_code_net_config.c \
 	../../../../apps/common/video/simple_avi_unpkg.c \
@@ -962,15 +937,27 @@ c_SRC_FILES := \
 	../../../../apps/wifi_soundbox/board/wl83/board_develop.c \
 	../../../../apps/wifi_soundbox/board/wl83/sdk_config.c \
 	../../../../apps/wifi_soundbox/lvgl_v8_ui_app/style_JL/custom/custom.c \
+	../../../../apps/wifi_soundbox/lvgl_v8_ui_app/style_JL/custom/lyrics_anim_effect.c \
+	../../../../apps/wifi_soundbox/lvgl_v8_ui_app/style_JL/custom/ui_action_jpeg_decode.c \
+	../../../../apps/wifi_soundbox/lvgl_v8_ui_app/style_JL/custom/ui_action_music_lyrics.c \
+	../../../../apps/wifi_soundbox/lvgl_v8_ui_app/style_JL/custom/ui_action_music_player.c \
+	../../../../apps/wifi_soundbox/lvgl_v8_ui_app/style_JL/custom/ui_action_spectrum.c \
+	../../../../apps/wifi_soundbox/lvgl_v8_ui_app/style_JL/custom/ui_music_eq.c \
 	../../../../apps/wifi_soundbox/lvgl_v8_ui_app/style_JL/generated/gui_events/callback_handler.c \
 	../../../../apps/wifi_soundbox/lvgl_v8_ui_app/style_JL/generated/gui_events/events_init.c \
 	../../../../apps/wifi_soundbox/lvgl_v8_ui_app/style_JL/generated/gui_events/i18n_handler.c \
+	../../../../apps/wifi_soundbox/lvgl_v8_ui_app/style_JL/generated/gui_events/screen_handler.c \
 	../../../../apps/wifi_soundbox/lvgl_v8_ui_app/style_JL/generated/gui_fonts/gui_fonts.c \
 	../../../../apps/wifi_soundbox/lvgl_v8_ui_app/style_JL/generated/gui_group/gui_group.c \
 	../../../../apps/wifi_soundbox/lvgl_v8_ui_app/style_JL/generated/gui_guider.c \
 	../../../../apps/wifi_soundbox/lvgl_v8_ui_app/style_JL/generated/gui_msg/gui_msg.c \
+	../../../../apps/wifi_soundbox/lvgl_v8_ui_app/style_JL/generated/gui_msg/gui_player_msg.c \
+	../../../../apps/wifi_soundbox/lvgl_v8_ui_app/style_JL/generated/gui_msg/gui_songs_msg.c \
+	../../../../apps/wifi_soundbox/lvgl_v8_ui_app/style_JL/generated/gui_msg/gui_sys_model_msg.c \
 	../../../../apps/wifi_soundbox/lvgl_v8_ui_app/style_JL/generated/gui_res/res_common.c \
-	../../../../apps/wifi_soundbox/lvgl_v8_ui_app/style_JL/generated/gui_scr/setup_scr_home.c \
+	../../../../apps/wifi_soundbox/lvgl_v8_ui_app/style_JL/generated/gui_scr/setup_scr_eq_modify.c \
+	../../../../apps/wifi_soundbox/lvgl_v8_ui_app/style_JL/generated/gui_scr/setup_scr_music_player.c \
+	../../../../apps/wifi_soundbox/lvgl_v8_ui_app/style_JL/generated/gui_scr/setup_scr_sys_menu.c \
 	../../../../apps/wifi_soundbox/lvgl_v8_ui_app/style_JL/generated/gui_scr/ui_scr_manager.c \
 	../../../../apps/wifi_soundbox/lvgl_v8_ui_app/style_JL/generated/gui_scr/ui_style.c \
 	../../../../apps/wifi_soundbox/lvgl_v8_ui_app/style_JL/generated/gui_timelines/gui_timelines.c \
@@ -1300,6 +1287,7 @@ LFLAGS := \
 	../../../../cpu/wl83/liba/btctrler.a \
 	../../../../cpu/wl83/liba/btstack.a \
 	--end-group \
+	../../../../cpu/wl83/liba/rcsp_stack.a \
 	../../../../cpu/wl83/liba/lib_ccm_aes.a \
 	../../../../cpu/wl83/liba/crypto_toolbox_Osize.a \
 	../../../../cpu/wl83/liba/wl_wifi_sta.a \
@@ -1442,6 +1430,7 @@ LFLAGS := \
 	../../../../cpu/wl83/liba/update.a \
 	../../../../cpu/wl83/liba/common_lib.a \
 	../../../../cpu/wl83/liba/lvgl_v8_extend.a \
+	../../../../cpu/wl83/liba/video_dec_server.a \
 	--whole-archive \
 	../../../../apps/common/third_party_profile/upay_t_head_v2/3rdparty/protobuf-c/lib/lib3rdparty_protobuf-c_pi32_jl.a \
 	../../../../apps/common/third_party_profile/upay_t_head_v2/3rdparty/mbedtls/lib/lib3rdparty_mbedtls_pi32_jl.a \

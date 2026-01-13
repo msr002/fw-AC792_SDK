@@ -241,6 +241,11 @@ static int bt_connction_status_event_handler(void *evt)
         log_info("BT_STATUS_CONN_A2DP_CH");
         memcpy(a2dp_vol_mac, bt->args, 6);
         app_audio_bt_volume_save_mac(a2dp_vol_mac);
+#if TCFG_BT_SUPPORT_PROFILE_BIP
+        if (!a2dp_player_runing()) {
+            __bip_info->timer = sys_timeout_add(NULL, __bip_file_request_update, 1500);
+        }
+#endif
         break;
     case BT_STATUS_DISCON_A2DP_CH:
         log_info("BT_STATUS_DISCON_A2DP_CH");
@@ -254,9 +259,15 @@ static int bt_connction_status_event_handler(void *evt)
         if (bt->value == AVC_VOLUME_UP) {
 
         } else if (bt->value == AVC_VOLUME_DOWN) {
+
         } else if (bt->value == AVC_PLAY) {
+            bt_music_post_msg_to_ui("music_state_on");
             bt_music_player_time_timer_deal(1);
+#if TCFG_BT_SUPPORT_PROFILE_BIP
+            bip_file_request_update(bt->args);
+#endif
         } else if (bt->value == AVC_PAUSE) {
+            bt_music_post_msg_to_ui("music_state_off");
             bt_music_player_time_timer_deal(0);
         }
         break;
@@ -266,6 +277,7 @@ static int bt_connction_status_event_handler(void *evt)
             tws_api_get_role() != TWS_ROLE_SLAVE &&
 #endif
             !a2dp_player_get_btaddr(a2dp_vol_mac)) {
+            bt_music_post_msg_to_ui("music_volume", bt->value);
             bt_set_music_device_volume(bt->value);
         }
         break;

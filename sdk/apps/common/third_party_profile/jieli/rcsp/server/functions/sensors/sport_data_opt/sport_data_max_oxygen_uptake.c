@@ -1,4 +1,4 @@
-#ifdef MEDIA_SUPPORT_MS_EXTENSIONS
+#ifdef RCSP_SUPPORT_MS_EXTENSIONS
 #pragma bss_seg(".sport_data_max_oxygen_uptake.data.bss")
 #pragma data_seg(".sport_data_max_oxygen_uptake.data")
 #pragma const_seg(".sport_data_max_oxygen_uptake.text.const")

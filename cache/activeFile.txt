@@ -1,13 +1,12 @@
 {
  "activeFile": {
-  "showName": "video_call_tx",
-  "fileName": "src\\音频流程\\video_call_tx.x6flow",
-  "folder": false,
-  "binName": "stream.bin",
   "type": 4,
+  "fileName": "src\\音频流程\\媒体.x6flow",
+  "binName": "stream.bin",
+  "showName": "媒体",
   "data": ""
  },
  "currentVariant": {
-  "name": "wifi_camera"
+  "name": ""
  }
 }

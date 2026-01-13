@@ -133,6 +133,7 @@ typedef struct {
     u8 *send_buf;                  ///< 发送buf
     u8 *recv_buf;                  ///< 接收buf
     u32 len;                       ///< 收发数据量
+    void (*callback)(u8);          ///< 数据准备通知回调
 } spi_fdx_data_t;
 /* \} name */
 

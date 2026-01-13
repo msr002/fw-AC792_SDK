@@ -1,11 +1,10 @@
-#ifdef MEDIA_SUPPORT_MS_EXTENSIONS
+#ifdef RCSP_SUPPORT_MS_EXTENSIONS
 #pragma bss_seg(".adv_bt_name_setting.data.bss")
 #pragma data_seg(".adv_bt_name_setting.data")
 #pragma const_seg(".adv_bt_name_setting.text.const")
 #pragma code_seg(".adv_bt_name_setting.text")
 #endif
 #include "app_config.h"
-#include "user_cfg.h"
 #include "syscfg_id.h"
 #include "ble_rcsp_server.h"
 
@@ -19,14 +18,11 @@ extern int get_bt_tws_connect_status();
 
 void adv_edr_name_change_now(void)
 {
-    printf("=====================%s=%d=yuring=\n\r", __func__, __LINE__);
-#if 0 //RCSP TODO
     extern BT_CONFIG bt_cfg;
     extern const char *bt_get_local_name();
     extern void lmp_hci_write_local_name(const char *name);
     memcpy(bt_cfg.edr_name, g_edr_name, LOCAL_NAME_LEN);
     lmp_hci_write_local_name(bt_get_local_name());
-#endif
 }
 
 static void set_bt_name_setting(u8 *bt_name_setting)

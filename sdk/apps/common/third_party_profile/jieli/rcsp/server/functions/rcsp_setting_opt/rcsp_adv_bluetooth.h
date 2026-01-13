@@ -1,7 +1,10 @@
 #ifndef __RCSP_ADV_BLUETOOTH__
 #define __RCSP_ADV_BLUETOOTH__
 #include "typedef.h"
-// #include "system/event.h"
+#include "event/touch_event.h"
+#include "event/key_event.h"
+#include "event/bt_event.h"
+#include "event/device_event.h"
 #include "event/event.h"
 
 

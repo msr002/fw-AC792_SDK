@@ -76,6 +76,13 @@
 #endif
 #endif /*CONFIG_CODE_MOVABLE_ENABLE*/ 
 
+#if AUDIO_LLNS_DNS_CODEC_AT_RAM
+    *(.llns_dns.const)
+    *(.llns_dns.code)
+    *(.conv_params)
+    *(.seq_params)
+#endif
+
 #if (AFx_SPATIAL_EFFECT_AT_RAM)
     . = ALIGN(4);
     *(.pSOUND360TD_cal_sparse_code)
@@ -163,7 +170,25 @@
     *(.ldac_dec.text.cache.L2.run)
     *(.ldac_dec.text.cache.L2.const)
 #endif
-    . = ALIGN(4);
+
+#if AUDIO_LHDC_AT_RAM
+    *(.lhdc.text.const)
+    *(.lhdc.text)
+    *(.lhdc_dec.text.cache.L2.run)
+    *(.lhdcv4_dec.text)
+    *(.lhdcv4_dec.const)
+    *(.lhdcv4_dec_text.cashe.L2.run)
+#endif
+
+#if AUDIO_LHDC_V5_AT_RAM
+    *(.lhdc_v5.text.const)
+    *(.lhdc_v5.text)
+    *(.lhdc_v5_dec.text.cache.L2.run)
+    *(.lhdcv5_dec.text)
+    *(.lhdcv5_dec.const)
+    *(.lhdcv5_dec_text.cashe.L2.run)
+#endif
+
 #if AUDIO_LC3_CODEC_AT_RAM
     *(.lc3_dec.text.const)
     *(.lc3_dec.text)

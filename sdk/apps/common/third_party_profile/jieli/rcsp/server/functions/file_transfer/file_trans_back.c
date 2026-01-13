@@ -1,9 +1,11 @@
-#ifdef MEDIA_SUPPORT_MS_EXTENSIONS
+#ifdef RCSP_SUPPORT_MS_EXTENSIONS
 #pragma bss_seg(".file_trans_back.data.bss")
 #pragma data_seg(".file_trans_back.data")
 #pragma const_seg(".file_trans_back.text.const")
 #pragma code_seg(".file_trans_back.text")
 #endif
+
+#include "rcsp_config.h"
 #include "file_trans_back.h"
 #include "rcsp.h"
 #include "system/includes.h"
@@ -18,7 +20,11 @@
 
 #if (RCSP_MODE && TCFG_DEV_MANAGER_ENABLE && RCSP_FILE_OPT)
 
-#include "dev_status.h"
+#define LOG_TAG_CONST	  APP_RCSP
+#define LOG_ERROR_ENABLE
+#define LOG_DEBUG_ENABLE
+#define LOG_INFO_ENABLE
+#include "system/debug.h"
 
 #define FTP_DOWNLOAD_FOLDER_NAME				"download" //下载目录
 
@@ -83,9 +89,10 @@ static const char scan_parm[] = "-t"
 
 static struct __file_trans_back *trans_back = NULL;
 
+static u8 g_trans_back_task_kill = 0;
 static u8 g_trans_back_cancel_flag = -1;
 
-static u32 g_dev_handle = RCSPDevMapSD1;
+static u32 g_dev_handle = RCSPDevMapSD0;
 
 extern u8 check_le_pakcet_sent_finish_flag(void);
 extern bool rcsp_send_list_is_empty(void);
@@ -101,7 +108,7 @@ static int get_file_prepare(u32 dev_handle)
 
     struct __dev *dev  = dev_manager_find_spec(logo, 0);
     if (NULL == dev) {
-        printf("trans_back dev is null");
+        printf("trans_back dev(%s) is null", logo);
         return -1;
     }
 
@@ -172,6 +179,7 @@ static void file_trans_back_task(void *p)
     u8 *resp_data = zalloc(resp_data_len);
     if (NULL == resp_data) {
         // 错误
+        log_error("%s: zalloc fail!", __func__);
         file_trans_back_response_send(&trans_back->op, sizeof(trans_back->op), (u8) - 1, trans_back->OpCode_SN);
         goto __file_trans_back_task_err;
     }
@@ -187,14 +195,17 @@ static void file_trans_back_task(void *p)
     file_trans_idle_set(0);
 
     u16 crc = 0;
+    /* log_info("%s---%d: resp_data_len = %d", __func__, __LINE__, resp_data_len); */
     resp_data_len -= 4;
     if (FILE_TRANS_BACK_BY_NAME != trans_back->op) {
         resp_data_len -= 2;
     }
+    /* log_info("%s---%d: resp_data_len = %d", __func__, __LINE__, resp_data_len); */
     for (u32 offset = 0, data_len = 0, ret = 0; offset < file_size;) {
         wdt_clear();
         // 假如当前spp或ble断开连接
         if (0 == get_rcsp_connect_status()) {
+            log_error("%s: disconnect", __func__);
             goto __file_trans_back_task_err;
         }
         if ((u8) - 1 != g_trans_back_cancel_flag) {
@@ -202,6 +213,7 @@ static void file_trans_back_task(void *p)
         }
 
         data_len = (file_size - offset) > resp_data_len ? resp_data_len : file_size - offset;
+        /* log_info("%s---%d: data_len = %d, offset = %d", __func__, __LINE__, data_len, offset); */
         fseek(trans_back->file, offset, SEEK_SET);
         resp_data[0] = ((u8 *)&offset)[3];
         resp_data[1] = ((u8 *)&offset)[2];
@@ -217,13 +229,22 @@ static void file_trans_back_task(void *p)
                 crc = CRC16_with_initval(resp_data + 6, data_len, crc);
             }
             data_len += 2;
+            /* log_info("%s---%d: data_len = %d", __func__, __LINE__, data_len); */
             resp_data[4] = crc >> 8;
             resp_data[5] = crc & 0xFF;
         }
 
         // 发送文件数据
+        /* mdelay(1); */
         ret = file_trans_back_response_send(resp_data, data_len + 4, 1, trans_back->OpCode_SN);
-        if (JL_ERR_SEND_BUSY == ret) {
+        /* log_info("%s: data-len = %d; data: ", __func__, data_len + 4); */
+        /* put_buf(resp_data, 16); */
+        if (JL_ERR_SEND_BUSY == ret || JL_ERR_SEND_DATA_OVER_LIMIT == ret) {
+            os_time_dly(10);
+            if (g_trans_back_task_kill) {
+                log_info("%s: task kill...", __func__);
+                return;
+            }
             continue;
         }
         offset += resp_data_len;
@@ -231,15 +252,22 @@ static void file_trans_back_task(void *p)
 
     while (!(rcsp_send_list_is_empty() && check_le_pakcet_sent_finish_flag())) {
         os_time_dly(10);
+        if (g_trans_back_task_kill) {
+            log_info("%s: task kill...", __func__);
+            return;
+        }
+
     }
 
     memset(resp_data, 0, resp_data_len + 1);
     if ((u8) - 1 == g_trans_back_cancel_flag) {
         // 如果传输完成发送结束命令
+        log_debug("%s: FILE_TRANS_BACK_FINISH", __func__);
         resp_data[0] = FILE_TRANS_BACK_FINISH;
         file_trans_back_response_send(resp_data, 1 + 4, 2, trans_back->OpCode_SN);
     } else {
         // 取消
+        log_debug("%s: FILE_TRANS_BACK_CANCEL", __func__);
         resp_data[0] = FILE_TRANS_BACK_CANCEL;
         file_trans_back_response_send(resp_data, 1, 0, trans_back->OpCode_SN);
     }
@@ -253,6 +281,10 @@ __file_trans_back_task_err:
     rcsp_msg_post(USER_MSG_RCSP_FILE_TRANS_BACK, 1, (int)p);
     while (1) {
         os_time_dly(10);
+        if (g_trans_back_task_kill) {
+            log_info("%s: task kill...", __func__);
+            return;
+        }
     }
 }
 
@@ -285,6 +317,7 @@ static int get_file_by_name(void *priv, u8 *data, u16 len)
     if (NULL == trans_back->file) {
         trans_back->file = fopen(path, "r");
     }
+    log_debug("%s: path--%s", __func__, path);
 
     if (path) {
         free(path);
@@ -292,10 +325,12 @@ static int get_file_by_name(void *priv, u8 *data, u16 len)
 
     if (NULL == trans_back->file) {
         // 文件不存在
+        log_error("%s: file not found!!", __func__);
         goto __get_file_file_by_name_err;
     }
 
-    if (task_create(file_trans_back_task, priv, FILE_TRANS_BACK_TASK_NAME)) {
+    g_trans_back_task_kill = 0;
+    if (thread_fork(FILE_TRANS_BACK_TASK_NAME, 10, 768, 128, NULL, file_trans_back_task, priv)) {
         goto __get_file_file_by_name_err;
     }
     return 0;
@@ -321,7 +356,7 @@ static int cancel_file_trans_back(u8 OpCode_SN, u8 *data, u16 len)
 // 关闭向手机发送文件
 void rcsp_file_trans_back_close(void)
 {
-    task_kill(FILE_TRANS_BACK_TASK_NAME);
+    g_trans_back_task_kill = 1;
     g_trans_back_cancel_flag = -1;
 
     if (trans_back->fsn) {
@@ -361,7 +396,8 @@ static int get_file_by_clust(void *priv, u8 *data, u16 len)
         goto __get_file_by_clust_err;
     }
 
-    if (task_create(file_trans_back_task, priv, FILE_TRANS_BACK_TASK_NAME)) {
+    g_trans_back_task_kill = 0;
+    if (thread_fork(FILE_TRANS_BACK_TASK_NAME, 10, 768, 128, NULL, file_trans_back_task, priv)) {
         goto __get_file_by_clust_err;
     }
     return 0;

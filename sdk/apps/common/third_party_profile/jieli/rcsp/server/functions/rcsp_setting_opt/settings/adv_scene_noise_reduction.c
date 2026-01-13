@@ -1,4 +1,4 @@
-#ifdef MEDIA_SUPPORT_MS_EXTENSIONS
+#ifdef RCSP_SUPPORT_MS_EXTENSIONS
 #pragma bss_seg(".adv_scene_noise_reduction.data.bss")
 #pragma data_seg(".adv_scene_noise_reduction.data")
 #pragma const_seg(".adv_scene_noise_reduction.text.const")

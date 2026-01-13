@@ -1,4 +1,4 @@
-#ifdef MEDIA_SUPPORT_MS_EXTENSIONS
+#ifdef RCSP_SUPPORT_MS_EXTENSIONS
 #pragma bss_seg(".adv_wind_noise_detection.data.bss")
 #pragma data_seg(".adv_wind_noise_detection.data")
 #pragma const_seg(".adv_wind_noise_detection.text.const")

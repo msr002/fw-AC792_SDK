@@ -1,4 +1,4 @@
-#ifdef MEDIA_SUPPORT_MS_EXTENSIONS
+#ifdef RCSP_SUPPORT_MS_EXTENSIONS
 #pragma bss_seg(".rcsp_bt_func.data.bss")
 #pragma data_seg(".rcsp_bt_func.data")
 #pragma const_seg(".rcsp_bt_func.text.const")
@@ -9,8 +9,6 @@
 #include "rcsp_device_status.h"
 #include "rcsp_config.h"
 #include "rcsp_event.h"
-#include "app_config.h"
-/* #include "app_action.h" */
 
 #include "ble_rcsp_server.h"
 #include "rcsp_music_info_setting.h"

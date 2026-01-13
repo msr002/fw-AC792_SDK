@@ -1,4 +1,4 @@
-#ifdef MEDIA_SUPPORT_MS_EXTENSIONS
+#ifdef RCSP_SUPPORT_MS_EXTENSIONS
 #pragma bss_seg(".sport_data_func.data.bss")
 #pragma data_seg(".sport_data_func.data")
 #pragma const_seg(".sport_data_func.text.const")
@@ -401,35 +401,4 @@ void sport_data_func_get_finish_deal(void)
     }
 }
 
-#else
-
-void sport_data_func_update(u32 mask, u8 *sub_mask)
-{
-
-}
-
-void sport_data_func_init(void)
-{
-
-}
-
-void sport_data_func_release(void)
-{
-
-}
-
-void sport_data_func_event(void *priv, u8 flag)
-{
-
-}
-
-void sport_data_func_get_prepare_deal(void)
-{
-
-}
-
-void sport_data_func_get_finish_deal(void)
-{
-
-}
 #endif

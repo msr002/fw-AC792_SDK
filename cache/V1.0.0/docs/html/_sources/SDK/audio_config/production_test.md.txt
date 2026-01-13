@@ -19,9 +19,23 @@
 
 ### Speaker EQ 校准
 
+由于生产样机喇叭存在一定差异，因此需要使用`Speaker EQ`校准喇叭频响
+
+**节点添加规则**
+- 在 `BitWidth Convert节点` 之前, 添加`SpeakerEQ节点`, 如下图；如流程没有`BitWidth Convert节点`，可在`DAC节点`之前添加`SpeakerEQ节点`。
+
+**音乐模式**
+- 音频流程->**蓝牙音乐**/**媒体**，添加节点，如下图：
+
 ![speaker_eq](./assets/pro_test_spkeq.png)
 
-用于校准喇叭频响，可在音频流程->**蓝牙音乐**，在 `DAC节点` 之前, 添加`SpeakerEQ节点`。
+**产测模式**
+- 当产测设备下发**音效bypass指令**时，音频流会进入产测模式，需要添加`SpeakerEQ节点`，否则<mark>SpeakerEQ测试无效;
+- 音频流程->**产测模式**，添加节点，如下图：
+
+![speaker_eq(dut_mode)](./assets/pro_test_dut_mode_spkeq.png)
+
+<mark>注意：自研产测通常会下发音效bypass指令，因此需要在**产测模式**下添加`SpeakerEQ节点`
 
 ### ANC 调试/产测
 
@@ -35,7 +49,7 @@
 
 ## 自研产测配置
 JL自主研发的产测流程，需配合JL产测串口板以及`JL π-HAT` 上位机。已支持功能如下
-- SPK测试及校准（Speaker EQ）
+- SPK测试及校准（Speaker EQ），需在音频流程->**产测模式**下添加`SpeakerEQ节点`
 - ANC测试及校准
 - ENC测试及校准(麦克风阵列校准)
 - 按键产测

@@ -1,4 +1,4 @@
-#ifdef MEDIA_SUPPORT_MS_EXTENSIONS
+#ifdef RCSP_SUPPORT_MS_EXTENSIONS
 #pragma bss_seg(".rcsp_rtc_func.data.bss")
 #pragma data_seg(".rcsp_rtc_func.data")
 #pragma const_seg(".rcsp_rtc_func.text.const")
@@ -8,11 +8,9 @@
 #include "rcsp_device_status.h"
 #include "rcsp_config.h"
 #include "rcsp_event.h"
-/* #include "app_action.h" */
 #include "rcsp_music_info_setting.h"
 #include "btstack/avctp_user.h"
 #include "JL_rcsp_packet.h"
-/* #include "key_event_deal.h" */
 #include "app_msg.h"
 #include "rcsp_manage.h"
 #include "tone_player.h"
@@ -27,9 +25,6 @@
 #include "music/general_player.h"
 #include "alarm.h"
 #include "rcsp_device_info_func_common.h"
-#if TCFG_APP_LINEIN_EN
-/* #include "linein.h" */
-#endif
 #include "alarm.h"
 
 
@@ -130,14 +125,16 @@ static const char *default_ringtone_name_table[] = {
 
 static void scan_enter(struct __dev *dev)
 {
+    r_printf("%s==%d: TODO", __func__, __LINE__);
     /* clock_add_set(SCAN_DISK_CLK); */
-    clock_alloc("SCAN_DISK_CLK", 120 * 1000000UL);
+    /* clock_alloc("SCAN_DISK_CLK", 120 * 1000000UL); */
 }
 
 static void scan_exit(struct __dev *dev)
 {
+    r_printf("%s==%d: TODO", __func__, __LINE__);
     /* clock_remove_set(SCAN_DISK_CLK); */
-    clock_free("SCAN_DISK_CLK");
+    /* clock_free("SCAN_DISK_CLK"); */
 }
 
 static const struct __scan_callback scan_cb = {

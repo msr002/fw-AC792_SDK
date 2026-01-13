@@ -1,10 +1,11 @@
-#ifdef MEDIA_SUPPORT_MS_EXTENSIONS
+#ifdef RCSP_SUPPORT_MS_EXTENSIONS
 #pragma bss_seg(".rcsp_command.data.bss")
 #pragma data_seg(".rcsp_command.data")
 #pragma const_seg(".rcsp_command.text.const")
 #pragma code_seg(".rcsp_command.text")
 #endif
 #include "app_config.h"
+#include "rcsp_cfg.h"
 #include "rcsp_config.h"
 #include "rcsp_command.h"
 #include "btstack/avctp_user.h"
@@ -14,19 +15,19 @@
 #include "rcsp_manage.h"
 #include "btstack/avctp_user.h"
 #include "btstack/btstack_task.h"
-/* #include "bt_tws.h" */
+#include "bt_tws.h"
 #include "rcsp_bt_manage.h"
 #include "JL_rcsp_protocol.h"
 
 #if RCSP_MODE == RCSP_MODE_EARPHONE
 #include "app_tone.h"
 #include "tone_player.h"
-#include "asm/dac.h"
+#include "audio_dac.h"
 #endif
 
 #if (RCSP_MODE)
 
-#define RCSP_DEBUG_EN
+/* #define RCSP_DEBUG_EN */
 #ifdef RCSP_DEBUG_EN
 #define rcsp_putchar(x)                	putchar(x)
 #define rcsp_printf                    	printf
@@ -180,7 +181,7 @@ static void earphone_mute(u8 channel, u8 mute)
         return;
     }
     printf("rcsp_find %s, channel:%d, mute:%d\n", __FUNCTION__, channel, mute);
-    audio_dac_ch_mute(NULL, channel, mute);
+    audio_dac_ch_mute(&dac_hdl, channel, mute);
 #if CONFIG_CPU_BR36
     extern void audio_dac_set_unmute_disable_ch(u8 ch, u8 disable_en);
     audio_dac_set_unmute_disable_ch(channel, mute);
@@ -250,6 +251,8 @@ void earphone_mute_handler(u8 *other_opt, u32 msec)
     }
 }
 
+#endif
+
 void find_decice_tws_connect_handle(u8 flag, u8 *param)
 {
 #if TCFG_USER_TWS_ENABLE
@@ -292,7 +295,6 @@ void find_decice_tws_connect_handle(u8 flag, u8 *param)
 
 }
 
-#endif
 
 void rcsp_find_device(void *priv)
 {

@@ -10,13 +10,22 @@
 #include "btstack/btstack_typedef.h"
 #include "app_config.h"
 
+#define ATT_CHARACTERISTIC_2a00_01_VALUE_HANDLE 0x0003
+#define ATT_CHARACTERISTIC_ae01_01_VALUE_HANDLE 0x0006
+#define ATT_CHARACTERISTIC_ae02_01_VALUE_HANDLE 0x0008
+#define ATT_CHARACTERISTIC_ae02_01_CLIENT_CONFIGURATION_HANDLE 0x0009
+#define ATT_CHARACTERISTIC_2a05_01_VALUE_HANDLE 0x0056
+#define ATT_CHARACTERISTIC_2a05_01_CLIENT_CONFIGURATION_HANDLE 0x0057
+
+extern const u8 rcsp_link_key_data[16];
+
 #if TCFG_PAY_ALIOS_ENABLE
 #define  UPAY_ONE_PROFILE          1  //同一个pofile
 #else
 #define  UPAY_ONE_PROFILE          0
 #endif
 
-#if (THIRD_PARTY_PROTOCOLS_SEL&RCSP_MODE_EN)
+#if (THIRD_PARTY_PROTOCOLS_SEL & RCSP_MODE_EN)
 
 static const uint8_t profile_data[1];
 
@@ -101,9 +110,7 @@ enum {
     TWS_UPDATE_INFO,
 };
 
-void rcsp_ble_profile_init(void);
-void bt_ble_init(void);
-void bt_ble_exit(void);
+void rcsp_ble_profile_init(const uint8_t *rcsp_profile_data);
 void rcsp_bt_ble_init(void);
 void rcsp_bt_ble_exit(void);
 void rcsp_bt_ble_adv_enable(u8 enable);
@@ -114,14 +121,54 @@ void ble_app_disconnect(void);
 
 void notify_update_connect_parameter(u8 table_index);
 
+
+/**
+ * @brief rcsp ble/spp handle初始化
+ */
+void bt_rcsp_interface_init(const uint8_t *rcsp_profile_data);
+
+/**
+ * @brief rcsp ble/spp handle退出并销毁
+ */
+void bt_rcsp_interface_exit(void);
+/**
+ * @brief 获取rcsp连接的ble_con_handle
+ */
+u16 rcsp_ble_con_handle_get();
+
+/**
+ * @brief rcsp_user_cbk_sm_packet_handler
+ */
+void rcsp_user_cbk_sm_packet_handler(uint8_t packet_type, uint16_t channel, uint8_t *packet, uint16_t size);
+
+/**
+ * @brief rcsp_att_read_callback
+ */
+uint16_t rcsp_att_read_callback(hci_con_handle_t connection_handle, uint16_t att_handle, uint16_t offset, uint8_t *buffer, uint16_t buffer_size);
+
+/**
+ * @brief rcsp_att_write_callback
+ */
+int rcsp_att_write_callback(hci_con_handle_t connection_handle, uint16_t att_handle, uint16_t transaction_mode, uint16_t offset, uint8_t *buffer, uint16_t buffer_size);
+
+/**
+ * @brief rcsp_cbk_packet_handler
+ */
+void rcsp_cbk_packet_handler(uint8_t packet_type, uint16_t channel, uint8_t *packet, uint16_t size);
+
 /**
  *	@brief 设置ble的地址
  */
 void rcsp_app_ble_set_mac_addr(void *addr);
 
-// 返回当前设备支持的最大连接数
+/**
+ * @brief 返回当前设备支持的最大连接数
+ */
 u8 rcsp_max_support_con_dev_num();
-// 根据已连接设备数量判断是否开关蓝牙广播
+
+/**
+ * @brief 根据已连接设备数量判断是否开关蓝牙广播
+ */
 void rcsp_ble_adv_enable_with_con_dev();
 
 /**
@@ -154,6 +201,7 @@ void rcsp_close_inquiry_scan(bool close_inquiry_scan);
  * @param len
  */
 void rcsp_ble_master_recieve_callback(void *buf, u16 len);
+void rcsp_ble_app_disconnect(void);
 
 #endif // (TCFG_BLE_DEMO_SELECT == DEF_BLE_DEMO_RCSP_DEMO)
 #endif // _BLE_RCSP_SERVER_H

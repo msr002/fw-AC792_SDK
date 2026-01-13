@@ -144,6 +144,12 @@ SDP_RECORD_HANDLER_REGISTER(pbap_sdp_record_item) = {
 
 #if (TCFG_BT_SUPPORT_PROFILE_MAP==1)
 extern const u8 sdp_map_mce_service_data[];
+#if TCFG_BT_SUPPORT_MAP_MESSAGE
+#if !TCFG_BT_SUPPORT_PROFILE_BIP
+u8 l2cap_support_ertm_enable = 1;
+#endif
+u8 user_map_support_message = 1;
+#endif
 u8 map_profile_support = 1;
 SDP_RECORD_HANDLER_REGISTER(map_sdp_record_item) = {
     .service_record = (u8 *)sdp_map_mce_service_data,

@@ -332,8 +332,12 @@ static void multi_protocol_profile_init(void)
 #endif
 
 #if (THIRD_PARTY_PROTOCOLS_SEL & RCSP_MODE_EN)
+#if !TCFG_THIRD_PARTY_PROTOCOLS_SIMPLIFIED
     bt_rcsp_interface_init(rcsp_profile_data);
-    rcsp_ble_profile_init();
+#else
+    rcsp_simplified_spp_init();
+#endif
+    rcsp_ble_profile_init(rcsp_profile_data);
 
 #if (TCFG_LE_AUDIO_APP_CONFIG & (LE_AUDIO_UNICAST_SINK_EN | LE_AUDIO_JL_UNICAST_SINK_EN))
     if (get_bt_le_audio_config()) { // RCSP 与 CIS 共用 ACL

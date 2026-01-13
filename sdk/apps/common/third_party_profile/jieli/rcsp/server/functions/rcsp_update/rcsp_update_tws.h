@@ -7,7 +7,11 @@
 
 #define SYS_BT_OTA_EVENT_TYPE_STATUS (('O' << 24) | ('T' << 16) | ('A' << 8) | '\0')
 
-// #include "system/event.h"
+#include "event/touch_event.h"
+#include "event/key_event.h"
+#include "event/bt_event.h"
+#include "event/device_event.h"
+#include "event/event.h"
 #include "update_loader_download.h"
 
 typedef int 		  sint32_t;

@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>10.1. dev manager应用说明 &mdash; JL Project Documentation</title>
+  <title>dev manager应用说明 &mdash; JL Project Documentation</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="https://doc.zh-jieli.com/static/css/custom.css" type="text/css" />
@@ -15,16 +15,12 @@
         <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
         <script src="../../_static/jquery.js"></script>
         <script src="../../_static/underscore.js"></script>
-        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../_static/doctools.js"></script>
-        <script src="../../_static/sphinx_highlight.js"></script>
         <script src="https://doc.zh-jieli.com/static/js/custom.js"></script>
         <script src="../../_static/js/custom.js"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
-    <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="11. 通用组件" href="../system/%E9%80%9A%E7%94%A8%E7%BB%84%E4%BB%B6/index.html" />
-    <link rel="prev" title="10. 设备管理" href="index.html" /> 
+    <link rel="search" title="Search" href="../../search.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -44,60 +40,17 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">SDK入门</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8/index.html">1. 快速入门</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../framework/index.html">1. 技术框架</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8/index.html">2. 快速入门</a></li>
 </ul>
-<p class="caption" role="heading"><span class="caption-text">SDK Reference</span></p>
+<p class="caption" role="heading"><span class="caption-text">音频功能进阶</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../soundbox/index.html">1. SDK 详细介绍</a></li>
-</ul>
-<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
-<ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../audio/index.html">1. 音频播放</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../btstack/index.html">2. 蓝牙协议栈</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../driver/index.html">3. 外设驱动</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../driver/pmu/index.html">4. 电源管理</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../led_ui/index.html">5. LED状态显示</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../system/file_system/index.html">6. 文件系统</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../system/os/index.html">7. 操作系统</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../system/timer/index.html">8. 定时器</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../system/clock_manage/index.html">9. 时钟管理</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="index.html">10. 设备管理</a><ul class="current">
-<li class="toctree-l2 current"><a class="current reference internal" href="#">10.1. dev manager应用说明</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#id1">10.1.1. 功能概述</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#id2">10.1.2. 关键结构体、枚举类型及参数说明</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#id3">10.1.2.1. 设备管理器结构体</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#const">10.1.2.2. 设备节点const信息结构体</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id4">10.1.2.3. 设备节点结构体</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id5">10.1.2.4. 设备配置参数</a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="#id6">10.1.3. 设备管理流程框架</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#id7">10.1.4. 如何将自定义设备加入到设备链表</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#api">10.1.5. 详细API说明</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#id8">10.1.5.1. 设备添加</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id9">10.1.5.2. 设备删除</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id10">10.1.5.3. 设备在线检测接口</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id11">10.1.5.4. 在线设备总数获取</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id12">10.1.5.5. 设备获取接口</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id13">10.1.5.6. 设备文件扫描</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id14">10.1.5.7. 设备扫描释放</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id15">10.1.5.8. 设备有效性标记</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id16">10.1.5.9. 盘符获取接口</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id17">10.1.5.10. 根目录路径获取</a></li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="../system/%E9%80%9A%E7%94%A8%E7%BB%84%E4%BB%B6/index.html">11. 通用组件</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../audio_config/index.html">12. 音频配置</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../audio_flow/index.html">13. 音频流程</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../audio_effects/index.html">14. 音效调试</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../audio_cvp/index.html">15. 通话清晰语音</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../system/report/index.html">16. 系统状态报告</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../system/ui/index.html">17. UI 框架</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../mic_effect/index.html">18. 麦克风音效</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../audio_config/index.html">2. 音频配置</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../audio_flow/index.html">3. 音频流程</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../audio_effects/index.html">4. 音效调试</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../audio_cvp/index.html">5. 通话清晰语音</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../audio_FAQ/index.html">6. 音频FAQ</a></li>
 </ul>
 
         </div>
@@ -113,9 +66,8 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../../index.html" class="icon icon-home"></a></li>
-          <li class="breadcrumb-item"><a href="index.html"><span class="section-number">10. </span>设备管理</a></li>
-      <li class="breadcrumb-item active"><span class="section-number">10.1. </span>dev manager应用说明</li>
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>dev manager应用说明</li>
       <li class="wy-breadcrumbs-aside">
       </li>
   </ul>
@@ -124,8 +76,8 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="dev-manager">
-<h1><span class="section-number">10.1. </span>dev manager应用说明<a class="headerlink" href="#dev-manager" title="Permalink to this heading"></a></h1>
+  <section class="tex2jax_ignore mathjax_ignore" id="dev-manager">
+<h1>dev manager应用说明<a class="headerlink" href="#dev-manager" title="Permalink to this headline"></a></h1>
 <table class="colwidths-auto docutils align-default">
 <thead>
 <tr class="row-odd"><th class="head"><p>缩写、术语</p></th>
@@ -151,7 +103,7 @@
 </tbody>
 </table>
 <section id="id1">
-<h2><span class="section-number">10.1.1. </span>功能概述<a class="headerlink" href="#id1" title="Permalink to this heading"></a></h2>
+<h2>功能概述<a class="headerlink" href="#id1" title="Permalink to this headline"></a></h2>
 <p>Dev_manager设备接口实现以下功能：</p>
 <ol class="arabic simple">
 <li><p>支持设备上下线</p></li>
@@ -190,13 +142,13 @@
 </ol>
 </section>
 <section id="id2">
-<h2><span class="section-number">10.1.2. </span>关键结构体、枚举类型及参数说明<a class="headerlink" href="#id2" title="Permalink to this heading"></a></h2>
+<h2>关键结构体、枚举类型及参数说明<a class="headerlink" href="#id2" title="Permalink to this headline"></a></h2>
 <section id="id3">
-<h3><span class="section-number">10.1.2.1. </span>设备管理器结构体<a class="headerlink" href="#id3" title="Permalink to this heading"></a></h3>
-<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="nx">struct</span><span class="w"> </span><span class="nx">__dev_manager</span><span class="w"> </span><span class="p">{</span>
-<span class="w">	</span><span class="nx">struct</span><span class="w"> </span><span class="nx">list_head</span><span class="w"> 	</span><span class="nx">list</span><span class="p">;</span>
-<span class="w">	</span><span class="nx">OS_MUTEX</span><span class="w">			</span><span class="nx">mutex</span><span class="p">;</span>
-<span class="w">	</span><span class="nx">OS_SEM</span><span class="w">			    </span><span class="nx">sem</span><span class="p">;</span>
+<h3>设备管理器结构体<a class="headerlink" href="#id3" title="Permalink to this headline"></a></h3>
+<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="nx">struct</span> <span class="nx">__dev_manager</span> <span class="p">{</span>
+	<span class="nx">struct</span> <span class="nx">list_head</span> 	<span class="nx">list</span><span class="p">;</span>
+	<span class="nx">OS_MUTEX</span>			<span class="nx">mutex</span><span class="p">;</span>
+	<span class="nx">OS_SEM</span>			    <span class="nx">sem</span><span class="p">;</span>
 <span class="p">};</span>
 </pre></div>
 </div>
@@ -204,15 +156,15 @@
 该结构体主要起到设备链表管理的作用。</p>
 </section>
 <section id="const">
-<h3><span class="section-number">10.1.2.2. </span>设备节点const信息结构体<a class="headerlink" href="#const" title="Permalink to this heading"></a></h3>
-<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="nx">struct</span><span class="w"> </span><span class="nx">__dev_reg</span><span class="w"> </span><span class="p">{</span>
-<span class="w">	</span><span class="kr">char</span><span class="w"> </span><span class="o">*</span><span class="nx">logo</span><span class="p">;</span><span class="c1">//设备选择使用的逻辑盘符</span>
-<span class="w">	</span><span class="kr">char</span><span class="w"> </span><span class="o">*</span><span class="nx">name</span><span class="p">;</span><span class="c1">//设备名称，底层匹配设备节点使用</span>
-<span class="w">	</span><span class="kr">char</span><span class="w"> </span><span class="o">*</span><span class="nx">storage_path</span><span class="p">;</span><span class="c1">//设备路径，文件系统mount时使用</span>
-<span class="w">	</span><span class="kr">char</span><span class="w"> </span><span class="o">*</span><span class="nx">bs_storage_path</span><span class="p">;</span><span class="c1">//设备浏览使用的设备路径，供文件浏览文件系统mount使用</span>
-<span class="w">	</span><span class="kr">char</span><span class="w"> </span><span class="o">*</span><span class="nx">root_path</span><span class="p">;</span><span class="c1">//设备文件系统根目录</span>
-<span class="w">	</span><span class="kr">char</span><span class="w"> </span><span class="o">*</span><span class="nx">bs_root_path</span><span class="p">;</span><span class="c1">//文件浏览设备文件系统根目录</span>
-<span class="w">	</span><span class="kr">char</span><span class="w"> </span><span class="o">*</span><span class="nx">fs_type</span><span class="p">;</span><span class="c1">//文件系统类型,如：fat, sdfile</span>
+<h3>设备节点const信息结构体<a class="headerlink" href="#const" title="Permalink to this headline"></a></h3>
+<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="nx">struct</span> <span class="nx">__dev_reg</span> <span class="p">{</span>
+	<span class="kr">char</span> <span class="o">*</span><span class="nx">logo</span><span class="p">;</span><span class="c1">//设备选择使用的逻辑盘符</span>
+	<span class="kr">char</span> <span class="o">*</span><span class="nx">name</span><span class="p">;</span><span class="c1">//设备名称，底层匹配设备节点使用</span>
+	<span class="kr">char</span> <span class="o">*</span><span class="nx">storage_path</span><span class="p">;</span><span class="c1">//设备路径，文件系统mount时使用</span>
+	<span class="kr">char</span> <span class="o">*</span><span class="nx">bs_storage_path</span><span class="p">;</span><span class="c1">//设备浏览使用的设备路径，供文件浏览文件系统mount使用</span>
+	<span class="kr">char</span> <span class="o">*</span><span class="nx">root_path</span><span class="p">;</span><span class="c1">//设备文件系统根目录</span>
+	<span class="kr">char</span> <span class="o">*</span><span class="nx">bs_root_path</span><span class="p">;</span><span class="c1">//文件浏览设备文件系统根目录</span>
+	<span class="kr">char</span> <span class="o">*</span><span class="nx">fs_type</span><span class="p">;</span><span class="c1">//文件系统类型,如：fat, sdfile</span>
 <span class="p">};</span>
 </pre></div>
 </div>
@@ -220,7 +172,7 @@
 设备const信息， 在dev_manager.c中断dev_reg[]中配置。</p>
 </section>
 <section id="id4">
-<h3><span class="section-number">10.1.2.3. </span>设备节点结构体<a class="headerlink" href="#id4" title="Permalink to this heading"></a></h3>
+<h3>设备节点结构体<a class="headerlink" href="#id4" title="Permalink to this headline"></a></h3>
 <div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span>struct __dev {
 	struct list_head 	entry;
 	struct __dev_reg 	*parm;//设备参数
@@ -234,150 +186,150 @@
 </div>
 </section>
 <section id="id5">
-<h3><span class="section-number">10.1.2.4. </span>设备配置参数<a class="headerlink" href="#id5" title="Permalink to this heading"></a></h3>
-<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="kd">const</span><span class="w"> </span><span class="nx">struct</span><span class="w"> </span><span class="nx">__dev_reg</span><span class="w"> </span><span class="nx">dev_reg</span><span class="p">[]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="c1">//内置flash</span>
-<span class="w">    </span><span class="p">{</span>
-<span class="w">        </span><span class="cm">/*logo*/</span><span class="w">			</span><span class="nx">SDFILE_DEV</span><span class="p">,</span>
-<span class="w">        </span><span class="cm">/*name*/</span><span class="w">			</span><span class="nx">NULL</span><span class="p">,</span>
-<span class="w">        </span><span class="cm">/*storage_path*/</span><span class="w">	</span><span class="nx">SDFILE_MOUNT_PATH</span><span class="p">,</span>
-<span class="w">        </span><span class="cm">/*bs_storage_path*/</span><span class="w">	</span><span class="nx">NULL</span><span class="p">,</span>
-<span class="w">        </span><span class="cm">/*root_path*/</span><span class="w">		</span><span class="nx">SDFILE_RES_ROOT_PATH</span><span class="p">,</span>
-<span class="w">        </span><span class="cm">/*bs_root_path*/</span><span class="w">	</span><span class="nx">NULL</span><span class="p">,</span>
-<span class="w">        </span><span class="cm">/*fs_type*/</span><span class="w">			</span><span class="s2">&quot;sdfile&quot;</span>
-<span class="w">    </span><span class="p">},</span>
-<span class="w">    </span><span class="c1">//内置录音</span>
-<span class="w">    </span><span class="p">{</span>
-<span class="w">        </span><span class="cm">/*logo*/</span><span class="w">			</span><span class="s2">&quot;rec_sdfile&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="cm">/*name*/</span><span class="w">			</span><span class="nx">NULL</span><span class="p">,</span>
-<span class="w">        </span><span class="cm">/*storage_path*/</span><span class="w">	</span><span class="s2">&quot;mnt/rec_sdfile&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="cm">/*bs_storage_path*/</span><span class="w">	</span><span class="nx">NULL</span><span class="p">,</span>
-<span class="w">        </span><span class="cm">/*root_path*/</span><span class="w">		</span><span class="s2">&quot;mnt/rec_sdfile/C/&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="cm">/*bs_root_path*/</span><span class="w">	</span><span class="nx">NULL</span><span class="p">,</span>
-<span class="w">        </span><span class="cm">/*fs_type*/</span><span class="w">			</span><span class="s2">&quot;rec_sdfile&quot;</span>
-<span class="w">    </span><span class="p">},</span>
-<span class="w">    </span><span class="c1">//sd0</span>
-<span class="w">    </span><span class="p">{</span>
-<span class="w">        </span><span class="cm">/*logo*/</span><span class="w">			</span><span class="s2">&quot;sd0&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="cm">/*name*/</span><span class="w">			</span><span class="s2">&quot;sd0&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="cm">/*storage_path*/</span><span class="w">	</span><span class="s2">&quot;storage/sd0&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="cm">/*bs_storage_path*/</span><span class="w">	</span><span class="nx">SD0_BS_STORAGE_PATH</span><span class="p">,</span>
-<span class="w">        </span><span class="cm">/*root_path*/</span><span class="w">		</span><span class="s2">&quot;storage/sd0/C/&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="cm">/*bs_root_path*/</span><span class="w">	</span><span class="nx">SD0_BS_ROOT_PATH</span><span class="p">,</span>
-<span class="w">        </span><span class="cm">/*fs_type*/</span><span class="w">			</span><span class="s2">&quot;fat&quot;</span>
-<span class="w">    </span><span class="p">},</span>
-<span class="w">    </span><span class="c1">//sd1</span>
-<span class="w">    </span><span class="p">{</span>
-<span class="w">        </span><span class="cm">/*logo*/</span><span class="w">			</span><span class="s2">&quot;sd1&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="cm">/*name*/</span><span class="w">			</span><span class="s2">&quot;sd1&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="cm">/*storage_path*/</span><span class="w">	</span><span class="s2">&quot;storage/sd1&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="cm">/*bs_storage_path*/</span><span class="w">	</span><span class="nx">SD1_BS_STORAGE_PATH</span><span class="p">,</span>
-<span class="w">        </span><span class="cm">/*root_path*/</span><span class="w">		</span><span class="s2">&quot;storage/sd1/C/&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="cm">/*bs_root_path*/</span><span class="w">	</span><span class="nx">SD1_BS_ROOT_PATH</span><span class="p">,</span>
-<span class="w">        </span><span class="cm">/*fs_type*/</span><span class="w">			</span><span class="s2">&quot;fat&quot;</span>
-<span class="w">    </span><span class="p">},</span>
-<span class="w">    </span><span class="c1">//u盘</span>
-<span class="w">    </span><span class="p">{</span>
-<span class="w">        </span><span class="cm">/*logo*/</span><span class="w">			</span><span class="s2">&quot;udisk0&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="cm">/*name*/</span><span class="w">			</span><span class="s2">&quot;udisk0&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="cm">/*storage_path*/</span><span class="w">	</span><span class="s2">&quot;storage/udisk0&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="cm">/*bs_storage_path*/</span><span class="w">	</span><span class="nx">UDISK0_BS_STORAGE_PATH</span><span class="p">,</span>
-<span class="w">        </span><span class="cm">/*root_path*/</span><span class="w">		</span><span class="s2">&quot;storage/udisk0/C/&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="cm">/*bs_root_path*/</span><span class="w">	</span><span class="nx">UDISK0_BS_ROOT_PATH</span><span class="p">,</span>
-<span class="w">        </span><span class="cm">/*fs_type*/</span><span class="w">			</span><span class="s2">&quot;fat&quot;</span>
-<span class="w">    </span><span class="p">},</span>
-<span class="w">    </span><span class="c1">//sd0录音文件夹分区</span>
-<span class="w">    </span><span class="p">{</span>
-<span class="w">        </span><span class="cm">/*logo*/</span><span class="w">			</span><span class="s2">&quot;sd0_rec&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="cm">/*name*/</span><span class="w">			</span><span class="s2">&quot;sd0&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="cm">/*storage_path*/</span><span class="w">	</span><span class="s2">&quot;storage/sd0&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="cm">/*bs_storage_path*/</span><span class="w">	</span><span class="nx">NULL</span><span class="p">,</span>
-<span class="w">        </span><span class="cm">/*root_path*/</span><span class="w">		</span><span class="s2">&quot;storage/sd0/C/&quot;</span><span class="nx">REC_FOLDER_NAME</span><span class="p">,</span>
-<span class="w">        </span><span class="cm">/*bs_root_path*/</span><span class="w">	</span><span class="nx">NULL</span><span class="p">,</span>
-<span class="w">        </span><span class="cm">/*fs_type*/</span><span class="w">			</span><span class="s2">&quot;fat&quot;</span>
-<span class="w">    </span><span class="p">},</span>
-<span class="w">    </span><span class="c1">//sd1录音文件夹分区</span>
-<span class="w">    </span><span class="p">{</span>
-<span class="w">        </span><span class="cm">/*logo*/</span><span class="w">			</span><span class="s2">&quot;sd1_rec&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="cm">/*name*/</span><span class="w">			</span><span class="s2">&quot;sd1&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="cm">/*storage_path*/</span><span class="w">	</span><span class="s2">&quot;storage/sd1&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="cm">/*bs_storage_path*/</span><span class="w">	</span><span class="nx">NULL</span><span class="p">,</span>
-<span class="w">        </span><span class="cm">/*root_path*/</span><span class="w">		</span><span class="s2">&quot;storage/sd1/C/&quot;</span><span class="nx">REC_FOLDER_NAME</span><span class="p">,</span>
-<span class="w">        </span><span class="cm">/*bs_root_path*/</span><span class="w">	</span><span class="nx">NULL</span><span class="p">,</span>
-<span class="w">        </span><span class="cm">/*fs_type*/</span><span class="w">			</span><span class="s2">&quot;fat&quot;</span>
-<span class="w">    </span><span class="p">},</span>
-<span class="w">    </span><span class="c1">//u盘录音文件夹分区</span>
-<span class="w">    </span><span class="p">{</span>
-<span class="w">        </span><span class="cm">/*logo*/</span><span class="w">			</span><span class="s2">&quot;udisk0_rec&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="cm">/*name*/</span><span class="w">			</span><span class="s2">&quot;udisk0&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="cm">/*storage_path*/</span><span class="w">	</span><span class="s2">&quot;storage/udisk0&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="cm">/*bs_storage_path*/</span><span class="w">	</span><span class="nx">NULL</span><span class="p">,</span>
-<span class="w">        </span><span class="cm">/*root_path*/</span><span class="w">		</span><span class="s2">&quot;storage/udisk0/C/&quot;</span><span class="nx">REC_FOLDER_NAME</span><span class="p">,</span>
-<span class="w">        </span><span class="cm">/*bs_root_path*/</span><span class="w">	</span><span class="nx">NULL</span><span class="p">,</span>
-<span class="w">        </span><span class="cm">/*fs_type*/</span><span class="w">			</span><span class="s2">&quot;fat&quot;</span>
-<span class="w">    </span><span class="p">},</span>
-<span class="w">    </span><span class="c1">//外挂fat分区</span>
-<span class="w">    </span><span class="p">{</span>
-<span class="w">        </span><span class="cm">/*logo*/</span><span class="w">			</span><span class="s2">&quot;fat_nor&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="cm">/*name*/</span><span class="w">			</span><span class="s2">&quot;fat_nor&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="cm">/*storage_path*/</span><span class="w">	</span><span class="s2">&quot;storage/fat_nor&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="cm">/*bs_storage_path*/</span><span class="w">	</span><span class="nx">NULL</span><span class="p">,</span>
-<span class="w">        </span><span class="cm">/*root_path*/</span><span class="w">		</span><span class="s2">&quot;storage/fat_nor/C/&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="cm">/*bs_root_path*/</span><span class="w">	</span><span class="nx">NULL</span><span class="p">,</span>
-<span class="w">        </span><span class="cm">/*fs_type*/</span><span class="w">			</span><span class="s2">&quot;fat&quot;</span>
-<span class="w">    </span><span class="p">},</span>
-<span class="w">    </span><span class="c1">//外挂flash资源分区</span>
-<span class="w">    </span><span class="p">{</span>
-<span class="w">        </span><span class="cm">/*logo*/</span><span class="w">			</span><span class="s2">&quot;res_nor&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="cm">/*name*/</span><span class="w">			</span><span class="s2">&quot;res_nor&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="cm">/*storage_path*/</span><span class="w">	</span><span class="s2">&quot;storage/res_nor&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="cm">/*bs_storage_path*/</span><span class="w">	</span><span class="nx">NULL</span><span class="p">,</span>
-<span class="w">        </span><span class="cm">/*root_path*/</span><span class="w">		</span><span class="s2">&quot;storage/res_nor/C/&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="cm">/*bs_root_path*/</span><span class="w">	</span><span class="nx">NULL</span><span class="p">,</span>
-<span class="w">        </span><span class="cm">/*fs_type*/</span><span class="w">			</span><span class="s2">&quot;nor_sdfile&quot;</span>
-<span class="w">    </span><span class="p">},</span>
-<span class="w">    </span><span class="c1">///外挂录音分区</span>
-<span class="w">    </span><span class="p">{</span>
-<span class="w">        </span><span class="cm">/*logo*/</span><span class="w">			</span><span class="s2">&quot;rec_nor&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="cm">/*name*/</span><span class="w">			</span><span class="s2">&quot;rec_nor&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="cm">/*storage_path*/</span><span class="w">	</span><span class="s2">&quot;storage/rec_nor&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="cm">/*bs_storage_path*/</span><span class="w">	</span><span class="nx">NULL</span><span class="p">,</span>
-<span class="w">        </span><span class="cm">/*root_path*/</span><span class="w">		</span><span class="s2">&quot;storage/rec_nor/C/&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="cm">/*bs_root_path*/</span><span class="w">	</span><span class="nx">NULL</span><span class="p">,</span>
-<span class="w">        </span><span class="cm">/*fs_type*/</span><span class="w">			</span><span class="s2">&quot;nor_fs&quot;</span>
-<span class="w">    </span><span class="p">},</span>
-<span class="w">    </span><span class="p">{</span>
-<span class="w">        </span><span class="cm">/*logo*/</span><span class="w">			</span><span class="s2">&quot;nor_ui&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="cm">/*name*/</span><span class="w">			</span><span class="s2">&quot;nor_ui&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="cm">/*storage_path*/</span><span class="w">	</span><span class="s2">&quot;storage/nor_ui&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="cm">/*bs_storage_path*/</span><span class="w">	</span><span class="nx">NULL</span><span class="p">,</span>
-<span class="w">        </span><span class="cm">/*root_path*/</span><span class="w">		</span><span class="s2">&quot;storage/nor_ui/C/&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="cm">/*bs_root_path*/</span><span class="w">	</span><span class="nx">NULL</span><span class="p">,</span>
-<span class="w">        </span><span class="cm">/*fs_type*/</span><span class="w">			</span><span class="s2">&quot;nor_sdfile&quot;</span>
-<span class="w">    </span><span class="p">},</span>
+<h3>设备配置参数<a class="headerlink" href="#id5" title="Permalink to this headline"></a></h3>
+<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="kd">const</span> <span class="nx">struct</span> <span class="nx">__dev_reg</span> <span class="nx">dev_reg</span><span class="p">[]</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="c1">//内置flash</span>
+    <span class="p">{</span>
+        <span class="cm">/*logo*/</span>			<span class="nx">SDFILE_DEV</span><span class="p">,</span>
+        <span class="cm">/*name*/</span>			<span class="nx">NULL</span><span class="p">,</span>
+        <span class="cm">/*storage_path*/</span>	<span class="nx">SDFILE_MOUNT_PATH</span><span class="p">,</span>
+        <span class="cm">/*bs_storage_path*/</span>	<span class="nx">NULL</span><span class="p">,</span>
+        <span class="cm">/*root_path*/</span>		<span class="nx">SDFILE_RES_ROOT_PATH</span><span class="p">,</span>
+        <span class="cm">/*bs_root_path*/</span>	<span class="nx">NULL</span><span class="p">,</span>
+        <span class="cm">/*fs_type*/</span>			<span class="s2">&quot;sdfile&quot;</span>
+    <span class="p">},</span>
+    <span class="c1">//内置录音</span>
+    <span class="p">{</span>
+        <span class="cm">/*logo*/</span>			<span class="s2">&quot;rec_sdfile&quot;</span><span class="p">,</span>
+        <span class="cm">/*name*/</span>			<span class="nx">NULL</span><span class="p">,</span>
+        <span class="cm">/*storage_path*/</span>	<span class="s2">&quot;mnt/rec_sdfile&quot;</span><span class="p">,</span>
+        <span class="cm">/*bs_storage_path*/</span>	<span class="nx">NULL</span><span class="p">,</span>
+        <span class="cm">/*root_path*/</span>		<span class="s2">&quot;mnt/rec_sdfile/C/&quot;</span><span class="p">,</span>
+        <span class="cm">/*bs_root_path*/</span>	<span class="nx">NULL</span><span class="p">,</span>
+        <span class="cm">/*fs_type*/</span>			<span class="s2">&quot;rec_sdfile&quot;</span>
+    <span class="p">},</span>
+    <span class="c1">//sd0</span>
+    <span class="p">{</span>
+        <span class="cm">/*logo*/</span>			<span class="s2">&quot;sd0&quot;</span><span class="p">,</span>
+        <span class="cm">/*name*/</span>			<span class="s2">&quot;sd0&quot;</span><span class="p">,</span>
+        <span class="cm">/*storage_path*/</span>	<span class="s2">&quot;storage/sd0&quot;</span><span class="p">,</span>
+        <span class="cm">/*bs_storage_path*/</span>	<span class="nx">SD0_BS_STORAGE_PATH</span><span class="p">,</span>
+        <span class="cm">/*root_path*/</span>		<span class="s2">&quot;storage/sd0/C/&quot;</span><span class="p">,</span>
+        <span class="cm">/*bs_root_path*/</span>	<span class="nx">SD0_BS_ROOT_PATH</span><span class="p">,</span>
+        <span class="cm">/*fs_type*/</span>			<span class="s2">&quot;fat&quot;</span>
+    <span class="p">},</span>
+    <span class="c1">//sd1</span>
+    <span class="p">{</span>
+        <span class="cm">/*logo*/</span>			<span class="s2">&quot;sd1&quot;</span><span class="p">,</span>
+        <span class="cm">/*name*/</span>			<span class="s2">&quot;sd1&quot;</span><span class="p">,</span>
+        <span class="cm">/*storage_path*/</span>	<span class="s2">&quot;storage/sd1&quot;</span><span class="p">,</span>
+        <span class="cm">/*bs_storage_path*/</span>	<span class="nx">SD1_BS_STORAGE_PATH</span><span class="p">,</span>
+        <span class="cm">/*root_path*/</span>		<span class="s2">&quot;storage/sd1/C/&quot;</span><span class="p">,</span>
+        <span class="cm">/*bs_root_path*/</span>	<span class="nx">SD1_BS_ROOT_PATH</span><span class="p">,</span>
+        <span class="cm">/*fs_type*/</span>			<span class="s2">&quot;fat&quot;</span>
+    <span class="p">},</span>
+    <span class="c1">//u盘</span>
+    <span class="p">{</span>
+        <span class="cm">/*logo*/</span>			<span class="s2">&quot;udisk0&quot;</span><span class="p">,</span>
+        <span class="cm">/*name*/</span>			<span class="s2">&quot;udisk0&quot;</span><span class="p">,</span>
+        <span class="cm">/*storage_path*/</span>	<span class="s2">&quot;storage/udisk0&quot;</span><span class="p">,</span>
+        <span class="cm">/*bs_storage_path*/</span>	<span class="nx">UDISK0_BS_STORAGE_PATH</span><span class="p">,</span>
+        <span class="cm">/*root_path*/</span>		<span class="s2">&quot;storage/udisk0/C/&quot;</span><span class="p">,</span>
+        <span class="cm">/*bs_root_path*/</span>	<span class="nx">UDISK0_BS_ROOT_PATH</span><span class="p">,</span>
+        <span class="cm">/*fs_type*/</span>			<span class="s2">&quot;fat&quot;</span>
+    <span class="p">},</span>
+    <span class="c1">//sd0录音文件夹分区</span>
+    <span class="p">{</span>
+        <span class="cm">/*logo*/</span>			<span class="s2">&quot;sd0_rec&quot;</span><span class="p">,</span>
+        <span class="cm">/*name*/</span>			<span class="s2">&quot;sd0&quot;</span><span class="p">,</span>
+        <span class="cm">/*storage_path*/</span>	<span class="s2">&quot;storage/sd0&quot;</span><span class="p">,</span>
+        <span class="cm">/*bs_storage_path*/</span>	<span class="nx">NULL</span><span class="p">,</span>
+        <span class="cm">/*root_path*/</span>		<span class="s2">&quot;storage/sd0/C/&quot;</span><span class="nx">REC_FOLDER_NAME</span><span class="p">,</span>
+        <span class="cm">/*bs_root_path*/</span>	<span class="nx">NULL</span><span class="p">,</span>
+        <span class="cm">/*fs_type*/</span>			<span class="s2">&quot;fat&quot;</span>
+    <span class="p">},</span>
+    <span class="c1">//sd1录音文件夹分区</span>
+    <span class="p">{</span>
+        <span class="cm">/*logo*/</span>			<span class="s2">&quot;sd1_rec&quot;</span><span class="p">,</span>
+        <span class="cm">/*name*/</span>			<span class="s2">&quot;sd1&quot;</span><span class="p">,</span>
+        <span class="cm">/*storage_path*/</span>	<span class="s2">&quot;storage/sd1&quot;</span><span class="p">,</span>
+        <span class="cm">/*bs_storage_path*/</span>	<span class="nx">NULL</span><span class="p">,</span>
+        <span class="cm">/*root_path*/</span>		<span class="s2">&quot;storage/sd1/C/&quot;</span><span class="nx">REC_FOLDER_NAME</span><span class="p">,</span>
+        <span class="cm">/*bs_root_path*/</span>	<span class="nx">NULL</span><span class="p">,</span>
+        <span class="cm">/*fs_type*/</span>			<span class="s2">&quot;fat&quot;</span>
+    <span class="p">},</span>
+    <span class="c1">//u盘录音文件夹分区</span>
+    <span class="p">{</span>
+        <span class="cm">/*logo*/</span>			<span class="s2">&quot;udisk0_rec&quot;</span><span class="p">,</span>
+        <span class="cm">/*name*/</span>			<span class="s2">&quot;udisk0&quot;</span><span class="p">,</span>
+        <span class="cm">/*storage_path*/</span>	<span class="s2">&quot;storage/udisk0&quot;</span><span class="p">,</span>
+        <span class="cm">/*bs_storage_path*/</span>	<span class="nx">NULL</span><span class="p">,</span>
+        <span class="cm">/*root_path*/</span>		<span class="s2">&quot;storage/udisk0/C/&quot;</span><span class="nx">REC_FOLDER_NAME</span><span class="p">,</span>
+        <span class="cm">/*bs_root_path*/</span>	<span class="nx">NULL</span><span class="p">,</span>
+        <span class="cm">/*fs_type*/</span>			<span class="s2">&quot;fat&quot;</span>
+    <span class="p">},</span>
+    <span class="c1">//外挂fat分区</span>
+    <span class="p">{</span>
+        <span class="cm">/*logo*/</span>			<span class="s2">&quot;fat_nor&quot;</span><span class="p">,</span>
+        <span class="cm">/*name*/</span>			<span class="s2">&quot;fat_nor&quot;</span><span class="p">,</span>
+        <span class="cm">/*storage_path*/</span>	<span class="s2">&quot;storage/fat_nor&quot;</span><span class="p">,</span>
+        <span class="cm">/*bs_storage_path*/</span>	<span class="nx">NULL</span><span class="p">,</span>
+        <span class="cm">/*root_path*/</span>		<span class="s2">&quot;storage/fat_nor/C/&quot;</span><span class="p">,</span>
+        <span class="cm">/*bs_root_path*/</span>	<span class="nx">NULL</span><span class="p">,</span>
+        <span class="cm">/*fs_type*/</span>			<span class="s2">&quot;fat&quot;</span>
+    <span class="p">},</span>
+    <span class="c1">//外挂flash资源分区</span>
+    <span class="p">{</span>
+        <span class="cm">/*logo*/</span>			<span class="s2">&quot;res_nor&quot;</span><span class="p">,</span>
+        <span class="cm">/*name*/</span>			<span class="s2">&quot;res_nor&quot;</span><span class="p">,</span>
+        <span class="cm">/*storage_path*/</span>	<span class="s2">&quot;storage/res_nor&quot;</span><span class="p">,</span>
+        <span class="cm">/*bs_storage_path*/</span>	<span class="nx">NULL</span><span class="p">,</span>
+        <span class="cm">/*root_path*/</span>		<span class="s2">&quot;storage/res_nor/C/&quot;</span><span class="p">,</span>
+        <span class="cm">/*bs_root_path*/</span>	<span class="nx">NULL</span><span class="p">,</span>
+        <span class="cm">/*fs_type*/</span>			<span class="s2">&quot;nor_sdfile&quot;</span>
+    <span class="p">},</span>
+    <span class="c1">///外挂录音分区</span>
+    <span class="p">{</span>
+        <span class="cm">/*logo*/</span>			<span class="s2">&quot;rec_nor&quot;</span><span class="p">,</span>
+        <span class="cm">/*name*/</span>			<span class="s2">&quot;rec_nor&quot;</span><span class="p">,</span>
+        <span class="cm">/*storage_path*/</span>	<span class="s2">&quot;storage/rec_nor&quot;</span><span class="p">,</span>
+        <span class="cm">/*bs_storage_path*/</span>	<span class="nx">NULL</span><span class="p">,</span>
+        <span class="cm">/*root_path*/</span>		<span class="s2">&quot;storage/rec_nor/C/&quot;</span><span class="p">,</span>
+        <span class="cm">/*bs_root_path*/</span>	<span class="nx">NULL</span><span class="p">,</span>
+        <span class="cm">/*fs_type*/</span>			<span class="s2">&quot;nor_fs&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="cm">/*logo*/</span>			<span class="s2">&quot;nor_ui&quot;</span><span class="p">,</span>
+        <span class="cm">/*name*/</span>			<span class="s2">&quot;nor_ui&quot;</span><span class="p">,</span>
+        <span class="cm">/*storage_path*/</span>	<span class="s2">&quot;storage/nor_ui&quot;</span><span class="p">,</span>
+        <span class="cm">/*bs_storage_path*/</span>	<span class="nx">NULL</span><span class="p">,</span>
+        <span class="cm">/*root_path*/</span>		<span class="s2">&quot;storage/nor_ui/C/&quot;</span><span class="p">,</span>
+        <span class="cm">/*bs_root_path*/</span>	<span class="nx">NULL</span><span class="p">,</span>
+        <span class="cm">/*fs_type*/</span>			<span class="s2">&quot;nor_sdfile&quot;</span>
+    <span class="p">},</span>
 
-<span class="w">    </span><span class="c1">//&lt;新加设备参数请在reg end前添加!!</span>
-<span class="w">    </span><span class="c1">//&lt;reg end</span>
-<span class="w">    </span><span class="p">{</span>
-<span class="w">        </span><span class="cm">/*logo*/</span><span class="w">			</span><span class="nx">NULL</span><span class="p">,</span>
-<span class="w">        </span><span class="cm">/*name*/</span><span class="w">			</span><span class="nx">NULL</span><span class="p">,</span>
-<span class="w">        </span><span class="cm">/*storage_path*/</span><span class="w">	</span><span class="nx">NULL</span><span class="p">,</span>
-<span class="w">        </span><span class="cm">/*bs_storage_path*/</span><span class="w">	</span><span class="nx">NULL</span><span class="p">,</span>
-<span class="w">        </span><span class="cm">/*root_path*/</span><span class="w">		</span><span class="nx">NULL</span><span class="p">,</span>
-<span class="w">        </span><span class="cm">/*bs_root_path*/</span><span class="w">	</span><span class="nx">NULL</span><span class="p">,</span>
-<span class="w">        </span><span class="cm">/*fs_type*/</span><span class="w">			</span><span class="nx">NULL</span>
-<span class="w">    </span><span class="p">},</span>
+    <span class="c1">//&lt;新加设备参数请在reg end前添加!!</span>
+    <span class="c1">//&lt;reg end</span>
+    <span class="p">{</span>
+        <span class="cm">/*logo*/</span>			<span class="nx">NULL</span><span class="p">,</span>
+        <span class="cm">/*name*/</span>			<span class="nx">NULL</span><span class="p">,</span>
+        <span class="cm">/*storage_path*/</span>	<span class="nx">NULL</span><span class="p">,</span>
+        <span class="cm">/*bs_storage_path*/</span>	<span class="nx">NULL</span><span class="p">,</span>
+        <span class="cm">/*root_path*/</span>		<span class="nx">NULL</span><span class="p">,</span>
+        <span class="cm">/*bs_root_path*/</span>	<span class="nx">NULL</span><span class="p">,</span>
+        <span class="cm">/*fs_type*/</span>			<span class="nx">NULL</span>
+    <span class="p">},</span>
 <span class="p">};</span>
 </pre></div>
 </div>
 </section>
 </section>
 <section id="id6">
-<h2><span class="section-number">10.1.3. </span>设备管理流程框架<a class="headerlink" href="#id6" title="Permalink to this heading"></a></h2>
+<h2>设备管理流程框架<a class="headerlink" href="#id6" title="Permalink to this headline"></a></h2>
 <p><img alt="绘图" src="../../_images/1670396694501.drawio.svg" /></p>
 </section>
 <section id="id7">
-<h2><span class="section-number">10.1.4. </span>如何将自定义设备加入到设备链表<a class="headerlink" href="#id7" title="Permalink to this heading"></a></h2>
+<h2>如何将自定义设备加入到设备链表<a class="headerlink" href="#id7" title="Permalink to this headline"></a></h2>
 <p>具体操作步骤：</p>
 <ol class="arabic">
 <li><p>配置dev_reg， 加入自定义设备信息项，包括:
@@ -457,11 +409,11 @@ struct __dev *dev_manager_find_by_index(u32 index, u8 valid);
 </ol>
 </section>
 <section id="api">
-<h2><span class="section-number">10.1.5. </span>详细API说明<a class="headerlink" href="#api" title="Permalink to this heading"></a></h2>
+<h2>详细API说明<a class="headerlink" href="#api" title="Permalink to this headline"></a></h2>
 <section id="id8">
-<h3><span class="section-number">10.1.5.1. </span>设备添加<a class="headerlink" href="#id8" title="Permalink to this heading"></a></h3>
+<h3>设备添加<a class="headerlink" href="#id8" title="Permalink to this headline"></a></h3>
 <section id="dev-manager-add">
-<h4><span class="section-number">10.1.5.1.1. </span>dev_manager_add<a class="headerlink" href="#dev-manager-add" title="Permalink to this heading"></a></h4>
+<h4>dev_manager_add<a class="headerlink" href="#dev-manager-add" title="Permalink to this headline"></a></h4>
 <p>原型：</p>
 <div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="c1">//*----------------------------------------------------------------------------*/</span>
 <span class="cm">/**@brief    设备增加接口</span>
@@ -470,7 +422,7 @@ struct __dev *dev_manager_find_by_index(u32 index, u8 valid);
 <span class="cm">	@note</span>
 <span class="cm">*/</span>
 <span class="cm">/*----------------------------------------------------------------------------*/</span>
-<span class="kr">int</span><span class="w"> </span><span class="nx">dev_manager_add</span><span class="p">(</span><span class="kr">char</span><span class="w"> </span><span class="o">*</span><span class="nx">logo</span><span class="p">)</span>
+<span class="kr">int</span> <span class="nx">dev_manager_add</span><span class="p">(</span><span class="kr">char</span> <span class="o">*</span><span class="nx">logo</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>参数：</p>
@@ -493,9 +445,9 @@ struct __dev *dev_manager_find_by_index(u32 index, u8 valid);
 </section>
 </section>
 <section id="id9">
-<h3><span class="section-number">10.1.5.2. </span>设备删除<a class="headerlink" href="#id9" title="Permalink to this heading"></a></h3>
+<h3>设备删除<a class="headerlink" href="#id9" title="Permalink to this headline"></a></h3>
 <section id="dev-manager-del">
-<h4><span class="section-number">10.1.5.2.1. </span>dev_manager_del<a class="headerlink" href="#dev-manager-del" title="Permalink to this heading"></a></h4>
+<h4>dev_manager_del<a class="headerlink" href="#dev-manager-del" title="Permalink to this headline"></a></h4>
 <p>原型：</p>
 <div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="c1">//*----------------------------------------------------------------------------*/</span>
 <span class="cm">/**@brief    设备删除接口</span>
@@ -504,7 +456,7 @@ struct __dev *dev_manager_find_by_index(u32 index, u8 valid);
 <span class="cm">   @note</span>
 <span class="cm">*/</span>
 <span class="cm">/*----------------------------------------------------------------------------*/</span>
-<span class="kr">int</span><span class="w"> </span><span class="nx">dev_manager_del</span><span class="p">(</span><span class="kr">char</span><span class="w"> </span><span class="o">*</span><span class="nx">logo</span><span class="p">)</span>
+<span class="kr">int</span> <span class="nx">dev_manager_del</span><span class="p">(</span><span class="kr">char</span> <span class="o">*</span><span class="nx">logo</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>参数：</p>
@@ -527,9 +479,9 @@ struct __dev *dev_manager_find_by_index(u32 index, u8 valid);
 </section>
 </section>
 <section id="id10">
-<h3><span class="section-number">10.1.5.3. </span>设备在线检测接口<a class="headerlink" href="#id10" title="Permalink to this heading"></a></h3>
+<h3>设备在线检测接口<a class="headerlink" href="#id10" title="Permalink to this headline"></a></h3>
 <section id="dev-manager-check">
-<h4><span class="section-number">10.1.5.3.1. </span>dev_manager_check<a class="headerlink" href="#dev-manager-check" title="Permalink to this heading"></a></h4>
+<h4>dev_manager_check<a class="headerlink" href="#dev-manager-check" title="Permalink to this headline"></a></h4>
 <p>通过设备节点检查设备是否在设备链表
 原型：</p>
 <div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="c1">//*----------------------------------------------------------------------------*/</span>
@@ -539,7 +491,7 @@ struct __dev *dev_manager_find_by_index(u32 index, u8 valid);
 <span class="cm">   @note     通过设备节点检查设备是否在设备链表中</span>
 <span class="cm">*/</span>
 <span class="cm">/*----------------------------------------------------------------------------*/</span>
-<span class="nx">struct</span><span class="w"> </span><span class="nx">__dev</span><span class="w"> </span><span class="o">*</span><span class="nx">dev_manager_check</span><span class="p">(</span><span class="nx">struct</span><span class="w"> </span><span class="nx">__dev</span><span class="w"> </span><span class="o">*</span><span class="nx">dev</span><span class="p">)</span>
+<span class="nx">struct</span> <span class="nx">__dev</span> <span class="o">*</span><span class="nx">dev_manager_check</span><span class="p">(</span><span class="nx">struct</span> <span class="nx">__dev</span> <span class="o">*</span><span class="nx">dev</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>参数：</p>
@@ -565,7 +517,7 @@ if（dev_manager_check(cur_dev)）{
 </div>
 </section>
 <section id="dev-manager-check-by-logo">
-<h4><span class="section-number">10.1.5.3.2. </span>dev_manager_check_by_logo<a class="headerlink" href="#dev-manager-check-by-logo" title="Permalink to this heading"></a></h4>
+<h4>dev_manager_check_by_logo<a class="headerlink" href="#dev-manager-check-by-logo" title="Permalink to this headline"></a></h4>
 <p>通过盘符检查设备是否在设备链表</p>
 <p>原型：</p>
 <div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="c1">//*----------------------------------------------------------------------------*/</span>
@@ -575,7 +527,7 @@ if（dev_manager_check(cur_dev)）{
 <span class="cm">   @note     通过设备节点检查设备是否在设备链表中</span>
 <span class="cm">*/</span>
 <span class="cm">/*----------------------------------------------------------------------------*/</span>
-<span class="nx">struct</span><span class="w"> </span><span class="nx">__dev</span><span class="w"> </span><span class="o">*</span><span class="nx">dev_manager_check_by_logo</span><span class="p">(</span><span class="kr">char</span><span class="w"> </span><span class="o">*</span><span class="nx">logo</span><span class="p">)</span>
+<span class="nx">struct</span> <span class="nx">__dev</span> <span class="o">*</span><span class="nx">dev_manager_check_by_logo</span><span class="p">(</span><span class="kr">char</span> <span class="o">*</span><span class="nx">logo</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>参数：</p>
@@ -592,15 +544,15 @@ if（dev_manager_check(cur_dev)）{
 </tbody>
 </table>
 <p>示例：</p>
-<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="nx">struct</span><span class="w"> </span><span class="nx">__dev</span><span class="w"> </span><span class="o">*</span><span class="nx">dev</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">dev_manager_check_by_logo</span><span class="p">(</span><span class="s2">&quot;sd0&quot;</span><span class="p">);</span>
+<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="nx">struct</span> <span class="nx">__dev</span> <span class="o">*</span><span class="nx">dev</span> <span class="o">=</span> <span class="nx">dev_manager_check_by_logo</span><span class="p">(</span><span class="s2">&quot;sd0&quot;</span><span class="p">);</span>
 <span class="k">if</span><span class="p">(</span><span class="nx">dev</span><span class="p">){</span>
-<span class="w">	</span><span class="c1">//……</span>
+	<span class="c1">//……</span>
 <span class="p">}</span>
 </pre></div>
 </div>
 </section>
 <section id="dev-manager-online-check-by-logo">
-<h4><span class="section-number">10.1.5.3.3. </span>dev_manager_online_check_by_logo<a class="headerlink" href="#dev-manager-online-check-by-logo" title="Permalink to this heading"></a></h4>
+<h4>dev_manager_online_check_by_logo<a class="headerlink" href="#dev-manager-online-check-by-logo" title="Permalink to this headline"></a></h4>
 <p>通过逻辑盘符判断设备是否在线</p>
 <p>原型：</p>
 <div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="c1">//*----------------------------------------------------------------------------*/</span>
@@ -614,7 +566,7 @@ if（dev_manager_check(cur_dev)）{
 <span class="cm">   @note</span>
 <span class="cm">*/</span>
 <span class="cm">/*----------------------------------------------------------------------------*/</span>
-<span class="kr">int</span><span class="w"> </span><span class="nx">dev_manager_online_check_by_logo</span><span class="p">(</span><span class="kr">char</span><span class="w"> </span><span class="o">*</span><span class="nx">logo</span><span class="p">,</span><span class="w"> </span><span class="nx">u8</span><span class="w"> </span><span class="nx">valid</span><span class="p">)</span>
+<span class="kr">int</span> <span class="nx">dev_manager_online_check_by_logo</span><span class="p">(</span><span class="kr">char</span> <span class="o">*</span><span class="nx">logo</span><span class="p">,</span> <span class="nx">u8</span> <span class="nx">valid</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>参数：</p>
@@ -635,13 +587,13 @@ if（dev_manager_check(cur_dev)）{
 </table>
 <p>示例：</p>
 <div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="k">if</span><span class="p">(</span><span class="nx">dev_manager_online_check_by_logo</span><span class="p">(</span><span class="s2">&quot;sd0&quot;</span><span class="p">,</span><span class="mf">1</span><span class="p">)){</span>
-<span class="w">	</span><span class="c1">//……</span>
+	<span class="c1">//……</span>
 <span class="p">}</span>
 </pre></div>
 </div>
 </section>
 <section id="dev-manager-online-check">
-<h4><span class="section-number">10.1.5.3.4. </span>dev_manager_online_check<a class="headerlink" href="#dev-manager-online-check" title="Permalink to this heading"></a></h4>
+<h4>dev_manager_online_check<a class="headerlink" href="#dev-manager-online-check" title="Permalink to this headline"></a></h4>
 <p>通过设备节点判断设备是否在线</p>
 <p>原型：</p>
 <div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="c1">//*----------------------------------------------------------------------------*/</span>
@@ -655,7 +607,7 @@ if（dev_manager_check(cur_dev)）{
 <span class="cm">   @note</span>
 <span class="cm">*/</span>
 <span class="cm">/*----------------------------------------------------------------------------*/</span>
-<span class="kr">int</span><span class="w"> </span><span class="nx">dev_manager_online_check</span><span class="p">(</span><span class="nx">struct</span><span class="w"> </span><span class="nx">__dev</span><span class="w"> </span><span class="o">*</span><span class="nx">dev</span><span class="p">,</span><span class="w"> </span><span class="nx">u8</span><span class="w"> </span><span class="nx">valid</span><span class="p">)</span>
+<span class="kr">int</span> <span class="nx">dev_manager_online_check</span><span class="p">(</span><span class="nx">struct</span> <span class="nx">__dev</span> <span class="o">*</span><span class="nx">dev</span><span class="p">,</span> <span class="nx">u8</span> <span class="nx">valid</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>参数：</p>
@@ -675,18 +627,18 @@ if（dev_manager_check(cur_dev)）{
 </tbody>
 </table>
 <p>示例：</p>
-<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="nx">struct</span><span class="w"> </span><span class="nx">__dev</span><span class="w"> </span><span class="o">*</span><span class="nx">first_dev</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">dev_manager_find_first</span><span class="p">(</span><span class="mf">0</span><span class="p">);</span>
+<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="nx">struct</span> <span class="nx">__dev</span> <span class="o">*</span><span class="nx">first_dev</span> <span class="o">=</span> <span class="nx">dev_manager_find_first</span><span class="p">(</span><span class="mf">0</span><span class="p">);</span>
 <span class="k">if</span><span class="p">(</span><span class="nx">dev_manager_online_check</span><span class="p">(</span><span class="nx">first_dev</span><span class="p">,</span><span class="mf">1</span><span class="p">)){</span>
-<span class="w">	</span><span class="c1">//……</span>
+	<span class="c1">//……</span>
 <span class="p">}</span>
 </pre></div>
 </div>
 </section>
 </section>
 <section id="id11">
-<h3><span class="section-number">10.1.5.4. </span>在线设备总数获取<a class="headerlink" href="#id11" title="Permalink to this heading"></a></h3>
+<h3>在线设备总数获取<a class="headerlink" href="#id11" title="Permalink to this headline"></a></h3>
 <section id="dev-manager-get-total">
-<h4><span class="section-number">10.1.5.4.1. </span>dev_manager_get_total<a class="headerlink" href="#dev-manager-get-total" title="Permalink to this heading"></a></h4>
+<h4>dev_manager_get_total<a class="headerlink" href="#dev-manager-get-total" title="Permalink to this headline"></a></h4>
 <p>原型：</p>
 <div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="c1">//*----------------------------------------------------------------------------*/</span>
 <span class="cm">/**@brief    获取设备总数</span>
@@ -696,7 +648,7 @@ if（dev_manager_check(cur_dev)）{
 <span class="cm">   @note     根据使用情景决定接口参数</span>
 <span class="cm">*/</span>
 <span class="cm">/*----------------------------------------------------------------------------*/</span>
-<span class="nx">u32</span><span class="w"> </span><span class="nx">dev_manager_get_total</span><span class="p">(</span><span class="nx">u8</span><span class="w"> </span><span class="nx">valid</span><span class="p">)</span>
+<span class="nx">u32</span> <span class="nx">dev_manager_get_total</span><span class="p">(</span><span class="nx">u8</span> <span class="nx">valid</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>参数：</p>
@@ -713,17 +665,17 @@ if（dev_manager_check(cur_dev)）{
 </tbody>
 </table>
 <p>示例：</p>
-<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="w">	</span><span class="k">if</span><span class="p">(</span><span class="nx">dev_manager_get_total</span><span class="p">(</span><span class="mf">1</span><span class="p">)){</span>
-<span class="w">		</span><span class="c1">//……</span>
-<span class="w">	</span><span class="p">}</span>
+<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span>	<span class="k">if</span><span class="p">(</span><span class="nx">dev_manager_get_total</span><span class="p">(</span><span class="mf">1</span><span class="p">)){</span>
+		<span class="c1">//……</span>
+	<span class="p">}</span>
 </pre></div>
 </div>
 </section>
 </section>
 <section id="id12">
-<h3><span class="section-number">10.1.5.5. </span>设备获取接口<a class="headerlink" href="#id12" title="Permalink to this heading"></a></h3>
+<h3>设备获取接口<a class="headerlink" href="#id12" title="Permalink to this headline"></a></h3>
 <section id="dev-manager-find-first">
-<h4><span class="section-number">10.1.5.5.1. </span>dev_manager_find_first<a class="headerlink" href="#dev-manager-find-first" title="Permalink to this heading"></a></h4>
+<h4>dev_manager_find_first<a class="headerlink" href="#dev-manager-find-first" title="Permalink to this headline"></a></h4>
 <p>获取设备列表第一个设备</p>
 <p>原型：</p>
 <div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="c1">//*----------------------------------------------------------------------------*/</span>
@@ -734,7 +686,7 @@ if（dev_manager_check(cur_dev)）{
 <span class="cm">   @note     根据使用情景决定接口参数</span>
 <span class="cm">*/</span>
 <span class="cm">/*----------------------------------------------------------------------------*/</span>
-<span class="nx">struct</span><span class="w"> </span><span class="nx">__dev</span><span class="w"> </span><span class="o">*</span><span class="nx">dev_manager_find_first</span><span class="p">(</span><span class="nx">u8</span><span class="w"> </span><span class="nx">valid</span><span class="p">)</span>
+<span class="nx">struct</span> <span class="nx">__dev</span> <span class="o">*</span><span class="nx">dev_manager_find_first</span><span class="p">(</span><span class="nx">u8</span> <span class="nx">valid</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>参数：</p>
@@ -751,12 +703,12 @@ if（dev_manager_check(cur_dev)）{
 </tbody>
 </table>
 <p>示例：</p>
-<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="nx">struct</span><span class="w"> </span><span class="nx">__dev</span><span class="w"> </span><span class="o">*</span><span class="nx">first_dev</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">dev_manager_find_first</span><span class="p">(</span><span class="mf">0</span><span class="p">);</span>
+<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="nx">struct</span> <span class="nx">__dev</span> <span class="o">*</span><span class="nx">first_dev</span> <span class="o">=</span> <span class="nx">dev_manager_find_first</span><span class="p">(</span><span class="mf">0</span><span class="p">);</span>
 </pre></div>
 </div>
 </section>
 <section id="dev-manager-find-last">
-<h4><span class="section-number">10.1.5.5.2. </span>dev_manager_find_last<a class="headerlink" href="#dev-manager-find-last" title="Permalink to this heading"></a></h4>
+<h4>dev_manager_find_last<a class="headerlink" href="#dev-manager-find-last" title="Permalink to this headline"></a></h4>
 <p>获取设备列表最后一个设备</p>
 <p>原型：</p>
 <div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="c1">//*----------------------------------------------------------------------------*/</span>
@@ -768,7 +720,7 @@ if（dev_manager_check(cur_dev)）{
 <span class="cm">   @note     根据使用情景决定接口参数</span>
 <span class="cm">*/</span>
 <span class="cm">/*----------------------------------------------------------------------------*/</span>
-<span class="nx">struct</span><span class="w"> </span><span class="nx">__dev</span><span class="w"> </span><span class="o">*</span><span class="nx">dev_manager_find_last</span><span class="p">(</span><span class="nx">u8</span><span class="w"> </span><span class="nx">valid</span><span class="p">)</span>
+<span class="nx">struct</span> <span class="nx">__dev</span> <span class="o">*</span><span class="nx">dev_manager_find_last</span><span class="p">(</span><span class="nx">u8</span> <span class="nx">valid</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>参数：</p>
@@ -785,12 +737,12 @@ if（dev_manager_check(cur_dev)）{
 </tbody>
 </table>
 <p>示例：</p>
-<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="nx">struct</span><span class="w"> </span><span class="nx">__dev</span><span class="w"> </span><span class="o">*</span><span class="nx">last_dev</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">dev_manager_find_last</span><span class="p">(</span><span class="mf">0</span><span class="p">);</span>
+<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="nx">struct</span> <span class="nx">__dev</span> <span class="o">*</span><span class="nx">last_dev</span> <span class="o">=</span> <span class="nx">dev_manager_find_last</span><span class="p">(</span><span class="mf">0</span><span class="p">);</span>
 </pre></div>
 </div>
 </section>
 <section id="dev-manager-find-prev">
-<h4><span class="section-number">10.1.5.5.3. </span>dev_manager_find_prev<a class="headerlink" href="#dev-manager-find-prev" title="Permalink to this heading"></a></h4>
+<h4>dev_manager_find_prev<a class="headerlink" href="#dev-manager-find-prev" title="Permalink to this headline"></a></h4>
 <p>原型：</p>
 <div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="c1">//*----------------------------------------------------------------------------*/</span>
 <span class="cm">/**@brief    获取上一个设备节点</span>
@@ -803,7 +755,7 @@ if（dev_manager_check(cur_dev)）{
 <span class="cm">   @note     根据当前设置的参数设备节点，找链表中的上一个设备</span>
 <span class="cm">*/</span>
 <span class="cm">/*----------------------------------------------------------------------------*/</span>
-<span class="nx">struct</span><span class="w"> </span><span class="nx">__dev</span><span class="w"> </span><span class="o">*</span><span class="nx">dev_manager_find_prev</span><span class="p">(</span><span class="nx">struct</span><span class="w"> </span><span class="nx">__dev</span><span class="w"> </span><span class="o">*</span><span class="nx">dev</span><span class="p">,</span><span class="w"> </span><span class="nx">u8</span><span class="w"> </span><span class="nx">valid</span><span class="p">)</span>
+<span class="nx">struct</span> <span class="nx">__dev</span> <span class="o">*</span><span class="nx">dev_manager_find_prev</span><span class="p">(</span><span class="nx">struct</span> <span class="nx">__dev</span> <span class="o">*</span><span class="nx">dev</span><span class="p">,</span> <span class="nx">u8</span> <span class="nx">valid</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>参数：</p>
@@ -823,13 +775,13 @@ if（dev_manager_check(cur_dev)）{
 </tbody>
 </table>
 <p>示例：</p>
-<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="nx">struct</span><span class="w"> </span><span class="nx">__dev</span><span class="w"> </span><span class="o">*</span><span class="nx">cur_dev</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">dev_manager_find_active</span><span class="p">(</span><span class="mf">0</span><span class="p">);</span>
-<span class="nx">struct</span><span class="w"> </span><span class="nx">__dev</span><span class="w"> </span><span class="o">*</span><span class="nx">prev_dev</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">dev_manager_find_prev</span><span class="p">(</span><span class="nx">dev</span><span class="p">,</span><span class="mf">0</span><span class="p">);</span>
+<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="nx">struct</span> <span class="nx">__dev</span> <span class="o">*</span><span class="nx">cur_dev</span> <span class="o">=</span> <span class="nx">dev_manager_find_active</span><span class="p">(</span><span class="mf">0</span><span class="p">);</span>
+<span class="nx">struct</span> <span class="nx">__dev</span> <span class="o">*</span><span class="nx">prev_dev</span> <span class="o">=</span> <span class="nx">dev_manager_find_prev</span><span class="p">(</span><span class="nx">dev</span><span class="p">,</span><span class="mf">0</span><span class="p">);</span>
 </pre></div>
 </div>
 </section>
 <section id="dev-manager-find-next">
-<h4><span class="section-number">10.1.5.5.4. </span>dev_manager_find_next<a class="headerlink" href="#dev-manager-find-next" title="Permalink to this heading"></a></h4>
+<h4>dev_manager_find_next<a class="headerlink" href="#dev-manager-find-next" title="Permalink to this headline"></a></h4>
 <p>获取下一个设备节点</p>
 <p>原型：</p>
 <div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="c1">//*----------------------------------------------------------------------------*/</span>
@@ -843,7 +795,7 @@ if（dev_manager_check(cur_dev)）{
 <span class="cm">   @note     根据当前设置的参数设备节点，找链表中的下一个设备</span>
 <span class="cm">*/</span>
 <span class="cm">/*----------------------------------------------------------------------------*/</span>
-<span class="nx">struct</span><span class="w"> </span><span class="nx">__dev</span><span class="w"> </span><span class="o">*</span><span class="nx">dev_manager_find_next</span><span class="p">(</span><span class="nx">struct</span><span class="w"> </span><span class="nx">__dev</span><span class="w"> </span><span class="o">*</span><span class="nx">dev</span><span class="p">,</span><span class="w"> </span><span class="nx">u8</span><span class="w"> </span><span class="nx">valid</span><span class="p">)</span>
+<span class="nx">struct</span> <span class="nx">__dev</span> <span class="o">*</span><span class="nx">dev_manager_find_next</span><span class="p">(</span><span class="nx">struct</span> <span class="nx">__dev</span> <span class="o">*</span><span class="nx">dev</span><span class="p">,</span> <span class="nx">u8</span> <span class="nx">valid</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>参数：</p>
@@ -863,13 +815,13 @@ if（dev_manager_check(cur_dev)）{
 </tbody>
 </table>
 <p>示例：</p>
-<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="nx">struct</span><span class="w"> </span><span class="nx">__dev</span><span class="w"> </span><span class="o">*</span><span class="nx">cur_dev</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">dev_manager_find_active</span><span class="p">(</span><span class="mf">0</span><span class="p">);</span>
-<span class="nx">struct</span><span class="w"> </span><span class="nx">__dev</span><span class="w"> </span><span class="o">*</span><span class="nx">next_dev</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">dev_manager_find_next</span><span class="p">(</span><span class="nx">dev</span><span class="p">,</span><span class="mf">0</span><span class="p">);</span>
+<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="nx">struct</span> <span class="nx">__dev</span> <span class="o">*</span><span class="nx">cur_dev</span> <span class="o">=</span> <span class="nx">dev_manager_find_active</span><span class="p">(</span><span class="mf">0</span><span class="p">);</span>
+<span class="nx">struct</span> <span class="nx">__dev</span> <span class="o">*</span><span class="nx">next_dev</span> <span class="o">=</span> <span class="nx">dev_manager_find_next</span><span class="p">(</span><span class="nx">dev</span><span class="p">,</span><span class="mf">0</span><span class="p">);</span>
 </pre></div>
 </div>
 </section>
 <section id="dev-manager-find-active">
-<h4><span class="section-number">10.1.5.5.5. </span>dev_manager_find_active<a class="headerlink" href="#dev-manager-find-active" title="Permalink to this heading"></a></h4>
+<h4>dev_manager_find_active<a class="headerlink" href="#dev-manager-find-active" title="Permalink to this headline"></a></h4>
 <p>获取当前活动设备节点</p>
 <p>原型：</p>
 <div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="c1">//*----------------------------------------------------------------------------*/</span>
@@ -882,7 +834,7 @@ if（dev_manager_check(cur_dev)）{
 <span class="cm">   @note</span>
 <span class="cm">*/</span>
 <span class="cm">/*----------------------------------------------------------------------------*/</span>
-<span class="nx">struct</span><span class="w"> </span><span class="nx">__dev</span><span class="w"> </span><span class="o">*</span><span class="nx">dev_manager_find_active</span><span class="p">(</span><span class="nx">u8</span><span class="w"> </span><span class="nx">valid</span><span class="p">)</span>
+<span class="nx">struct</span> <span class="nx">__dev</span> <span class="o">*</span><span class="nx">dev_manager_find_active</span><span class="p">(</span><span class="nx">u8</span> <span class="nx">valid</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>参数：</p>
@@ -899,12 +851,12 @@ if（dev_manager_check(cur_dev)）{
 </tbody>
 </table>
 <p>示例：</p>
-<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="nx">struct</span><span class="w"> </span><span class="nx">__dev</span><span class="w"> </span><span class="o">*</span><span class="nx">cur_dev</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">dev_manager_find_active</span><span class="p">(</span><span class="mf">1</span><span class="p">);</span>
+<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="nx">struct</span> <span class="nx">__dev</span> <span class="o">*</span><span class="nx">cur_dev</span> <span class="o">=</span> <span class="nx">dev_manager_find_active</span><span class="p">(</span><span class="mf">1</span><span class="p">);</span>
 </pre></div>
 </div>
 </section>
 <section id="dev-manager-find-spec">
-<h4><span class="section-number">10.1.5.5.6. </span>dev_manager_find_spec<a class="headerlink" href="#dev-manager-find-spec" title="Permalink to this heading"></a></h4>
+<h4>dev_manager_find_spec<a class="headerlink" href="#dev-manager-find-spec" title="Permalink to this headline"></a></h4>
 <p>获取指定设备节点</p>
 <p>原型：</p>
 <div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="c1">//*----------------------------------------------------------------------------*/</span>
@@ -918,7 +870,7 @@ if（dev_manager_check(cur_dev)）{
 <span class="cm">   @note</span>
 <span class="cm">*/</span>
 <span class="cm">/*----------------------------------------------------------------------------*/</span>
-<span class="nx">struct</span><span class="w"> </span><span class="nx">__dev</span><span class="w"> </span><span class="o">*</span><span class="nx">dev_manager_find_spec</span><span class="p">(</span><span class="kr">char</span><span class="w"> </span><span class="o">*</span><span class="nx">logo</span><span class="p">,</span><span class="w"> </span><span class="nx">u8</span><span class="w"> </span><span class="nx">valid</span><span class="p">)</span>
+<span class="nx">struct</span> <span class="nx">__dev</span> <span class="o">*</span><span class="nx">dev_manager_find_spec</span><span class="p">(</span><span class="kr">char</span> <span class="o">*</span><span class="nx">logo</span><span class="p">,</span> <span class="nx">u8</span> <span class="nx">valid</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>参数：</p>
@@ -938,12 +890,12 @@ if（dev_manager_check(cur_dev)）{
 </tbody>
 </table>
 <p>示例：</p>
-<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="nx">struct</span><span class="w"> </span><span class="nx">__dev</span><span class="w"> </span><span class="o">*</span><span class="nx">dev</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">dev_manager_find_spec</span><span class="p">(</span><span class="s2">&quot;sd0&quot;</span><span class="p">,</span><span class="mf">1</span><span class="p">);</span>
+<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="nx">struct</span> <span class="nx">__dev</span> <span class="o">*</span><span class="nx">dev</span> <span class="o">=</span> <span class="nx">dev_manager_find_spec</span><span class="p">(</span><span class="s2">&quot;sd0&quot;</span><span class="p">,</span><span class="mf">1</span><span class="p">);</span>
 </pre></div>
 </div>
 </section>
 <section id="dev-manager-find-by-index">
-<h4><span class="section-number">10.1.5.5.7. </span>dev_manager_find_by_index<a class="headerlink" href="#dev-manager-find-by-index" title="Permalink to this heading"></a></h4>
+<h4>dev_manager_find_by_index<a class="headerlink" href="#dev-manager-find-by-index" title="Permalink to this headline"></a></h4>
 <p>获取指定序号设备节点</p>
 <p>原型：</p>
 <div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="c1">//*----------------------------------------------------------------------------*/</span>
@@ -957,7 +909,7 @@ if（dev_manager_check(cur_dev)）{
 <span class="cm">   @note</span>
 <span class="cm">*/</span>
 <span class="cm">/*----------------------------------------------------------------------------*/</span>
-<span class="nx">struct</span><span class="w"> </span><span class="nx">__dev</span><span class="w"> </span><span class="o">*</span><span class="nx">dev_manager_find_by_index</span><span class="p">(</span><span class="nx">u32</span><span class="w"> </span><span class="nx">index</span><span class="p">,</span><span class="w"> </span><span class="nx">u8</span><span class="w"> </span><span class="nx">valid</span><span class="p">)</span>
+<span class="nx">struct</span> <span class="nx">__dev</span> <span class="o">*</span><span class="nx">dev_manager_find_by_index</span><span class="p">(</span><span class="nx">u32</span> <span class="nx">index</span><span class="p">,</span> <span class="nx">u8</span> <span class="nx">valid</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>参数：</p>
@@ -977,15 +929,15 @@ if（dev_manager_check(cur_dev)）{
 </tbody>
 </table>
 <p>示例：</p>
-<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="nx">struct</span><span class="w"> </span><span class="nx">__dev</span><span class="w"> </span><span class="o">*</span><span class="nx">dev</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">dev_manager_find_by_index</span><span class="p">(</span><span class="mf">0</span><span class="p">,</span><span class="mf">1</span><span class="p">);</span>
+<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="nx">struct</span> <span class="nx">__dev</span> <span class="o">*</span><span class="nx">dev</span> <span class="o">=</span> <span class="nx">dev_manager_find_by_index</span><span class="p">(</span><span class="mf">0</span><span class="p">,</span><span class="mf">1</span><span class="p">);</span>
 </pre></div>
 </div>
 </section>
 </section>
 <section id="id13">
-<h3><span class="section-number">10.1.5.6. </span>设备文件扫描<a class="headerlink" href="#id13" title="Permalink to this heading"></a></h3>
+<h3>设备文件扫描<a class="headerlink" href="#id13" title="Permalink to this headline"></a></h3>
 <section id="dev-manager-scan-disk">
-<h4><span class="section-number">10.1.5.6.1. </span>dev_manager_scan_disk<a class="headerlink" href="#dev-manager-scan-disk" title="Permalink to this heading"></a></h4>
+<h4>dev_manager_scan_disk<a class="headerlink" href="#dev-manager-scan-disk" title="Permalink to this headline"></a></h4>
 <p>原型：</p>
 <div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="c1">//*----------------------------------------------------------------------------*/</span>
 <span class="cm">/**@brief   设备扫盘</span>
@@ -999,7 +951,7 @@ if（dev_manager_check(cur_dev)）{
 <span class="cm">   @note</span>
 <span class="cm">*/</span>
 <span class="cm">/*----------------------------------------------------------------------------*/</span>
-<span class="nx">struct</span><span class="w"> </span><span class="nx">vfscan</span><span class="w"> </span><span class="o">*</span><span class="nx">dev_manager_scan_disk</span><span class="p">(</span><span class="nx">struct</span><span class="w"> </span><span class="nx">__dev</span><span class="w"> </span><span class="o">*</span><span class="nx">dev</span><span class="p">,</span><span class="w"> </span><span class="kd">const</span><span class="w"> </span><span class="kr">char</span><span class="w"> </span><span class="o">*</span><span class="nx">path</span><span class="p">,</span><span class="w"> </span><span class="kd">const</span><span class="w"> </span><span class="kr">char</span><span class="w"> </span><span class="o">*</span><span class="nx">parm</span><span class="p">,</span><span class="w"> </span><span class="nx">u8</span><span class="w"> </span><span class="nx">cycle_mode</span><span class="p">,</span><span class="w"> </span><span class="kr">int</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="nx">callback</span><span class="p">)(</span><span class="ow">void</span><span class="p">))</span>
+<span class="nx">struct</span> <span class="nx">vfscan</span> <span class="o">*</span><span class="nx">dev_manager_scan_disk</span><span class="p">(</span><span class="nx">struct</span> <span class="nx">__dev</span> <span class="o">*</span><span class="nx">dev</span><span class="p">,</span> <span class="kd">const</span> <span class="kr">char</span> <span class="o">*</span><span class="nx">path</span><span class="p">,</span> <span class="kd">const</span> <span class="kr">char</span> <span class="o">*</span><span class="nx">parm</span><span class="p">,</span> <span class="nx">u8</span> <span class="nx">cycle_mode</span><span class="p">,</span> <span class="kr">int</span> <span class="p">(</span><span class="o">*</span><span class="nx">callback</span><span class="p">)(</span><span class="ow">void</span><span class="p">))</span>
 </pre></div>
 </div>
 <p>参数：</p>
@@ -1028,19 +980,19 @@ if（dev_manager_check(cur_dev)）{
 </tbody>
 </table>
 <p>示例：</p>
-<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="nx">__struct</span><span class="w"> </span><span class="nx">__dev</span><span class="w"> </span><span class="o">*</span><span class="nx">dev</span><span class="p">;</span>
-<span class="nx">struct</span><span class="w"> </span><span class="nx">vfscan</span><span class="w"> </span><span class="o">*</span><span class="nx">fsn</span><span class="p">;</span>
-<span class="nx">dev</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">dev_manager_find_active</span><span class="p">(</span><span class="mf">0</span><span class="p">);</span>
+<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="nx">__struct</span> <span class="nx">__dev</span> <span class="o">*</span><span class="nx">dev</span><span class="p">;</span>
+<span class="nx">struct</span> <span class="nx">vfscan</span> <span class="o">*</span><span class="nx">fsn</span><span class="p">;</span>
+<span class="nx">dev</span> <span class="o">=</span> <span class="nx">dev_manager_find_active</span><span class="p">(</span><span class="mf">0</span><span class="p">);</span>
 
-<span class="nx">fsn</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">dev_manager_scan_disk</span><span class="p">(</span><span class="nx">dev</span><span class="p">,</span><span class="nx">NULL</span><span class="p">,</span><span class="s2">&quot;-tMP3 -sn -r&quot;</span><span class="p">,</span><span class="nx">FCYCLE_LIST</span><span class="p">,</span><span class="nx">NULL</span><span class="p">);</span>
+<span class="nx">fsn</span> <span class="o">=</span> <span class="nx">dev_manager_scan_disk</span><span class="p">(</span><span class="nx">dev</span><span class="p">,</span><span class="nx">NULL</span><span class="p">,</span><span class="s2">&quot;-tMP3 -sn -r&quot;</span><span class="p">,</span><span class="nx">FCYCLE_LIST</span><span class="p">,</span><span class="nx">NULL</span><span class="p">);</span>
 </pre></div>
 </div>
 </section>
 </section>
 <section id="id14">
-<h3><span class="section-number">10.1.5.7. </span>设备扫描释放<a class="headerlink" href="#id14" title="Permalink to this heading"></a></h3>
+<h3>设备扫描释放<a class="headerlink" href="#id14" title="Permalink to this headline"></a></h3>
 <section id="dev-manager-scan-disk-release">
-<h4><span class="section-number">10.1.5.7.1. </span>dev_manager_scan_disk_release<a class="headerlink" href="#dev-manager-scan-disk-release" title="Permalink to this heading"></a></h4>
+<h4>dev_manager_scan_disk_release<a class="headerlink" href="#dev-manager-scan-disk-release" title="Permalink to this headline"></a></h4>
 <p>设备扫盘释放</p>
 <p>原型：</p>
 <div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="c1">//*----------------------------------------------------------------------------*/</span>
@@ -1051,7 +1003,7 @@ if（dev_manager_check(cur_dev)）{
 <span class="cm">   @note</span>
 <span class="cm">*/</span>
 <span class="cm">/*----------------------------------------------------------------------------*/</span>
-<span class="ow">void</span><span class="w"> </span><span class="nx">dev_manager_scan_disk_release</span><span class="p">(</span><span class="nx">struct</span><span class="w"> </span><span class="nx">vfscan</span><span class="w"> </span><span class="o">*</span><span class="nx">fsn</span><span class="p">)</span>
+<span class="ow">void</span> <span class="nx">dev_manager_scan_disk_release</span><span class="p">(</span><span class="nx">struct</span> <span class="nx">vfscan</span> <span class="o">*</span><span class="nx">fsn</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>参数：</p>
@@ -1068,10 +1020,10 @@ if（dev_manager_check(cur_dev)）{
 </tbody>
 </table>
 <p>示例：</p>
-<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="nx">__struct</span><span class="w"> </span><span class="nx">__dev</span><span class="w"> </span><span class="o">*</span><span class="nx">dev</span><span class="p">;</span>
-<span class="nx">struct</span><span class="w"> </span><span class="nx">vfscan</span><span class="w"> </span><span class="o">*</span><span class="nx">fsn</span><span class="p">;</span>
-<span class="nx">dev</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">dev_manager_find_active</span><span class="p">(</span><span class="mf">0</span><span class="p">);</span>
-<span class="nx">fsn</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">dev_manager_scan_disk</span><span class="p">(</span><span class="nx">dev</span><span class="p">,</span><span class="nx">NULL</span><span class="p">,</span><span class="s2">&quot;-tMP3 -sn -r&quot;</span><span class="p">,</span><span class="nx">FCYCLE_LIST</span><span class="p">,</span><span class="nx">NULL</span><span class="p">);</span>
+<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="nx">__struct</span> <span class="nx">__dev</span> <span class="o">*</span><span class="nx">dev</span><span class="p">;</span>
+<span class="nx">struct</span> <span class="nx">vfscan</span> <span class="o">*</span><span class="nx">fsn</span><span class="p">;</span>
+<span class="nx">dev</span> <span class="o">=</span> <span class="nx">dev_manager_find_active</span><span class="p">(</span><span class="mf">0</span><span class="p">);</span>
+<span class="nx">fsn</span> <span class="o">=</span> <span class="nx">dev_manager_scan_disk</span><span class="p">(</span><span class="nx">dev</span><span class="p">,</span><span class="nx">NULL</span><span class="p">,</span><span class="s2">&quot;-tMP3 -sn -r&quot;</span><span class="p">,</span><span class="nx">FCYCLE_LIST</span><span class="p">,</span><span class="nx">NULL</span><span class="p">);</span>
 <span class="c1">//……</span>
 <span class="nx">dev_manager_scan_disk_release</span><span class="p">(</span><span class="nx">fsn</span><span class="p">);</span>
 </pre></div>
@@ -1079,9 +1031,9 @@ if（dev_manager_check(cur_dev)）{
 </section>
 </section>
 <section id="id15">
-<h3><span class="section-number">10.1.5.8. </span>设备有效性标记<a class="headerlink" href="#id15" title="Permalink to this heading"></a></h3>
+<h3>设备有效性标记<a class="headerlink" href="#id15" title="Permalink to this headline"></a></h3>
 <section id="dev-manager-set-valid">
-<h4><span class="section-number">10.1.5.8.1. </span>dev_manager_set_valid<a class="headerlink" href="#dev-manager-set-valid" title="Permalink to this heading"></a></h4>
+<h4>dev_manager_set_valid<a class="headerlink" href="#dev-manager-set-valid" title="Permalink to this headline"></a></h4>
 <p>通过设备节点标记指定设备是否有效</p>
 <p>原型：</p>
 <div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="c1">//*----------------------------------------------------------------------------*/</span>
@@ -1095,7 +1047,7 @@ if（dev_manager_check(cur_dev)）{
 <span class="cm">   @note    这里有无效是指是否有可播放文件</span>
 <span class="cm">*/</span>
 <span class="cm">/*----------------------------------------------------------------------------*/</span>
-<span class="ow">void</span><span class="w"> </span><span class="nx">dev_manager_set_valid</span><span class="p">(</span><span class="nx">struct</span><span class="w"> </span><span class="nx">__dev</span><span class="w"> </span><span class="o">*</span><span class="nx">dev</span><span class="p">,</span><span class="w"> </span><span class="nx">u8</span><span class="w"> </span><span class="nx">flag</span><span class="p">)</span>
+<span class="ow">void</span> <span class="nx">dev_manager_set_valid</span><span class="p">(</span><span class="nx">struct</span> <span class="nx">__dev</span> <span class="o">*</span><span class="nx">dev</span><span class="p">,</span> <span class="nx">u8</span> <span class="nx">flag</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>参数：</p>
@@ -1122,7 +1074,7 @@ dev_manager_set_valid（dev,1);
 </div>
 </section>
 <section id="dev-manager-set-valid-by-logo">
-<h4><span class="section-number">10.1.5.8.2. </span>dev_manager_set_valid_by_logo<a class="headerlink" href="#dev-manager-set-valid-by-logo" title="Permalink to this heading"></a></h4>
+<h4>dev_manager_set_valid_by_logo<a class="headerlink" href="#dev-manager-set-valid-by-logo" title="Permalink to this headline"></a></h4>
 <p>通过逻辑盘符标记指定设备是否有效</p>
 <p>原型：</p>
 <div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="c1">//*----------------------------------------------------------------------------*/</span>
@@ -1136,7 +1088,7 @@ dev_manager_set_valid（dev,1);
 <span class="cm">   @note    这里有无效是指是否有可播放文件</span>
 <span class="cm">*/</span>
 <span class="cm">/*----------------------------------------------------------------------------*/</span>
-<span class="ow">void</span><span class="w"> </span><span class="nx">dev_manager_set_valid_by_logo</span><span class="p">(</span><span class="kr">char</span><span class="w"> </span><span class="o">*</span><span class="nx">logo</span><span class="p">,</span><span class="w"> </span><span class="nx">u8</span><span class="w"> </span><span class="nx">flag</span><span class="p">)</span>
+<span class="ow">void</span> <span class="nx">dev_manager_set_valid_by_logo</span><span class="p">(</span><span class="kr">char</span> <span class="o">*</span><span class="nx">logo</span><span class="p">,</span> <span class="nx">u8</span> <span class="nx">flag</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>参数：</p>
@@ -1162,9 +1114,9 @@ dev_manager_set_valid（dev,1);
 </section>
 </section>
 <section id="id16">
-<h3><span class="section-number">10.1.5.9. </span>盘符获取接口<a class="headerlink" href="#id16" title="Permalink to this heading"></a></h3>
+<h3>盘符获取接口<a class="headerlink" href="#id16" title="Permalink to this headline"></a></h3>
 <section id="dev-manager-get-logo">
-<h4><span class="section-number">10.1.5.9.1. </span>dev_manager_get_logo<a class="headerlink" href="#dev-manager-get-logo" title="Permalink to this heading"></a></h4>
+<h4>dev_manager_get_logo<a class="headerlink" href="#dev-manager-get-logo" title="Permalink to this headline"></a></h4>
 <p>获取设备节点的逻辑盘符</p>
 <p>原型：</p>
 <div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="c1">//*----------------------------------------------------------------------------*/</span>
@@ -1175,7 +1127,7 @@ dev_manager_set_valid（dev,1);
 <span class="cm">   @note</span>
 <span class="cm">*/</span>
 <span class="cm">/*----------------------------------------------------------------------------*/</span>
-<span class="kr">char</span><span class="w"> </span><span class="o">*</span><span class="nx">dev_manager_get_logo</span><span class="p">(</span><span class="nx">struct</span><span class="w"> </span><span class="nx">__dev</span><span class="w"> </span><span class="o">*</span><span class="nx">dev</span><span class="p">)</span>
+<span class="kr">char</span> <span class="o">*</span><span class="nx">dev_manager_get_logo</span><span class="p">(</span><span class="nx">struct</span> <span class="nx">__dev</span> <span class="o">*</span><span class="nx">dev</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>参数：</p>
@@ -1192,16 +1144,16 @@ dev_manager_set_valid（dev,1);
 </tbody>
 </table>
 <p>示例：</p>
-<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="nx">__struct</span><span class="w"> </span><span class="nx">__dev</span><span class="w"> </span><span class="o">*</span><span class="nx">dev</span><span class="p">;</span>
-<span class="nx">dev</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">dev_manager_find_active</span><span class="p">(</span><span class="mf">0</span><span class="p">);</span>
+<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="nx">__struct</span> <span class="nx">__dev</span> <span class="o">*</span><span class="nx">dev</span><span class="p">;</span>
+<span class="nx">dev</span> <span class="o">=</span> <span class="nx">dev_manager_find_active</span><span class="p">(</span><span class="mf">0</span><span class="p">);</span>
 <span class="k">if</span><span class="p">(</span><span class="nx">dev</span><span class="p">){</span>
-<span class="w">	</span><span class="kr">char</span><span class="w"> </span><span class="o">*</span><span class="nx">logo</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">dev_manager_get_logo</span><span class="p">(</span><span class="nx">dev</span><span class="p">);</span>
+	<span class="kr">char</span> <span class="o">*</span><span class="nx">logo</span> <span class="o">=</span> <span class="nx">dev_manager_get_logo</span><span class="p">(</span><span class="nx">dev</span><span class="p">);</span>
 <span class="p">}</span>
 </pre></div>
 </div>
 </section>
 <section id="dev-manager-get-phy-logo">
-<h4><span class="section-number">10.1.5.9.2. </span>dev_manager_get_phy_logo<a class="headerlink" href="#dev-manager-get-phy-logo" title="Permalink to this heading"></a></h4>
+<h4>dev_manager_get_phy_logo<a class="headerlink" href="#dev-manager-get-phy-logo" title="Permalink to this headline"></a></h4>
 <p>获取物理设备节点的逻辑盘符(去掉_rec后缀)</p>
 <p>原型：</p>
 <div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="c1">//*----------------------------------------------------------------------------*/</span>
@@ -1212,7 +1164,7 @@ dev_manager_set_valid（dev,1);
 <span class="cm">   @note    物理逻辑盘符是指非录音文件夹设备盘符(录音文件夹设备如：sd0_rec)</span>
 <span class="cm">*/</span>
 <span class="cm">/*----------------------------------------------------------------------------*/</span>
-<span class="kr">char</span><span class="w"> </span><span class="o">*</span><span class="nx">dev_manager_get_phy_logo</span><span class="p">(</span><span class="nx">struct</span><span class="w"> </span><span class="nx">__dev</span><span class="w"> </span><span class="o">*</span><span class="nx">dev</span><span class="p">)</span>
+<span class="kr">char</span> <span class="o">*</span><span class="nx">dev_manager_get_phy_logo</span><span class="p">(</span><span class="nx">struct</span> <span class="nx">__dev</span> <span class="o">*</span><span class="nx">dev</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>参数：</p>
@@ -1229,16 +1181,16 @@ dev_manager_set_valid（dev,1);
 </tbody>
 </table>
 <p>示例：</p>
-<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="nx">__struct</span><span class="w"> </span><span class="nx">__dev</span><span class="w"> </span><span class="o">*</span><span class="nx">dev</span><span class="p">;</span>
-<span class="nx">dev</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">dev_manager_find_active</span><span class="p">(</span><span class="mf">0</span><span class="p">);</span>
+<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="nx">__struct</span> <span class="nx">__dev</span> <span class="o">*</span><span class="nx">dev</span><span class="p">;</span>
+<span class="nx">dev</span> <span class="o">=</span> <span class="nx">dev_manager_find_active</span><span class="p">(</span><span class="mf">0</span><span class="p">);</span>
 <span class="k">if</span><span class="p">(</span><span class="nx">dev</span><span class="p">){</span>
-<span class="w">	</span><span class="kr">char</span><span class="w"> </span><span class="o">*</span><span class="nx">logo</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">dev_manager_get_phy_logo</span><span class="p">(</span><span class="nx">dev</span><span class="p">);</span>
+	<span class="kr">char</span> <span class="o">*</span><span class="nx">logo</span> <span class="o">=</span> <span class="nx">dev_manager_get_phy_logo</span><span class="p">(</span><span class="nx">dev</span><span class="p">);</span>
 <span class="p">}</span>
 </pre></div>
 </div>
 </section>
 <section id="dev-manager-get-rec-logo">
-<h4><span class="section-number">10.1.5.9.3. </span>dev_manager_get_rec_logo<a class="headerlink" href="#dev-manager-get-rec-logo" title="Permalink to this heading"></a></h4>
+<h4>dev_manager_get_rec_logo<a class="headerlink" href="#dev-manager-get-rec-logo" title="Permalink to this headline"></a></h4>
 <p>获取录音文件夹设备节点的逻辑盘符(追加_rec后缀)</p>
 <p>原型：</p>
 <div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="c1">//*----------------------------------------------------------------------------*/</span>
@@ -1249,7 +1201,7 @@ dev_manager_set_valid（dev,1);
 <span class="cm">   @note</span>
 <span class="cm">*/</span>
 <span class="cm">/*----------------------------------------------------------------------------*/</span>
-<span class="kr">char</span><span class="w"> </span><span class="o">*</span><span class="nx">dev_manager_get_rec_logo</span><span class="p">(</span><span class="nx">struct</span><span class="w"> </span><span class="nx">__dev</span><span class="w"> </span><span class="o">*</span><span class="nx">dev</span><span class="p">)</span>
+<span class="kr">char</span> <span class="o">*</span><span class="nx">dev_manager_get_rec_logo</span><span class="p">(</span><span class="nx">struct</span> <span class="nx">__dev</span> <span class="o">*</span><span class="nx">dev</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>参数：</p>
@@ -1266,19 +1218,19 @@ dev_manager_set_valid（dev,1);
 </tbody>
 </table>
 <p>示例：</p>
-<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="nx">__struct</span><span class="w"> </span><span class="nx">__dev</span><span class="w"> </span><span class="o">*</span><span class="nx">dev</span><span class="p">;</span>
-<span class="nx">dev</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">dev_manager_find_active</span><span class="p">(</span><span class="mf">0</span><span class="p">);</span>
+<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="nx">__struct</span> <span class="nx">__dev</span> <span class="o">*</span><span class="nx">dev</span><span class="p">;</span>
+<span class="nx">dev</span> <span class="o">=</span> <span class="nx">dev_manager_find_active</span><span class="p">(</span><span class="mf">0</span><span class="p">);</span>
 <span class="k">if</span><span class="p">(</span><span class="nx">dev</span><span class="p">){</span>
-<span class="w">	</span><span class="kr">char</span><span class="w"> </span><span class="o">*</span><span class="nx">logo</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">dev_manager_get_rec_logo</span><span class="p">(</span><span class="nx">dev</span><span class="p">);</span>
+	<span class="kr">char</span> <span class="o">*</span><span class="nx">logo</span> <span class="o">=</span> <span class="nx">dev_manager_get_rec_logo</span><span class="p">(</span><span class="nx">dev</span><span class="p">);</span>
 <span class="p">}</span>
 </pre></div>
 </div>
 </section>
 </section>
 <section id="id17">
-<h3><span class="section-number">10.1.5.10. </span>根目录路径获取<a class="headerlink" href="#id17" title="Permalink to this heading"></a></h3>
+<h3>根目录路径获取<a class="headerlink" href="#id17" title="Permalink to this headline"></a></h3>
 <section id="dev-manager-get-root-path">
-<h4><span class="section-number">10.1.5.10.1. </span>dev_manager_get_root_path<a class="headerlink" href="#dev-manager-get-root-path" title="Permalink to this heading"></a></h4>
+<h4>dev_manager_get_root_path<a class="headerlink" href="#dev-manager-get-root-path" title="Permalink to this headline"></a></h4>
 <p>通过设备节点获取设备文件系统根目录</p>
 <p>原型：</p>
 <div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="c1">//*----------------------------------------------------------------------------*/</span>
@@ -1289,7 +1241,7 @@ dev_manager_set_valid（dev,1);
 <span class="cm">   @note</span>
 <span class="cm">*/</span>
 <span class="cm">/*----------------------------------------------------------------------------*/</span>
-<span class="kr">char</span><span class="w"> </span><span class="o">*</span><span class="nx">dev_manager_get_root_path</span><span class="p">(</span><span class="nx">struct</span><span class="w"> </span><span class="nx">__dev</span><span class="w"> </span><span class="o">*</span><span class="nx">dev</span><span class="p">)</span>
+<span class="kr">char</span> <span class="o">*</span><span class="nx">dev_manager_get_root_path</span><span class="p">(</span><span class="nx">struct</span> <span class="nx">__dev</span> <span class="o">*</span><span class="nx">dev</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>参数：</p>
@@ -1306,17 +1258,17 @@ dev_manager_set_valid（dev,1);
 </tbody>
 </table>
 <p>示例：</p>
-<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="nx">__struct</span><span class="w"> </span><span class="nx">__dev</span><span class="w"> </span><span class="o">*</span><span class="nx">dev</span><span class="p">;</span>
-<span class="nx">dev</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">dev_manager_find_space</span><span class="p">(</span><span class="s2">&quot;sd0&quot;</span><span class="p">,</span><span class="mf">1</span><span class="p">);</span>
+<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="nx">__struct</span> <span class="nx">__dev</span> <span class="o">*</span><span class="nx">dev</span><span class="p">;</span>
+<span class="nx">dev</span> <span class="o">=</span> <span class="nx">dev_manager_find_space</span><span class="p">(</span><span class="s2">&quot;sd0&quot;</span><span class="p">,</span><span class="mf">1</span><span class="p">);</span>
 <span class="k">if</span><span class="p">(</span><span class="nx">dev</span><span class="p">){</span>
-<span class="w">	</span><span class="kr">char</span><span class="w"> </span><span class="o">*</span><span class="nx">root_path</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">dev_manager_get_root_path</span><span class="p">(</span><span class="nx">dev</span><span class="p">);</span>
-<span class="w">	</span><span class="c1">//……</span>
+	<span class="kr">char</span> <span class="o">*</span><span class="nx">root_path</span> <span class="o">=</span> <span class="nx">dev_manager_get_root_path</span><span class="p">(</span><span class="nx">dev</span><span class="p">);</span>
+	<span class="c1">//……</span>
 <span class="p">}</span>
 </pre></div>
 </div>
 </section>
 <section id="dev-manager-get-root-path-by-logo">
-<h4><span class="section-number">10.1.5.10.2. </span>dev_manager_get_root_path_by_logo<a class="headerlink" href="#dev-manager-get-root-path-by-logo" title="Permalink to this heading"></a></h4>
+<h4>dev_manager_get_root_path_by_logo<a class="headerlink" href="#dev-manager-get-root-path-by-logo" title="Permalink to this headline"></a></h4>
 <p>通过逻辑盘符获取设备文件系统根目录</p>
 <p>原型：</p>
 <div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="c1">//*----------------------------------------------------------------------------*/</span>
@@ -1327,7 +1279,7 @@ dev_manager_set_valid（dev,1);
 <span class="cm">   @note</span>
 <span class="cm">*/</span>
 <span class="cm">/*----------------------------------------------------------------------------*/</span>
-<span class="kr">char</span><span class="w"> </span><span class="o">*</span><span class="nx">dev_manager_get_root_path_by_logo</span><span class="p">(</span><span class="kr">char</span><span class="w"> </span><span class="o">*</span><span class="nx">logo</span><span class="p">)</span>
+<span class="kr">char</span> <span class="o">*</span><span class="nx">dev_manager_get_root_path_by_logo</span><span class="p">(</span><span class="kr">char</span> <span class="o">*</span><span class="nx">logo</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>参数：</p>
@@ -1344,7 +1296,7 @@ dev_manager_set_valid（dev,1);
 </tbody>
 </table>
 <p>示例：</p>
-<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="kr">char</span><span class="w"> </span><span class="o">*</span><span class="nx">root_path</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">dev_manager_get_root_path_by_logo</span><span class="p">(</span><span class="s2">&quot;sd0&quot;</span><span class="p">);</span>
+<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="kr">char</span> <span class="o">*</span><span class="nx">root_path</span> <span class="o">=</span> <span class="nx">dev_manager_get_root_path_by_logo</span><span class="p">(</span><span class="s2">&quot;sd0&quot;</span><span class="p">);</span>
 </pre></div>
 </div>
 </section>
@@ -1355,17 +1307,12 @@ dev_manager_set_valid（dev,1);
 
            </div>
           </div>
-          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="index.html" class="btn btn-neutral float-left" title="10. 设备管理" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="../system/%E9%80%9A%E7%94%A8%E7%BB%84%E4%BB%B6/index.html" class="btn btn-neutral float-right" title="11. 通用组件" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-    </div>
+          <footer>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2010-2023, 杰理科技股份有限公司.
-      <span class="lastupdated">Last updated on Aug 24, 2023.
-      </span></p>
+    <p>&#169; Copyright 2010-2026, 杰理科技股份有限公司.</p>
   </div>
 
    

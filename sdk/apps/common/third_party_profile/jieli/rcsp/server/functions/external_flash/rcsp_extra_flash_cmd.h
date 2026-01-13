@@ -1,7 +1,11 @@
 #ifndef _RCSP_EXTRA_FLASH_CMD_H_
 #define _RCSP_EXTRA_FLASH_CMD_H_
 #include "typedef.h"
-// #include "system/event.h"
+#include "event/touch_event.h"
+#include "event/key_event.h"
+#include "event/bt_event.h"
+#include "event/device_event.h"
+#include "event/event.h"
 
 //外挂flash命令处理
 int JL_rcsp_extra_flash_cmd_resp(void *priv, u8 OpCode, u8 OpCode_SN, u8 *data, u16 len);

@@ -11,7 +11,7 @@
 
 #define CONFIG_NET_ENABLE
 #define CONFIG_BT_ENABLE
-/* #define CONFIG_UI_ENABLE */
+#define CONFIG_UI_ENABLE
 /* #define CONFIG_VIDEO_ENABLE */
 #define CONFIG_MEDIA_ENABLE
 

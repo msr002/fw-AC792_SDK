@@ -344,7 +344,7 @@ int main()
 
     setup_arch();
 
-#if CPU_CORE_NUM == 1
+#if CPU_CORE_NUM == 1 && MAX_CPU_CORE_NUM > 1
     EnableOtherCpu();
     //cpu1_run_flag = 0; //如果运行在SFC模式下,不希望写FLASH的时候会挂起CPU1,则打开这句话,但是需要保证cpu1_main调用到的所有函数全部放到内部ram或者sdram,防止写flash过程中引起死机
 #endif

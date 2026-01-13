@@ -7,4 +7,5 @@
    porting_guide.md
    music_effect_3rd_party.md
    call_effect_3rd_party.md
+   hearing_aid_3rd_party.md
    

@@ -11,7 +11,7 @@
 
 #if TCFG_VOICE_CHANGER_NODE_ENABLE
 
-static const VOICECHANGER_PARM vparm[] = {
+static const struct voice_changer_update_parm vparm[] = {
     {0, 0, 0},
     {EFFECT_VOICECHANGE_PITCHSHIFT, 130, 100},
     {EFFECT_VOICECHANGE_SPECTRUM,    56,  90},
@@ -29,7 +29,7 @@ static const VOICECHANGER_PARM vparm[] = {
 void audio_voice_changer_mode_switch(u16 uuid, char *name, VOICE_CHANGER_MODE mode)
 {
     voice_changer_param_tool_set cfg = {0};
-    cfg.is_bypass = 0;
+
     if (mode >= ARRAY_SIZE(vparm)) {
         return;
     }
@@ -39,4 +39,5 @@ void audio_voice_changer_mode_switch(u16 uuid, char *name, VOICE_CHANGER_MODE mo
     }
     jlstream_set_node_param(uuid, name, &cfg, sizeof(cfg));
 }
+
 #endif

@@ -1,4 +1,4 @@
-#ifdef MEDIA_SUPPORT_MS_EXTENSIONS
+#ifdef RCSP_SUPPORT_MS_EXTENSIONS
 #pragma bss_seg(".adv_voice_enhancement_mode.data.bss")
 #pragma data_seg(".adv_voice_enhancement_mode.data")
 #pragma const_seg(".adv_voice_enhancement_mode.text.const")

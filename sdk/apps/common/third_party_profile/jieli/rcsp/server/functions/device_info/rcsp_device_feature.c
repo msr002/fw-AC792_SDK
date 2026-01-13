@@ -1,4 +1,4 @@
-#ifdef MEDIA_SUPPORT_MS_EXTENSIONS
+#ifdef RCSP_SUPPORT_MS_EXTENSIONS
 #pragma bss_seg(".rcsp_device_feature.data.bss")
 #pragma data_seg(".rcsp_device_feature.data")
 #pragma const_seg(".rcsp_device_feature.text.const")
@@ -12,17 +12,23 @@
 #include "custom_cfg.h"
 #include "JL_rcsp_packet.h"
 #include "rcsp_extra_flash_opt.h"
-/* #include "app_task.h" */
 #include "rcsp_vol_setting.h"
 #include "rcsp_device_status.h"
 #include "JL_rcsp_api.h"
 #include "JL_rcsp_attr.h"
-#if (TCFG_LE_AUDIO_APP_CONFIG & (LE_AUDIO_UNICAST_SINK_EN | LE_AUDIO_JL_UNICAST_SINK_EN))
+#if (TCFG_LE_AUDIO_RCSP_USE_SAME_ACL)
 #include "bt_common.h"
 #include "app_le_connected.h"
 #endif
 
 #if (RCSP_MODE)
+
+#define LOG_TAG_CONST	  APP_RCSP
+#define LOG_ERROR_ENABLE
+#define LOG_DEBUG_ENABLE
+#define LOG_INFO_ENABLE
+#include "system/debug.h"
+
 #pragma pack(1)
 struct _SYS_info {
     u8 bat_lev;
@@ -37,6 +43,9 @@ struct _EDR_info {
     u8 state;
 };
 #pragma pack()
+
+//用户自定义
+static const u8 authkey_procode_data[VER_INFO_EXT_COUNT * (VER_INFO_EXT_MAX_LEN + 1)] = {0};    //authkey + , + procode + '\0'
 
 static u32 target_feature_attr_protocol_version(void *priv, u8 attr, u8 *buf, u16 buf_size, u32 offset)
 {
@@ -53,11 +62,13 @@ static u32 target_feature_attr_sys_info(void *priv, u8 attr, u8 *buf, u16 buf_si
         return 0;
     }
     struct _SYS_info sys_info = {0};
-#if (RCSP_MODE != RCSP_MODE_EARPHONE)
+#if 1//(RCSP_MODE != RCSP_MODE_EARPHONE)
     extern u8 get_vbat_percent(void);
     sys_info.bat_lev = get_vbat_percent(); //get_battery_level() / 10;
+#if (RCSP_MODE && RCSP_ADV_EQ_SET_ENABLE)
     rcsp_get_max_vol_info(&sys_info.max_vol);
     rcsp_get_cur_dev_vol_info(&sys_info.sys_vol);
+#endif
 #endif
 #if BT_SUPPORT_MUSIC_VOL_SYNC || TCFG_BT_VOL_SYNC_ENABLE
     extern u8 avctp_get_remote_vol_sync(bd_addr_t addr);
@@ -204,11 +215,11 @@ static u32 target_feature_authkey(void *priv, u8 attr, u8 *buf, u16 buf_size, u3
 {
     u32 rlen = 0;
 #if VER_INFO_EXT_COUNT
-    u8 authkey_len = 0;
-    u8 *local_authkey_data = NULL;
-    get_authkey_procode_from_cfg_file(&local_authkey_data, &authkey_len, GET_AUTH_KEY_FROM_EX_CFG);
+    u8 authkey_len = sizeof(authkey_procode_data);
+    u8 *local_authkey_data = authkey_procode_data;
+    /* get_authkey_procode_from_cfg_file(&local_authkey_data, &authkey_len, GET_AUTH_KEY_FROM_EX_CFG); */
     if (local_authkey_data && authkey_len) {
-        printf("%s, %s, %d\n", __FILE__, __FUNCTION__, __LINE__);
+        log_info("%s-authkey:", __FUNCTION__);
         put_buf(local_authkey_data, authkey_len);
         rlen = add_one_attr(buf, buf_size, offset, attr, local_authkey_data, authkey_len);
     }
@@ -219,11 +230,11 @@ static u32 target_feature_procode(void *priv, u8 attr, u8 *buf, u16 buf_size, u3
 {
     u32 rlen = 0;
 #if VER_INFO_EXT_COUNT
-    u8 procode_len = 0;
-    u8 *local_procode_data = NULL;
-    get_authkey_procode_from_cfg_file(&local_procode_data, &procode_len, GET_PRO_CODE_FROM_EX_CFG);
+    u8 procode_len = sizeof(authkey_procode_data);
+    u8 *local_procode_data = authkey_procode_data;
+    /* get_authkey_procode_from_cfg_file(&local_procode_data, &procode_len, GET_PRO_CODE_FROM_EX_CFG); */
     if (local_procode_data && procode_len) {
-        printf("%s, %s, %d\n", __FILE__, __FUNCTION__, __LINE__);
+        log_info("%s-procode:", __FUNCTION__);
         put_buf(local_procode_data, procode_len);
         rlen = add_one_attr(buf, buf_size, offset, attr, local_procode_data, procode_len);
     }
@@ -247,7 +258,7 @@ static u32 target_feature_ble_only(void *priv, u8 attr, u8 *buf, u16 buf_size, u
 {
     u32 rlen = 0;
 
-#if (TCFG_LE_AUDIO_APP_CONFIG & (LE_AUDIO_UNICAST_SINK_EN | LE_AUDIO_JL_UNICAST_SINK_EN))
+#if (TCFG_LE_AUDIO_RCSP_USE_SAME_ACL)
     u8 taddr_buf[8];
     taddr_buf[0] = 0;
     le_controller_get_mac(taddr_buf + 1);
@@ -285,7 +296,7 @@ static u32 target_feature_bt_emitter_info(void *priv, u8 attr, u8 *buf, u16 buf_
     u8 val = 0;
     val |= rcspModel->emitter_en;
     val |= rcspModel->emitter_sw;
-    printf("val = %d, emitter_en = %d, emitter_sw = %d\n", val, rcspModel->emitter_en, rcspModel->emitter_sw);
+    log_info("val = %d, emitter_en = %d, emitter_sw = %d\n", val, rcspModel->emitter_en, rcspModel->emitter_sw);
     rlen = add_one_attr(buf, buf_size, offset,  attr, &val, 1);
     return rlen;
 }
@@ -336,6 +347,9 @@ static u32 target_feature_md5_game_support(void *priv, u8 attr, u8 *buf, u16 buf
 #if RCSP_ADV_ADAPTIVE_NOISE_REDUCTION
     ext_function_flag_byte1 |= BIT(1);
 #endif
+#if RCSP_ADV_TRANSLATOR
+    ext_function_flag_byte1 |= BIT(2);
+#endif
 #if RCSP_ADV_AI_NO_PICK
     ext_function_flag_byte1 |= BIT(3);
 #endif
@@ -352,6 +366,9 @@ static u32 target_feature_md5_game_support(void *priv, u8 attr, u8 *buf, u16 buf
     // 是否一拖二
     ext_function_flag_byte1 |= BIT(7);
 #endif
+#if RCSP_TONE_FILE_TRANSFER_ENABLE
+    ext_function_flag_byte1 |= BIT(2);
+#endif
     ext_function_flag[1] = ext_function_flag_byte1;
 
     rlen = add_one_attr(buf, buf_size, offset,  attr, ext_function_flag, 2);
@@ -363,6 +380,7 @@ static u32 target_feature_file_transfer_info(void *priv, u8 attr, u8 *buf, u16 b
 {
     struct RcspModel *rcspModel = (struct RcspModel *)priv;
     if (rcspModel == NULL) {
+        log_error("%s: rcspModel is NULL!!", __FUNCTION__);
         return 0;
     }
     u32 config = 0;
@@ -410,7 +428,7 @@ static const attr_get_func target_feature_mask_get_tab[RCSP_DEVICE_FEATURE_ATTR_
 // 解析设备特征相关的rcsp数据
 u32 rcsp_target_feature_parse_packet(void *priv, u8 *buf, u16 buf_size, u32 mask)
 {
-    printf("rcsp_target_feature_parse_packet, mask = %x\n", mask);
+    log_info("rcsp_target_feature_parse_packet, mask = %x\n", mask);
     return attr_get(priv, buf, buf_size, target_feature_mask_get_tab, RCSP_DEVICE_FEATURE_ATTR_TYPE_MAX, mask);
 }
 
@@ -437,5 +455,6 @@ RCSP_LeAudioMode rcsp_get_LeAudio_mode()
 #endif
 
 #endif//RCSP_MODE
+
 
 

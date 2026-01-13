@@ -70,12 +70,22 @@ void lv_draw_sw_rect(lv_draw_ctx_t *draw_ctx, const lv_draw_rect_dsc_t *dsc, con
     draw_shadow(draw_ctx, dsc, coords);
 #endif
 
+
+#if LV_USE_GPU_RLE
+    uint8_t temp_type = draw_ctx->compress_type;
+    draw_ctx->compress_type = LV_COMPRESS_NONE;
+#endif
+
     draw_bg(draw_ctx, dsc, coords);
     draw_bg_img(draw_ctx, dsc, coords);
 
     draw_border(draw_ctx, dsc, coords);
 
     draw_outline(draw_ctx, dsc, coords);
+
+#if LV_USE_GPU_RLE
+    draw_ctx->compress_type = temp_type;
+#endif
 
     LV_ASSERT_MEM_INTEGRITY();
 }

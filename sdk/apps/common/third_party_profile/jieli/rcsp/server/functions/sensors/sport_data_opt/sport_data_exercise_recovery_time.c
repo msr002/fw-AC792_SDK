@@ -1,4 +1,4 @@
-#ifdef MEDIA_SUPPORT_MS_EXTENSIONS
+#ifdef RCSP_SUPPORT_MS_EXTENSIONS
 #pragma bss_seg(".sport_data_exercise_recovery_time.data.bss")
 #pragma data_seg(".sport_data_exercise_recovery_time.data")
 #pragma const_seg(".sport_data_exercise_recovery_time.text.const")

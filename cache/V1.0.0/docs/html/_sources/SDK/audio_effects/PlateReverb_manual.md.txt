@@ -1,4 +1,4 @@
-# 混响（Reverb）
+# Plate Reverb
 
 ## 功能介绍
 

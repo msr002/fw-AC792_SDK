@@ -520,7 +520,7 @@ REGISTER_APP_EVENT_HANDLER(a2dp_bt_hci_event) = {
 };
 
 
-static void bt_set_low_latency_mode(int enable, u8 tone_play_enable, int delay_ms)
+void bt_set_low_latency_mode(int enable, u8 tone_play_enable, int delay_ms)
 {
     /*
      * 未连接手机,操作无效

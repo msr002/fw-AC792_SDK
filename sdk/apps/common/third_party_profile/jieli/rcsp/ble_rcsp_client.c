@@ -1,8 +1,4 @@
-
-#if 0
-
-
-#ifdef SUPPORT_MS_EXTENSIONS
+#ifdef RCSP_SUPPORT_MS_EXTENSIONS
 #pragma bss_seg(".ble_rcsp_client.data.bss")
 #pragma data_seg(".ble_rcsp_client.data")
 #pragma const_seg(".ble_rcsp_client.text.const")
@@ -35,16 +31,15 @@
 #include "system/includes.h"
 
 #include "app_config.h"
-/* #include "app_action.h" */
 
 #include "btstack/btstack_task.h"
 #include "btstack/bluetooth.h"
-#include "user_cfg.h"
+#include "user_cfg_id.h"
 #include "vm.h"
 #include "btcontroller_modules.h"
 #include "bt_common.h"
 
-#include "le_client_demo.h"
+/* #include "le_client_demo.h" */
 #include "le_common.h"
 #include "ble_user.h"
 #include "ble_rcsp_multi_common.h"
@@ -55,17 +50,21 @@
 #endif
 
 /* #if (TCFG_BLE_DEMO_SELECT == DEF_BLE_DEMO_RCSP_DEMO && RCSP_MULTI_BLE_MASTER_NUMS && (RCSP_MULTI_BLE_EN || RCSP_BLE_MASTER)) */
-/* #if 0 */
+#if 0
 
 #define SUPPORT_TEST_BOX_BLE_MASTER_TEST_EN	1
 #define SHOW_RX_DATA_RATE           0
 #define EXT_ADV_MODE_EN             0
 
+#define LOG_TAG_CONST	  LE_RCSP_CLI
+#define LOG_TAG             "[LE_RCSP_CLI]"
+#define LOG_ERROR_ENABLE
+#define LOG_DEBUG_ENABLE
+#define LOG_INFO_ENABLE
+#include "system/debug.h"
 #if 1
-#define log_info(x, ...)    printf("[LE-MUL-CLIENT]" x " ", ## __VA_ARGS__)
 #define log_info_hexdump    put_buf
 #else
-#define log_info(...)
 #define log_info_hexdump(...)
 #endif
 

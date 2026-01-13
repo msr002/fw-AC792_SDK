@@ -1,4 +1,4 @@
-#ifdef MEDIA_SUPPORT_MS_EXTENSIONS
+#ifdef RCSP_SUPPORT_MS_EXTENSIONS
 #pragma bss_seg(".rcsp_config.data.bss")
 #pragma data_seg(".rcsp_config.data")
 #pragma const_seg(".rcsp_config.text.const")
@@ -152,13 +152,15 @@ void rcsp_config(struct RcspModel *rcspModel)
     rcspModel->sound_effects_disable = RCSP_SOUND_EFFECT_FUNC_DISABLE;
 #endif
 
-#if (JL_RCSP_EXTRA_FLASH_OPT)
-    rcspModel->extra_flash_en = JL_RCSP_EXTRA_FLASH_OPT;
+#if (JL_RCSP_EXTRA_FLASH_OPT || RCSP_TONE_FILE_TRANSFER_ENABLE)
+    rcspModel->extra_flash_en = 1;
+    rcspModel->file_transfer_mode = 1;
+#elif (RCSP_MODE == RCSP_MODE_SOUNDBOX)
+    rcspModel->file_transfer_mode = 1;
 #endif
 
 #if (WATCH_FILE_TO_FLASH && TCFG_DEV_MANAGER_ENABLE)
     rcspModel->file_trans_back_mode = 1;
-    rcspModel->file_transfer_mode = 1;
 #if (TCFG_NOR_FAT)
     rcspModel->file_trans_nor_fat = 1;
 #endif

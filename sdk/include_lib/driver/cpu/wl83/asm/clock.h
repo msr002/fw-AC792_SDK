@@ -146,6 +146,8 @@ void clk_out_disable(u32 gpio, u8 clock_out_ch);
 
 u32 clk_get_osc_cap(void);
 
+u32 get_dmc_refresh_clk(void);
+
 
 /**
  * @brief uart_clk_src_set 设置UART的时钟源。所有UART都是同一个时钟源（包括log）。

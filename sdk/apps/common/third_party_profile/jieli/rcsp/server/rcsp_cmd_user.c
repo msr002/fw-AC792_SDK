@@ -1,4 +1,4 @@
-#ifdef MEDIA_SUPPORT_MS_EXTENSIONS
+#ifdef RCSP_SUPPORT_MS_EXTENSIONS
 #pragma bss_seg(".rcsp_cmd_user.data.bss")
 #pragma data_seg(".rcsp_cmd_user.data")
 #pragma const_seg(".rcsp_cmd_user.text.const")
@@ -7,11 +7,10 @@
 #include "rcsp_cmd_user.h"
 #include "app_config.h"
 #include "ble_rcsp_server.h"
-#include "rcsp_define.h"
 
 #if RCSP_MODE
 
-#define RCSP_DEBUG_EN
+/* #define RCSP_DEBUG_EN */
 #ifdef RCSP_DEBUG_EN
 #define rcsp_putchar(x)                	putchar(x)
 #define rcsp_printf                    	printf

@@ -1,4 +1,4 @@
-#ifdef MEDIA_SUPPORT_MS_EXTENSIONS
+#ifdef RCSP_SUPPORT_MS_EXTENSIONS
 #pragma bss_seg(".rcsp_browser.data.bss")
 #pragma data_seg(".rcsp_browser.data")
 #pragma const_seg(".rcsp_browser.text.const")
@@ -6,6 +6,7 @@
 #endif
 #include "rcsp_browser.h"
 #include "app_config.h"
+#include "rcsp_cfg.h"
 #include "rcsp.h"
 #include "dev_manager.h"
 #include "file_operate/file_bs_deal.h"
@@ -15,6 +16,12 @@
 
 #if RCSP_MODE && RCSP_FILE_OPT
 #include "music/music_player.h"
+
+#define LOG_TAG_CONST	  APP_RCSP
+#define LOG_ERROR_ENABLE
+#define LOG_DEBUG_ENABLE
+#define LOG_INFO_ENABLE
+#include "system/debug.h"
 
 #define FILE_BROWSE_BUF_LEN    			250//要小于RCSP MTU, 不要随意改大
 #define FILE_BROWSE_NAME_MAX_LIMIT  	128//限制最大文件夹名称大小
@@ -64,6 +71,10 @@ struct JL_FILE_DATA {
 };
 #pragma pack()
 
+struct rcsp_browser_hdl {
+    u8 task_kill;
+    int pid;
+};
 
 
 static const char dec_file_ext[][3] = {
@@ -113,7 +124,10 @@ static const char dec_file_ext[][3] = {
 #endif // WATCH_FILE_TO_FLASH
 };
 
+static struct rcsp_browser_hdl rcsp_browser_hdl;
 static struct __browser *browser = NULL;
+
+#define __this  (&rcsp_browser_hdl)
 
 //rcsp获取文件浏览后缀配置
 char *rcsp_browser_file_ext(void)
@@ -161,13 +175,13 @@ static bool browser_get_dir_info(FILE_BS_DEAL *fil_bs, u8 *path_buf, u16 len, RC
     }
 
     if (len == 4 && type == RCSPBrowserObjectTypeFolder) {
-        /* printf("root deep\n"); */
+        /* log_info("root deep"); */
         if (ptr) {
             *((u32 *)ptr) = ret;
         }
         goto end;
     } else if (len == 4 && type == RCSPBrowserObjectTypeFile) {
-        /* printf("play file path\n"); */
+        /* log_info("play file path"); */
         memcpy((u8 *)&deep_clust, path_buf, 4);
         deep_clust = app_ntohl(deep_clust);
         if (ptr) {
@@ -178,14 +192,14 @@ static bool browser_get_dir_info(FILE_BS_DEAL *fil_bs, u8 *path_buf, u16 len, RC
     //deep check
     u8 deep = len / 4;
     if (deep >  MAX_DEEPTH) {
-        printf("deep err : %d\n", deep);
+        log_error("deep err : %d", deep);
         return false;
     }
-    /* printf("get deep%d data\n", deep - 1); */
+    /* log_info("get deep%d data", deep - 1); */
     for (i = 1; i < deep; i++) {
         memcpy((u8 *)&deep_clust, path_buf + 4 * i, 4);
         deep_clust = app_ntohl(deep_clust);
-        /* printf("deep_clust:%x\n", deep_clust); */
+        /* log_info("deep_clust:%x", deep_clust); */
         for (j = 1; j < ret + 1; j++) {
             file_bs_get_dir_info(fil_bs, &dir_info, j, 1);
             if (dir_info.sclust == deep_clust) {
@@ -231,13 +245,13 @@ static void file_printf_dir(FS_DIR_INFO *dir_inf, u8 cnt)
     LONG_FILE_NAME *l_name_pt;
 
     for (i = 0; i < cnt; i++) {
-        /* printf("file type %d nt:%d clust %x \n", dir_inf[i].dir_type, dir_inf[i].fn_type, dir_inf[i].sclust); */
+        /* log_info("file type %d nt:%d clust %x ", dir_inf[i].dir_type, dir_inf[i].fn_type, dir_inf[i].sclust); */
         l_name_pt = &dir_inf[i].lfn_buf;
         if (dir_inf[i].fn_type == BS_FNAME_TYPE_SHORT) {
             file_comm_display_83name((void *)&l_name_pt->lfn[32], (void *)l_name_pt->lfn);
             strcpy(l_name_pt->lfn, &l_name_pt->lfn[32]);
             l_name_pt->lfn_cnt = strlen(l_name_pt->lfn);
-            printf("%s\n", l_name_pt->lfn);
+            log_info("%s", l_name_pt->lfn);
         } else {
             if (l_name_pt->lfn_cnt > 510) {
                 l_name_pt->lfn_cnt = 510;
@@ -247,7 +261,7 @@ static void file_printf_dir(FS_DIR_INFO *dir_inf, u8 cnt)
             l_name_pt->lfn[l_name_pt->lfn_cnt] = 0;
             l_name_pt->lfn[l_name_pt->lfn_cnt + 1] = 0;
 
-            /* printf("file name len : %d \n", l_name_pt->lfn_cnt); */
+            /* log_info("file name len : %d ", l_name_pt->lfn_cnt); */
             /* put_buf((u8 *)l_name_pt->lfn, l_name_pt->lfn_cnt); */
         }
     }
@@ -277,7 +291,7 @@ static u16 add_one_iterm_to_sendbuf(u8 *dest, u16 max_buf_len, u16 offset, FS_DI
     memcpy(dest + offset, (u8 *)&file_data, sizeof(struct JL_FILE_DATA));
     memcpy(dest + offset + sizeof(struct JL_FILE_DATA), (u8 *)p_dir_info->lfn_buf.lfn, p_dir_info->lfn_buf.lfn_cnt);
 
-    /* printf("add send data:"); */
+    /* log_info("add send data:"); */
     /* put_buf(dest+offset,p_dir_info->lfn_buf.lfn_cnt + sizeof(struct JL_FILE_DATA)); */
     return (p_dir_info->lfn_buf.lfn_cnt + sizeof(struct JL_FILE_DATA));
 }
@@ -296,25 +310,25 @@ static void rcsp_browser_task(void *p)
     fil_bs.dev = dev_manager_find_spec(rcsp_browser_dev_remap(browser->dev_handle), 0);
     if (fil_bs.dev == NULL) {
         reason = 1;
-        printf("dev nofound!!!\n");
+        log_error("dev nofound!!!");
         goto _EXIT;
     }
-    file_bs_open_handle(&fil_bs, rcsp_browser_file_ext());
+    file_bs_open_handle(&fil_bs, (u8 *)rcsp_browser_file_ext());
 
     u32 dir_file_cnt = browse_open_dir(&fil_bs, (u8 *)browser->path_clust, browser->path_len);
-    if (browser->start_num  + browser->read_file_num >= dir_file_cnt) {
-        printf("file range err\n");
+    if (browser->start_num + browser->read_file_num >= dir_file_cnt) {
+        log_error("file range err; start_num = %d; read_file_num = %d; dir_file_cnt = %d", browser->start_num, browser->read_file_num, dir_file_cnt);
         reason = 1;
         browser->read_file_num =  dir_file_cnt - browser->start_num + 1;
     }
-    /* printf("start num:%d read file num:%d\n", browser->start_num, browser->read_file_num); */
+    /* printf("start num:%d read file num:%d", browser->start_num, browser->read_file_num); */
 
     u16 offset = 0;
     u32 ret = 0;
     path_data = (u8 *)zalloc(FILE_BROWSE_BUF_LEN);
     if (path_data == NULL) {
         reason = 1;
-        printf("no ram for path_data!! \n");
+        log_error("no ram for path_data!! ");
         goto _EXIT;
     }
     for (int i = browser->start_num ; i < (browser->start_num + browser->read_file_num); i++) {
@@ -328,7 +342,7 @@ static void rcsp_browser_task(void *p)
             ///如果buf不够填充了， 先将数据发送了先，再重新填充
             ret = JL_DATA_send(JL_OPCODE_DATA, JL_OPCODE_FILE_BROWSE_REQUEST_START, path_data, offset, JL_NOT_NEED_RESPOND, 0, NULL);
             if (ret) {
-                printf("send data err: %d, %d\n", ret, offset);
+                log_error("send data err: %d, %d", ret, offset);
                 goto _EXIT;
             }
             //reset send buf
@@ -344,7 +358,7 @@ static void rcsp_browser_task(void *p)
     if (offset) {
         ret = JL_DATA_send(JL_OPCODE_DATA, JL_OPCODE_FILE_BROWSE_REQUEST_START, path_data, offset, JL_NOT_NEED_RESPOND, 0, NULL);
         if (ret) {
-            printf("send data err: %d\n", ret);
+            log_error("send data err: %d", ret);
             goto _EXIT;
         }
     }
@@ -364,6 +378,9 @@ _EXIT:
 
     while (1) {
         os_time_dly(10);
+        if (__this->task_kill) {
+            return;
+        }
     }
 }
 
@@ -371,7 +388,7 @@ _EXIT:
 void rcsp_browser_start(u8 *data, u16 len)
 {
     ///检查数据是否有效
-    printf("%s\n", __func__);
+    log_info("%s", __func__);
     if (len > sizeof(struct __browser)) {
         return ;
     }
@@ -385,10 +402,9 @@ void rcsp_browser_start(u8 *data, u16 len)
     browser->start_num = app_ntohs(browser->start_num);
     browser->dev_handle = app_ntohl(browser->dev_handle);
     browser->path_len = app_ntohs(browser->path_len);
-
     ///检查设备范围
     if (browser->dev_handle >= RCSPDevMapMax) {
-        printf("bs dev hdl err !!\n");
+        log_error("bs dev hdl err !!");
         free(browser);
         browser = NULL;
         return ;
@@ -407,10 +423,11 @@ void rcsp_browser_start(u8 *data, u16 len)
         return ;
     }
     ///目录浏览线程创建
-    if (task_create(rcsp_browser_task, (void *)NULL, FILE_BROWSE_TASK_NAME)) {
+    __this->task_kill = 0;
+    if (thread_fork(FILE_BROWSE_TASK_NAME, 10, 768, 128, &__this->pid, rcsp_browser_task, NULL)) {
         free(browser);
         browser = NULL;
-        printf("rcsp_browser_task creat fail\n");
+        log_error("rcsp_browser_task creat fail");
     }
 }
 
@@ -428,7 +445,8 @@ bool rcsp_browser_busy(void)
 void rcsp_browser_stop(void)
 {
     ///删除线程，释放资源
-    task_kill(FILE_BROWSE_TASK_NAME);
+    log_info("%s: bs task kill...", __func__);
+    __this->task_kill = 1;
     if (browser) {
         free(browser);
         browser = NULL;

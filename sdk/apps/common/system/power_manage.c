@@ -34,7 +34,7 @@ static u8 cur_bat_st = VBAT_NORMAL;
 
 static void vbat_check(void *priv);
 
-static int get_charge_online_flag(void)
+int get_charge_online_flag(void)
 {
     return sys_power_is_charging();
 }

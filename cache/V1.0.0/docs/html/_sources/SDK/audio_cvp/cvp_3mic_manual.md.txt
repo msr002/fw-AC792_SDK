@@ -304,11 +304,11 @@ windows自带计算器计算如下：
 3MIC通话算法支持配置工具选择新版的AGC算法，参数如下： </br>
 ![](./assets/cvp_tms/cvp_tms_6.png) </br>
 
-**MIN_MAG_LEVEL** : 语音能量放大下限阈值（单位db,默认-50，范围（-90db~-35db））
-**MAX_MAG_LEVEL**： 语音能量放大上限阈值（单位db,默认-3，范围（-90db~0db））
-**ADDITIONAL_MAG_LEVEL**： 语音补偿能量值（单位db,默认0，范围（0db~20db））
-**CLIP_MAG_LEVEL** ： 语音最大截断能量值（单位db,默认-3，范围（-10db~0db））
-**FLOOR_MAG_LEVEL** ： 语音最小截断能量值（单位db,默认-70，范围（-90db~-35db）
+**MIN_MAG_LEVEL** : 语音能量放大下限阈值（单位dB,默认-50，范围（-90 ~-35dB））
+**MAX_MAG_LEVEL**： 语音能量放大上限阈值（单位dB,默认-3，范围（-90 ~0dB））
+**ADDITIONAL_MAG_LEVEL**： 语音补偿能量值（单位dB,默认0，范围（0 ~20dB））
+**CLIP_MAG_LEVEL** ： 语音最大截断能量值（单位dB,默认-3，范围（-10 ~0dB））
+**FLOOR_MAG_LEVEL** ： 语音最小截断能量值（单位dB,默认-70，范围（-90 ~-35dB）
 
 &emsp;&emsp;基本原理：算法会对语音进行动态增益调整，调整的过程如果语音小于MAX_MAG_LEVEL时，则将语音压制到FLOOR_MAG_LEVEL大小，如果语音大于MAX_MAG_LEVEL时，则将语音压制到CLIP_MAG_LEVEL大小；ADDITIONAL_MAG_LEVEL是对语音进行额外的增益补偿。</br>
 
@@ -334,8 +334,8 @@ windows自带计算器计算如下：
 
 ### 常见问题调试指引
 #### 出现吃音或者一句话某个字某个字变得很小声问题
-&emsp;&emsp;出现该问题时，首先要确认所处环境是不是信噪比很低(如小于-5db)，即噪声比人声大很多，这种情形下，优化空间有限，调试步骤如下：
-- 步骤1：通过调节mic的增益来缓解：如果mic的增益比较小(小于10db)，可以适当提高mic增益来缓解吃音问题，建议调节范围不要超过15db；提高mic增益可能会导致噪声增大，据实际情况调节。
+&emsp;&emsp;出现该问题时，首先要确认所处环境是不是信噪比很低(如小于-5dB)，即噪声比人声大很多，这种情形下，优化空间有限，调试步骤如下：
+- 步骤1：通过调节mic的增益来缓解：如果mic的增益比较小(小于10dB)，可以适当提高mic增益来缓解吃音问题，建议调节范围不要超过15dB；提高mic增益可能会导致噪声增大，据实际情况调节。
 - 步骤2：调节DNS_GainFloor和DNS_OverDrive参数：适当提高DNS_GainFloor 或 适当减小 DNS_OverDrive，可以通过配合gain_floor和over_drive适度调节。
 #### 远端听到声音不均匀，忽大忽小
 &emsp;&emsp;如果后处理开启了AGC模块，出现该问题时，请参照“章节十：常见问题FAQ”第二个问题进行确认调整。
@@ -343,11 +343,11 @@ windows自带计算器计算如下：
 ## JLSP WNC风噪检测模块
 ### 参数说明
 ![](./assets/cvp_tms/cvp_tms_7.png) </br>
-**wn_msc_th**: 双麦非相关性阈值，根据双麦采集到的音频相关性取值，相关性越小取值越大，取值范围（0~1），默认取值0.6</br>
-**ms_th**：麦增益能量阈值，用于衡量音频特定频段能量强度，需要根据实际风噪做确定；</br>
+**WN_Correlation_Threshold**: 双麦非相关性阈值，根据双麦采集到的音频相关性取值，相关性越小取值越大，取值范围（0~1），默认取值0.6</br>
+**WN_MassCenter_Threshold**：麦增益能量阈值，用于衡量音频特定频段能量强度，需要根据实际风噪做确定；</br>
 &emsp;&emsp;确定方法如下：如果需要在大于3m/s风速下做降风噪，需要用样机在3m/s的实际环境下测试，使用int jlsp_tms_get_wind_detect_info(int *wd_flag, int *wd_val, int *wd_lev)接口实时获取当前的风噪强度wd_val，把这个风噪强度的值wd_val填给ms_th。</br>
 `注意：有无风是由wn_msc_th和ms_th两个参数共同决定的。`</br>
-**wn_gain_offset**：风噪能量增益偏移阈值，风噪参数确认后一般是不能修改mic增益的了，如果修改了mic的增益，mic数据变化的dB数需要填到wn_gain_offset这里</br>
+**WN_Gain_Offset**：风噪能量增益偏移阈值，风噪参数确认后一般是不能修改mic增益的了，如果修改了mic的增益，mic数据变化的dB数需要填到wn_gain_offset这里</br>
 </br>
 在audio_aec_dms.c或者audio_cvp_3mic.c打开 WIND_DETECT_INFO_SPP_DEBUG_ENABLE可在通话是通过蓝牙spp工具查看看风噪值</br>
 ![](./assets/cvp_tms/cvp_jlsp_wnc_spp.png) </br>

@@ -3,19 +3,25 @@
 |Version|Date|Notes|
 |---|---|---|
 |V1.0|2024-03-11|初始版本|
+|V1.1|2025-10-20|增加导出数据带宽说明|
 
 ## 功能介绍
-默认可以导出3通路*512byte的PCM数据，首先打开小机的数据导出功能，配置需要导出的数据流，连接Auto_test串口接收板（插SD卡），等待数据写入完成后，用读卡器插入电脑，打开rec_tool上位机，将卡扇区数据转成对应的raw格式音频文件。</br>
+- **数据导出带宽**
+    - 采样率**16kHz**，最大支持同时导出**7通道**，每通道固定帧长是**512byte**
+- **使用步骤**
+    - SDK使能数据导出功能，配置需要导出的数据流
+    - 连接**AUTO_TEST**串口接收板（插SD卡），等待数据写入完成
+    - 用读卡器插入电脑，打开**rec_tool**上位机，将卡扇区数据转成对应的raw格式音频文件
 
 ## 小机软件配置
 ### 非可视化程序
     对应的board.h定义AUDIO_PCM_DEBUG 则表示打开串口数据导出功能（注意：串口有没有被其他地方占用。）
 ### 可视化程序
 
-```c
+```C
 /* 在app_config.h里配置*/
 #define TCFG_AUDIO_DATA_EXPORT_DEFINE AUDIO_DATA_EXPORT_VIA_UART
-````
+```
 
 ### 串口配置
     在uartPcmSender.h配置小机串口TX IO和波特率，波特率默认使用2MHz
@@ -84,7 +90,7 @@ void aec_uart_write(void);
 ## 串口接收板使用教程
 ![](./assets/uart_export/uart_export_0.png) <br>
 
-|	|Microphone选型规格|
+|	|描述|
 |-------|-------|
 |绿灯亮 |SD卡在线，同时小屏幕显示sd:online卡在线，同时小屏幕显示sd:online|
 |蓝灯亮	|读/写卡异常，需插拔SD卡或重新上电/写卡异常，需插拔SD卡或重新上电|
@@ -93,7 +99,7 @@ void aec_uart_write(void);
 |VMCU|供电口/或者usb供电|
 
 ### 显示屏功能
-    显示SD卡是否挂载成功、接收到的数据秒数、当前设置可以接收的数据通道数和数据长度，该数值需要和aec_uart_open(u8 nch, u16 single_size)函数的参数保持一致
+> 显示SD卡是否挂载成功、接收到的数据秒数、当前设置可以接收的数据通道数和数据长度，该数值需要和aec_uart_open(u8 nch, u16 single_size)函数的参数保持一致
 
 ### 按键功能
 软件版本：v20240306<br>
@@ -159,7 +165,7 @@ void aec_uart_write(void);
     3mic模式写卡    ch：5 len：512
 
 
-## 常见问题FAQ
+## FAQ
 - （1）耳机写卡时打印**uart baudrate limit**
     表示串口写卡跑不过来：
     - a. 检查数据发送的数据是否超过181byte/ms，如果超过建议减少发送的数据，或者同时把耳机和写卡小板的串口波特率都提高

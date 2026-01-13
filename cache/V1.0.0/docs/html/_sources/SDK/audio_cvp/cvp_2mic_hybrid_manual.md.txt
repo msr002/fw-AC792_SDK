@@ -2,7 +2,7 @@
 
 |Version|Date|Notes|
 |---|---|---|
-|V1.0|2024-01-15|初始版本|
+|V1.0|2025-09-26|初始版本|
 
 + 点击跳转 [通话算法节点配置说明](../audio_flow/bt_call/bt_call_flow.md)
 
@@ -45,53 +45,76 @@ ANC让自己听感环境更加安静，ENC让通话的另一端听感环境更�
 ## 双麦ENC参数与调试指引
 
 ### 生成传递函数配置
-- 1、在配置工具的通话参数配置界面点击”3 mic Analysis”按钮打开分析工具</br>
-![](./assets/cvp_tms/cvp_tms_3.png) <br>
-- 2、工具界面如下：<br>
-![](./assets/cvp_tms/cvp_tms_4.png) <br>
-
-    （1）Talk麦信号<br>
-    主麦的声音信号，要求真实人耳佩戴，正常说话时，Talk麦和FB麦同时录制的声音<br>
-    （2）FB麦信号<br> 
-    FB麦的声音信号，要求真实人耳佩戴，正常说话时，Talk麦和FB麦同时录制的声音<br>
-    （3）FFT点数<br>
-    固定512点<br>
-    （4）采样率，单位：Hz<br>
-    固定16000Hz<br>
-    （5）开始时间，单位：s<br>
-    需要分析的数据的起始时间，默认0s<br>
-    （6）结束时间，单位：s<br>
-    需要分析的数据的结束时间，默认10s<br>
-    （7）主副麦补偿增益，单位dB<br>
-    如果主副麦数据送到算法前做了数字放大，放大的dB需要填到这里，默认0dB<br>
-    （8）输出文件名字：dms_hybrid.bin<br>
-    （名字固定不可修改）<br>
-
-- 3、将生成的dms_hybrid.bin文件放到下载目录，通过download.bat的-res参数把文件烧写到芯片里面<br>
-
-
-
-调试指引
 ### 配套工具
 （1）安卓手机apk：audio_tools(“AudioTools使用手册/记录”章节) </br>
 （2）PC音频录制工具（内置于“杰理SDK工具->拓展->蓝牙spp音频数据录制工具”）</br>
 ### SDK配置
-打开数据导出宏定义 <br>
+1. 打开数据导出宏定义导出talk mic和fb mic数据 <br>
 ![](./assets/cvp_dms/export_mic_spp.png)  <br>
 
+2. 在可视化工具的调音选项下，点击“CVP Analysis”工具按钮以打开分析工具，界面如下：
+  ![](./assets/2mic-hybrid/2mic-hyybrid0.png) 
+
+   **工具参数说明：**
+   -  **增益范围、频率范围、Hp、Lp**：和EQ节点的调试一致。
+   -  **算法类型**：根据当前节点的选择的通话算法选择，节点选择算法类型**2MIC**</br>
+    ![](./assets/2mic-hybrid/2mic-hyybrid1.png) </br>
+   - **Talk麦信号**：主麦的声音信号，要求佩戴真实人耳，正常说话时，Talk麦和FB麦同时录制的声音。
+   - **FB麦信号**：FB麦的声音信号，同样要求佩戴真实人耳，正常说话时，Talk麦和FB麦同时录制的声音。
+   - **FFT点数**：固定为512点。
+   - **采样率（单位：Hz）**：固定为16000Hz。
+   - **总增益（单位：dB）**：作用于宽带EQ曲线和窄带EQ曲线，对曲线的总增益进行调整。(注意：适用于所有**CVP-V3-xx算法中的宽带EQ曲线和窄带EQ曲线**)。
+   - **补偿增益（单位：dB）**：如果主副麦数据在输入算法前进行了数字放大，则需填写放大的dB值，默认值为0dB(注意：适用于算法类型是2MIC和3MIC)。
+   - **开始时间（单位：s）**：需要分析数据的起始时间，默认为0秒。
+   - **结束时间（单位：s）**：需要分析数据的结束时间，默认为10秒。
+
+3. 离线导出步骤
+   1. 对于**2-MIC-Hybrid**算法模式
+   - 步骤一：在工具上选择对应的算法类型。导入Talk MIC和FB MIC数据。绿色曲线为EQ曲线，灰色曲线（参考线）是TALK和FB数据的映射曲线</br>
+    ![](./assets/2mic-hybrid/2mic-hyybrid2.png) </br>
+
+   - 步骤二：工具点击**导出**并命名为**DNSFB_Coeff.bin**到当前SDK的download目录下。
+   - 步骤三：重复步骤一和二，工具点击**导出**并命名为**TALK_Coeff.bin**到当前SDK的download目录下。
+   - 步骤四：使用-res将两个bin文件在download.bat链接</br>
+  ![](./assets/2mic-hybrid/2mic-hyybrid3.png) </br>
+   
+> **注意**:
+> 1. 对于DNSFB_Coeff.bin曲线：曲线是调2mic-hybrid融合效果的曲线，即fb mic曲线。
+> 2. 对于TALK_Coeff.bin曲线：曲线是调2mic-hybrid非融合效果的曲线，即talk mic曲线。
+>
+> 算法默认使用的Talk MIC和FB MIC映射生成的参考线。由于参考线不支持在线修改，因此：
+> - 如果需要调整的效果，且是离线传入bin文件的方式，需要手动调整对应模式下的绿色曲线。
+> - 比如，若觉得工具生成的参考线效果不好，可以依据灰色曲线拖动大致曲线，然后微调直到满意效果，工具点击导出bin文件到当前SDK的download目录下。
+> - 微调之后，需在代码层面需要将REF_EQ改为EQ，文件会解析微调之后的绿色EQ曲线。</br>
+![](./assets/2mic-hybrid/2mic-hyybrid4.png) </br>
+>在代码层面，对应模式的参考曲线改为对应的EQ曲线配置即可</br>
+![](./assets/2mic-hybrid/2mic-hyybrid5.png) </br>
+
 ### 在线调试
-使用audio_tools在线调试ENC参数，感受实时效果 <br>
-![](./assets/cvp_tool.png)  <br>
+在线调试ENC参数，感受实时效果。使能SDK板级配置下的FW配置、在线调音模块选择合适的通信方式即可。<br>
+![](./assets/cvp_v3/cvp_v3_update.png) <br>
+使用**CVP Analysis**工具进行EQ在线调试，通过拖动绿色曲线实时调整对应的EQ。<br>
+![](./assets/cvp_v3/cvp_v3_update1.png) 
+
+在文件**audio_cvp_dms.c**下需要配置**CONST_DMS_HYBRID_ONLINE_TYPE**的值来适配**2mic-hybrid**在线调音EQ选择
+- 0 : 更新fb eq曲线，调融合EQ(对应需要设置可视化界面->noise_level_db_T0设置90)
+- 1 : 更新talk eq曲线，调非融合EQ (对应需要设置可视化界面->noise_level_db_T0设置10)
+
+1. 步骤一：开启在线调音功能，连接上样机，如图所示</br>
+![](./assets/2mic-hybrid/2mic-hyybrid6.png) </br>
+2. 步骤二：拖动左框中的曲线，实时调试。</br>
+
 
 ## HYBRID模块
 ![](./assets/cvp_dms/cvp_dms_hybrid.png) <br>
 **ENC_Process_MaxFreq** : 处理频率上限,设定范围（3000~8000），默认8000</br>
 **ENC_Process_MinFreq** : 处理频率下限，设定范围（0~1000），默认为0 </br>
-**snr_db_T0** ：进入数据融合的snr阈值，单位（db），默认0db</br>
-**snr_db_T1** : 推出数据融合的snr阈值，单位（db），默认5db，一般设定snr_db_T1 >= snr_db_T0 + 5 </br>
-**floor_noise_db_T** : 底噪阈值，大于该值才会进入融合 </br>
-**compen_db** ：对输入数据进行补偿，单位（db），默认为12db，如果经过agc出来幅度还是小,可以尝试适当改大该值</br>
-
+**Noise_Level_dB_T0** ：退出融合阈值，该阈值如果设置小于20，则一直走的是非融合模式，相当于只有talk麦的单麦降噪。如果设置大于85，则一直走的是融合模式，相当于2k以上用的talk，2k以下一直是fb，单位（dB），默认55dB</br>
+**Noise_Level_dB_T1** : 进入融合阈值，实际麦的能量只有大于该阈值才会进入融合，单位（dB），默认65dB</br>
+**compen_db** ：对输入数据进行补偿，单位（dB），默认为0dB，如果经过agc出来幅度还是小,可以尝试适当改大该值</br>
+```
+注意：Beamforming配置ENC模块的compen_db和双麦神经网络降噪配置NS的compensate设置为一样
+```
 ## AEC模块 
 ![](./assets/cvp_dms/cvp_dms_aec.png) <br>
 `注1`：双mic降噪ENC默认需要打开AEC模块。</br>
@@ -146,20 +169,18 @@ ANC让自己听感环境更加安静，ENC让通话的另一端听感环境更�
 3MIC通话算法支持配置工具选择新版的AGC算法，参数如下： </br>
 ![](./assets/cvp_tms/cvp_tms_6.png) </br>
 
-**MIN_MAG_LEVEL** : 语音能量放大下限阈值（单位db,默认-50，范围（-90db~-35db））</br>
-**MAX_MAG_LEVEL**： 语音能量放大上限阈值（单位db,默认-3，范围（-90db~0db））</br>
-**ADDITIONAL_MAG_LEVEL**： 语音补偿能量值（单位db,默认0，范围（0db~20db））</br>
-**CLIP_MAG_LEVEL** ： 语音最大截断能量值（单位db,默认-3，范围（-10db~0db））</br>
-**FLOOR_MAG_LEVEL** ： 语音最小截断能量值（单位db,默认-70，范围（-90db~-35db））</br>
+**MIN_MAG_LEVEL** : 语音能量放大下限阈值（单位dB,默认-50，范围（-90dB~-35dB））</br>
+**MAX_MAG_LEVEL**： 语音能量放大上限阈值（单位dB,默认-3，范围（-90dB~0dB））</br>
+**ADDITIONAL_MAG_LEVEL**： 语音补偿能量值（单位dB,默认0，范围（0dB~20dB））</br>
+**CLIP_MAG_LEVEL** ： 语音最大截断能量值（单位dB,默认-3，范围（-10dB~0dB））</br>
+**FLOOR_MAG_LEVEL** ： 语音最小截断能量值（单位dB,默认-70，范围（-90dB~-35dB））</br>
 
 &emsp;&emsp;基本原理：算法会对语音进行动态增益调整，调整的过程如果语音小于MAX_MAG_LEVEL时，则将语音压制到FLOOR_MAG_LEVEL大小，如果语音大于MAX_MAG_LEVEL时，则将语音压制到CLIP_MAG_LEVEL大小；ADDITIONAL_MAG_LEVEL是对语音进行额外的增益补偿。</br>
 
-
-
 ### 常见问题调试指引
 #### 出现吃音或者一句话某个字某个字变得很小声问题
-&emsp;&emsp;出现该问题时，首先要确认所处环境是不是信噪比很低(如小于-5db)，即噪声比人声大很多，这种情形下，优化空间有限，调试步骤如下：
-- 步骤1：通过调节mic的增益来缓解：如果mic的增益比较小(小于10db)，可以适当提高mic增益来缓解吃音问题，建议调节范围不要超过15db；提高mic增益可能会导致噪声增大，据实际情况调节。
+&emsp;&emsp;出现该问题时，首先要确认所处环境是不是信噪比很低(如小于-5dB)，即噪声比人声大很多，这种情形下，优化空间有限，调试步骤如下：
+- 步骤1：通过调节mic的增益来缓解：如果mic的增益比较小(小于10dB)，可以适当提高mic增益来缓解吃音问题，建议调节范围不要超过15dB；提高mic增益可能会导致噪声增大，据实际情况调节。
 - 步骤2：调节DNS_GainFloor和DNS_OverDrive参数：适当提高DNS_GainFloor 或 适当减小 DNS_OverDrive，可以通过配合gain_floor和over_drive适度调节。
 #### 远端听到声音不均匀，忽大忽小
 &emsp;&emsp;如果后处理开启了AGC模块，出现该问题时，请参照“章节十：常见问题FAQ”第二个问题进行确认调整。
@@ -167,10 +188,11 @@ ANC让自己听感环境更加安静，ENC让通话的另一端听感环境更�
 ## WNC风噪检测模块
 ### 参数说明
 ![](./assets/cvp_dms/cvp_dms_hybrid_wnc.png) </br>
-**coh_val_T**:双麦非相关性阈值，根据双麦采集到的音频相关性取值，相关性越小取值越大，取值范围（0~1），默认取值0.85</br>
-**eng_db_T**：麦增益能量阈值，大于该阈值才会进入风噪检测，默认设定为85db，需要根据实际风噪做确定；</br>
-&emsp;&emsp;确定方法如下：如果需要在大于3m/s风速下做降风噪，需要用样机在3m/s的实际环境下测试，使用int JLSP_DmsHybridSystem_Process(void* handle, short* near, short* fb_in, short*far, short* out, int Batch)接口实时获取当前的风噪强度，把这个风噪强度的均值填给eng_db_T。</br>
-`注意：有无风是由coh_val_T和ng_db_T两个参数共同决定的。`</br>
+**WN_Correlation_Threshold**：双麦非相关性阈值，根据双麦采集到的音频相关性取值，相关性越小取值越大，取值范围（0~1），默认取值0.85</br>
+**WN_Detect_Threshold**：麦增益能量阈值，大于该阈值才会进入风噪检测，默认设定为85dB，需要根据实际风噪做确定；</br>
+&emsp;&emsp;确定方法如下：如果需要在大于3m/s风速下做降风噪，需要用样机在3m/s的实际环境下测试，使用float jlsp_dms_hybrid_get_wind_energy();
+接口实时获取当前的风噪强度，把这个风噪强度的均值填给eng_db_T。</br>
+`注意：有无风是由coh_val_T和eng_db_T两个参数共同决定的。`</br>
 
 
 ## EQ参数

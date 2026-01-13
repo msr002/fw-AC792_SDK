@@ -1,1772 +1,216 @@
-<!DOCTYPE html><html lang="en"><head>
-<title> phaser_manual.md</title>
-  <meta charset="utf-8">
-<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<style type="text/css">
-#wmd-preview{
-  max-width: 210mm;
-  margin: 0 auto;
-}
-/* normal start */
-body {
-  font-family: 'Helvetica Neue', Helvetica, Tahoma, Arial, 'Hiragino Sans GB', STHeiti, "Microsoft YaHei", "微软雅黑", 'WenQuanYi Micro Hei', STXihei, "华文细黑", Heiti, "黑体", SimSun, "宋体", Song, sans-serif;
-  font-size: 16px;
-  line-height: 1.8;
-  font-weight: normal;
-  color: #2f2f2f;
-  word-wrap: break-word;
-  word-break: break-word;
-}
-
-
-/* link start */
-a:focus {
-  outline: thin dotted #333;
-  outline: 5px auto -webkit-focus-ring-color;
-  outline-offset: -2px;
-}
-
-a:hover,
-a:active {
-  outline: 0;
-}
-a {
-  color: #0088cc;
-  text-decoration: none;
-}
-
-a:hover {
-  color: #005580;
-  text-decoration: underline;
-}
-/* link end */
-
-
-/* head start */
-h1,h2,h3,h4,h5,h6 {
-  font-weight: bold;
-  text-rendering: optimizelegibility;
-}
-
-h1 {
-  font-size: 2rem;;
-  margin: .8em 0 .6em 0;
-}
-
-h2 {
-  font-size: 1.5rem;
-  margin: .7em 0 .5em 0;
-}
-
-h3 {
-  font-size: 1.17rem;
-  margin: .6em 0 .4em 0;
-}
-
-h4 {
-  margin: .5em 0 .3em 0;
-}
-
-video {
-  max-width: 100%;
-}
-
-h5 {
-  font-size: 0.83rem;
-  margin: .5em 0 .3em 0;
-}
-
-h6 {
-  font-size: 0.67rem;
-  margin: .5em 0 .3em 0;
-}
-/* head end */
-
-.xsj_hr {
-    margin: 20px 0;
-    border: 0;
-    border-top: 1px dashed #2f2f2f;
-    border-left: 90px solid transparent;
-    border-right: 90px solid transparent;
-}
-
-p {
-    margin: 1.1em 0 1.6em;
-}
-
-pre{
-    line-height: initial !important;
-    word-wrap: break-word;
-    word-break: break-word;
-    tab-size: 4;
-    white-space: pre-wrap;
-    font-family: monospace;
-}
-
-kbd{
-    display: inline-block;
-    padding: 3px 5px;
-    font-size: 11px;
-    line-height: 10px;
-    color: #2f2f2f;
-    vertical-align: middle;
-    background: #fcfcfc;
-    border: solid 1px #2f2f2f;
-    border-bottom-color: #2f2f2f;
-    border-radius: 3px;
-    box-shadow: inset 0 -1px 0 #2f2f2f;
-}
-
-address {
-  display: block;
-  margin-bottom: 20px;
-  font-style: normal;
-  line-height: 20px;
-}
-
-
-small {
-  font-size: 85%;
-}
-
-strong {
-  font-weight: bold;
-}
-
-em {
-  font-style: italic;
-}
-
-cite {
-  font-style: normal;
-}
-
-
-/* list start */
-ul,ol {
-  padding: 0;
-  margin: 1.1em 0 1.1em 3em;
-}
-
-ul ul,
-ul ol,
-ol ol,
-ol ul {
-  margin-top: 0;
-  margin-bottom: 0;
-  margin-left: 1em;
-}
-/* list end */
-
-dl {
-  margin-bottom: 20px;
-}
-
-dt,
-dd {
-  line-height: 20px;
-}
-
-dt {
-  font-weight: bold;
-  line-height: 1.35em;
-}
-
-dd {
-  margin-left: 10px;
-  line-height: 1.35em;
-}
-abbr[title],
-abbr[data-original-title] {
-  cursor: help;
-  border-bottom: 1px dotted #999999;
-}
-
-/* normal end */
-
-
-/* blockquote start */
-blockquote {
-  padding: 20px 20px;
-  margin: 20px 0 20px;
-  border-left: 5px solid rgba(153, 153, 153, 0.2);
-  background: rgba(204, 204, 204, 0.2);
-}
-
-blockquote p {
-    margin: 1.1em 0 1.1em;
-}
-
-blockquote>ol.markdown_ol, blockquote>ul.markdown_ul{
-  margin-left: 1.1em;
-}
-
-blockquote>*:first-child {
-  margin-top: 0;
-}
-
-blockquote>*:last-child {
-  margin-bottom: 0;
-}
-
-blockquote small {
-  display: block;
-  line-height: 20px;
-  color: #999999;
-}
-
-blockquote small:before {
-  content: '\2014 \00A0';
-}
-
-blockquote footer{
-    margin: 1em 0;
-    font-style: italic;
-}
-
-blockquote footer cite {
-    margin: 0 1em;
-}
-
-/* blockquote end */
-
-/**
- * Treeview syntax highlighting based on highlight.js
- * Copyright (c) 2014-2015, Asciidocfx Team, (MIT Licensed)
- * https://github.com/asciidocfx/highlight-treeview.js
- */
-.language-treeview.hljs{
-  position: relative;
-}
-.hljs-folder,
-.hljs-hiddenfile,
-.hljs-file {
-    position: relative;
-    vertical-align: top;
-    display: inline-block;
-    height: 16px;
-}
-.hljs-folder:before,
-.hljs-file:before,
-.hljs-hiddenfile:before {
-    top: 0;
-    content: '';
-    width: 14px;
-    height: 12px;
-    margin-top: 0px;
-    margin-right: 3px;
-    position: relative;
-    display: inline-block;
-    background-size: 14px;
-    background-repeat: no-repeat;
-}
-.hljs-file:before,
-.hljs-hiddenfile:before {
-    height: 14px;
-    margin-left: 1px;
-}
-.hljs-hiddenfile {
-    opacity: 0.6;
-}
-.hljs-file.photo:before {
-    font: normal normal normal 14px/1 FontAwesome;
-    content: "\f1c5";
-}
-.hljs-file.plain:before {
-    font: normal normal normal 14px/1 FontAwesome;
-    content: "\f016";
-}
-.hljs-file.source:before {
-    font: normal normal normal 14px/1 FontAwesome;
-    content: "\f1c9";
-}
-.hljs-file.archive:before {
-    font: normal normal normal 14px/1 FontAwesome;
-    content: "\f1c6";
-}
-.hljs-file.audio:before {
-    font: normal normal normal 14px/1 FontAwesome;
-    content: "\f1c7";
-}
-.hljs-file.video:before {
-    font: normal normal normal 14px/1 FontAwesome;
-    content: "\f1c8";
-}
-.hljs-file.pdf:before {
-    font: normal normal normal 14px/1 FontAwesome;
-    content: "\f1c1";
-}
-.hljs-file.xls:before {
-    font: normal normal normal 14px/1 FontAwesome;
-    content: "\f1c3";
-}
-.hljs-file.doc:before {
-    font: normal normal normal 14px/1 FontAwesome;
-    content: "\f1c2";
-}
-.hljs-file.ppt:before {
-    font: normal normal normal 14px/1 FontAwesome;
-    content: "\f1c4";
-}
-.hljs-folder:before {
-    font: normal normal normal 14px/1 FontAwesome;
-    content: "\f114";
-}
-.hljs-hiddenfile:before {
-    font: normal normal normal 14px/1 FontAwesome;
-    content: "\f016";
-}
-.hljs-tvline {
-    margin-left: 6px;
-    position: absolute;
-    text-indent: -99em;
-    padding-bottom: 8px;
-    vertical-align: top;
-    display: inline-block;
-    border-left-width: 1px;
-    border-left-style: solid;
-    border-left-color: rgb(94, 144, 117);
-}
-.hljs-folder-branch {
-    width: 8px;
-    height: 8px;
-    margin-top: -1px;
-    margin-left: 6px;
-    text-indent: -99em;
-    position: relative;
-    vertical-align: top;
-    display: inline-block;
-    border-bottom-width: 1px;
-    border-bottom-style: solid;
-    border-bottom-color: rgb(94, 144, 117);
-}
-.hljs-folder-branch.win {
-    width: 14px;
-    margin-right: 2px;
-}
-.hljs-folder-last-branch {
-    height: 7px;
-    width: 7px;
-    margin-left: 6px;
-    text-indent: -99em;
-    position: relative;
-    vertical-align: top;
-    display: inline-block;
-    border-bottom-width: 1px;
-    border-bottom-style: solid;
-    border-bottom-color: rgb(94, 144, 117);
-    border-left-width: 1px;
-    border-left-style: solid;
-    border-left-color: rgb(94, 144, 117);
-}
-.hljs-folder-last-branch.win {
-    width: 13px;
-    margin-right: 2px;
-}
-
-
-/**
- * Treeview syntax highlighting based on highlight.js
- */
-
-/*wavedrom start*/
-
-.wavedrom_svg text, .wavedrom_svg_defs text {
-    font-size:11pt;
-    font-style:normal;
-    font-variant:normal;
-    font-weight:normal;
-    font-stretch:normal;
-    text-align:center;
-    fill-opacity:1;
-    font-family:Helvetica
-}
-.wavedrom_svg .muted, .wavedrom_svg_defs .muted {
-    fill:#aaa
-}
-.wavedrom_svg .warning, .wavedrom_svg_defs .warning {
-    fill:#f6b900
-}
-.wavedrom_svg .error, .wavedrom_svg_defs .error {
-    fill:#f60000
-}
-.wavedrom_svg .info, .wavedrom_svg_defs .info {
-    fill:#0041c4
-}
-.wavedrom_svg .success, .wavedrom_svg_defs .success {
-    fill:#00ab00
-}
-.wavedrom_svg .h1, .wavedrom_svg_defs .h1 {
-    font-size:33pt;
-    font-weight:bold
-}
-.wavedrom_svg .h2, .wavedrom_svg_defs .h2 {
-    font-size:27pt;
-    font-weight:bold
-}
-.wavedrom_svg .h3, .wavedrom_svg_defs .h3 {
-    font-size:20pt;
-    font-weight:bold
-}
-.wavedrom_svg .h4, .wavedrom_svg_defs .h4 {
-    font-size:14pt;
-    font-weight:bold
-}
-.wavedrom_svg .h5, .wavedrom_svg_defs .h5 {
-    font-size:11pt;
-    font-weight:bold
-}
-.wavedrom_svg .h6, .wavedrom_svg_defs .h6 {
-    font-size:8pt;
-    font-weight:bold
-}
-.wavedrom_svg_defs .s1 {
-    fill:none;
-    stroke:#000;
-    stroke-width:1;
-    stroke-linecap:round;
-    stroke-linejoin:miter;
-    stroke-miterlimit:4;
-    stroke-opacity:1;
-    stroke-dasharray:none
-}
-.wavedrom_svg_defs .s2 {
-    fill:none;
-    stroke:#000;
-    stroke-width:0.5;
-    stroke-linecap:round;
-    stroke-linejoin:miter;
-    stroke-miterlimit:4;
-    stroke-opacity:1;
-    stroke-dasharray:none
-}
-.wavedrom_svg_defs .s3 {
-    color:#000;
-    fill:none;
-    stroke:#000;
-    stroke-width:1;
-    stroke-linecap:round;
-    stroke-linejoin:miter;
-    stroke-miterlimit:4;
-    stroke-opacity:1;
-    stroke-dasharray:1,3;
-    stroke-dashoffset:0;
-    marker:none;
-    visibility:visible;
-    display:inline;
-    overflow:visible;
-    enable-background:accumulate
-}
-.wavedrom_svg_defs .s4 {
-    color:#000;
-    fill:none;
-    stroke:#000;
-    stroke-width:1;
-    stroke-linecap:round;
-    stroke-linejoin:miter;
-    stroke-miterlimit:4;
-    stroke-opacity:1;
-    stroke-dasharray:none;
-    stroke-dashoffset:0;
-    marker:none;
-    visibility:visible;
-    display:inline;
-    overflow:visible
-}
-.wavedrom_svg_defs .s5 {
-    fill:#fff;
-    stroke:none
-}
-.wavedrom_svg_defs .s6 {
-    color:#000;
-    fill:#ffffb4;
-    fill-opacity:1;
-    fill-rule:nonzero;
-    stroke:none;
-    stroke-width:1px;
-    marker:none;
-    visibility:visible;
-    display:inline;
-    overflow:visible;
-    enable-background:accumulate
-}
-.wavedrom_svg_defs .s7 {
-    color:#000;
-    fill:#ffe0b9;
-    fill-opacity:1;
-    fill-rule:nonzero;
-    stroke:none;
-    stroke-width:1px;
-    marker:none;
-    visibility:visible;
-    display:inline;
-    overflow:visible;
-    enable-background:accumulate
-}
-.wavedrom_svg_defs .s8 {
-    color:#000;
-    fill:#b9e0ff;
-    fill-opacity:1;
-    fill-rule:nonzero;
-    stroke:none;
-    stroke-width:1px;
-    marker:none;
-    visibility:visible;
-    display:inline;
-    overflow:visible;
-    enable-background:accumulate
-}
-.wavedrom_svg_defs .s9 {
-    fill:#000;
-    fill-opacity:1;
-    stroke:none
-}
-.wavedrom_svg_defs .s10 {
-    color:#000;
-    fill:#fff;
-    fill-opacity:1;
-    fill-rule:nonzero;
-    stroke:none;
-    stroke-width:1px;
-    marker:none;
-    visibility:visible;
-    display:inline;
-    overflow:visible;
-    enable-background:accumulate
-}
-.wavedrom_svg_defs .s11 {
-    fill:#0041c4;
-    fill-opacity:1;
-    stroke:none
-}
-.wavedrom_svg_defs .s12 {
-    fill:none;
-    stroke:#0041c4;
-    stroke-width:1;
-    stroke-linecap:round;
-    stroke-linejoin:miter;
-    stroke-miterlimit:4;
-    stroke-opacity:1;
-    stroke-dasharray:none
-}
-
-/*wavedrom stop*/
-
-
-/* fontawesome */
-
-/*!
- * Font Awesome Free 5.7.1 by @fontawesome - https://fontawesome.com
- * License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License)
- */
-svg:not(:root).svg-inline--fa {
-  overflow: visible; }
-
-.svg-inline--fa {
-  display: inline-block;
-  font-size: inherit;
-  height: 1em;
-  overflow: visible;
-  vertical-align: -.125em; }
-  .svg-inline--fa.fa-lg {
-    vertical-align: -.225em; }
-  .svg-inline--fa.fa-w-1 {
-    width: 0.0625em; }
-  .svg-inline--fa.fa-w-2 {
-    width: 0.125em; }
-  .svg-inline--fa.fa-w-3 {
-    width: 0.1875em; }
-  .svg-inline--fa.fa-w-4 {
-    width: 0.25em; }
-  .svg-inline--fa.fa-w-5 {
-    width: 0.3125em; }
-  .svg-inline--fa.fa-w-6 {
-    width: 0.375em; }
-  .svg-inline--fa.fa-w-7 {
-    width: 0.4375em; }
-  .svg-inline--fa.fa-w-8 {
-    width: 0.5em; }
-  .svg-inline--fa.fa-w-9 {
-    width: 0.5625em; }
-  .svg-inline--fa.fa-w-10 {
-    width: 0.625em; }
-  .svg-inline--fa.fa-w-11 {
-    width: 0.6875em; }
-  .svg-inline--fa.fa-w-12 {
-    width: 0.75em; }
-  .svg-inline--fa.fa-w-13 {
-    width: 0.8125em; }
-  .svg-inline--fa.fa-w-14 {
-    width: 0.875em; }
-  .svg-inline--fa.fa-w-15 {
-    width: 0.9375em; }
-  .svg-inline--fa.fa-w-16 {
-    width: 1em; }
-  .svg-inline--fa.fa-w-17 {
-    width: 1.0625em; }
-  .svg-inline--fa.fa-w-18 {
-    width: 1.125em; }
-  .svg-inline--fa.fa-w-19 {
-    width: 1.1875em; }
-  .svg-inline--fa.fa-w-20 {
-    width: 1.25em; }
-  .svg-inline--fa.fa-pull-left {
-    margin-right: .3em;
-    width: auto; }
-  .svg-inline--fa.fa-pull-right {
-    margin-left: .3em;
-    width: auto; }
-  .svg-inline--fa.fa-border {
-    height: 1.5em; }
-  .svg-inline--fa.fa-li {
-    width: 2em; }
-  .svg-inline--fa.fa-fw {
-    width: 1.25em; }
-
-.fa-layers svg.svg-inline--fa {
-  bottom: 0;
-  left: 0;
-  margin: auto;
-  position: absolute;
-  right: 0;
-  top: 0; }
-
-.fa-layers {
-  display: inline-block;
-  height: 1em;
-  position: relative;
-  text-align: center;
-  vertical-align: -.125em;
-  width: 1em; }
-  .fa-layers svg.svg-inline--fa {
-    -webkit-transform-origin: center center;
-            transform-origin: center center; }
-
-.fa-layers-text, .fa-layers-counter {
-  display: inline-block;
-  position: absolute;
-  text-align: center; }
-
-.fa-layers-text {
-  left: 50%;
-  top: 50%;
-  -webkit-transform: translate(-50%, -50%);
-          transform: translate(-50%, -50%);
-  -webkit-transform-origin: center center;
-          transform-origin: center center; }
-
-.fa-layers-counter {
-  background-color: #ff253a;
-  border-radius: 1em;
-  -webkit-box-sizing: border-box;
-          box-sizing: border-box;
-  color: #fff;
-  height: 1.5em;
-  line-height: 1;
-  max-width: 5em;
-  min-width: 1.5em;
-  overflow: hidden;
-  padding: .25em;
-  right: 0;
-  text-overflow: ellipsis;
-  top: 0;
-  -webkit-transform: scale(0.25);
-          transform: scale(0.25);
-  -webkit-transform-origin: top right;
-          transform-origin: top right; }
-
-.fa-layers-bottom-right {
-  bottom: 0;
-  right: 0;
-  top: auto;
-  -webkit-transform: scale(0.25);
-          transform: scale(0.25);
-  -webkit-transform-origin: bottom right;
-          transform-origin: bottom right; }
-
-.fa-layers-bottom-left {
-  bottom: 0;
-  left: 0;
-  right: auto;
-  top: auto;
-  -webkit-transform: scale(0.25);
-          transform: scale(0.25);
-  -webkit-transform-origin: bottom left;
-          transform-origin: bottom left; }
-
-.fa-layers-top-right {
-  right: 0;
-  top: 0;
-  -webkit-transform: scale(0.25);
-          transform: scale(0.25);
-  -webkit-transform-origin: top right;
-          transform-origin: top right; }
-
-.fa-layers-top-left {
-  left: 0;
-  right: auto;
-  top: 0;
-  -webkit-transform: scale(0.25);
-          transform: scale(0.25);
-  -webkit-transform-origin: top left;
-          transform-origin: top left; }
-
-.fa-lg {
-  font-size: 1.33333em;
-  line-height: 0.75em;
-  vertical-align: -.0667em; }
-
-.fa-xs {
-  font-size: .75em; }
-
-.fa-sm {
-  font-size: .875em; }
-
-.fa-1x {
-  font-size: 1em; }
-
-.fa-2x {
-  font-size: 2em; }
-
-.fa-3x {
-  font-size: 3em; }
-
-.fa-4x {
-  font-size: 4em; }
-
-.fa-5x {
-  font-size: 5em; }
-
-.fa-6x {
-  font-size: 6em; }
-
-.fa-7x {
-  font-size: 7em; }
-
-.fa-8x {
-  font-size: 8em; }
-
-.fa-9x {
-  font-size: 9em; }
-
-.fa-10x {
-  font-size: 10em; }
-
-.fa-fw {
-  text-align: center;
-  width: 1.25em; }
-
-.fa-ul {
-  list-style-type: none;
-  margin-left: 2.5em;
-  padding-left: 0; }
-  .fa-ul > li {
-    position: relative; }
-
-.fa-li {
-  left: -2em;
-  position: absolute;
-  text-align: center;
-  width: 2em;
-  line-height: inherit; }
-
-.fa-border {
-  border: solid 0.08em #eee;
-  border-radius: .1em;
-  padding: .2em .25em .15em; }
-
-.fa-pull-left {
-  float: left; }
-
-.fa-pull-right {
-  float: right; }
-
-.far,.fa {
-  margin: 0 .3em;
-}
-.fa.fa-pull-left,
-.fas.fa-pull-left,
-.far.fa-pull-left,
-.fal.fa-pull-left,
-.fab.fa-pull-left {
-  margin-right: .3em; }
-
-.fa.fa-pull-right,
-.fas.fa-pull-right,
-.far.fa-pull-right,
-.fal.fa-pull-right,
-.fab.fa-pull-right {
-  margin-left: .3em; }
-
-.fa-spin {
-  -webkit-animation: fa-spin 2s infinite linear;
-          animation: fa-spin 2s infinite linear; }
-
-.fa-pulse {
-  -webkit-animation: fa-spin 1s infinite steps(8);
-          animation: fa-spin 1s infinite steps(8); }
-
-@-webkit-keyframes fa-spin {
-  0% {
-    -webkit-transform: rotate(0deg);
-            transform: rotate(0deg); }
-  100% {
-    -webkit-transform: rotate(360deg);
-            transform: rotate(360deg); } }
-
-@keyframes fa-spin {
-  0% {
-    -webkit-transform: rotate(0deg);
-            transform: rotate(0deg); }
-  100% {
-    -webkit-transform: rotate(360deg);
-            transform: rotate(360deg); } }
-
-.fa-rotate-90 {
-  -ms-filter: "progid:DXImageTransform.Microsoft.BasicImage(rotation=1)";
-  -webkit-transform: rotate(90deg);
-          transform: rotate(90deg); }
-
-.fa-rotate-180 {
-  -ms-filter: "progid:DXImageTransform.Microsoft.BasicImage(rotation=2)";
-  -webkit-transform: rotate(180deg);
-          transform: rotate(180deg); }
-
-.fa-rotate-270 {
-  -ms-filter: "progid:DXImageTransform.Microsoft.BasicImage(rotation=3)";
-  -webkit-transform: rotate(270deg);
-          transform: rotate(270deg); }
-
-.fa-flip-horizontal {
-  -ms-filter: "progid:DXImageTransform.Microsoft.BasicImage(rotation=0, mirror=1)";
-  -webkit-transform: scale(-1, 1);
-          transform: scale(-1, 1); }
-
-.fa-flip-vertical {
-  -ms-filter: "progid:DXImageTransform.Microsoft.BasicImage(rotation=2, mirror=1)";
-  -webkit-transform: scale(1, -1);
-          transform: scale(1, -1); }
-
-.fa-flip-both, .fa-flip-horizontal.fa-flip-vertical {
-  -ms-filter: "progid:DXImageTransform.Microsoft.BasicImage(rotation=2, mirror=1)";
-  -webkit-transform: scale(-1, -1);
-          transform: scale(-1, -1); }
-
-:root .fa-rotate-90,
-:root .fa-rotate-180,
-:root .fa-rotate-270,
-:root .fa-flip-horizontal,
-:root .fa-flip-vertical,
-:root .fa-flip-both {
-  -webkit-filter: none;
-          filter: none; }
-
-.fa-stack {
-  display: inline-block;
-  height: 2em;
-  position: relative;
-  width: 2.5em; }
-
-.fa-stack-1x,
-.fa-stack-2x {
-  bottom: 0;
-  left: 0;
-  margin: auto;
-  position: absolute;
-  right: 0;
-  top: 0; }
-
-.svg-inline--fa.fa-stack-1x {
-  height: 1em;
-  width: 1.25em; }
-
-.svg-inline--fa.fa-stack-2x {
-  height: 2em;
-  width: 2.5em; }
-
-.fa-inverse {
-  color: #fff; }
-
-.sr-only {
-  border: 0;
-  clip: rect(0, 0, 0, 0);
-  height: 1px;
-  margin: -1px;
-  overflow: hidden;
-  padding: 0;
-  position: absolute;
-  width: 1px; }
-
-.sr-only-focusable:active, .sr-only-focusable:focus {
-  clip: auto;
-  height: auto;
-  margin: 0;
-  overflow: visible;
-  position: static;
-  width: auto; }
-
-/* fontawesome end*/
-
-/* xsj patch start */
-
-.xsj_anchor{
-  overflow: hidden;
-  float: right;
-}
-
-.blank_anchor_id {
-    float: right;
-    width: 1px;
-    height: 0px;
-}
-.blank_anchor_id {
-    visibility: hidden;
-}
-.blank_anchor_id:before {
-    content: 'a';
-}
-.xsj_foreignObject{
-  width: 100%!important;
-  height: 100%!important;
-  text-align: initial;
-  word-spacing: normal;
-}
-.xsj_foreignObject hr{
-    margin: inherit;
-}
-.xsj_foreignObject.xsj_drawio_foreignObject *{
-  font-size: inherit;
-}
-.xsj_export_pdf .xsj_foreignObject.xsj_drawio_foreignObject *{
-  font-size: 85%;
-}
-
-.xsj_export_pdf ins .mathjax .MathJax_SVG {
-    border-bottom: 2px solid;
-}
-
-.xsj_foreignObject.xsj_drawio_foreignObject h1{
-  font-size: 2em;
-  margin-block-start: 0.67em;
-  margin-block-end: 0.67em;
-  margin-inline-start: 0px;
-  margin-inline-end: 0px;
-  font-weight: bold;
-}
-.xsj_foreignObject.xsj_drawio_foreignObject h2{
-  font-size: 1.5em;
-  margin-block-start: 0.83em;
-  margin-block-end: 0.83em;
-  margin-inline-start: 0px;
-  margin-inline-end: 0px;
-  font-weight: bold;
-}
-.xsj_foreignObject.xsj_drawio_foreignObject h3{
-  font-size: 1.17em;
-  margin-block-start: 1em;
-  margin-block-end: 1em;
-  margin-inline-start: 0px;
-  margin-inline-end: 0px;
-  font-weight: bold;
-}
-.xsj_foreignObject.xsj_drawio_foreignObject h4{
-  font-size: 1em;
-  margin-block-start: 1.33em;
-  margin-block-end: 1.33em;
-  margin-inline-start: 0px;
-  margin-inline-end: 0px;
-  font-weight: bold;
-}
-.xsj_foreignObject.xsj_drawio_foreignObject h5{
-  font-size: .83em;
-  margin-block-start: 1.67em;
-  margin-block-end: 1.67em;
-  margin-inline-start: 0px;
-  margin-inline-end: 0px;
-  font-weight: bold;
-}
-.xsj_foreignObject.xsj_drawio_foreignObject h6{
-  font-size: .67em;
-  margin-block-start: 2.33em;
-  margin-block-end: 2.33em;
-  margin-inline-start: 0px;
-  margin-inline-end: 0px;
-  font-weight: bold;
-}
-
-/* xsj patch end */
-
-
-/* title start */
-h1.story_title {
-    font-size: 2.1rem;
-    margin: 0.7em 0;
-}
-/* title end */
-
-/* tag start */
-.story_tags {
-    margin: 0 0 1.2em;
-}
-.tag.label{
-    display: inline-block;
-    vertical-align: baseline;
-    line-height: 1;
-    margin: 0 0.5em 0.5em 0;
-    background: #e2e2e2;
-    border-color: #e2e2e2;
-    background-image: none;
-    padding: 0.6em 0.8em;
-    font-weight: bold;
-    border-radius: 0.2857rem;
-    box-sizing: border-box;
-    font-size: 12px;
-}
-/* tag end */
-
-/* emoji */
-img.emoji {
-    width: 1em;
-    line-height: 1em;
-    vertical-align: baseline;
-    margin-bottom: 0;
-}
-/* emoji */
-
-/* align grammar start*/
-
-.story_align_left, .story_align_left .story_image_container {
-    text-align: left;
-}
-.story_align_right, .story_align_right .story_image_container {
-    text-align: right;
-}
-.story_align_center, .story_align_center .story_image_container {
-    text-align: center;
-}
-.story_align_justify, .story_align_justify .story_image_container {
-    text-align: justify;
-}
-
-/* align grammar end*/
-
-/*mindmap start*/
-.mindmap_container {
-  text-align: center;
-}
-
-.xsj_mindmap_caption{
-   border-bottom: 1px solid #d9d9d9;
-  display: inline-block;
-  color: #999;
-  padding: 10px;
-}
-/*mindmap end*/
-
-
-
-/* table start*/
-
-table {
-  max-width: 100%;
-  background-color: transparent;
-  border-collapse: collapse;
-  border-spacing: 0;
-  word-break: initial;
-  border: 1px solid #d9d9da;
-}
-.table {
-  width: 100%;
-  margin-bottom: 20px;
-  margin-right: auto;
-  margin-left: auto;
-}
-
-.table th,
-.table td {
-  padding: 8px;
-  line-height: 20px;
-  text-align: left;
-  vertical-align: top;
-  border-top: 1px solid #d9d9da;
-}
-
-.table th {
-  font-weight: bold;
-}
-
-.table thead th {
-  vertical-align: bottom;
-}
-
-.table tbody + tbody {
-  border-top: 2px solid #d9d9da;
-}
-
-.table .table {
-  background-color: #ffffff;
-}
-
-
-.table-striped tbody > tr:nth-child(odd) > td,
-.table-striped tbody > tr:nth-child(odd) > th {
-  background-color: #f9f9f9;
-}
-
-.table-celled.table tr td,.table-celled.table tr th {
-    border-left: 1px solid #d9d9da;
-}
-
-/* table end*/
-
-/*code start*/
-
-code {
-    background-color: #F0F0F0;
-    border-radius: 4px;
-    padding: 2px 4px;
-    margin: 0 .225em;
-    color: #880000;
-}
-body code{
-    border: 0;
-    border-radius: 4px;
-    font-size: .9em;
-}
-
-.hljs, .hljs * {
-  overflow: visible !important;
-} 
-
-body .xiaoshujiang_code {
-    border: 0;
-    border-radius: 4px;
-    font-size: .9em;
-}
-.xiaoshujiang_code ol{
-    margin-top: 0px;
-    margin-bottom: 0px;
-}
-
-.xiaoshujiang_pre {
-    line-height: initial !important;
-    word-wrap: break-word;
-    word-break: break-word;
-    tab-size: 4;
-    white-space: pre-wrap;
-    font-family: monospace;
-}
-.xiaoshujiang_code_container pre{
-    margin: 0px;
-}
-.xiaoshujiang_code_container.xiaoshujiang_code_chunk{
-    box-shadow: 0 0 0 1px #A3C293 inset,0 0 0 0 transparent;
-    margin: 1em 0;
-    padding: 1em;
-}
-.xiaoshujiang_code_container.xiaoshujiang_code_chunk_hide_code{
-    box-shadow: initial;
-    padding: initial;
-    padding-bottom: 2em;
-}
-.xiaoshujiang_code_container .out_put{
-    box-shadow: 0 0 0 1px #A3C293 inset,0 0 0 0 transparent;
-    margin: 1em 0;
-    background-color: #FCFFF5;
-    color: #2C662D;
-    padding: 1em;
-}
-.xiaoshujiang_code_container .out_put_error{
-    background-color: #FFF6F6;
-    color: #9F3A38;
-    margin: 1em 0;
-    box-shadow: 0 0 0 1px #E0B4B4 inset,0 0 0 0 transparent;
-    padding: 1em;
-}
-
-/*code end*/
-
-/* code line nums start*/
-
-code.hljs.code_linenums, .xiaoshujiang_code.hljs.code_linenums{
-    position: relative;
-}
-.ol_linenums{
-    padding: 0px;
-    margin-left: 2em;
-    border-left: 1px solid #e0e0e0;
-}
-.li_linenum{
-    position:relative;
-    margin-left: 0.5em;
-    list-style: none;
-    counter-increment: lines 1;
-}
-.li_linenum.li_list_style{
-    list-style: inherit;
-    margin-left: 5px;
-}
-.li_linenum:before, .li_linenum_before_span{
-    content: counter(lines, decimal);
-  position: absolute;
-  left: -3em;
-  text-align: center;
-  width: 2.5em;
-  vertical-align: top;
-}
-.li_linenum_before_span_hide{
-    display: none;
-}
-.xiaoshujiang_code .code_line_break_hack{
-    margin:0;
-    border:0;
-    border-top:0;
-    border-bottom:0;
-}
-.component_attachment, .code_line_break_hack{
-  display: none;
-  visibility: collapse!important;
-  height: 0!important;
-}
-
-/* code line nums end*/
-
-/* block code start */
-.xiaoshujiang_code_container {
-    margin: 1em 0px 2em;
-    position: relative;
-}
-
-
-.xiaoshujiang_code_title_container{
-    font-size: 50%;
-}
-.xiaoshujiang_code_title_container>.xiaoshujiang_code_infos{
-    float: right;
-}
-/* block code end */
-
-
-/*mark start*/
-
-.mark{
-  border: 0;
-  background-color: rgba(221, 243, 231, 0.4);
-  color: #105012;
-  padding: 2px 4px;
-}
-
-.li_linenum.line_mark:before, .line_mark .li_linenum_before_span {
-    background: rgba(210, 118, 118, 0.6);
-}
-.line_mark{
-    border: 1px dashed #3A4C42;
-    margin-top: 2px;
-}
-code .mark, .xiaoshujiang_code .mark{
-    border-radius: 0px;
-    font-size: initial;
-    padding: initial;
-}
-/*mark end*/
-
-
-.xsj_code_strong{
-  -webkit-text-emphasis: triangle;
-  -webkit-text-emphasis-position: under;
-}
-
-/* attachment start */
-a.attachment{
-    background: #ecf0f3;
-    border: 1px solid #bec6cb;
-    display: inline-block;
-    padding: 0.6em;
-    margin: 0.5em 0.5em;
-    min-width: 250px;
-}
-a.attachment i.fa{
-    font-size: 3em;
-  float: left;
-  margin-right: 0.2em;
-}
-a.attachment .filename{
-    vertical-align: top;
-  text-align: left;
-  font-weight: bold;
-}
-a.attachment .filesize{
-  display: -webkit-box;
-  display: -moz-box;
-  display: -ms-flexbox;
-  display: -webkit-flex;
-  display: flex;
-  opacity: .6;
-  font-size: 80%;
-  white-space: nowrap;
-}
-/* attachment end */
-
-
-/*code chunk video, slideshare start*/
-.video_container{
-    width: 100%;
-    display: table;
-    text-align: center;
-    position: relative;
-    padding-bottom: 56.25%!important;
-}
-
-.video_container iframe{
-    width: 100%;
-    height: 100%;
-    position: absolute;
-    top: 0;
-    left: 0;
-    z-index: 1;
-    vertical-align: middle;
-}
-
-.slideshare_container .inner{
-    position: relative;
-    width: 100%;
-}
-
-.slideshare_container .inner iframe{
-    width: 100%;
-    height: 100%;
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    right: 0;
-}
-
-/*code chunk video, slideshare start*/
-
-
-
-/*mermaid start*/
-
-.mermaid {
-    text-align: center;
-}
-
-.mermaid_svg{
-    font-family: monospace;
-    text-align: initial;
-}
-.mermaid_svg foreignObject{
-  overflow: visible;
-}
-.mermaid_svg foreignObject i.fa{
-  min-width: 16px;
-}
-.mermaid_svg .svg-inline--fa,.mermaid_svg .svg-inline--fa path {
-    fill: initial!important;
-    stroke: initial!important;
-}
-
-.mermaid_svg .grid path {
-  stroke: transparent;
-}
-/*mermaid stop*/
-
-
-/* patch evernote start*/
-.toc ul {
-    list-style-type: none;
-}
-/* patch evernote end*/
-
-
-/* image start*/
-img {
-    height: auto;
-    max-width: 100%;
-    vertical-align: middle;
-    border: 0;
-}
-
-.story_image_container{
-    text-align: center;
-}
-.story_image_container>.story_image{
-    display: inline-block;
-    position: relative;
-    max-width: 100%;
-}
-.story_image_caption, .xsj_remote_html_caption {
-    border-bottom: 1px solid #d9d9d9;
-    display: inline-block;
-    color: #999;
-    padding: 10px;
-}
-.story_image_blank_caption, .xsj_remote_html_blank_caption{
-    display: none;
-}
-.story_image>img{
-    border-radius: 0.3125em;
-    box-shadow: 0 2px 4px 0 rgba(34,36,38,.12),0 2px 10px 0 rgba(34,36,38,.08);
-}
-
-.story_inline_image{
-  display: inline-block;
-}
-.story_inline_image>img{
-    vertical-align: bottom;
-}
-/* image end*/
-
-.story_remote_resource_block{
-    text-align: center;
-}
-
-/* task list start */
-.task-list-item{
-    list-style: none;
-}
-.task-list-item.li_list_style{
-    list-style:inherit;
-}
-.task-list-item>input{
-    margin: 0 0 0 -1.5em;
-    width: 1.5em;
-}
-
-/* task list end */
-
-/* other start */
-em.cjk_emphasis{
-    font-style: normal;
-    font-family: Georgia,"Times New Roman",Times,"楷体","AR PL UKai CN", "NSimSun","Songti SC","SimSun",serif!important;
-}
-
-.flow-chart, .sequence-diagram{
-    text-align: center;
-}
-.plot, .plot-image{
-    text-align: center;
-    min-height: 200px;
-    min-width: 200px;
-}
-
-ins .mathjax .MathJax_SVG {
-    border-bottom: 1px solid;
-    padding-bottom: 2px;
-    margin-bottom: 2px;
-}
-
-.mathjax-container{
-    text-align: center;
-    margin: 0 auto;
-}
-div.mathjax{
-    max-width: 100%;
-    margin: 0 auto;
-    font-size: 14px;
-}
-
-.mathjax-container .math_equation_table{
-  border: 0;
-  width: 100%;
-}
-.mathjax-container .math_equation_table td{
-  text-align: center;
-  vertical-align: top;
-}
-
-.xsj_numbered_heading{
-  margin-right: .5em;
-}
-
-.xsj_export_pdf .fa-border {
-  border: none;
-  border-radius: initial;
-  padding: initial;
-  margin: 0 .25em;
-  outline-offset: .2em;
-  outline: 1px solid #eee;
-}
-.preview.html_preview{
-  max-width: 100%;
-}
-
-.xsj_export_pdf.preview.html_preview{
-  max-width: initial;
-  border: initial;
-  margin: initial;
-  padding: initial;
-  border-radius: initial;
-  box-shadow: initial;
-}
-/* other end */
-
-
-
-
-/* blockquote start*/
-/** only icon **/
-.html_preview>.markdown_blockquote{
-    position: relative;
-}
-.html_preview>.markdown_blockquote.markdown_blockquote_icon{
-    margin-left: 10px;
-}
-.html_preview>.markdown_blockquote>.xsj_paragraph:first-child>i:first-child{
-    background-color: #dedede;
-    border-radius: 100%;
-    left: -18px;
-    line-height: 30px;
-    position: absolute;
-    height: 30px;
-    width: 30px;
-    text-align: center;
-    font-size: 16px!important;
-    padding: 0;
-    border: 0px;
-
-}
-
-.html_preview>.markdown_blockquote>.xsj_paragraph:first-child>.svg-image:first-child,
-.html_preview>.markdown_blockquote>.xsj_paragraph:first-child>svg.svg-inline--fa:first-child {
-    background-color: #dedede;
-    border-radius: 100%;
-    left: -15px;
-    line-height: 30px;
-    position: absolute;
-    height: 20px;
-    width: 20px;
-    text-align: center;
-    box-shadow: 0 0 0px 5px #dedede;
-    font-size: 16px!important;
-    padding: 0;
-    border: 0px;
-    outline: 0;
-    margin: 0;
-}
-/** only icon **/
-/** heading **/
-.html_preview > .markdown_blockquote.markdown_blockquote_heading {
-    margin-top: 40px;
-    page-break-inside: auto;
-}
-.html_preview>.markdown_blockquote_heading>.xsj_heading:first-child {
-    display: block;
-    font-size: 1.4em;
-    background-color: #dedede;
-    padding: 0 15px;
-    margin: -20px;
-    position: relative;
-}
-.html_preview>.markdown_blockquote_heading>.xsj_heading:first-child .xsj_heading_content>i:first-child {
-    background-color: #dedede;
-    border-radius: 100%;
-    left: -16px;
-    top: .25em;
-    line-height: 30px;
-    position: absolute;
-    height: 30px;
-    width: 30px;
-    text-align: center;
-    font-size: 16px !important;
-    padding: 0;
-    border: 0px;
-}
-
-.html_preview>.markdown_blockquote_heading>.xsj_heading:first-child .xsj_heading_content>.svg-image:first-child,
-.html_preview>.markdown_blockquote_heading>.xsj_heading:first-child .xsj_heading_content>svg.svg-inline--fa:first-child {
-    background-color: #dedede;
-    border-radius: 100%;
-    left: -15px;
-    top: .25em;
-    line-height: 30px;
-    position: absolute;
-    height: 20px;
-    width: 20px;
-    text-align: center;
-    box-shadow: 0 0 0px 5px #dedede;
-    font-size: 16px!important;
-    padding: 0;
-    border: 0px;
-    outline: 0;
-    margin: 0;
-}
-
-/** heading **/
-/* blockquote end*/
-
-
-@media print{
-  body{
-    font-size: 18px;
-    word-wrap: break-word;
-    word-break: break-word;
-    background: initial!important;
-    font-kerning: normal;
-    text-rendering: geometricPrecision;
-  }
-  .preview.html_preview{
-    max-width: initial;
-    border: initial;
-    margin: initial;
-    padding: initial;
-    border-radius: initial;
-    box-shadow: initial;
-  }
-  .xiaoshujiang_element.xsj_anchor{
-    position: absolute;
-  }
-  tr { page-break-inside: avoid; }
-  .story_image_container{
-     page-break-inside: avoid;
-  }
-  blockquote{
-    page-break-inside: avoid;
-  }
-
-  .xsj_underline{
-      page-break-after: always;
-      visibility: hidden;
-  }
-}
-
-body{color:#2f2f2f}.xsj_hr{border-top:1px dashed #2f2f2f}kbd{color:#2f2f2f;border:solid 1px #2f2f2f;border-bottom-color:#2f2f2f;box-shadow:inset 0 -1px 0 #2f2f2f}table{border:1px solid rgba(34,36,38,.15)}.table td,.table th{border-top:1px solid #ddd}.table tbody+tbody{border-top:2px solid #ddd}.table .table{background:#fff}.table-striped tbody>tr:nth-child(odd)>td,.table-striped tbody>tr:nth-child(odd)>th{background:#f9f9f9}.table-celled.table tr td,.table-celled.table tr th{border-left:1px solid rgba(34,36,38,.1)}.line_mark{background:rgba(210,174,174,.3)}.xiaoshujiang_code .mark,code .mark{background:rgba(160,234,194,.7)}.markdown_vertical>*,.markdown_vertical>:first-child{margin-top:.8em}.markdown_vertical{font-family:YRDZST,"Noto Serif CJK SC",FandolKai,"Adobe Kaiti Std","Adobe 楷体 Std",FZKai-Z03S,"方正楷体简体","AR PL UKai CN","楷体",NSimSun,SimSun,serif;font-size:1.2em;writing-mode:vertical-rl;border:initial;border-left:initial;background:initial;margin-left:auto!important;margin-right:0}.markdown_vertical em{-webkit-text-emphasis:circle}.markdown_vertical strong{border-left:2px solid}.html_preview>.markdown_blockquote_heading.markdown_vertical>.xsj_heading:first-child{position:initial;background:initial;border:initial;background-color:initial;border-top:initial}.html_preview>.markdown_blockquote.markdown_vertical>.xsj_paragraph:first-child>i:first-child,.html_preview>.markdown_blockquote_heading.markdown_vertical>.xsj_heading:first-child .xsj_heading_content>i:first-child{position:initial;background-color:initial}@media print{.markdown_vertical{writing-mode:initial}.markdown_vertical strong{border-left:0;border-bottom:2px solid}}
-/*
-
-Original highlight.js style (c) Ivan Sagalaev <maniac@softwaremaniacs.org>
-
-*/
-
-.hljs {
-  display: block;
-  overflow-x: auto;
-  padding: 0.5em;
-  background: #F0F0F0;
-}
-
-
-/* Base color: saturation 0; */
-
-.hljs,
-.hljs-subst {
-  color: #444;
-}
-
-.hljs-comment {
-  color: #888888;
-}
-
-.hljs-keyword,
-.hljs-attribute,
-.hljs-selector-tag,
-.hljs-meta .hljs-keyword,
-.hljs-doctag,
-.hljs-name {
-  font-weight: bold;
-}
-
-
-/* User color: hue: 0 */
-
-.hljs-type,
-.hljs-string,
-.hljs-number,
-.hljs-selector-id,
-.hljs-selector-class,
-.hljs-quote,
-.hljs-template-tag,
-.hljs-deletion {
-  color: #880000;
-}
-
-.hljs-title,
-.hljs-section {
-  color: #880000;
-  font-weight: bold;
-}
-
-.hljs-regexp,
-.hljs-symbol,
-.hljs-variable,
-.hljs-template-variable,
-.hljs-link,
-.hljs-selector-attr,
-.hljs-selector-pseudo {
-  color: #BC6060;
-}
-
-
-/* Language color: hue: 90; */
-
-.hljs-literal {
-  color: #78A960;
-}
-
-.hljs-built_in,
-.hljs-bullet,
-.hljs-code,
-.hljs-addition {
-  color: #397300;
-}
-
-
-/* Meta color: hue: 200 */
-
-.hljs-meta {
-  color: #1f7199;
-}
-
-.hljs-meta .hljs--string {
-  color: #4d99bf;
-}
-
-
-/* Misc effects */
-
-.hljs-emphasis {
-  font-style: italic;
-}
-
-.hljs-strong {
-  font-weight: bold;
-}
-
-</style>
-</head><body>
-<div><div class="preview" id="wmd-preview">
-
-	<div class="preview html_preview xsj_export_html"><h1 class="xsj_heading_hash xsj_heading xsj_heading_h1" id="phaser_1"><div class="xiaoshujiang_element xsj_anchor">
-  <a name="phaser_1" class="blank_anchor_name"></a><a id="phaser_1" class="blank_anchor_id"></a><a name="phaser" class="blank_anchor_name"></a><a id="phaser" class="blank_anchor_id"></a>
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>4.60. Phaser &mdash; JL Project Documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="https://doc.zh-jieli.com/static/css/custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="https://doc.zh-jieli.com/static/js/custom.js"></script>
+        <script src="../../_static/js/custom.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="4.61. 双耳回声效果（Pingpong Echo）" href="pingpong_echo_manual.html" />
+    <link rel="prev" title="4.59. Flanger" href="flanger_manual.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../index.html" class="icon icon-home"> JieLi_蓝牙音频
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
 </div>
-<span class="xsj_heading_content">Phaser</span></h1>
-<h2 class="xsj_heading_hash xsj_heading xsj_heading_h2" id="e58a9fe883bde4bb8be7bb8d_2"><div class="xiaoshujiang_element xsj_anchor">
-  <a name="e58a9fe883bde4bb8be7bb8d_2" class="blank_anchor_name"></a><a id="e58a9fe883bde4bb8be7bb8d_2" class="blank_anchor_id"></a><a name="功能介绍" class="blank_anchor_name"></a><a id="功能介绍" class="blank_anchor_id"></a>
-</div>
-<span class="xsj_heading_content">功能介绍</span></h2>
-<p class="xsj_paragraph xsj_paragraph_level_0">phaser模块用于实现相位调制效果，它通过改变音频信号的相位来实现音色变化。</p>
-<h2 class="xsj_heading_hash xsj_heading xsj_heading_h2" id="e58f82e695b0e7ae80e8bfb0_3"><div class="xiaoshujiang_element xsj_anchor">
-  <a name="e58f82e695b0e7ae80e8bfb0_3" class="blank_anchor_name"></a><a id="e58f82e695b0e7ae80e8bfb0_3" class="blank_anchor_id"></a><a name="参数简述" class="blank_anchor_name"></a><a id="参数简述" class="blank_anchor_id"></a>
-</div>
-<span class="xsj_heading_content">参数简述</span></h2>
-<ul class="markdown_ul">
-<li><strong class="markdown_strong_asterisk">反馈系数[Feedback]</strong>:单位percent</li>
-<li><strong class="markdown_strong_asterisk">调制频率[Modulation Rate]</strong>:单位Hz</li>
-<li><strong class="markdown_strong_asterisk">延迟时间[Delay]</strong>:影响申请的buf大小,单位ms</li>
-<li><strong class="markdown_strong_asterisk">调制长度[Modulation  Depth]</strong>  :实际值是delay*mod_depth/100,单位percent，影响原声跟效果声来回抖动的长度</li>
-<li><strong class="markdown_strong_asterisk">湿声增益[Wet Gain]</strong>:单位percent，效果声的音量</li>
-<li><strong class="markdown_strong_asterisk">干声增益[Dry Gain]</strong>:单位percent，原声的音量</li>
-<li><strong class="markdown_strong_asterisk">左右相位差异[LRphase Diff]</strong>:范围0到360度</li>
-<li><strong class="markdown_strong_asterisk">相位滤波器阶数[N-Stage]</strong>:实际阶数是N-Stage*2阶</li>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">SDK入门</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../framework/index.html">1. 技术框架</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8/index.html">2. 快速入门</a></li>
 </ul>
-<h3 class="xsj_heading_hash xsj_heading xsj_heading_h3" id="e5a682e69e9ce99c80e8a681e58d95e5a3b0e98193e8bf9be58f8ce5a3b0e98193e587baefbc8ce38090lrphasediffe8aebee68890e99d9e0e7949fe69588e38091efbc8ce58fafe4bba5e58588e58d95e58f98e58f8cefbc9a_4"><div class="xiaoshujiang_element xsj_anchor">
-  <a name="e5a682e69e9ce99c80e8a681e58d95e5a3b0e98193e8bf9be58f8ce5a3b0e98193e587baefbc8ce38090lrphasediffe8aebee68890e99d9e0e7949fe69588e38091efbc8ce58fafe4bba5e58588e58d95e58f98e58f8cefbc9a_4" class="blank_anchor_name"></a><a id="e5a682e69e9ce99c80e8a681e58d95e5a3b0e98193e8bf9be58f8ce5a3b0e98193e587baefbc8ce38090lrphasediffe8aebee68890e99d9e0e7949fe69588e38091efbc8ce58fafe4bba5e58588e58d95e58f98e58f8cefbc9a_4" class="blank_anchor_id"></a><a name="如果需要单声道进双声道出lrphasediff设成非0生效可以先单变双" class="blank_anchor_name"></a><a id="如果需要单声道进双声道出lrphasediff设成非0生效可以先单变双" class="blank_anchor_id"></a>
-</div>
-<span class="xsj_heading_content">如果需要单声道进双声道出，【LRphasediff设成非0生效】，可以先单变双：</span></h3>
-<p class="xsj_paragraph xsj_paragraph_level_0"></p><div class="story_image_container story_block_image"><div class="story_image"><img src="data:image/png;base64,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" data-vdom-skip="true" data-vdom-cache="true" alt="phaser" title="phaser" name="assets/phaser.png" data-src="./assets/phaser.png"><br><div class="story_image_caption ">phaser</div></div></div><p></p>
-</div>
+<p class="caption" role="heading"><span class="caption-text">音频功能进阶</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../audio/index.html">1. 音频播放</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../audio_config/index.html">2. 音频配置</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../audio_flow/index.html">3. 音频流程</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">4. 音效调试</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="effects_common/index.html">4.1. 音效通用说明</a></li>
+<li class="toctree-l2"><a class="reference internal" href="AudioEffects_List.html">4.2. 音效列表（Effects List）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="EQ_manual.html">4.3. 均衡器（EQ）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="VirtualBass_manual.html">4.4. 虚拟低音（VBass）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="virtual_bass_pro_manual.html">4.5. VirtualBass Pro</a></li>
+<li class="toctree-l2"><a class="reference internal" href="VoiceChanger_manual.html">4.6. 变声（VoiceChanger）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="CrossOver_manual.html">4.7. 分频器（CrossOver）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="DRC_manual.html">4.8. 动态范围压缩（DRC）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="DRC_manual.html#drc-advance">4.9. 动态范围压缩（DRC ADVANCE）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Dynamic_EQ_manual.html">4.10. 动态均衡器（Dynamic EQ）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Dynamic_EQ_manual.html#dynamic-eq-pro">4.11. 动态均衡器（Dynamic EQ Pro）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Echo_manual.html">4.12. 回声（Echo）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="PlateReverb_manual.html">4.13. Plate Reverb</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Reverb_manual.html">4.14. Reverb</a></li>
+<li class="toctree-l2"><a class="reference internal" href="HowlingFrequencyShift_manual.html">4.15. 移频（Frequency Shift）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="HowlingSuppress_manual.html">4.16. 啸叫抑制（Howling Suppress）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="NoiseGate_manual.html">4.17. 噪声门限（Noise Gate）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="NoiseGate_Pro_manual.html">4.18. NoiseGate Pro</a></li>
+<li class="toctree-l2"><a class="reference internal" href="StereoWidener_manual.html">4.19. 立体声扩展器（Stereo Widener）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="SurroundEffect_manual.html">4.20. 3D环绕音（3D Surround）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="HarmonicExciter_manual.html">4.21. 谐波增强（Harmonic Exciter）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Autotune_manual.html">4.22. 电音（Autotune）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="BandMerge_manual.html">4.23. 频带合并（Band Merge）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="BassTreble_manual.html">4.24. 高低音（Bass and Treble）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="EnergyDetect_manual.html">4.25. 能量检测（EnergyDetect）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Gain_manual.html">4.26. 增益模块（Gain）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="SplitGain_manual.html">4.27. 立体声增益模块（Split Gain）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="PitchSpeed_manual.html">4.28. 变速变调（PitchSpeed）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Spectrum_manual.html">4.29. 频谱显示（Spectrum）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="StereoMix_manual.html">4.30. 立体声混合（Stereo Mix）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="VocalRemover_manual.html">4.31. 人声消除（Vocal Remover）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Chorus_manual.html">4.32. 合唱（Chorus）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Indicator_manual.html">4.33. 分贝指示器（Indicator）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ChannelAdapter_manual.html">4.34. 声道适配</a></li>
+<li class="toctree-l2"><a class="reference internal" href="NoiseSuppressor_manual.html">4.35. 降噪（Noise Suppressor）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="NoiseSuppressor_LITE_manual.html">4.36. 轻型降噪（Noise Suppressor Lite）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="DNS%20NoiseSuppressor_manual.html">4.37. 降噪（DNS Noise Suppressor）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="LLNS_manual.html">4.38. LLNS（低延时降噪）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="LLNS_DNS_manual.html">4.39. LLNS_DNS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="NF_suppressor_manual.html">4.40. 噪声抑制（NoiseFloor Suppressor）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="AutoDuck_manual.html">4.41. 自动闪避（AutoDuck）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="AutoWah_manual.html">4.42. 自动哇（AutoWah）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="PingPongPcmDelay_manual.html">4.43. PingPong</a></li>
+<li class="toctree-l2"><a class="reference internal" href="3D_Effect_manual.html">4.44. 3D音效(3D Effect)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="BitWidth_Convert_manual.html">4.45. 位宽转换</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Speaker_EQ_manual.html">4.46. SPK_EQ</a></li>
+<li class="toctree-l2"><a class="reference internal" href="SpectrumAdvance_manual.html">4.47. 高级频谱显示</a></li>
+<li class="toctree-l2"><a class="reference internal" href="StereoMtapsEcho_manua.html">4.48. StereoMtapsEcho</a></li>
+<li class="toctree-l2"><a class="reference internal" href="limiter_manual.html">4.49. Limiter and MB Limiter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Volume_manual.html">4.50. 音量控制器</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Fade_manual.html">4.51. 淡入（Fade）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pcm_delay_manual.html">4.52. 延时（PCM Delay）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Virtual_Surround_Pro_manual.html">4.53. 声场扩宽器</a></li>
+<li class="toctree-l2"><a class="reference internal" href="SignalGenerator_manual.html">4.54. 信号发生器（SignalGen 和 SignalGenSource）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="3D_Plus_manual.html">4.55. 3D环绕音效</a></li>
+<li class="toctree-l2"><a class="reference internal" href="multi_frequence_generator_menual.html">4.56. Multi Frequency Generator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="switch_manual.html">4.57. 数据流开关节点（Switch）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="chorus_adv_manual.html">4.58. 合唱（Chorus Advance）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="flanger_manual.html">4.59. Flanger</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">4.60. Phaser</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id1">4.60.1. 功能介绍</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id2">4.60.2. 参数简述</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#lrphasediff0">4.60.2.1. 如果需要单声道进双声道出，【LRphasediff设成非0生效】，可以先单变双：</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pingpong_echo_manual.html">4.61. 双耳回声效果（Pingpong Echo）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="distortion_clipping_manual.html">4.62. Distortion Clipping</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Stereo_Spatial_Wider_manual.html">4.63. 立体声空间扩宽器</a></li>
+<li class="toctree-l2"><a class="reference internal" href="frequency_compressor_manual.html">4.64. Frequency Compressor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="SpatialEffect.html">4.65. 空间音效</a></li>
+<li class="toctree-l2"><a class="reference internal" href="SpatialAdv_manual.html">4.66. Spatial Adv</a></li>
+<li class="toctree-l2"><a class="reference internal" href="vibrato_manual.html">4.67. Vibrato</a></li>
+<li class="toctree-l2"><a class="reference internal" href="harmony_manual.html">4.68. Harmony</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Tremolo_manual.html">4.69. Tremolo</a></li>
+<li class="toctree-l2"><a class="reference internal" href="VirtualSurroundHeadphone_manual.html">4.70. 耳机虚拟环绕音</a></li>
+<li class="toctree-l2"><a class="reference internal" href="AGC.html">4.71. AGC</a></li>
+<li class="toctree-l2"><a class="reference internal" href="AVC_manual.html">4.72. 音量自适应(Automatic Volume Control, AVC)</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../audio_cvp/index.html">5. 通话清晰语音</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../audio_FAQ/index.html">6. 音频FAQ</a></li>
+</ul>
 
-</div></div>
-</body></html>
+        </div>
+      </div>
+    </nav>
 
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">JieLi_蓝牙音频</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="index.html"><span class="section-number">4. </span>音效调试</a> &raquo;</li>
+      <li><span class="section-number">4.60. </span>Phaser</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section class="tex2jax_ignore mathjax_ignore" id="phaser">
+<h1><span class="section-number">4.60. </span>Phaser<a class="headerlink" href="#phaser" title="Permalink to this headline"></a></h1>
+<section id="id1">
+<h2><span class="section-number">4.60.1. </span>功能介绍<a class="headerlink" href="#id1" title="Permalink to this headline"></a></h2>
+<p>phaser模块用于实现相位调制效果，它通过改变音频信号的相位来实现音色变化。</p>
+</section>
+<section id="id2">
+<h2><span class="section-number">4.60.2. </span>参数简述<a class="headerlink" href="#id2" title="Permalink to this headline"></a></h2>
+<ul class="simple">
+<li><p><strong>反馈系数[Feedback]</strong>:单位percent</p></li>
+<li><p><strong>调制频率[Modulation Rate]</strong>:单位Hz</p></li>
+<li><p><strong>延迟时间[Delay]</strong>:影响申请的buf大小,单位ms</p></li>
+<li><p><strong>调制长度[Modulation  Depth]</strong>  :实际值是delay*mod_depth/100,单位percent，影响原声跟效果声来回抖动的长度</p></li>
+<li><p><strong>湿声增益[Wet Gain]</strong>:单位percent，效果声的音量</p></li>
+<li><p><strong>干声增益[Dry Gain]</strong>:单位percent，原声的音量</p></li>
+<li><p><strong>左右相位差异[LRphase Diff]</strong>:范围0到360度</p></li>
+<li><p><strong>相位滤波器阶数[N-Stage]</strong>:实际阶数是N-Stage*2阶</p></li>
+</ul>
+<section id="lrphasediff0">
+<h3><span class="section-number">4.60.2.1. </span>如果需要单声道进双声道出，【LRphasediff设成非0生效】，可以先单变双：<a class="headerlink" href="#lrphasediff0" title="Permalink to this headline"></a></h3>
+<p><img alt="phaser" src="../../_images/phaser.png" /></p>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="flanger_manual.html" class="btn btn-neutral float-left" title="4.59. Flanger" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="pingpong_echo_manual.html" class="btn btn-neutral float-right" title="4.61. 双耳回声效果（Pingpong Echo）" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2010-2026, 杰理科技股份有限公司.</p>
+  </div>
+
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

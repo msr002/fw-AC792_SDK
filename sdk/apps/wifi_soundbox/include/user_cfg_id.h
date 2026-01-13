@@ -47,5 +47,9 @@
 #define CFG_MIJIA_RECORD_ID_05          23  //ota传输包数记录
 #define CFG_MIJIA_RECORD_ID_10          24
 
+//RCSP
+#define CFG_RCSP_ADV_SEQ_RAND           40
+#define CFG_RCSP_VM_UPDATE_FLAG         41
+#define CFG_RCSP_ADV_TIME_STAMP         42
 
 #endif /* #ifndef _USER_CFG_ID_H_ */

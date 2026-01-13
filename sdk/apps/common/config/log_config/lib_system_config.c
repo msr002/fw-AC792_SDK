@@ -22,6 +22,8 @@ const int config_printf_time   = 1;
 
 const int config_system_info   = 1;
 
+const int config_system_os_cpu_num = CPU_CORE_NUM;
+
 ///异常中断，asser打印开启
 #ifdef CONFIG_RELEASE_ENABLE
 const int config_asser         = 1;

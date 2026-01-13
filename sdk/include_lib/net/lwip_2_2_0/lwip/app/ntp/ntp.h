@@ -27,9 +27,15 @@
 
 //此处添加ntp服务器,请自行测试ntp服务器是否正常
 static const char *ntp_host[] = {
-    "s2a.time.edu.cn",
-    "s2b.time.edu.cn",
-    "s2c.time.edu.cn",
+    "ntp.aliyun.com",
+    "ntp.ntsc.ac.cn",
+    "pool.ntp.org",
+    "ntp.tencent.com",
+    "s1e.time.edu.cn",
+    "time.apple.com",
+    // "s2a.time.edu.cn",
+    // "s2b.time.edu.cn",
+    // "s2c.time.edu.cn",
     // "s2d.time.edu.cn",
     // "s2e.time.edu.cn",
     // "s2f.time.edu.cn",

@@ -74,6 +74,8 @@
 <Add directory="../../../../../apps/common/third_party_profile/ancs_client_demo" />
 <Add directory="../../../../../apps/common/third_party_profile" />
 <Add directory="../../../../../apps/common/ble/include" />
+<Add directory="../../../../../apps/common/third_party_profile/jieli/rcsp" />
+<Add directory="../../../../../include_lib/btstack/third_party" />
 </Compiler>
 <Linker>
 <Add option="--plugin-opt=-pi32v2-always-use-itblock=false" />

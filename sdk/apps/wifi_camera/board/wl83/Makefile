@@ -247,6 +247,8 @@ INCLUDES := \
 	-I../../../../apps/common/third_party_profile/mijia/mijia_ble_libs \
 	-I../../../../apps/common/third_party_profile/alipay \
 	-I../../../../apps/common/third_party_profile/ancs_client_demo \
+	-I../../../../apps/common/third_party_profile/jieli/rcsp \
+	-I../../../../include_lib/btstack/third_party \
 	-I../../../../apps/common/lcd/include \
 	-I../../../../apps/wifi_camera/mode/bt/le_audio/include \
 	-I../../../../apps/wifi_camera/mode/bt/le_audio/include/big \

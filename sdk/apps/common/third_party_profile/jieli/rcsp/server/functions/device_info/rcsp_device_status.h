@@ -3,6 +3,7 @@
 
 #include "typedef.h"
 #include "app_config.h"
+#include "app_msg.h"
 
 // 0x07、0x08使用以下枚举
 enum {
@@ -48,7 +49,7 @@ void rcsp_device_status_update(u8 function, u32 mask);
 // rcsp功能设置关闭
 void rcsp_device_status_setting_stop(void);
 // 获取当前模式
-u8 rcsp_get_cur_mode(u8 app_mode);
+u8 rcsp_get_cur_mode(app_mode_t app_mode);
 
 void function_change_inform(u8 app_mode, u8 ret);
 

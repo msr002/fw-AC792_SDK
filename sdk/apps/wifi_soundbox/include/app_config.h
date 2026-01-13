@@ -32,7 +32,6 @@
 #endif
 
 
-
 //*********************************************************************************//
 //                                 资源分配相关配置                                //
 //*********************************************************************************//
@@ -259,7 +258,7 @@
 #endif
 
 // #define CONFIG_WT_SDK_ENABLE                 //新玩瞳接口
-#define CONFIG_QR_CODE_NET_CFG                  //二维码配网
+// #define CONFIG_QR_CODE_NET_CFG                  //二维码配网
 #endif
 
 #endif
@@ -386,6 +385,8 @@
 #define TCFG_JLFAT_SUPPORT_OVERSECTOR_RW_ENABLE 1
 #endif
 
+#define TCFG_DEV_MANAGER_ENABLE                 1
+
 #if TCFG_SD0_ENABLE
 #define CONFIG_STORAGE_PATH                     "storage/sd0"   //定义对应SD0的路径
 #define SDX_DEV                                 "sd0"
@@ -432,7 +433,8 @@
 //*********************************************************************************//
 #ifdef CONFIG_VIDEO_ENABLE
 
-#define CONFIG_USR_VIDEO_ENABLE                     //自定义VIDEO流使能
+#define CONFIG_VIDEO_DEC_ENABLE                                 //打开视频解码器
+#define CONFIG_USR_VIDEO_ENABLE                                 //自定义VIDEO流使能
 
 #ifdef CONFIG_USR_VIDEO_ENABLE
 #ifdef CONFIG_USER_VIDEO_720P
@@ -540,6 +542,13 @@
 #define TCFG_LE_AUDIO_APP_CONFIG                0
 #endif
 
+//rcsp与le audio共用BLE ACL
+#if ((TCFG_LE_AUDIO_APP_CONFIG & (LE_AUDIO_UNICAST_SINK_EN)) && (THIRD_PARTY_PROTOCOLS_SEL & RCSP_MODE_EN))
+#define TCFG_LE_AUDIO_RCSP_USE_SAME_ACL         1
+#else
+#define TCFG_LE_AUDIO_RCSP_USE_SAME_ACL         0
+#endif
+
 
 //*********************************************************************************//
 //                                  pay 配置                                       //
@@ -599,12 +608,27 @@
 
 #define TCFG_ATT_OVER_EDR_DEMO_EN               0
 
+#include "rcsp_define.h"
+#define TCFG_THIRD_PARTY_PROTOCOLS_SIMPLIFIED   0
+#define TCFG_RCSP_DUAL_CONN_ENABLE              0
+#if !(THIRD_PARTY_PROTOCOLS_SEL & RCSP_MODE_EN)
+#define RCSP_MODE                               RCSP_MODE_OFF
+#else
+#define RCSP_MODE                               RCSP_MODE_SOUNDBOX
+#endif
+
 
 //*********************************************************************************//
 //                                UI DEMO配置                                      //
 //*********************************************************************************//
 #if TCFG_LCD_ENABLE
 #define USE_LVGL_V8_UI_DEMO
+#define UI_MUSIC_DYNAMIC_BACKGROUND  //是否启用动态背景
+#ifdef UI_MUSIC_DYNAMIC_BACKGROUND
+#define CONFIG_BACKGROUND_AVI_NAME               "music_background.avi"
+#define CONFIG_BACKGROUND_AVI_PATH               CONFIG_ROOT_PATH\
+                                                CONFIG_BACKGROUND_AVI_NAME
+#endif
 /* LVGL UI使用的FB显存个数 */
 /* 0:表示 LVGL UI直接在LCD显存上绘制,不需要额外的帧buffer (适用于UI刷新要求不高的方案)
  * 1:表示 LVGL UI 单独申请1块帧buffer

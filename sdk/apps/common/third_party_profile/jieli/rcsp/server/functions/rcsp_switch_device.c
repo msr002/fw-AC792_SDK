@@ -1,4 +1,4 @@
-#ifdef MEDIA_SUPPORT_MS_EXTENSIONS
+#ifdef RCSP_SUPPORT_MS_EXTENSIONS
 #pragma bss_seg(".rcsp_switch_device.data.bss")
 #pragma data_seg(".rcsp_switch_device.data")
 #pragma const_seg(".rcsp_switch_device.text.const")

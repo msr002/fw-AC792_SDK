@@ -1,4 +1,4 @@
-#ifdef MEDIA_SUPPORT_MS_EXTENSIONS
+#ifdef RCSP_SUPPORT_MS_EXTENSIONS
 #pragma bss_seg(".file_simple_transfer.data.bss")
 #pragma data_seg(".file_simple_transfer.data")
 #pragma const_seg(".file_simple_transfer.text.const")
@@ -9,13 +9,14 @@
 #include "system/includes.h"
 #include "fs/fs.h"
 #include "dev_manager.h"
+#include "rcsp/JL_rcsp_protocol.h"
 
 #if TCFG_NOR_VM
 #include "ui_vm/ui_vm.h"
 #endif
 
 #if (RCSP_MODE && TCFG_DEV_MANAGER_ENABLE && JL_RCSP_SIMPLE_TRANSFER)
-#include "message_vm_cfg.h"
+/* #include "message_vm_cfg.h" */
 
 #define FILE_SIMPLE_TRANSFER_VERSION	0
 

@@ -6,6 +6,7 @@
 
    uart_debug.rst
    jtag_debug.rst
+   dlog_debug.rst
 
 
 

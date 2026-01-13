@@ -1,4 +1,4 @@
-#ifdef MEDIA_SUPPORT_MS_EXTENSIONS
+#ifdef RCSP_SUPPORT_MS_EXTENSIONS
 #pragma bss_seg(".rcsp_update_tws.data.bss")
 #pragma data_seg(".rcsp_update_tws.data")
 #pragma const_seg(".rcsp_update_tws.text.const")
@@ -16,13 +16,13 @@
 #include "init.h"
 #include "rcsp_update_tws.h"
 /* #include "dual_bank_updata_api.h" */
-/* #include "bt_tws.h" */
+#include "bt_tws.h"
 #include "app_config.h"
 #include "btstack/avctp_user.h"
 #include "update.h"
 /* #include "app_main.h" */
 
-#if ((RCSP_MODE == RCSP_MODE_SOUNDBOX) && OTA_TWS_SAME_TIME_ENABLE)
+#if ((RCSP_MODE == RCSP_MODE_SOUNDBOX) && 0) //OTA_TWS_SAME_TIME_ENABLE)
 
 //#define LOG_TAG_CONST       EARPHONE
 #define LOG_TAG             "[UPDATE_TWS]"

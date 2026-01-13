@@ -1,4 +1,4 @@
-#ifdef MEDIA_SUPPORT_MS_EXTENSIONS
+#ifdef RCSP_SUPPORT_MS_EXTENSIONS
 #pragma bss_seg(".nfc_data_opt.data.bss")
 #pragma data_seg(".nfc_data_opt.data")
 #pragma const_seg(".nfc_data_opt.text.const")

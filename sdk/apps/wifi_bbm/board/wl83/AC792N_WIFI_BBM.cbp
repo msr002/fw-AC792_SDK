@@ -163,6 +163,8 @@
 <Add directory="../../../../apps/common/third_party_profile/mijia/mijia_ble_libs" />
 <Add directory="../../../../apps/common/third_party_profile/alipay" />
 <Add directory="../../../../apps/common/third_party_profile/ancs_client_demo" />
+<Add directory="../../../../apps/common/third_party_profile/jieli/rcsp" />
+<Add directory="../../../../include_lib/btstack/third_party" />
 <Add directory="../../../../apps/common/lcd/include" />
 <Add directory="../../../../apps/wifi_bbm/mode/bt/le_audio/include" />
 <Add directory="../../../../apps/wifi_bbm/mode/bt/le_audio/include/big" />

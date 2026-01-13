@@ -1,4 +1,4 @@
-#ifdef MEDIA_SUPPORT_MS_EXTENSIONS
+#ifdef RCSP_SUPPORT_MS_EXTENSIONS
 #pragma bss_seg(".rcsp_ch_loader_download.data.bss")
 #pragma data_seg(".rcsp_ch_loader_download.data")
 #pragma const_seg(".rcsp_ch_loader_download.text.const")
@@ -6,23 +6,32 @@
 #endif
 //#include "update_lib.h"
 #include "app_config.h"
+#include "rcsp_cfg.h"
 #include "update.h"
 #include "uart.h"
 #include "update_loader_download.h"
 #include "rcsp_update.h"
 #include "JL_rcsp_protocol.h"
+#include "JL_rcsp_packet.h"
 #include "classic/tws_api.h"
 #include "os/os_api.h"
 #include "ble_rcsp_server.h"
 #include "btstack/avctp_user.h"
 #include "rcsp_ch_loader_download.h"
+#include "cig.h"
+#include "app_msg.h"
+#include "JL_rcsp_api.h"
+#include "rcsp_config.h"
+#include "le_connected.h"
+#include "btstack_rcsp_user.h"
+#include "app_ble_spp_api.h"
 
 #include <string.h>
 
 #include "rcsp_update_tws.h"
 
 #if TCFG_USER_TWS_ENABLE
-/* #include "bt_tws.h" */
+#include "bt_tws.h"
 #endif
 
 #if (RCSP_MODE && RCSP_UPDATE_EN && !RCSP_BLE_MASTER)
@@ -55,6 +64,59 @@ typedef enum {
     UPDATA_STOP,
 } UPDATA_BIT_FLAG;
 
+//update result code;
+#define RCSP_UPDATE_RESULT_FLAG_BITMAP      BIT(7)
+typedef enum {
+    RCSP_UPDATE_RESULT_ERR_NONE = 0,
+    RCSP_UPDATE_RESULT_FILE_SIZE_ERR = 0x1, 	//文件大小错误
+    RCSP_UPDATE_RESULT_LOADER_SIZE_ERR = 0x2, //loader大小错误
+    RCSP_UPDATE_RESULT_LOADER_VERIFY_ERR,    //update loader校验失败
+    RCSP_UPDATE_RESULT_REMOTE_FILE_HEAD_ERR, //读升级文件头错误
+
+    RCSP_UPDATE_RESULT_LOCAL_FILE_HEAD_ERR = 0x5, //读flash文件头错误
+    RCSP_UPDATE_RESULT_NOT_FIND_TARGET_FILE_ERR, //找不到目标文件(ota.bin找不到对应loader)
+    RCSP_UPDATE_RESULT_FILE_OPERATION_ERR,       //文件操作失败
+    RCSP_UPDATE_RESULT_FLASH_DATA_VERIFY_ERR,    //flash数据校验失败
+
+    RCSP_UPDATE_RESULT_UBOOT_NOT_MATCH = 0x09,  //UBOOT不匹配
+    RCSP_UPDATE_RESULT_PRODUCT_INFO_NOT_MATCH = 0x0a, //芯片型号不匹配
+    RCSP_UPDATE_RESULT_EX_DSP_UPDATE_ERR,		//外部IC升级出错;
+    RCSP_UPDATE_RESULT_CFG_UPDATE_ERR,			//配置升级出错
+
+    RCSP_UPDATE_RESULT_FLASH_ERASE_ERR = 0x0d,	  //flash 擦失败(可能是写保护)
+    RCSP_UPDATE_RESULT_REMOTE_FILE_NOT_MATCH,      //升级文件不匹配
+    RCSP_UPDATE_RESULT_ANC_CFG_UPDATE_ERR,         //ANC配置升级出错
+    RCSP_UPDATE_RESULT_ANC_COEF_UPDATE_ERR = 0x10, //ANC配置升级出错
+
+    RCSP_UPDATE_RESULT_OTA_TWS_NO_RSP,             //对耳同步升级传输数据没有回复
+    RCSP_UPDATE_RESULT_RESOURCE_LIMIT,			  //资源不足
+    RCSP_UPDATE_RESULT_OTA_TWS_START_ERR,          //对耳启动升级失败
+    RCSP_UPDATE_RESULT_OTA_TWS_CRC_ERROR,          //对耳校验失败
+
+    RCSP_UPDATE_RESULT_OTA_APP_EXIT = 0x15,        //升级过程APP强制退出
+    RCSP_UPDATE_RESULT_TWS_NO_CONNECT,             //对耳未连接
+    RCSP_UPDATE_RESULT_READ_REMOTE_FILE_ERR,       //读取不到远端数据
+    RCSP_UPDATE_RESULT_UFW_FLASH_HEAD_CRC_ERR,     //校验远端文件里的FLASH_HEAD失败
+
+    RCSP_UPDATE_RESULT_UFW_CODE_HEAD_CRC_ERR = 0x19,      //校验远端文件里的APP_CODE_HEAD失败
+    RCSP_UPDATE_RESULT_UFW_ALGIN_OF_OFFSET_MATCH_ERR,  //升级文件中找不到和本地对齐和偏移方式一致的文件
+    RCSP_UPDATE_RESULT_UFW_CANNOT_FIND_VM_AREA,  //升级文件中找不到vm区域信息
+    RCSP_UPDATE_RESULT_LOADER_HEAD_CRC_ERR,      //校验LOADER_HEAD失败，检查ota.bin前面数据是否为00
+
+    RCSP_UPDATE_RESULT_LOADER_WRITE_ERR = 0x1d,         //写loader失败
+    RCSP_UPDATE_RESULT_DUALBANK_GET_UFW_APP_HEAD_ERR,   //双备份获取远端APP_head失败
+    RCSP_UPDATE_RESULT_DUALBANK_GET_LOCAL_APP_HEAD_ERR, //双备份获取本地APP_head失败
+    RCSP_UPDATE_RESULT_DUALBANK_APP_HEAD_NOT_MATCH,     //双备份本地和远端APP分解线不匹配
+
+    RCSP_UPDATE_RESULT_LOCAL_VM_NOT_ENOUGH_FOR_LOADER_SIZE = 0x21,	//本地vm大小不足加载loader code(需缩小loader code的大小)
+    RCSP_UPDATE_RESULT_REMOTE_VM_NOT_ENOUGH_FOR_LOADER_SIZE,  //升级文件vm大小无法适配loader code(减少升级文件可解决)
+
+    //蓝牙相关err
+    RCSP_UPDATE_RESULT_BT_UPDATE_OVER = 0x23,
+    RCSP_UPDATE_RESULT_BT_UPDATE_KEY_ERR,
+    RCSP_UPDATE_RESULT_BT_UPDATE_CONNECT_ERR,
+
+} RCSP_UPDATE_ERROR_CODE;
 
 typedef struct _rcsp_update_param_t {
     u32 state;
@@ -72,6 +134,7 @@ typedef struct _rcsp_update_param_t {
 } rcsp_update_param_t;
 
 extern const int support_dual_bank_update_en;
+extern void rcsp_clear_all_buffer(void);
 
 static rcsp_update_param_t	rcsp_update_param;
 #define __this (&rcsp_update_param)
@@ -82,6 +145,8 @@ static u32 rcsp_file_offset = 0;
 static u8 rcsp_seek_type = 0;
 
 static u8 g_rcsp_ancs_state_flag = 0;
+static u32 rcsp_offset_addr = 0;
+static u16 g_cis_conn_handle = 0;
 
 //NOTE:测试盒的定义和本sdk文件系统的seek_type定义不一样;
 enum {
@@ -100,7 +165,8 @@ void rcsp_clean_update_hdl_for_end_update(u16 ble_con_handle, u8 *spp_remote_add
         __this->ble_con_handle = 0;
         __this->spp_remote_addr = NULL;
     }
-    if (spp_remote_addr && __this->spp_remote_addr && !memcmp(spp_remote_addr, __this->spp_remote_addr, 6)) {
+    u8 _addr_temp[6] = {0};
+    if (spp_remote_addr && __this->spp_remote_addr && (!memcmp(spp_remote_addr, __this->spp_remote_addr, 6) || !memcmp(spp_remote_addr, _addr_temp, 6))) {
         __this->ble_con_handle = 0;
         __this->spp_remote_addr = NULL;
     }
@@ -147,6 +213,7 @@ void tws_api_auto_role_switch_enable();
 
 int rcsp_f_seek(void *fp, u8 type, u32 offset)
 {
+    offset += rcsp_offset_addr;
     if (type == SEEK_SET) {
         __this->file_offset = offset;
         __this->seek_type = BT_SEEK_SET;
@@ -159,6 +226,13 @@ int rcsp_f_seek(void *fp, u8 type, u32 offset)
     return 0;//FR_OK;
 }
 
+void rcsp_update_set_offset_addr(u32 offset)
+{
+    rcsp_offset_addr = offset;
+    rcsp_f_seek(NULL, SEEK_SET, 0); //确定好偏移
+}
+
+
 static u16 rcsp_f_stop(u8 err);
 
 #define RETRY_TIMES		3
@@ -167,6 +241,9 @@ u16 rcsp_f_read(void *fp, u8 *buff, u16 len)
 {
     //printf("===rcsp_read:%x %x\n", __this->file_offset, len);
     u8 retry_cnt = 0;
+    if (g_cis_conn_handle) {
+        retry_cnt = RETRY_TIMES;
+    }
 
     __this->need_rx_len = len;
     __this->state = UPDATA_REV_DATA;
@@ -214,7 +291,6 @@ __RETRY:
         __this->file_offset += len;
     }
 
-
     return len;
 }
 
@@ -241,7 +317,6 @@ enum {
 
 static u8 update_result_handle(u8 err)
 {
-    printf("====RCSP-TODO=================%s=%d=yuring=\n\r", __func__, __LINE__);
     u8 res = 0;
     if (0 == support_dual_bank_update_en) {
         res = DEVICE_UPDATE_STA_LOADER_DOWNLOAD_SUCC;
@@ -251,46 +326,42 @@ static u8 update_result_handle(u8 err)
     tws_api_auto_role_switch_enable();
 #endif
 
-    if (err & UPDATE_RESULT_FLAG_BITMAP) {
+    if (err & RCSP_UPDATE_RESULT_FLAG_BITMAP) {
         switch (err & 0x7f) {
         //升级文件错误
-        case UPDATE_RESULT_FILE_SIZE_ERR:
-        case UPDATE_RESULT_LOADER_SIZE_ERR:
-        case UPDATE_RESULT_REMOTE_FILE_HEAD_ERR:
-        //RCSP TODO
-        /* case UPDATE_RESULT_LOCAL_FILE_HEAD_ERR: */
-        case UPDATE_RESULT_FILE_OPERATION_ERR:
-        case UPDATE_RESULT_NOT_FIND_TARGET_FILE_ERR:
-        case UPDATE_RESULT_PRODUCT_INFO_NOT_MATCH:
+        case RCSP_UPDATE_RESULT_FILE_SIZE_ERR:
+        case RCSP_UPDATE_RESULT_LOADER_SIZE_ERR:
+        case RCSP_UPDATE_RESULT_REMOTE_FILE_HEAD_ERR:
+        case RCSP_UPDATE_RESULT_LOCAL_FILE_HEAD_ERR:
+        case RCSP_UPDATE_RESULT_FILE_OPERATION_ERR:
+        case RCSP_UPDATE_RESULT_NOT_FIND_TARGET_FILE_ERR:
+        case RCSP_UPDATE_RESULT_PRODUCT_INFO_NOT_MATCH:
             res = DEVICE_UPDATE_STA_FILE_ERR;
             break;
         //文件内容校验失败
-        case UPDATE_RESULT_LOADER_VERIFY_ERR:
-            /* case UPDATE_RESULT_FLASH_DATA_VERIFY_ERR: */
+        case RCSP_UPDATE_RESULT_LOADER_VERIFY_ERR:
+        case RCSP_UPDATE_RESULT_FLASH_DATA_VERIFY_ERR:
             res = DEVICE_UPDATE_STA_VERIFY_ERR;
             break;
-        case UPDATE_RESULT_EX_DSP_UPDATE_ERR:
-            res = UPDATE_RESULT_EX_DSP_UPDATE_ERR;
+        case RCSP_UPDATE_RESULT_EX_DSP_UPDATE_ERR:
+            res = RCSP_UPDATE_RESULT_EX_DSP_UPDATE_ERR;
             break;
         default:
             res = err;
             break;
 
         }
-    }
-#if 0 //RCSP TODO
-    else if (UPDATE_RESULT_BT_UPDATE_OVER == err) {
+    } else if (RCSP_UPDATE_RESULT_BT_UPDATE_OVER == err) {
         if (support_dual_bank_update_en) {
             res = DEVICE_UPDATE_STA_SUCCESS;
         } else {
             res = DEVICE_UPDATE_STA_LOADER_DOWNLOAD_SUCC;
         }
-    } else if (UPDATE_RESULT_BT_UPDATE_KEY_ERR == err) {
+    } else if (RCSP_UPDATE_RESULT_BT_UPDATE_KEY_ERR == err) {
         res = DEVICE_UPDATE_STA_KEY_ERR;
     } else {
         res = DEVICE_UPDATE_STA_FAIL;
     }
-#endif
 
     return res;
 }
@@ -454,15 +525,13 @@ static void rcsp_update_state_cbk(int type, u32 state, void *priv)
         rcsp_bt_ble_adv_enable(0);
 #endif
         // 如果是ble，则设置连接参数，提高传输效率
-        if (0 == get_curr_device_type()) {
+        if (0 == get_curr_device_type() && 0 == g_cis_conn_handle) {
             notify_update_connect_parameter(3);
         }
         break;
     case UPDATE_CH_EXIT:
-        printf("====RCSP-TODO=================%s=%d=yuring=\n\r", __func__, __LINE__);
-#if 0 //RCSP TODO
         if (UPDATE_DUAL_BANK_IS_SUPPORT()) {
-            if ((0 == ret_code->stu) && (UPDATE_RESULT_ERR_NONE == ret_code->err_code || UPDATE_RESULT_BT_UPDATE_OVER == ret_code->err_code)) {
+            if ((0 == ret_code->stu) && (RCSP_UPDATE_RESULT_ERR_NONE == ret_code->err_code || RCSP_UPDATE_RESULT_BT_UPDATE_OVER == ret_code->err_code)) {
                 set_jl_update_flag(1);
                 log_info(">>>rcsp update succ\n");
                 update_result_set(UPDATA_SUCC);
@@ -472,13 +541,12 @@ static void rcsp_update_state_cbk(int type, u32 state, void *priv)
                 log_info(">>>rcsp update err\n");
             }
         } else {
-            if ((0 == ret_code->stu) && (UPDATE_RESULT_ERR_NONE == ret_code->err_code || UPDATE_RESULT_BT_UPDATE_OVER == ret_code->err_code)) {
+            if ((0 == ret_code->stu) && (RCSP_UPDATE_RESULT_ERR_NONE == ret_code->err_code || RCSP_UPDATE_RESULT_BT_UPDATE_OVER == ret_code->err_code)) {
                 set_jl_update_flag(1);
             }
         }
-#endif
         // 如果是ble，则设置连接参数，还原传输效率
-        if (0 == get_curr_device_type()) {
+        if (0 == get_curr_device_type() && 0 == g_cis_conn_handle) {
             notify_update_connect_parameter(-1);
         }
 #if TCFG_RCSP_DUAL_CONN_ENABLE
@@ -500,16 +568,121 @@ static void rcsp_update_state_cbk(int type, u32 state, void *priv)
     }
 }
 
+#if TCFG_BT_SUPPORT_SPP
+static void *bt_dg_rcsp_spp_hdl = NULL;
+
+static void spp_rcsp_recieve_filter_callback(void *hdl, void *remote_addr, u8 *buf, u16 len)
+{
+    if (remote_addr) {
+        u8 custem_buf[] = {0x4A, 0x4C, 0xFF, 0xED};
+        if (0 == memcmp(buf, custem_buf, sizeof(custem_buf))) {
+            rcsp_update_ancs_disconn_handler();
+            rcsp_clear_all_buffer();
+        }
+    }
+}
+
+static void rcsp_spp_update_init(void)
+{
+    if (NULL == bt_dg_rcsp_spp_hdl) {
+        bt_dg_rcsp_spp_hdl = app_spp_hdl_alloc(0x0);
+        if (NULL == bt_dg_rcsp_spp_hdl) {
+            ASSERT(0, "err: %s alloc fail\n", __func__);
+            return;
+        }
+        app_spp_recieve_callback_register(bt_dg_rcsp_spp_hdl, spp_rcsp_recieve_filter_callback);
+    }
+}
+#endif
+
 void rcsp_update_loader_download_init(int update_type, void (*result_cbk)(void *priv, u8 type, u8 cmd))
 {
+#if TCFG_BT_SUPPORT_SPP
+    rcsp_spp_update_init();
+#endif
+
     update_mode_info_t info = {
         .type = update_type,
         .state_cbk = rcsp_update_state_cbk,
         .p_op_api = &rcsp_update_op,
         .task_en = 1,
     };
+#if CONFIG_UPDATE_MUTIL_CPU_UART
+    y_printf("\n >>>[test]:func = %s,line= %d\n", __FUNCTION__, __LINE__);
+    update_interactive_task_start((void *)&info, rcsp_update_set_offset_addr, 1);
+#else
+    y_printf("\n >>>[test]:func = %s,line= %d\n", __FUNCTION__, __LINE__);
     app_active_update_task_init(&info);
+#endif
 }
+
+#if ((TCFG_LE_AUDIO_APP_CONFIG & (LE_AUDIO_UNICAST_SINK_EN | LE_AUDIO_JL_UNICAST_SINK_EN)))
+void cis_rcsp_recv_handle(u16 conn_handle, const void *const buf, size_t length, void *priv)
+{
+    if (conn_handle) {
+        printf("rcsp_cis_rx(%d)", (int)length);
+        put_buf(buf, length);
+        u8 custem_buf[] = {0x4A, 0x4C, 0xFF, 0xED};
+        if (0 == memcmp(buf, custem_buf, sizeof(custem_buf))) {
+            rcsp_update_ancs_disconn_handler();
+            rcsp_clear_all_buffer();
+        }
+        g_cis_conn_handle = conn_handle;
+        bt_rcsp_recieve_callback(rcsp_server_ble_hdl, NULL, (u8 *)buf, length);
+    }
+}
+
+int bt_rcsp_data_send_filter(u16 ble_con_hdl, u8 *remote_addr, u8 *buf, u16 len)
+{
+    int ret = 0;
+    if (g_cis_conn_handle) {
+        if (!JL_rcsp_get_auth_flag_with_bthdl(ble_con_hdl, NULL)) {
+            if (!rcsp_protocol_head_check(buf, len)) {
+                connected_send_acl_data(ble_con_hdl, buf, len);
+            }
+        } else {
+            connected_send_acl_data(ble_con_hdl, buf, len);
+        }
+        ret = 1;
+    }
+    return ret;
+}
+
+u16 cis_rcsp_update_flag(void)
+{
+    return g_cis_conn_handle;
+}
+
+static int app_connected_conn_status_event_handler(int *msg)
+{
+    cis_acl_info_t *acl_info = NULL;
+    int *event = msg;
+    switch (event[0]) {
+    case CIG_EVENT_ACL_CONNECT:
+        acl_info = (cis_acl_info_t *)&event[1];
+        if (rcsp_get_auth_support() && acl_info) {
+            JL_rcsp_reset_bthdl_auth(acl_info->acl_hdl, NULL);
+        }
+        break;
+    case CIG_EVENT_ACL_DISCONNECT:
+        g_cis_conn_handle = 0;
+        break;
+    };
+    return 0;
+}
+
+APP_MSG_PROB_HANDLER(cis_rcsp_connected_msg_entry_filter) = {
+    .owner = 0xff,
+    .from = MSG_FROM_CIG,
+    .handler = app_connected_conn_status_event_handler,
+};
+
+
+void rcsp_cis_update_init(void)
+{
+    connected_iso_recv_handle_register(NULL, cis_rcsp_recv_handle);
+}
+#endif // ((TCFG_LE_AUDIO_APP_CONFIG & (LE_AUDIO_UNICAST_SINK_EN | LE_AUDIO_JL_UNICAST_SINK_EN)))
 
 #else // (RCSP_MODE && RCSP_UPDATE_EN && !RCSP_BLE_MASTER)
 

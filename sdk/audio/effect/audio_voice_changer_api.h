@@ -1,7 +1,6 @@
-#ifndef ___VOICE_CHANGER_API__
-#define ___VOICE_CHANGER_API__
-#include "jlstream.h"
-#include "media/audio_base.h"
+#ifndef __VOICE_CHANGER_API__
+#define __VOICE_CHANGER_API__
+
 #include "effects/audio_voice_changer.h"
 #include "effects/effects_adj.h"
 

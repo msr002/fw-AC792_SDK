@@ -64,6 +64,8 @@ typedef enum {
     PCONTROL_PD_WDVDD_LEV,					//pdown wvdd挡位
     PCONTROL_PD_DVDD_LEV,					//pdown dvdd挡位
     PCONTROL_PD_KEEP_LPCTMU,				//pdown 触摸是否保持 0：不保持 1：保持
+    PCONTROL_PD_SET_SDRAM_LP_STA,           //pdown时sdram工作模式:
+    //                                        0-self fresh(低功耗), 1-poweroff
 
     //*****************************************************
     /* soff

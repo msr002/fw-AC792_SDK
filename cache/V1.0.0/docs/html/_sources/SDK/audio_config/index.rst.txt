@@ -7,13 +7,15 @@
 
    DAC_cfg.md
    ADC_cfg.md
-   ANC_cfg.md
+   IIS_cfg.md
+   PDM_cfg.md
    General_cfg.md
-   codec.md
+   phone_call_cfg.md
+   audio_algo_cfg.md
+   codec/index.rst
    music_palyback.md
-   production_test.md
    kws.md
-   spatial_audio.md
    Hi_Res_Audio/index.rst
+   audio_delay.md
 
 

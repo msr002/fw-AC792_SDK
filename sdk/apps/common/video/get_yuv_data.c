@@ -68,8 +68,9 @@ static void get_yuv_task(void *priv)
         return;
     }
 
+    u32 fb_parm = (VIDEO_PIX_FMT_YUV420 << 16) | 0;
     //打开显示通道
-    fb5 = dev_open(f.private_data, (void *)FB_COLOR_FORMAT_YUV422);
+    fb5 = dev_open(f.private_data, (void *)fb_parm);
     if (!fb5) {
         log_error(" ||| %s ,,, %d", __FUNCTION__, __LINE__);
         dev_close(video_dev_fd);

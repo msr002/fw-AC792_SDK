@@ -1,15 +1,16 @@
-#ifdef MEDIA_SUPPORT_MS_EXTENSIONS
+#ifdef RCSP_SUPPORT_MS_EXTENSIONS
 #pragma bss_seg(".rcsp_setting_opt.data.bss")
 #pragma data_seg(".rcsp_setting_opt.data")
 #pragma const_seg(".rcsp_setting_opt.text.const")
 #pragma code_seg(".rcsp_setting_opt.text")
 #endif
+#include "syscfg/syscfg_id.h"
 #include "rcsp_config.h"
 #include "rcsp_setting_opt.h"
 #include "rcsp_setting_sync.h"
 #include "rcsp_manage.h"
 #include "btstack/avctp_user.h"
-/* #include "bt_tws.h" */
+#include "bt_tws.h"
 #include "rcsp_bt_manage.h"
 
 

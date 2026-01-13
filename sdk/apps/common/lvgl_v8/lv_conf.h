@@ -42,7 +42,7 @@
  *LV_COLOR_DEPTH_EXTEN = 24:适配ARGB8565,需要把LV_DISP_UI_FB_NUM 1/2,用于有透视场景需求;
  *无透视需求时请注释或者配置LV_COLOR_DEPTH_EXTEN == LV_COLOR_DEPTH;
  */
-#define LV_COLOR_DEPTH_EXTEN 16
+#define LV_COLOR_DEPTH_EXTEN 24
 #ifndef LV_COLOR_DEPTH_EXTEN
 #define LV_COLOR_DEPTH_EXTEN LV_COLOR_DEPTH
 #endif
@@ -79,7 +79,7 @@
 #define LV_MEM_CUSTOM 0
 #if LV_MEM_CUSTOM == 0
 /*Size of the memory available for `lv_mem_alloc()` in bytes (>= 2kB)*/
-#define LV_MEM_SIZE (300U * 1024U)          /*[bytes]*/
+#define LV_MEM_SIZE (1024 * 1024U)          /*[bytes]*/
 
 /*Set an address for the memory pool instead of allocating it as a normal array. Can be in external SRAM too.*/
 #define LV_MEM_ADR 0     /*0: unused*/
@@ -706,12 +706,12 @@
 #define LV_USE_FREETYPE 1
 #if LV_USE_FREETYPE
 /*Memory used by FreeType to cache characters [bytes] (-1: no caching)*/
-#define LV_FREETYPE_CACHE_SIZE (16 * 1024)
+#define LV_FREETYPE_CACHE_SIZE (32 * 1024)
 #if LV_FREETYPE_CACHE_SIZE >= 0
 /* 1: bitmap cache use the sbit cache, 0:bitmap cache use the image cache. */
 /* sbit cache:it is much more memory efficient for small bitmaps(font size < 256) */
 /* if font size >= 256, must be configured as image cache */
-#define LV_FREETYPE_SBIT_CACHE 0
+#define LV_FREETYPE_SBIT_CACHE 1
 /* Maximum number of opened FT_Face/FT_Size objects managed by this cache instance. */
 /* (0:use system defaults) */
 #define LV_FREETYPE_CACHE_FT_FACES 0

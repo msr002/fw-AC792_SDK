@@ -1,6 +1,4 @@
-#if 0
-
-#ifdef SUPPORT_MS_EXTENSIONS
+#ifdef RCSP_SUPPORT_MS_EXTENSIONS
 #pragma bss_seg(".ble_rcsp_multi_common.data.bss")
 #pragma data_seg(".ble_rcsp_multi_common.data")
 #pragma const_seg(".ble_rcsp_multi_common.text.const")
@@ -33,11 +31,10 @@
 #include "system/includes.h"
 
 #include "app_config.h"
-/* #include "app_action.h" */
 
 #include "btstack/btstack_task.h"
 #include "btstack/bluetooth.h"
-#include "user_cfg.h"
+#include "user_cfg_id.h"
 #include "vm.h"
 #include "btcontroller_modules.h"
 #include "bt_common.h"
@@ -54,7 +51,7 @@
 /* #include "ble/ancs_client.h" */
 
 /* #if ((TCFG_BLE_DEMO_SELECT == DEF_BLE_DEMO_RCSP_DEMO) && (RCSP_MULTI_BLE_EN || RCSP_BLE_MASTER)) */
-/* #if 0 */
+#if 0
 
 
 #if 1

@@ -78,7 +78,7 @@ typedef struct __JL_PACKET_CONTROL JL_PACKET_CONTROL;
 #define JL_MTU_SEND                 (128L)
 #define JL_RECIEVE_BUF_SIZE         (JL_MTU_RESV + sizeof(JL_PACKET) + 128)
 #define JL_CMD_POOL_SIZE            (JL_MTU_SEND*4)
-#define JL_RESP_POOL_SIZE           (JL_MTU_SEND*2)
+#define JL_RESP_POOL_SIZE           (JL_MTU_SEND*6)
 #define JL_WAIT_RESP_POOL_SIZE      (JL_MTU_SEND*2)
 #endif
 
