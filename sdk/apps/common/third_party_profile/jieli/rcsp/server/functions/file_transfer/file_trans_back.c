@@ -5,6 +5,7 @@
 #pragma code_seg(".file_trans_back.text")
 #endif
 
+#include "app_config.h"
 #include "rcsp_config.h"
 #include "file_trans_back.h"
 #include "rcsp.h"
@@ -97,6 +98,7 @@ static u32 g_dev_handle = RCSPDevMapSD0;
 extern u8 check_le_pakcet_sent_finish_flag(void);
 extern bool rcsp_send_list_is_empty(void);
 extern void file_trans_idle_set(u8 file_trans_idle_flag);
+extern u32 get_bredr_tx_remain_size(void);
 
 static int get_file_prepare(u32 dev_handle)
 {
@@ -235,12 +237,18 @@ static void file_trans_back_task(void *p)
         }
 
         // 发送文件数据
-        /* mdelay(1); */
+#if TCFG_ATT_OVER_EDR_DEMO_EN
+        if (get_bredr_tx_remain_size() < data_len + 20) {
+            os_time_dly(20);
+            log_debug("%s: bredr buffer is full! waiting...", __func__);
+        }
+#endif
         ret = file_trans_back_response_send(resp_data, data_len + 4, 1, trans_back->OpCode_SN);
         /* log_info("%s: data-len = %d; data: ", __func__, data_len + 4); */
         /* put_buf(resp_data, 16); */
         if (JL_ERR_SEND_BUSY == ret || JL_ERR_SEND_DATA_OVER_LIMIT == ret) {
             os_time_dly(10);
+            log_debug("%s: buffer is full! waiting...", __func__);
             if (g_trans_back_task_kill) {
                 log_info("%s: task kill...", __func__);
                 return;

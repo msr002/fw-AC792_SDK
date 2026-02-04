@@ -20,7 +20,7 @@
 //                                   时钟配置                                      //
 //*********************************************************************************//
 #define TCFG_OSC_FREQUENCY                  24000000
-#define TCFG_SYS_CLK                        360000000         //360M,320M,240M,192M,160M,120M,96M,80M,64M,60M,48M,40M,32M,24M，其他值时启用SYS_PLL(最高支持360M)
+#define TCFG_SYS_CLK                        320000000         //360M,320M,240M,192M,160M,120M,96M,80M,64M,60M,48M,40M,32M,24M，其他值时启用SYS_PLL(最高支持360M)
 #define TCFG_LSB_CLK                        48000000          //96M,80M,60M,48M,40M,24M,20M,12M
 #define TCFG_HSB_CLK_DIV                    2                 //HSB_CLK = SYS_CLK / HSB_CLK_DIV
 #define TCFG_SFCTZ_CLK                      96000000          //SFC时钟，和加载代码的速度有关
@@ -683,11 +683,12 @@
 #define TCFG_LTE_PHY_ENABLE                 0
 
 #if TCFG_EXT_WIFI_ENABLE
-#define TCFG_RTL8189E_ENABLE                1
+#define TCFG_RTL8189E_ENABLE                0
 #define TCFG_RTL8189F_ENABLE                0
 #define TCFG_RTL8822ES_10M_ENABLE           0
 #define TCFG_RTL8822CS_ENABLE               0
 #define TCFG_RTL8733BS_ENABLE               0
+#define TCFG_AIC8800_ENABLE					1
 #endif
 
 

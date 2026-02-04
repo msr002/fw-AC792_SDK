@@ -55,7 +55,7 @@ static struct tws_user_var gtws;
 
 static void multiple_bt_pair_remove(void);
 static void tws_sniff_controle_check_enable(void);
-static void tws_sniff_controle_check_disable(void);
+void tws_sniff_controle_check_disable(void);
 void get_random_number(u8 *ptr, u8 len);
 
 u8 bt_tws_active(void)
@@ -1191,7 +1191,7 @@ static void tws_sniff_controle_check_enable(void)
     log_info("tws_sniff_check_enable");
 }
 
-static void tws_sniff_controle_check_disable(void)
+void tws_sniff_controle_check_disable(void)
 {
 #if (CONFIG_BT_TWS_SNIFF == 0)
     return;

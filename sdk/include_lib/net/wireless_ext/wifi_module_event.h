@@ -24,6 +24,7 @@ enum WIFI_MODULE {
     RTL8821CS,
     HI3881,
     RTL8733B,
+    AIC8800,
     NONE_MODULE = -1,
 };
 

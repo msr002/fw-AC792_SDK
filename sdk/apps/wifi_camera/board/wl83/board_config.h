@@ -6,6 +6,7 @@
 #define CONFIG_BOARD_AC7926A
 //#define CONFIG_BOARD_AC7925B
 // #define CONFIG_BOARD_AC7925C
+//#define CONFIG_BOARD_MOTORCYCLE_DASHBOARD_AC7926C
 //板子型号
 #define CONFIG_BOARD_DEVELOP      // 开发板
 
@@ -25,6 +26,9 @@
 #endif
 #ifdef CONFIG_BOARD_AC7925C
 #include "board_develop_AC7925C.h"
+#endif
+#ifdef CONFIG_BOARD_MOTORCYCLE_DASHBOARD_AC7926C
+#include "board_motorcycle_dashboard_ac7926c.h"
 #endif
 #endif
 

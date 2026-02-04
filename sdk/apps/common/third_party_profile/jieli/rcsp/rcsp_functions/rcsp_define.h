@@ -18,6 +18,9 @@
 #define		RCSP_SDK_TYPE_AC701N_WATCH					0x9
 #define		RCSP_SDK_TYPE_MANIFEST_EARPHONE				0xA
 #define		RCSP_SDK_TYPE_MANIFEST_SOUNDBOX				0xB
+#define		RCSP_SDK_TYPE_CHARGE_CASE                   0xC
+#define		RCSP_SDK_TYPE_DONGLE                        0xE
+#define		RCSP_SDK_TYPE_COMMON                        0xFE
 
 //===========================================================================================
 // RCSP命令码
@@ -71,8 +74,7 @@
 #define    JL_OPCODE_1T2_DEVICE_EDR_INFO_LIST						0x31
 #define    JL_OPCODE_TRANSLATOR                                     0x34//翻译功能
 #define    JL_OPCODE_PUBLIC_SET_CMD                                 0x33
-
-#define    JL_OPCODE_PUBLIC_SET_CMD                                 0x33
+#define    JL_OPTCODE_AURACAST_CMD                                  0x35
 
 #define    JL_OPCODE_SPORTS_DATA_INFO_GET							0xA0
 #define    JL_OPCODE_SPORTS_DATA_INFO_SET							0xA1

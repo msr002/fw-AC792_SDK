@@ -5,9 +5,7 @@
 #pragma code_seg(".rcsp_vol_setting.text")
 #endif
 #include "rcsp_config.h"
-
 #include "syscfg_id.h"
-
 #include "rcsp_setting_sync.h"
 #include "rcsp_setting_opt.h"
 #include "ble_rcsp_server.h"

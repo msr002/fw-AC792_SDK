@@ -48,16 +48,11 @@
 #include "mic_effect.h"
 #endif
 
-#define RCSP_DEBUG_EN
-#ifdef  RCSP_DEBUG_EN
-#define rcsp_putchar(x)                	putchar(x)
-#define rcsp_printf                    	printf
-#define rcsp_put_buf(x,len)				put_buf(x,len)
-#else
-#define rcsp_putchar(...)
-#define rcsp_printf(...)
-#define rcsp_put_buf(...)
-#endif
+#define LOG_TAG_CONST	  RCSP_UPDATE
+#define LOG_ERROR_ENABLE
+#define LOG_DEBUG_ENABLE
+#define LOG_INFO_ENABLE
+#include "system/debug.h"
 
 #define DEV_UPDATE_FILE_INFO_OFFEST  0x00//0x40
 #define DEV_UPDATE_FILE_INFO_LEN     0x00//(0x10 + VER_INFO_EXT_COUNT * (VER_INFO_EXT_MAX_LEN + 1))
@@ -140,14 +135,14 @@ static void rcsp_update_fail_and_resume(void)
 
 u8 get_jl_update_flag(void)
 {
-    printf("get_update_flag:%x\n", update_flag);
+    log_info("get_update_flag:%x", update_flag);
     return update_flag;
 }
 
 void set_jl_update_flag(u8 flag)
 {
     update_flag = flag;
-    printf("update_flag:%x\n", update_flag);
+    log_info("update_flag:%x", update_flag);
 }
 
 /**
@@ -217,7 +212,7 @@ static void wait_response_and_disconn_spp(void *priv)
 {
     static u32 wait_time = 0;
     if (check_edr_is_disconnct()) {
-        rcsp_printf("b");
+        /* rcsp_printf("b"); */
         if (wait_time > RCSP_UPDATE_WAIT_SPP_DISCONN_TIME) {
             wait_time = 0;
             bt_cmd_prepare(USER_CTRL_POWER_OFF, 0, NULL);
@@ -229,7 +224,7 @@ static void wait_response_and_disconn_spp(void *priv)
     }
 
     wait_time = 0;
-    rcsp_printf("BLE_APP_UPDATE\n");
+    log_info("BLE_APP_UPDATE");
     update_mode_api_v2(BLE_APP_UPDATA,
                        rcsp_update_private_param_fill,
                        rcsp_update_before_jump_handle);
@@ -263,7 +258,7 @@ static void ble_discon_timeout_handle(void *priv)
 static u16 wait_response_timeout;
 static void wait_response_and_disconn_ble(void *priv)
 {
-    rcsp_printf("W");
+    /* rcsp_printf("W"); */
     JL_rcsp_event_to_user(DEVICE_EVENT_FROM_RCSP, MSG_JL_DEV_DISCONNECT, NULL, 0);
 }
 
@@ -344,19 +339,19 @@ int JL_rcsp_update_cmd_resp(void *priv, u8 OpCode, u8 OpCode_SN, u8 *data, u16 l
     }
     int ret = 0;
     u8 msg[5];
-    rcsp_printf("%s: %d", __FUNCTION__, OpCode);
+    log_info("%s: %d", __FUNCTION__, OpCode);
     switch (OpCode) {
     case JL_OPCODE_GET_DEVICE_UPDATE_FILE_INFO_OFFSET:
         if (0 == len) {
-            rcsp_printf("JL_OPCODE_GET_DEVICE_UPDATE_FILE_INFO_OFFSET\n");
+            log_info("JL_OPCODE_GET_DEVICE_UPDATE_FILE_INFO_OFFSET");
             JL_rcsp_resp_dev_update_file_info_offest(OpCode, OpCode_SN, ble_con_handle, spp_remote_addr);
 
         } else {
-            rcsp_printf("JL_OPCODE_GET_DEVICE_UPDATE_FILE_INFO_OFFSET ERR\n");
+            log_error("JL_OPCODE_GET_DEVICE_UPDATE_FILE_INFO_OFFSET ERR");
         }
         break;
     case JL_OPCODE_INQUIRE_DEVICE_IF_CAN_UPDATE:
-        rcsp_printf("JL_OPCODE_INQUIRE_DEVICE_IF_CAN_UPDATE:%x %x\n", len, data[0]);
+        log_info("JL_OPCODE_INQUIRE_DEVICE_IF_CAN_UPDATE:%x %x", len, data[0]);
         if (len) {
             u8 can_update_flag = UPDATE_FLAG_FW_INFO_ERR;
             set_curr_update_type(data[0]);
@@ -401,15 +396,16 @@ int JL_rcsp_update_cmd_resp(void *priv, u8 OpCode, u8 OpCode_SN, u8 *data, u16 l
             if (0 == support_dual_bank_update_en) {
 #if RCSP_MODE == RCSP_MODE_EARPHONE
                 if (tws_api_get_role() == TWS_ROLE_MASTER) {
-                    g_printf("tws master start update...\n");
-                    JL_rcsp_event_to_user(DEVICE_EVENT_FROM_RCSP, MSG_JL_LOADER_DOWNLOAD_START, NULL, 0);
+                    log_info("tws master start update...");
+                    JL_rcsp_update_msg_deal(NULL, MSG_JL_LOADER_DOWNLOAD_START, NULL);
+                    /* JL_rcsp_event_to_user(DEVICE_EVENT_FROM_RCSP, MSG_JL_LOADER_DOWNLOAD_START, NULL, 0); */
                     //需要通知从机进入了升级
                     u8 data = TWS_UPDATE_INFO;
                     tws_api_send_data_to_sibling(&data, sizeof(data), TWS_FUNC_ID_SEQ_RAND_SYNC);
                 } else {
                     bt_ble_rcsp_adv_disable();
                     ble_module_enable(0);               //关闭广播防止从机被手机误回连
-                    r_printf("slave close adv...\n");
+                    log_info("slave close adv...");
                     sys_timeout_add(NULL,  update_slave_adv_reopen, 1000 * 60);     //延迟一分钟再开广播
                 }
                 // 断开tws会导致spp断连，不断开也可以正常升级
@@ -427,7 +423,8 @@ int JL_rcsp_update_cmd_resp(void *priv, u8 OpCode, u8 OpCode_SN, u8 *data, u16 l
 #else
                 if (1) {
 #endif
-                    JL_rcsp_event_to_user(DEVICE_EVENT_FROM_RCSP, MSG_JL_LOADER_DOWNLOAD_START, NULL, 0);
+                    /* JL_rcsp_event_to_user(DEVICE_EVENT_FROM_RCSP, MSG_JL_LOADER_DOWNLOAD_START, NULL, 0); */
+                    JL_rcsp_update_msg_deal(NULL, MSG_JL_LOADER_DOWNLOAD_START, NULL);
                 } else {
                     tws_need_update = 1;                //置上该标志位APP重新连接的时候强制进入升级
                 }
@@ -438,10 +435,10 @@ int JL_rcsp_update_cmd_resp(void *priv, u8 OpCode, u8 OpCode_SN, u8 *data, u16 l
         }
         break;
     case JL_OPCODE_EXIT_UPDATE_MODE:
-        rcsp_printf("JL_OPCODE_EXIT_UPDATE_MODE\n");
+        log_info("JL_OPCODE_EXIT_UPDATE_MODE");
         break;
     case JL_OPCODE_ENTER_UPDATE_MODE:
-        rcsp_printf("JL_OPCODE_ENTER_UPDATE_MODE\n");
+        log_info("JL_OPCODE_ENTER_UPDATE_MODE");
 #if (RCSP_MODE == RCSP_MODE_EARPHONE || RCSP_MODE == RCSP_MODE_SOUNDBOX)
         bt_set_low_latency_mode(0, 0, 0);
 #endif
@@ -474,29 +471,29 @@ int JL_rcsp_update_cmd_resp(void *priv, u8 OpCode, u8 OpCode_SN, u8 *data, u16 l
             JL_CMD_response_send(OpCode, JL_PRO_STATUS_SUCCESS, OpCode_SN, &status, 1, ble_con_handle, spp_remote_addr);
             rcsp_update_data_api_register(rcsp_update_data_read, rcsp_update_status_response);
             register_receive_fw_update_block_handle(rcsp_update_handle);
-            printf("rcsp_update_loader_download_init %d\n", __LINE__);
+            log_info("rcsp_update_loader_download_init %d", __LINE__);
             rcsp_update_loader_download_init(DUAL_BANK_UPDATA, rcsp_loader_download_result_handle);
         }
         break;
     case JL_OPCODE_SEND_FW_UPDATE_BLOCK:
-        rcsp_printf("JL_OPCODE_SEND_FW_UPDATE_BLOCK\n");
+        log_info("JL_OPCODE_SEND_FW_UPDATE_BLOCK");
         break;
     case JL_OPCODE_GET_DEVICE_REFRESH_FW_STATUS:
-        rcsp_printf("JL_OPCODE_GET_DEVICE_REFRESH_FW_STATUS\n");
+        log_info("JL_OPCODE_GET_DEVICE_REFRESH_FW_STATUS");
         JL_controller_save_curr_cmd_para(OpCode, OpCode_SN);
         if (fw_update_block_handle) {
             fw_update_block_handle(UPDATA_STOP, NULL, 0);
         }
         break;
     case JL_OPCODE_SET_DEVICE_REBOOT:
-        rcsp_printf("JL_OPCODE_SET_DEVICE_REBOOT\n");
+        log_info("JL_OPCODE_SET_DEVICE_REBOOT");
         JL_CMD_response_send(OpCode, JL_PRO_STATUS_SUCCESS, OpCode_SN, NULL, 0, ble_con_handle, spp_remote_addr);
         rcsp_rcsp_reboot_dev();
 
         break;
 #if 0//TCFG_RCSP_DUAL_CONN_ENABLE
     case JL_OPCODE_CHECK_DEVICE_CONN_NUM:
-        rcsp_printf("JL_OPCODE_CHECK_DEVICE_CONN_NUM\n");
+        log_info("JL_OPCODE_CHECK_DEVICE_CONN_NUM");
         u8 cur_con_dev = bt_rcsp_device_conn_num();
         if (cur_con_dev > 1) {
             // 踢掉另一个连接的设备
@@ -591,7 +588,7 @@ static u8 judge_remote_version_can_update(void)
 #endif
 
     if (remote_file_ver == local_ver) {
-        rcsp_printf("remote_file_ver is %x, local_ver is %x, remote_file_ver is similar to local_ver\n", remote_file_ver, local_ver);
+        log_info("remote_file_ver is %x, local_ver is %x, remote_file_ver is similar to local_ver", remote_file_ver, local_ver);
         return UPDATE_FLAG_FW_INFO_CONSISTENT;
     }
 
@@ -626,7 +623,7 @@ static u32 rcsp_update_data_read(void *priv, u32 offset_addr, u16 len)
     u16 current_update_ble_con_hdl = 0;
     u8 current_update_spp_addr[6] = {0};
     rcsp_get_update_hdl(&current_update_ble_con_hdl, current_update_spp_addr);
-    /* printf("%s, %s, %d\n", __FILE__, __FUNCTION__, __LINE__); */
+    /* log_info("%s, %s, %d", __FILE__, __FUNCTION__, __LINE__); */
     /* u8 _addr_temp[6] = {0}; */
     /* if (memcmp(current_update_spp_addr, _addr_temp, 6)) { */
     /* 	put_buf(current_update_spp_addr, 6); */
@@ -659,7 +656,7 @@ static u32 rcsp_update_status_response(void *priv, u8 status)
 
     JL_controller_get_curr_cmd_para(&OpCode, &OpCode_SN);
 
-    //log_info("get cmd para:%x %x\n", OpCode, OpCode_SN);
+    //log_info("get cmd para:%x %x", OpCode, OpCode_SN);
 
     if (JL_OPCODE_GET_DEVICE_REFRESH_FW_STATUS == OpCode) {
         send_err = JL_controller_resp_get_dev_refresh_fw_status(OpCode, OpCode_SN, status);
@@ -692,11 +689,11 @@ static void rcsp_loader_download_result_handle(void *priv, u8 type, u8 cmd)
         //JL_rcsp_event_to_user(DEVICE_EVENT_FROM_RCSP,MSG_JL_UPDATE_START,NULL,0);
         set_jl_update_flag(1);
         if (support_dual_bank_update_en) {
-            rcsp_printf(">>>rcsp update succ\n");
+            log_info(">>>rcsp update succ");
             update_result_set(UPDATA_SUCC);
         }
     } else {
-        rcsp_printf(">>>update loader err\n");
+        log_error(">>>update loader err");
 #if 1//(RCSP_MODE == RCSP_MODE_SOUNDBOX)
         rcsp_update_fail_and_resume();
 #endif
@@ -712,8 +709,9 @@ static void rcsp_loader_download_result_handle(void *priv, u8 type, u8 cmd)
 extern u32 ex_cfg_fill_content_api(void);
 static void rcsp_update_private_param_fill(UPDATA_PARM *p)
 {
-    u32 exif_addr = ex_cfg_fill_content_api();
-    memcpy(p->parm_priv, (u8 *)&exif_addr, sizeof(exif_addr));
+    printf("%s===%d===TODO", __func__, __LINE__);
+    /* u32 exif_addr = ex_cfg_fill_content_api(); */
+    /* memcpy(p->parm_priv, (u8 *)&exif_addr, sizeof(exif_addr)); */
 }
 
 static void rcsp_update_change_mtu(u16 new_mtu)
@@ -761,7 +759,7 @@ void rcsp_update_set_role_switch(u8 sw)
 
 void update_slave_adv_reopen(void *priv)
 {
-    r_printf("slave reopen adv...\n");
+    log_info("slave reopen adv...");
     ble_module_enable(1);
     bt_ble_rcsp_adv_enable();
 }
@@ -774,10 +772,10 @@ int JL_rcsp_update_msg_deal(void *hdl, u8 event, u8 *msg)
     u16 remote_file_version;
     u8 can_update_flag = UPDATE_FLAG_FW_INFO_ERR;
 
-    printf("---%s --- %d   %d\n", __func__, __LINE__, event);
+    log_debug("%s: event-%d", __func__, event);
     switch (event) {
     case MSG_JL_DEV_DISCONNECT:
-        rcsp_printf("MSG_JL_DEV_DISCONNECT\n");
+        log_info("MSG_JL_DEV_DISCONNECT");
         static u8 wait_cnt = 0;
         if ((10 == wait_cnt) || (rcsp_send_list_is_empty() && check_ble_all_packet_sent())) {
             wait_cnt = 0;
@@ -786,7 +784,7 @@ int JL_rcsp_update_msg_deal(void *hdl, u8 event, u8 *msg)
             rcsp_clear_ble_hdl_and_tws_sync();
 #endif
             if (check_edr_is_disconnct()) {
-                puts("-need discon edr\n");
+                puts("-need discon edr");
                 bt_cmd_prepare(USER_CTRL_POWER_OFF, 0, NULL);
             }
             ble_discon_timeout = sys_timeout_add(NULL, ble_discon_timeout_handle, 1000);
@@ -797,7 +795,7 @@ int JL_rcsp_update_msg_deal(void *hdl, u8 event, u8 *msg)
         break;
 
     case MSG_JL_LOADER_DOWNLOAD_START:
-        printf("---%s --- %d\n", __func__, __LINE__);
+        log_info("---%s --- %d", __func__, __LINE__);
         rcsp_update_data_api_register(rcsp_update_data_read, rcsp_update_status_response);
         register_receive_fw_update_block_handle(rcsp_update_handle);
 #if (RCSP_MODE == RCSP_MODE_WATCH)
@@ -808,20 +806,20 @@ int JL_rcsp_update_msg_deal(void *hdl, u8 event, u8 *msg)
         rcsp_update_change_mtu(rcsp_packet_write_alloc_len());
 #endif
         if (RCSP_USE_BLE == get_curr_device_type()) {
-            printf("rcsp_update_loader_download_init %d\n", __LINE__);
+            log_info("rcsp_update_loader_download_init %d", __LINE__);
             rcsp_update_loader_download_init(BLE_APP_UPDATA, rcsp_loader_download_result_handle);
         } else if (RCSP_USE_SPP == get_curr_device_type()) {
-            printf("rcsp_update_loader_download_init %d\n", __LINE__);
+            log_info("rcsp_update_loader_download_init %d", __LINE__);
             rcsp_update_loader_download_init(SPP_APP_UPDATA, rcsp_loader_download_result_handle);
         }
         break;
 
     case MSG_JL_UPDATE_START:
-        rcsp_printf("MSG_JL_UPDATE_START\n");
+        log_info("MSG_JL_UPDATE_START");
         static u8 update_wait_cnt = 0;
         // loader加载完成，开始进入loader升级
         if ((100 < update_wait_cnt) && check_edr_is_disconnct()) {
-            rcsp_printf("b");
+            printf("b");
             update_wait_cnt++;
             JL_rcsp_event_to_user(DEVICE_EVENT_FROM_RCSP, MSG_JL_UPDATE_START, NULL, 0);
             break;
@@ -830,7 +828,7 @@ int JL_rcsp_update_msg_deal(void *hdl, u8 event, u8 *msg)
         }
 
         // 单备份的loader都是使用ble
-        rcsp_printf("BLE_APP_UPDATE\n");
+        log_info("BLE_APP_UPDATE");
         update_mode_api_v2(BLE_APP_UPDATA,
                            rcsp_update_private_param_fill,
                            rcsp_update_before_jump_handle);
@@ -858,7 +856,7 @@ u8 get_rcsp_db_update_status()
 
 void rcsp_before_enter_db_update_mode() //进入双备份升级前
 {
-    r_printf("%s", __func__);
+    log_info("%s", __func__);
     rcsp_update_flag = 1;
     void sys_auto_shut_down_disable(void);
     if (bt_get_total_connect_dev() == 0) {
@@ -879,7 +877,7 @@ void rcsp_before_enter_db_update_mode() //进入双备份升级前
 extern void sys_auto_shut_down_enable(void);
 void rcsp_db_update_fail_deal() //双备份升级失败处理
 {
-    r_printf("%s", __func__);
+    log_info("%s", __func__);
     if (rcsp_update_flag) {
         rcsp_update_flag = 0;
         if (bt_get_total_connect_dev() == 0) {

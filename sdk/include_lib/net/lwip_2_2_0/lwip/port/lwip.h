@@ -22,6 +22,8 @@ typedef enum {
 
 #endif
 
+extern bool is_aic_driver;
+
 struct netif_info {
     u32_t ip;
     u32_t gw;
@@ -60,6 +62,8 @@ struct lan_setting {
     u8_t SUB_NET_MASK3;
     u8_t SUB_NET_MASK4;
 };
+
+
 
 enum LWIP_EVENT {
     LWIP_WIRELESS_DHCP_BOUND_TIMEOUT,

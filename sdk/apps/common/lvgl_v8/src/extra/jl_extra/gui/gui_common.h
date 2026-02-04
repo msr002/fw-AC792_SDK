@@ -47,10 +47,16 @@
 #define LV_OBJ_SET_STYLE_ARC_ROUNDED_ID       0x00100026
 #define LV_OBJ_SET_STYLE_IMAGE_RECOLOR_ID     0x00100027
 #define LV_OBJ_SET_STYLE_IMAGE_RECOLOR_OPA_ID 0x00100028
-#define LV_OBJ_SET_STYLE_IMAGE_OPA_ID         0x00100039
-#define LV_OBJ_SET_STYLE_MAX_HEIGHT_ID        0x0010003A
+#define LV_OBJ_SET_STYLE_IMAGE_OPA_ID         0x00100029
+#define LV_OBJ_SET_STYLE_MAX_HEIGHT_ID        0x0010002A
+#define LV_OBJ_SET_STYLE_BG_IMG_SRC_ID        0x0010002B
+#define LV_OBJ_SET_STYLE_BG_IMG_OPA_ID        0x0010002C
+#define LV_OBJ_SET_STYLE_BG_IMG_RECOLOR_ID    0x0010002D
+#define LV_OBJ_SET_STYLE_BG_IMG_RECOLOR_OPA_ID 0x0010002E
+#define LV_OBJ_SET_STYLE_ARC_IMG_SRC_ID        0x0010002F
+#define LV_OBJ_SET_STYLE_ARC_OPA_ID            0x00100030
 
-//基础控件
+// 基础控件
 #define LV_OBJ_SET_POS_ID       0x00010000
 #define LV_OBJ_SET_SIZE_ID      0x00010001
 #define LV_OBJ_SET_X_ID         0x00010002
@@ -63,15 +69,15 @@
 #define LV_OBJ_CLEAR_FLAG_ID    0x00010009
 #define LV_OBJ_ALIGN_ID         0x0001000A
 
-//label
+// label
 #define LV_LABEL_SET_TEXT_ID      0x00011000
 #define LV_LABEL_SET_TEXT_FMT_ID  0x00011001
 #define LV_LABEL_SET_LONG_MODE_ID 0x00011002
 #define LV_LABEL_SET_RECOLOR_ID   0x00011003
 
-//btn
+// btn
 
-//img
+// img
 #define LV_IMG_SET_SRC_ID      0x00013000
 #define LV_IMG_SET_PIVOT_ID    0x00013001
 #define LV_IMG_SET_ANGLE_ID    0x00013002
@@ -79,7 +85,7 @@
 #define LV_IMG_SET_OFFSET_X_ID 0x00013004
 #define LV_IMG_SET_OFFSET_Y_ID 0x00013005
 
-//analogue
+// analogue
 #define LV_ANALOGCLOCK_SET_HIDE_DIGITS_ID      0x00014000
 #define LV_ANALOGCLOCK_SET_MAJOR_TICKS_ID      0x00014001
 #define LV_ANALOGCLOCK_SET_TICKS_ID            0x00014002
@@ -92,18 +98,30 @@
 #define LV_ANALOGCLOCK_SET_MIN_NEEDLE_IMG_ID   0x00014009
 #define LV_ANALOGCLOCK_SET_SEC_NEEDLE_IMG_ID   0x0001400A
 
-//控件类型
+// imglist
+#define LV_IMGLIST_SET_SRC_ID 0x00015000
+#define LV_IMGLIST_SET_ACT_ID 0x00015001
+
+// line
+#define LV_LINE_SET_POINTS_ID 0x00016000
+
+// 控件类型
 #define TYPE_OBJ         "obj"
 #define TYPE_SCR         "scr"
 #define TYPE_LABEL       "label"
 #define TYPE_BTN         "btn"
 #define TYPE_IMG         "img"
 #define TYPE_ANALOGCLOCK "analog_clock"
+#define TYPE_IMGLIST     "imglist"
+#define TYPE_LINE        "line"
 
 #define TYPE_OBJ_ID         0x10
 #define TYPE_LABEL_ID       0x11
 #define TYPE_BTN_ID         0x12
 #define TYPE_IMG_ID         0x13
 #define TYPE_ANALOGCLOCK_ID 0x14
+#define TYPE_IMGLIST_ID     0x15
+#define TYPE_LINE_ID        0x16
 
 #endif /*GUI_COMMON_H*/
+

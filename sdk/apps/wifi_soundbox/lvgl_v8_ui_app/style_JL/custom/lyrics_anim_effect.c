@@ -1,7 +1,8 @@
-// lyrics_anim_effect_safe.c
 #include "lyrics_anim_effect.h"
+
 // 配置参数
 #define LYRIC_ANIM_ZOOM_BASE 256  // 256表示100%缩放
+#define LYRIC_ANIM_MOVE_DISTANCE 100  // 底部上移距离
 
 // 安全的歌词动画上下文结构
 typedef struct {
@@ -12,6 +13,7 @@ typedef struct {
     lv_coord_t start_y;         // 起始Y坐标
     lv_coord_t target_x;        // 目标X坐标
     lv_coord_t target_y;        // 目标Y坐标
+    lv_coord_t original_y;      // 原始Y坐标（用于移动动画）
 } safe_lyrics_context_t;
 
 // 全局上下文池（避免动态内存分配）
@@ -68,9 +70,6 @@ static int is_obj_valid(lv_obj_t *obj)
         return 0;
     }
 
-    // 如果需要更严格的检查，可以添加更多条件
-    // 例如：检查对象是否在有效的内存范围内
-
     return 1;
 }
 
@@ -110,6 +109,17 @@ static void safe_lyrics_set_zoom_no_redraw(lv_obj_t *obj, int32_t zoom_x, int32_
     lv_lyrics_set_zoom(obj, zoom_x, zoom_y);
 }
 
+// 安全的歌词位置设置
+static void safe_lyrics_set_pos_no_redraw(lv_obj_t *obj, lv_coord_t x, lv_coord_t y)
+{
+    if (!is_obj_valid(obj)) {
+        return;
+    }
+
+    // 直接设置位置，不立即重绘
+    lv_lyrics_set_pos(obj, x, y);
+}
+
 // 安全的歌词重绘函数（添加保护）
 static void safe_lyrics_redraw(lv_obj_t *obj)
 {
@@ -118,7 +128,6 @@ static void safe_lyrics_redraw(lv_obj_t *obj)
         return;
     }
 
-    // 添加延迟或尝试/捕获机制
     // 这里使用简单的延迟机制
     static uint32_t last_redraw_time = 0;
     uint32_t current_time = lv_tick_get();
@@ -134,45 +143,80 @@ static void safe_lyrics_redraw(lv_obj_t *obj)
     lv_lyrics_fontimg_redarw(obj);
 }
 
-// 安全的缩放和位置处理（避免在回调中死机）
-static void safe_scale_and_translate_handle(lv_obj_t *obj, int32_t scale,
-        int32_t translate_x, int32_t translate_y,
-        uint8_t alpha)
+// 复合动画回调：同时处理缩放、位置和透明度
+static void composite_zoom_move_opa_cb(void *var, int32_t v)
 {
-    if (!is_obj_valid(obj)) {
+    safe_lyrics_context_t *ctx = (safe_lyrics_context_t *)var;
+    if (!is_context_valid(ctx) || !is_obj_valid(ctx->obj)) {
         return;
     }
 
-    // 计算缩放值 (scale为百分比，0-100)
-    int32_t zoom_value = scale * LYRIC_ANIM_ZOOM_BASE / 100;
+    lv_obj_t *obj = ctx->obj;
 
     // 边界检查
+    if (v < 0) {
+        v = 0;
+    }
+    if (v > 100) {
+        v = 100;
+    }
+
+    // 1. 计算缩放：从10%到100%
+    // 第一阶段：0-40%进度：10% -> 47.5%
+    // 第二阶段：40%-100%进度：52% -> 100%
+    uint32_t scale;
+    if (v <= 40) {
+        // 第一阶段：0-40%进度
+        scale = v * 375 / 400 + 10;  // 10% + (v/40)*37.5%
+    } else {
+        // 第二阶段：40%-100%进度
+        scale = (v - 40) * 48 / 60 + 52;  // 52% + ((v-40)/60)*48%
+    }
+
+    // 2. 计算位置：从起始位置移动到目标位置
+    // 使用线性插值：v=0时在起始位置，v=100时在目标位置
+    lv_coord_t current_x, current_y;
+
+    // 方法A：简单的线性插值
+    current_x = ctx->start_x + (ctx->target_x - ctx->start_x) * v / 100;
+    current_y = ctx->start_y + (ctx->target_y - ctx->start_y) * v / 100;
+
+
+    // 3. 计算透明度：从0到100%
+    uint8_t alpha = v * 255 / 100;
+
+    // 4. 应用所有效果
+    // 计算缩放值
+    int32_t zoom_value = scale * LYRIC_ANIM_ZOOM_BASE / 100;
     if (zoom_value < 26) {
         zoom_value = 26;    // 最小10%
     }
-    if (zoom_value > 512) {
-        zoom_value = 512;    // 最大200%
+    if (zoom_value > 256) {
+        zoom_value = 256;    // 最大100%
     }
 
     // 设置缩放（不立即重绘）
     safe_lyrics_set_zoom_no_redraw(obj, zoom_value, zoom_value);
 
+    // 设置位置（不立即重绘） - 这里用current_x而不是ctx->target_x
+    safe_lyrics_set_pos_no_redraw(obj, current_x, current_y);
+
     // 设置透明度（不立即重绘）
     jlvg_color_t color = {0xFF, 0xFF, 0xFF, alpha};
     safe_lyrics_set_color_no_redraw(obj, color);
 
-    // 延迟重绘（避免频繁重绘）
-    static uint32_t redraw_count = 0;
-    redraw_count++;
+    // 5. 重绘（控制频率）
+    static uint32_t composite_redraw_count = 0;
+    composite_redraw_count++;
 
-    // 每5帧重绘一次（减少重绘频率）
-    if (redraw_count % 5 == 0) {
+    // 每3帧重绘一次
+    if (composite_redraw_count % 3 == 0) {
         safe_lyrics_redraw(obj);
     }
 }
 
-// 简化的第一阶段动画回调（无上下文）
-static void simple_down_in_one_cb(void *var, int32_t v)
+// 简化版本：只处理缩放和透明度（向后兼容）
+static void simple_zoom_opa_cb(void *var, int32_t v)
 {
     lv_obj_t *obj = (lv_obj_t *)var;
     if (!is_obj_valid(obj)) {
@@ -188,17 +232,37 @@ static void simple_down_in_one_cb(void *var, int32_t v)
     }
 
     // 计算缩放：从10%到47.5%
-    uint32_t scale = v * 375 / 1000 + 10;  // v * 37.5 / 100 + 10
+    uint32_t scale = v * 375 / 1000 + 10;
 
     // 计算透明度：从0到100%
     uint8_t alpha = v * 255 / 100;
 
-    // 使用安全的处理函数
-    safe_scale_and_translate_handle(obj, scale, 0, 0, alpha);
+    // 计算缩放值
+    int32_t zoom_value = scale * LYRIC_ANIM_ZOOM_BASE / 100;
+    if (zoom_value < 26) {
+        zoom_value = 26;
+    }
+    if (zoom_value > 256) {
+        zoom_value = 256;
+    }
+
+    // 设置缩放（不立即重绘）
+    safe_lyrics_set_zoom_no_redraw(obj, zoom_value, zoom_value);
+
+    // 设置透明度（不立即重绘）
+    jlvg_color_t color = {0xFF, 0xFF, 0xFF, alpha};
+    safe_lyrics_set_color_no_redraw(obj, color);
+
+    // 重绘（控制频率）
+    static uint32_t simple_redraw_count = 0;
+    simple_redraw_count++;
+    if (simple_redraw_count % 3 == 0) {
+        safe_lyrics_redraw(obj);
+    }
 }
 
-// 简化的第二阶段动画回调（无上下文）
-static void simple_down_in_two_cb(void *var, int32_t v)
+// 简化第二阶段动画回调
+static void simple_second_stage_cb(void *var, int32_t v)
 {
     lv_obj_t *obj = (lv_obj_t *)var;
     if (!is_obj_valid(obj)) {
@@ -216,64 +280,62 @@ static void simple_down_in_two_cb(void *var, int32_t v)
     // 计算缩放：从52%到100%
     uint32_t scale = v * 48 / 100 + 52;
 
+    // 计算缩放值
+    int32_t zoom_value = scale * LYRIC_ANIM_ZOOM_BASE / 100;
+    if (zoom_value < 135) {
+        zoom_value = 135;    // 52%
+    }
+    if (zoom_value > 256) {
+        zoom_value = 256;    // 100%
+    }
+
+    // 设置缩放（不立即重绘）
+    safe_lyrics_set_zoom_no_redraw(obj, zoom_value, zoom_value);
+
     // 透明度保持100%
-    uint8_t alpha = 255;
-
-    // 使用安全的处理函数
-    safe_scale_and_translate_handle(obj, scale, 0, 0, alpha);
-}
-
-// 简化的透明度动画回调（无上下文）
-static void simple_opa_cb(void *var, int32_t v)
-{
-    lv_obj_t *obj = (lv_obj_t *)var;
-    if (!is_obj_valid(obj)) {
-        return;
-    }
-
-    // 边界检查
-    if (v < 0) {
-        v = 0;
-    }
-    if (v > 100) {
-        v = 100;
-    }
-
-    // 计算透明度：v是0-100，转换为0-255
-    uint8_t alpha = v * 255 / 100;
-
-    // 直接设置颜色，不立即重绘
-    jlvg_color_t color = {0xFF, 0xFF, 0xFF, alpha};
+    jlvg_color_t color = {0xFF, 0xFF, 0xFF, 0xFF};
     safe_lyrics_set_color_no_redraw(obj, color);
 
-    // 每3帧重绘一次
-    static uint32_t opa_redraw_count = 0;
-    opa_redraw_count++;
-    if (opa_redraw_count % 3 == 0) {
+    // 重绘（控制频率）
+    static uint32_t second_redraw_count = 0;
+    second_redraw_count++;
+    if (second_redraw_count % 3 == 0) {
         safe_lyrics_redraw(obj);
     }
 }
 
-// 动画完成回调（清理资源）
 static void anim_completed_cb(lv_anim_t *anim)
 {
     if (!anim) {
         return;
     }
 
-    lv_obj_t *obj = (lv_obj_t *)anim->var;
-    printf("[INFO] Animation completed for object %p\n", obj);
+    safe_lyrics_context_t *ctx = (safe_lyrics_context_t *)anim->var;
+    if (ctx && is_context_valid(ctx)) {
 
-    // 清理对应的上下文
-    for (int i = 0; i < MAX_SAFE_CONTEXTS; i++) {
-        if (safe_contexts[i].obj == obj) {
-            invalidate_context(&safe_contexts[i]);
-            break;
+        // 只需确保最终缩放为100%
+        if (is_obj_valid(ctx->obj)) {
+            // 设置最终缩放（确保100%）
+            safe_lyrics_set_zoom_no_redraw(ctx->obj, LYRIC_ANIM_ZOOM_BASE, LYRIC_ANIM_ZOOM_BASE);
+
+            // 设置最终透明度（确保不透明）
+            jlvg_color_t final_color = {0xFF, 0xFF, 0xFF, 0xFF};
+            safe_lyrics_set_color_no_redraw(ctx->obj, final_color);
+
+            // 只重绘一次
+            safe_lyrics_redraw(ctx->obj);
+        }
+
+        // 清理上下文
+        for (int i = 0; i < MAX_SAFE_CONTEXTS; i++) {
+            if (&safe_contexts[i] == ctx) {
+                invalidate_context(ctx);
+                break;
+            }
         }
     }
 }
-
-// 简化的ZoomInDown特效（安全版本）
+// 增强版ZoomInDown特效：包含缩放、上移和透明度动画
 void lyrics_anim_effect_zooming_in_down(lv_obj_t *lyrics_obj, lyrics_anim_effect_args_t *args)
 {
     if (!lyrics_obj || !args) {
@@ -281,7 +343,6 @@ void lyrics_anim_effect_zooming_in_down(lv_obj_t *lyrics_obj, lyrics_anim_effect
         return;
     }
 
-    printf("[INFO] Starting safe zoom-in-down animation for object %p\n", lyrics_obj);
 
     // 获取安全上下文
     safe_lyrics_context_t *ctx = get_safe_context(lyrics_obj);
@@ -290,14 +351,30 @@ void lyrics_anim_effect_zooming_in_down(lv_obj_t *lyrics_obj, lyrics_anim_effect
         return;
     }
 
-    // 记录位置
-    ctx->start_x = 0;
-    ctx->start_y = 0;
-    ctx->target_x = 0;
-    ctx->target_y = 0;
+    // 使用传入的目标位置（最可靠的方式）
+    ctx->target_x = args->target_x;
+    ctx->target_y = args->target_y;
 
-    // 设置初始状态（使用安全函数）
+    // 设置起始位置 - 在目标位置下方
+    ctx->start_x = ctx->target_x;  // X坐标相同（水平居中位置不变）
+    ctx->start_y = ctx->target_y + LYRIC_ANIM_MOVE_DISTANCE;  // 从下方开始
+
+    // 创建单个复合动画，同时处理缩放、位置和透明度
+    lv_anim_t composite_anim;
+    lv_anim_init(&composite_anim);
+    lv_anim_set_var(&composite_anim, ctx);
+    lv_anim_set_exec_cb(&composite_anim, (lv_anim_exec_xcb_t)composite_zoom_move_opa_cb);
+    lv_anim_set_values(&composite_anim, 0, 100);
+    lv_anim_set_delay(&composite_anim, args->delay);
+    lv_anim_set_time(&composite_anim, args->duration);
+
+    // 使用自定义路径：先快速后慢速
+    lv_anim_set_path_cb(&composite_anim, lv_anim_path_ease_out);
+    lv_anim_set_ready_cb(&composite_anim, anim_completed_cb);
+
+    // 设置初始状态
     safe_lyrics_set_zoom_no_redraw(lyrics_obj, 26, 26);  // 10%缩放
+    safe_lyrics_set_pos_no_redraw(lyrics_obj, ctx->start_x, ctx->start_y);  // 起始位置
 
     jlvg_color_t transparent = {0xFF, 0xFF, 0xFF, 0x00};
     safe_lyrics_set_color_no_redraw(lyrics_obj, transparent);
@@ -305,96 +382,30 @@ void lyrics_anim_effect_zooming_in_down(lv_obj_t *lyrics_obj, lyrics_anim_effect
     // 初始重绘
     safe_lyrics_redraw(lyrics_obj);
 
-    // 计算动画时间
-    int32_t time = 600;  // 固定600ms第一阶段
-
-    // 第一阶段动画
-    lv_anim_t anim1;
-    lv_anim_init(&anim1);
-    lv_anim_set_var(&anim1, lyrics_obj);  // 直接使用对象指针，而不是上下文
-    lv_anim_set_exec_cb(&anim1, (lv_anim_exec_xcb_t)simple_down_in_one_cb);
-    lv_anim_set_values(&anim1, 0, 100);
-    lv_anim_set_delay(&anim1, args->delay);
-    lv_anim_set_path_cb(&anim1, lv_anim_path_ease_in);
-    lv_anim_set_time(&anim1, time);
-    lv_anim_set_ready_cb(&anim1, anim_completed_cb);
-    lv_anim_start(&anim1);
-
-    // 第二阶段动画
-    lv_anim_t anim2;
-    lv_anim_init(&anim2);
-    lv_anim_set_var(&anim2, lyrics_obj);
-    lv_anim_set_exec_cb(&anim2, (lv_anim_exec_xcb_t)simple_down_in_two_cb);
-    lv_anim_set_values(&anim2, 0, 100);
-    lv_anim_set_delay(&anim2, args->delay + time);
-    lv_anim_set_path_cb(&anim2, lv_anim_path_ease_out);
-    lv_anim_set_time(&anim2, args->duration - time);
-    lv_anim_set_ready_cb(&anim2, anim_completed_cb);
-    lv_anim_start(&anim2);
-
-    // 透明度动画
-    lv_anim_t opa_anim;
-    lv_anim_init(&opa_anim);
-    lv_anim_set_var(&opa_anim, lyrics_obj);
-    lv_anim_set_exec_cb(&opa_anim, (lv_anim_exec_xcb_t)simple_opa_cb);
-    lv_anim_set_values(&opa_anim, 0, 100);
-    lv_anim_set_delay(&opa_anim, args->delay);
-    lv_anim_set_path_cb(&opa_anim, lv_anim_path_ease_in);
-    lv_anim_set_time(&opa_anim, time);
-    lv_anim_set_ready_cb(&opa_anim, NULL);
-    lv_anim_start(&opa_anim);
-}
-
-// 简化的ZoomIn特效
-void lyrics_anim_effect_zooming_in(lv_obj_t *lyrics_obj, lyrics_anim_effect_args_t *args)
-{
-    if (!lyrics_obj || !args) {
-        return;
-    }
-
-    printf("[INFO] Starting safe zoom-in animation for object %p\n", lyrics_obj);
-
-    // 设置初始状态
-    safe_lyrics_set_zoom_no_redraw(lyrics_obj, 77, 77);  // 30%缩放
-
-    jlvg_color_t transparent = {0xFF, 0xFF, 0xFF, 0x00};
-    safe_lyrics_set_color_no_redraw(lyrics_obj, transparent);
-
-    safe_lyrics_redraw(lyrics_obj);
-
-    // 缩放动画
-    lv_anim_t scale_anim;
-    lv_anim_init(&scale_anim);
-    lv_anim_set_var(&scale_anim, lyrics_obj);
-    lv_anim_set_exec_cb(&scale_anim, (lv_anim_exec_xcb_t)simple_down_in_two_cb); // 复用
-    lv_anim_set_values(&scale_anim, 30, 100);
-    lv_anim_set_delay(&scale_anim, args->delay);
-    lv_anim_set_path_cb(&scale_anim, lv_anim_path_linear);
-    lv_anim_set_time(&scale_anim, args->duration);
-    lv_anim_start(&scale_anim);
-
-    // 透明度动画
-    lv_anim_t opa_anim;
-    lv_anim_init(&opa_anim);
-    lv_anim_set_var(&opa_anim, lyrics_obj);
-    lv_anim_set_exec_cb(&opa_anim, (lv_anim_exec_xcb_t)simple_opa_cb);
-    lv_anim_set_values(&opa_anim, 0, 100);
-    lv_anim_set_delay(&opa_anim, args->delay);
-    lv_anim_set_time(&opa_anim, args->duration * 50 / 100);
-    lv_anim_set_path_cb(&opa_anim, lv_anim_path_linear);
-    lv_anim_start(&opa_anim);
+    // 启动复合动画
+    lv_anim_start(&composite_anim);
 }
 
 // 清理所有动画
 void lyrics_anim_effect_cleanup(void)
 {
-    printf("[INFO] Cleaning up all animation contexts\n");
 
     // 停止所有动画
     for (int i = 0; i < MAX_SAFE_CONTEXTS; i++) {
         if (safe_contexts[i].obj && safe_contexts[i].is_animating) {
+            // 停止所有相关动画
             lv_anim_del(safe_contexts[i].obj, NULL);
+            lv_anim_del(&safe_contexts[i], NULL);
+
+            // 恢复对象到最终位置
+            if (is_obj_valid(safe_contexts[i].obj)) {
+                safe_lyrics_set_pos_no_redraw(safe_contexts[i].obj,
+                                              safe_contexts[i].target_x, safe_contexts[i].target_y);
+                safe_lyrics_redraw(safe_contexts[i].obj);
+            }
+
             invalidate_context(&safe_contexts[i]);
         }
     }
 }
+

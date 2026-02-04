@@ -51,7 +51,7 @@ void *vir_audio_recoder_open(u16 sample_rate, u32 code_type, void *priv, void (*
     struct stream_fmt fmt = {0};
     struct encoder_fmt enc_fmt = {0};
 
-    u16 uuid = jlstream_event_notify(STREAM_EVENT_GET_PIPELINE_UUID, (int)"video_call_tx");
+    u16 uuid = jlstream_event_notify(STREAM_EVENT_GET_PIPELINE_UUID, (int)"vir_voice");
     if (uuid == 0) {
         log_error("get vir voice uuid err \n");
         return NULL;
@@ -94,6 +94,15 @@ void *vir_audio_recoder_open(u16 sample_rate, u32 code_type, void *priv, void (*
         err = jlstream_node_ioctl(recorder->stream, NODE_UUID_ENCODER, NODE_IOC_SET_PRIV_FMT, (int)(&enc_fmt));
         if (err) {
             log_error("vir audio recorder set encoder fmt err \n");
+            goto __exit1;
+        }
+    } else if (code_type == AUDIO_CODING_PCM) {
+        err = jlstream_node_ioctl(recorder->stream, NODE_UUID_ENCODER, NODE_IOC_SET_FMT, (int)(&enc_fmt));
+        if (err) {
+            goto __exit1;
+        }
+        err = jlstream_node_ioctl(recorder->stream, NODE_UUID_VIR_DATA_TX, NODE_IOC_SET_FMT, (int)(&fmt));
+        if (err) {
             goto __exit1;
         }
     }

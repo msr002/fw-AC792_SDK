@@ -1,8 +1,7 @@
 #include "app_config.h"
 #ifdef CONFIG_UI_STYLE_LY_ENABLE
-#include "custom.h"
 #include "lvgl.h"
-#include "gui_guider.h"
+#include "../generated/gui_guider.h"
 
 #if !LV_USE_GUIBUILDER_SIMULATOR
 #include "app_core.h"

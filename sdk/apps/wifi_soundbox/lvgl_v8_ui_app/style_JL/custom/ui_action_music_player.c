@@ -363,6 +363,13 @@ void ui_music_artist_handler(char *song_info)
     if (!song_info) {
         return;
     }
+    FILE *fd = fopen(CONFIG_FONT_TTF_PATH, "r");
+    if (fd) {
+        fclose(fd);
+    } else {
+        printf("Open font fft path error 30100000.ttf  or no exit font fft resource 30100000.ttf !!!!!\n");
+        return;
+    }
 
     char *artist_and_name = lvgl_module_msg_get_ptr(GUI_SONGS_MSG_ID_MUSIC_ARTIST_AND_NAME, strlen(song_info) + 1);
     if (!artist_and_name) {
@@ -486,13 +493,17 @@ static int gui_src_action_music_player(int action)
         }
 #ifdef UI_MUSIC_DYNAMIC_BACKGROUND
         //启用动态背景，从SD卡中加载背景视频
-        logo_show(CONFIG_BACKGROUND_AVI_PATH, NULL, 0xffff,  NULL);
+        if (storage_device_ready()) {
+            logo_show(CONFIG_BACKGROUND_AVI_PATH, NULL, 0xffff,  NULL);
+        }
 #endif
         break;
     case GUI_SCREEN_ACTION_UNLOAD:
 #ifdef UI_MUSIC_DYNAMIC_BACKGROUND
         //停止动态背景播放
-        logo_stop(NULL);
+        if (storage_device_ready()) {
+            logo_stop(NULL);
+        }
 #endif
         break;
     }

@@ -328,6 +328,7 @@ c_SRC_FILES := \
 	../../../../apps/common/camera/sc1346_mipi/SC1346_mipi_ae.c \
 	../../../../apps/common/camera/sc1346_mipi/SC1346_mipi_awb.c \
 	../../../../apps/common/camera/sc1346_mipi/SC1346_mipi_iq.c \
+	../../../../apps/common/camera/xs9950_mipi/xs9950_mipi.c \
 	../../../../apps/common/config/bt_profile_config.c \
 	../../../../apps/common/config/log_config/app_config.c \
 	../../../../apps/common/config/log_config/lib_btctrler_config.c \
@@ -444,6 +445,7 @@ c_SRC_FILES := \
 	../../../../apps/common/lcd/lcd_driver/mipi_lcd/lcd_mipi_st7701s_480x800_rotate_90.c \
 	../../../../apps/common/lcd/lcd_driver/mipi_lcd/lcd_mipi_st7703_720x720.c \
 	../../../../apps/common/lcd/lcd_driver/mipi_lcd/lcd_mipi_st77922_480x480.c \
+	../../../../apps/common/lcd/lcd_driver/rgb_lcd/lcd_rgb_fl58202_800x480.c \
 	../../../../apps/common/lcd/lcd_driver/rgb_lcd/lcd_rgb_hx8264_800x480.c \
 	../../../../apps/common/lcd/lcd_driver/rgb_lcd/lcd_rgb_ssd2828_720x1280.c \
 	../../../../apps/common/lcd/lcd_driver/rgb_lcd/lcd_rgb_st7701s_480x800.c \
@@ -1014,6 +1016,7 @@ c_SRC_FILES := \
 	../../../../apps/wifi_camera/lvgl_v8_ui_app/style_LY/custom/ui_action_main.c \
 	../../../../apps/wifi_camera/lvgl_v8_ui_app/style_LY/custom/ui_action_page_lyrics.c \
 	../../../../apps/wifi_camera/lvgl_v8_ui_app/style_LY/custom/ui_action_page_map.c \
+	../../../../apps/wifi_camera/lvgl_v8_ui_app/style_LY/custom/ui_action_page_music.c \
 	../../../../apps/wifi_camera/lvgl_v8_ui_app/style_LY/custom/ui_action_parking.c \
 	../../../../apps/wifi_camera/lvgl_v8_ui_app/style_LY/custom/ui_action_replay.c \
 	../../../../apps/wifi_camera/lvgl_v8_ui_app/style_LY/custom/ui_action_sys_setting.c \
@@ -1095,6 +1098,7 @@ c_SRC_FILES := \
 	../../../../apps/wifi_camera/mode/video_rec/video_rec.c \
 	../../../../apps/wifi_camera/mode/video_rec/video_rec_cfg.c \
 	../../../../apps/wifi_camera/wifi/ctp_cmd.c \
+	../../../../apps/wifi_camera/wifi/ext_wifi_app_task.c \
 	../../../../apps/wifi_camera/wifi/ftpd_vfs_reg.c \
 	../../../../apps/wifi_camera/wifi/media_file_list.c \
 	../../../../apps/wifi_camera/wifi/net_video_rec.c \
@@ -1378,9 +1382,9 @@ LFLAGS := \
 	../../../../cpu/wl83/liba/crypto_toolbox_Osize.a \
 	../../../../cpu/wl83/liba/wl_wifi.a \
 	../../../../cpu/wl83/liba/wpasupplicant.a \
+	../../../../cpu/wl83/liba/wl_rf_common.a \
 	../../../../cpu/wl83/liba/libcrypto_mbedtls.a \
 	../../../../cpu/wl83/liba/hsm.a \
-	../../../../cpu/wl83/liba/wl_rf_common.a \
 	../../../../cpu/wl83/liba/lte_module.a \
 	../../../../cpu/wl83/liba/profile.a \
 	../../../../cpu/wl83/liba/libduer-device.a \

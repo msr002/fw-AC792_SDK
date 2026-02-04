@@ -29,6 +29,7 @@ struct avi_player {
 
     avi_player_event_callback_t event_callback;
     void *event_priv;
+    u8 play_end;
 };
 
 static int virtual_dev_seek(void *file, int offset, int fromwhere);
@@ -163,6 +164,7 @@ static void avi_audio_exit(struct avi_player *avi)
 
         if (avi->player_state != AVI_PLAYER_STATE_PLAYING) {
             os_sem_post(&avi->audio_pause_sem);
+            os_sem_del(&avi->audio_pause_sem, OS_DEL_ALWAYS);
         }
 
         vir_source_player_close(avi->audio_player);
@@ -172,7 +174,6 @@ static void avi_audio_exit(struct avi_player *avi)
             lbuf_free(avi->current_audio_node);
             avi->current_audio_node = NULL;
         }
-        os_sem_del(&avi->audio_pause_sem, OS_DEL_ALWAYS);
 
     }
 }
@@ -245,7 +246,6 @@ static void avi_video_play_task(void *priv)
 
     int threshold = duration_per_frame / 2;
     int sec = 0;
-    int finish = 0;
     while (!avi->video_task_exit) {
 
 
@@ -255,8 +255,8 @@ static void avi_video_play_task(void *priv)
                 sec = seconds;
                 avi->event_callback(AVI_PLAYER_EVENT_CURRENT_TIME_MS, avi->video_pts, avi->event_priv);
             }
-            if (avi->video_pts >= avi->info.total_time_ms && !finish) {
-                finish = 1;
+            if (avi->video_pts >= avi->info.total_time_ms && !avi->play_end) {
+                avi->play_end = 1;
                 avi->event_callback(AVI_PLAYER_EVENT_END, 0, avi->event_priv);
             }
         }
@@ -329,7 +329,7 @@ static int virtual_dev_read(void *file, u8 *buf, int len)
     struct avi_frame_lbuf_node *node = NULL;
     int rlen = 0;
 
-    if (avi->player_state != AVI_PLAYER_STATE_PLAYING) {
+    if (avi->player_state != AVI_PLAYER_STATE_PLAYING && !avi->audio_exit) {
         //暂停状态，等待
         os_sem_pend(&avi->audio_pause_sem, 0);
     }
@@ -378,7 +378,6 @@ static int virtual_dev_read(void *file, u8 *buf, int len)
 
     //一秒一次
     static int sec = 0;
-    static int finish = 0;
     if (!avi->info.has_video) {
         if (avi->event_callback) {
             int seconds = avi->audio_pts / 1000;
@@ -387,8 +386,8 @@ static int virtual_dev_read(void *file, u8 *buf, int len)
                 avi->event_callback(AVI_PLAYER_EVENT_CURRENT_TIME_MS, avi->audio_pts, avi->event_priv);
             }
 
-            if (avi->audio_pts >= avi->info.total_time_ms && !finish) {
-                finish = 1;
+            if (avi->audio_pts >= avi->info.total_time_ms && !avi->play_end) {
+                avi->play_end = 1;
                 avi->event_callback(AVI_PLAYER_EVENT_END, 0, avi->event_priv);
             }
         }

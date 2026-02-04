@@ -6,6 +6,8 @@
 #endif
 #include "app_config.h"
 #include "syscfg_id.h"
+#include "user_cfg_id.h"
+#include "rcsp_config.h"
 #include "ble_rcsp_server.h"
 
 #include "rcsp_setting_sync.h"
@@ -13,20 +15,16 @@
 
 #if (RCSP_MODE && TCFG_EQ_ENABLE && RCSP_ADV_EQ_SET_ENABLE)
 
-#if RCSP_MODE == RCSP_MODE_EARPHONE
-#include "media/effects/audio_eq.h"
-#include "media/effects/eq_config.h"
-#else
-#ifndef CONFIG_MEDIA_NEW_ENABLE
-#include "media/eq_config.h"
-#else
 #include "effects/audio_eq.h"
 #include "effects/eq_config.h"
-#endif
-#endif
-
-
 /* #include "clock_manager/clock_manager.h" */
+
+#define LOG_TAG_CONST	  APP_RCSP
+#define LOG_TAG             "[APP_RCSP]"
+#define LOG_ERROR_ENABLE
+#define LOG_DEBUG_ENABLE
+#define LOG_INFO_ENABLE
+#include "system/debug.h"
 
 extern int get_bt_tws_connect_status();
 
@@ -40,6 +38,7 @@ static u8 g_eq_setting_info[11] = {0};
 
 static void rcsp_eq_clock_refurbishi_in_app_core()
 {
+    //按实际项目需要，提高时钟主频
     r_printf("%s==%d: TODO", __func__, __LINE__);
     /* clock_refurbish(); */
 }
@@ -52,9 +51,10 @@ static void rcsp_eq_clock_refurbish()
         argv[1] = 0;
         int ret = os_taskq_post_type("app_core", Q_CALLBACK, sizeof(argv) / sizeof(int), argv);
         if (ret) {
-            log_e("taskq post err \n");
+            log_error("%s: taskq post err", __func__);
         }
     } else {
+        //按实际项目需要，提高时钟主频
         /* clock_refurbish(); */
         r_printf("%s==%d: TODO", __func__, __LINE__);
     }

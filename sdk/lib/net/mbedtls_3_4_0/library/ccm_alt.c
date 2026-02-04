@@ -47,6 +47,8 @@
 
 #if defined(MBEDTLS_CCM_ALT)
 
+#include "mbedtls/threading.h"
+
 int mbedtls_ccm_starts(mbedtls_ccm_context *ctx,
                        int mode,
                        const unsigned char *iv,
@@ -105,7 +107,6 @@ int mbedtls_ccm_finish(mbedtls_ccm_context *ctx,
 #endif
 
 
-
 /* Parameter validation macros */
 #define CCM_VALIDATE_RET( cond ) \
     MBEDTLS_INTERNAL_VALIDATE_RET( cond, MBEDTLS_ERR_CCM_BAD_INPUT )
@@ -149,11 +150,9 @@ int mbedtls_ccm_setkey(mbedtls_ccm_context *ctx,
 
     /* Protect context access                                  */
     /* (it may occur at a same time in a threaded environment) */
-#if defined(MBEDTLS_THREADING_C)
-    if (mbedtls_mutex_lock(&cryp_mutex) != 0) {
+    if (mbedtls_cryp_mutex_lock() != 0) {
         return (MBEDTLS_ERR_THREADING_MUTEX_ERROR);
     }
-#endif /* MBEDTLS_THREADING_C */
 
     switch (keybits) {
     case 128:
@@ -194,11 +193,9 @@ int mbedtls_ccm_setkey(mbedtls_ccm_context *ctx,
 
 exit :
     /* Free context access */
-#if defined(MBEDTLS_THREADING_C)
-    if (mbedtls_mutex_unlock(&cryp_mutex) != 0) {
+    if (mbedtls_cryp_mutex_unlock() != 0) {
         ret = MBEDTLS_ERR_THREADING_MUTEX_ERROR;
     }
-#endif /* MBEDTLS_THREADING_C */
 
     return (ret);
 }
@@ -214,12 +211,6 @@ void mbedtls_ccm_free(mbedtls_ccm_context *ctx)
 
     memset((void *)ctx, 0, sizeof(mbedtls_ccm_context));
 }
-
-
-
-
-
-
 
 /*
  * Authenticated encryption or decryption
@@ -244,7 +235,6 @@ static int ccm_auth_crypt(mbedtls_ccm_context *ctx, int mode, size_t length,
     uint8_t b1_padding;                              /* B1 word alignment */
 
     uint8_t mac[16] __attribute__((aligned(4)));  /* temporary mac      */
-
 
     CCM_VALIDATE_RET(mode != CCM_ENCRYPT || mode != CCM_DECRYPT);
 
@@ -308,11 +298,9 @@ static int ccm_auth_crypt(mbedtls_ccm_context *ctx, int mode, size_t length,
 
     /* Protect context access                                  */
     /* (it may occur at a same time in a threaded environment) */
-#if defined(MBEDTLS_THREADING_C)
-    if (mbedtls_mutex_lock(&cryp_mutex) != 0) {
+    if (mbedtls_cryp_mutex_lock() != 0) {
         return (MBEDTLS_ERR_THREADING_MUTEX_ERROR);
     }
-#endif /* MBEDTLS_THREADING_C */
 
     /*
     * If there is additional data, update with
@@ -385,15 +373,12 @@ static int ccm_auth_crypt(mbedtls_ccm_context *ctx, int mode, size_t length,
             goto free_block;
         }
     } else {
-
 #if 1 //cpu_mode
-
         if (HAL_CRYP_Encrypt(&ctx->hcryp_ccm,
                              (uint32_t *)input,
                              length,
                              (uint32_t *)output,
                              0) != HAL_OK) {
-
 #else //dma_mode
 
         if (HAL_CRYP_Encrypt_DMA(&ctx->hcryp_ccm,
@@ -419,7 +404,6 @@ static int ccm_auth_crypt(mbedtls_ccm_context *ctx, int mode, size_t length,
 
     memcpy(tag, mac, tag_len);
 
-
 free_block:
     if (add_len > 0) {
         mbedtls_free(b1_padded_addr);
@@ -427,11 +411,9 @@ free_block:
 
 exit:
     /* Free context access */
-#if defined(MBEDTLS_THREADING_C)
-    if (mbedtls_mutex_unlock(&cryp_mutex) != 0) {
+    if (mbedtls_cryp_mutex_unlock() != 0) {
         ret = MBEDTLS_ERR_THREADING_MUTEX_ERROR;
     }
-#endif /* MBEDTLS_THREADING_C */
 
     return (ret);
 }

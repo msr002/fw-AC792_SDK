@@ -118,6 +118,13 @@ const char log_tag_const_i_RCSP_ADV AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(TRUE);
 const char log_tag_const_w_RCSP_ADV AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(FALSE);
 const char log_tag_const_e_RCSP_ADV AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(TRUE);
 
+const char log_tag_const_v_RCSP_UPDATE AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(FALSE);
+const char log_tag_const_c_RCSP_UPDATE AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(FALSE);
+const char log_tag_const_d_RCSP_UPDATE AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(FALSE);
+const char log_tag_const_i_RCSP_UPDATE AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(TRUE);
+const char log_tag_const_w_RCSP_UPDATE AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(FALSE);
+const char log_tag_const_e_RCSP_UPDATE AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(TRUE);
+
 const char log_tag_const_v_LE_RCSP_SER AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(FALSE);
 const char log_tag_const_c_LE_RCSP_SER AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(FALSE);
 const char log_tag_const_d_LE_RCSP_SER AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(FALSE);

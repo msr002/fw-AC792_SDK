@@ -10,9 +10,6 @@
 #endif
 
 #if !LV_USE_GUIBUILDER_SIMULATOR
-#define CONFIG_FONT_TTF_NAME                "30100000.ttf"
-#define CONFIG_FONT_TTF_PATH                CONFIG_ROOT_PATH\
-                                            CONFIG_FONT_TTF_NAME
 #include "./lyrics_anim_effect.h"
 #include "../../lv_examples.h"
 
@@ -302,8 +299,6 @@ static void safe_lyrics_delete_cb(lv_event_t *e)
 // 修改清理函数
 void lyrics_example_clean(void)
 {
-    printf("[INFO] Starting lyrics cleanup\n");
-
     // 清理特效动画
     lyrics_anim_effect_cleanup();
 
@@ -311,8 +306,6 @@ void lyrics_example_clean(void)
         // 先停止动画
         lv_anim_del(curr_obj_0, NULL);
 
-        // 等待一小段时间，确保动画已停止
-        lv_timer_handler();
 
         // 然后销毁对象
         lv_lyrics_destructor(curr_obj_0);
@@ -321,12 +314,9 @@ void lyrics_example_clean(void)
 
     if (curr_obj_1 != NULL) {
         lv_anim_del(curr_obj_1, NULL);
-        lv_timer_handler();
         lv_lyrics_destructor(curr_obj_1);
         curr_obj_1 = NULL;
     }
-
-    printf("[INFO] Lyrics cleanup completed\n");
 }
 // 修改创建歌词的函数
 static lv_obj_t *create_lyrics_line(lv_obj_t *parent, const char *font_file,
@@ -390,8 +380,6 @@ static void lv_example_lyrics_letter(lv_obj_t *dest_scr, const char *text,
     // 根据字符数量决定显示方式
     if (char_count <= LYRICS_LINE_MAX_CHARS) {
         // 单行显示
-        printf("Single line display\n");
-
         // 计算居中位置
         lv_coord_t line_width = calculate_exact_width(letter_buf, char_count, font_size);
         lv_coord_t center_x = (SCREEN_WIDTH - line_width) / 2;
@@ -406,17 +394,16 @@ static void lv_example_lyrics_letter(lv_obj_t *dest_scr, const char *text,
                                         center_x, y_position);
         lv_obj_add_event_cb(curr_obj_0, lyrics_0_delete_event_cb, LV_EVENT_DELETE, NULL);
         if (curr_obj_0) {
-            // 使用ZoomInDown特效
             lyrics_anim_effect_args_t effect_args;
             effect_args.delay = 0;
-            effect_args.duration = 1500;
+            effect_args.duration = 1000;
+            effect_args.target_x = center_x;  // 传入目标位置
+            effect_args.target_y = y_position;
             lyrics_anim_effect_zooming_in_down(curr_obj_0, &effect_args);
         }
 
     } else {
         // 两行显示
-        printf("Two line display\n");
-
         // 寻找分割点
         uint16_t split_pos = find_optimal_split_point(letter_buf, char_count, font_size);
 
@@ -433,6 +420,14 @@ static void lv_example_lyrics_letter(lv_obj_t *dest_scr, const char *text,
                                         letter_buf, line1_count,
                                         line1_center_x, y_position);
         lv_obj_add_event_cb(curr_obj_0, lyrics_0_delete_event_cb, LV_EVENT_DELETE, NULL);
+        if (curr_obj_0) {
+            lyrics_anim_effect_args_t effect_args1;
+            effect_args1.delay = 0;
+            effect_args1.duration = 800;
+            effect_args1.target_x = line1_center_x;  // 传入第一行目标位置
+            effect_args1.target_y = y_position;  // 注意：这是第一行的Y坐标
+            lyrics_anim_effect_zooming_in_down(curr_obj_0, &effect_args1);
+        }
         // 第二行
         y_position += LYRIC_LINE_HEIGHT;
         uint16_t line2_count = char_count - split_pos;
@@ -448,17 +443,13 @@ static void lv_example_lyrics_letter(lv_obj_t *dest_scr, const char *text,
                                         line2_center_x, y_position);
         lv_obj_add_event_cb(curr_obj_1, lyrics_1_delete_event_cb, LV_EVENT_DELETE, NULL);
         // 使用特效动画
-        if (curr_obj_0) {
-            lyrics_anim_effect_args_t effect_args1;
-            effect_args1.delay = 0;
-            effect_args1.duration = 800;
-            lyrics_anim_effect_zooming_in_down(curr_obj_0, &effect_args1);
-        }
 
         if (curr_obj_1) {
             lyrics_anim_effect_args_t effect_args2;
-            effect_args2.delay = 200;  // 第二行延迟200ms开始
+            effect_args2.delay = 200;
             effect_args2.duration = 800;
+            effect_args2.target_x = line2_center_x;  // 传入第二行目标位置
+            effect_args2.target_y = y_position;  // 这是第二行的Y坐标
             lyrics_anim_effect_zooming_in_down(curr_obj_1, &effect_args2);
         }
     }
@@ -481,7 +472,7 @@ void lv_example_lyrics_text_input(char *new_text)
             fclose(fd);
             lyrics_path_init_flag = 1;
         } else {
-            printf("open lyrics path error!!!!!\n");
+            printf("Open font fft path error 30100000.ttf  or no exit font fft resource 30100000.ttf !!!!!\n");
             return;
         }
     }
@@ -508,3 +499,4 @@ void lv_example_lyrics_text_input(char *new_text)
 #endif
 
 #endif
+

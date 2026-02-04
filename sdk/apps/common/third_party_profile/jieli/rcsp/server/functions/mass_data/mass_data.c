@@ -39,6 +39,12 @@
 
 #define MASS_DATA_SEND_TIMEOUT_MS       5000 // 发送超时
 
+#define LOG_TAG_CONST	  APP_RCSP
+#define LOG_TAG             "[APP_RCSP]"
+#define LOG_ERROR_ENABLE
+#define LOG_DEBUG_ENABLE
+#define LOG_INFO_ENABLE
+#include "system/debug.h"
 #if 0
 #define DEBUG_PUT_BUF                   put_buf
 #else
@@ -197,7 +203,7 @@ static void mass_data_asyn_send_release(u8 type, int event)
     }
     local_irq_enable();
 
-    log_i("send[%d] relese evt:%d \n", type, event);
+    log_info("send[%d] relese evt:%d ", type, event);
 
     if (evt_func) {
         ((void (*)(void *, int))evt_func)(evt_priv, event);
@@ -210,7 +216,7 @@ static void mass_data_asyn_send_to(void *priv)
     if (type >= MASS_DATA_TYPE_MAX) {
         return ;
     }
-    log_e("send[%d] timeout\n", type);
+    log_error("send[%d] timeout", type);
 
     mass_data_asyn_send_release(type, MASS_DATA_SEND_EVENT_TO);
 }
@@ -221,7 +227,7 @@ static void mass_data_asyn_resend_no_wait(void *priv)
     if (type >= MASS_DATA_TYPE_MAX) {
         return ;
     }
-    log_i("resend \n");
+    log_info("resend ");
     if (massdat_tx[type]->resend_tm) {
         sys_timeout_del(massdat_tx[type]->resend_tm);
         massdat_tx[type]->resend_tm = 0;
@@ -298,21 +304,21 @@ static int mass_data_asyn_send_no_wait(u8 type, u16 ble_con_handle, u8 *spp_remo
     int to = 0;
     massdat_tx[type]->tx_flag = 1;
 
-    log_i("%s, type:%d, len:%d \n", __func__, type, massdat_tx[type]->pkt_len);
+    log_info("%s, type:%d, len:%d ", __func__, type, massdat_tx[type]->pkt_len);
     DEBUG_PUT_BUF(massdat_tx[type]->pkt_buf, massdat_tx[type]->pkt_len);
 
     int result = 0;
     result = JL_CMD_send(JL_OPCODE_MASS_DATA, massdat_tx[type]->pkt_buf, massdat_tx[type]->pkt_len, JL_NEED_RESPOND, ble_con_handle, spp_remote_addr);
     if (result) {
         if (result == JL_ERR_SEND_BUSY) {
-            log_i("send busy \n");
+            log_info("send busy ");
             u32 tmp_type = type;
             massdat_tx[type]->ble_con_handle = ble_con_handle;
             massdat_tx[type]->spp_remote_addr = spp_remote_addr;
             massdat_tx[type]->resend_tm = sys_timeout_add((void *)tmp_type, mass_data_asyn_resend_no_wait, 20);
             return true;
         }
-        log_e("send err:%d \n", result);
+        log_error("send err:%d ", result);
         return false;
     }
     return true;
@@ -324,21 +330,21 @@ static int mass_data_asyn_send_response_no_wait(u8 type, u8 OpCode_SN, u16 ble_c
     int to = 0;
     massdat_tx[type]->tx_flag = 1;
 
-    log_i("%s, type:%d, len:%d \n", __func__, type, massdat_tx[type]->pkt_len);
+    log_info("%s, type:%d, len:%d ", __func__, type, massdat_tx[type]->pkt_len);
     DEBUG_PUT_BUF(massdat_tx[type]->pkt_buf, massdat_tx[type]->pkt_len);
 
     int result = 0;
     result = JL_CMD_response_send(JL_OPCODE_MASS_DATA, JL_PRO_STATUS_SUCCESS, OpCode_SN, massdat_tx[type]->pkt_buf, massdat_tx[type]->pkt_len, ble_con_handle, spp_remote_addr);
     if (result) {
         if (result == JL_ERR_SEND_BUSY) {
-            log_i("send busy \n");
+            log_info("send busy ");
             u32 tmp_type = type;
             massdat_tx[type]->ble_con_handle = ble_con_handle;
             massdat_tx[type]->spp_remote_addr = spp_remote_addr;
             massdat_tx[type]->resend_tm = sys_timeout_add((void *)tmp_type, mass_data_asyn_resend_no_wait, 20);
             return true;
         }
-        log_e("send err:%d \n", result);
+        log_error("send err:%d ", result);
         return false;
     }
     return true;
@@ -346,7 +352,7 @@ static int mass_data_asyn_send_response_no_wait(u8 type, u8 OpCode_SN, u16 ble_c
 
 int mass_data_async_send_read_opt(u8 type, u8 OpCode_SN, u8 *head, u16 head_len, u8 *data, u32 len, void *evt_cb_priv, void (*evt_cb)(void *priv, int event), u16 ble_con_handle, u8 *spp_remote_addr)
 {
-    log_i("%s, task:%s, type:%d,len:%d \n", __func__, os_current_task(), type, len);
+    log_info("%s, task:%s, type:%d,len:%d ", __func__, os_current_task(), type, len);
     DEBUG_PUT_BUF(data, len);
 
     if (type >= MASS_DATA_TYPE_MAX) {
@@ -357,7 +363,7 @@ int mass_data_async_send_read_opt(u8 type, u8 OpCode_SN, u8 *head, u16 head_len,
     if (massdat_tx[type]) {
         local_irq_enable();
         MASS_FREE(tx_hdl);
-        log_e("why massdat_tx[%d]:0x%x \n", type, massdat_tx[type]);
+        log_error("why massdat_tx[%d]:0x%x ", type, massdat_tx[type]);
         return false;
     }
     ASSERT(tx_hdl);
@@ -390,7 +396,7 @@ int mass_data_async_send_read_opt(u8 type, u8 OpCode_SN, u8 *head, u16 head_len,
 
 int mass_data_asyn_send_ex(u8 type, u8 *head, u16 head_len, u8 *data, u16 len, void *evt_cb_priv, void (*evt_cb)(void *priv, int event), u16 ble_con_handle, u8 *spp_remote_addr)
 {
-    log_i("%s, task:%s, type:%d,len:%d \n", __func__, os_current_task(), type, len);
+    log_info("%s, task:%s, type:%d,len:%d ", __func__, os_current_task(), type, len);
     DEBUG_PUT_BUF(data, len);
 
     if (type >= MASS_DATA_TYPE_MAX) {
@@ -401,7 +407,7 @@ int mass_data_asyn_send_ex(u8 type, u8 *head, u16 head_len, u8 *data, u16 len, v
     if (massdat_tx[type]) {
         local_irq_enable();
         MASS_FREE(tx_hdl);
-        log_e("why massdat_tx[%d]:0x%x \n", type, massdat_tx[type]);
+        log_error("why massdat_tx[%d]:0x%x ", type, massdat_tx[type]);
         return false;
     }
     ASSERT(tx_hdl);
@@ -511,7 +517,7 @@ void mass_data_recieve(void *priv, u8 OpCode, u8 OpCode_SN, u8 *data, u16 len, u
     u8 op = data[offset++];
     struct _MASSDATA_RECV *p_md_rx;
 
-    log_i("%s, op:%d \n", __func__, op);
+    log_info("%s, op:%d ", __func__, op);
     DEBUG_PUT_BUF(data, len);
 
     if (op == MASS_DATA_OP_PARAM) {
@@ -525,7 +531,7 @@ void mass_data_recieve(void *priv, u8 OpCode, u8 OpCode_SN, u8 *data, u16 len, u
 
         if (op_param.type >= MASS_DATA_TYPE_MAX) {
             // 不支持数据类型
-            log_e("no support way:%d \n", op_param.type);
+            log_error("%d - no support way:%d ", __LINE__, op_param.type);
             result = MASS_DATA_ERR_TYPE;
             goto __op_param_end;
         }
@@ -536,7 +542,7 @@ void mass_data_recieve(void *priv, u8 OpCode, u8 OpCode_SN, u8 *data, u16 len, u
             }
 #endif
             // 不支持拉取
-            log_e("no support way:%d \n", op_param.way);
+            log_error("%d - no support way:%d ", __LINE__, op_param.way);
             result = MASS_DATA_ERR_WAY;
             goto __op_param_end;
         }
@@ -552,7 +558,7 @@ void mass_data_recieve(void *priv, u8 OpCode, u8 OpCode_SN, u8 *data, u16 len, u
         op_w.send_data_limit = READ_BIG_U16(&op_w.send_data_limit);
         op_w.recv_data_limit = READ_BIG_U16(&op_w.recv_data_limit);
 
-        log_i("massdat_rx[%d]:%d, crc:0x%x \n", op_param.type, op_w.data_len, op_w.crc);
+        log_info("massdat_rx[%d]:%d, crc:0x%x ", op_param.type, op_w.data_len, op_w.crc);
 
         massdat_rx[op_param.type] = MASS_ZALLOC(sizeof(struct _MASSDATA_RECV) + op_w.data_len);
         ASSERT(massdat_rx[op_param.type]);
@@ -563,7 +569,7 @@ void mass_data_recieve(void *priv, u8 OpCode, u8 OpCode_SN, u8 *data, u16 len, u
         /* goto __op_param_end; */
 
 __op_param_end:
-        log_e("result:%d \n", result);
+        log_error("result:%d ", result);
         if (op_param.way == MASS_DATA_WAY_READ) {
             res_len = 1 + sizeof(struct _MASSDATA_OP_PARAM_RESPOND) + sizeof(struct _MASSDATA_OP_PARAM_RESPOND_READ);
             pkt_buf = MASS_ZALLOC(res_len);
@@ -604,7 +610,7 @@ __op_param_end:
 
         if (op_data.type >= MASS_DATA_TYPE_MAX) {
             // 不支持数据类型
-            log_e("no support way:%d \n", op_data.type);
+            log_error("%d - no support way:%d ", __LINE__, op_data.type);
             result = MASS_DATA_ERR_TYPE;
             goto __op_data_end;
         }
@@ -618,20 +624,20 @@ __op_param_end:
         u16 seq = op_data.seq & ~MASS_DATA_OP_DATA_SEQ_END;
         if (seq != p_md_rx->seq) {
             // 序列号错误
-            log_e("err seq:%d, %d \n", seq, p_md_rx->seq);
+            log_error("err seq:%d, %d ", seq, p_md_rx->seq);
             result = MASS_DATA_ERR_SEQ;
             goto __op_data_end;
         }
         if ((p_md_rx->w + op_data.len) > p_md_rx->total_len) {
             // 长度错误
-            log_e("err len0:%d, %d, %d \n", p_md_rx->w, op_data.len, p_md_rx->total_len);
+            log_error("err len0:%d, %d, %d ", p_md_rx->w, op_data.len, p_md_rx->total_len);
             result = MASS_DATA_ERR_TOTAL_LEN;
             goto __op_data_end;
         }
         u16 crc = CRC16(&data[offset], op_data.len);
         if (op_data.crc != crc) {
             // CRC错误
-            log_e("err crc0:%x, %x \n", op_data.crc, crc);
+            log_error("err crc0:%x, %x ", op_data.crc, crc);
             result = MASS_DATA_ERR_CRC;
             goto __op_data_end;
         }
@@ -642,19 +648,19 @@ __op_param_end:
             // 结束
             if (p_md_rx->w != p_md_rx->total_len) {
                 // 长度错误
-                log_e("err len1:%d, %d \n", p_md_rx->w, p_md_rx->total_len);
+                log_error("err len1:%d, %d ", p_md_rx->w, p_md_rx->total_len);
                 result = MASS_DATA_ERR_TOTAL_LEN;
                 goto __op_data_end;
             }
             crc = CRC16(p_md_rx->dat, p_md_rx->total_len);
             if (p_md_rx->crc != crc) {
                 // CRC错误
-                log_e("err crc1:%x, %x \n", op_data.crc, crc);
+                log_error("err crc1:%x, %x ", op_data.crc, crc);
                 result = MASS_DATA_ERR_CRC;
                 goto __op_data_end;
             }
 
-            log_i("datlen[%d]:%d \n", op_data.type, p_md_rx->total_len);
+            log_info("datlen[%d]:%d ", op_data.type, p_md_rx->total_len);
             DEBUG_PUT_BUF(p_md_rx->dat, p_md_rx->total_len);
 
             // 回调处理
@@ -670,7 +676,7 @@ __op_param_end:
         /* goto __op_param_end; */
 
 __op_data_end:
-        log_e("result:%d \n", result);
+        log_error("result:%d ", result);
 
         res_len = 1 + sizeof(struct _MASSDATA_OP_DATA_RESPOND) + 4;
         pkt_buf = MASS_ZALLOC(res_len);
@@ -693,7 +699,7 @@ void mass_data_respone(void *priv, u8 OpCode, u8 status, u8 *data, u16 len, u16 
     u8 offset = 0;
     u8 op = data[offset++];
 
-    log_i("%s, op:%d \n", __func__, op);
+    log_info("%s, op:%d ", __func__, op);
     DEBUG_PUT_BUF(data, len);
 
     if (op == MASS_DATA_OP_PARAM) {
@@ -709,10 +715,10 @@ void mass_data_respone(void *priv, u8 OpCode, u8 status, u8 *data, u16 len, u16 
             u16 send_limit = READ_BIG_U16(&op_w.send_data_limit);
             u16 recv_limit = READ_BIG_U16(&op_w.recv_data_limit);
 
-            log_i("write[%d] result:%d, limit:%d,%d \n", op_param_respond.type, op_w.result, send_limit, recv_limit);
+            log_info("write[%d] result:%d, limit:%d,%d ", op_param_respond.type, op_w.result, send_limit, recv_limit);
 
             if (op_param_respond.type >= MASS_DATA_TYPE_MAX) {
-                log_e("no support type:%d \n", op_param_respond.type);
+                log_error("%d - no support type:%d ", __LINE__, op_param_respond.type);
                 return ;
             }
             u8 asyn = 0;
@@ -737,7 +743,7 @@ void mass_data_respone(void *priv, u8 OpCode, u8 status, u8 *data, u16 len, u16 
                 }
             }
         } else {
-            log_e("err way:%d \n", op_param_respond.way);
+            log_error("err way:%d ", op_param_respond.way);
         }
     } else if (op == MASS_DATA_OP_DATA) {
         struct _MASSDATA_OP_DATA_RESPOND op_data_respond;
@@ -745,10 +751,10 @@ void mass_data_respone(void *priv, u8 OpCode, u8 status, u8 *data, u16 len, u16 
         offset += sizeof(struct _MASSDATA_OP_DATA_RESPOND);
 
         u16 seq = READ_BIG_U16(&op_data_respond.seq);
-        log_i("data[%d] result:%d, seq:%d \n", op_data_respond.type, op_data_respond.result, seq);
+        log_info("data[%d] result:%d, seq:%d ", op_data_respond.type, op_data_respond.result, seq);
 
         if (op_data_respond.type >= MASS_DATA_TYPE_MAX) {
-            log_e("no support type:%d \n", op_data_respond.type);
+            log_error("%d - no support type:%d ", __LINE__, op_data_respond.type);
             return ;
         }
 

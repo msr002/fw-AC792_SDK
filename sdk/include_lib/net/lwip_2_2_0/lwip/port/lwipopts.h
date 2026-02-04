@@ -19,6 +19,8 @@ extern "C" {
 
 #define JL_LWIP                         1
 
+#define LWIP_HAVE_LOOPIF                1
+
 /**
  * LWIP_SOCKET==1: Enable Socket API (require to use sockets.c)
  */
@@ -593,6 +595,8 @@ extern unsigned char __attribute__((aligned(4)))  __attribute__((section(".memp_
  * LWIP_DHCP==1: Enable DHCP module.
  */
 #define LWIP_DHCP                       1
+
+#define LWIP_DHCP_SAVE_TO_FLASH         0
 
 /*---------- AUTOIP options ----------*/
 /**

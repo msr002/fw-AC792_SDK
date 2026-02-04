@@ -6,6 +6,8 @@
 #endif
 #include "app_config.h"
 #include "syscfg_id.h"
+#include "user_cfg_id.h"
+#include "rcsp_config.h"
 
 #include "rcsp_setting_sync.h"
 #include "rcsp_setting_opt.h"
@@ -16,6 +18,13 @@
 #include "effects/eq_config.h"
 
 #if (RCSP_MODE && RCSP_ADV_HIGH_LOW_SET && TCFG_BASS_TREBLE_NODE_ENABLE)
+
+#define LOG_TAG_CONST	  APP_RCSP
+#define LOG_TAG             "[APP_RCSP]"
+#define LOG_ERROR_ENABLE
+#define LOG_DEBUG_ENABLE
+#define LOG_INFO_ENABLE
+#include "system/debug.h"
 
 struct _HIGH_LOW_VOL {
     int low_vol;
@@ -65,7 +74,7 @@ static void high_low_vol_state_update(void)
 #if 0
         mix_out_high_bass(AUDIO_EQ_BASS, &param);
 #else
-        //printf("low vol %d gain %d\n",high_low_vol.low_vol,param.gain);
+        //log_info("low vol %d gain %d",high_low_vol.low_vol,param.gain);
         eq_mode_set_custom_param(2, param.gain);
 #endif
         low_vol = high_low_vol.low_vol;
@@ -75,7 +84,7 @@ static void high_low_vol_state_update(void)
 #if 0
         mix_out_high_bass(AUDIO_EQ_HIGH, &param);
 #else
-        //printf("high vol %d gain %d\n",high_low_vol.high_vol,param.gain);
+        //log_info("high vol %d gain %d",high_low_vol.high_vol,param.gain);
         eq_mode_set_custom_param(8, param.gain);
 #endif
         high_vol = high_low_vol.high_vol;
@@ -86,7 +95,7 @@ static void deal_high_low_vol(u8 *vol_gain_data, u8 write_vm, u8 tws_sync)
 {
     if (vol_gain_data) {
         set_high_low_vol_info(vol_gain_data);
-        printf("low %d, high %d\n", high_low_vol.low_vol, high_low_vol.high_vol);
+        log_info("low %d, high %d", high_low_vol.low_vol, high_low_vol.high_vol);
     }
     if (write_vm) {
         update_high_low_vol_vm_value((u8 *)&high_low_vol);

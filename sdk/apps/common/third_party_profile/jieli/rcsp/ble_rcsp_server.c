@@ -65,6 +65,12 @@
 #include "app_le_connected.h"
 #endif
 
+#if (RCSP_CHANNEL_SEL == RCSP_USE_GATT_OVER_EDR)
+#if (TCFG_ATT_OVER_EDR_DEMO_EN == 0)
+#error "need enable TCFG_ATT_OVER_EDR_DEMO_EN"
+#endif
+#endif
+
 #if (THIRD_PARTY_PROTOCOLS_SEL & RCSP_MODE_EN)
 
 const u8 rcsp_link_key_data[16] = {0x06, 0x77, 0x5f, 0x87, 0x91, 0x8d, 0xd4, 0x23, 0x00, 0x5d, 0xf1, 0xd8, 0xcf, 0x0c, 0x14, 0x2b};
@@ -544,12 +550,18 @@ void rcsp_cbk_packet_handler(uint8_t packet_type, uint16_t channel, uint8_t *pac
                 }
                 hci_con_handle_t con_handle = little_endian_read_16(packet, 4);
                 log_info("RCSP HCI_SUBEVENT_LE_CONNECTION_COMPLETE: %0x", con_handle);
+#if (TCFG_LE_AUDIO_APP_CONFIG & LE_AUDIO_JL_UNICAST_SINK_EN)
+#if (!TCFG_LE_AUDIO_RCSP_USE_SAME_ACL)
+                // 私有unicast与 RCSP 共存，需要单独设置RCSP 的rxmaxbuf，否则长数据会有问题
+                ble_op_set_rxmaxbuf(con_handle, 255);
+#endif
+#endif
 #if !TCFG_THIRD_PARTY_PROTOCOLS_SIMPLIFIED
 #if TCFG_USER_TWS_ENABLE
                 printf("%s===%d===TODO", __FUNCTION__, __LINE__);
+                // 处理无edr连接下ble主从切换，可能BLE的中间层或底层链路无法同时同步给从机的问题
                 /* if (app_var.goto_poweroff_flag) { */
                 /* log_info("HCI_SUBEVENT_LE_CONNECTION_COMPLETE, power_off, role:%d", tws_api_get_role()); */
-                /* // 处理无edr连接下ble主从切换，可能BLE的中间层或底层链路无法同时同步给从机的问题 */
                 /* if (get_bt_tws_connect_status() && TWS_ROLE_MASTER == tws_api_get_role()) { */
                 /* rcsp_bt_ble_adv_enable(0); */
                 /* tws_api_send_data_to_sibling((void *)&con_handle, sizeof(u16), 0x123482C0); */
@@ -560,12 +572,13 @@ void rcsp_cbk_packet_handler(uint8_t packet_type, uint16_t channel, uint8_t *pac
                 bt_rcsp_set_conn_info(con_handle, NULL, true);
 #else
                 rcsp_ble_con_handle = little_endian_read_16(packet, 4);
+
+                ble_op_set_rxmaxbuf(con_handle, 255);
                 rcsp_protocol_bound(con_handle, NULL);
                 if (rcsp_get_auth_support()) {
                     JL_rcsp_reset_bthdl_auth(rcsp_ble_con_handle, NULL);
                 }
                 connection_update_complete_success(packet + 8);
-                printf("%s==%d: cbuf-size = %d", __FUNCTION__, __LINE__, ATT_RAM_BUFSIZE);
                 ble_user_cmd_prepare(BLE_CMD_ATT_SEND_INIT, 4, rcsp_ble_con_handle, att_ram_buffer, ATT_RAM_BUFSIZE, ATT_LOCAL_PAYLOAD_SIZE);
 #endif
                 log_info_hexdump(packet + 7, 7);
@@ -947,9 +960,11 @@ static void advertisements_setup_init()
     }
 #endif
 
+#if (RCSP_CHANNEL_SEL == RCSP_USE_GATT_OVER_EDR)
     if (adt_profile_support && rcsp_adt_support) {
         adv_type = APP_ADV_SCAN_IND;
     }
+#endif
 
 #if !TCFG_THIRD_PARTY_PROTOCOLS_SIMPLIFIED
     app_ble_set_adv_param(rcsp_server_ble_hdl, adv_interval, adv_type, adv_channel);
@@ -1081,7 +1096,7 @@ static int set_adv_enable(void *priv, u32 en)
             if (!is_cig_phone_conn()) {
 #endif
                 // 防止ios只连上ble的情况下，android(spp)回连导致ble断开后重新开广播的情况
-                if (bt_rcsp_spp_conn_num() > 0 || bt_rcsp_ble_conn_num() > 0) {
+                if ((bt_rcsp_spp_conn_num() > 0) || (bt_rcsp_ble_conn_num() > 0)) {
                     log_info("spp is connecting");
                     log_info("%s, %s, %d", __FILE__, __FUNCTION__, __LINE__);
                     return APP_BLE_OPERATION_ERROR;
@@ -1094,12 +1109,6 @@ static int set_adv_enable(void *priv, u32 en)
 #endif
         }
     }
-
-    printf("%s===%d===TODO", __FUNCTION__, __LINE__);
-    /* if (app_var.goto_poweroff_flag) { */
-    /* printf("%s, poweroff", __FUNCTION__); */
-    /* en = 0; */
-    /* } */
 
     if (en) {
         next_state = BLE_ST_ADV;

@@ -44,13 +44,12 @@
 
 #if RCSP_MODE
 
-#define LOG_TAG             "[RCSP-ADV]"
+#define LOG_TAG_CONST	  RCSP_ADV
+#define LOG_TAG             "[RCSP_ADV]"
 #define LOG_ERROR_ENABLE
 #define LOG_DEBUG_ENABLE
-/* #define LOG_INFO_ENABLE */
-/* #define LOG_DUMP_ENABLE */
-#define LOG_CLI_ENABLE
-#include "debug.h"
+#define LOG_INFO_ENABLE
+#include "system/debug.h"
 
 extern void rcsp_clear_all_buffer(void);
 extern void rcsp_find_device_reset(void);
@@ -65,6 +64,12 @@ u8 get_rcsp_connect_status(void)
     if (bt_rcsp_device_conn_num() > 0) {
         return 1;
     }
+#if ((TCFG_LE_AUDIO_APP_CONFIG & (LE_AUDIO_UNICAST_SINK_EN | LE_AUDIO_JL_UNICAST_SINK_EN)))
+    extern u16 cis_rcsp_update_flag(void);
+    if (cis_rcsp_update_flag()) {
+        return 1;
+    }
+#endif
     return 0;
 }
 
@@ -73,7 +78,7 @@ void JL_rcsp_event_to_user(u32 type, u8 event, u8 *msg, u8 size)
     struct rcsp_event rcsp_e;
     memset(&rcsp_e, 0, sizeof(struct rcsp_event));
     if (size > sizeof(rcsp_e.args)) {
-        log_info("rcsp event size overflow:%x %lx\n", size, sizeof(rcsp_e.args));
+        log_info("rcsp event size overflow:%x %lx", size, sizeof(rcsp_e.args));
     }
     rcsp_e.event = event;
     if (size) {
@@ -81,7 +86,8 @@ void JL_rcsp_event_to_user(u32 type, u8 event, u8 *msg, u8 size)
     }
     rcsp_e.size = size;
     struct rcsp_event *rcsp_e_p = &rcsp_e;
-    printf("%s----%d----TODO", __FUNCTION__, __LINE__);
+
+    sys_event_notify(SYS_BT_EVENT, BT_EVENT_FROM_RCSP, (void *)rcsp_e_p, sizeof(*rcsp_e_p));
     /* app_send_message_from(MSG_FROM_RCSP, sizeof(*rcsp_e_p), (int *)rcsp_e_p); */
 }
 
@@ -91,44 +97,45 @@ void JL_rcsp_event_to_user(u32 type, u8 event, u8 *msg, u8 size)
 int JL_rcsp_event_handler(struct rcsp_event *rcsp)
 {
     int ret = 0;
+    log_debug("%s: event-%d", __FUNCTION__, rcsp->event);
     switch (rcsp->event) {
     case MSG_JL_ADV_SETTING_SYNC:
-        log_info("MSG_JL_ADV_SETTING_SYNC\n");
+        log_info("MSG_JL_ADV_SETTING_SYNC");
         update_rcsp_setting(-1);
         break;
     case MSG_JL_ADV_SETTING_UPDATE:
-        log_info("MSG_JL_ADV_SETTING_UPDATE\n");
+        log_info("MSG_JL_ADV_SETTING_UPDATE");
         update_info_from_vm_info();
         break;
     case MSG_JL_UPDATE_EQ:
         rcsp_device_status_update(COMMON_FUNCTION, BIT(RCSP_DEVICE_STATUS_ATTR_TYPE_EQ_INFO));
         break;
     case MSG_JL_USER_SPP_BLE_STATE:
-        log_info("MSG_JL_USER_SPP_BLE_STATE\n");
+        log_info("MSG_JL_USER_SPP_BLE_STATE");
         rcsp_user_state_handler(rcsp->args, rcsp->size);
         break;
 #if RCSP_ADV_MUSIC_INFO_ENABLE
     case MSG_JL_UPDATE_PLAYER_TIME:
-        log_info("MSG_JL_UPDATE_PLAYER_TIME\n");
+        log_info("MSG_JL_UPDATE_PLAYER_TIME");
         if (JL_rcsp_get_auth_flag()) {
             rcsp_device_status_update(BT_FUNCTION_MASK, 0x100);
         }
         break;
     case MSG_JL_UPDATE_PLAYER_STATE:
-        log_info("MSG_JL_UPDATE_PLAYER_STATE\n");
+        log_info("MSG_JL_UPDATE_PLAYER_STATE");
         if (JL_rcsp_get_auth_flag()) {
             rcsp_device_status_update(BT_FUNCTION_MASK, 0x80);
         }
         break;
     case MSG_JL_UPDATE_MUSIC_INFO:
-        /* log_info("MSG_JL_UPDATE_MUSIC_INFO\n"); */
+        /* log_info("MSG_JL_UPDATE_MUSIC_INFO"); */
         if (JL_rcsp_get_auth_flag()) {
-            /* log_info("rcsp type %x\n",rcsp->args[0]); */
+            /* log_info("rcsp type %x",rcsp->args[0]); */
             rcsp_device_status_update(BT_FUNCTION_MASK, BIT(rcsp->args[0] - 1));
         }
         break;
     case  MSG_JL_UPDATE_MUSIC_PLAYER_TIME_TEMER:
-        log_info("MSG_JL_UPDATE_MUSIC_PLAYER_TIME_TEMER\n");
+        log_info("MSG_JL_UPDATE_MUSIC_PLAYER_TIME_TEMER");
         if (JL_rcsp_get_auth_flag()) {
             music_player_time_timer_deal(rcsp->args[0]);
         }
@@ -136,7 +143,7 @@ int JL_rcsp_event_handler(struct rcsp_event *rcsp)
 #endif
 #if (RCSP_ADV_ANC_VOICE)
     case MSG_JL_UPDATE_ANC_VOICE:
-        log_info("MSG_JL_UPDATE_ANC_VOICE\n");
+        log_info("MSG_JL_UPDATE_ANC_VOICE");
 #if RCSP_ADV_ADAPTIVE_NOISE_REDUCTION
         rcsp_device_status_update(COMMON_FUNCTION, (BIT(RCSP_DEVICE_STATUS_ATTR_TYPE_ANC_VOICE) | BIT(RCSP_DEVICE_STATUS_ATTR_TYPE_ADAPTIVE_NOISE_REDUCTION)));
 #else
@@ -144,7 +151,7 @@ int JL_rcsp_event_handler(struct rcsp_event *rcsp)
 #endif
         break;
     case MSG_JL_UPDATE_ANC_VOICE_MAX_SYNC:
-        log_info("MSG_JL_UPDATE_ANC_VOICE_MAX_SYNC\n");
+        log_info("MSG_JL_UPDATE_ANC_VOICE_MAX_SYNC");
 #if TCFG_USER_TWS_ENABLE && RCSP_ADV_ANC_VOICE
         extern void anc_voice_max_val_swap_sync(void);
         anc_voice_max_val_swap_sync();
@@ -153,44 +160,43 @@ int JL_rcsp_event_handler(struct rcsp_event *rcsp)
 #endif
 #if RCSP_ADV_ADAPTIVE_NOISE_REDUCTION
     case MSG_JL_UPDATE_ADAPTIVE_NOISE_REDUCTION:
-        log_info("MSG_JL_UPDATE_ADAPTIVE_NOISE_REDUCTION\n");
+        log_info("MSG_JL_UPDATE_ADAPTIVE_NOISE_REDUCTION");
         rcsp_device_status_update(COMMON_FUNCTION, BIT(RCSP_DEVICE_STATUS_ATTR_TYPE_ADAPTIVE_NOISE_REDUCTION));
         break;
 #endif
 #if RCSP_ADV_AI_NO_PICK
     case MSG_JL_UPDATE_AI_NO_PICK:
-        log_info("MSG_JL_UPDATE_AI_NO_PICK\n");
+        log_info("MSG_JL_UPDATE_AI_NO_PICK");
         rcsp_device_status_update(COMMON_FUNCTION, BIT(RCSP_DEVICE_STATUS_ATTR_TYPE_AI_NO_PICK));
         break;
 #endif
 #if RCSP_ADV_SCENE_NOISE_REDUCTION
     case MSG_JL_UPDATE_SCENE_NOISE_REDUCTION:
-        log_info("MSG_JL_UPDATE_SCENE_NOISE_REDUCTION\n");
+        log_info("MSG_JL_UPDATE_SCENE_NOISE_REDUCTION");
         rcsp_device_status_update(COMMON_FUNCTION, BIT(RCSP_DEVICE_STATUS_ATTR_TYPE_SCENE_NOISE_REDUCTION));
         break;
 #endif
 #if RCSP_ADV_WIND_NOISE_DETECTION
     case MSG_JL_UPDATE_WIND_NOISE_DETECTION:
-        log_info("MSG_JL_UPDATE_WIND_NOISE_DETECTION\n");
+        log_info("MSG_JL_UPDATE_WIND_NOISE_DETECTION");
         rcsp_device_status_update(COMMON_FUNCTION, BIT(RCSP_DEVICE_STATUS_ATTR_TYPE_WIND_NOISE_DETECTION));
         break;
 #endif
 #if RCSP_ADV_VOICE_ENHANCEMENT_MODE
     case MSG_JL_UPDATE_VOICE_ENHANCEMENT_MODE:
-        log_info("MSG_JL_UPDATE_VOICE_ENHANCEMENT_MODE\n");
+        log_info("MSG_JL_UPDATE_VOICE_ENHANCEMENT_MODE");
         rcsp_device_status_update(COMMON_FUNCTION, BIT(RCSP_DEVICE_STATUS_ATTR_TYPE_VOICE_ENHANCEMENT_MODE));
         break;
 #endif
 #if TCFG_RCSP_DUAL_CONN_ENABLE
     case MSG_JL_1T2_SETTING:
-        log_info("MSG_JL_UPDATE_VOICE_ENHANCEMENT_MODE\n");
+        log_info("MSG_JL_UPDATE_VOICE_ENHANCEMENT_MODE");
         rcsp_device_status_update(COMMON_FUNCTION, BIT(RCSP_DEVICE_STATUS_ATTR_TYPE_1T2));
         break;
 #endif
 #if RCSP_ADV_FIND_DEVICE_ENABLE
     case MSG_JL_FIND_DEVICE_RESUME:
-        log_info("MSG_JL_FIND_DEVICE_RESUME\n");
-        /* printf("rcsp_find %s, %s, %d\n", __FILE__, __FUNCTION__, __LINE__); */
+        log_info("MSG_JL_FIND_DEVICE_RESUME");
         /* put_buf(rcsp->args, 3); */
 #if TCFG_USER_TWS_ENABLE
         find_decice_tws_connect_handle(2, rcsp->args);
@@ -201,9 +207,8 @@ int JL_rcsp_event_handler(struct rcsp_event *rcsp)
 #endif
         break;
     case MSG_JL_FIND_DEVICE_STOP:
-        log_info("MSG_JL_FIND_DEVICE_STOP\n");
+        log_info("MSG_JL_FIND_DEVICE_STOP");
         u16 sec = *((u16 *)rcsp->args);
-        /* printf("rcsp_find %s, %s, %d, sec:%x\n", __FILE__, __FUNCTION__, __LINE__, sec); */
         /* put_buf(rcsp->args, 3); */
 #if TCFG_USER_TWS_ENABLE
         find_decice_tws_connect_handle(1, rcsp->args);
@@ -213,13 +218,12 @@ int JL_rcsp_event_handler(struct rcsp_event *rcsp)
         break;
 #endif
     case MSG_JL_TWS_NEED_UPDATE:
-        log_info("MSG_JL_TWS_NEED_UPDATE\n");
-        printf("%s----%d----TODO", __FUNCTION__, __LINE__);
+        log_info("MSG_JL_TWS_NEED_UPDATE");
         syscfg_write(CFG_RCSP_VM_UPDATE_FLAG, (const void *)rcsp->args, 1);
         break;
 
     default:
-        log_info("default\n");
+        log_info("default");
 #if RCSP_ADV_EN
         if (0 == JL_rcsp_adv_event_handler(rcsp)) {
             break;
@@ -291,9 +295,9 @@ extern void bredr_conn_last_dev();
 void rcsp_user_event_ble_handler(ble_state_e ble_status, u8 flag)
 {
     /* if (cpu_in_irq()) { */
-    /*     printf("%s, %s, %d, cpu_in_irq\n", __FILE__, __FUNCTION__, __LINE__); */
+    /*     printf("%s, %s, %d, cpu_in_irq", __FILE__, __FUNCTION__, __LINE__); */
     /* } else { */
-    /*     printf("%s, %s, %d, task:%s\n", __FILE__, __FUNCTION__, __LINE__, os_current_task()); */
+    /*     printf("%s, %s, %d, task:%s", __FILE__, __FUNCTION__, __LINE__, os_current_task()); */
     /* } */
     switch (ble_status) {
     case BLE_ST_INIT_OK:
@@ -318,7 +322,7 @@ void rcsp_user_event_ble_handler(ble_state_e ble_status, u8 flag)
         }
         rcsp_ble_connect();
 #if (RCSP_ADV_FIND_DEVICE_ENABLE)
-        log_info("rcsp_find_device_reset\n");
+        log_info("rcsp_find_device_reset");
         rcsp_find_device_reset();
 #endif
 #if RCSP_ADV_TRANSLATOR
@@ -362,10 +366,9 @@ void rcsp_user_event_ble_handler(ble_state_e ble_status, u8 flag)
 void rcsp_user_event_spp_handler(u8 spp_status, u8 flag)
 {
     if (cpu_in_irq()) {
-        printf("%s, %s, %d, cpu_in_irq\n", __FILE__, __FUNCTION__, __LINE__);
-    } else {
-        printf("%s, %s, %d, task:%s\n", __FILE__, __FUNCTION__, __LINE__, os_current_task());
+        log_error("%s: cpu_in_irq...", __FUNCTION__);
     }
+
     switch (spp_status) {
     case SPP_USER_ST_NULL:
         break;
@@ -376,7 +379,7 @@ void rcsp_user_event_spp_handler(u8 spp_status, u8 flag)
         }
         rcsp_ble_connect();
 #if (RCSP_ADV_FIND_DEVICE_ENABLE)
-        log_info("rcsp_find_device_reset\n");
+        log_info("rcsp_find_device_reset");
         rcsp_find_device_reset();
 #endif
 #if RCSP_ADV_TRANSLATOR

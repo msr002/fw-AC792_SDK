@@ -121,6 +121,8 @@ WIFI_PLATFORM_DATA_BEGIN(wifi_data)
 	.module = RTL8822C,
 #elif TCFG_RTL8733BS_ENABLE
 	.module = RTL8733B,
+#elif TCFG_AIC8800_ENABLE
+	.module = AIC8800,
 #endif
  .sdio_parm = SDIO_GRP_0 | SDIO_PORT_0 | SDIO_4_BIT_DATA | SDIO_POLLING | SDIO_CLOCK_20M,
 	.wakeup_port = -1,

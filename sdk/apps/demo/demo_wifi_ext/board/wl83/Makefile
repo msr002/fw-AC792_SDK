@@ -314,7 +314,6 @@ LFLAGS := \
 	../../../../../cpu/wl83/liba/hostapd_and_wpasupplicant.a \
 	../../../../../cpu/wl83/liba/rtl8189e.a \
 	../../../../../cpu/wl83/liba/lwip_2_2_0.a \
-	../../../../../cpu/wl83/liba/wl_wifi.a \
 	--end-group \
 	../../../../../include_lib/newlib/pi32v2-lib/libm.a \
 	../../../../../include_lib/newlib/pi32v2-lib/libc.a \

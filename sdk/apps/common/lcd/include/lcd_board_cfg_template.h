@@ -37,6 +37,7 @@
 #define TCFG_LCD_RGB_SSD2828_720x1280           0
 #define TCFG_LCD_RGB_ST7701S_480x800            0
 #define TCFG_LCD_RGB_HX8264_800x480             0
+#define TCFG_LCD_RGB_FL58202_800X480            0
 
 
 
@@ -260,6 +261,19 @@
 #define TCFG_LCD_BL_IO                      -1
 #define TCFG_LCD_RS_IO                      -1
 #define TCFG_LCD_CS_IO                      IO_PORTC_02
+#define TCFG_LCD_TE_ENABLE                  0
+#define TCFG_LCD_TE_IO                      -1
+#define TCFG_LCD_SPI_INTERFACE              NULL
+#define TCFG_LCD_RGB_IO_HD_LEVEL            1
+#endif
+
+#if TCFG_LCD_RGB_FL58202_800X480
+#define TCFG_LCD_DEVICE_NAME                "RGB_800X480_FL58202"
+#define TCFG_LCD_BL_VALUE                   1
+#define TCFG_LCD_RESET_IO                   -1
+#define TCFG_LCD_BL_IO                      IO_PORTC_00
+#define TCFG_LCD_RS_IO                      -1
+#define TCFG_LCD_CS_IO                      -1
 #define TCFG_LCD_TE_ENABLE                  0
 #define TCFG_LCD_TE_IO                      -1
 #define TCFG_LCD_SPI_INTERFACE              NULL

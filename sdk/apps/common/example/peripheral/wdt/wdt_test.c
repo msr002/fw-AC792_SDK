@@ -7,6 +7,7 @@
 // 重写覆盖库内弱函数,可以选择不再使用库内清看门狗
 /* void wdt_clear(void) */
 /* { */
+/*p33_or_1byte(P3_WDT_CON, BIT(6));*/
 
 /* } */
 

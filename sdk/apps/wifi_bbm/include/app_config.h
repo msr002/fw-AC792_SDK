@@ -22,6 +22,10 @@
 //PA生效需要wifi_conf.c的WIFI_PA_ENABLE变量要手动置1
 #define BBM_WIFI_PA_ENABLE                  1
 
+//音频编码使用opus. 默认为pcm.
+//使能opus需要修改可视化工具配置,输出对应的stream.bin
+#define BBM_AUDIO_OPUS_ENABLE               0
+
 
 #define CONFIG_VIDEO_DEC_ENABLE             1
 

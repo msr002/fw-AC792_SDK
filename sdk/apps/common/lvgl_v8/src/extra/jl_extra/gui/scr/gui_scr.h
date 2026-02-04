@@ -30,6 +30,7 @@ typedef struct {
     lv_obj_t *scr;                 // 页面对象
     bool is_del;                   // 是否删除
     bool is_act;                   // 是否是活动页面
+    bool need_rebuild;             // 是否需要重新创建页面对象
     gui_scr_setup_cb_t setup_cb;   // 页面初始化回调
     gui_scr_unload_cb_t unload_cb; // 页面卸载回调
 } gui_scr_t;
@@ -53,7 +54,8 @@ void gui_scr_init(void);
  * @param unload_cb screen unload callback
  * @return gui_scr_t* screen object
  */
-gui_scr_t *gui_scr_create(int32_t id, const char *name, lv_obj_t *obj, gui_scr_setup_cb_t setup_cb, gui_scr_unload_cb_t unload_cb);
+gui_scr_t *gui_scr_create(int32_t id, const char *name, lv_obj_t *obj, gui_scr_setup_cb_t setup_cb,
+                          gui_scr_unload_cb_t unload_cb);
 
 /**
  * @brief delete the screen
@@ -100,7 +102,8 @@ void gui_scr_set_act(gui_scr_t *screen, void *ui);
  * @param is_clear whether to clear the old screen
  * @param auto_del whether to delete the old screen
  */
-void gui_scr_set_act_anim(gui_scr_t *screen, void *ui, lv_scr_load_anim_t anim_type, uint32_t time, uint32_t delay, bool is_clear, bool auto_del);
+void gui_scr_set_act_anim(gui_scr_t *screen, void *ui, lv_scr_load_anim_t anim_type, uint32_t time, uint32_t delay,
+                          bool is_clear, bool auto_del);
 
 /*=====================
  * Getter functions

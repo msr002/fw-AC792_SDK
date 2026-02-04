@@ -1004,14 +1004,13 @@ static const attr_get_func target_common_function_get_tab[RCSP_DEVICE_STATUS_ATT
 
 static bool rcsp_common_function_set(void *priv, u8 OpCode, u8 OpCode_SN, u8 *data, u16 len, u16 ble_con_handle, u8 *spp_remote_addr)
 {
-    log_info("rcsp_common_function_set");
     struct RcspModel *rcspModel = (struct RcspModel *)priv;
     if (rcspModel == NULL) {
         return false;
     }
     _OpCode = OpCode;
     _OpCode_SN = OpCode_SN;
-    put_buf(data, len);
+    /* put_buf(data, len); */
     attr_set(priv, data, len, common_function_set_tab, RCSP_DEVICE_STATUS_ATTR_TYPE_MAX, ble_con_handle, spp_remote_addr);
     if (rcspModel->err_code) {
         rcspModel->err_code = 0;
@@ -1140,8 +1139,8 @@ void rcsp_update_dev_state(u32 event, void *param)
 // 获取当前模式
 u8 rcsp_get_cur_mode(app_mode_t app_mode)
 {
+    log_debug("%s: app_mode %d", __FUNCTION__, app_mode);
     u8 current_mode = BT_FUNCTION_MASK;
-    log_info("%s==%d==TODO", __FUNCTION__, __LINE__);
     switch (app_mode) {
     case APP_MODE_LOCAL:
         current_mode = MUSIC_FUNCTION_MASK;

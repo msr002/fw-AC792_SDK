@@ -6,6 +6,7 @@
 #endif
 #include "rcsp_misc_setting.h"
 #include "app_config.h"
+#include "rcsp_config.h"
 
 #if (RCSP_MODE && RCSP_REVERBERATION_SETTING && TCFG_MIC_EFFECT_ENABLE && RCSP_ADV_EQ_SET_ENABLE)
 #include "syscfg_id.h"

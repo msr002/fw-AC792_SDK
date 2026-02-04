@@ -3,6 +3,7 @@
 #include "audio_player.h"
 #include "vir_dev_player.h"
 #include "file_player.h"
+#include "app_config.h"
 
 #define LOG_TAG_CONST       AUDIO_PLAYER
 #define LOG_TAG             "[AUDIO_PLAYER]"
@@ -11,7 +12,11 @@
 #define LOG_DUMP_ENABLE
 #include "debug.h"
 
+#if BBM_AUDIO_OPUS_ENABLE
 #define AUDIO_PLAY_CBUF_SIZE           8 * 1024   //解码音频缓存
+#else
+#define AUDIO_PLAY_CBUF_SIZE           64 * 1024   //解码音频缓存
+#endif
 
 static u8 *audio_play_buf;
 static cbuffer_t audio_play_cbuf;
@@ -63,6 +68,14 @@ static int virtual_dev_read(void *file, u8 *buf, int len)
         }
     }
 
+    if (rlen > len) {
+#if BBM_AUDIO_OPUS_ENABLE
+        rlen = 0;
+#else
+        rlen = len;
+#endif
+    }
+
     return cbuf_read(&audio_play_cbuf, buf, rlen);
 }
 
@@ -70,8 +83,11 @@ static int virtual_dev_get_fmt(void *file, struct stream_fmt *fmt)
 {
     fmt->sample_rate = 16000;
     fmt->channel_mode = AUDIO_CH_L;
-    /* fmt->coding_type = AUDIO_CODING_PCM; */
+    fmt->coding_type = AUDIO_CODING_PCM;
+
+#if BBM_AUDIO_OPUS_ENABLE
     fmt->coding_type = AUDIO_CODING_OPUS;
+#endif
 
     if (fmt->coding_type == AUDIO_CODING_OPUS) {
         fmt->quality = AUDIO_ATTR_OPUS_CBR_PKTLEN_TYPE;//CONFIG_OPUS_DEC_FILE_TYPE;
@@ -80,6 +96,12 @@ static int virtual_dev_get_fmt(void *file, struct stream_fmt *fmt)
         }
         return -EINVAL;
     }
+
+    if (fmt->coding_type == AUDIO_CODING_PCM) {
+        fmt->pcm_file_mode = 1;
+        return 0;
+    }
+
     return 0;
 }
 
@@ -107,7 +129,12 @@ int audio_player_one_frame(u8 *buf, u32 size)
 
     if (!player) {
         //需要有数据才初始化
-        player = virtual_dev_play_callback(&audio_play_cbuf, &virtual_dev_ops, NULL, virtual_audio_player_decode_event_callback, NULL, AUDIO_CODING_OPUS);
+        u32 coding_type = AUDIO_CODING_PCM;
+
+#if BBM_AUDIO_OPUS_ENABLE
+        coding_type = AUDIO_CODING_OPUS;
+#endif
+        player = virtual_dev_play_callback(&audio_play_cbuf, &virtual_dev_ops, NULL, virtual_audio_player_decode_event_callback, NULL, coding_type);
         /* void app_audio_set_volume(u8 state, s16 volume, u8 fade); */
         /* app_audio_set_volume(app_audio_get_state(), 70, 0); */
     }

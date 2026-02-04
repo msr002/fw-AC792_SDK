@@ -64,6 +64,15 @@
 
 /* #include "asm/charge.h" */
 
+// 设备类型
+#define RCSP_ADV_DEV_TYPE_SOUNDBOX              (0x00) //音箱类型
+#define RCSP_ADV_DEV_TYPE_CHARGESTORE           (0x10) //充电池类型
+#define RCSP_ADV_DEV_TYPE_TWS_EARPHONE          (0x20) //TWS耳机类型
+#define RCSP_ADV_DEV_TYPE_EARPHONE              (0x30) //普通耳机类型
+#define RCSP_ADV_DEV_TYPE_SOUNDCARD             (0x40) //声卡类型
+#define RCSP_ADV_DEV_TYPE_WATCH                 (0x50) //手表类型
+#define RCSP_ADV_DEV_TYPE_DONGLE                (0x60) //Dongle设备类型
+
 #if TCFG_USER_BLE_CTRL_BREDR_EN
 #define VER_FLAG_BLE_CTRL_BREDR					BIT(0) // 先连接ble再连接edr
 #else
@@ -78,7 +87,7 @@
 #define LOG_DEBUG_ENABLE
 #define LOG_INFO_ENABLE
 #include "system/debug.h"
-#if 1
+#if 0
 #define log_info_hexdump       put_buf
 #else
 #define log_info_hexdump(...)
@@ -137,8 +146,75 @@ int JL_AES_BASE_BT = (int)JL_AES;	// add for btcon_hash, by lingxuanfeng, 202205
 #endif
 int rcsp_make_set_adv_data(void)
 {
-    u8 i;
     u8 *buf = adv_data;
+#if (RCSP_ADV_VERSION == 6)
+    u8 offset = 0;
+
+    buf[offset++] = 0;  // length
+    buf[offset++] = 0xFF;  // type:Manufacturer Specific Data
+
+    buf[offset++] = 0xD6;	// JL ID
+    buf[offset++] = 0x05;
+
+    u16 vid = get_vid_pid_ver_from_cfg_file(GET_VID_FROM_EX_CFG);
+    buf[offset++] = vid & 0xFF;
+    buf[offset++] = vid >> 8;
+
+    u16 pid = get_vid_pid_ver_from_cfg_file(GET_PID_FROM_EX_CFG);
+    buf[offset++] = pid & 0xFF;
+    buf[offset++] = pid >> 8;
+
+    u8 bat_num = 1;
+    u8 adv_version = 6;
+#if (RCSP_MODE == RCSP_MODE_SOUNDBOX)
+    u8 dev_type = RCSP_ADV_DEV_TYPE_SOUNDBOX;
+#if (defined(RCSP_DISPLAY_AS_DONGLE) && RCSP_DISPLAY_AS_DONGLE)
+    dev_type = RCSP_ADV_DEV_TYPE_DONGLE;
+#endif
+#if	TCFG_USER_TWS_ENABLE
+    bat_num = 2;
+#endif
+
+#elif (RCSP_MODE == RCSP_MODE_EARPHONE)
+    u8 dev_type = RCSP_ADV_DEV_TYPE_TWS_EARPHONE;
+    bat_num = 3;
+#endif
+    buf[offset++] = dev_type | adv_version;
+
+    u8 edr_flag = __this->connect_flag;
+#if ((RCSP_CHANNEL_SEL == RCSP_USE_BLE) || (0 == TCFG_USER_BT_CLASSIC_ENABLE))
+    edr_flag = 0x0F;
+#endif
+    buf[offset++] = (bat_num << 4) | edr_flag;
+
+    swapX(bt_get_mac_addr(), &buf[offset], 6);
+    offset += 6;
+
+    buf[offset++] = __this->bat_percent_L ? (((!!__this->bat_charge_L) << 7) | (__this->bat_percent_L & 0x7F)) : 0;
+
+    if (bat_num > 1) {
+        buf[offset++] = __this->bat_percent_R ? (((!!__this->bat_charge_R) << 7) | (__this->bat_percent_R & 0x7F)) : 0;
+    }
+    if (bat_num > 2) {
+        buf[offset++] = __this->bat_percent_C ? (((!!__this->bat_charge_C) << 7) | (__this->bat_percent_C & 0x7F)) : 0;
+    }
+
+    // Seq
+    buf[offset++] = __this->seq_rand;
+
+    // CFG 1
+    u8 android_connect_way = RCSP_CHANNEL_SEL;
+    u8 ios_connect_way = (RCSP_CHANNEL_SEL == RCSP_USE_GATT_OVER_EDR) ? RCSP_USE_GATT_OVER_EDR : RCSP_USE_BLE;
+    buf[offset++] = (android_connect_way << 1) | (ios_connect_way << 4) | BIT(7);
+
+    // CFG 2
+    buf[offset++] = 0;
+
+    adv_data_len = offset;
+    buf[0] = adv_data_len - 1;
+
+#elif (RCSP_ADV_VERSION < 6)
+    u8 i;
     buf[0] = 0x1E;
     buf[1] = 0xFF;
 
@@ -155,7 +231,7 @@ int rcsp_make_set_adv_data(void)
 
 #if RCSP_MODE == RCSP_MODE_EARPHONE
 
-    buf[8] = 0x20;	//   2:TWS耳机类型   |  protocol verson
+    buf[8] = RCSP_ADV_DEV_TYPE_TWS_EARPHONE;	//   2:TWS耳机类型   |  protocol verson
 
 #if (TCFG_LE_AUDIO_RCSP_USE_SAME_ACL)
     buf[8] |= 4;
@@ -173,9 +249,9 @@ int rcsp_make_set_adv_data(void)
 
 #if RCSP_MODE == RCSP_MODE_SOUNDBOX
 #if (SOUNDCARD_ENABLE)
-    buf[8] = 0x40;	//   4:声卡类型   |  protocol verson
+    buf[8] = RCSP_ADV_DEV_TYPE_SOUNDCARD;	//   4:声卡类型   |  protocol verson
 #else
-    buf[8] = 0x0;	//   0:音箱类型   |  protocol verson
+    buf[8] = RCSP_ADV_DEV_TYPE_SOUNDBOX;	//   0:音箱类型   |  protocol verson
 #endif
     if (RCSP_USE_SPP == get_defalut_bt_channel_sel()) {
         buf[8] |= 2;
@@ -222,17 +298,23 @@ int rcsp_make_set_adv_data(void)
     }
 #endif // RCSP_MODE == RCSP_MODE_WATCH
 
-    __this->modify_flag = 0;
     adv_data_len = 31;
-#if !TCFG_THIRD_PARTY_PROTOCOLS_SIMPLIFIED
-    app_ble_adv_data_set(rcsp_server_ble_hdl, buf, 31);
-    app_ble_adv_data_set(rcsp_server_ble_hdl1, buf, 31);
+
 #else
-    ble_op_set_adv_data(31, buf);
+#error "RCSP_ADV_VERSION unsupport"
+#endif
+    __this->modify_flag = 0;
+
+    /* ble_op_set_adv_data(31, buf); */
+#if !TCFG_THIRD_PARTY_PROTOCOLS_SIMPLIFIED
+    app_ble_adv_data_set(rcsp_server_ble_hdl, buf, adv_data_len);
+    app_ble_adv_data_set(rcsp_server_ble_hdl1, buf, adv_data_len);
+#else
+    ble_op_set_adv_data(adv_data_len, buf);
 #endif
 
-    log_info("ADV data():");
-    log_info_hexdump(buf, 31);
+    log_debug("ADV data():");
+    log_info_hexdump(buf, adv_data_len);
     return 0;
 }
 
@@ -255,7 +337,7 @@ int rcsp_make_set_rsp_data(void)
     }
     offset += make_eir_packet_data(&buf[offset], offset, HCI_EIR_DATATYPE_COMPLETE_LOCAL_NAME, (void *)edr_name, name_len);
     scan_rsp_data_len = offset;
-    log_info("rsp_data(%d):", offset);
+    log_debug("rsp_data(%d):", offset);
     log_info_hexdump(buf, offset);
 #if !TCFG_THIRD_PARTY_PROTOCOLS_SIMPLIFIED
     app_ble_rsp_data_set(rcsp_server_ble_hdl, buf, 31);
@@ -297,9 +379,14 @@ static int update_adv_data(u8 *buf)
 
 #if RCSP_MODE == RCSP_MODE_SOUNDBOX
 #if (SOUNDCARD_ENABLE)
-    buf[6] = 0x40;	//   4:声卡类型   |  protocol verson
+    buf[6] = RCSP_ADV_DEV_TYPE_SOUNDCARD;	//   4:声卡类型   |  protocol verson
 #else
-    buf[6] = 0x0;	//   0:音箱类型   |  protocol verson
+
+    buf[6] = RCSP_ADV_DEV_TYPE_SOUNDBOX;	//   0:音箱类型   |  protocol verson
+#if (defined(RCSP_DISPLAY_AS_DONGLE) && RCSP_DISPLAY_AS_DONGLE)
+    buf[6] = RCSP_ADV_DEV_TYPE_DONGLE;
+#endif
+
 #endif
     if (RCSP_USE_SPP == get_defalut_bt_channel_sel()) {
         buf[6] |= 2;
@@ -352,7 +439,7 @@ int upay_ble_adv_data_set(void)
     adv_data_len = offset;
     ble_op_set_adv_data(offset, buf);
 
-    log_info("upay ADV data(%d):", adv_data_len);
+    log_debug("upay ADV data(%d):", adv_data_len);
     log_info_hexdump(buf, offset);
 
     buf = scan_rsp_data;
@@ -362,7 +449,7 @@ int upay_ble_adv_data_set(void)
     scan_rsp_data_len = offset;
     ble_op_set_rsp_data(offset, buf);
 
-    log_info("upay RSP data(%d):", scan_rsp_data_len);
+    log_debug("upay RSP data(%d):", scan_rsp_data_len);
     log_info_hexdump(buf, offset);
 
     return 0;
@@ -706,15 +793,15 @@ u8 *ble_get_adv_data_ptr(u16 *len)
     if (len) {
         *len = adv_data_len;
     }
-#if RCSP_UPDATE_EN
-    adv_data[15] = 1;
-    adv_data[20] = 0;
-    u8 t_buf[16];
-    btcon_hash(&adv_data[2], 16, &adv_data[15], 4, t_buf);
-    for (u8 i = 0; i < 8; i++) {
-        adv_data[23 + i] = t_buf[2 * i + 1];
-    }
-#endif
+    /* #if RCSP_UPDATE_EN */
+    /* adv_data[15] = 1; */
+    /* adv_data[20] = 0; */
+    /* u8 t_buf[16]; */
+    /* btcon_hash(&adv_data[2], 16, &adv_data[15], 4, t_buf); */
+    /* for (u8 i = 0; i < 8; i++) { */
+    /* adv_data[23 + i] = t_buf[2 * i + 1]; */
+    /* } */
+    /* #endif */
     return adv_data;
 }
 
@@ -1097,7 +1184,7 @@ u16 rebuild_adv_rcsp_info(u8 *adv_rsp_buf, u16 buf_size, u8 type, u8 *addr)
             // vbat (1byte)
             adv_rsp_buf[rsp_adv_len++] = 0;
 
-            log_info("new adv_data(%d) = %lu:\n", rsp_adv_len, (2 + sizeof(struct excfg_rsp_payload) + 6));
+            log_debug("new adv_data(%d) = %lu:", rsp_adv_len, (2 + sizeof(struct excfg_rsp_payload) + 6));
             log_info_hexdump(adv_rsp_buf, rsp_adv_len);
         }
         break;
@@ -1106,8 +1193,8 @@ u16 rebuild_adv_rcsp_info(u8 *adv_rsp_buf, u16 buf_size, u8 type, u8 *addr)
         rsp_adv_len += make_eir_packet_val(&adv_rsp_buf[rsp_adv_len], rsp_adv_len, HCI_EIR_DATATYPE_FLAGS, 0x06, 1);
         const char *edr_name = bt_get_local_name();
         rsp_adv_len += make_eir_packet_data(&adv_rsp_buf[rsp_adv_len], rsp_adv_len, HCI_EIR_DATATYPE_COMPLETE_LOCAL_NAME, (void *)edr_name, strlen(edr_name) > 26 ? 26 : strlen(edr_name));
-        log_debug("%s, strlen(edr_name):%d", edr_name, (int)strlen(edr_name));
-        log_info("new rsp_data(%d):\n", rsp_adv_len);
+        log_info("%s, strlen(edr_name):%d", edr_name, (int)strlen(edr_name));
+        log_debug("new rsp_data(%d):", rsp_adv_len);
         log_info_hexdump(adv_rsp_buf, rsp_adv_len);
         break;
     }

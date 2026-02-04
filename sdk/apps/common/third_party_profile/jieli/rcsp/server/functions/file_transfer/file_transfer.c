@@ -134,6 +134,7 @@ static void *file_t_open(const char *path, const char *mode)
 {
     void *file_ptr = NULL;
     if (NULL == ftp_d) {
+        log_error("%s: ftp_d is NULL", __FUNCTION__);
         return file_ptr;
     }
 #if TCFG_USER_TWS_ENABLE
@@ -250,6 +251,13 @@ static int file_t_erase(void *file, u32 erase_addr, u32 erase_size)
     }
 #endif
 _ERR_RET:
+    return 0;
+}
+#else
+
+static int file_t_erase(void *file, u32 erase_addr, u32 erase_size)
+{
+    log_info("%s===%d===TODO", __FUNCTION__, __LINE__);
     return 0;
 }
 #endif

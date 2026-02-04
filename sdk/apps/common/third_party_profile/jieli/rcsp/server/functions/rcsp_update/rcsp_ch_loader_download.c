@@ -25,6 +25,7 @@
 #include "le_connected.h"
 #include "btstack_rcsp_user.h"
 #include "app_ble_spp_api.h"
+#include "update/error_code.h"
 
 #include <string.h>
 
@@ -42,10 +43,11 @@
 #include "adv_1t2_setting.h"
 #endif
 
-#define LOG_TAG "[RCSP-UPDATE]"
-#define LOG_INFO_ENABLE
+#define LOG_TAG_CONST	  RCSP_UPDATE
 #define LOG_ERROR_ENABLE
-#include "debug.h"
+#define LOG_DEBUG_ENABLE
+#define LOG_INFO_ENABLE
+#include "system/debug.h"
 
 typedef enum __DEVICE_REFRESH_FW_STATUS {
     DEVICE_UPDATE_STA_SUCCESS = 0,      //升级成功(default)
@@ -63,60 +65,6 @@ typedef enum {
     UPDATA_REV_DATA,
     UPDATA_STOP,
 } UPDATA_BIT_FLAG;
-
-//update result code;
-#define RCSP_UPDATE_RESULT_FLAG_BITMAP      BIT(7)
-typedef enum {
-    RCSP_UPDATE_RESULT_ERR_NONE = 0,
-    RCSP_UPDATE_RESULT_FILE_SIZE_ERR = 0x1, 	//文件大小错误
-    RCSP_UPDATE_RESULT_LOADER_SIZE_ERR = 0x2, //loader大小错误
-    RCSP_UPDATE_RESULT_LOADER_VERIFY_ERR,    //update loader校验失败
-    RCSP_UPDATE_RESULT_REMOTE_FILE_HEAD_ERR, //读升级文件头错误
-
-    RCSP_UPDATE_RESULT_LOCAL_FILE_HEAD_ERR = 0x5, //读flash文件头错误
-    RCSP_UPDATE_RESULT_NOT_FIND_TARGET_FILE_ERR, //找不到目标文件(ota.bin找不到对应loader)
-    RCSP_UPDATE_RESULT_FILE_OPERATION_ERR,       //文件操作失败
-    RCSP_UPDATE_RESULT_FLASH_DATA_VERIFY_ERR,    //flash数据校验失败
-
-    RCSP_UPDATE_RESULT_UBOOT_NOT_MATCH = 0x09,  //UBOOT不匹配
-    RCSP_UPDATE_RESULT_PRODUCT_INFO_NOT_MATCH = 0x0a, //芯片型号不匹配
-    RCSP_UPDATE_RESULT_EX_DSP_UPDATE_ERR,		//外部IC升级出错;
-    RCSP_UPDATE_RESULT_CFG_UPDATE_ERR,			//配置升级出错
-
-    RCSP_UPDATE_RESULT_FLASH_ERASE_ERR = 0x0d,	  //flash 擦失败(可能是写保护)
-    RCSP_UPDATE_RESULT_REMOTE_FILE_NOT_MATCH,      //升级文件不匹配
-    RCSP_UPDATE_RESULT_ANC_CFG_UPDATE_ERR,         //ANC配置升级出错
-    RCSP_UPDATE_RESULT_ANC_COEF_UPDATE_ERR = 0x10, //ANC配置升级出错
-
-    RCSP_UPDATE_RESULT_OTA_TWS_NO_RSP,             //对耳同步升级传输数据没有回复
-    RCSP_UPDATE_RESULT_RESOURCE_LIMIT,			  //资源不足
-    RCSP_UPDATE_RESULT_OTA_TWS_START_ERR,          //对耳启动升级失败
-    RCSP_UPDATE_RESULT_OTA_TWS_CRC_ERROR,          //对耳校验失败
-
-    RCSP_UPDATE_RESULT_OTA_APP_EXIT = 0x15,        //升级过程APP强制退出
-    RCSP_UPDATE_RESULT_TWS_NO_CONNECT,             //对耳未连接
-    RCSP_UPDATE_RESULT_READ_REMOTE_FILE_ERR,       //读取不到远端数据
-    RCSP_UPDATE_RESULT_UFW_FLASH_HEAD_CRC_ERR,     //校验远端文件里的FLASH_HEAD失败
-
-    RCSP_UPDATE_RESULT_UFW_CODE_HEAD_CRC_ERR = 0x19,      //校验远端文件里的APP_CODE_HEAD失败
-    RCSP_UPDATE_RESULT_UFW_ALGIN_OF_OFFSET_MATCH_ERR,  //升级文件中找不到和本地对齐和偏移方式一致的文件
-    RCSP_UPDATE_RESULT_UFW_CANNOT_FIND_VM_AREA,  //升级文件中找不到vm区域信息
-    RCSP_UPDATE_RESULT_LOADER_HEAD_CRC_ERR,      //校验LOADER_HEAD失败，检查ota.bin前面数据是否为00
-
-    RCSP_UPDATE_RESULT_LOADER_WRITE_ERR = 0x1d,         //写loader失败
-    RCSP_UPDATE_RESULT_DUALBANK_GET_UFW_APP_HEAD_ERR,   //双备份获取远端APP_head失败
-    RCSP_UPDATE_RESULT_DUALBANK_GET_LOCAL_APP_HEAD_ERR, //双备份获取本地APP_head失败
-    RCSP_UPDATE_RESULT_DUALBANK_APP_HEAD_NOT_MATCH,     //双备份本地和远端APP分解线不匹配
-
-    RCSP_UPDATE_RESULT_LOCAL_VM_NOT_ENOUGH_FOR_LOADER_SIZE = 0x21,	//本地vm大小不足加载loader code(需缩小loader code的大小)
-    RCSP_UPDATE_RESULT_REMOTE_VM_NOT_ENOUGH_FOR_LOADER_SIZE,  //升级文件vm大小无法适配loader code(减少升级文件可解决)
-
-    //蓝牙相关err
-    RCSP_UPDATE_RESULT_BT_UPDATE_OVER = 0x23,
-    RCSP_UPDATE_RESULT_BT_UPDATE_KEY_ERR,
-    RCSP_UPDATE_RESULT_BT_UPDATE_CONNECT_ERR,
-
-} RCSP_UPDATE_ERROR_CODE;
 
 typedef struct _rcsp_update_param_t {
     u32 state;
@@ -175,7 +123,7 @@ void rcsp_clean_update_hdl_for_end_update(u16 ble_con_handle, u8 *spp_remote_add
         __this->spp_remote_addr = NULL;
     }
     /* if (__this->spp_remote_addr) { */
-    /* 	printf("%s, %d\n", __FUNCTION__, __LINE__); */
+    /* 	printf("%s, %d", __FUNCTION__, __LINE__); */
     /*     put_buf(__this->spp_remote_addr, 6); */
     /* } */
 }
@@ -196,7 +144,7 @@ void rcsp_set_update_hdl(u16 ble_con_handle, u8 *spp_remote_addr)
 void rcsp_get_update_hdl(u16 *ble_con_handle, u8 *spp_remote_addr)
 {
     /* if (__this->spp_remote_addr) { */
-    /* 	printf("%s, %d\n", __FUNCTION__, __LINE__); */
+    /* 	printf("%s, %d", __FUNCTION__, __LINE__); */
     /*     put_buf(__this->spp_remote_addr, 6); */
     /* } */
     *ble_con_handle = __this->ble_con_handle;
@@ -222,7 +170,7 @@ int rcsp_f_seek(void *fp, u8 type, u32 offset)
         __this->seek_type = BT_SEEK_CUR;
     }
 
-    /* lib_printf("---------UPDATA_seek type %d, offsize %d----------\n", bt_seek_type, bt_file_offset); */
+    /* lib_printf("---------UPDATA_seek type %d, offsize %d----------", bt_seek_type, bt_file_offset); */
     return 0;//FR_OK;
 }
 
@@ -239,7 +187,7 @@ static u16 rcsp_f_stop(u8 err);
 u8 get_rcsp_connect_status();
 u16 rcsp_f_read(void *fp, u8 *buff, u16 len)
 {
-    //printf("===rcsp_read:%x %x\n", __this->file_offset, len);
+    //printf("===rcsp_read:%x %x", __this->file_offset, len);
     u8 retry_cnt = 0;
     if (g_cis_conn_handle) {
         retry_cnt = RETRY_TIMES;
@@ -296,7 +244,7 @@ __RETRY:
 
 u16 rcsp_f_open(void)
 {
-    log_info(">>>rcsp_f_open\n");
+    log_info(">>>rcsp_f_open");
     __this->file_offset = 0;
     __this->seek_type = BT_SEEK_SET;
     return 1;
@@ -309,12 +257,6 @@ u16 rcsp_send_update_len(u32 update_len)
     return 1;
 }
 
-enum {
-    BT_UPDATE_OVER = 0,
-    BT_UPDATE_KEY_ERR,
-    BT_UPDATE_CONNECT_ERR,
-};
-
 static u8 update_result_handle(u8 err)
 {
     u8 res = 0;
@@ -326,41 +268,38 @@ static u8 update_result_handle(u8 err)
     tws_api_auto_role_switch_enable();
 #endif
 
-    if (err & RCSP_UPDATE_RESULT_FLAG_BITMAP) {
-        switch (err & 0x7f) {
-        //升级文件错误
-        case RCSP_UPDATE_RESULT_FILE_SIZE_ERR:
-        case RCSP_UPDATE_RESULT_LOADER_SIZE_ERR:
-        case RCSP_UPDATE_RESULT_REMOTE_FILE_HEAD_ERR:
-        case RCSP_UPDATE_RESULT_LOCAL_FILE_HEAD_ERR:
-        case RCSP_UPDATE_RESULT_FILE_OPERATION_ERR:
-        case RCSP_UPDATE_RESULT_NOT_FIND_TARGET_FILE_ERR:
-        case RCSP_UPDATE_RESULT_PRODUCT_INFO_NOT_MATCH:
-            res = DEVICE_UPDATE_STA_FILE_ERR;
-            break;
-        //文件内容校验失败
-        case RCSP_UPDATE_RESULT_LOADER_VERIFY_ERR:
-        case RCSP_UPDATE_RESULT_FLASH_DATA_VERIFY_ERR:
-            res = DEVICE_UPDATE_STA_VERIFY_ERR;
-            break;
-        case RCSP_UPDATE_RESULT_EX_DSP_UPDATE_ERR:
-            res = RCSP_UPDATE_RESULT_EX_DSP_UPDATE_ERR;
-            break;
-        default:
-            res = err;
-            break;
-
-        }
-    } else if (RCSP_UPDATE_RESULT_BT_UPDATE_OVER == err) {
+    log_debug("%s: update status %d", __func__, err);
+    if (UPDATE_RESULT_ERR_NONE == err) {
         if (support_dual_bank_update_en) {
             res = DEVICE_UPDATE_STA_SUCCESS;
         } else {
             res = DEVICE_UPDATE_STA_LOADER_DOWNLOAD_SUCC;
         }
-    } else if (RCSP_UPDATE_RESULT_BT_UPDATE_KEY_ERR == err) {
-        res = DEVICE_UPDATE_STA_KEY_ERR;
     } else {
-        res = DEVICE_UPDATE_STA_FAIL;
+        switch (err) {
+        //升级文件错误
+        case UPDATE_RESULT_FILE_SIZE_ERR:
+        case UPDATE_RESULT_LOADER_SIZE_ERR:
+        case UPDATE_RESULT_REMOTE_FILE_HEAD_ERR:
+        case UPDATE_RESULT_FILE_OPERATION_ERR:
+        case UPDATE_RESULT_NOT_FIND_TARGET_FILE_ERR:
+        case UPDATE_RESULT_PRODUCT_INFO_NOT_MATCH:
+            res = DEVICE_UPDATE_STA_FILE_ERR;
+            break;
+        //文件内容校验失败
+        case UPDATE_RESULT_LOADER_VERIFY_ERR:
+        case UPDATE_RESULT_LOADER_INFO_VERIFY_ERR:
+        case UPDATE_ERR_PEER_FILE_VERIFY_FAILED:
+        case UPDATE_ERR_BOOT_AREA_VERIFY_FAILED:
+        case RESERVED_ZONE_ERR_FILE_HEAD_VERIFY:
+        case RESERVED_ZONE_ERR_FILE_DATA_VERIFY:
+            res = DEVICE_UPDATE_STA_VERIFY_ERR;
+            break;
+        case UPDATE_RESULT_EX_DSP_UPDATE_ERR:
+        default:
+            res = DEVICE_UPDATE_STA_FAIL;
+            break;
+        }
     }
 
     return res;
@@ -372,7 +311,7 @@ static u16 rcsp_f_stop(u8 err)
     /* bt_updata_clr_flag(updata_start);    //clr flag */
 
     err = update_result_handle(err);
-    log_info(">>>rcsp_stop\n");
+    log_info(">>>rcsp_stop...err = %d", err);
     __this->state = UPDATA_STOP;
 
     if (!get_rcsp_connect_status() || g_rcsp_ancs_state_flag) {
@@ -425,7 +364,7 @@ static int rcsp_notify_update_content_size(void *priv, u32 size)
 
     user_change_ble_conn_param(0);
 
-    log_info("send content_size:%x\n", size);
+    log_info("send content_size:%x", size);
     err = JL_CMD_send(JL_OPCODE_NOTIFY_UPDATE_CONENT_SIZE, data, sizeof(data), JL_NEED_RESPOND, __this->ble_con_handle, __this->spp_remote_addr);
 
     return err;
@@ -435,7 +374,7 @@ void rcsp_update_handle(u8 state, void *buf, int len)
 {
     /* log_info("R"); */
     if (state != __this->state) {
-        log_error(">>>rcsp state err\n");
+        log_error(">>>rcsp state err; state-%d; __this->state-%d", state, __this->state);
         return;
     }
 
@@ -483,7 +422,7 @@ void rcsp_update_data_api_register(u32(*data_send_hdl)(void *priv, u32 offset, u
 
 void rcsp_ch_update_init(void (*resume_hdl)(void *priv), int (*sleep_hdl)(void *priv))
 {
-    log_info("------------rcsp_ch_update_init\n");
+    log_info("------------rcsp_ch_update_init");
 
     g_rcsp_ancs_state_flag = 0;
     rcsp_update_resume_hdl_register(resume_hdl, sleep_hdl);
@@ -517,7 +456,7 @@ static void rcsp_update_state_cbk(int type, u32 state, void *priv)
 {
     update_ret_code_t *ret_code = (update_ret_code_t *)priv;
     if (ret_code) {
-        log_info("state:%x, update result code:%x\n", ret_code->stu, ret_code->err_code);
+        log_info("state:%d, update result code:%d", ret_code->stu, ret_code->err_code);
     }
     switch (state) {
     case UPDATE_CH_INIT:
@@ -531,17 +470,17 @@ static void rcsp_update_state_cbk(int type, u32 state, void *priv)
         break;
     case UPDATE_CH_EXIT:
         if (UPDATE_DUAL_BANK_IS_SUPPORT()) {
-            if ((0 == ret_code->stu) && (RCSP_UPDATE_RESULT_ERR_NONE == ret_code->err_code || RCSP_UPDATE_RESULT_BT_UPDATE_OVER == ret_code->err_code)) {
+            if ((0 == ret_code->stu) && (UPDATE_RESULT_ERR_NONE == ret_code->err_code)) {
                 set_jl_update_flag(1);
-                log_info(">>>rcsp update succ\n");
+                log_info(">>>rcsp update succ");
                 update_result_set(UPDATA_SUCC);
 
             } else {
                 update_result_set(UPDATA_DEV_ERR);
-                log_info(">>>rcsp update err\n");
+                log_info(">>>rcsp update err");
             }
         } else {
-            if ((0 == ret_code->stu) && (RCSP_UPDATE_RESULT_ERR_NONE == ret_code->err_code || RCSP_UPDATE_RESULT_BT_UPDATE_OVER == ret_code->err_code)) {
+            if ((0 == ret_code->stu) && (UPDATE_RESULT_ERR_NONE == ret_code->err_code)) {
                 set_jl_update_flag(1);
             }
         }
@@ -587,7 +526,7 @@ static void rcsp_spp_update_init(void)
     if (NULL == bt_dg_rcsp_spp_hdl) {
         bt_dg_rcsp_spp_hdl = app_spp_hdl_alloc(0x0);
         if (NULL == bt_dg_rcsp_spp_hdl) {
-            ASSERT(0, "err: %s alloc fail\n", __func__);
+            ASSERT(0, "err: %s alloc fail", __func__);
             return;
         }
         app_spp_recieve_callback_register(bt_dg_rcsp_spp_hdl, spp_rcsp_recieve_filter_callback);
@@ -608,10 +547,10 @@ void rcsp_update_loader_download_init(int update_type, void (*result_cbk)(void *
         .task_en = 1,
     };
 #if CONFIG_UPDATE_MUTIL_CPU_UART
-    y_printf("\n >>>[test]:func = %s,line= %d\n", __FUNCTION__, __LINE__);
+    y_printf(">>>[test]:func = %s,line= %d", __FUNCTION__, __LINE__);
     update_interactive_task_start((void *)&info, rcsp_update_set_offset_addr, 1);
 #else
-    y_printf("\n >>>[test]:func = %s,line= %d\n", __FUNCTION__, __LINE__);
+    y_printf(">>>[test]:func = %s,line= %d", __FUNCTION__, __LINE__);
     app_active_update_task_init(&info);
 #endif
 }
@@ -628,7 +567,13 @@ void cis_rcsp_recv_handle(u16 conn_handle, const void *const buf, size_t length,
             rcsp_clear_all_buffer();
         }
         g_cis_conn_handle = conn_handle;
-        bt_rcsp_recieve_callback(rcsp_server_ble_hdl, NULL, (u8 *)buf, length);
+        if (!JL_rcsp_get_auth_flag_with_bthdl(conn_handle, NULL)) {
+            if (!rcsp_protocol_head_check((u8 *)buf, (u16)length)) {
+                JL_rcsp_auth_recieve(conn_handle, NULL, (u8 *)buf, length);
+            }
+            return;
+        }
+        JL_protocol_data_recieve(NULL, (u8 *)buf, length, conn_handle, NULL);
     }
 }
 
@@ -636,12 +581,12 @@ int bt_rcsp_data_send_filter(u16 ble_con_hdl, u8 *remote_addr, u8 *buf, u16 len)
 {
     int ret = 0;
     if (g_cis_conn_handle) {
-        if (!JL_rcsp_get_auth_flag_with_bthdl(ble_con_hdl, NULL)) {
+        if (!JL_rcsp_get_auth_flag_with_bthdl(g_cis_conn_handle, NULL)) {
             if (!rcsp_protocol_head_check(buf, len)) {
-                connected_send_acl_data(ble_con_hdl, buf, len);
+                connected_send_acl_data(g_cis_conn_handle, buf, len);
             }
         } else {
-            connected_send_acl_data(ble_con_hdl, buf, len);
+            connected_send_acl_data(g_cis_conn_handle, buf, len);
         }
         ret = 1;
     }

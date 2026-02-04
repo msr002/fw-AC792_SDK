@@ -606,7 +606,9 @@
 #define THIRD_PARTY_PROTOCOLS_SEL               0
 #endif
 
+#if (THIRD_PARTY_PROTOCOLS_SEL & CUSTOM_DEMO_EN)
 #define TCFG_ATT_OVER_EDR_DEMO_EN               0
+#endif
 
 #include "rcsp_define.h"
 #define TCFG_THIRD_PARTY_PROTOCOLS_SIMPLIFIED   0
@@ -615,6 +617,9 @@
 #define RCSP_MODE                               RCSP_MODE_OFF
 #else
 #define RCSP_MODE                               RCSP_MODE_SOUNDBOX
+#ifndef TCFG_ATT_OVER_EDR_DEMO_EN
+#define TCFG_ATT_OVER_EDR_DEMO_EN               1
+#endif
 #endif
 
 

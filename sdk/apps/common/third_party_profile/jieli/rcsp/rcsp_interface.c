@@ -43,7 +43,11 @@ static int g_rcsp_spp_conn_num = 0;
 extern const u8 adt_profile_support;
 extern u8 rcsp_dual_support; // 是否支持一拖二
 
+#if TCFG_ATT_OVER_EDR_DEMO_EN
+__attribute__((weak)) u8 rcsp_adt_support = 1; //edr att是否接入rcsp
+#else
 __attribute__((weak)) u8 rcsp_adt_support = 0; //edr att是否接入rcsp
+#endif
 void *bt_rcsp_spp_hdl = NULL;
 void *rcsp_server_ble_hdl = NULL;
 void *rcsp_server_edr_att_hdl = NULL;
@@ -87,6 +91,22 @@ u8 *rcsp_get_ble_hdl_remote_mac_addr(u16 ble_con_handle)
         }
     }
     return NULL;
+}
+
+// 获取rcsp_ble_con_handle
+u16 rcsp_ble_con_handle_get()
+{
+    u16 rcsp_ble_con_handle = app_ble_get_hdl_con_handle(rcsp_server_ble_hdl);
+    rcsp_lib_printf("%s, %s, %d, rcsp_ble_con_handle:%d\n", __FILE__, __FUNCTION__, __LINE__, rcsp_ble_con_handle);
+    return rcsp_ble_con_handle;
+}
+
+void bt_rcsp_reset_conn_num(void)
+{
+    rcsp_lib_printf("bt_rcsp_reset_conn_num\n");
+    g_rcsp_adt_conn_num = 0;
+    g_rcsp_ble_conn_num = 0;
+    g_rcsp_spp_conn_num = 0;
 }
 
 // 获取当前已连接ble数目
@@ -676,7 +696,7 @@ int bt_rcsp_data_send(u16 ble_con_hdl, u8 *remote_addr, u8 *buf, u16 len)
         }
     }
     rcsp_lib_printf("===rcsp_tx(%d):", len);
-    rcsp_lib_printf_buf(buf, 24);
+    rcsp_lib_printf_buf(buf, len);
     u16 ble_con_handle = 0, ble_con_handle1 = 0;
     u16 adt_con_handle = 0, adt_con_handle1 = 0;
     u8 *spp_remote_addr = NULL;
@@ -882,6 +902,8 @@ void bt_rcsp_interface_init(const uint8_t *rcsp_profile_data)
 {
     rcsp_lib_printf("%s, %s, %d\n", __FILE__, __FUNCTION__, __LINE__);
 
+    bt_rcsp_reset_conn_num();
+
     // spp init
     if (bt_rcsp_spp_hdl == NULL) {
         bt_rcsp_spp_hdl = app_spp_hdl_alloc(0x0);
@@ -1004,6 +1026,7 @@ void bt_rcsp_interface_exit(void)
         }
     }
 
+    bt_rcsp_reset_conn_num();
 }
 
 

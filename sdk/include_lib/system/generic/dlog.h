@@ -292,6 +292,8 @@ extern const int dlog_seg_begin;
 
 #define DLOG_LEVEL_TO_STR(level) #level
 
+#ifndef CONFIG_DLOG_BUILD_DISBALE
+
 #define dlog_printf(level, format, ...) \
     if(config_dlog_enable){ \
         VA_ARGS_NUM_CHECK(VA_ARGS_NUM(__VA_ARGS__)); \
@@ -310,6 +312,13 @@ extern const int dlog_seg_begin;
                 format, \
                 ##__VA_ARGS__); \
     };
+
+#else
+
+#define dlog_printf(level, format, ...)
+
+#endif
+
 
 #if 0
 #define dlog_print_args_check(...)  \

@@ -7,6 +7,11 @@
 #include "wireless_ext/wifi_connect.h"
 #include "lwip.h"
 #include "lwip/sockets.h"
+#include "http/http_server.h"
+#include "server/ctp_server.h"
+#include "server/net_server.h"
+#include "dev_desc.h"
+#include "video_rt_tcp.h"
 
 #define LOG_TAG             "[EXT_WIFI]"
 #define LOG_ERROR_ENABLE
@@ -36,6 +41,15 @@ enum WIFI_APP_MSG_CODE {
     WIFI_MSG_STA_NETWORK_STACK_DHCP_SUCC,
 };
 
+static struct server *ctp = NULL;
+static const struct ctp_server_info server_info = {
+    .ctp_vaild = true,
+    .ctp_port = CTP_CTRL_PORT,
+    .cdp_vaild = true,
+    .cdp_port = CDP_CTRL_PORT,
+    .k_alive_type = CTP_ALIVE,
+    /*.k_alive_type = CDP_ALIVE,*/
+};
 
 static void *wifi_dev = NULL;
 
@@ -164,6 +178,9 @@ static int network_user_callback(void *network_ctx, enum WIFI_EVENT state, void 
 
     case WIFI_EVENT_P2P_GC_DISCONNECTED:
         log_info("ext_network_user_callback->WIFI_EVENT_P2P_GC_DISCONNECTED");
+#if TCFG_AIC8800_ENABLE
+        wlan_enable_p2p(0);
+#endif
         break;
 
     case WIFI_EVENT_P2P_GC_NETWORK_STACK_DHCP_SUCC:
@@ -253,6 +270,106 @@ static void wifi_set_lan_setting_info(void)
     dev_ioctl(wifi_dev, DEV_SET_LAN_SETTING, (u32)&info);
 }
 
+#if 1
+void net_app_init(void)
+{
+#ifdef CONFIG_MASS_PRODUCTION_ENABLE
+    if (get_MassProduction()) {
+        wifi_enter_sta_mode("wl83", "12345678");
+#if 0
+        /*     **代码段功能:修改RTSP的URL */
+        /* **默认配置  :URL为rtsp://192.168.1.1/avi_pcm_rt/front.sd,//(avi_pcma_rt 传G7111音频)传JPEG实时流 */
+        /* ** */
+        /* * */
+        const char *user_custom_name = "avi_pcm_rt";
+        const char *user_custom_content =
+            "stream\r\n"\
+            "file_ext_name avi\r\n"\
+            "media_source live\r\n"\
+            "priority 1\r\n"\
+            "payload_type 26\r\n"\
+            "clock_rate 90000\r\n"\
+            "encoding_name JPEG\r\n"\
+            "coding_type frame\r\n"\
+            "byte_per_pckt 1458\r\n"\
+            "stream_end\r\n"\
+            "stream\r\n"\
+            "file_ext_name pcm\r\n"\
+            "media_source live\r\n"\
+            "priority 1\r\n"\
+            "payload_type 8\r\n"\
+            "encoding_name PCMA\r\n"\
+            "clock_rate 8000\r\n"\
+            "stream_end";
+        extern void rtsp_modify_url(const char *user_custom_name, const char *user_custom_content);
+        rtsp_modify_url(user_custom_name, user_custom_content);
+#endif
+        extern int stream_media_server_init(struct fenice_config * conf);
+        extern int fenice_get_video_info(struct fenice_source_info * info);
+        extern int fenice_get_audio_info(struct fenice_source_info * info);
+        extern int fenice_set_media_info(struct fenice_source_info * info);
+        extern int fenice_video_rec_setup(void);
+        extern int fenice_video_rec_exit(void);
+        struct fenice_config conf = {0};
+
+        strncpy(conf.protocol, "UDP", 3);
+        conf.exit = fenice_video_rec_exit;
+        conf.setup = fenice_video_rec_setup;
+        conf.get_video_info = fenice_get_video_info;
+        conf.get_audio_info = fenice_get_audio_info;
+        conf.set_media_info = fenice_set_media_info;
+        conf.port = RTSP_PORT;  // 当为0时,用默认端口554
+        stream_media_server_init(&conf);
+    } else
+#endif
+#ifdef CONFIG_RTSP_TEST_ENABLE
+        extern int stream_media_server_init(struct fenice_config * conf);
+    extern int fenice_get_video_info(struct fenice_source_info * info);
+    extern int fenice_get_audio_info(struct fenice_source_info * info);
+    extern int fenice_set_media_info(struct fenice_source_info * info);
+    extern int fenice_video_rec_setup(void);
+    extern int fenice_video_rec_exit(void);
+    struct fenice_config conf = {0};
+
+    strncpy(conf.protocol, "UDP", 3);
+    conf.exit = fenice_video_rec_exit;
+    conf.setup = fenice_video_rec_setup;
+    conf.get_video_info = fenice_get_video_info;
+    conf.get_audio_info = fenice_get_audio_info;
+    conf.set_media_info = fenice_set_media_info;
+    conf.port = RTSP_PORT;  // 当为0时,用默认端口554
+    stream_media_server_init(&conf);
+#else
+    {
+        ctp = server_open("ctp_server", (void *)&server_info);
+        if (!ctp) {
+            printf("ctp server fail\n");
+        }
+        puts("http server init\n");
+        extern int http_virfile_reg(const char *path, const char *contents, unsigned long len);
+
+        http_virfile_reg(DEV_DESC_PATH, DEV_DESC_CONTENT, strlen(DEV_DESC_CONTENT)); //注册虚拟文件描述文档,可在dev_desc.h修改
+        http_get_server_init(HTTP_PORT); //8080
+        video_rt_tcp_server_init(2229);
+#ifdef CONFIG_ENABLE_VLIST
+        preview_init(VIDEO_PREVIEW_PORT, NULL); //2226
+        playback_init(VIDEO_PLAYBACK_PORT, NULL);
+#endif
+
+
+        /* printf("ftpd server init \n"); */
+        /*extern void ftpd_vfs_interface_cfg(void);*/
+        /*ftpd_vfs_interface_cfg();*/
+        /*stupid_ftpd_init("MAXUSERS=2\nUSER=FTPX 12345678     0:/      2   A\n", NULL);*/
+
+        /* void ftpd_server_init(const char *user, const char *pass, const char *ota_name, int fifo_size); */
+        /* ftpd_server_init("FTPX", "12345678", "update-ota.ufw", 4096); */
+    }
+#endif
+}
+#endif
+
+
 void ext_wifi_on(void)
 {
     dev_ioctl(wifi_dev, DEV_NETWORK_START, 0);
@@ -282,7 +399,9 @@ static void ext_wifi_app_task(void *priv)
     dev_ioctl(wifi_dev, DEV_SET_WIFI_POWER_SAVE, 0);//打开就启用低功耗模式, 只有STA模式才有用
 #endif
 
-#if 1
+
+
+#if !TCFG_AIC8800_ENABLE
     log_info(">>>> DEV_SET_WIFI_TX_PWR_BY_RATE<<<");
     info.tx_pwr_lmt_enable = 0;//  解除WIFI发送功率限制
     dev_ioctl(wifi_dev, DEV_SET_WIFI_TX_PWR_LMT_ENABLE, (u32)&info);
@@ -295,12 +414,8 @@ static void ext_wifi_app_task(void *priv)
 #if !IP_NAPT_EXT || !TCFG_LTE_PHY_ENABLE
     ext_wifi_on();
 #endif
+    net_app_init();
 
-#ifdef CONFIG_IPERF_ENABLE
-//网络测试工具，使用iperf
-    extern void iperf_test(void);
-    iperf_test();
-#endif
     sys_timer_add(NULL, wifi_app_timer_func, 1000);
 
 #if (EXT_WIFI_TEST_MODE == AP_TEST_MODE)
@@ -316,9 +431,16 @@ static void ext_wifi_app_task(void *priv)
     info.force_default_mode = 1;
     dev_ioctl(wifi_dev, DEV_STA_MODE, (u32)&info);
 #elif (EXT_WIFI_TEST_MODE == P2P_TEST_MODE)
-	info.p2p_role = 1;
-	info.force_default_mode = 1;
-	dev_ioctl(wifi_dev, DEV_P2P_MODE, (u32)&info);
+    info.p2p_role = 1;
+    info.ssid = "AP79N-P2P-EXT";
+    info.force_default_mode = 1;
+    dev_ioctl(wifi_dev, DEV_P2P_MODE, (u32)&info);
+#endif
+
+
+#ifdef CONFIG_IPERF_ENABLE
+    void iperf_test(void);
+    iperf_test();
 #endif
 
     while (1) {
@@ -370,4 +492,104 @@ const char *get_rec_path_3()
 {
     return CONFIG_REC_PATH_2;
 }
+
+
+//sdio驱动底层调用接口
+
+//设置指定IO的强驱
+int get_sdio_hd_value(void)
+{
+    printf("sdio hd level set\n");
+    return 0;
+}
+
+//设置高速卡
+int get_sdio_hs_enable(void)
+{
+    return 0;
+}
+
+//返回Hi3861L用的edge
+int SDIO_DAT_EDGE_GET(void)
+{
+    return 0;
+}
+
+//CTU模式下连续读写报错时回调，用于过滤错误的报错信息
+int sdio_wr_err_cb(int crc_status)
+{
+    if (crc_status == 1) {
+        return 0;
+    }
+    printf("\n >>>crc_status = %d \n", crc_status);
+    return -1;
+}
+
+//AIC8800需要软件判忙
+int get_sdio_tx_ctu_enable(void)
+{
+#if TCFG_AIC8800_ENABLE
+    return 0;
+#else
+    return 1;
+#endif
+}
+
+int get_sdio_rx_ctu_enable(void)
+{
+    return 1;
+}
+
+void port_wakeup_reg_set_gpio_cb(int event, unsigned int gpio, int edge)
+{
+    if (event != 0) {
+        gpio_direction_input(gpio);
+        gpio_set_die(gpio, 1);
+        if (edge == 0) {
+            gpio_set_pull_down(gpio, 1);
+            gpio_set_pull_up(gpio, 0);
+        } else if (edge == 1) {
+            gpio_set_pull_down(gpio, 0);
+            gpio_set_pull_up(gpio, 1);
+        }
+    }
+}
+
+static OS_SEM busy_sem;
+
+static void sdio_wait_busy_isr(void *priv)
+{
+//    printf(">>>>>>>>>>>>>>>>>>>>>>>>>>>1");
+    os_sem_post(&busy_sem);
+}
+
+//软件判忙操作
+void sdio_wait_busy(int gpio)
+{
+    int ret;
+    int index = 0;
+
+    if (!os_sem_valid(&busy_sem)) {
+        os_sem_create(&busy_sem, 0);
+    }
+
+    index = exti_init(gpio, 1, sdio_wait_busy_isr, NULL);
+
+    if (gpio_read(gpio)) {
+        goto __exit;
+    } else {
+        ret = os_sem_pend(&busy_sem, 10);
+        if (ret) {
+            while (1) {
+                puts("BUSY");
+                msleep(100);
+            }
+        }
+    }
+__exit:
+
+    exti_uninit(index);
+    os_sem_set(&busy_sem, 0);
+}
+
 #endif

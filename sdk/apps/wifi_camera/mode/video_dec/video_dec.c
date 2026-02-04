@@ -623,11 +623,12 @@ static int video_dec_set_speed(float speed)
     return 0;
 }
 
-//TODO
-//SEEK到文件头部开始播放
-static int video_dec_set_seek(void)
+//调转到指定位置(文件起始位置+seek_ms)
+static int video_dec_set_seek(u32 seek_ms)
 {
     union video_dec_req req = {0};
+
+    req.dec.seek_position = seek_ms;
 
     server_request(__this->video_dec, VIDEO_REQ_DEC_SET_SEEK, &req);
     return 0;

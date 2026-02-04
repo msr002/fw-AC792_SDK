@@ -476,6 +476,7 @@
 <Unit filename="../../../../apps/common/camera/sc1346_mipi/SC1346_mipi_awb.h" />
 <Unit filename="../../../../apps/common/camera/sc1346_mipi/SC1346_mipi_iq.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/common/camera/sc1346_mipi/SC1346_mipi_iq.h" />
+<Unit filename="../../../../apps/common/camera/xs9950_mipi/xs9950_mipi.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/common/config/bt_profile_config.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/common/config/include/bt_profile_cfg.h" />
 <Unit filename="../../../../apps/common/config/log_config/app_config.c"><Option compilerVer="CC"/></Unit>
@@ -862,6 +863,7 @@
 <Unit filename="../../../../apps/common/lcd/lcd_driver/mipi_lcd/lcd_mipi_st7701s_480x800_rotate_90.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/common/lcd/lcd_driver/mipi_lcd/lcd_mipi_st7703_720x720.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/common/lcd/lcd_driver/mipi_lcd/lcd_mipi_st77922_480x480.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="../../../../apps/common/lcd/lcd_driver/rgb_lcd/lcd_rgb_fl58202_800x480.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/common/lcd/lcd_driver/rgb_lcd/lcd_rgb_hx8264_800x480.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/common/lcd/lcd_driver/rgb_lcd/lcd_rgb_ssd2828_720x1280.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/common/lcd/lcd_driver/rgb_lcd/lcd_rgb_st7701s_480x800.c"><Option compilerVer="CC"/></Unit>
@@ -1301,7 +1303,7 @@
 <Unit filename="../../../../apps/common/lvgl_v8/src/extra/jl_extra/widgets/jl_widgets.h" />
 <Unit filename="../../../../apps/common/lvgl_v8/src/extra/jl_extra/widgets/kaleidoscopemenu/lv_kaleidoscopemenu.h" />
 <Unit filename="../../../../apps/common/lvgl_v8/src/extra/jl_extra/widgets/keyboard/lv_ime_pinyin.h" />
-<Unit filename="../../../../apps/common/lvgl_v8/src/extra/jl_extra/widgets/keyboard/lv_zh_keyboard.h" />
+<Unit filename="../../../../apps/common/lvgl_v8/src/extra/jl_extra/widgets/keyboard/lv_keyboard.h" />
 <Unit filename="../../../../apps/common/lvgl_v8/src/extra/jl_extra/widgets/listmenu/lv_listmenu.h" />
 <Unit filename="../../../../apps/common/lvgl_v8/src/extra/jl_extra/widgets/lyrics/lv_lyrics.h" />
 <Unit filename="../../../../apps/common/lvgl_v8/src/extra/jl_extra/widgets/obj2p5d/lv_font2p5d.h" />

@@ -48,6 +48,8 @@
 
 #if defined(MBEDTLS_GCM_ALT)
 
+#include "mbedtls/threading.h"
+
 #ifndef GET_UINT32_BE
 #define GET_UINT32_BE(n,b,i)                            	\
 	do {                                                    \
@@ -79,7 +81,7 @@
 /* Private define ------------------------------------------------------------*/
 #define IV_LENGTH        12U   /* implementations restrict support to 96 bits */
 
-#if !defined(STM32_AAD_ANY_LENGTH_SUPPORT)
+#if !defined(JL_AAD_ANY_LENGTH_SUPPORT)
 #define AAD_WORD_ALIGN   4U   /* implementations may restrict AAD support on  */
 /* a buffer multiple of 32 bits                 */
 #endif
@@ -104,11 +106,9 @@ int mbedtls_gcm_setkey(mbedtls_gcm_context *ctx,
     GCM_VALIDATE_RET(ctx != NULL);
     GCM_VALIDATE_RET(key != NULL);
 
-#if defined(MBEDTLS_THREADING_C)
-    if (mbedtls_mutex_lock(&cryp_mutex) != 0) {
+    if (mbedtls_cryp_mutex_lock() != 0) {
         return (MBEDTLS_ERR_THREADING_MUTEX_ERROR);
     }
-#endif /* MBEDTLS_THREADING_C */
 
     switch (keybits) {
     case 128:
@@ -144,26 +144,21 @@ int mbedtls_gcm_setkey(mbedtls_gcm_context *ctx,
         goto exit;
     }
 
-
-exit :
-#if defined(MBEDTLS_THREADING_C)
-    if (mbedtls_mutex_unlock(&cryp_mutex) != 0) {
+exit:
+    if (mbedtls_cryp_mutex_unlock() != 0) {
         ret = MBEDTLS_ERR_THREADING_MUTEX_ERROR;
     }
-#endif /* MBEDTLS_THREADING_C */
 
     return (ret);
 }
 
-
-uint32_t __REV_DATA(uint32_t value)
+static uint32_t __REV_DATA(uint32_t value)
 {
     uint32_t result;
 
     result = ((value << 24) & 0xff000000) | ((value << 8) & 0x00ff0000) | ((value >> 24) & 0x000000ff) | ((value >> 8) & 0x0000ff00);
 
     return result;
-
 }
 
 int mbedtls_gcm_starts(mbedtls_gcm_context *ctx,
@@ -173,7 +168,6 @@ int mbedtls_gcm_starts(mbedtls_gcm_context *ctx,
 {
     int ret = 0;
     unsigned int i;
-    static uint32_t iv_32B[4] __attribute__((aligned(4)));
 
     GCM_VALIDATE_RET(ctx != NULL);
     GCM_VALIDATE_RET(mode != MBEDTLS_GCM_ENCRYPT || mode != MBEDTLS_GCM_DECRYPT);
@@ -188,11 +182,9 @@ int mbedtls_gcm_starts(mbedtls_gcm_context *ctx,
 
     /* Protect context access                                  */
     /* (it may occur at a same time in a threaded environment) */
-#if defined(MBEDTLS_THREADING_C)
-    if (mbedtls_mutex_lock(&cryp_mutex) != 0) {
+    if (mbedtls_cryp_mutex_lock() != 0) {
         return (MBEDTLS_ERR_THREADING_MUTEX_ERROR);
     }
-#endif /* MBEDTLS_THREADING_C */
 
     if (HAL_CRYP_Init(&ctx->hcryp_gcm) != HAL_OK) {
         ret = MBEDTLS_ERR_PLATFORM_HW_ACCEL_FAILED;
@@ -206,22 +198,26 @@ int mbedtls_gcm_starts(mbedtls_gcm_context *ctx,
     if (iv_len == 12) {
         ctx->hcryp_gcm.Init.Gcm_Iv_Not96_En = 0;
         for (i = 0; i < 3; i++) {
-            GET_UINT32_BE(iv_32B[i], iv, 4 * i);
+            GET_UINT32_BE(ctx->iv_32B[i], iv, 4 * i);
         }
 
         /* According to NIST specification, the counter value is 0x2 when
         processing the first block of payload */
-        iv_32B[3] = 0x00000002;
+        ctx->iv_32B[3] = 0x00000002;
 
-        ctx->hcryp_gcm.Init.pInitVect = iv_32B;
+        ctx->hcryp_gcm.Init.pInitVect = ctx->iv_32B;
     } else {
         ctx->hcryp_gcm.Init.Gcm_Iv_Not96_En = 1;
-        u32 iv_data_len;
-        iv_data_len = ((iv_len / 16) + 2) * 4;
+        u32 iv_data_len = ((iv_len / 16) + 2) * 4;
 
-        ctx->hcryp_gcm.Init.gcm_mbed_iv = malloc(iv_data_len * 4);
+        if (ctx->hcryp_gcm.Init.Gcm_Ivlen < iv_data_len && ctx->hcryp_gcm.Init.gcm_mbed_iv) {
+            mbedtls_free(ctx->hcryp_gcm.Init.gcm_mbed_iv);
+            ctx->hcryp_gcm.Init.gcm_mbed_iv = NULL;
+        }
+
+        ctx->hcryp_gcm.Init.gcm_mbed_iv = mbedtls_calloc(1, iv_data_len * 4);
         if (!ctx->hcryp_gcm.Init.gcm_mbed_iv) {
-            printf("ctx->hcryp_gcm.Init.gcm_mbed_iv malloc err!");
+            goto exit;
         }
 
         for (i = 0; i < (iv_len / 4); i++) {
@@ -236,7 +232,6 @@ int mbedtls_gcm_starts(mbedtls_gcm_context *ctx,
         ctx->hcryp_gcm.Init.pInitVect = ctx->hcryp_gcm.Init.gcm_mbed_iv;
     }
 
-
     /* Do not Allow IV reconfiguration at every gcm update */
     ctx->hcryp_gcm.Init.KeyIVConfigSkip = CRYP_KEYIVCONFIG_ONCE;
 
@@ -246,14 +241,11 @@ int mbedtls_gcm_starts(mbedtls_gcm_context *ctx,
         goto exit;
     }
 
-
 exit:
     /* Free context access */
-#if defined(MBEDTLS_THREADING_C)
-    if (mbedtls_mutex_unlock(&cryp_mutex) != 0) {
+    if (mbedtls_cryp_mutex_unlock() != 0) {
         ret = MBEDTLS_ERR_THREADING_MUTEX_ERROR;
     }
-#endif /* MBEDTLS_THREADING_C */
 
     return (ret);
 }
@@ -270,7 +262,8 @@ int mbedtls_gcm_update_ad(mbedtls_gcm_context *ctx,
     if (((uint64_t) add_len) >> 61 != 0) {
         return (MBEDTLS_ERR_GCM_BAD_INPUT);
     }
-#if !defined(STM32_AAD_ANY_LENGTH_SUPPORT)
+
+#if !defined(JL_AAD_ANY_LENGTH_SUPPORT)
     /* implementation restrict support to a buffer multiple of 32 bits */
     if ((add_len % AAD_WORD_ALIGN) != 0U) {
         return (MBEDTLS_ERR_PLATFORM_FEATURE_UNSUPPORTED);
@@ -279,11 +272,9 @@ int mbedtls_gcm_update_ad(mbedtls_gcm_context *ctx,
 
     /* Protect context access                                  */
     /* (it may occur at a same time in a threaded environment) */
-#if defined(MBEDTLS_THREADING_C)
-    if (mbedtls_mutex_lock(&cryp_mutex) != 0) {
+    if (mbedtls_cryp_mutex_lock() != 0) {
         return (MBEDTLS_ERR_THREADING_MUTEX_ERROR);
     }
-#endif /* MBEDTLS_THREADING_C */
 
     if (HAL_CRYP_Init(&ctx->hcryp_gcm) != HAL_OK) {
         ret = MBEDTLS_ERR_PLATFORM_HW_ACCEL_FAILED;
@@ -292,7 +283,7 @@ int mbedtls_gcm_update_ad(mbedtls_gcm_context *ctx,
 
     if (add_len > 0) {
         ctx->hcryp_gcm.Init.Header = (uint32_t *)add;
-#if defined(STM32_AAD_ANY_LENGTH_SUPPORT)
+#if defined(JL_AAD_ANY_LENGTH_SUPPORT)
         /* header buffer in byte length */
         ctx->hcryp_gcm.Init.HeaderSize = (uint32_t)add_len;
 #else
@@ -304,7 +295,7 @@ int mbedtls_gcm_update_ad(mbedtls_gcm_context *ctx,
         ctx->hcryp_gcm.Init.HeaderSize = 0;
     }
 
-#if defined(STM32_AAD_ANY_LENGTH_SUPPORT)
+#if defined(JL_AAD_ANY_LENGTH_SUPPORT)
     /* Additional Authentication Data in bytes unit */
     ctx->hcryp_gcm.Init.HeaderWidthUnit = CRYP_HEADERWIDTHUNIT_BYTE;
 #endif
@@ -317,11 +308,9 @@ int mbedtls_gcm_update_ad(mbedtls_gcm_context *ctx,
 
 exit:
     /* Free context access */
-#if defined(MBEDTLS_THREADING_C)
-    if (mbedtls_mutex_unlock(&cryp_mutex) != 0) {
+    if (mbedtls_cryp_mutex_unlock() != 0) {
         ret = MBEDTLS_ERR_THREADING_MUTEX_ERROR;
     }
-#endif /* MBEDTLS_THREADING_C */
 
     return (ret);
 }
@@ -336,6 +325,7 @@ int mbedtls_gcm_update(mbedtls_gcm_context *ctx,
     if (output_size < input_length) {
         return MBEDTLS_ERR_GCM_BUFFER_TOO_SMALL;
     }
+
     *output_length = input_length;
 
     GCM_VALIDATE_RET(ctx != NULL);
@@ -355,11 +345,9 @@ int mbedtls_gcm_update(mbedtls_gcm_context *ctx,
 
     /* Protect context access                                  */
     /* (it may occur at a same time in a threaded environment) */
-#if defined(MBEDTLS_THREADING_C)
-    if (mbedtls_mutex_lock(&cryp_mutex) != 0) {
+    if (mbedtls_cryp_mutex_lock() != 0) {
         return (MBEDTLS_ERR_THREADING_MUTEX_ERROR);
     }
-#endif /* MBEDTLS_THREADING_C */
 
     /* allow multi-context of CRYP use: restore context */
     /* ctx->hcryp_gcm.Instance->CR = ctx->ctx_save_cr; */
@@ -385,7 +373,6 @@ int mbedtls_gcm_update(mbedtls_gcm_context *ctx,
             goto exit;
         }
     } else {
-
 #if 1 //cpu_mode
         if (HAL_CRYP_Encrypt(&ctx->hcryp_gcm,
                              (uint32_t *)input,
@@ -407,17 +394,12 @@ int mbedtls_gcm_update(mbedtls_gcm_context *ctx,
 
 exit:
     /* Free context access */
-#if defined(MBEDTLS_THREADING_C)
-    if (mbedtls_mutex_unlock(&cryp_mutex) != 0) {
+    if (mbedtls_cryp_mutex_unlock() != 0) {
         ret = MBEDTLS_ERR_THREADING_MUTEX_ERROR;
     }
-#endif /* MBEDTLS_THREADING_C */
 
     return (ret);
-
-
 }
-
 
 int mbedtls_gcm_finish(mbedtls_gcm_context *ctx,
                        unsigned char *output, size_t output_size,
@@ -436,11 +418,9 @@ int mbedtls_gcm_finish(mbedtls_gcm_context *ctx,
 
     /* Protect context access                                  */
     /* (it may occur at a same time in a threaded environment) */
-#if defined(MBEDTLS_THREADING_C)
-    if (mbedtls_mutex_lock(&cryp_mutex) != 0) {
+    if (mbedtls_cryp_mutex_lock() != 0) {
         return (MBEDTLS_ERR_THREADING_MUTEX_ERROR);
     }
-#endif /* MBEDTLS_THREADING_C */
 
     /* Tag has a variable length */
     memset(mac, 0, sizeof(mac));
@@ -457,11 +437,9 @@ int mbedtls_gcm_finish(mbedtls_gcm_context *ctx,
 
 exit:
     /* Free context access */
-#if defined(MBEDTLS_THREADING_C)
-    if (mbedtls_mutex_unlock(&cryp_mutex) != 0) {
+    if (mbedtls_cryp_mutex_unlock() != 0) {
         ret = MBEDTLS_ERR_THREADING_MUTEX_ERROR;
     }
-#endif /* MBEDTLS_THREADING_C */
 
     return (ret);
 }
@@ -558,12 +536,11 @@ void mbedtls_gcm_free(mbedtls_gcm_context *ctx)
     }
 
     if (ctx->hcryp_gcm.Init.gcm_mbed_iv) {
-        free(ctx->hcryp_gcm.Init.gcm_mbed_iv);
+        mbedtls_free(ctx->hcryp_gcm.Init.gcm_mbed_iv);
     }
 
     memset((void *)ctx, 0, sizeof(mbedtls_gcm_context));
 }
-
 
 #endif /* !MBEDTLS_GCM_ALT */
 

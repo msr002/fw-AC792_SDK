@@ -8,12 +8,16 @@
 extern void putbyte(char a);
 
 extern int putchar(int a);
+#ifndef CONFIG_DLOG_BUILD_DISBALE
 #define putchar(a)  {if(config_ulog_enable){putchar(a);}if(config_dlog_enable){dlog_putchar(a);}}
+#endif
 
 extern int puts(const char *out);
 // puts 目前无法提取字符串常量
 // #define puts(format)  {if(config_ulog_enable){puts(format);}if(config_dlog_enable){dlog_printf(7, "%s", (const char *)format);}}
+#ifndef CONFIG_DLOG_BUILD_DISBALE
 #define puts(format)  {if(config_ulog_enable){puts(format);}if(config_dlog_enable){dlog_printf(7, format);}}
+#endif
 
 extern void put_u4hex(unsigned char dat);
 
@@ -24,10 +28,14 @@ extern void put_u16hex(unsigned short dat);
 extern void put_u32hex(unsigned int dat);
 
 extern void put_buf(const unsigned char *buf, int len);
+#ifndef CONFIG_DLOG_BUILD_DISBALE
 #define put_buf(buf, len)  {if(config_ulog_enable){put_buf(buf, len);}if(config_dlog_enable){dlog_put_buf(buf, len);}}
+#endif
 
 extern int printf(const char *format, ...);
+#ifndef CONFIG_DLOG_BUILD_DISBALE
 #define printf(format, ...)  {if(config_ulog_enable){printf(format, ##__VA_ARGS__);}if(config_dlog_enable){dlog_printf(6, format, ##__VA_ARGS__);}}
+#endif
 
 extern int assert_printf(const char *format, ...);
 

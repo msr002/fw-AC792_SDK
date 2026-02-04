@@ -866,6 +866,12 @@ netif_set_default(struct netif *netif)
                               netif ? netif->name[0] : '\'', netif ? netif->name[1] : '\''));
 }
 
+struct netif *
+netif_get_default(void)
+{
+    return netif_default;
+}
+
 /**
  * @ingroup netif
  * Bring an interface up, available for processing

@@ -51,5 +51,8 @@
 #define CFG_RCSP_ADV_SEQ_RAND           40
 #define CFG_RCSP_VM_UPDATE_FLAG         41
 #define CFG_RCSP_ADV_TIME_STAMP         42
+#define CFG_RCSP_ADV_EQ_MODE_SETTING    43
+#define CFG_RCSP_ADV_EQ_DATA_SETTING    44
+#define CFG_RCSP_ADV_HIGH_LOW_VOL       45
 
 #endif /* #ifndef _USER_CFG_ID_H_ */

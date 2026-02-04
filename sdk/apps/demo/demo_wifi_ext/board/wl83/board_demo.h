@@ -124,6 +124,7 @@
 #define TCFG_RTL8822ES_10M_ENABLE           0
 #define TCFG_RTL8822CS_ENABLE               0
 #define TCFG_RTL8733BS_ENABLE               0
+#define TCFG_AIC8800_ENABLE                 0
 #endif
 
 #endif

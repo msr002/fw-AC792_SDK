@@ -177,7 +177,7 @@ static void rcsp_common_event_deal(int msg, int argc, int *argv)
                     // RCSP TODO:
                     log_info("rcsp play dev by sclust!!!");
                     dev_manager_set_active_by_logo(dev_logo);
-                    app_send_message(APP_MSG_LOCAL_MUSIC_PLAY_START_BY_SCLUST, sclust);
+                    app_send_message(APP_MSG_LOCAL_MUSIC_PLAY_START_BY_SCLUST, 1, sclust);
                 }
             } else {
                 log_info("is not music mode");

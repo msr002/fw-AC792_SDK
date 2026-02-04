@@ -8,6 +8,7 @@
 #include "aes_alt.h"
 #include "mbedtls/aes.h"
 #include "mbedtls/error.h"
+#include "mbedtls/threading.h"
 
 #ifndef GET_UINT32_BE
 #define GET_UINT32_BE(n,b,i)                            	\
@@ -21,6 +22,9 @@
 
 #if defined(MBEDTLS_AES_ALT)
 
+#include "system/init.h"
+#include "os/os_api.h"
+
 #define AES_USE_CPU_MODE  1
 
 /* Parameter validation macros based on platform_util.h */
@@ -28,6 +32,24 @@
 	MBEDTLS_INTERNAL_VALIDATE_RET( cond, MBEDTLS_ERR_AES_BAD_INPUT_DATA )
 #define AES_VALIDATE( cond )        \
 	MBEDTLS_INTERNAL_VALIDATE( cond )
+
+static OS_MUTEX cryp_mutex;
+
+static int cryp_mutex_init(void)
+{
+    return os_mutex_create(&cryp_mutex);
+}
+early_initcall(cryp_mutex_init);
+
+int mbedtls_cryp_mutex_lock(void)
+{
+    return os_mutex_pend(&cryp_mutex, 0);
+}
+
+int mbedtls_cryp_mutex_unlock(void)
+{
+    return os_mutex_post(&cryp_mutex);
+}
 
 static int aes_set_key(mbedtls_aes_context *ctx,
                        const unsigned char *key,
@@ -41,11 +63,9 @@ static int aes_set_key(mbedtls_aes_context *ctx,
 
     /* Protect context access                                  */
     /* (it may occur at a same time in a threaded environment) */
-#if defined(MBEDTLS_THREADING_C)
-    if (mbedtls_mutex_lock(&cryp_mutex) != 0) {
+    if (mbedtls_cryp_mutex_lock() != 0) {
         return (MBEDTLS_ERR_THREADING_MUTEX_ERROR);
     }
-#endif /* MBEDTLS_THREADING_C */
 
     switch (keybits) {
     case 128:
@@ -75,16 +95,13 @@ static int aes_set_key(mbedtls_aes_context *ctx,
 
     if (HAL_CRYP_Init(&ctx->hcryp_aes) != HAL_OK) {
         ret = MBEDTLS_ERR_PLATFORM_HW_ACCEL_FAILED;
-        goto exit;
     }
 
 exit :
     /* Free context access */
-#if defined(MBEDTLS_THREADING_C)
-    if (mbedtls_mutex_unlock(&cryp_mutex) != 0) {
+    if (mbedtls_cryp_mutex_unlock() != 0) {
         ret = MBEDTLS_ERR_THREADING_MUTEX_ERROR;
     }
-#endif /* MBEDTLS_THREADING_C */
 
     return (ret);
 }
@@ -92,14 +109,6 @@ exit :
 void mbedtls_aes_init(mbedtls_aes_context *ctx)
 {
     AES_VALIDATE(ctx != NULL);
-
-#if defined(MBEDTLS_THREADING_C)
-    /* mutex cannot be initialized twice */
-    if (!cryp_mutex_started) {
-        mbedtls_mutex_init(&cryp_mutex);
-        cryp_mutex_started = 1;
-    }
-#endif /* MBEDTLS_THREADING_C */
 
     memset((void *)ctx, 0, sizeof(mbedtls_aes_context));
 }
@@ -109,13 +118,6 @@ void mbedtls_aes_free(mbedtls_aes_context *ctx)
     if (ctx == NULL) {
         return;
     }
-
-#if defined(MBEDTLS_THREADING_C)
-    if (cryp_mutex_started) {
-        mbedtls_mutex_free(&cryp_mutex);
-        cryp_mutex_started = 0;
-    }
-#endif /* MBEDTLS_THREADING_C */
 
     HAL_CRYP_DeInit(&ctx->hcryp_aes);
 
@@ -268,11 +270,9 @@ int mbedtls_aes_crypt_ecb(mbedtls_aes_context *ctx,
 
     /* Protect context access                                  */
     /* (it may occur at a same time in a threaded environment) */
-#if defined(MBEDTLS_THREADING_C)
-    if (mbedtls_mutex_lock(&cryp_mutex) != 0) {
+    if (mbedtls_cryp_mutex_lock() != 0) {
         return (MBEDTLS_ERR_THREADING_MUTEX_ERROR);
     }
-#endif /* MBEDTLS_THREADING_C */
 
     ctx->hcryp_aes.Init.DataType = CRYP_DATATYPE_8B;
     ctx->hcryp_aes.Init.pKey = ctx->aes_key;
@@ -292,24 +292,16 @@ int mbedtls_aes_crypt_ecb(mbedtls_aes_context *ctx,
     if (mode == MBEDTLS_AES_DECRYPT) {
         /* AES decryption */
         ret = mbedtls_internal_aes_decrypt(ctx, input, output);
-        if (ret != 0) {
-            goto exit;
-        }
     } else {
         /* AES encryption */
         ret = mbedtls_internal_aes_encrypt(ctx, input, output);
-        if (ret != 0) {
-            goto exit;
-        }
     }
 
 exit:
     /* Free context access */
-#if defined(MBEDTLS_THREADING_C)
-    if (mbedtls_mutex_unlock(&cryp_mutex) != 0) {
+    if (mbedtls_cryp_mutex_unlock() != 0) {
         ret = MBEDTLS_ERR_THREADING_MUTEX_ERROR;
     }
-#endif /* MBEDTLS_THREADING_C */
 
     return (ret);
 }
@@ -342,11 +334,9 @@ int mbedtls_aes_crypt_cbc(mbedtls_aes_context *ctx,
 
     /* Protect context access                                  */
     /* (it may occur at a same time in a threaded environment) */
-#if defined(MBEDTLS_THREADING_C)
-    if (mbedtls_mutex_lock(&cryp_mutex) != 0) {
+    if (mbedtls_cryp_mutex_lock() != 0) {
         return (MBEDTLS_ERR_THREADING_MUTEX_ERROR);
     }
-#endif /* MBEDTLS_THREADING_C */
 
     /* Set the Algo if not configured till now */
     if (CRYP_AES_CBC != ctx->hcryp_aes.Init.Algorithm) {
@@ -390,7 +380,6 @@ int mbedtls_aes_crypt_cbc(mbedtls_aes_context *ctx,
             goto exit;
         }
     } else {
-
 #if AES_USE_CPU_MODE//use_cpu_mode
         if (HAL_CRYP_Encrypt(&ctx->hcryp_aes,
                              (uint32_t *)input,
@@ -413,14 +402,11 @@ int mbedtls_aes_crypt_cbc(mbedtls_aes_context *ctx,
         memcpy(iv, output, 16);
     }
 
-
 exit:
     /* Free context access */
-#if defined(MBEDTLS_THREADING_C)
-    if (mbedtls_mutex_unlock(&cryp_mutex) != 0) {
+    if (mbedtls_cryp_mutex_unlock() != 0) {
         return (MBEDTLS_ERR_THREADING_MUTEX_ERROR);
     }
-#endif /* MBEDTLS_THREADING_C */
 
     return (ret);
 }
@@ -511,6 +497,12 @@ int mbedtls_aes_crypt_xts(mbedtls_aes_xts_context *ctx,
         return MBEDTLS_ERR_AES_INVALID_INPUT_LENGTH;
     }
 
+    /* Protect context access                                  */
+    /* (it may occur at a same time in a threaded environment) */
+    if (mbedtls_cryp_mutex_lock() != 0) {
+        return (MBEDTLS_ERR_THREADING_MUTEX_ERROR);
+    }
+
     /* Set the Algo if not configured till now */
     if (CRYP_AES_XTS != ctx->crypt.hcryp_aes.Init.Algorithm) {
         ctx->crypt.hcryp_aes.Init.Algorithm  = CRYP_AES_XTS;
@@ -520,6 +512,7 @@ int mbedtls_aes_crypt_xts(mbedtls_aes_xts_context *ctx,
     for (int i = 0; i < 4; i++) {
         GET_UINT32_BE(tweak_32B[i], data_unit, 4 * i);
     }
+
     ctx->crypt.hcryp_aes.Init.Tweak = tweak_32B;
 
     /* reconfigure the CRYP */
@@ -569,6 +562,11 @@ int mbedtls_aes_crypt_xts(mbedtls_aes_xts_context *ctx,
 
 exit:
 
+    /* Free context access */
+    if (mbedtls_cryp_mutex_unlock() != 0) {
+        return (MBEDTLS_ERR_THREADING_MUTEX_ERROR);
+    }
+
     return ret;
 
 }
@@ -598,6 +596,12 @@ int mbedtls_aes_crypt_cfb128(mbedtls_aes_context *ctx,
     AES_VALIDATE_RET(iv != NULL);
     AES_VALIDATE_RET(input != NULL);
     AES_VALIDATE_RET(output != NULL);
+
+    /* Protect context access                                  */
+    /* (it may occur at a same time in a threaded environment) */
+    if (mbedtls_cryp_mutex_lock() != 0) {
+        return (MBEDTLS_ERR_THREADING_MUTEX_ERROR);
+    }
 
     /* Set the Algo if not configured till now */
     if (CRYP_AES_CFB != ctx->hcryp_aes.Init.Algorithm) {
@@ -660,6 +664,12 @@ int mbedtls_aes_crypt_cfb128(mbedtls_aes_context *ctx,
     }
 
 exit:
+
+    /* Free context access */
+    if (mbedtls_cryp_mutex_unlock() != 0) {
+        return (MBEDTLS_ERR_THREADING_MUTEX_ERROR);
+    }
+
     return ret;
 }
 
@@ -731,6 +741,12 @@ int mbedtls_aes_crypt_ofb(mbedtls_aes_context *ctx,
     AES_VALIDATE_RET(input != NULL);
     AES_VALIDATE_RET(output != NULL);
 
+    /* Protect context access                                  */
+    /* (it may occur at a same time in a threaded environment) */
+    if (mbedtls_cryp_mutex_lock() != 0) {
+        return (MBEDTLS_ERR_THREADING_MUTEX_ERROR);
+    }
+
     /* Set the Algo if not configured till now */
     if (CRYP_AES_OFB != ctx->hcryp_aes.Init.Algorithm) {
         ctx->hcryp_aes.Init.Algorithm  = CRYP_AES_OFB;
@@ -769,6 +785,12 @@ int mbedtls_aes_crypt_ofb(mbedtls_aes_context *ctx,
     }
 
 exit:
+
+    /* Free context access */
+    if (mbedtls_cryp_mutex_unlock() != 0) {
+        return (MBEDTLS_ERR_THREADING_MUTEX_ERROR);
+    }
+
     return (ret);
 }
 #endif /* MBEDTLS_CIPHER_MODE_OFB */
@@ -795,6 +817,12 @@ int mbedtls_aes_crypt_ctr(mbedtls_aes_context *ctx,
     AES_VALIDATE_RET(stream_block != NULL);
     AES_VALIDATE_RET(input != NULL);
     AES_VALIDATE_RET(output != NULL);
+
+    /* Protect context access                                  */
+    /* (it may occur at a same time in a threaded environment) */
+    if (mbedtls_cryp_mutex_lock() != 0) {
+        return (MBEDTLS_ERR_THREADING_MUTEX_ERROR);
+    }
 
     /* Set the Algo if not configured till now */
     if (CRYP_AES_CTR != ctx->hcryp_aes.Init.Algorithm) {
@@ -836,6 +864,12 @@ int mbedtls_aes_crypt_ctr(mbedtls_aes_context *ctx,
     }
 
 exit:
+
+    /* Free context access */
+    if (mbedtls_cryp_mutex_unlock() != 0) {
+        return (MBEDTLS_ERR_THREADING_MUTEX_ERROR);
+    }
+
     return ret;
 
 }
@@ -845,7 +879,6 @@ int mbedtls_internal_aes_encrypt(mbedtls_aes_context *ctx,
                                  const unsigned char input[16],
                                  unsigned char output[16])
 {
-
 #if AES_USE_CPU_MODE//use_cpu_mode
     if (HAL_CRYP_Encrypt(&ctx->hcryp_aes,
                          (uint32_t *)input,
@@ -862,8 +895,8 @@ int mbedtls_internal_aes_encrypt(mbedtls_aes_context *ctx,
 
         return (MBEDTLS_ERR_PLATFORM_HW_ACCEL_FAILED);
     }
-    return (0);
 
+    return (0);
 }
 
 int mbedtls_internal_aes_decrypt(mbedtls_aes_context *ctx,
@@ -886,6 +919,7 @@ int mbedtls_internal_aes_decrypt(mbedtls_aes_context *ctx,
 #endif
         return (MBEDTLS_ERR_PLATFORM_HW_ACCEL_FAILED);
     }
+
     return (0);
 }
 
@@ -904,6 +938,5 @@ void mbedtls_aes_decrypt(mbedtls_aes_context *ctx,
 #error "mbedtls_aes_decrypt() is a deprecated function (not implemented)"
 }
 #endif /* MBEDTLS_DEPRECATED_REMOVED */
-
 
 #endif //MBEDTLS_AES_ALT

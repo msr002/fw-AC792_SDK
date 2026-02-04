@@ -46,6 +46,7 @@ extern err_t uart_ethernetif_init(struct netif *netif);
 extern void ntp_client_get_time(const char *host);
 extern int netdev_get_mac_addr(u8 *mac_addr);
 static void __lwip_renew(unsigned short parm);
+void lwip_etharp_cleanup_netif(u8_t lwip_netif);
 
 int __attribute__((weak)) lwip_event_cb(void *lwip_ctx, enum LWIP_EVENT event)
 {
@@ -926,6 +927,48 @@ void lwip_set_default_netif(u8_t lwip_netif)
     netif_set_default(netif);
 }
 
+u8_t lwip_get_default_netif(void)
+{
+    struct netif *netif = netif_get_default();
+    if (netif == NULL) {
+        return WIFI_NETIF;
+    }
+
+    if (netif == &wireless_netif) {
+        return WIFI_NETIF;
+    }
+#ifdef HAVE_WRIELESS_RAW_NETIF
+    else if (netif == &wireless_raw_netif) {
+        return WIFI_RAW_NETIF;
+    }
+#endif
+#ifdef HAVE_EXT_WIRELESS_NETIF
+    else if (netif == &ext_wireless_netif) {
+        return EXT_WIFI_NETIF;
+    }
+#endif
+#ifdef HAVE_LTE_NETIF
+    else if (netif == &lte_netif) {
+        return LTE_NETIF;
+    }
+#endif
+#ifdef HAVE_ETH_WIRE_NETIF
+    else if (netif == &wire_netif) {
+        return ETH_NETIF;
+    }
+#endif
+#ifdef HAVE_BT_NETIF
+    else if (netif == &bt_netif) {
+        return BT_NETIF;
+    }
+#endif
+#ifdef HAVE_UART_NETIF
+    else if (netif == &uart_netif) {
+        return UART_NETIF;
+    }
+#endif
+}
+
 void lwip_netif_remove(u8_t lwip_netif)
 {
     struct netif *netif = net_get_netif_handle(lwip_netif);
@@ -1002,6 +1045,9 @@ static void __lwip_renew(unsigned short parm)
     if (!lan_setting_info) {
         return;
     }
+	
+	//清除arp缓存
+    lwip_etharp_cleanup_netif(lwip_netif);
 
 #if LWIP_NETIF_EXT_STATUS_CALLBACK
     netif_remove_ext_callback(&netif_callback);
@@ -1316,7 +1362,9 @@ void Init_LwIP(u8_t lwip_netif)
 
 #ifndef LWIP_HOOK_IP4_ROUTE_SRC
     /*设置默认网卡 .*/
-    netif_set_default(netif);
+    if (netif_get_default() == NULL) {
+        netif_set_default(netif);
+    }
 #endif
 
     /*设置多播网卡*/
@@ -1639,5 +1687,14 @@ int lwip_dhcp_bound(void)
     }
 
     return 0;
+}
+
+void lwip_etharp_cleanup_netif(u8_t lwip_netif)
+{
+    struct netif *netif = net_get_netif_handle(lwip_netif);
+    if (NULL == netif) {
+        return;
+    }
+    etharp_cleanup_netif(netif);
 }
 

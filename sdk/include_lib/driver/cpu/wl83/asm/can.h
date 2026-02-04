@@ -28,6 +28,7 @@
 #define IOCTL_CAN_GET_RX_ERROR_CNT				_IOR(CAN_MAGIC,17,u8 *)				///<  获取接收错误计数
 #define IOCTL_CAN_GET_TX_ERROR_CNT				_IOR(CAN_MAGIC,18,u8 *)				///<  获取发送错误计数
 #define IOCTL_CAN_GET_PUT_REGISTER_INFO			_IO(CAN_MAGIC,19)					///<  寄存器参数读取
+#define IOCTL_CAN_SET_RESTART                   _IO(CAN_MAGIC,20)                   ///<  CAN软重启
 /* \} name */
 
 

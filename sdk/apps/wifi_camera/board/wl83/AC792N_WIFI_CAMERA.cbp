@@ -241,9 +241,9 @@
 <Add option="../../../../cpu/wl83/liba/crypto_toolbox_Osize.a" />
 <Add option="../../../../cpu/wl83/liba/wl_wifi.a" />
 <Add option="../../../../cpu/wl83/liba/wpasupplicant.a" />
+<Add option="../../../../cpu/wl83/liba/wl_rf_common.a" />
 <Add option="../../../../cpu/wl83/liba/libcrypto_mbedtls.a" />
 <Add option="../../../../cpu/wl83/liba/hsm.a" />
-<Add option="../../../../cpu/wl83/liba/wl_rf_common.a" />
 <Add option="../../../../cpu/wl83/liba/lte_module.a" />
 <Add option="../../../../cpu/wl83/liba/profile.a" />
 <Add option="../../../../cpu/wl83/liba/libduer-device.a" />
@@ -500,6 +500,7 @@
 <Unit filename="../../../../apps/common/camera/sc1346_mipi/SC1346_mipi_awb.h" />
 <Unit filename="../../../../apps/common/camera/sc1346_mipi/SC1346_mipi_iq.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/common/camera/sc1346_mipi/SC1346_mipi_iq.h" />
+<Unit filename="../../../../apps/common/camera/xs9950_mipi/xs9950_mipi.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/common/config/bt_profile_config.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/common/config/include/bt_profile_cfg.h" />
 <Unit filename="../../../../apps/common/config/log_config/app_config.c"><Option compilerVer="CC"/></Unit>
@@ -898,6 +899,7 @@
 <Unit filename="../../../../apps/common/lcd/lcd_driver/mipi_lcd/lcd_mipi_st7701s_480x800_rotate_90.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/common/lcd/lcd_driver/mipi_lcd/lcd_mipi_st7703_720x720.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/common/lcd/lcd_driver/mipi_lcd/lcd_mipi_st77922_480x480.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="../../../../apps/common/lcd/lcd_driver/rgb_lcd/lcd_rgb_fl58202_800x480.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/common/lcd/lcd_driver/rgb_lcd/lcd_rgb_hx8264_800x480.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/common/lcd/lcd_driver/rgb_lcd/lcd_rgb_ssd2828_720x1280.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/common/lcd/lcd_driver/rgb_lcd/lcd_rgb_st7701s_480x800.c"><Option compilerVer="CC"/></Unit>
@@ -1337,7 +1339,7 @@
 <Unit filename="../../../../apps/common/lvgl_v8/src/extra/jl_extra/widgets/jl_widgets.h" />
 <Unit filename="../../../../apps/common/lvgl_v8/src/extra/jl_extra/widgets/kaleidoscopemenu/lv_kaleidoscopemenu.h" />
 <Unit filename="../../../../apps/common/lvgl_v8/src/extra/jl_extra/widgets/keyboard/lv_ime_pinyin.h" />
-<Unit filename="../../../../apps/common/lvgl_v8/src/extra/jl_extra/widgets/keyboard/lv_zh_keyboard.h" />
+<Unit filename="../../../../apps/common/lvgl_v8/src/extra/jl_extra/widgets/keyboard/lv_keyboard.h" />
 <Unit filename="../../../../apps/common/lvgl_v8/src/extra/jl_extra/widgets/listmenu/lv_listmenu.h" />
 <Unit filename="../../../../apps/common/lvgl_v8/src/extra/jl_extra/widgets/lyrics/lv_lyrics.h" />
 <Unit filename="../../../../apps/common/lvgl_v8/src/extra/jl_extra/widgets/obj2p5d/lv_font2p5d.h" />
@@ -1800,6 +1802,7 @@
 <Unit filename="../../../../apps/wifi_camera/lvgl_v8_ui_app/style_LY/custom/ui_action_main.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/wifi_camera/lvgl_v8_ui_app/style_LY/custom/ui_action_page_lyrics.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/wifi_camera/lvgl_v8_ui_app/style_LY/custom/ui_action_page_map.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="../../../../apps/wifi_camera/lvgl_v8_ui_app/style_LY/custom/ui_action_page_music.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/wifi_camera/lvgl_v8_ui_app/style_LY/custom/ui_action_parking.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/wifi_camera/lvgl_v8_ui_app/style_LY/custom/ui_action_replay.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/wifi_camera/lvgl_v8_ui_app/style_LY/custom/ui_action_sys_setting.c"><Option compilerVer="CC"/></Unit>
@@ -1919,6 +1922,7 @@
 <Unit filename="../../../../apps/wifi_camera/mode/video_rec/video_rec.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/wifi_camera/mode/video_rec/video_rec_cfg.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/wifi_camera/wifi/ctp_cmd.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="../../../../apps/wifi_camera/wifi/ext_wifi_app_task.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/wifi_camera/wifi/ftpd_vfs_reg.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/wifi_camera/wifi/media_file_list.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/wifi_camera/wifi/net_video_rec.c"><Option compilerVer="CC"/></Unit>

@@ -35,6 +35,22 @@ struct _dhcps_cli {
     struct _dhcps_cli *next;
 };
 
+#if LWIP_DHCP_SAVE_TO_FLASH
+#define VM_MAX_DHCPS_CLI 8         		//最大掉电保存个数
+//#define VM_DHCP_CLIENT_LIST_ID  2       //配置项ID分配，用户根据实际情况修改
+
+struct dhcps_cli_flash {
+    u8_t cli_mac[6];
+    struct ip4_addr ipaddr;
+    s32_t timeout;
+};
+
+struct dhcps_cli_flash_block {
+    u8_t num;
+    struct dhcps_cli_flash client[VM_MAX_DHCPS_CLI];
+};
+#endif// LWIP_DHCP_SAVE_TO_FLASH
+
 static struct udp_pcb *pcb_dhcps;
 static struct ip4_addr broadcast_dhcps;
 static struct ip4_addr server_address;
@@ -290,6 +306,11 @@ static void send_ack(struct pbuf *p)
     ip_addr_t dst_ip = IPADDR4_INIT(0x0);
     ip4_addr_set(ip_2_ip4(&dst_ip), &broadcast_dhcps);
     udp_sendto(pcb_dhcps, p, &dst_ip, DHCP_CLIENT_PORT);
+
+#if LWIP_DHCP_SAVE_TO_FLASH
+    dhcps_cli_save_to_flash();
+#endif
+
 }
 
 static u8_t parse_options(struct dhcp_msg *m, s16_t len)
@@ -621,4 +642,101 @@ int dhcps_get_ipaddr(u8 hwaddr[6], struct ip4_addr *ipaddr)
     return ret;
 }
 
+/**
+ * dhcps_cli_save_to_flash: 写入当前DHCP租约表到flash
+ * dhcps_cli_load_from_flash: 从flash导入DHCP租约表
+ * 使用方式：在include_lib/lwip_2_2_0/../lwippopts.h中打开LWIP_DHCP_SAVE_TO_FLASH，
+ * 指定VM_DHCP_CLIENT_LIST_ID，在wifi_event_callback的AP_START或P2P_START事件下调用
+ * dhcps_cli_load_from_flash()即可。
+ */
+#if LWIP_DHCP_SAVE_TO_FLASH
+static int dhcps_cli_save_to_flash(void)
+{
+    struct dhcps_cli_flash_block blk;
+    struct _dhcps_cli *cli;
+    int idx = 0;
 
+    memset(&blk, 0, sizeof(blk));
+
+    for (cli = dhcps_cli_head; cli != NULL; cli = cli->next) {
+        if (idx >= VM_MAX_DHCPS_CLI) {
+            break;
+        }
+
+        memcpy(blk.client[idx].cli_mac, cli->cli_mac, 6);
+        blk.client[idx].ipaddr = cli->ipaddr;
+        blk.client[idx].timeout = cli->timeout;
+        idx++;
+
+    }
+    blk.num = idx;
+
+    return syscfg_write(WIFI_DHCP_CLIENT_LIST, &blk, sizeof(blk));
+}
+
+void dhcps_cli_load_from_flash(void)
+{
+    struct dhcps_cli_flash_block blk;
+    int i;
+
+    if (!is_dhcps_initalized) {
+        printf("dhcps: already loaded from flash, skip\n");  //必须dhcps_uninit释放之后才允许重新load
+        return;
+    }
+
+    if (syscfg_read(WIFI_DHCP_CLIENT_LIST, &blk, sizeof(blk)) <= 0) {
+        return;
+    }
+
+    struct lan_setting *lan_setting_info;
+    lan_setting_info = net_get_lan_info(netif);
+
+    printf("dhcps: load dhcp clients from flash, client num = %d\n", blk.num);
+
+    if (blk.num > VM_MAX_DHCPS_CLI) {
+        printf("dhcps: invalid client num %d (max %d)",
+               blk.num, VM_MAX_DHCPS_CLI);
+        blk.num = VM_MAX_DHCPS_CLI;
+    }
+
+    for (int i = 0; i < blk.num; i++) {
+        printf("dhcps[%d]: MAC=%02X:%02X:%02X:%02X:%02X:%02X"
+               "IP=%d.%d.%d.%d timeout=%u",
+               i,
+               blk.client[i].cli_mac[0],
+               blk.client[i].cli_mac[1],
+               blk.client[i].cli_mac[2],
+               blk.client[i].cli_mac[3],
+               blk.client[i].cli_mac[4],
+               blk.client[i].cli_mac[5],
+               ip4_addr1(&blk.client[i].ipaddr),
+               ip4_addr2(&blk.client[i].ipaddr),
+               ip4_addr3(&blk.client[i].ipaddr),
+               ip4_addr4(&blk.client[i].ipaddr),
+               blk.client[i].timeout);
+    }
+
+    dhcps_cli_head = NULL;
+
+    for (i = 0; i < blk.num; i++) {
+        struct _dhcps_cli *cli = malloc(sizeof(struct _dhcps_cli));
+        if (!cli) {
+            break;
+        }
+
+        memcpy(cli->cli_mac, blk.client[i].cli_mac, 6);
+        cli->ipaddr  = blk.client[i].ipaddr;
+        cli->timeout = blk.client[i].timeout;
+
+        /* 同步ipaddr_tab */
+        u8_t host = ip4_addr4(&cli->ipaddr);
+        if (host >= lan_setting_info->CLIENT_IPADDR4 &&
+            host < lan_setting_info->CLIENT_IPADDR4 + sizeof(ipaddr_tab)) {
+            ipaddr_tab[host - lan_setting_info->CLIENT_IPADDR4] = 1;
+        }
+
+        cli->next = dhcps_cli_head;
+        dhcps_cli_head = cli;
+    }
+}
+#endif // LWIP_DHCP_SAVE_TO_FLASH

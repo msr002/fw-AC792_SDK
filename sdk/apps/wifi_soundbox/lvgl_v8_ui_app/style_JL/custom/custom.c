@@ -94,6 +94,10 @@ int lvgl_module_msg_send_value(unsigned int msg_id, unsigned int value, char ref
 void bt_music_post_msg_to_ui(const char *msg, ...)
 {
 #ifdef USE_LVGL_V8_UI_DEMO
+    if (!storage_device_ready()) {
+        printf("SD card is not online!, please insert SD Card!\n");
+        return;
+    }
     va_list argptr;
 
     printf("[chili] %s %s   \n", __func__, msg);

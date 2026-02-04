@@ -7,6 +7,7 @@
 #include "wireless_ext/wifi_connect.h"
 #include "lwip.h"
 #include "lwip/sockets.h"
+#include "device/gpio.h"
 
 #define LOG_TAG             "[EXT_WIFI]"
 #define LOG_ERROR_ENABLE
@@ -58,7 +59,7 @@ static int network_user_callback(void *network_ctx, enum WIFI_EVENT state, void 
 
     case WIFI_EVENT_MODULE_INIT:
         log_info("ext_network_user_callback->WIFI_EVENT_MODULE_INIT");
-
+#if !TCFG_AIC8800_ENABLE
 //wifi module port seting
         info.port_status = 0;
         dev_ioctl(wifi_dev, DEV_SET_WIFI_POWER, (u32)&info);
@@ -79,10 +80,12 @@ static int network_user_callback(void *network_ctx, enum WIFI_EVENT state, void 
         info.pwd  = AP_PWD;
         info.force_default_mode = 1;
         dev_ioctl(wifi_dev, DEV_SET_DEFAULT_MODE, (u32)&info);
+#endif
         break;
 
     case WIFI_EVENT_MODULE_START:
         log_info("ext_network_user_callback->WIFI_EVENT_MODULE_START");
+#if !TCFG_AIC8800_ENABLE
         info.mode = AP_MODE;
         info.ssid = AP_SSID;
         info.pwd  = AP_PWD;
@@ -90,6 +93,7 @@ static int network_user_callback(void *network_ctx, enum WIFI_EVENT state, void 
         dev_ioctl(wifi_dev, DEV_SAVE_DEFAULT_MODE, (u32)&info);
 
         wpa_supplicant_set_connect_timeout(20);
+#endif
         break;
 
     case WIFI_EVENT_MODULE_STOP:
@@ -165,6 +169,9 @@ static int network_user_callback(void *network_ctx, enum WIFI_EVENT state, void 
 
     case WIFI_EVENT_P2P_GC_DISCONNECTED:
         log_info("ext_network_user_callback->WIFI_EVENT_P2P_GC_DISCONNECTED");
+#if TCFG_AIC8800_ENABLE
+        wlan_enable_p2p(0);
+#endif
         break;
 
     case WIFI_EVENT_P2P_GC_NETWORK_STACK_DHCP_SUCC:
@@ -213,8 +220,10 @@ static int network_user_callback(void *network_ctx, enum WIFI_EVENT state, void 
         printf("WIFI_EVENT_P2P_WSC_OPERATION device name[%d] = %.*s, mac = %02x:%02x:%02x:%02x:%02x:%02x\n",
                sta_info->dev_name_len, sta_info->dev_name_len, sta_info->dev_name,
                sta_info->dev_addr[0], sta_info->dev_addr[1], sta_info->dev_addr[2], sta_info->dev_addr[3], sta_info->dev_addr[4], sta_info->dev_addr[5]);
+#if !TCFG_AIC8800_ENABLE
         void ext_p2p_wsc_trigger(void);
         ext_p2p_wsc_trigger();
+#endif
         break;
 
     default:
@@ -292,7 +301,9 @@ static void ext_wifi_app_task(void *priv)
     dev_ioctl(wifi_dev, DEV_SET_WIFI_POWER_SAVE, 0);//打开就启用低功耗模式, 只有STA模式才有用
 #endif
 
-#if 1
+
+
+#if !TCFG_AIC8800_ENABLE
     log_info(">>>> DEV_SET_WIFI_TX_PWR_BY_RATE<<<");
     info.tx_pwr_lmt_enable = 0;//  解除WIFI发送功率限制
     dev_ioctl(wifi_dev, DEV_SET_WIFI_TX_PWR_LMT_ENABLE, (u32)&info);
@@ -304,11 +315,6 @@ static void ext_wifi_app_task(void *priv)
 
 #if !IP_NAPT_EXT || !TCFG_LTE_PHY_ENABLE
     ext_wifi_on();
-#endif
-
-#ifdef CONFIG_IPERF_ENABLE
-    void iperf_test(void);
-    iperf_test();
 #endif
 
     sys_timer_add(NULL, wifi_app_timer_func, 1000);
@@ -326,10 +332,16 @@ static void ext_wifi_app_task(void *priv)
     info.force_default_mode = 1;
     dev_ioctl(wifi_dev, DEV_STA_MODE, (u32)&info);
 #elif (EXT_WIFI_TEST_MODE == P2P_TEST_MODE)
-    info.p2p_role = 1;
+    info.p2p_role = 0;
     info.ssid = "AP79N-P2P-EXT";
     info.force_default_mode = 1;
     dev_ioctl(wifi_dev, DEV_P2P_MODE, (u32)&info);
+#endif
+
+
+#ifdef CONFIG_IPERF_ENABLE
+    void iperf_test(void);
+    iperf_test();
 #endif
 
     while (1) {
@@ -339,8 +351,8 @@ static void ext_wifi_app_task(void *priv)
         case WIFI_MSG_TICK_1_SEC:
             if (time_lapse(&timehdl, 3 * 1000)) {
                 if (wifi_module_is_init()) {
-                    log_info("WIFI U= %d KB/s, D= %d KB/s", ext_wifi_get_upload_rate() / 1024, ext_wifi_get_download_rate() / 1024);
 #if 0
+                    log_info("WIFI U= %d KB/s, D= %d KB/s", ext_wifi_get_upload_rate() / 1024, ext_wifi_get_download_rate() / 1024);
                     if (ext_get_cur_wifi_info()->mode == STA_MODE) {
                         get_rx_signal();
                     }
@@ -355,6 +367,105 @@ static void ext_wifi_app_task(void *priv)
         }
 
     }
+}
+
+
+//sdio驱动底层调用接口
+
+//设置指定IO的强驱
+int get_sdio_hd_value(void)
+{
+    printf("sdio hd level set\n");
+    return 0;
+}
+
+//设置高速卡
+int get_sdio_hs_enable(void)
+{
+    return 0;
+}
+
+//返回Hi3861L用的edge
+int SDIO_DAT_EDGE_GET(void)
+{
+    return 0;
+}
+
+//CTU模式下连续读写报错时回调，用于过滤错误的报错信息
+int sdio_wr_err_cb(int crc_status)
+{
+    if (crc_status == 1) {
+        return 0;
+    }
+    printf("\n >>>crc_status = %d \n", crc_status);
+    return -1;
+}
+
+//AIC8800需要软件判忙
+int get_sdio_tx_ctu_enable(void)
+{
+#if TCFG_AIC8800_ENABLE
+    return 0;
+#else
+    return 1;
+#endif
+}
+
+int get_sdio_rx_ctu_enable(void)
+{
+    return 1;
+}
+
+void port_wakeup_reg_set_gpio_cb(int event, unsigned int gpio, int edge)
+{
+    if (event != 0) {
+        gpio_direction_input(gpio);
+        gpio_set_die(gpio, 1);
+        if (edge == 0) {
+            gpio_set_pull_down(gpio, 1);
+            gpio_set_pull_up(gpio, 0);
+        } else if (edge == 1) {
+            gpio_set_pull_down(gpio, 0);
+            gpio_set_pull_up(gpio, 1);
+        }
+    }
+}
+
+static OS_SEM busy_sem;
+
+static void sdio_wait_busy_isr(void *priv)
+{
+//    printf(">>>>>>>>>>>>>>>>>>>>>>>>>>>1");
+    os_sem_post(&busy_sem);
+}
+
+//软件判忙操作
+void sdio_wait_busy(int gpio)
+{
+    int ret;
+    int index = 0;
+
+    if (!os_sem_valid(&busy_sem)) {
+        os_sem_create(&busy_sem, 0);
+    }
+
+    index = exti_init(gpio, 1, sdio_wait_busy_isr, NULL);
+
+    if (gpio_read(gpio)) {
+        goto __exit;
+    } else {
+        ret = os_sem_pend(&busy_sem, 10);
+        if (ret) {
+            while (1) {
+                puts("BUSY");
+                msleep(100);
+            }
+        }
+    }
+__exit:
+
+    exti_uninit(index);
+    os_sem_set(&busy_sem, 0);
 }
 
 static int ext_wireless_net_init(void)//主要是create wifi 线程的

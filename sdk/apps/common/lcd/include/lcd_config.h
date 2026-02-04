@@ -93,6 +93,11 @@
 #define LCD_H 480
 #endif
 
+#if TCFG_LCD_RGB_FL58202_800X480
+#define LCD_W 800
+#define LCD_H 480
+#endif
+
 //SPI LCD
 #if TCFG_LCD_SPI_GC9307_240X296
 #define LCD_W 240

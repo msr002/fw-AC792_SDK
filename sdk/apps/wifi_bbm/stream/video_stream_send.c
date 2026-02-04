@@ -236,8 +236,14 @@ int video_stream_send_start(struct video_stream_send_hdl *hdl)
 
     //audio
     if (audio_cfg->audio_enable) {
+        u32 coding_type = AUDIO_CODING_PCM;
+
+#if BBM_AUDIO_OPUS_ENABLE
+        coding_type = AUDIO_CODING_OPUS;
+#endif
+
         hdl->audio_recoder = vir_audio_recoder_open(audio_cfg->sample_rate,
-                             AUDIO_CODING_OPUS,
+                             coding_type,
                              NULL,
                              audio_recoder_data_cb);    //音频数据回调
     }

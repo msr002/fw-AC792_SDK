@@ -87,7 +87,11 @@ typedef struct {
     lv_coord_t bottom_margin;
 
     bool is_snap;
+    bool is_loop;
     bool _is_init;
+
+    lv_coord_t _cached_total_height;
+    bool _need_recalc_total_height;
 } lv_listmenu_t;
 
 typedef struct {
@@ -158,6 +162,14 @@ void lv_listmenu_set_scroll_offset(lv_obj_t *obj, lv_coord_t ver_offset, bool an
 void lv_listmenu_set_scroll_to_center(lv_obj_t *obj, bool anim, uint32_t speed);
 
 /**
+ * @brief Stop the scroll
+ * @param obj list menu object
+ * @param snap_to_nearest whether to snap to nearest
+ * @param speed animation speed
+ */
+void lv_listmenu_stop_scroll(lv_obj_t *obj, bool snap_to_nearest, uint32_t speed);
+
+/**
  * @brief Set the margin
  * @param obj list menu object
  * @param top_margin head margin
@@ -199,6 +211,13 @@ void lv_listmenu_set_friction_factor(lv_obj_t *obj, lv_coord_t friction_factor);
  * @param snap_factor snap factor (0-100, default value: 40)
  */
 void lv_listmenu_set_snap_factor(lv_obj_t *obj, lv_coord_t snap_factor);
+
+/**
+ * @brief Set the loop enabled
+ * @param obj list menu object
+ * @param enabled whether to enable
+ */
+void lv_listmenu_set_loop(lv_obj_t *obj, bool enabled);
 
 /**
  * @brief Hide or show button
@@ -308,6 +327,13 @@ lv_coord_t lv_listmenu_get_elastic_factor(lv_obj_t *obj);
  * @return out of bound factor
  */
 lv_coord_t lv_listmenu_get_out_of_bound_factor(lv_obj_t *obj);
+
+/**
+ * @brief Get the loop enabled
+ * @param obj list menu object
+ * @return loop enabled
+ */
+bool lv_listmenu_is_loop(lv_obj_t *obj);
 
 /*=====================
  * Other functions

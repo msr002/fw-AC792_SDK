@@ -248,23 +248,22 @@ void lv_scr_load_anim(lv_obj_t *new_scr, lv_scr_load_anim_t anim_type, uint32_t 
 
     /*If an other screen load animation is in progress
      *make target screen loaded immediately. */
-    if (d->scr_to_load) {
+    if (d->scr_to_load && act_scr != d->scr_to_load) {
         lv_anim_del(d->scr_to_load, NULL);
         lv_obj_set_pos(d->scr_to_load, 0, 0);
         lv_obj_remove_local_style_prop(d->scr_to_load, LV_STYLE_OPA, 0);
-
-        if (d->del_prev) {
-            lv_obj_del(act_scr);
-        }
+        d->prev_scr = d->act_scr;
         act_scr = d->scr_to_load;
-
         scr_load_internal(d->scr_to_load);
     }
 
     d->scr_to_load = new_scr;
 
     if (d->prev_scr && d->del_prev) {
-        lv_obj_del(d->prev_scr);
+        /*Check if prev_scr is the same as new_scr to avoid deleting the target screen*/
+        if (d->prev_scr != new_scr) {
+            lv_obj_del(d->prev_scr);
+        }
         d->prev_scr = NULL;
     }
 
@@ -567,9 +566,11 @@ static void scr_anim_ready(lv_anim_t *a)
 
     lv_event_send(d->act_scr, LV_EVENT_SCREEN_LOADED, NULL);
     lv_event_send(d->prev_scr, LV_EVENT_SCREEN_UNLOADED, NULL);
-
     if (d->prev_scr && d->del_prev) {
-        lv_obj_del(d->prev_scr);
+        /*Check if prev_scr is the same as act_scr to avoid deleting the active screen*/
+        if (d->prev_scr != d->act_scr) {
+            lv_obj_del(d->prev_scr);
+        }
     }
     d->prev_scr = NULL;
     d->draw_prev_over_act = false;

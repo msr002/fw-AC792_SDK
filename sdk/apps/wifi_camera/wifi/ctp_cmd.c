@@ -3593,6 +3593,7 @@ static int cmd_put_date_time(void *priv, char *content)
 }
 
 
+#if TCFG_WIFI_ENABLE 	//仅内置WiFi可用
 static int cmd_get_ap_ssid_info(void *priv, char *content)
 {
     char buf[128];
@@ -3603,7 +3604,6 @@ static int cmd_get_ap_ssid_info(void *priv, char *content)
     snprintf(buf, sizeof(buf), "ssid:%s,pwd:%s", info.ssid, info.pwd);
     CTP_CMD_COMBINED(priv, CTP_NO_ERR, "AP_SSID_INFO", "NOTIFY", buf);
     return 0;
-
 
 }
 
@@ -3674,7 +3674,7 @@ static int cmd_get_sta_ssid_info(void *priv, char *content)
     CTP_CMD_COMBINED(priv, CTP_NO_ERR, "STA_SSID_INFO", "NOTIFY", buf);
     return 0;
 }
-
+#endif
 
 
 static int cmd_put_sta_ssid_info(void *priv, char *content)
@@ -4450,8 +4450,10 @@ const struct ctp_map_entry ctp_system_cmd_tab[] SEC_USED(.ctp_system_cmd) = {
     {NULL, "FILES_DELETE", NULL, cmd_put_files_delete},
     {NULL, "MULTI_COVER_FIGURE", NULL, cmd_put_multi_cover_figure},
     {NULL, "DATE_TIME", cmd_get_date_time, cmd_put_date_time},
+#if TCFG_WIFI_ENABLE
     {NULL, "AP_SSID_INFO", cmd_get_ap_ssid_info, cmd_put_ap_ssid_info},
     {NULL, "STA_SSID_INFO", cmd_get_sta_ssid_info, cmd_put_sta_ssid_info},
+#endif
     {NULL, "RESET", NULL, cmd_put_soft_reset},
     {NULL, "CTP_CLI_DISCONNECT", NULL, cmd_put_ctp_cli_disconnect},
 

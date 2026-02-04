@@ -159,6 +159,7 @@ c_SRC_FILES := \
 	../../../../../apps/common/config/user_cfg.c \
 	../../../../../apps/common/debug/debug.c \
 	../../../../../apps/common/debug/debug_user.c \
+	../../../../../apps/common/example/network_protocols/websocket/main.c \
 	../../../../../apps/common/net/assign_macaddr.c \
 	../../../../../apps/common/net/config_network.c \
 	../../../../../apps/common/net/iperf_test.c \

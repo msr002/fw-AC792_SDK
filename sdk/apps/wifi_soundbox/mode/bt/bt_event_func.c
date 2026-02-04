@@ -124,6 +124,9 @@ static void bt_status_init_ok(void)
 
 #if ((THIRD_PARTY_PROTOCOLS_SEL & RCSP_MODE_EN) && RCSP_MODE)
     rcsp_init();
+#if TCFG_ATT_OVER_EDR_DEMO_EN
+    bredr_adt_init();
+#endif
 #endif
 #if THIRD_PARTY_PROTOCOLS_SEL
     multi_protocol_bt_init();

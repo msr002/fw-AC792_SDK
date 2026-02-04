@@ -15,6 +15,7 @@ extern "C" {
  *********************/
 
 #include "gui/jl_gui.h"
+#include "gui/gui_common.h"
 #include "libs/jl_libs.h"
 #include "others/jl_others.h"
 #include "widgets/jl_widgets.h"

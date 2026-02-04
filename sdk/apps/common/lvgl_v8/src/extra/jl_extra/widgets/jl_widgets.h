@@ -17,7 +17,7 @@ extern "C" {
 #include "analogclock/lv_analogclock.h"
 #include "carousel/lv_carousel.h"
 #include "imglist/lv_imglist.h"
-#include "keyboard/lv_zh_keyboard.h"
+#include "keyboard/lv_keyboard.h"
 #include "radiobtn/lv_radiobtn.h"
 #include "textprogress/lv_textprogress.h"
 #include "obj2p5d/lv_font2p5d.h"

@@ -27,6 +27,13 @@
 	 ((u8)('S' + 'F' + 'E' + 'R') << (1 * 8)) | \
 	 ((u8)('S' + 'Y' + 'N' + 'C') << (0 * 8)))
 
+#define LOG_TAG_CONST	  APP_RCSP
+#define LOG_TAG             "[APP_RCSP]"
+#define LOG_ERROR_ENABLE
+#define LOG_DEBUG_ENABLE
+#define LOG_INFO_ENABLE
+#include "system/debug.h"
+
 enum {
     FILE_TRANS_TWS_SYNC_INIT,
     FILE_TRANS_TWS_SYNC_INIT_RSP,
@@ -69,6 +76,7 @@ typedef struct file_trans_tws_opt_t {
     };
 } ft_tws_opt;
 
+static u8 g_rcsp_tws_task_kill = 0;
 static ft_tws_opt *g_ft_tws_opt;
 #define __this	(g_ft_tws_opt)
 
@@ -83,7 +91,7 @@ static int tws_file_trans_to_sibling(u8 *data, u16 len)
     }
     tws_api_tx_unsniff_req();
     tws_sniff_controle_check_disable();
-    sys_auto_shut_down_disable();
+    /* sys_auto_shut_down_disable(); */
     return tws_api_send_data_to_sibling(data, len, TWS_FUNC_ID_FILE_TRANSFER_SYNC);
 }
 
@@ -112,10 +120,11 @@ static void deal_sibling_tws_file_trans(void *data, u16 len)
                 __this->ft_tws_op.ft_fill_filp(__this->file_p);
                 rsp_data[1] = 0;
             } else {
+                log_error("%s: file open fail! path - %s", __func__, path);
                 rsp_data[1] = -1;
             }
         } else {
-            printf("slave file trans state is illegal, __this is NULL\n");
+            log_error("slave file trans state is illegal, __this is NULL-%d", __LINE__);
             rsp_data[1] = -1;
         }
         rsp_data[0] = FILE_TRANS_TWS_SYNC_OPEN_RSP;
@@ -131,7 +140,7 @@ static void deal_sibling_tws_file_trans(void *data, u16 len)
         if (__this) {
             ret = __this->ft_tws_op.ft_erase(__this->file_p, erase_addr, erase_size);
         } else {
-            printf("slave file trans state is illegal, __this is NULL\n");
+            log_error("slave file trans state is illegal, __this is NULL-%d", __LINE__);
             ret = -1;
         }
 
@@ -156,7 +165,7 @@ static void deal_sibling_tws_file_trans(void *data, u16 len)
                 rsp_data[1] = 0;
             }
         } else {
-            printf("slave file trans state is illegal, __this is NULL\n");
+            log_error("slave file trans state is illegal, __this is NULL-%d", __LINE__);
             rsp_data[1] = -1;
         }
         rsp_data[0] = FILE_TRANS_TWS_SYNC_WRITE_RSP;
@@ -177,7 +186,7 @@ static void deal_sibling_tws_file_trans(void *data, u16 len)
                 tws_file_trans_to_sibling(rsp_data, 2);
             }
         } else {
-            printf("slave file trans state is illegal, __this is NULL\n");
+            log_error("slave file trans state is illegal, __this is NULL-%d", __LINE__);
             rsp_data[0]	= FILE_TRANS_TWS_SYNC_CALC_CRC_RSP;
             rsp_data[1] = -1;
             tws_file_trans_to_sibling(rsp_data, 2);
@@ -188,7 +197,7 @@ static void deal_sibling_tws_file_trans(void *data, u16 len)
             __this->ft_tws_op.ft_close();
             rsp_data[1] = 0;
         } else {
-            printf("slave file trans state is illegal, __this is NULL\n");
+            log_error("slave file trans state is illegal, __this is NULL-%d", __LINE__);
             rsp_data[1] = -1;
         }
 
@@ -205,14 +214,14 @@ static void deal_sibling_tws_file_trans(void *data, u16 len)
             rcsp_file_transfer_init(NULL, 0, NULL);
             __this = (ft_tws_opt *)zalloc(sizeof(ft_tws_opt));
             if (__this && rcsp_file_tws_info_fill(&__this->ft_tws_op)) {
-                printf("%s, alloc fail\n", __func__);
+                log_error("%s, alloc fail", __func__);
                 rsp_data[1] = -1;
             } else {
-                printf("%s, init succ\n", __func__);
+                log_info("%s, init succ", __func__);
                 rsp_data[1] = 0;
             }
         } else {
-            printf("slave file trans fp is exist\n");
+            log_error("slave file trans fp is exist");
         }
         tws_file_trans_to_sibling(rsp_data, 2);
         break;
@@ -235,7 +244,7 @@ static void deal_sibling_tws_file_trans(void *data, u16 len)
             __this->ft_tws_op.ft_seek(__this->file_p, file_offset, orig);
             rsp_data[1] = 0;
         } else {
-            printf("slave file trans state is illegal, __this is NULL\n");
+            log_error("slave file trans state is illegal, __this is NULL-%d", __LINE__);
             rsp_data[1] = -1;
         }
 
@@ -259,8 +268,11 @@ static void deal_sibling_tws_file_trans(void *data, u16 len)
     case FILE_TRANS_TWS_SYNC_SPECIAL_FLAG_RSP:
     case FILE_TRANS_TWS_SYNC_SEEK_RSP:
     case FILE_TRANS_TWS_SYNC_PARM_EXTRA_RSP:
-        __this->result = recv_data[1];
-        os_sem_post(&__this->ft_tws_sem);
+        if (__this) {
+            __this->result = recv_data[1];
+            log_info("%s: result = %d; op = %d", __func__, __this->result, file_trans_op);
+            os_sem_post(&__this->ft_tws_sem);
+        }
         break;
     }
 
@@ -274,7 +286,7 @@ static void deal_sibling_tws_file_trans_in_irq(void *data, u16 len, bool rx)
     if (rx)	 {
         void *buf = malloc(len);
         if (NULL == buf) {
-            printf("%s, malloc fail len %d\n", __func__, len);
+            log_error("%s, malloc fail len %d", __func__, len);
             return;
         }
         memcpy(buf, data, len);
@@ -309,12 +321,12 @@ u8 file_trans_request_sem(u8 cmd)
     case FILE_TRANS_TWS_SYNC_SPECIAL_FLAG:
     case FILE_TRANS_TWS_SYNC_SEEK:
     case FILE_TRANS_TWS_SYNC_PARM_EXTRA:
-        if (OS_TIMEOUT == os_sem_pend(&__this->ft_tws_sem, timeout)) {
-            printf("err:%s, %x timeout\n", __func__, cmd);
+        if (__this && OS_TIMEOUT == os_sem_pend(&__this->ft_tws_sem, timeout)) {
+            log_error("err:%s, %x timeout", __func__, cmd);
             return -1;
         }
-        if (__this->result) {
-            printf("err:%s, slave opt is fail %x, %x\n", __func__, __this->result, cmd);
+        if (__this && __this->result) {
+            log_error("err:%s, slave opt is fail %x, %x", __func__, __this->result, cmd);
             return __this->result;
         }
         break;
@@ -560,7 +572,7 @@ u8 file_trans_init_tws_sync(void)
 
     if (0 == ret) {
         ret = file_trans_request_sem(FILE_TRANS_TWS_SYNC_INIT);
-        if (__this->result) {
+        if (__this && __this->result) {
             ret = -1;
         }
     }
@@ -600,7 +612,7 @@ u8 file_trans_special_flag_tws_sync(u8 flag)
 
     if (0 == ret) {
         ret = file_trans_request_sem(FILE_TRANS_TWS_SYNC_SPECIAL_FLAG);
-        if (__this->result) {
+        if (__this && __this->result) {
             ret = -1;
         }
     }
@@ -643,7 +655,7 @@ u8 file_trans_seek_tws_sync(int file_offset, int orig)
 
     if (0 == ret) {
         ret = file_trans_request_sem(FILE_TRANS_TWS_SYNC_SEEK);
-        if (__this->result) {
+        if (__this && __this->result) {
             ret = -1;
         }
     }
@@ -684,7 +696,7 @@ u8 file_trans_parm_extra_tws_sync(u8 *data, u16 len)
 
     if (0 == ret) {
         ret = file_trans_request_sem(FILE_TRANS_TWS_SYNC_PARM_EXTRA);
-        if (__this->result) {
+        if (__this && __this->result) {
             ret = -1;
         }
     }
@@ -710,18 +722,21 @@ static u32 file_trans_tws_exit_handle(void *priv)
     u32 ret = 0;
 
     if (__this) {
-        ret = task_kill(THIS_TASK_NAME);
-        printf("kill file_trans task : %s, %x\n", THIS_TASK_NAME, ret);
+        g_rcsp_tws_task_kill = 1;
+        /* ret = task_kill(THIS_TASK_NAME); */
+        log_info("kill file_trans task : %s", THIS_TASK_NAME);
         if (0 == ret) {
             if (__this->data) {
                 free(__this->data);
                 __this->data = NULL;
             }
-            free(__this);
-            __this = NULL;
+            if (__this) {
+                free(__this);
+                __this = NULL;
+            }
         }
     } else {
-        printf("TASK:%s not running\n", THIS_TASK_NAME);
+        log_info("TASK:%s not running", THIS_TASK_NAME);
         ret = -1;
     }
     return ret;
@@ -743,7 +758,7 @@ static int active_task_exit(void *priv)
 
     while (1) {
         if (result) {
-            printf("file trans exit\n");
+            log_info("file trans exit");
         }
         os_time_dly(100);
         if (result && retry_cnt) {
@@ -775,17 +790,21 @@ static void file_trans_tws_loop(void *priv)
     int msg[32];
     int ret = 0;
     int app_res = 0;
-    printf("%s\n", __func__);
     if (file_trans_tws_task_start()) {
         goto _ERR_RET;
     }
 
     while (1) {
-        ret = os_taskq_pend(NULL, msg, ARRAY_SIZE(msg));
+        ret = os_taskq_pend_timeout(msg, ARRAY_SIZE(msg), 30);
+        if (g_rcsp_tws_task_kill) {
+            log_info("%s: task(%s) kill", __func__, THIS_TASK_NAME);
+            return;
+        }
         if (ret != OS_TASKQ) {
             continue;
         }
 
+        log_info("%s: opcode - %d", __func__, msg[0]);
         switch (msg[0]) {
         case JL_OPCODE_FILE_TRANSFER_START:
             rcsp_file_transfer_download_start(__this->priv, __this->OpCode_SN, __this->data, __this->data_len, __this->ble_con_handle, __this->spp_remote_addr);
@@ -816,7 +835,7 @@ static void file_trans_tws_loop(void *priv)
         }
     }
 _ERR_RET:
-    printf("file trans process %x err:%d\n", msg[0], ret);
+    log_error("file trans process %x err:%d; task(%s) kill...", msg[0], ret, THIS_TASK_NAME);
     file_trans_tws_exit(NULL);
 }
 
@@ -856,7 +875,7 @@ u32 file_trans_start(void *priv, u8 OpCode_SN, u8 *data, u16 len, u16 ble_con_ha
     }
 _ERR_RET:
     if (ret) {
-        printf("%s err:%x\n", __func__, ret);
+        log_error("%s err:%x", __func__, ret);
     }
     return ret;
 }
@@ -898,7 +917,7 @@ u32 file_trans_end(u8 status, u8 *data, u16 len, u16 ble_con_handle, u8 *spp_rem
     }
 _ERR_RET:
     if (ret) {
-        printf("%s err:%x\n", __func__, ret);
+        log_error("%s err:%x", __func__, ret);
     }
     return ret;
 }
@@ -940,7 +959,7 @@ u32 file_trans_handle(u8 *data, u16 len, u16 ble_con_handle, u8 *spp_remote_addr
     }
 _ERR_RET:
     if (ret) {
-        printf("%s err:%x\n", __func__, ret);
+        log_error("%s err:%x", __func__, ret);
     }
     return ret;
 }
@@ -982,7 +1001,7 @@ u32 file_trans_rename(u8 status, u8 *data, u16 len, u16 ble_con_handle, u8 *spp_
     }
 _ERR_RET:
     if (ret) {
-        printf("%s err:%x\n", __func__, ret);
+        log_error("%s err:%x", __func__, ret);
     }
     return ret;
 }
@@ -1024,7 +1043,7 @@ u32 file_trans_parm_extra(u8 OpCode_SN, u8 *data, u16 len, u16 ble_con_handle, u
     }
 _ERR_RET:
     if (ret) {
-        printf("%s err:%x\n", __func__, ret);
+        log_error("%s err:%x", __func__, ret);
     }
     return ret;
 }
@@ -1040,16 +1059,19 @@ u32 file_trans_init(u8 type, u16 ble_con_handle, u8 *spp_remote_addr)
     if (NULL == __this) {
         __this = (ft_tws_opt *)zalloc(sizeof(ft_tws_opt));
         if (NULL == __this) {
-            printf("%s, alloc fail\n", __func__);
+            log_error("%s, alloc fail", __func__);
             return -1;
         }
         __this->spp_remote_addr = spp_remote_addr;
         __this->ble_con_handle = ble_con_handle;
         __this->type = type;
+        g_rcsp_tws_task_kill = 0;
+        log_info("%s: %d---init ok", __func__, __LINE__);
         os_sem_create(&__this->ft_tws_sem, 0);
-        task_create(file_trans_tws_loop, NULL, THIS_TASK_NAME);
+        thread_fork(THIS_TASK_NAME, 10, 512, 128, NULL, file_trans_tws_loop, NULL);
+        /* task_create(file_trans_tws_loop, NULL, THIS_TASK_NAME); */
     } else {
-        printf("TASK %s is already start\n", THIS_TASK_NAME);
+        log_info("TASK %s is already start", THIS_TASK_NAME);
         ret = -1;
     }
 _ERR_RET:

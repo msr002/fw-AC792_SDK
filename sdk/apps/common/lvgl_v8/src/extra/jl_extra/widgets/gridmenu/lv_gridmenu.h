@@ -102,7 +102,11 @@ typedef struct {
 
     bool hex_layout;
     bool is_snap;
+    bool is_loop;
     bool _is_init;
+
+    lv_coord_t _cached_total_height;
+    bool _need_recalc_total_height;
 } lv_gridmenu_t;
 
 typedef struct {
@@ -180,15 +184,17 @@ void lv_gridmenu_set_scroll_dir(lv_obj_t *obj, lv_dir_t dir);
  * @param obj grid menu object
  * @param offset scroll offset of the grid menu
  * @param anim animate the scroll offset
+ * @param speed scroll speed (px/s)
  */
-void lv_gridmenu_set_scroll_offset(lv_obj_t *obj, lv_point_t offest, bool anim);
+void lv_gridmenu_set_scroll_offset(lv_obj_t *obj, lv_point_t offset, bool anim, uint32_t speed);
 
 /**
  * @brief Set the scroll to center of the grid menu
  * @param obj grid menu object
  * @param anim animate the scroll to center
+ * @param speed scroll speed (px/s)
  */
-void lv_gridmenu_set_scroll_to_center(lv_obj_t *obj, bool anim);
+void lv_gridmenu_set_scroll_to_center(lv_obj_t *obj, bool anim, uint32_t speed);
 
 /**
  * @brief Set the vertical margin of the grid menu
@@ -242,11 +248,26 @@ void lv_gridmenu_set_out_of_bound_factor(lv_obj_t *obj, lv_coord_t out_of_bound_
 void lv_gridmenu_set_snap_factor(lv_obj_t *obj, lv_coord_t snap_factor);
 
 /**
+ * @brief Enable or disable loop (circular) scrolling of the grid menu
+ * @param obj grid menu object
+ * @param enable whether to enable loop mode
+ */
+void lv_gridmenu_set_loop(lv_obj_t *obj, bool enable);
+
+/**
  * @brief Set the hide of the grid menu button
  * @param btn grid menu button object
  * @param hide hide of the grid menu button
  */
 void lv_gridmenu_btn_set_hide(lv_obj_t *btn, bool hide);
+
+/**
+ * @brief Stop current scrolling immediately
+ * @param obj grid menu object
+ * @param snap_to_nearest whether to snap to the nearest item center immediately
+ * @param speed scroll speed (px/s)
+ */
+void lv_gridmenu_stop_scroll(lv_obj_t *obj, bool snap_to_nearest, uint32_t speed);
 
 /**
  * @brief Set the zoom of the grid menu button
@@ -370,6 +391,13 @@ lv_coord_t lv_gridmenu_get_out_of_bound_factor(lv_obj_t *obj);
  * @return lv_coord_t snap factor of the grid menu
  */
 lv_coord_t lv_gridmenu_get_snap_factor(lv_obj_t *obj);
+
+/**
+ * @brief Get whether loop (circular) scrolling is enabled
+ * @param obj grid menu object
+ * @return true if loop mode is enabled
+ */
+bool lv_gridmenu_is_loop(lv_obj_t *obj);
 
 /*=====================
  * Other functions

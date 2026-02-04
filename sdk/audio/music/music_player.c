@@ -741,6 +741,35 @@ int music_player_play_auto_next(struct music_player *player_hd)
     return err;
 }
 
+int music_player_set_play_folder(struct music_player *player_hd, const char *path)
+{
+    //close player first
+    music_player_stop(player_hd, 1);
+    //get dev, 检查设备是否有掉线
+    if (dev_manager_online_check(player_hd->dev, 1) == 0) {
+        return MUSIC_PLAYER_ERR_DEV_OFFLINE;
+    }
+    player_hd->fsn = file_manager_scan_disk(player_hd->dev, path, scan_parm, cycle_mode, (scan_callback_t *)player_hd->parm.scan_cb);
+    if (player_hd->fsn == NULL) {
+        return MUSIC_PLAYER_ERR_FSCAN;
+    }
+
+    //get file
+    player_hd->file = file_manager_select(player_hd->dev, player_hd->fsn, FSEL_FIRST_FILE, 0, (scan_callback_t *)player_hd->parm.scan_cb);
+    if (player_hd->file == NULL) {
+        return MUSIC_PLAYER_ERR_FILE_NOFOUND;
+    }
+
+    //start decoder
+    int err = music_player_decode_start(player_hd, player_hd->file, 0);
+    if (err == MUSIC_PLAYER_SUCC) {
+        //选定新设备播放成功后，需要激活当前设备
+        dev_manager_set_active(player_hd->dev);
+        log_info("%s (%s) ok", __FUNCTION__, path);
+    }
+    return err;
+}
+
 int music_player_play_folder_prev(struct music_player *player_hd)
 {
     //close player first

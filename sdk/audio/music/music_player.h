@@ -311,6 +311,16 @@ int music_player_play_last_file(struct music_player *player_hd, const char *logo
 int music_player_play_auto_next(struct music_player *player_hd);
 
 /*----------------------------------------------------------------------------*/
+/**@brief    music_player设置仅播放当前文件夹
+   @param
+			 path：文件夹路径，不需要带根目录
+   @return   播放错误码
+   @note
+*/
+/*----------------------------------------------------------------------------*/
+int music_player_set_play_folder(struct music_player *player_hd, const char *path);
+
+/*----------------------------------------------------------------------------*/
 /**@brief    music_player播放上一个文件夹
    @param
    @return   播放错误码

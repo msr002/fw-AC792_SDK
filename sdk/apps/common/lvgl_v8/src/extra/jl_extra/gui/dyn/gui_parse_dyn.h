@@ -13,8 +13,9 @@ extern "C" {
 /*********************
  *      INCLUDES
  *********************/
+#include "../../../../lvgl.h"
 
-#if LV_USE_GUI_PARSE_DYN
+#if LV_USE_GUI_PARSE_DYN != 0
 
 #include "../gui_common.h"
 #include "../scr/gui_scr.h"
@@ -31,9 +32,18 @@ extern "C" {
 typedef struct {
     char JL[2];          // 标识符
     int16_t version;     // 版本号
+
+    char ver[4]; // "W004"
+    char uuid[36]; // UUID
+
     int32_t ts;          // 时间戳
-    int32_t page_cnt;    // 页面数量
+
     int32_t page_offset; // 页面偏移
+
+    int32_t res_cnt;    // 资源数量
+    int32_t res_offset; // 资源偏移
+
+    int32_t preview_offset; // 页面预览图偏移
 } JLDynResource;
 
 /*dynamic page header*/
@@ -43,108 +53,112 @@ typedef struct {
     int8_t nop1;
     int8_t nop2;
     int8_t nop3;
-    int16_t children_cnt;    // 子控件数量
     int32_t children_offset; // 子控件偏移
-    int16_t prop_cnt;        // 属性数量
     int32_t prop_offset;     // 属性偏移
-    int16_t style_cnt;       // 样式数量
     int32_t style_offset;    // 样式偏移
-    int16_t event_cnt;       // 事件数量
     int32_t event_offset;    // 事件偏移
+    int32_t bind_offset;     // 绑定偏移
+    int16_t children_cnt: 16; // 子控件数量
+    int16_t prop_cnt: 16;    // 属性数量
+    int16_t style_cnt: 16;   // 样式数量
+    int16_t event_cnt: 16;   // 事件数量
+    int16_t bind_cnt: 16;    // 绑定数量
 } JLDynControl;
+
+/*dynamic page resource*/
+typedef struct {
+    int32_t id;  // 资源ID
+    int8_t type; // 资源类型
+    int8_t nop1;
+    int8_t nop2;
+    int8_t nop3;
+    int32_t offset; // 资源偏移
+    int32_t size;   // 资源大小
+} JLDynPageResource;
+
+typedef struct {
+    int32_t id;  // 资源ID
+    int8_t type; // 资源类型
+    int8_t nop1;
+    int8_t nop2;
+    int8_t nop3;
+    void *data;  //从dyn资源中处理转换后的资源
+} LvPageRes;
+
+
+typedef lv_event_cb_t (*gui_get_event_cb_t)(int32_t id);
+
+typedef int32_t (*gui_bind_send_cb_t)(int32_t msg_id, void *value, int32_t len);
+typedef void *(*gui_bind_get_cb_t)(int32_t msg_id);
+typedef lv_subject_t *(*gui_bind_get_subject_cb_t)(int32_t id);
+typedef void *(*gui_bind_get_data_cb_t)();
 
 /**********************
  * GLOBAL PROTOTYPES
  **********************/
 
 /**
- * @brief Get the dyn file data
- *
+ * @brief Initialize the dyn data
+ */
+void gui_dyn_init();
+
+/**
+ * @brief Parse the dyn data to object
  * @param path dyn file path
- * @param res dynamic resource header
- * @param size data size
- * @return char* data buffer
- */
-char *gui_dyn_get_data(const char *path, JLDynResource *res, int32_t *size);
-
-/**
- * @brief Free the dyn data buffer
- *
- * @param buf data buffer
- */
-void gui_dyn_free_data(char *buf);
-
-/**
- * @brief Parse the dyn data to screen by page index
- *
- * @param buf data buffer
- * @param size data size
- * @param page_idx page index
  * @param parent parent object
  * @return lv_obj_t* object
  */
-lv_obj_t *gui_dyn_parse_obj_by_idx(char *buf, int32_t size, int32_t page_idx, lv_obj_t *parent);
+lv_obj_t *gui_dyn_parse_obj(const char *path, lv_obj_t *parent);
 
 /**
- * @brief Parse the dyn data to screen by page id
- *
- * @param buf data buffer
- * @param size data size
- * @param page_id page id
- * @param parent parent object
- * @return lv_obj_t* object
- */
-lv_obj_t *gui_dyn_parse_obj_by_id(char *buf, int32_t size, int32_t page_id, lv_obj_t *parent);
-
-/**
- * @brief Parse the dyn data to screen by page index
- *
- * @param buf data buffer
- * @param size data size
- * @param page_idx page index
+ * @brief Parse the dyn data to screen
+ * @param path dyn file path
  * @return gui_scr_t* screen
  */
-gui_scr_t *gui_dyn_parse_src_by_idx(char *buf, int32_t size, int32_t page_idx);
+gui_scr_t *gui_dyn_parse_scr(const char *path);
 
 /**
- * @brief Parse the dyn data to screen by page id
- *
- * @param buf data buffer
- * @param size data size
- * @param page_id page id
- * @return gui_scr_t* screen
+ * @brief Set the event get cb
+ * @param cb
  */
-gui_scr_t *gui_dyn_parse_src_by_id(char *buf, int32_t size, int32_t page_id);
+void gui_dyn_set_event_get_cb(gui_get_event_cb_t cb);
 
 /**
- * @brief Get the page data by page index
- *
- * @param buf data buffer
- * @param size data size
- * @param page_idx page index
- * @param page_data page data buffer
- * @param page_size page data size
- * @return JLDynControl* page control
+ * @brief Set the bind send cb
+ * @param cb
  */
-JLDynControl *gui_dyn_get_page_by_idx(char *buf, int32_t size, int32_t page_idx, char **page_data, int32_t *page_size);
+void gui_dyn_set_bind_send_cb(gui_bind_send_cb_t cb);
 
 /**
- * @brief Get the page data by page id
- *
- * @param buf data buffer
- * @param size data size
- * @param page_id page id
- * @param page_data page data buffer
- * @param page_size page data size
- * @return JLDynControl* page control
+ * @brief Set the bind get cb
+ * @param cb
  */
-JLDynControl *gui_dyn_get_page_by_id(char *buf, int32_t size, int32_t page_id, char **page_data, int32_t *page_size);
+void gui_dyn_set_bind_get_cb(gui_bind_get_cb_t cb);
 
-#endif
+/**
+ * @brief Set the bind get subject cb
+ * @param cb
+ */
+void gui_dyn_set_bind_get_subject_cb(gui_bind_get_subject_cb_t cb);
 
+/**
+ * @brief Set the bind get data cb
+ * @param cb
+ */
+void gui_dyn_set_bind_get_data_cb(gui_bind_get_data_cb_t cb);
+
+/**
+ * @brief Get the preview image
+ * @param path dyn file path
+ * @return The preview image
+ */
+lv_img_dsc_t *gui_dyn_get_preview(const char *path);
+
+#endif /*LV_USE_GUI_PARSE_DYN*/
 
 #ifdef __cplusplus
 } /*extern "C"*/
 #endif
 
 #endif /*GUI_PARSE_DYN_H*/
+

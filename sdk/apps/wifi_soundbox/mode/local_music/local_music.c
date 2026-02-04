@@ -128,6 +128,9 @@ static void music_player_play_start(void)
         app_send_message(APP_MSG_LOCAL_MUSIC_PLAY_START, 1, 0);
         break;
     case MUSIC_TASK_START_BY_SCLUST:
+#if MUSIC_DEVICE_TONE_EN
+        music_device_tone_play(dev_manager_get_logo(dev_manager_find_active(1)));
+#endif
         log_info("MUSIC_TASK_START_BY_SCLUST");
         app_send_message(APP_MSG_LOCAL_MUSIC_PLAY_START_BY_SCLUST, 1, __this->task_parm.val);
         break;
@@ -1183,6 +1186,12 @@ static int local_music_msg_handler(struct application *app, int *msg)
     case APP_MSG_LOCAL_MUSIC_PLAY_NEXT_FOLDER:
         log_info("play next folder");
         err = music_player_play_folder_next(__this->player_hd);
+        break;
+    case APP_MSG_LOCAL_MUSIC_PLAY_SWITCH_FOLDER:
+        //path 传入不需要带根目录
+        const char *path = (const char *)msg[1];
+        log_info("play switch folder");
+        err = music_player_set_play_folder(__this->player_hd, path);
         break;
     case APP_MSG_LOCAL_MUSIC_AUTO_NEXT_DEV:
     /* fall-through */

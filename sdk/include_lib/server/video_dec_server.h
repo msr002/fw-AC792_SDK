@@ -110,6 +110,7 @@ struct video_dec_param {
     float speed;
     u8 dec_cyc;
     u8 disp_id;
+    u32 seek_position;
 };
 
 

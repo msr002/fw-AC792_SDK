@@ -5,6 +5,7 @@
 #pragma code_seg(".rcsp_setting_sync.text")
 #endif
 #include "app_config.h"
+#include "rcsp_config.h"
 #include "rcsp_setting_sync.h"
 #include "rcsp_setting_opt.h"
 #include "adv_time_stamp_setting.h"
@@ -46,7 +47,8 @@ static void tws_app_opt_sync_call_fun(int cmd, int err)
     bt_e.args[1] = 0;
     bt_e.args[2] = cmd;
     struct bt_event *bt_e_p = &bt_e;
-    app_send_message_from(MSG_FROM_RCSP_BT, sizeof(*bt_e_p), (int *)bt_e_p);
+    sys_event_notify(SYS_BT_EVENT, BT_EVENT_FROM_RCSP, (void *)bt_e_p, sizeof(*bt_e_p));
+    /* app_send_message_from(MSG_FROM_RCSP_BT, sizeof(*bt_e_p), (int *)bt_e_p); */
 }
 
 TWS_SYNC_CALL_REGISTER(tws_tone_sync) = {

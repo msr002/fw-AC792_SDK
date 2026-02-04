@@ -209,11 +209,10 @@ void ui_music_spectrum_handler(float db_data[2][MAX_SPECTRUM_SECTION_NUM])
         magnitude_data[i] = db_to_magnitude_optimized(db_avg);
     }
 
-
     // 清零数组
     memset(expanded_data, 0, sizeof(expanded_data));
 
-    // 使用插值算法将32点扩展到72点
+    // 使用插值算法将USE_SPECTRUM_SECTION_NUM点扩展到72点
     for (int i = 0; i < CIRCULAR_SPECTRUM_BAR_CNT; i++) {
         float position = (float)i * (USE_SPECTRUM_SECTION_NUM - 1) / 71.0f;
         int index1 = (int)position;
@@ -248,7 +247,7 @@ void ui_music_spectrum_handler(float db_data[2][MAX_SPECTRUM_SECTION_NUM])
     }
 
     // 更新显示
-    lvgl_rpc_post_func(ui_music_update_spectrum_with_magnitude, 1, magnitude_data);
+    lvgl_rpc_post_func(ui_music_update_spectrum_with_magnitude, 0);
 }
 
 void ui_music_draw_spectrum(void)
@@ -297,3 +296,4 @@ void ui_music_update_spectrum_with_magnitude(void)
 }
 
 #endif
+

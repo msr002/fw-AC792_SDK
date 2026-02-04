@@ -13,7 +13,7 @@ extern "C" {
 /*********************
  *      INCLUDES
  *********************/
-#include "gui_scr.h"
+#include "./gui_scr.h"
 
 /*********************
  *      DEFINES

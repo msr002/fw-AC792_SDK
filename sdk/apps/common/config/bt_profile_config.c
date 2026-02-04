@@ -157,7 +157,7 @@ SDP_RECORD_HANDLER_REGISTER(map_sdp_record_item) = {
 };
 #endif
 
-#if ((THIRD_PARTY_PROTOCOLS_SEL & CUSTOM_DEMO_EN) && TCFG_ATT_OVER_EDR_DEMO_EN)
+#if (((THIRD_PARTY_PROTOCOLS_SEL & CUSTOM_DEMO_EN) || (THIRD_PARTY_PROTOCOLS_SEL & RCSP_MODE_EN)) && TCFG_ATT_OVER_EDR_DEMO_EN)
 //GATT over BR/EDR
 static const u8 sdp_att_service_data[60] = {                           //
     0x36, 0x00, 0x31, 0x09, 0x00, 0x00, 0x0A, 0x00, 0x01, 0x00, 0x21, 0x09, 0x00, 0x01, 0x35, 0x03,
@@ -206,7 +206,7 @@ const u8 pbg_support_enable = 1;
 const u8 adt_profile_support = 1;
 #else
 const u8 pbg_support_enable = 0;
-#if ((THIRD_PARTY_PROTOCOLS_SEL & CUSTOM_DEMO_EN) && TCFG_ATT_OVER_EDR_DEMO_EN)
+#if (((THIRD_PARTY_PROTOCOLS_SEL & CUSTOM_DEMO_EN) || (THIRD_PARTY_PROTOCOLS_SEL & RCSP_MODE_EN)) && TCFG_ATT_OVER_EDR_DEMO_EN)
 const u8 adt_profile_support = 1;   //gatt over edr
 #else
 const u8 adt_profile_support = 0;
