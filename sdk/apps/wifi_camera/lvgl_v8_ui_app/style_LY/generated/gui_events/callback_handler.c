@@ -55,34 +55,6 @@ void page_map_timer_2_timer_cb(lv_timer_t *src)
     }
 
 }
-// Generate page_meter_timer_1 CallBack Handler
-void page_meter_timer_1_timer_cb(lv_timer_t *src)
-{
-    lv_ui_page_meter *ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_PAGE_METER);
-#if 1
-    static uint8_t meter_idx = 0;
-    lv_imglist_set_act(ui_scr->page_meter_imglist_1, meter_idx);
-    if (meter_idx <  21) {
-        meter_idx++;
-    } else {
-        meter_idx = 0;
-    }
-
-    static uint8_t imglist_2_idx = 0;
-    lv_imglist_set_act(ui_scr->page_meter_imglist_2, imglist_2_idx);
-    lv_imglist_set_act(ui_scr->page_meter_imglist_3, imglist_2_idx);
-    if (meter_idx <  21 && imglist_2_idx < 9) {
-        imglist_2_idx += 2;
-    } else {
-        imglist_2_idx = 0;
-    }
-#endif
-
-    if (src->repeat_count == 0) {
-        ui_scr->page_meter_timer_1 = NULL;
-    }
-
-}
 // Generate page_music_timer_1 CallBack Handler
 void page_music_timer_1_timer_cb(lv_timer_t *src)
 {
@@ -110,6 +82,155 @@ void page_music_timer_1_timer_cb(lv_timer_t *src)
 
     if (src->repeat_count == 0) {
         ui_scr->page_music_timer_1 = NULL;
+    }
+
+}
+// Generate page_meter_anim_pwr_l CallBack Handler
+void page_meter_anim_pwr_l_anim_start_cb(lv_anim_t *anim)
+{
+
+}
+// Generate page_meter_anim_pwr_l CallBack Handler
+void page_meter_anim_pwr_l_anim_ready_cb(lv_anim_t *anim)
+{
+
+}
+// Generate page_meter_anim_pwr_r CallBack Handler
+void page_meter_anim_pwr_r_anim_start_cb(lv_anim_t *anim)
+{
+
+}
+// Generate page_meter_anim_pwr_r CallBack Handler
+void page_meter_anim_pwr_r_anim_ready_cb(lv_anim_t *anim)
+{
+
+}
+// Generate page_meter_timer_1 CallBack Handler
+void page_meter_timer_1_timer_cb(lv_timer_t *src)
+{
+    lv_ui_page_meter *ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_PAGE_METER);
+
+    static uint8_t tens_idx = 0;
+    lv_imglist_set_act(ui_scr->page_meter_imglist_speed_tens, tens_idx);
+    lv_imglist_set_act(ui_scr->page_meter_imglist_speed_ones, tens_idx);
+
+    if (tens_idx <=  9) {
+        tens_idx++;
+    } else {
+        tens_idx = 0;
+    }
+
+
+    if (src->repeat_count == 0) {
+        ui_scr->page_meter_timer_1 = NULL;
+    }
+
+}
+// Generate page_meter_timer_2 CallBack Handler
+void page_meter_timer_2_timer_cb(lv_timer_t *src)
+{
+    lv_ui_page_meter *ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_PAGE_METER);
+
+    static uint8_t turn_img_flag = 0;
+
+    if (turn_img_flag) {
+        turn_img_flag = 0;
+        lv_obj_add_flag(ui_scr->page_meter_img_left_turn, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_add_flag(ui_scr->page_meter_img_right_turn, LV_OBJ_FLAG_HIDDEN);
+    } else {
+        turn_img_flag = 1;
+        lv_obj_clear_flag(ui_scr->page_meter_img_left_turn, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_clear_flag(ui_scr->page_meter_img_right_turn, LV_OBJ_FLAG_HIDDEN);
+    }
+
+
+    if (src->repeat_count == 0) {
+        ui_scr->page_meter_timer_2 = NULL;
+    }
+
+}
+// Generate page_meter_timer_3 CallBack Handler
+void page_meter_timer_3_timer_cb(lv_timer_t *src)
+{
+    lv_ui_page_meter *ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_PAGE_METER);
+
+    static uint8_t turn_img = 0;
+
+    switch (turn_img) {
+    case 0:
+        lv_obj_clear_flag(ui_scr->page_meter_img_brake_system_fault, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_add_flag(ui_scr->page_meter_img_hdc, LV_OBJ_FLAG_HIDDEN);
+        turn_img++;
+        break;
+    case 1:
+        lv_obj_clear_flag(ui_scr->page_meter_img_hdc, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_add_flag(ui_scr->page_meter_img_position, LV_OBJ_FLAG_HIDDEN);
+        turn_img++;
+        break;
+    case 2:
+        lv_obj_clear_flag(ui_scr->page_meter_img_position, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_add_flag(ui_scr->page_meter_imgList_high_low_beam, LV_OBJ_FLAG_HIDDEN);
+        turn_img++;
+        break;
+    case 3:
+        lv_obj_clear_flag(ui_scr->page_meter_imgList_high_low_beam, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_add_flag(ui_scr->page_meter_img_auto, LV_OBJ_FLAG_HIDDEN);
+        turn_img++;
+        break;
+    case 4:
+        lv_obj_clear_flag(ui_scr->page_meter_img_auto, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_add_flag(ui_scr->page_meter_img_abs, LV_OBJ_FLAG_HIDDEN);
+        turn_img++;
+        break;
+    case 5:
+        lv_obj_clear_flag(ui_scr->page_meter_img_abs, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_add_flag(ui_scr->page_meter_img_limping, LV_OBJ_FLAG_HIDDEN);
+        turn_img++;
+        break;
+    case 6:
+        lv_obj_clear_flag(ui_scr->page_meter_img_limping, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_add_flag(ui_scr->page_meter_img_P_mode, LV_OBJ_FLAG_HIDDEN);
+        turn_img++;
+        break;
+    case 7:
+        lv_obj_clear_flag(ui_scr->page_meter_img_P_mode, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_add_flag(ui_scr->page_meter_img_force_touch, LV_OBJ_FLAG_HIDDEN);
+        turn_img++;
+        break;
+    case 8:
+        lv_obj_clear_flag(ui_scr->page_meter_img_force_touch, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_add_flag(ui_scr->page_meter_img_box_open, LV_OBJ_FLAG_HIDDEN);
+        turn_img++;
+        break;
+    case 9:
+        lv_obj_clear_flag(ui_scr->page_meter_img_box_open, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_add_flag(ui_scr->page_meter_img_side_support, LV_OBJ_FLAG_HIDDEN);
+        turn_img++;
+        break;
+    case 10:
+        lv_obj_clear_flag(ui_scr->page_meter_img_side_support, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_add_flag(ui_scr->page_meter_img_tcs, LV_OBJ_FLAG_HIDDEN);
+        turn_img++;
+        break;
+    case 11:
+        lv_obj_clear_flag(ui_scr->page_meter_img_tcs, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_add_flag(ui_scr->page_meter_img_tapLoc, LV_OBJ_FLAG_HIDDEN);
+        turn_img++;
+        break;
+    case 12:
+        lv_obj_clear_flag(ui_scr->page_meter_img_tapLoc, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_add_flag(ui_scr->page_meter_img_car_fault, LV_OBJ_FLAG_HIDDEN);
+        turn_img++;
+        break;
+    case 13:
+        lv_obj_clear_flag(ui_scr->page_meter_img_car_fault, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_add_flag(ui_scr->page_meter_img_brake_system_fault, LV_OBJ_FLAG_HIDDEN);
+        turn_img = 0;
+        break;
+    }
+
+    if (src->repeat_count == 0) {
+        ui_scr->page_meter_timer_3 = NULL;
     }
 
 }

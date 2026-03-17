@@ -104,11 +104,14 @@ gui_scr_t *ui_get_scr(int32_t scr_id)
     if (scr_id == GUI_SCREEN_PAGE_MAP) {
         return gui_scr_create(GUI_SCREEN_PAGE_MAP, "page_map", NULL, (gui_scr_setup_cb_t)setup_scr_page_map, (gui_scr_unload_cb_t)unload_scr_page_map);
     }
+    if (scr_id == GUI_SCREEN_PAGE_MUSIC) {
+        return gui_scr_create(GUI_SCREEN_PAGE_MUSIC, "page_music", NULL, (gui_scr_setup_cb_t)setup_scr_page_music, (gui_scr_unload_cb_t)unload_scr_page_music);
+    }
     if (scr_id == GUI_SCREEN_PAGE_METER) {
         return gui_scr_create(GUI_SCREEN_PAGE_METER, "page_meter", NULL, (gui_scr_setup_cb_t)setup_scr_page_meter, (gui_scr_unload_cb_t)unload_scr_page_meter);
     }
-    if (scr_id == GUI_SCREEN_PAGE_MUSIC) {
-        return gui_scr_create(GUI_SCREEN_PAGE_MUSIC, "page_music", NULL, (gui_scr_setup_cb_t)setup_scr_page_music, (gui_scr_unload_cb_t)unload_scr_page_music);
+    if (scr_id == GUI_SCREEN_POWER_ON) {
+        return gui_scr_create(GUI_SCREEN_POWER_ON, "power_on", NULL, (gui_scr_setup_cb_t)setup_scr_power_on, (gui_scr_unload_cb_t)unload_scr_power_on);
     }
     return NULL;
 }
@@ -192,11 +195,14 @@ void *ui_get_scr_ptr(lv_ui *ui, int32_t scr_id)
     if (scr_id == GUI_SCREEN_PAGE_MAP) {
         return ui->page_map;
     }
+    if (scr_id == GUI_SCREEN_PAGE_MUSIC) {
+        return ui->page_music;
+    }
     if (scr_id == GUI_SCREEN_PAGE_METER) {
         return ui->page_meter;
     }
-    if (scr_id == GUI_SCREEN_PAGE_MUSIC) {
-        return ui->page_music;
+    if (scr_id == GUI_SCREEN_POWER_ON) {
+        return ui->power_on;
     }
     return NULL;
 }
@@ -212,96 +218,86 @@ void ui_free_scr_ptr(lv_ui *ui, int32_t scr_id)
             lv_mem_free(ui->usb_slave);
         }
         ui->usb_slave = NULL;
-    }
-    if (scr_id == GUI_SCREEN_VIDEO_REC) {
+    } else if (scr_id == GUI_SCREEN_VIDEO_REC) {
         if (ui->video_rec != NULL) {
             lv_mem_free(ui->video_rec);
         }
         ui->video_rec = NULL;
-    }
-    if (scr_id == GUI_SCREEN_SYS_PROMPT) {
+    } else if (scr_id == GUI_SCREEN_SYS_PROMPT) {
         if (ui->sys_prompt != NULL) {
             lv_mem_free(ui->sys_prompt);
         }
         ui->sys_prompt = NULL;
-    }
-    if (scr_id == GUI_SCREEN_SYS_SETTING) {
+    } else if (scr_id == GUI_SCREEN_SYS_SETTING) {
         if (ui->sys_setting != NULL) {
             lv_mem_free(ui->sys_setting);
         }
         ui->sys_setting = NULL;
-    }
-    if (scr_id == GUI_SCREEN_VIDEO_PHOTO) {
+    } else if (scr_id == GUI_SCREEN_VIDEO_PHOTO) {
         if (ui->video_photo != NULL) {
             lv_mem_free(ui->video_photo);
         }
         ui->video_photo = NULL;
-    }
-    if (scr_id == GUI_SCREEN_VIDEO_PLAY) {
+    } else if (scr_id == GUI_SCREEN_VIDEO_PLAY) {
         if (ui->video_play != NULL) {
             lv_mem_free(ui->video_play);
         }
         ui->video_play = NULL;
-    }
-    if (scr_id == GUI_SCREEN_VIDEO_FILE) {
+    } else if (scr_id == GUI_SCREEN_VIDEO_FILE) {
         if (ui->video_file != NULL) {
             lv_mem_free(ui->video_file);
         }
         ui->video_file = NULL;
-    }
-    if (scr_id == GUI_SCREEN_VIDEO_DIR) {
+    } else if (scr_id == GUI_SCREEN_VIDEO_DIR) {
         if (ui->video_dir != NULL) {
             lv_mem_free(ui->video_dir);
         }
         ui->video_dir = NULL;
-    }
-    if (scr_id == GUI_SCREEN_CAR_PARKING) {
+    } else if (scr_id == GUI_SCREEN_CAR_PARKING) {
         if (ui->car_parking != NULL) {
             lv_mem_free(ui->car_parking);
         }
         ui->car_parking = NULL;
-    }
-    if (scr_id == GUI_SCREEN_LINE_DRIFT) {
+    } else if (scr_id == GUI_SCREEN_LINE_DRIFT) {
         if (ui->line_drift != NULL) {
             lv_mem_free(ui->line_drift);
         }
         ui->line_drift = NULL;
-    }
-    if (scr_id == GUI_SCREEN_SYS_POPWIN) {
+    } else if (scr_id == GUI_SCREEN_SYS_POPWIN) {
         if (ui->sys_popwin != NULL) {
             lv_mem_free(ui->sys_popwin);
         }
         ui->sys_popwin = NULL;
-    }
-    if (scr_id == GUI_SCREEN_VIDEO_DEC) {
+    } else if (scr_id == GUI_SCREEN_VIDEO_DEC) {
         if (ui->video_dec != NULL) {
             lv_mem_free(ui->video_dec);
         }
         ui->video_dec = NULL;
-    }
-    if (scr_id == GUI_SCREEN_VIDEO_DEC_OPTIONS) {
+    } else if (scr_id == GUI_SCREEN_VIDEO_DEC_OPTIONS) {
         if (ui->video_dec_options != NULL) {
             lv_mem_free(ui->video_dec_options);
         }
         ui->video_dec_options = NULL;
-    }
-    if (scr_id == GUI_SCREEN_PAGE_MAP) {
+    } else if (scr_id == GUI_SCREEN_PAGE_MAP) {
         if (ui->page_map != NULL) {
             lv_mem_free(ui->page_map);
         }
         ui->page_map = NULL;
-    }
-    if (scr_id == GUI_SCREEN_PAGE_METER) {
-        if (ui->page_meter != NULL) {
-            lv_mem_free(ui->page_meter);
-        }
-        ui->page_meter = NULL;
-    }
-    if (scr_id == GUI_SCREEN_PAGE_MUSIC) {
+    } else if (scr_id == GUI_SCREEN_PAGE_MUSIC) {
         if (ui->page_music != NULL) {
             lv_mem_free(ui->page_music);
         }
         ui->page_music = NULL;
+    } else if (scr_id == GUI_SCREEN_PAGE_METER) {
+        if (ui->page_meter != NULL) {
+            lv_mem_free(ui->page_meter);
+        }
+        ui->page_meter = NULL;
+    } else if (scr_id == GUI_SCREEN_POWER_ON) {
+        if (ui->power_on != NULL) {
+            lv_mem_free(ui->power_on);
+        }
+        ui->power_on = NULL;
     }
 }
 
@@ -331,6 +327,7 @@ void setup_ui(lv_ui *ui)
 #endif
     gui_group_init();
     ui_scr_manager_init();
+    /*gui_scr_t *scr = ui_get_scr(GUI_SCREEN_POWER_ON);*/
     gui_scr_t *scr = ui_get_scr(GUI_SCREEN_USB_SLAVE);
     ui_load_scr_anim(ui, scr, LV_SCR_LOAD_ANIM_NONE, 0, 0, false, false, false);
     events_init(ui);

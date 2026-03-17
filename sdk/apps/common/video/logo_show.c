@@ -1,8 +1,10 @@
 #include "logo_show.h"
+#include "app_config.h"
 
 #ifdef CONFIG_UI_ENABLE
 
 #include "os/os_api.h"
+#include "lcd_config.h"
 #if (defined USE_LVGL_V8_UI_DEMO)
 #include "lv_conf.h"
 #endif

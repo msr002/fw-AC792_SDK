@@ -17,14 +17,17 @@ void gui_anim_delete_cb(lv_anim_t *anim)
 //Init Timelines
 void gui_timelines_init(lv_ui *ui)
 {
+    gui_timeline_timeline_init(ui);
 }
 //Stop Timelines
 void gui_timelines_stop()
 {
+    gui_timeline_stop(&gui_timeline_timeline);
 }
 //Delete Timelines
 void gui_timelines_delete()
 {
+    gui_timeline_delete(&gui_timeline_timeline);
 }
 
 void gui_anim_set_var(lv_anim_t *anim, lv_obj_t *obj, lv_anim_exec_xcb_t exec_cb, gui_anim_data_t data)
@@ -99,5 +102,21 @@ void gui_timeline_set_repeat_count(gui_timeline_t *timeline, int32_t repeat_coun
     timeline->_repeat_count = repeat_count;
 }
 
+void gui_anim_set_zoom(void *var, int32_t v)
+{
+    lv_obj_t *obj = GUI_ANIM_OBJ(var);
+    if (obj == NULL || !lv_obj_is_valid(obj)) {
+        return;
+    }
+    lv_img_set_zoom(obj, v);
+}
+void gui_anim_set_y(void *var, int32_t v)
+{
+    lv_obj_t *obj = GUI_ANIM_OBJ(var);
+    if (obj == NULL || !lv_obj_is_valid(obj)) {
+        return;
+    }
+    lv_obj_set_y(obj, v);
+}
 
 #endif

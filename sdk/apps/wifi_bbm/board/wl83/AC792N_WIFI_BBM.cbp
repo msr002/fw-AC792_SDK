@@ -37,7 +37,6 @@
 <Add option="-DCONFIG_WIFI_BBM_PROJECT_ENABLE" />
 <Add option="-DEVENT_HANDLER_NUM_CONFIG=2" />
 <Add option="-DEVENT_POOL_SIZE_CONFIG=256" />
-<Add option="-DTIMER_POOL_NUM_CONFIG=15" />
 <Add option="-DAPP_ASYNC_POOL_NUM_CONFIG=8" />
 <Add option="-DVFS_FILE_POOL_NUM_CONFIG=8" />
 <Add option="-DVM_MAX_PAGE_ALIGN_SIZE_CONFIG=64*1024" />
@@ -2378,6 +2377,7 @@
 <Unit filename="../../../../include_lib/media/effects/audio_reverb_common.h" />
 <Unit filename="../../../../include_lib/media/effects/audio_spatial_adv.h" />
 <Unit filename="../../../../include_lib/media/effects/audio_spk_eq.h" />
+<Unit filename="../../../../include_lib/media/effects/audio_split_gain_fade.h" />
 <Unit filename="../../../../include_lib/media/effects/audio_stereo_spatial_wider.h" />
 <Unit filename="../../../../include_lib/media/effects/audio_stereo_widener.h" />
 <Unit filename="../../../../include_lib/media/effects/audio_surround.h" />

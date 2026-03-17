@@ -113,6 +113,7 @@ const int mp3encode_input_mode = 1; //0x01--short输入 0x02--float输入,使用
 //*     M4A Codec       *
 //***********************
 const int const_audio_m4a_dec16_fifo_precision = 16;  //  24 或者 16
+const int const_audio_m4a_dec_dab_mode_enable = 0;
 
 //***********************
 //*     WAV Codec       *

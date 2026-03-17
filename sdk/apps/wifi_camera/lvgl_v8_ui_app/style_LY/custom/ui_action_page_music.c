@@ -12,13 +12,11 @@
 
 #if !LV_USE_GUIBUILDER_SIMULATOR
 //专辑图片显示
-//static lv_img_dsc_t image_dsc = {0};
-lv_obj_t *img = NULL;
-static lv_img_dsc_t image_dsc = {0};
+static lv_img_dsc_t album_image_dsc = {0};
 
 lv_img_dsc_t *lv_get_page_music_image_dsc(void)
 {
-    return &image_dsc;
+    return &album_image_dsc;
 }
 
 void lv_update_ui_music_img(lv_img_dsc_t *image_dsc);
@@ -28,18 +26,14 @@ void lv_album_img_show(const uint8_t *jpg_buf, uint32_t jpg_buf_len)
         return;
     }
 
-    image_dsc.header.always_zero = 0;
-    image_dsc.header.w = 200;
-    image_dsc.header.h = 200;
-    image_dsc.data = jpg_buf;
-    image_dsc.data_size = jpg_buf_len;
-    image_dsc.header.cf = LV_IMG_CF_TRUE_COLOR;
+    album_image_dsc.header.always_zero = 0;
+    album_image_dsc.header.w = 200;
+    album_image_dsc.header.h = 200;
+    album_image_dsc.data = jpg_buf;
+    album_image_dsc.data_size = jpg_buf_len;
+    album_image_dsc.header.cf = LV_IMG_CF_TRUE_COLOR;
 
-    lv_img_dsc_t *get_dsc =   lv_get_page_music_image_dsc();
-
-    memcpy(get_dsc, &image_dsc, sizeof(lv_img_dsc_t));
-
-    lv_update_ui_music_img(&image_dsc);
+    lv_update_ui_music_img(&album_image_dsc);
 }
 
 void update_ui_music_img(lv_img_dsc_t *image_dsc)

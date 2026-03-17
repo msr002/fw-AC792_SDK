@@ -21,6 +21,9 @@ extern "C" {
 #if LV_USE_IMG == 0
 #error "lv_curvemenu: lv_img is required. Enable it in lv_conf.h (LV_USE_IMG 1)"
 #endif
+#if LV_USE_LABEL == 0
+#error "lv_curvemenu: lv_label is required. Enable it in lv_conf.h (LV_USE_LABEL 1)"
+#endif
 
 /*********************
  *      DEFINES
@@ -39,40 +42,68 @@ typedef struct {
     lv_coord_t radius;          /*菜单半径*/
     lv_coord_t px_per_angle;    /*每度对应的像素*/
     lv_coord_t col_num;         /*列数*/
-    lv_coord_t cr;              /*圆心半径(圆心到菜单控件的距离，实际半径为菜单半径加上圆心半径)*/
+    lv_coord_t
+    cr;              /*圆心半径(圆心到菜单控件的距离，实际半径为菜单半径加上圆心半径)*/
     bool _is_init;              /*是否初始化*/
 
     struct {
-        lv_coord_t ver_offset;
-        lv_coord_t ver_offset_min;
-        lv_coord_t ver_offset_max;
         lv_coord_t ver_momentum;
 
         lv_timer_t *scroll_tmr;
     } scroll;
 
+    lv_obj_t **layout_buf;
+    uint32_t layout_buf_cap;
+
 } lv_curvemenu_t;
 
 typedef struct {
-    lv_img_t img;
-    uint16_t zoom;
+    lv_obj_t obj;
     bool is_hide;
+    lv_obj_t *img;
+    lv_obj_t *label;
 } lv_curvemenu_btn_t;
 
 extern const lv_obj_class_t lv_curvemenu_class;
+extern const lv_obj_class_t lv_curvemenu_btn_class;
 
 /**********************
  * GLOBAL PROTOTYPES
  **********************/
 
+/**
+ * Create a curve menu objects
+ * @param parent pointer to the parent object
+ * @return lv_obj_t* pointer to the created curve menu object
+ */
 lv_obj_t *lv_curvemenu_create(lv_obj_t *parent);
 
+/**
+ * Add a button to the curve menu
+ * @param parent pointer to the parent object
+ * @param icon pointer to an image source (a C array or path to a file)
+ * @return lv_obj_t* pointer to the created button object
+ */
 lv_obj_t *lv_curvemenu_add_btn(lv_obj_t *parent, const void *icon);
+
+/**
+ * Add a button with text to the curve menu
+ * @param parent pointer to the parent object
+ * @param icon pointer to an image source (a C array or path to a file)
+ * @param text pointer to the text, set NULL for no text
+ * @return lv_obj_t* pointer to the created button object
+ */
+lv_obj_t *lv_curvemenu_add_btn_with_text(lv_obj_t *parent, const void *icon, const char *text);
 
 /*=====================
  * Setter functions
  *====================*/
 
+/**
+ * Set the radius of the curve menu
+ * @param obj
+ * @param radius
+ */
 void lv_curvemenu_set_radius(lv_obj_t *obj, lv_coord_t radius);
 
 void lv_curvemenu_set_angle_step(lv_obj_t *obj, lv_coord_t angle_step);
@@ -90,9 +121,13 @@ void lv_curvemenu_set_cr(lv_obj_t *obj, lv_coord_t cr);
 void lv_curvemenu_btn_set_hide(lv_obj_t *btn, bool is_hide);
 
 void lv_curvemenu_btn_set_zoom(lv_obj_t *btn, uint16_t zoom);
+
+void lv_curvemenu_btn_set_text(lv_obj_t *btn, const char *text);
+
 /*=====================
  * Getter functions
  *====================*/
+
 lv_coord_t lv_curvemenu_get_radius(lv_obj_t *obj);
 
 lv_coord_t lv_curvemenu_get_angle_step(lv_obj_t *obj);
@@ -124,3 +159,4 @@ uint16_t lv_curvemenu_btn_get_zoom(lv_obj_t *btn);
 #endif
 
 #endif /*LV_CURVEMENU_H*/
+

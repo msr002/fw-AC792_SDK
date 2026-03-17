@@ -11,6 +11,11 @@
 //模式切换是否添加打断提示音，数据流重新开关
 #define SPATIAL_AUDIO_EFFECT_SW_TONE_PLAY     0
 
+//流程中添加动态eq，需要手动命名为"SpatialDyEq"，并配置为bypass，代码中切换模式时会打开并跑fade
+#define SPATIAL_AUDIO_EFFECT_WITH_DYNAMIC_EQ    0
+//流程中添加混响，需要手动命名为"SpatialPReverb"，并配置为bypass，代码中切换模式时会打开并跑fade
+#define SPATIAL_AUDIO_EFFECT_WITH_PLATE_REVERB  0
+
 #define A2DP_SPATIAL_ON     "A2DPSpatialOn"
 #define A2DP_SPATIAL_OFF    "A2DPSpatialOff"
 
@@ -74,5 +79,7 @@ int spatial_effects_node_param_cfg_read(void *cfg, int size);
 int audio_spatial_effects_frame_pack_disable(void);
 
 int spatial_effect_dy_eq_bypass(u8 is_bypass);
+
+int spatial_effect_plate_reverb_bypass(u8 is_bypass);
 
 #endif

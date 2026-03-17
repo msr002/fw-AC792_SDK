@@ -33,5 +33,9 @@ int net_avi_player_test(const char *url)
     // 控制暂停/播放
     // net_avi_play_pause_resume(net_player, 0);
 
+    //跳转
+    /* u32 target_ms = 10 * 1000; //跳转到第10s */
+    /* net_avi_play_seek(net_player, target_ms); */
+
     return 0;
 }

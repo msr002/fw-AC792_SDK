@@ -114,7 +114,6 @@ DEFINES := \
 	-DCONFIG_WIFI_DVR_PROJECT_ENABLE \
 	-DEVENT_HANDLER_NUM_CONFIG=2 \
 	-DEVENT_POOL_SIZE_CONFIG=256 \
-	-DTIMER_POOL_NUM_CONFIG=15 \
 	-DAPP_ASYNC_POOL_NUM_CONFIG=8 \
 	-DVFS_FILE_POOL_NUM_CONFIG=8 \
 	-DVM_MAX_PAGE_ALIGN_SIZE_CONFIG=64*1024 \
@@ -1048,6 +1047,7 @@ c_SRC_FILES := \
 	../../../../apps/wifi_camera/lvgl_v8_ui_app/style_LY/generated/gui_scr/setup_scr_page_map.c \
 	../../../../apps/wifi_camera/lvgl_v8_ui_app/style_LY/generated/gui_scr/setup_scr_page_meter.c \
 	../../../../apps/wifi_camera/lvgl_v8_ui_app/style_LY/generated/gui_scr/setup_scr_page_music.c \
+	../../../../apps/wifi_camera/lvgl_v8_ui_app/style_LY/generated/gui_scr/setup_scr_power_on.c \
 	../../../../apps/wifi_camera/lvgl_v8_ui_app/style_LY/generated/gui_scr/setup_scr_sys_popwin.c \
 	../../../../apps/wifi_camera/lvgl_v8_ui_app/style_LY/generated/gui_scr/setup_scr_sys_prompt.c \
 	../../../../apps/wifi_camera/lvgl_v8_ui_app/style_LY/generated/gui_scr/setup_scr_sys_setting.c \
@@ -1061,6 +1061,7 @@ c_SRC_FILES := \
 	../../../../apps/wifi_camera/lvgl_v8_ui_app/style_LY/generated/gui_scr/setup_scr_video_rec.c \
 	../../../../apps/wifi_camera/lvgl_v8_ui_app/style_LY/generated/gui_scr/ui_scr_manager.c \
 	../../../../apps/wifi_camera/lvgl_v8_ui_app/style_LY/generated/gui_scr/ui_style.c \
+	../../../../apps/wifi_camera/lvgl_v8_ui_app/style_LY/generated/gui_timelines/gui_timeline_timeline.c \
 	../../../../apps/wifi_camera/lvgl_v8_ui_app/style_LY/generated/gui_timelines/gui_timelines.c \
 	../../../../apps/wifi_camera/lvgl_v8_ui_app/style_LY/generated/i18n/lv_i18n.c \
 	../../../../apps/wifi_camera/lvgl_v8_ui_app/ui_action.c \

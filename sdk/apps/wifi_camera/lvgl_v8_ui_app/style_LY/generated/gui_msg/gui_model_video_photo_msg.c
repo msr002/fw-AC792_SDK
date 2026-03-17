@@ -119,37 +119,37 @@ GUI_WEAK int gui_model_video_photo_msg_shot_mode_icon_cb(gui_msg_action_t access
 GUI_WEAK int gui_model_video_photo_msg_show_handshake_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type)
 {
     static lv_obj_flag_t show_handshake_var = LV_OBJ_FLAG_HIDDEN;
-    _gui_msg_obj_flag_cb((int32_t *)&show_handshake_var, access, data);
+    _gui_msg_obj_flag_cb(&show_handshake_var, access, data);
     return 0;
 }
 GUI_WEAK int gui_model_video_photo_msg_hide_handshake_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type)
 {
     static lv_obj_flag_t hide_handshake_var = LV_OBJ_FLAG_HIDDEN;
-    _gui_msg_obj_flag_cb((int32_t *)&hide_handshake_var, access, data);
+    _gui_msg_obj_flag_cb(&hide_handshake_var, access, data);
     return 0;
 }
 GUI_WEAK int gui_model_video_photo_msg_show_shots_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type)
 {
     static lv_obj_flag_t show_shots_var = LV_OBJ_FLAG_HIDDEN;
-    _gui_msg_obj_flag_cb((int32_t *)&show_shots_var, access, data);
+    _gui_msg_obj_flag_cb(&show_shots_var, access, data);
     return 0;
 }
 GUI_WEAK int gui_model_video_photo_msg_hide_shots_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type)
 {
     static lv_obj_flag_t hide_shots_var = LV_OBJ_FLAG_HIDDEN;
-    _gui_msg_obj_flag_cb((int32_t *)&hide_shots_var, access, data);
+    _gui_msg_obj_flag_cb(&hide_shots_var, access, data);
     return 0;
 }
 GUI_WEAK int gui_model_video_photo_msg_show_shots_mode_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type)
 {
     static lv_obj_flag_t show_shots_mode_var = LV_OBJ_FLAG_HIDDEN;
-    _gui_msg_obj_flag_cb((int32_t *)&show_shots_mode_var, access, data);
+    _gui_msg_obj_flag_cb(&show_shots_mode_var, access, data);
     return 0;
 }
 GUI_WEAK int gui_model_video_photo_msg_hide_shots_mode_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type)
 {
     static lv_obj_flag_t hide_shots_mode_var = LV_OBJ_FLAG_HIDDEN;
-    _gui_msg_obj_flag_cb((int32_t *)&hide_shots_mode_var, access, data);
+    _gui_msg_obj_flag_cb(&hide_shots_mode_var, access, data);
     return 0;
 }
 GUI_WEAK int gui_model_video_photo_msg_photo_remain_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type)

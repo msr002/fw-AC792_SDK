@@ -87,15 +87,18 @@ struct pc_mic_recorder *pc_mic_recorder_open(struct stream_fmt *fmt)
     }
 
     recorder->stream = jlstream_pipeline_parse_by_node_name(uuid, "USB_ADC");
-
+    if (!recorder->stream) {
+        recorder->stream = jlstream_pipeline_parse(uuid, NODE_UUID_IIS0_RX);
+        source_uuid = NODE_UUID_IIS0_RX;
+    }
     if (!recorder->stream) {
         goto __exit0;
     }
 
     jlstream_node_ioctl(recorder->stream, NODE_UUID_PC_MIC, NODE_IOC_SET_FMT, (int)fmt);
 
-    //设置ADC的中断点数
-    int err = jlstream_node_ioctl(recorder->stream, NODE_UUID_SOURCE, NODE_IOC_SET_PRIV_FMT, AUDIO_ADC_IRQ_POINTS_MUSIC_MODE);
+    //设置ADC的中断点数,通话算法节点要求输入点数是256
+    int err = jlstream_node_ioctl(recorder->stream, NODE_UUID_SOURCE, NODE_IOC_SET_PRIV_FMT, 256);
     if (err) {
         goto __exit1;
     }

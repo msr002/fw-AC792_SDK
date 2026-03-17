@@ -49,7 +49,10 @@ extern void gui_timeline_delete(gui_timeline_t *timeline);
 extern void gui_timeline_set_period(gui_timeline_t *timeline, uint32_t period);
 extern void gui_timeline_set_repeat_count(gui_timeline_t *timeline, int32_t count);
 
+extern void gui_anim_set_zoom(void *var, int32_t v);
+extern void gui_anim_set_y(void *var, int32_t v);
 //One file per timeline
+#include "./gui_timeline_timeline.h"
 
 #ifdef __cplusplus
 }

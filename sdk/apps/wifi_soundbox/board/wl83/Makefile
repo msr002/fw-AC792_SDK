@@ -238,6 +238,7 @@ c_SRC_FILES := \
 	../../../../apps/common/example/third_party/sqlite/os_jl.c \
 	../../../../apps/common/example/third_party/sqlite/sqlite3.c \
 	../../../../apps/common/example/third_party/sqlite/sqlite_test_main.c \
+	../../../../apps/common/example/update/ota_loader_boot/ota_loader_boot.c \
 	../../../../apps/common/fat_nor/extflash.c \
 	../../../../apps/common/fat_nor/virfat_flash.c \
 	../../../../apps/common/file_operate/file_bs_deal.c \

@@ -32,7 +32,6 @@ lv_obj_t *setup_scr_page_music(lv_ui *ui)
     ui_style_set(ui_scr->page_music, GUI_CTRL_SCR);
 
     //Set style for page_music. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
-    lv_obj_set_style_bg_color(ui_scr->page_music, lv_color_make(0x00, 0x00, 0x00), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_opa(ui_scr->page_music, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     //Write codes page_music_img_1
@@ -116,4 +115,5 @@ void unload_scr_page_music(lv_ui *ui)
     }
     ui_free_scr_ptr(ui, GUI_SCREEN_PAGE_MUSIC);
 }
+
 #endif

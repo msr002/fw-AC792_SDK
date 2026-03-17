@@ -496,6 +496,7 @@ static int gui_src_action_music_player(int action)
         if (storage_device_ready()) {
             logo_show(CONFIG_BACKGROUND_AVI_PATH, NULL, 0xffff,  NULL);
         }
+
 #endif
         break;
     case GUI_SCREEN_ACTION_UNLOAD:

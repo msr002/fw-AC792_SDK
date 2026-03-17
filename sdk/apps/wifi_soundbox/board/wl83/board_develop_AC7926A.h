@@ -30,7 +30,7 @@
 #define TCFG_LSB_CLK                        48000000          //96M,80M,60M,48M,40M,24M,20M,12M
 #define TCFG_HSB_CLK_DIV                    2                 //HSB_CLK = SYS_CLK / HSB_CLK_DIV
 #define TCFG_SFCTZ_CLK                      96000000          //SFC时钟，和加载代码的速度有关
-#define TCFG_SDRAM_CLK                      250000000         //SDRAM/DDR时钟
+#define TCFG_SDRAM_CLK                      200000000         //SDRAM/DDR时钟
 #define TCFG_VIDEO_CLK                      TCFG_SYS_CLK      //EVA/PUB时钟，240M,192M,160M,120M,96M,80M,64M,60M,48M，其他值时启用SYS_PLL或者DDR_PLL
 #define TCFG_GPU_CLK                        TCFG_SYS_CLK      //GPU时钟，240M,192M,160M,120M,96M,80M,64M,60M,48M，TCFG_SYS_CLK(和cpu同频)
 

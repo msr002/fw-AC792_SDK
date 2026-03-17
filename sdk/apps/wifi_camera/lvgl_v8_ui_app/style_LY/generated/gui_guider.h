@@ -157,7 +157,6 @@ typedef struct {
     lv_obj_t *sys_prompt_img_warn;
     lv_obj_t *sys_prompt_lbl_warn;
     lv_obj_t *sys_prompt_img_2;
-    lv_obj_t *sys_prompt_img_1;
     lv_obj_t *sys_prompt_lbl_1;
 } lv_ui_sys_prompt;
 
@@ -493,38 +492,6 @@ typedef struct {
 } lv_ui_page_map;
 
 typedef struct {
-    // Screen page_meter
-    lv_obj_t *page_meter;
-    bool      page_meter_del;
-    lv_obj_t *page_meter_imglist_1;
-    lv_timer_t *page_meter_timer_1;
-    lv_obj_t *page_meter_imglist_2;
-    lv_obj_t *page_meter_imglist_3;
-    lv_obj_t *page_meter_img_1;
-    lv_obj_t *page_meter_img_2;
-    lv_obj_t *page_meter_img_3;
-    lv_obj_t *page_meter_img_4;
-    lv_obj_t *page_meter_img_5;
-    lv_obj_t *page_meter_img_6;
-    lv_obj_t *page_meter_img_7;
-    lv_obj_t *page_meter_img_8;
-    lv_obj_t *page_meter_img_9;
-    lv_obj_t *page_meter_img_10;
-    lv_obj_t *page_meter_img_11;
-    lv_obj_t *page_meter_img_12;
-    lv_obj_t *page_meter_img_13;
-    lv_obj_t *page_meter_img_14;
-    lv_obj_t *page_meter_img_15;
-    lv_obj_t *page_meter_img_16;
-    lv_obj_t *page_meter_img_17;
-    lv_obj_t *page_meter_img_18;
-    lv_obj_t *page_meter_btn_1;
-    lv_obj_t *page_meter_btn_1_label;
-    lv_obj_t *page_meter_btn_2;
-    lv_obj_t *page_meter_btn_2_label;
-} lv_ui_page_meter;
-
-typedef struct {
     // Screen page_music
     lv_obj_t *page_music;
     bool      page_music_del;
@@ -536,6 +503,70 @@ typedef struct {
     lv_obj_t *page_music_btn_1;
     lv_obj_t *page_music_btn_1_label;
 } lv_ui_page_music;
+
+typedef struct {
+    // Screen page_meter
+    lv_obj_t *page_meter;
+    bool      page_meter_del;
+    lv_obj_t *page_meter_img_road_eco;
+    lv_obj_t *page_meter_img_arrow_eco;
+    lv_obj_t *page_meter_img_bat_d;
+    lv_obj_t *page_meter_img_position;
+    lv_obj_t *page_meter_img_force_touch;
+    lv_obj_t *page_meter_img_right_turn;
+    lv_obj_t *page_meter_img_hdc;
+    lv_obj_t *page_meter_img_auto;
+    lv_obj_t *page_meter_img_box_open;
+    lv_obj_t *page_meter_img_side_support;
+    lv_obj_t *page_meter_img_tcs;
+    lv_obj_t *page_meter_img_abs;
+    lv_obj_t *page_meter_img_limping;
+    lv_obj_t *page_meter_img_tapLoc;
+    lv_obj_t *page_meter_img_car_fault;
+    lv_obj_t *page_meter_img_P_mode;
+    lv_obj_t *page_meter_img_brake_system_fault;
+    lv_obj_t *page_meter_img_cruisework;
+    lv_obj_t *page_meter_lbl_temp;
+    lv_obj_t *page_meter_lbl_time;
+    lv_obj_t *page_meter_lbl_odo_num;
+    lv_obj_t *page_meter_lbl_odo;
+    lv_obj_t *page_meter_lbl_bat;
+    lv_obj_t *page_meter_lbl_endurance;
+    lv_obj_t *page_meter_imglist_speed_ones;
+    lv_obj_t *page_meter_imglist_speed_tens;
+    lv_obj_t *page_meter_lbl_km;
+    lv_obj_t *page_meter_imgList_high_low_beam;
+    lv_obj_t *page_meter_anim_pwr_l;
+    lv_obj_t *page_meter_anim_pwr_r;
+    lv_obj_t *page_meter_view_call_in;
+    lv_obj_t *page_meter_lbl_3;
+    lv_obj_t *page_meter_lbl_phone_num;
+    lv_obj_t *page_meter_img_1;
+    lv_obj_t *page_meter_img_2;
+    lv_obj_t *page_meter_lbl_2;
+    lv_obj_t *page_meter_lbl_4;
+    lv_timer_t *page_meter_timer_1;
+    lv_timer_t *page_meter_timer_2;
+    lv_timer_t *page_meter_timer_3;
+    lv_obj_t *page_meter_imglist_1;
+    lv_obj_t *page_meter_img_4;
+    lv_obj_t *page_meter_img_5;
+    lv_obj_t *page_meter_imglist_2;
+    lv_obj_t *page_meter_imglist_3;
+    lv_obj_t *page_meter_imglist_4;
+    lv_obj_t *page_meter_imglist_5;
+    lv_obj_t *page_meter_imglist_6;
+    lv_obj_t *page_meter_img_6;
+    lv_obj_t *page_meter_img_left_turn;
+    lv_obj_t *page_meter_imglist_bat;
+} lv_ui_page_meter;
+
+typedef struct {
+    // Screen power_on
+    lv_obj_t *power_on;
+    bool      power_on_del;
+    lv_obj_t *power_on_img_1;
+} lv_ui_power_on;
 
 // generate lv_ui gui_guider
 typedef struct {
@@ -553,8 +584,9 @@ typedef struct {
     lv_ui_video_dec *video_dec;
     lv_ui_video_dec_options *video_dec_options;
     lv_ui_page_map *page_map;
-    lv_ui_page_meter *page_meter;
     lv_ui_page_music *page_music;
+    lv_ui_page_meter *page_meter;
+    lv_ui_power_on *power_on;
 
     lv_group_t *default_group;
 } lv_ui;
@@ -628,15 +660,27 @@ void unload_scr_page_map(lv_ui *ui);
 
 
 
+// Screen page_music
+lv_obj_t *setup_scr_page_music(lv_ui *ui);
+void unload_scr_page_music(lv_ui *ui);
 // Screen page_meter
 lv_obj_t *setup_scr_page_meter(lv_ui *ui);
 void unload_scr_page_meter(lv_ui *ui);
 
 
 
-// Screen page_music
-lv_obj_t *setup_scr_page_music(lv_ui *ui);
-void unload_scr_page_music(lv_ui *ui);
+
+
+
+
+
+
+
+
+
+// Screen power_on
+lv_obj_t *setup_scr_power_on(lv_ui *ui);
+void unload_scr_power_on(lv_ui *ui);
 #ifdef __cplusplus
 }
 #endif

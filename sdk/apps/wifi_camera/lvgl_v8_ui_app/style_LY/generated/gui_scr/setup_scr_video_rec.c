@@ -32,6 +32,9 @@ lv_obj_t *setup_scr_video_rec(lv_ui *ui)
     lv_obj_set_scrollbar_mode(ui_scr->video_rec, LV_SCROLLBAR_MODE_OFF);
     ui_style_set(ui_scr->video_rec, GUI_CTRL_SCR);
 
+    //Set style for video_rec. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
+    lv_obj_set_style_bg_color(ui_scr->video_rec, lv_color_make(0x55, 0xaa, 0xa5), LV_PART_MAIN | LV_STATE_DEFAULT);
+
     //Write codes video_rec_view_scan
     ui_scr->video_rec_view_scan = lv_obj_create(ui_scr->video_rec);
     lv_obj_set_pos(ui_scr->video_rec_view_scan, 0, 0);

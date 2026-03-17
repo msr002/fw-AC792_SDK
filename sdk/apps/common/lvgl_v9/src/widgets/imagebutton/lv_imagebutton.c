@@ -22,7 +22,7 @@
  *      DEFINES
  *********************/
 #define MY_CLASS (&lv_imagebutton_class)
-
+#define MALLOC_IMGBTN_SRC 1
 /**********************
  *      TYPEDEFS
  **********************/
@@ -38,6 +38,10 @@ static lv_imagebutton_state_t suggest_state(lv_obj_t *imagebutton, lv_imagebutto
 static lv_imagebutton_state_t get_state(const lv_obj_t *imagebutton);
 static void update_src_info(lv_imagebutton_src_info_t *info, const void *src);
 
+#if MALLOC_IMGBTN_SRC
+static void lv_imagebutton_destructor(const lv_obj_class_t *class_p, lv_obj_t *obj);
+#endif
+
 /**********************
  *  STATIC VARIABLES
  **********************/
@@ -48,6 +52,9 @@ const lv_obj_class_t lv_imagebutton_class = {
     .height_def = LV_SIZE_CONTENT,
     .instance_size = sizeof(lv_imagebutton_t),
     .constructor_cb = lv_imagebutton_constructor,
+#if MALLOC_IMGBTN_SRC
+    .destructor_cb = lv_imagebutton_destructor,
+#endif
     .event_cb = lv_imagebutton_event,
     .name = "lv_imagebutton",
 };
@@ -83,9 +90,46 @@ void lv_imagebutton_set_src(lv_obj_t *obj, lv_imagebutton_state_t state, const v
         LV_LOG_WARN("middle image source is not set while left and/or right image sources are");
     }
 
+#if MALLOC_IMGBTN_SRC
+    void *src_left_str = NULL;
+    void *src_mid_str = NULL;
+    void *src_right_str = NULL;
+
+    if (src_left) {
+        if (lv_image_src_get_type(src_left) != LV_IMAGE_SRC_VARIABLE) {
+            src_left_str = lv_malloc(lv_strlen(src_left) + 1);
+            LV_ASSERT_MALLOC(src_left_str);
+            lv_strcpy(src_left_str, src_left);
+            update_src_info(&imagebutton->src_left[state], src_left_str);
+        } else {
+            update_src_info(&imagebutton->src_left[state], src_left);
+        }
+    }
+    if (src_mid) {
+        if (lv_image_src_get_type(src_mid) != LV_IMAGE_SRC_VARIABLE) {
+            src_mid_str = lv_malloc(lv_strlen(src_mid) + 1);
+            LV_ASSERT_MALLOC(src_mid_str);
+            lv_strcpy(src_mid_str, src_mid);
+            update_src_info(&imagebutton->src_mid[state], src_mid_str);
+        } else {
+            update_src_info(&imagebutton->src_mid[state], src_mid);
+        }
+    }
+    if (src_right) {
+        if (lv_image_src_get_type(src_right) != LV_IMAGE_SRC_VARIABLE) {
+            src_right_str = lv_malloc(lv_strlen(src_right) + 1);
+            LV_ASSERT_MALLOC(src_right_str);
+            lv_strcpy(src_right_str, src_right);
+            update_src_info(&imagebutton->src_right[state], src_right_str);
+        } else {
+            update_src_info(&imagebutton->src_right[state], src_right);
+        }
+    }
+#else
     update_src_info(&imagebutton->src_left[state], src_left);
     update_src_info(&imagebutton->src_mid[state], src_mid);
     update_src_info(&imagebutton->src_right[state], src_right);
+#endif
 
     refr_image(obj);
 }
@@ -146,6 +190,30 @@ const void *lv_imagebutton_get_src_right(lv_obj_t *obj, lv_imagebutton_state_t s
 /**********************
  *   STATIC FUNCTIONS
  **********************/
+#if MALLOC_IMGBTN_SRC
+static void lv_imagebutton_destructor(const lv_obj_class_t *class_p, lv_obj_t *obj)
+{
+    LV_UNUSED(class_p);
+    lv_imagebutton_t *imagebutton = (lv_imagebutton_t *)obj;
+    for (int state = 0; state < LV_IMAGEBUTTON_STATE_NUM; state++) {
+        if (imagebutton->src_left[state].img_src &&
+            lv_image_src_get_type(imagebutton->src_left[state].img_src) != LV_IMAGE_SRC_VARIABLE) {
+            lv_free((void *)imagebutton->src_left[state].img_src);
+            imagebutton->src_left[state].img_src = NULL;
+        }
+        if (imagebutton->src_mid[state].img_src &&
+            lv_image_src_get_type(imagebutton->src_mid[state].img_src) != LV_IMAGE_SRC_VARIABLE) {
+            lv_free((void *)imagebutton->src_mid[state].img_src);
+            imagebutton->src_mid[state].img_src = NULL;
+        }
+        if (imagebutton->src_right[state].img_src &&
+            lv_image_src_get_type(imagebutton->src_right[state].img_src) != LV_IMAGE_SRC_VARIABLE) {
+            lv_free((void *)imagebutton->src_right[state].img_src);
+            imagebutton->src_right[state].img_src = NULL;
+        }
+    }
+}
+#endif
 
 static void lv_imagebutton_constructor(const lv_obj_class_t *class_p, lv_obj_t *obj)
 {

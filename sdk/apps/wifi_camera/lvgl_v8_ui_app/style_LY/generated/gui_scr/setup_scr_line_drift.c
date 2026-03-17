@@ -31,6 +31,9 @@ lv_obj_t *setup_scr_line_drift(lv_ui *ui)
     lv_obj_set_scrollbar_mode(ui_scr->line_drift, LV_SCROLLBAR_MODE_OFF);
     ui_style_set(ui_scr->line_drift, GUI_CTRL_SCR);
 
+    //Set style for line_drift. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
+    lv_obj_set_style_bg_color(ui_scr->line_drift, lv_color_make(0x55, 0xaa, 0xa5), LV_PART_MAIN | LV_STATE_DEFAULT);
+
     //Write codes line_drift_lbl_3
     ui_scr->line_drift_lbl_3 = lv_label_create(ui_scr->line_drift);
     lv_label_set_text(ui_scr->line_drift_lbl_3, "请移动至车头地平线");

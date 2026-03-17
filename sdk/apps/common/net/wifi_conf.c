@@ -155,8 +155,8 @@ short CHL_BUSY_CONFIG = (0xe & 0x0f); //0xe
 #else
 //WIFI Adaptivity
 /*n/8 dBm 干扰功率阈值, 设置值和真实值有-20dBm的差值, 即默认值为(-80*8)时，干扰功率为-60dBm时进行规避, 最低配置值为(-127*8)*/
-short CHL_PWR_THR = (-80 * 8);
-short CHL_BUSY_CONFIG = (0xc & 0x0f); //0xe
+short CHL_PWR_THR = (-70 * 8);
+short CHL_BUSY_CONFIG = (0xe & 0x0f); //0xe
 #endif
 
 const u8 CONFIG_WPA3_SUPPORT = 1;  //1：使能wpa3支持，0：关闭wpa3支持

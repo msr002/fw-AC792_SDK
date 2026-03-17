@@ -318,7 +318,7 @@ int music_player_play_auto_next(struct music_player *player_hd);
    @note
 */
 /*----------------------------------------------------------------------------*/
-int music_player_set_play_folder(struct music_player *player_hd, const char *path);
+int music_player_set_play_folder(struct music_player *player_hd, const char *path, const char *logo);
 
 /*----------------------------------------------------------------------------*/
 /**@brief    music_player播放上一个文件夹

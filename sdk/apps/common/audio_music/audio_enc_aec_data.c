@@ -6,11 +6,17 @@
 #if defined CONFIG_AUDIO_ENC_AEC_DATA_CHECK
 
 #ifdef CONFIG_MEDIA_ENABLE
+#include "jlstream_node_cfg.h"
 #define READSIZE 256
 #else
 #define READSIZE 128
 #endif
+
+#if defined TCFG_AUDIO_CVP_DMS_ANS_MODE && (TCFG_AUDIO_CVP_DMS_ANS_MODE)
+#define MIX_DATA_LEN (READSIZE*4*2)  //DMS AEC READSIZE = 128, 4:channel, 2:s16
+#else
 #define MIX_DATA_LEN (READSIZE*3*2)  //AEC READSIZE = 128, 3:channel, 2:s16
+#endif
 #define DAC_DATA_LEN (READSIZE*2*3)  //dac_sr/aec_sr*aec_points*channel  48000/16000 * 128 * 2
 
 static struct {
@@ -78,6 +84,61 @@ void aec_mix_data_set_cb(s16 *data, int step)
             os_sem_post(&__this->w_sem);
 
             memset(__this->cache, 0, sizeof(__this->cache));
+        }
+    }
+}
+
+void dms_aec_soft_mix_data_set_cb(s16 *data, int step)
+{
+    if (__this->fd) {
+        // talk mic data
+        if (step == 1) {
+            for (u32 i = 0; i < READSIZE; ++i) {
+                __this->cache[4 * i] = data[i];
+            }
+        }
+        //ref mic data
+        if (step == 2) {
+            for (u32 i = 0; i < READSIZE; ++i) {
+                __this->cache[4 * i + 1] = data[i];
+            }
+        }
+
+        //dac data
+        if (step == 3) {
+            for (u32 i = 0; i < READSIZE; ++i) {
+                __this->cache[4 * i + 2] = data[i];
+            }
+        }
+
+        //aec_data
+        if (step == 4) {
+            for (u32 i = 0; i < READSIZE; ++i) {
+                __this->cache[4 * i + 3] = data[i];
+            }
+
+            if (0 == cbuf_write(&__this->save_cbuf, __this->cache, MIX_DATA_LEN)) {
+                printf("error jlkws aec_data cbuf write full!");
+                cbuf_clear(&__this->save_cbuf);
+            }
+
+            os_sem_set(&__this->w_sem, 0);
+            os_sem_post(&__this->w_sem);
+
+            memset(__this->cache, 0, sizeof(__this->cache));
+        }
+    }
+
+    if (__this->fd1) {
+        if (step == 5) {
+            for (u32 i = 0; i < DAC_DATA_LEN / 2; ++i) {
+                __this->dac_obuf[i] = data[i];
+            }
+
+            if (0 == cbuf_write(&__this->dac_save_cbuf, __this->dac_obuf, DAC_DATA_LEN)) {
+                printf("error jlkws dac_data cbuf write full!");
+                cbuf_clear(&__this->dac_save_cbuf);
+            }
         }
     }
 }

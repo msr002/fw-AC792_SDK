@@ -102,7 +102,8 @@ int dev_upgrade_cpu_release(u32 addr, u8 type)
 static struct net_update *net_update_info = NULL;
 int storage_device_ready(void);
 u32 get_target_udate_addr(void);
-
+void dual_bank_uboot_protect_disable(void);
+void dual_bank_uboot_protect_en(void);
 
 void test_update_process_notify_callback(void *priv)
 {

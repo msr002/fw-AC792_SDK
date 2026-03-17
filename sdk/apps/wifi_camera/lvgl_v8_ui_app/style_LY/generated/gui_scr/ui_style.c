@@ -62,6 +62,9 @@ lv_style_t gui_roller_main_default_style;
 lv_style_t gui_roller_main_focus_key_style;
 lv_style_t gui_roller_selected_default_style;
 
+// animimg
+lv_style_t gui_animimg_main_default_style;
+
 void ui_style_init(void)
 {
     // digitclock
@@ -176,7 +179,7 @@ void ui_style_init(void)
 
     // scr
     lv_style_init(&gui_scr_main_default_style);
-    lv_style_set_bg_color(&gui_scr_main_default_style, lv_color_make(0x55, 0xaa, 0xa5));
+    lv_style_set_bg_color(&gui_scr_main_default_style, lv_color_make(0x00, 0x00, 0x00));
     lv_style_set_bg_grad_color(&gui_scr_main_default_style, lv_color_make(0x21, 0x95, 0xf6));
     lv_style_set_bg_grad_dir(&gui_scr_main_default_style, LV_GRAD_DIR_NONE);
     lv_style_set_bg_opa(&gui_scr_main_default_style, 0);
@@ -677,6 +680,11 @@ void ui_style_init(void)
     lv_style_set_text_letter_space(&gui_roller_selected_default_style, 0);
     lv_style_set_text_align(&gui_roller_selected_default_style, LV_TEXT_ALIGN_CENTER);
 
+    // animimg
+    lv_style_init(&gui_animimg_main_default_style);
+    lv_style_set_radius(&gui_animimg_main_default_style, 0);
+    lv_style_set_clip_corner(&gui_animimg_main_default_style, true);
+
 }
 
 void ui_style_set(lv_obj_t *obj, gui_ctrl_type_t type)
@@ -736,6 +744,9 @@ void ui_style_set(lv_obj_t *obj, gui_ctrl_type_t type)
         lv_obj_add_style(obj, &gui_roller_main_default_style, LV_PART_MAIN | LV_STATE_DEFAULT);
         lv_obj_add_style(obj, &gui_roller_main_focus_key_style, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
         lv_obj_add_style(obj, &gui_roller_selected_default_style, LV_PART_SELECTED | LV_STATE_DEFAULT);
+        break;
+    case GUI_CTRL_ANIMIMG:
+        lv_obj_add_style(obj, &gui_animimg_main_default_style, LV_PART_MAIN | LV_STATE_DEFAULT);
         break;
     default:
         break;

@@ -144,55 +144,55 @@ GUI_WEAK int gui_model_video_rec_msg_rec_reso_cb(gui_msg_action_t access, gui_ms
 GUI_WEAK int gui_model_video_rec_msg_rec_btn_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type)
 {
     static lv_state_t rec_btn_var = LV_STATE_DEFAULT;
-    _gui_msg_state_cb((int32_t *)&rec_btn_var, access, data);
+    _gui_msg_state_cb(&rec_btn_var, access, data);
     return 0;
 }
 GUI_WEAK int gui_model_video_rec_msg_show_gsensor_icon_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type)
 {
     static lv_obj_flag_t show_gsensor_icon_var = 0;
-    _gui_msg_obj_flag_cb((int32_t *)&show_gsensor_icon_var, access, data);
+    _gui_msg_obj_flag_cb(&show_gsensor_icon_var, access, data);
     return 0;
 }
 GUI_WEAK int gui_model_video_rec_msg_hide_gsensor_icon_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type)
 {
     static lv_obj_flag_t hide_gsensor_icon_var = 0;
-    _gui_msg_obj_flag_cb((int32_t *)&hide_gsensor_icon_var, access, data);
+    _gui_msg_obj_flag_cb(&hide_gsensor_icon_var, access, data);
     return 0;
 }
 GUI_WEAK int gui_model_video_rec_msg_show_guard_icon_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type)
 {
     static lv_obj_flag_t show_guard_icon_var = 0;
-    _gui_msg_obj_flag_cb((int32_t *)&show_guard_icon_var, access, data);
+    _gui_msg_obj_flag_cb(&show_guard_icon_var, access, data);
     return 0;
 }
 GUI_WEAK int gui_model_video_rec_msg_hide_guard_icon_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type)
 {
     static lv_obj_flag_t hide_guard_icon_var = 0;
-    _gui_msg_obj_flag_cb((int32_t *)&hide_guard_icon_var, access, data);
+    _gui_msg_obj_flag_cb(&hide_guard_icon_var, access, data);
     return 0;
 }
 GUI_WEAK int gui_model_video_rec_msg_show_motion_icon_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type)
 {
     static lv_obj_flag_t show_motion_icon_var = 0;
-    _gui_msg_obj_flag_cb((int32_t *)&show_motion_icon_var, access, data);
+    _gui_msg_obj_flag_cb(&show_motion_icon_var, access, data);
     return 0;
 }
 GUI_WEAK int gui_model_video_rec_msg_hide_motion_icon_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type)
 {
     static lv_obj_flag_t hide_motion_icon_var = 0;
-    _gui_msg_obj_flag_cb((int32_t *)&hide_motion_icon_var, access, data);
+    _gui_msg_obj_flag_cb(&hide_motion_icon_var, access, data);
     return 0;
 }
 GUI_WEAK int gui_model_video_rec_msg_show_hdr_icon_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type)
 {
     static lv_obj_flag_t show_hdr_icon_var = 0;
-    _gui_msg_obj_flag_cb((int32_t *)&show_hdr_icon_var, access, data);
+    _gui_msg_obj_flag_cb(&show_hdr_icon_var, access, data);
     return 0;
 }
 GUI_WEAK int gui_model_video_rec_msg_hide_hdr_icon_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type)
 {
     static lv_obj_flag_t hide_hdr_icon_var = 0;
-    _gui_msg_obj_flag_cb((int32_t *)&hide_hdr_icon_var, access, data);
+    _gui_msg_obj_flag_cb(&hide_hdr_icon_var, access, data);
     return 0;
 }
 GUI_WEAK int gui_model_video_rec_msg_rec_remain_time_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type)
@@ -211,7 +211,7 @@ GUI_WEAK int gui_model_video_rec_msg_rec_remain_time_cb(gui_msg_action_t access,
 GUI_WEAK int gui_model_video_rec_msg_rec_time_state_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type)
 {
     static lv_state_t rec_time_state_var = LV_STATE_DEFAULT;
-    _gui_msg_state_cb((int32_t *)&rec_time_state_var, access, data);
+    _gui_msg_state_cb(&rec_time_state_var, access, data);
     return 0;
 }
 GUI_WEAK int gui_model_video_rec_msg_video_rec_menu_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type)

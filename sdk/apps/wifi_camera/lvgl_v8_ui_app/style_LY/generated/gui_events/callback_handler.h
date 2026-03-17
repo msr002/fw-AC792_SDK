@@ -20,11 +20,29 @@ extern void page_map_timer_1_timer_cb(lv_timer_t *src);
 static int img_2_init_flag  = 0;
 extern void page_map_timer_2_timer_cb(lv_timer_t *src);
 
+// Generate page_music_timer_1 CallBack Handler
+extern void page_music_timer_1_timer_cb(lv_timer_t *src);
+
+// Generate page_meter_anim_pwr_l CallBack Handler
+extern void page_meter_anim_pwr_l_anim_start_cb(lv_anim_t *anim);
+
+// Generate page_meter_anim_pwr_l CallBack Handler
+extern void page_meter_anim_pwr_l_anim_ready_cb(lv_anim_t *anim);
+
+// Generate page_meter_anim_pwr_r CallBack Handler
+extern void page_meter_anim_pwr_r_anim_start_cb(lv_anim_t *anim);
+
+// Generate page_meter_anim_pwr_r CallBack Handler
+extern void page_meter_anim_pwr_r_anim_ready_cb(lv_anim_t *anim);
+
 // Generate page_meter_timer_1 CallBack Handler
 extern void page_meter_timer_1_timer_cb(lv_timer_t *src);
 
-// Generate page_music_timer_1 CallBack Handler
-extern void page_music_timer_1_timer_cb(lv_timer_t *src);
+// Generate page_meter_timer_2 CallBack Handler
+extern void page_meter_timer_2_timer_cb(lv_timer_t *src);
+
+// Generate page_meter_timer_3 CallBack Handler
+extern void page_meter_timer_3_timer_cb(lv_timer_t *src);
 
 #ifdef __cplusplus
 }

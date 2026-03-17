@@ -46,6 +46,11 @@ typedef enum {
     LV_LISTMENU_STYLE_CUSTOM = 0x10, // 自定义
 } lv_listmenu_style_t;
 
+typedef enum {
+    LV_LISTMENU_ITEM_LAYOUT_HORIZONTAL, // 图文水平排列（图左文右）
+    LV_LISTMENU_ITEM_LAYOUT_VERTICAL,   // 图文垂直排列（图上文下）
+} lv_listmenu_item_layout_t;
+
 typedef union {
     struct {
         lv_coord_t radius;
@@ -67,6 +72,7 @@ typedef struct {
 
     lv_listmenu_item_transform_cb_t item_transform_cb;
     lv_listmenu_style_t style;
+    lv_listmenu_item_layout_t item_layout;
     lv_listmenu_style_param_t style_param;
 
     struct {
@@ -143,6 +149,13 @@ void lv_listmenu_set_style(lv_obj_t *obj, lv_listmenu_style_t style, lv_listmenu
  */
 void lv_listmenu_set_item_transform_cb(lv_obj_t *obj, lv_listmenu_item_transform_cb_t item_transform_cb,
                                        lv_listmenu_style_param_t *param);
+
+/**
+ * @brief Set menu item image/text layout mode
+ * @param obj list menu object
+ * @param layout layout mode
+ */
+void lv_listmenu_set_item_layout(lv_obj_t *obj, lv_listmenu_item_layout_t layout);
 
 /**
  * @brief Set the scroll offset
@@ -259,6 +272,13 @@ lv_listmenu_style_t lv_listmenu_get_style(lv_obj_t *obj);
 lv_listmenu_style_param_t *lv_listmenu_get_style_param(lv_obj_t *obj);
 
 /**
+ * @brief Get the menu item image/text layout mode
+ * @param obj list menu object
+ * @return current layout mode
+ */
+lv_listmenu_item_layout_t lv_listmenu_get_item_layout(lv_obj_t *obj);
+
+/**
  * @brief Get the current center button
  * @param obj list menu object
  * @return current center button object
@@ -350,3 +370,4 @@ bool lv_listmenu_is_loop(lv_obj_t *obj);
 #endif
 
 #endif
+

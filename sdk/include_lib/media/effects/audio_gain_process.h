@@ -3,6 +3,8 @@
 
 #include "generic/typedef.h"
 #include "effects/gain_mix_api.h"
+#include "effects/audio_split_gain_fade.h"
+
 #ifndef RUN_NORMAL
 #define RUN_NORMAL  0
 #endif
@@ -30,20 +32,16 @@ typedef struct _steromix_gain_process_TOOL_SET {
     struct aud_steromix_gain_parm_update parm;
 } stereo_mix_gain_param_tool_set;
 
-struct aud_split_gain_parm_update {
-    int revere_phase_l;
-    float gain_l;
-    int revere_phase_r;
-    float gain_r;
-};
-
 struct split_gain_param_tool_set {
     int is_bypass;
-    struct aud_split_gain_parm_update parm;
+    int fade_time;
+    struct _aud_gain_parm_update parm[GAIN_MAX_CH];
 };
 
 struct aud_gain_parm {
-    float gain[4];//增加多少dB
+    float gain[GAIN_MAX_CH];//增加多少dB
+    int sample_rate;
+    int fade_time;
     u8 channel;//通道数
     u8 indata_inc;//channel ==1 ?1:2;
     u8 outdata_inc;//channel ==1 ?1:2;
@@ -52,13 +50,14 @@ struct aud_gain_parm {
 };
 
 struct aud_gain_parm_update {
-    float gain[4];//增加多少dB
+    float gain[GAIN_MAX_CH];//增加多少dB
+    int fade_time;
 };
 
 struct aud_gain_process {
     struct aud_gain_parm parm;
+    struct aud_fade_gain *fade_hdl;
     u8 status;                           //内部运行状态机
-    u8 update;                           //设置参数更新标志
 };
 
 

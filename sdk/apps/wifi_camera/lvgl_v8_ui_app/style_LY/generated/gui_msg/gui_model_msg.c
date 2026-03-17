@@ -65,7 +65,7 @@ GUI_WEAK int gui_model_msg_next_file_cb(gui_msg_action_t access, gui_msg_data_t 
 GUI_WEAK int gui_model_msg_video_pause_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type)
 {
     static lv_state_t video_pause_var = LV_STATE_DEFAULT;
-    _gui_msg_state_cb((int32_t *)&video_pause_var, access, data);
+    _gui_msg_state_cb(&video_pause_var, access, data);
     return 0;
 }
 GUI_WEAK int gui_model_msg_cur_time_process_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type)
@@ -109,7 +109,7 @@ GUI_WEAK int gui_model_msg_file_num_cb(gui_msg_action_t access, gui_msg_data_t *
 GUI_WEAK int gui_model_msg_music_state_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type)
 {
     static lv_state_t music_state_var = LV_STATE_DEFAULT;
-    _gui_msg_state_cb((int32_t *)&music_state_var, access, data);
+    _gui_msg_state_cb(&music_state_var, access, data);
     return 0;
 }
 

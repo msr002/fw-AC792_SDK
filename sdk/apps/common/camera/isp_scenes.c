@@ -1,6 +1,5 @@
 #include "system/includes.h"
 #include "app_config.h"
-#include "cpu.h"
 #include "asm/debug.h"
 #include "video/isp.h"
 
@@ -383,9 +382,11 @@ static void isp_scene_switch(struct user_isp_cfg *cfg, u8 force)
     cfg->current_scene = scene;
     flush_isp_cfg(cfg);
 
+#ifdef CONFIG_UI_ENABLE
     //屏效跟随isp效果变化
     void lcd_scenes_switch(int model);
     lcd_scenes_switch(scene);
+#endif
 }
 
 static void isp_scene_switch_timer(struct user_isp_cfg *cfg)

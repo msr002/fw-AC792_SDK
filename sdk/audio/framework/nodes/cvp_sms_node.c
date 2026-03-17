@@ -451,7 +451,7 @@ static void cvp_ioc_start(struct cvp_node_hdl *hdl)
     u8 mic_num; //算法需要使用的MIC个数
 
 #if TCFG_AUDIO_CVP_OUTPUT_WAY_IIS_ENABLE && TCFG_IIS_NODE_ENABLE
-    audio_cvp_ref_src_open(hdl->scene == STREAM_SCENE_PC_MIC ? STREAM_SCENE_PC_SPK : hdl->scene, audio_iis_get_sample_rate(iis_hdl[0]), fmt->sample_rate, 2);
+    audio_cvp_ref_src_open(hdl->scene == STREAM_SCENE_PC_MIC ? STREAM_SCENE_PC_SPK : hdl->scene, audio_iis_get_sample_rate(iis_hdl[0]) ? audio_iis_get_sample_rate(iis_hdl[0]) : TCFG_AUDIO_GLOBAL_SAMPLE_RATE, fmt->sample_rate, 2);
 #endif
 
     audio_aec_init(&init_param);
@@ -494,8 +494,11 @@ static int cvp_ioc_update_parm(struct cvp_node_hdl *hdl, int parm)
     struct cvp_cfg_t *cfg = (struct cvp_cfg_t *)parm;
     if (hdl) {
         cvp_node_param_cfg_update(cfg, &hdl->online_cfg);
-        /* aec_cfg_update(&hdl->online_cfg); */
-        printf("========todo=============%s=%d=yuring=\n\r", __func__, __LINE__);
+#if (TCFG_AUDIO_SMS_SEL == SMS_DEFAULT)
+        aec_cfg_update(&hdl->online_cfg);
+#elif (TCFG_AUDIO_SMS_SEL == SMS_TDE)
+        sms_tde_cfg_update(&hdl->online_cfg);
+#endif
         ret = true;
     }
     return ret;

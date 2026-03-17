@@ -958,20 +958,20 @@ void _gui_msg_int32_cb(int32_t *var_ptr, gui_msg_action_t access, gui_msg_data_t
     data->value_int = *var_ptr;
     return;
 }
-void _gui_msg_state_cb(int32_t *var_ptr, gui_msg_action_t access, gui_msg_data_t *data)
+void _gui_msg_state_cb(lv_state_t *var_ptr, gui_msg_action_t access, gui_msg_data_t *data)
 {
     if (access == GUI_MSG_ACCESS_SET) {
         *var_ptr = (lv_state_t)data->value_int;
     }
-    data->value_int = *var_ptr;
+    data->value_int = (int32_t) * var_ptr;
     return;
 }
-void _gui_msg_obj_flag_cb(int32_t *var_ptr, gui_msg_action_t access, gui_msg_data_t *data)
+void _gui_msg_obj_flag_cb(lv_obj_flag_t *var_ptr, gui_msg_action_t access, gui_msg_data_t *data)
 {
     if (access == GUI_MSG_ACCESS_SET) {
         *var_ptr = (lv_obj_flag_t)data->value_int;
     }
-    data->value_int = *var_ptr;
+    data->value_int = (int32_t) * var_ptr;
     return;
 }
 void _gui_msg_tm_cb(struct tm *var_ptr, bool is_systime, gui_msg_action_t access, gui_msg_data_t *data)

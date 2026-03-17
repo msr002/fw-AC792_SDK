@@ -81,121 +81,121 @@ GUI_WEAK int gui_model_sys_setting_msg_subpage_warning_cb(gui_msg_action_t acces
 GUI_WEAK int gui_model_sys_setting_msg_hide_viewdate_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type)
 {
     static lv_obj_flag_t hide_viewdate_var = LV_OBJ_FLAG_HIDDEN;
-    _gui_msg_obj_flag_cb((int32_t *)&hide_viewdate_var, access, data);
+    _gui_msg_obj_flag_cb(&hide_viewdate_var, access, data);
     return 0;
 }
 GUI_WEAK int gui_model_sys_setting_msg_hide_viewcarnum_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type)
 {
     static lv_obj_flag_t hide_viewcarnum_var = LV_OBJ_FLAG_HIDDEN;
-    _gui_msg_obj_flag_cb((int32_t *)&hide_viewcarnum_var, access, data);
+    _gui_msg_obj_flag_cb(&hide_viewcarnum_var, access, data);
     return 0;
 }
 GUI_WEAK int gui_model_sys_setting_msg_hide_viewlist_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type)
 {
     static lv_obj_flag_t hide_viewlist_var = LV_OBJ_FLAG_HIDDEN;
-    _gui_msg_obj_flag_cb((int32_t *)&hide_viewlist_var, access, data);
+    _gui_msg_obj_flag_cb(&hide_viewlist_var, access, data);
     return 0;
 }
 GUI_WEAK int gui_model_sys_setting_msg_hide_subpagewarning_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type)
 {
     static lv_obj_flag_t hide_subpagewarning_var = LV_OBJ_FLAG_HIDDEN;
-    _gui_msg_obj_flag_cb((int32_t *)&hide_subpagewarning_var, access, data);
+    _gui_msg_obj_flag_cb(&hide_subpagewarning_var, access, data);
     return 0;
 }
 GUI_WEAK int gui_model_sys_setting_msg_show_viewdate_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type)
 {
     static lv_obj_flag_t show_viewdate_var = 0;
-    _gui_msg_obj_flag_cb((int32_t *)&show_viewdate_var, access, data);
+    _gui_msg_obj_flag_cb(&show_viewdate_var, access, data);
     return 0;
 }
 GUI_WEAK int gui_model_sys_setting_msg_show_viewcarnum_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type)
 {
     static lv_obj_flag_t show_viewcarnum_var = 0;
-    _gui_msg_obj_flag_cb((int32_t *)&show_viewcarnum_var, access, data);
+    _gui_msg_obj_flag_cb(&show_viewcarnum_var, access, data);
     return 0;
 }
 GUI_WEAK int gui_model_sys_setting_msg_show_viewlist_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type)
 {
     static lv_obj_flag_t show_viewlist_var = 0;
-    _gui_msg_obj_flag_cb((int32_t *)&show_viewlist_var, access, data);
+    _gui_msg_obj_flag_cb(&show_viewlist_var, access, data);
     return 0;
 }
 GUI_WEAK int gui_model_sys_setting_msg_show_subpagewarning_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type)
 {
     static lv_obj_flag_t show_subpagewarning_var = 0;
-    _gui_msg_obj_flag_cb((int32_t *)&show_subpagewarning_var, access, data);
+    _gui_msg_obj_flag_cb(&show_subpagewarning_var, access, data);
     return 0;
 }
 GUI_WEAK int gui_model_sys_setting_msg_hide_funkey5_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type)
 {
     static lv_obj_flag_t hide_funkey5_var = LV_OBJ_FLAG_HIDDEN;
-    _gui_msg_obj_flag_cb((int32_t *)&hide_funkey5_var, access, data);
+    _gui_msg_obj_flag_cb(&hide_funkey5_var, access, data);
     return 0;
 }
 GUI_WEAK int gui_model_sys_setting_msg_hide_funkey6_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type)
 {
     static lv_obj_flag_t hide_funkey6_var = LV_OBJ_FLAG_HIDDEN;
-    _gui_msg_obj_flag_cb((int32_t *)&hide_funkey6_var, access, data);
+    _gui_msg_obj_flag_cb(&hide_funkey6_var, access, data);
     return 0;
 }
 GUI_WEAK int gui_model_sys_setting_msg_hide_funkey7_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type)
 {
     static lv_obj_flag_t hide_funkey7_var = LV_OBJ_FLAG_HIDDEN;
-    _gui_msg_obj_flag_cb((int32_t *)&hide_funkey7_var, access, data);
+    _gui_msg_obj_flag_cb(&hide_funkey7_var, access, data);
     return 0;
 }
 GUI_WEAK int gui_model_sys_setting_msg_show_funkey4_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type)
 {
     static lv_obj_flag_t show_funkey4_var = 0;
-    _gui_msg_obj_flag_cb((int32_t *)&show_funkey4_var, access, data);
+    _gui_msg_obj_flag_cb(&show_funkey4_var, access, data);
     return 0;
 }
 GUI_WEAK int gui_model_sys_setting_msg_show_funkey5_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type)
 {
     static lv_obj_flag_t show_funkey5_var = 0;
-    _gui_msg_obj_flag_cb((int32_t *)&show_funkey5_var, access, data);
+    _gui_msg_obj_flag_cb(&show_funkey5_var, access, data);
     return 0;
 }
 GUI_WEAK int gui_model_sys_setting_msg_show_funkey6_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type)
 {
     static lv_obj_flag_t show_funkey6_var = 0;
-    _gui_msg_obj_flag_cb((int32_t *)&show_funkey6_var, access, data);
+    _gui_msg_obj_flag_cb(&show_funkey6_var, access, data);
     return 0;
 }
 GUI_WEAK int gui_model_sys_setting_msg_show_funkey7_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type)
 {
     static lv_obj_flag_t show_funkey7_var = 0;
-    _gui_msg_obj_flag_cb((int32_t *)&show_funkey7_var, access, data);
+    _gui_msg_obj_flag_cb(&show_funkey7_var, access, data);
     return 0;
 }
 GUI_WEAK int gui_model_sys_setting_msg_state_funkey4_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type)
 {
     static lv_state_t state_funkey4_var = LV_STATE_DEFAULT;
-    _gui_msg_state_cb((int32_t *)&state_funkey4_var, access, data);
+    _gui_msg_state_cb(&state_funkey4_var, access, data);
     return 0;
 }
 GUI_WEAK int gui_model_sys_setting_msg_state_funkey5_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type)
 {
     static lv_state_t state_funkey5_var = LV_STATE_DEFAULT;
-    _gui_msg_state_cb((int32_t *)&state_funkey5_var, access, data);
+    _gui_msg_state_cb(&state_funkey5_var, access, data);
     return 0;
 }
 GUI_WEAK int gui_model_sys_setting_msg_state_funkey6_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type)
 {
     static lv_state_t state_funkey6_var = LV_STATE_DEFAULT;
-    _gui_msg_state_cb((int32_t *)&state_funkey6_var, access, data);
+    _gui_msg_state_cb(&state_funkey6_var, access, data);
     return 0;
 }
 GUI_WEAK int gui_model_sys_setting_msg_state_funkey7_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type)
 {
     static lv_state_t state_funkey7_var = LV_STATE_DEFAULT;
-    _gui_msg_state_cb((int32_t *)&state_funkey7_var, access, data);
+    _gui_msg_state_cb(&state_funkey7_var, access, data);
     return 0;
 }
 GUI_WEAK int gui_model_sys_setting_msg_hide_funkey4_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type)
 {
     static lv_obj_flag_t hide_funkey4_var = LV_OBJ_FLAG_HIDDEN;
-    _gui_msg_obj_flag_cb((int32_t *)&hide_funkey4_var, access, data);
+    _gui_msg_obj_flag_cb(&hide_funkey4_var, access, data);
     return 0;
 }
 GUI_WEAK int gui_model_sys_setting_msg_subpage_warning_state_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type)

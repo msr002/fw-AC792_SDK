@@ -32,6 +32,9 @@ lv_obj_t *setup_scr_sys_setting(lv_ui *ui)
     lv_obj_set_scrollbar_mode(ui_scr->sys_setting, LV_SCROLLBAR_MODE_OFF);
     ui_style_set(ui_scr->sys_setting, GUI_CTRL_SCR);
 
+    //Set style for sys_setting. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
+    lv_obj_set_style_bg_color(ui_scr->sys_setting, lv_color_make(0x55, 0xaa, 0xa5), LV_PART_MAIN | LV_STATE_DEFAULT);
+
     //Write codes sys_setting_view_menu_b
     ui_scr->sys_setting_view_menu_b = lv_obj_create(ui_scr->sys_setting);
     lv_obj_set_pos(ui_scr->sys_setting_view_menu_b, 0, 0);

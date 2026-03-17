@@ -24,15 +24,15 @@ typedef enum {
 } lv_i18n_plural_type_t;
 
 typedef struct {
-    const char *msg_id;
+    uint16_t msg_id;
+    uint16_t font_id;
     const char *translation;
-    const char *font_name;
 } lv_i18n_phrase_t;
 
 typedef struct {
     const char *locale_name;
-    lv_i18n_phrase_t *singulars;
-    lv_i18n_phrase_t *plurals[_LV_I18N_PLURAL_TYPE_NUM];
+    const lv_i18n_phrase_t *singulars;
+    const lv_i18n_phrase_t *plurals[_LV_I18N_PLURAL_TYPE_NUM];
     uint8_t (*locale_plural_fn)(int32_t num);
 } lv_i18n_lang_t;
 
@@ -56,25 +56,25 @@ int lv_i18n_init(const lv_i18n_language_pack_t *langs);
 int lv_i18n_set_locale(const char *l_name);
 
 /**
- * Get the translation from a message ID
- * @param msg_id message ID
- * @return the translation of `msg_id` on the set local
+ * Get the translation from a message name
+ * @param msg_name message name
+ * @return the translation of `msg_name` on the set local
  */
-const char *lv_i18n_get_text(const char *msg_id);
+const char *lv_i18n_get_text(const char *msg_name);
 
 /**
  * Get the translation from a message ID and apply the language's plural rule to get correct form
- * @param msg_id message ID
+ * @param msg_name message name
  * @param num an integer to select the correct plural form
- * @return the translation of `msg_id` on the set local
+ * @return the translation of `msg_name` on the set local
  */
-const char *lv_i18n_get_text_plural(const char *msg_id, int32_t num);
+const char *lv_i18n_get_text_plural(const char *msg_name, int32_t num);
 
 /*
- * Get the font for a message ID
- * @param msg_id message ID
+ * Get the font for a message name
+ * @param msg_name message name
 */
-const lv_font_t *lv_i18n_get_font(const char *msg_id);
+const lv_font_t *lv_i18n_get_font(const char *msg_name);
 
 /**
  * Get the name of the currently used localization.

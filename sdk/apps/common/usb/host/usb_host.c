@@ -604,6 +604,7 @@ static u32 _usb_host_mount(const usb_dev usb_id, u32 port, u32 retry, u32 reset_
         private_data->devnum = 0;
         private_data->ep0_max_packet_size = 8;
         /* usb_get_device_descriptor(host_dev, &device_desc); */
+        int usb_get_device_descriptor_64(struct usb_host_device * host_dev, struct usb_device_descriptor * desc);
         usb_get_device_descriptor_64(host_dev, &device_desc);
 
         /**********set address*********/

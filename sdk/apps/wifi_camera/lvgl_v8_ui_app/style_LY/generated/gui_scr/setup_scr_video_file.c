@@ -34,7 +34,6 @@ lv_obj_t *setup_scr_video_file(lv_ui *ui)
     ui_style_set(ui_scr->video_file, GUI_CTRL_SCR);
 
     //Set style for video_file. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
-    lv_obj_set_style_bg_color(ui_scr->video_file, lv_color_make(0x00, 0x00, 0x00), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_opa(ui_scr->video_file, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_border_opa(ui_scr->video_file, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
 

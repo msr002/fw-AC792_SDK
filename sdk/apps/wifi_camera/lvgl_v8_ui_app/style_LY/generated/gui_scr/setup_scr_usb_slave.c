@@ -32,7 +32,6 @@ lv_obj_t *setup_scr_usb_slave(lv_ui *ui)
     ui_style_set(ui_scr->usb_slave, GUI_CTRL_SCR);
 
     //Set style for usb_slave. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
-    lv_obj_set_style_bg_color(ui_scr->usb_slave, lv_color_make(0x00, 0x00, 0x00), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_opa(ui_scr->usb_slave, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     //Write codes usb_slave_img_icon_pccam

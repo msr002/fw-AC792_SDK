@@ -72,7 +72,11 @@ static void pdm_mic_output_handler(void *priv, void *data, u32 len)
         memset((u8 *)data, 0x0, len);
     }
 
-    if (hdl->scene == STREAM_SCENE_ESCO) {	//cvp读dac 参考数据
+    //cvp读dac 参考数据
+    if ((hdl->scene == STREAM_SCENE_ESCO) ||
+        (hdl->scene == STREAM_SCENE_PC_MIC) ||
+        (hdl->scene == STREAM_SCENE_LEA_CALL) ||
+        (hdl->scene == STREAM_SCENE_VIR_DATA_TX)) {
         audio_cvp_phase_align();
     }
 

@@ -30,9 +30,13 @@ extern const int config_audio_limiter_xfade_enable;
 
 extern const int config_audio_mblimiter_xfade_enable;
 
+extern const int config_audio_plate_reverb_xfade_enable;
+
 extern const int config_audio_gain_enable;
 
 extern const int config_audio_split_gain_enable;
+
+extern const int config_audio_split_gain_fade_enable;
 
 extern const int config_audio_stereomix_enable;
 
@@ -131,6 +135,8 @@ extern const int config_mixer_32bit_enable;
 extern const int config_peak_rms_32bit_enable;
 
 extern const int config_audio_vocal_track_synthesis_32bit_enable;
+
+extern const int config_jlstream_fade_time_msec;
 
 extern const int config_jlstream_fade_32bit_enable;
 

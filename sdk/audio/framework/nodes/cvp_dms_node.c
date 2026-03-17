@@ -10,6 +10,7 @@
 #include "cvp_node.h"
 #include "app_config.h"
 #include "cvp_dms.h"
+#include "audio_iis.h"
 
 #if TCFG_AUDIO_DUT_ENABLE
 #include "audio_dut_control.h"
@@ -247,6 +248,7 @@ struct cvp_node_hdl {
         DMS_AWN_CONFIG dms_awn;
     } online_cfg;
     struct stream_frame *frame[3];	//输入frame存储，算法输入缓存使用
+    enum stream_scene scene;
     u8 buf_cnt;						//循环输入buffer位置
     u8 mic_swap;					//主副MIC顺序交换标志
     u16 source_uuid; //源节点uuid
@@ -719,6 +721,9 @@ static void cvp_handle_frame(struct stream_iport *iport, struct stream_note *not
     u8 mic_ch = audio_adc_file_get_mic_en_map();
 
     while (1) {
+        if (jlstream_get_iport_frame_num(hdl_node(hdl)->oport->next) > 1) {
+            break;
+        }
         in_frame = jlstream_pull_frame(iport, note);		//从iport读取数据
         if (!in_frame) {
             break;
@@ -790,6 +795,7 @@ static void cvp_handle_frame(struct stream_iport *iport, struct stream_note *not
             }
         }
         jlstream_free_frame(in_frame);	//释放iport资源
+        break;
     }
 }
 
@@ -860,8 +866,12 @@ static void cvp_ioc_start(struct cvp_node_hdl *hdl)
     struct audio_aec_init_param_t init_param;
     init_param.sample_rate = fmt->sample_rate;
     init_param.ref_sr = hdl->ref_sr;
-    init_param.ref_channel = 1;;
+    init_param.ref_channel = 1;
     u8 mic_num; //算法需要使用的MIC个数
+
+#if TCFG_AUDIO_CVP_OUTPUT_WAY_IIS_ENABLE && TCFG_IIS_NODE_ENABLE
+    audio_cvp_ref_src_open(hdl->scene == STREAM_SCENE_PC_MIC ? STREAM_SCENE_PC_SPK : hdl->scene, audio_iis_get_sample_rate(iis_hdl[0]) ? audio_iis_get_sample_rate(iis_hdl[0]) : TCFG_AUDIO_GLOBAL_SAMPLE_RATE, fmt->sample_rate, 2);
+#endif
 
     audio_aec_init(&init_param);
 
@@ -891,6 +901,9 @@ static void cvp_ioc_stop(struct cvp_node_hdl *hdl)
 {
     if (hdl) {
         audio_aec_close();
+#if TCFG_AUDIO_CVP_OUTPUT_WAY_IIS_ENABLE && TCFG_IIS_NODE_ENABLE
+        audio_cvp_ref_src_close();
+#endif
     }
 }
 
@@ -934,6 +947,9 @@ static int cvp_adapter_ioctl(struct stream_iport *iport, int cmd, int arg)
         break;
     case NODE_IOC_SET_FMT:
         hdl->ref_sr = (u32)arg;
+        break;
+    case NODE_IOC_SET_SCENE:
+        hdl->scene = arg;
         break;
     case NODE_IOC_START:
         cvp_ioc_start(hdl);

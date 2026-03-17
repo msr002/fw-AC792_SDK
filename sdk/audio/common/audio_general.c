@@ -15,6 +15,8 @@
 #include "audio_config_def.h"
 #include "effects/voiceChanger_api.h"
 #include "scene_update.h"
+#include "spatial_effects_process.h"
+
 
 /*音频配置在线调试配置*/
 const int config_audio_cfg_debug_online = TCFG_CFG_TOOL_ENABLE;
@@ -31,6 +33,7 @@ const int config_audio_dac_ng_debug = 0;
 const int config_ch_adapter_32bit_enable = 1;
 const int config_mixer_32bit_enable = 1;
 const int config_jlstream_fade_32bit_enable = 1;
+const int config_jlstream_fade_time_msec = 100;
 const int config_audio_eq_xfade_enable = 1;
 const float config_audio_eq_xfade_time = 0;//0.4f;//0：一帧fade完成 非0：连续多帧fade，过度更加平滑，fade过程算力会相应增加(fade时间 范围(0~1)单位:秒)
 const int config_peak_rms_32bit_enable = 1;
@@ -66,6 +69,7 @@ const int config_audio_dac_underrun_time_lea = 100; //le_audio 音频流欠载�
 
 const int config_audio_gain_enable = TCFG_GAIN_NODE_ENABLE;
 const int config_audio_split_gain_enable = TCFG_SPLIT_GAIN_NODE_ENABLE;
+const int config_audio_split_gain_fade_enable = TCFG_SPLIT_GAIN_NODE_ENABLE;
 const int config_audio_stereomix_enable = TCFG_STEROMIX_NODE_ENABLE;
 
 /*
@@ -344,10 +348,26 @@ const int config_audio_crossover_3band_enable   = 1;
 const int config_audio_limiter_xfade_enable = 0;
 const int config_audio_mblimiter_xfade_enable = 0;
 
+//空间音效流程串接reverb时自动使能，也可自行置1用于其他场景
+const int config_audio_plate_reverb_xfade_enable = SPATIAL_AUDIO_EFFECT_WITH_PLATE_REVERB;
+
 /*Vocal Remover Configs*/
+#ifdef TCFG_VOCAL_REMOVER_LOW_PASS_ENABLE
+const int config_audio_vocal_remover_low_cut_enable = TCFG_VOCAL_REMOVER_LOW_PASS_ENABLE;
+#else
 const int config_audio_vocal_remover_low_cut_enable = 1;
+#endif
+#ifdef TCFG_VOCAL_REMOVER_HIGH_PASS_ENABLE
+const int config_audio_vocal_remover_high_cut_enable = TCFG_VOCAL_REMOVER_HIGH_PASS_ENABLE;
+#else
 const int config_audio_vocal_remover_high_cut_enable = 1;
-const int config_audio_vocal_remover_preset_mode = 0; //预设参数模式[0/1]，0：预设关，使用工具节点配置 1：使用预设模式1
+#endif
+#ifdef TCFG_VOCAL_REMOVER_PRESET_MODE
+//预设参数模式[0/1]，0：预设关，使用工具节点配置 1：使用预设模式1
+const int config_audio_vocal_remover_preset_mode = TCFG_VOCAL_REMOVER_PRESET_MODE;
+#else
+const int config_audio_vocal_remover_preset_mode = 0;
+#endif
 
 /*vbass noisegate 参数配置*/
 const int virtualbass_noisegate_attack_time = 50;

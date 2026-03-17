@@ -304,8 +304,8 @@ extern void gui_msg_set_textarea_text_by_string_cb(lv_observer_t *observer, lv_s
 extern void gui_msg_change_textarea_text_cb(lv_event_t *e);
 extern void _gui_msg_char_array_cb(char **var_ptr, const char *init_value, bool *is_init, gui_msg_action_t access, gui_msg_data_t *data);
 extern void _gui_msg_int32_cb(int32_t *var_ptr, gui_msg_action_t access, gui_msg_data_t *data);
-extern void _gui_msg_state_cb(int32_t *var_ptr, gui_msg_action_t access, gui_msg_data_t *data);
-extern void _gui_msg_obj_flag_cb(int32_t *var_ptr, gui_msg_action_t access, gui_msg_data_t *data);
+extern void _gui_msg_state_cb(lv_state_t *var_ptr, gui_msg_action_t access, gui_msg_data_t *data);
+extern void _gui_msg_obj_flag_cb(lv_obj_flag_t *var_ptr, gui_msg_action_t access, gui_msg_data_t *data);
 extern void _gui_msg_tm_cb(struct tm *var_ptr, bool is_systime, gui_msg_action_t access, gui_msg_data_t *data);
 extern void _gui_msg_bool_cb(bool *var_ptr, gui_msg_action_t access, gui_msg_data_t *data);
 #if LV_USE_OBSERVER

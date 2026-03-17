@@ -84,18 +84,6 @@ lv_obj_t *setup_scr_sys_prompt(lv_ui *ui)
     lv_obj_add_flag(ui_scr->sys_prompt_img_2, LV_OBJ_FLAG_CLICKABLE);
     ui_style_set(ui_scr->sys_prompt_img_2, GUI_CTRL_IMG);
 
-    //Write codes sys_prompt_img_1
-    ui_scr->sys_prompt_img_1 = lv_img_create(ui_scr->sys_prompt);
-    lv_img_set_src(ui_scr->sys_prompt_img_1, gui_get_res_path(GUI_RES_ASTERN_PNG));
-    lv_img_set_pivot(ui_scr->sys_prompt_img_1, 0, 0);
-    lv_img_set_angle(ui_scr->sys_prompt_img_1, 0);
-    lv_img_set_zoom(ui_scr->sys_prompt_img_1, 256);
-    lv_obj_set_pos(ui_scr->sys_prompt_img_1, 106, 311);
-    lv_obj_set_size(ui_scr->sys_prompt_img_1, 550, 167);
-    lv_obj_add_flag(ui_scr->sys_prompt_img_1, LV_OBJ_FLAG_HIDDEN);
-    lv_obj_add_flag(ui_scr->sys_prompt_img_1, LV_OBJ_FLAG_CLICKABLE);
-    ui_style_set(ui_scr->sys_prompt_img_1, GUI_CTRL_IMG);
-
     //Write codes sys_prompt_lbl_1
     ui_scr->sys_prompt_lbl_1 = lv_label_create(ui_scr->sys_prompt);
     lv_label_set_text(ui_scr->sys_prompt_lbl_1, "准备好了吗~\n电量不足\n未插入卡\n没有文件\n摄像头掉线了\n");

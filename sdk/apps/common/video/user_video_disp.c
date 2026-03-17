@@ -1,5 +1,10 @@
 #include "server/video_server.h"
 #include "server/server_core.h"
+#include "app_config.h"
+
+
+#if defined CONFIG_USR_VIDEO_ENABLE && defined CONFIG_UI_ENABLE
+
 #include "lcd_config.h"
 
 #define LOG_TAG             "[USER_VIDEO_DISP]"
@@ -12,7 +17,6 @@
 
 static struct server *video_display[8];
 
-#if defined CONFIG_USR_VIDEO_ENABLE && defined CONFIG_UI_ENABLE
 
 int user_video_disp_start(int video_id, int sub_id, const struct video_window *win)
 {

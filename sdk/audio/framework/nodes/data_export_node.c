@@ -105,6 +105,29 @@ static void data_export_ioc_open_iport(struct stream_iport *iport)
     iport->handle_frame = data_export_handle_frame;				//注册输出回调
 }
 
+static int data_export_ioc_fmt_nego(struct data_export_node_hdl *hdl, struct stream_iport *iport)
+{
+#if TCFG_USER_BT_CLASSIC_ENABLE && TCFG_BT_SUPPORT_PROFILE_HFP
+    struct stream_fmt *in_fmt = &iport->prev->fmt;
+    struct stream_fmt *out_fmt = &hdl_node(hdl)->oport->fmt;
+    int type = lmp_private_get_esco_packet_type();
+    int frame_time = (lmp_private_get_esco_packet_type() >> 8) & 0xff;
+    int media_type = type & 0xff;
+    if (out_fmt->coding_type == 0 || out_fmt->coding_type != AUDIO_CODING_PCM) {
+        if (media_type == 0) {
+            in_fmt->sample_rate = 8000;
+            in_fmt->coding_type = AUDIO_CODING_CVSD;
+        } else if (media_type == 2) {
+            in_fmt->sample_rate = 32000;
+            in_fmt->coding_type = AUDIO_CODING_LC3;
+        } else {
+            in_fmt->sample_rate = 16000;
+            in_fmt->coding_type = AUDIO_CODING_MSBC;
+        }
+    }
+#endif
+    return 0;
+}
 
 /*节点start函数*/
 static void data_export_ioc_start(struct data_export_node_hdl *hdl)
@@ -170,6 +193,9 @@ static int data_export_adapter_ioctl(struct stream_iport *iport, int cmd, int ar
     case NODE_IOC_OPEN_OPORT:
         break;
     case NODE_IOC_CLOSE_IPORT:
+        break;
+    case NODE_IOC_NEGOTIATE:
+        *(int *)arg |= data_export_ioc_fmt_nego(hdl, iport);
         break;
     case NODE_IOC_SET_SCENE:
         break;

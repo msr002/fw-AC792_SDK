@@ -37,7 +37,6 @@
 <Add option="-DCONFIG_WIFI_DVR_PROJECT_ENABLE" />
 <Add option="-DEVENT_HANDLER_NUM_CONFIG=2" />
 <Add option="-DEVENT_POOL_SIZE_CONFIG=256" />
-<Add option="-DTIMER_POOL_NUM_CONFIG=15" />
 <Add option="-DAPP_ASYNC_POOL_NUM_CONFIG=8" />
 <Add option="-DVFS_FILE_POOL_NUM_CONFIG=8" />
 <Add option="-DVM_MAX_PAGE_ALIGN_SIZE_CONFIG=64*1024" />
@@ -1856,6 +1855,7 @@
 <Unit filename="../../../../apps/wifi_camera/lvgl_v8_ui_app/style_LY/generated/gui_scr/setup_scr_page_map.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/wifi_camera/lvgl_v8_ui_app/style_LY/generated/gui_scr/setup_scr_page_meter.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/wifi_camera/lvgl_v8_ui_app/style_LY/generated/gui_scr/setup_scr_page_music.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="../../../../apps/wifi_camera/lvgl_v8_ui_app/style_LY/generated/gui_scr/setup_scr_power_on.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/wifi_camera/lvgl_v8_ui_app/style_LY/generated/gui_scr/setup_scr_sys_popwin.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/wifi_camera/lvgl_v8_ui_app/style_LY/generated/gui_scr/setup_scr_sys_prompt.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/wifi_camera/lvgl_v8_ui_app/style_LY/generated/gui_scr/setup_scr_sys_setting.c"><Option compilerVer="CC"/></Unit>
@@ -1871,6 +1871,8 @@
 <Unit filename="../../../../apps/wifi_camera/lvgl_v8_ui_app/style_LY/generated/gui_scr/ui_scr_manager.h" />
 <Unit filename="../../../../apps/wifi_camera/lvgl_v8_ui_app/style_LY/generated/gui_scr/ui_style.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/wifi_camera/lvgl_v8_ui_app/style_LY/generated/gui_scr/ui_style.h" />
+<Unit filename="../../../../apps/wifi_camera/lvgl_v8_ui_app/style_LY/generated/gui_timelines/gui_timeline_timeline.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="../../../../apps/wifi_camera/lvgl_v8_ui_app/style_LY/generated/gui_timelines/gui_timeline_timeline.h" />
 <Unit filename="../../../../apps/wifi_camera/lvgl_v8_ui_app/style_LY/generated/gui_timelines/gui_timelines.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/wifi_camera/lvgl_v8_ui_app/style_LY/generated/gui_timelines/gui_timelines.h" />
 <Unit filename="../../../../apps/wifi_camera/lvgl_v8_ui_app/style_LY/generated/i18n/lv_i18n.c"><Option compilerVer="CC"/></Unit>
@@ -2487,6 +2489,7 @@
 <Unit filename="../../../../include_lib/media/effects/audio_reverb_common.h" />
 <Unit filename="../../../../include_lib/media/effects/audio_spatial_adv.h" />
 <Unit filename="../../../../include_lib/media/effects/audio_spk_eq.h" />
+<Unit filename="../../../../include_lib/media/effects/audio_split_gain_fade.h" />
 <Unit filename="../../../../include_lib/media/effects/audio_stereo_spatial_wider.h" />
 <Unit filename="../../../../include_lib/media/effects/audio_stereo_widener.h" />
 <Unit filename="../../../../include_lib/media/effects/audio_surround.h" />

@@ -9,6 +9,7 @@
 #include "lvgl.h"
 #include "custom.h"
 #include <time.h>
+#include "app_config.h"
 
 /*********************
  *      DEFINES
@@ -90,14 +91,14 @@ int lvgl_module_msg_send_value(unsigned int msg_id, unsigned int value, char ref
 *
 */
 
-#if 1
+#ifdef USE_LVGL_V8_UI_DEMO
 void bt_music_post_msg_to_ui(const char *msg, ...)
 {
-#ifdef USE_LVGL_V8_UI_DEMO
     if (!storage_device_ready()) {
         printf("SD card is not online!, please insert SD Card!\n");
         return;
     }
+
     va_list argptr;
 
     printf("[chili] %s %s   \n", __func__, msg);
@@ -136,7 +137,6 @@ void bt_music_post_msg_to_ui(const char *msg, ...)
     }
 
     va_end(argptr);
-#endif
 }
 #endif
 

@@ -108,6 +108,7 @@ void audio_smart_voice_aec_cbuf_data_clear(void)
     if (voice_aec_hdl) {
         cbuf_clear(&voice_aec_hdl->aec_cbuf);
         audio_dac_read_reset();
+        audio_cvp_ref_start(1);
     }
 }
 

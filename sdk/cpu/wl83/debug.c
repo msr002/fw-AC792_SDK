@@ -765,9 +765,10 @@ void debug_msg_clear(void)
     q32DSP(1)->EMU_MSG = 0xffffffff;
 }
 
+SEC(.volatile_ram_code)
 static int wwdg_isr_callback(void)
 {
-    return 0;
+    return 1;
 }
 
 void debug_init(void)
@@ -786,8 +787,15 @@ void debug_init(void)
         debug_msg_clear();
 
         //初始化窗口看门狗
-        wwdg_init(0x76, 0x7f, wwdg_isr_callback);
-        /* wwdg_enable(); */
+        extern const int config_wwdg_clear_by_tick_isr;
+        if (config_wwdg_clear_by_tick_isr) {
+            wwdg_init(0x74, 0x7f, NULL);
+        } else {
+            wwdg_init(0x41, 0x7f, wwdg_isr_callback);
+        }
+#ifdef CONFIG_WWDG_ENABLE
+        wwdg_enable();
+#endif
     }
 
     pc_rang_limit(&rom_text_code_begin, &rom_text_code_end,

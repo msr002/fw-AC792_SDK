@@ -29,15 +29,16 @@ extern void delete_file(uint8_t data);
 extern void lock_flie(uint8_t file_num, uint8_t lock);
 extern void exit_dec_setting_menu(void);
 #if !LV_USE_GUIBUILDER_SIMULATOR
-extern int map_jpeg_disp_frame_uninit(void);
-#endif
-#if !LV_USE_GUIBUILDER_SIMULATOR
 //#include "fs/fs.h"
 extern int map_jpeg_disp_one_frame(u16 width, u16 height, u8 *buf, int len);
 extern int map_jpeg_disp_frame_init(void);
 extern void lv_example_lyrics_text_input(char *new_text);
+extern int logo_show(char *logo_path, char *audio_path, int time_out, void (*func)());
 static int init_flag = 1;
+char *lyrics_test = "lyrics one lyrics two";
 #endif
+
+static lv_obj_t *page_map_simple_navi_view = NULL;
 static int page_map_img_2_init_flag = 1;
 int in_ui_navi_flag = 0; //只有ui在导航界面允许更新导航信息
 
@@ -51,16 +52,7 @@ void set_in_ui_navi_flag(int val)
     in_ui_navi_flag = val;
 }
 #if !LV_USE_GUIBUILDER_SIMULATOR
-extern void logo_stop(void (*func)());
-#endif
-#if !LV_USE_GUIBUILDER_SIMULATOR
-extern int logo_show(char *logo_path, char *audio_path, int time_out, void (*func)());
-
-char *lyrics_test = "lyrics one lyrics two";
-#endif
-#if !LV_USE_GUIBUILDER_SIMULATOR
-extern void logo_stop(void (*func)());
-extern void lyrics_example_clean(void);
+extern int map_jpeg_disp_frame_uninit(void);
 #endif
 void scr_loaded_handler(lv_event_t *e)
 {
@@ -1546,13 +1538,13 @@ static void sys_setting_view_menu_event_handler(lv_event_t *e)
                     if (screen == NULL) {
                         screen = gui_scr_create(GUI_SCREEN_VIDEO_REC, "video_rec", guider_ui.video_rec, (gui_scr_setup_cb_t)setup_scr_video_rec, (gui_scr_unload_cb_t)unload_scr_video_rec);
                     }
-                    ui_load_scr_anim(ui, screen, LV_SCR_LOAD_ANIM_NONE, 0, 0, true, true, false);
+                    ui_load_scr_anim(&guider_ui, screen, LV_SCR_LOAD_ANIM_NONE, 0, 0, true, true, false);
                 } else if (cur_mode == 1) {
                     gui_scr_t *screen = gui_scr_get(GUI_SCREEN_VIDEO_PHOTO);
                     if (screen == NULL) {
                         screen = gui_scr_create(GUI_SCREEN_VIDEO_PHOTO, "video_photo", guider_ui.video_photo, (gui_scr_setup_cb_t)setup_scr_video_photo, (gui_scr_unload_cb_t)unload_scr_video_photo);
                     }
-                    ui_load_scr_anim(ui, screen, LV_SCR_LOAD_ANIM_NONE, 0, 0, true, true, false);
+                    ui_load_scr_anim(&guider_ui, screen, LV_SCR_LOAD_ANIM_NONE, 0, 0, true, true, false);
                 }
 
 #endif
@@ -4397,8 +4389,6 @@ void events_init_video_dec_options(lv_ui *ui)
     lv_obj_add_event_cb(ui_scr->video_dec_options_btn_2, video_dec_options_btn_2_event_handler, LV_EVENT_ALL, ui);
 }
 
-
-
 static void page_map_event_handler(lv_event_t *e)
 {
     lv_event_code_t code = lv_event_get_code(e);
@@ -4420,26 +4410,10 @@ static void page_map_event_handler(lv_event_t *e)
                 init_flag = 0;
             }
 
-
-#if 0
-            map_jpeg_disp_frame_init();
-
-            FILE *profile_fp = fopen("mnt/sdfile/EXT_RESERVED/uipackres/ui/poweron.jpg", "r");
-            //FILE *profile_fp = fopen(CONFIG_FONT_TTF_PATH, "r");
-
-            if (profile_fp == NULL) {
-                return;
+            page_map_simple_navi_view = get_page_map_view_3_in_map();
+            if (page_map_simple_navi_view) {
+                lv_obj_clear_flag(page_map_simple_navi_view, LV_OBJ_FLAG_HIDDEN);
             }
-            u16 disp_width = 800;
-            u16 disp_height = 480;
-            u32 jpg_len = flen(profile_fp);
-            struct vfs_attr file_attr;
-            fget_attrs(profile_fp, &file_attr);
-            u8 *jpg_buffer = file_attr.sclust;
-            fclose(profile_fp);
-
-            map_jpeg_disp_one_frame(disp_width, disp_height, jpg_buffer, jpg_len);
-#endif
 
 #endif
         }
@@ -4449,33 +4423,28 @@ static void page_map_event_handler(lv_event_t *e)
         //custom code
         {
 #if !LV_USE_GUIBUILDER_SIMULATOR
-            //map_jpeg_disp_frame_uninit();
+            page_map_simple_navi_view = get_page_map_view_3_in_map();
+            if (page_map_simple_navi_view) {
+                lv_obj_add_flag(page_map_simple_navi_view, LV_OBJ_FLAG_HIDDEN);
+            }
 #endif
         }
     }
     break;
     case LV_EVENT_GESTURE: {
         lv_dir_t dir = lv_indev_get_gesture_dir(lv_indev_get_act());
-        if (dir & LV_DIR_LEFT) {
-            gui_scr_t *screen = ui_get_scr(GUI_SCREEN_PAGE_METER);
-            if (screen != NULL) {
-                ui_load_scr_anim(&guider_ui, screen, LV_SCR_LOAD_ANIM_NONE, 0, 0, true, true, false);
-            }
-        }
-        if (dir & LV_DIR_LEFT) {
-            //custom code page_meter
-            {
-#if !LV_USE_GUIBUILDER_SIMULATOR
-                set_in_ui_navi_flag(0);
-                //map_jpeg_disp_frame_uninit();
-#endif
-            }
-        }
         if (dir & LV_DIR_RIGHT) {
-            set_in_ui_navi_flag(0);
             gui_scr_t *screen = ui_get_scr(GUI_SCREEN_USB_SLAVE);
             if (screen != NULL) {
                 ui_load_scr_anim(&guider_ui, screen, LV_SCR_LOAD_ANIM_NONE, 0, 0, true, true, false);
+            }
+        }
+        if (dir & LV_DIR_RIGHT) {
+            //custom code usb_slave
+            {
+#if !LV_USE_GUIBUILDER_SIMULATOR
+                set_in_ui_navi_flag(0);
+#endif
             }
         }
     }
@@ -4490,31 +4459,13 @@ static void page_map_btn_1_event_handler(lv_event_t *e)
     lv_event_code_t code = lv_event_get_code(e);
     switch (code) {
     case LV_EVENT_CLICKED: {
-
-        set_in_ui_navi_flag(0);
         gui_scr_t *screen = ui_get_scr(GUI_SCREEN_USB_SLAVE);
         if (screen != NULL) {
             ui_load_scr_anim(&guider_ui, screen, LV_SCR_LOAD_ANIM_NONE, 0, 0, false, true, false);
         }
-    }
-    break;
-    default:
-        break;
-    }
-}
-
-static void page_map_btn_2_event_handler(lv_event_t *e)
-{
-    lv_event_code_t code = lv_event_get_code(e);
-    switch (code) {
-    case LV_EVENT_CLICKED: {
-
-
-        set_in_ui_navi_flag(0);
-
-        gui_scr_t *screen = ui_get_scr(GUI_SCREEN_PAGE_METER);
-        if (screen != NULL) {
-            ui_load_scr_anim(&guider_ui, screen, LV_SCR_LOAD_ANIM_NONE, 0, 0, true, true, false);
+        //custom code usb_slave
+        {
+            set_in_ui_navi_flag(0);
         }
     }
     break;
@@ -4522,26 +4473,15 @@ static void page_map_btn_2_event_handler(lv_event_t *e)
         break;
     }
 }
-
-lv_obj_t *page_map_simple_navi_view = NULL;
 static void page_map_screen_event_handler(lv_event_t *e)
 {
     lv_event_code_t code = lv_event_get_code(e);
-    page_map_simple_navi_view = get_page_map_view_3_in_map();
-
-
     switch (code) {
-    case LV_EVENT_SCREEN_LOADED: {
-        if (page_map_simple_navi_view) {
-            lv_obj_clear_flag(page_map_simple_navi_view, LV_OBJ_FLAG_HIDDEN);
-        }
+    case LV_EVENT_SCREEN_LOAD_START: {
         gui_scr_action_cb(GUI_SCREEN_PAGE_MAP, GUI_SCREEN_ACTION_LOAD);
         break;
     }
     case LV_EVENT_SCREEN_UNLOADED: {
-        if (page_map_simple_navi_view) {
-            lv_obj_add_flag(page_map_simple_navi_view, LV_OBJ_FLAG_HIDDEN);
-        }
         gui_scr_action_cb(GUI_SCREEN_PAGE_MAP, GUI_SCREEN_ACTION_UNLOAD);
         break;
     }
@@ -4554,57 +4494,15 @@ void events_init_page_map(lv_ui *ui)
     lv_obj_add_event_cb(ui_scr->page_map, scr_loaded_handler, LV_EVENT_SCREEN_LOADED, ui);
     lv_obj_add_event_cb(ui_scr->page_map, page_map_event_handler, LV_EVENT_ALL, ui);
     lv_obj_add_event_cb(ui_scr->page_map_btn_1, page_map_btn_1_event_handler, LV_EVENT_ALL, ui);
-    lv_obj_add_event_cb(ui_scr->page_map_btn_2, page_map_btn_2_event_handler, LV_EVENT_ALL, ui);
     lv_obj_add_event_cb(ui_scr->page_map, page_map_screen_event_handler, LV_EVENT_ALL, ui);
 }
 
-static void page_meter_event_handler(lv_event_t *e)
+static void power_on_event_handler(lv_event_t *e)
 {
     lv_event_code_t code = lv_event_get_code(e);
     switch (code) {
-    case LV_EVENT_SCREEN_LOADED: {
-        //custom code
-        {
-#if !LV_USE_GUIBUILDER_SIMULATOR
-            //logo_show("storage/sd0/C/avi/moto.avi", NULL, 0Xffff, NULL);
-            //logo_show(CONFIG_AVI_PATH, NULL, 0Xffff, NULL);
-#endif
-
-        }
-    }
-    break;
-    case LV_EVENT_SCREEN_UNLOADED: {
-        //custom code
-        {
-#if !LV_USE_GUIBUILDER_SIMULATOR
-            //logo_stop(NULL);
-            //lyrics_example_clean();
-#endif
-        }
-    }
-    break;
-    case LV_EVENT_GESTURE: {
-        lv_dir_t dir = lv_indev_get_gesture_dir(lv_indev_get_act());
-        if (dir & LV_DIR_RIGHT) {
-            gui_scr_t *screen = ui_get_scr(GUI_SCREEN_PAGE_MAP);
-            if (screen != NULL) {
-                ui_load_scr_anim(&guider_ui, screen, LV_SCR_LOAD_ANIM_NONE, 0, 0, false, true, false);
-            }
-        }
-        if (dir & LV_DIR_RIGHT) {
-            //custom code page_map
-            {
-#if !LV_USE_GUIBUILDER_SIMULATOR
-                //logo_stop();
-#endif
-            }
-        }
-        if (dir & LV_DIR_LEFT) {
-            gui_scr_t *screen = ui_get_scr(GUI_SCREEN_PAGE_MUSIC);
-            if (screen != NULL) {
-                ui_load_scr_anim(&guider_ui, screen, LV_SCR_LOAD_ANIM_NONE, 0, 0, true, true, false);
-            }
-        }
+    case LV_EVENT_SCREEN_LOAD_START: {
+        gui_timeline_start(&gui_timeline_timeline);
     }
     break;
     default:
@@ -4612,88 +4510,11 @@ static void page_meter_event_handler(lv_event_t *e)
     }
 }
 
-static void page_meter_btn_1_event_handler(lv_event_t *e)
+void events_init_power_on(lv_ui *ui)
 {
-    lv_event_code_t code = lv_event_get_code(e);
-    switch (code) {
-    case LV_EVENT_CLICKED: {
-        gui_scr_t *screen = ui_get_scr(GUI_SCREEN_PAGE_MAP);
-        if (screen != NULL) {
-            ui_load_scr_anim(&guider_ui, screen, LV_SCR_LOAD_ANIM_NONE, 0, 0, true, true, false);
-        }
-    }
-    break;
-    default:
-        break;
-    }
-}
-
-static void page_meter_btn_2_event_handler(lv_event_t *e)
-{
-    lv_event_code_t code = lv_event_get_code(e);
-    switch (code) {
-    case LV_EVENT_CLICKED: {
-        gui_scr_t *screen = ui_get_scr(GUI_SCREEN_PAGE_MUSIC);
-        if (screen != NULL) {
-            ui_load_scr_anim(&guider_ui, screen, LV_SCR_LOAD_ANIM_NONE, 0, 0, true, true, false);
-        }
-    }
-    break;
-    default:
-        break;
-    }
-}
-
-void events_init_page_meter(lv_ui *ui)
-{
-    lv_ui_page_meter *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_PAGE_METER);
-    lv_obj_add_event_cb(ui_scr->page_meter, scr_loaded_handler, LV_EVENT_SCREEN_LOADED, ui);
-    lv_obj_add_event_cb(ui_scr->page_meter, page_meter_event_handler, LV_EVENT_ALL, ui);
-    lv_obj_add_event_cb(ui_scr->page_meter_btn_1, page_meter_btn_1_event_handler, LV_EVENT_ALL, ui);
-    lv_obj_add_event_cb(ui_scr->page_meter_btn_2, page_meter_btn_2_event_handler, LV_EVENT_ALL, ui);
-}
-
-static void page_music_event_handler(lv_event_t *e)
-{
-    lv_event_code_t code = lv_event_get_code(e);
-    switch (code) {
-    case LV_EVENT_GESTURE: {
-        lv_dir_t dir = lv_indev_get_gesture_dir(lv_indev_get_act());
-        if (dir & LV_DIR_RIGHT) {
-            gui_scr_t *screen = ui_get_scr(GUI_SCREEN_PAGE_METER);
-            if (screen != NULL) {
-                ui_load_scr_anim(&guider_ui, screen, LV_SCR_LOAD_ANIM_NONE, 0, 0, true, true, false);
-            }
-        }
-    }
-    break;
-    default:
-        break;
-    }
-}
-
-static void page_music_btn_1_event_handler(lv_event_t *e)
-{
-    lv_event_code_t code = lv_event_get_code(e);
-    switch (code) {
-    case LV_EVENT_CLICKED: {
-        gui_scr_t *screen = ui_get_scr(GUI_SCREEN_PAGE_METER);
-        if (screen != NULL) {
-            ui_load_scr_anim(&guider_ui, screen, LV_SCR_LOAD_ANIM_NONE, 0, 0, true, true, false);
-        }
-    }
-    break;
-    default:
-        break;
-    }
-}
-
-void events_init_page_music(lv_ui *ui)
-{
-    lv_ui_page_music *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_PAGE_MUSIC);
-    lv_obj_add_event_cb(ui_scr->page_music, scr_loaded_handler, LV_EVENT_SCREEN_LOADED, ui);
-    lv_obj_add_event_cb(ui_scr->page_music, page_music_event_handler, LV_EVENT_ALL, ui);
-    lv_obj_add_event_cb(ui_scr->page_music_btn_1, page_music_btn_1_event_handler, LV_EVENT_ALL, ui);
+    lv_ui_power_on *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_POWER_ON);
+    lv_obj_add_event_cb(ui_scr->power_on, scr_loaded_handler, LV_EVENT_SCREEN_LOADED, ui);
+    lv_obj_add_event_cb(ui_scr->power_on, power_on_event_handler, LV_EVENT_ALL, ui);
 }
 static void car_parking_screen_event_handler(lv_event_t *e)
 {
@@ -4715,6 +4536,33 @@ void events_init_car_parking(lv_ui *ui)
     lv_ui_car_parking *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_CAR_PARKING);
     lv_obj_add_event_cb(ui_scr->car_parking, scr_loaded_handler, LV_EVENT_SCREEN_LOADED, ui);
     lv_obj_add_event_cb(ui_scr->car_parking, car_parking_screen_event_handler, LV_EVENT_ALL, ui);
+}
+
+void events_init_page_music(lv_ui *ui)
+{
+    lv_ui_page_music *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_PAGE_MUSIC);
+    lv_obj_add_event_cb(ui_scr->page_music, scr_loaded_handler, LV_EVENT_SCREEN_LOADED, ui);
+}
+static void page_meter_screen_event_handler(lv_event_t *e)
+{
+    lv_event_code_t code = lv_event_get_code(e);
+    switch (code) {
+    case LV_EVENT_SCREEN_LOAD_START: {
+        gui_scr_action_cb(GUI_SCREEN_PAGE_METER, GUI_SCREEN_ACTION_LOAD);
+        break;
+    }
+    case LV_EVENT_SCREEN_UNLOADED: {
+        gui_scr_action_cb(GUI_SCREEN_PAGE_METER, GUI_SCREEN_ACTION_UNLOAD);
+        break;
+    }
+    }
+}
+
+void events_init_page_meter(lv_ui *ui)
+{
+    lv_ui_page_meter *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_PAGE_METER);
+    lv_obj_add_event_cb(ui_scr->page_meter, scr_loaded_handler, LV_EVENT_SCREEN_LOADED, ui);
+    lv_obj_add_event_cb(ui_scr->page_meter, page_meter_screen_event_handler, LV_EVENT_ALL, ui);
 }
 
 #endif

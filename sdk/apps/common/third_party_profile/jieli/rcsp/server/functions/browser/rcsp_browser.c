@@ -379,6 +379,7 @@ _EXIT:
     while (1) {
         os_time_dly(10);
         if (__this->task_kill) {
+            log_info("task %s: kill...", os_current_task());
             return;
         }
     }
@@ -387,6 +388,11 @@ _EXIT:
 //rcsp文件浏览开始
 void rcsp_browser_start(u8 *data, u16 len)
 {
+    if (!rcsp_browser_busy()) {
+        //支持重入，避免内存泄漏
+        log_error("%s: rcsp browser busy", __func__);
+        return;
+    }
     ///检查数据是否有效
     log_info("%s", __func__);
     if (len > sizeof(struct __browser)) {
@@ -395,7 +401,7 @@ void rcsp_browser_start(u8 *data, u16 len)
     ///创建数据解析句柄
     browser = (struct __browser *)zalloc(sizeof(struct __browser));
     if (browser == NULL) {
-        return ;
+        return;
     }
     ///解析数据
     memcpy((u8 *)browser, data, sizeof(struct __browser));
@@ -407,7 +413,7 @@ void rcsp_browser_start(u8 *data, u16 len)
         log_error("bs dev hdl err !!");
         free(browser);
         browser = NULL;
-        return ;
+        return;
     }
     ///检查是否是已经选定好文件播放
     if (browser->path_type) {
@@ -420,11 +426,11 @@ void rcsp_browser_start(u8 *data, u16 len)
             (int)reason,
             (int)rcsp_browser_dev_remap(browser->dev_handle),
             (int)play_file_clust);
-        return ;
+        return;
     }
     ///目录浏览线程创建
     __this->task_kill = 0;
-    if (thread_fork(FILE_BROWSE_TASK_NAME, 10, 768, 128, &__this->pid, rcsp_browser_task, NULL)) {
+    if (thread_fork_multiple(FILE_BROWSE_TASK_NAME, 10, 768, 128, &__this->pid, rcsp_browser_task, NULL)) {
         free(browser);
         browser = NULL;
         log_error("rcsp_browser_task creat fail");

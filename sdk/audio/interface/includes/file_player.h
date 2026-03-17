@@ -87,6 +87,9 @@ struct file_player {
     void *le_audio;     //广播音箱的句柄
     void *fmt;			//广播音箱的编码格式
     u32 pcm_addr;
+#if FILE_DEC_AB_REPEAT_EN
+    void *ab_buf;
+#endif
 };
 
 // AB点复读模式

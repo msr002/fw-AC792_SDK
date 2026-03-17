@@ -104,6 +104,9 @@ struct jlstream;
 #define NODE_IOC_GET_PRIV_FMT       0x0002003b      //获取解码码率等信息
 #define NODE_IOC_SET_SYNC_NETWORK   0x0002003c
 #define NODE_IOC_SET_VIR_ENC_INPUT  0x0002003d
+#define NODE_IOC_GET_BP_AB          0x0002003e      //获取复读AB断点信息
+#define NODE_IOC_RSET_BP_AB         0x0002003f      //设置复读AB断点信息
+#define NODE_IOC_GET_BP_AB_SIZE     0x00020040      //获取复读AB断点信息需要的buff大小
 
 #define NODE_IOC_START              (0x00040000 | NODE_STA_RUN)
 #define NODE_IOC_PAUSE              (0x00040000 | NODE_STA_PAUSE)
@@ -234,9 +237,9 @@ enum stream_node_state : u16 {
 enum stream_node_type : u8 {
     NODE_TYPE_SYNC      = 0x01,
     NODE_TYPE_BYPASS    = 0x03,
-    NODE_TYPE_FLOW_CTRL = 0x04,
+    NODE_TYPE_FLOW_CTRL = 0x04,  //流控类型，源节点后接入解码器，解码器会控制输出的速度，防止中间缓存过多
     NODE_TYPE_ASYNC     = 0x10,
-    NODE_TYPE_IRQ       = 0x20,
+    NODE_TYPE_IRQ       = 0x20,  //中断输入类型，比如ADC，通常1次中断唤醒一次数据流，如果数据流内有拆包，拼包行为，会导致输出不及时，效率降低
     NODE_TYPE_SWITCH    = 0x40,
 };
 

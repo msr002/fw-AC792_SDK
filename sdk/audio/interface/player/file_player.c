@@ -47,6 +47,10 @@ static struct music_file_player_hdl g_file_player;
 
 static const struct stream_file_ops music_file_ops;
 
+#if FILE_DEC_AB_REPEAT_EN
+int music_file_ab_repeat_reset(struct file_player *music_player, int ab_cmd, void *save_buf);
+#endif
+
 static void music_player_free(struct file_player *player)
 {
     if (--player->ref == 0) {
@@ -55,6 +59,12 @@ static void music_player_free(struct file_player *player)
             player->break_point = NULL;
             player->break_point_flag = 0;
         }
+#if FILE_DEC_AB_REPEAT_EN
+        if (player->ab_buf) {
+            free(player->ab_buf);
+            player->ab_buf = NULL;
+        }
+#endif
         free(player);
 #if FILE_DEC_DEST_PLAY || FILE_DEC_REPEAT_EN
         if (player == g_file_player.cur_player) {
@@ -92,10 +102,18 @@ static void music_player_callback(void *_player_id, int event)
             log_info("player_id_not_match: %d", player->player_id);
             break;
         }
-        os_mutex_post(&g_file_player.mutex);
         if (player->callback) {
             player->callback(player->priv, 0, STREAM_EVENT_START);
         }
+#if FILE_DEC_AB_REPEAT_EN
+        //恢复播放还原ab断点信息
+        if (player->ab_buf) {
+            music_file_ab_repeat_reset(player, AUDIO_IOCTRL_CMD_RSET_BREAKPOINT_AB, player->ab_buf);
+            free(player->ab_buf);
+            player->ab_buf = NULL;
+        }
+#endif
+        os_mutex_post(&g_file_player.mutex);
         break;
     case STREAM_EVENT_PREEMPTED:
         break;
@@ -257,6 +275,17 @@ int music_file_player_pp(struct file_player *music_player)
             if (music_player->stream->coding_type == AUDIO_CODING_PCM) {
                 jlstream_node_ioctl(music_player->stream, NODE_UUID_DECODER, NODE_IOC_GET_PARAM, (int)&music_player->pcm_addr);
             }
+#if FILE_DEC_AB_REPEAT_EN  //暂停前保存ab断点信息
+            if (!music_player->ab_buf) {
+                int size = music_file_ab_repeat_reset(music_player, AUDIO_IOCTRL_CMD_GET_BREAKPOINT_AB_SZIE, NULL); //获取AB断点信息需要的buffer
+                if (size > 0) {
+                    music_player->ab_buf = zalloc(size);
+                }
+            }
+            if (music_player->ab_buf) {
+                music_file_ab_repeat_reset(music_player, AUDIO_IOCTRL_CMD_GET_BREAKPOINT_AB, music_player->ab_buf); //保存AB断点信息
+            }
+#endif
         }
 
         jlstream_pp_toggle(music_player->stream, 50);
@@ -510,6 +539,51 @@ static int music_file_ab_repeat_set(int ab_cmd, int ab_mode, struct file_player 
 }
 
 /*----------------------------------------------------------------------------*/
+/**@brief    获取和重设AB点复读信息
+   @param    music_player: 播放器句柄
+   @param    ab_cmd: 命令
+   @param    save_buf: 保存AB断点信息的buffer
+   @return   1: 设置成功 0:设置失败
+   @note
+   使用示例：
+    int size = music_file_ab_repeat_reset(file_player, AUDIO_IOCTRL_CMD_GET_BREAKPOINT_AB_SZIE, NULL); //获取AB断点信息需要的buffer
+    int *buf = zalloc(size);
+    music_file_ab_repeat_reset(file_player, AUDIO_IOCTRL_CMD_GET_BREAKPOINT_AB, buf); //保存AB断点信息
+    music_file_player_pp(file_player); //暂停播放
+    music_file_player_pp(file_player); //恢复播放
+    music_file_ab_repeat_reset(file_player, AUDIO_IOCTRL_CMD_RSET_BREAKPOINT_AB, buf);//重设AB断点信息
+    free(buf);
+}
+*/
+/*----------------------------------------------------------------------------*/
+int music_file_ab_repeat_reset(struct file_player *music_player, int ab_cmd, void *save_buf)
+{
+    int err = false;
+
+    if (!music_player) {
+        return false;
+    }
+
+    log_info("ab repeat reset, cmd:0x%x", ab_cmd);
+
+    switch (ab_cmd) {
+    case AUDIO_IOCTRL_CMD_GET_BREAKPOINT_AB:
+        err = jlstream_node_ioctl(music_player->stream, NODE_UUID_DECODER, NODE_IOC_GET_BP_AB, (int)save_buf);
+        break;
+    case AUDIO_IOCTRL_CMD_RSET_BREAKPOINT_AB:
+        err = jlstream_node_ioctl(music_player->stream, NODE_UUID_DECODER, NODE_IOC_RSET_BP_AB, (int)save_buf);
+        break;
+    case AUDIO_IOCTRL_CMD_GET_BREAKPOINT_AB_SZIE:
+        err = jlstream_node_ioctl(music_player->stream, NODE_UUID_DECODER, NODE_IOC_GET_BP_AB_SIZE, 0);
+        break;
+    default:
+        break;
+    }
+
+    return err;
+}
+
+/*----------------------------------------------------------------------------*/
 /**@brief    切换AB点复读状态
    @param
    @return   0: 设置成功 -1:设置失败
@@ -689,6 +763,20 @@ int file_dec_set_start_play(u32 start_time, u32 coding_type)
 {
     return file_dec_set_start_dest_play(start_time, 0x7fffffff, NULL, NULL, g_file_player.cur_player->stream->coding_type, g_file_player.cur_player);
 }
+#if 0 //以下为一个应用demo，效果是从歌曲的3s到6s不断重复播放，在dest_cb里面决定是要继续重复还是结束重复
+u32 dest_cb(void *arg)
+{
+    if (1) { //结束循环播放
+        return 0;
+    } else { //继续重复循环
+        return file_dec_set_start_dest_play(3000, 6000, dest_cb, NULL, g_file_player.cur_player->stream->coding_type, g_file_player.cur_player);
+    }
+}
+int file_dec_set_start_dest_repeat_demo()
+{
+    return file_dec_set_start_dest_play(3000, 6000, dest_cb, NULL, g_file_player.cur_player->stream->coding_type, g_file_player.cur_player);
+}
+#endif
 #endif
 
 

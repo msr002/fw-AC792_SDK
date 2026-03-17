@@ -12,17 +12,23 @@ extern "C" {
 #define GUI_UIT_VERSION_MAJOR 1
 #define GUI_UIT_VERSION_MINOR 0
 #define GUI_UIT_VERSION_PATCH 0
-#define GUI_UIT_VERSION_INFO "20250520"
+#define GUI_UIT_VERSION_INFO "20260227"
 
 #define GUI_CORE_VERSION_MAJOR 3
 #define GUI_CORE_VERSION_MINOR 0
-#define GUI_CORE_VERSION_PATCH 0
+#define GUI_CORE_VERSION_PATCH 3
 #define GUI_CORE_VERSION_INFO "GENERIC(with tools)"
 
 #define GUI_TEMPLATE_VERSION_MAJOR 1
 #define GUI_TEMPLATE_VERSION_MINOR 3
 #define GUI_TEMPLATE_VERSION_PATCH 3
 #define GUI_TEMPLATE_VERSION_INFO "full"
+
+#if LV_USE_GUIBUILDER_SIMULATOR
+#define GUI_TM_MON(mon) ((mon) + 1)
+#else
+#define GUI_TM_MON(mon) (mon)
+#endif
 
 typedef enum {
     GUI_SCREEN_ACTION_LOAD = 0,
@@ -44,8 +50,9 @@ typedef enum {
     GUI_SCREEN_VIDEO_DEC,
     GUI_SCREEN_VIDEO_DEC_OPTIONS,
     GUI_SCREEN_PAGE_MAP,
-    GUI_SCREEN_PAGE_METER,
     GUI_SCREEN_PAGE_MUSIC,
+    GUI_SCREEN_PAGE_METER,
+    GUI_SCREEN_POWER_ON,
 } gui_screen_id_t;
 
 static const int32_t gui_screen_ids[] = {
@@ -63,8 +70,9 @@ static const int32_t gui_screen_ids[] = {
     GUI_SCREEN_VIDEO_DEC,
     GUI_SCREEN_VIDEO_DEC_OPTIONS,
     GUI_SCREEN_PAGE_MAP,
-    GUI_SCREEN_PAGE_METER,
     GUI_SCREEN_PAGE_MUSIC,
+    GUI_SCREEN_PAGE_METER,
+    GUI_SCREEN_POWER_ON,
 };
 
 #define GUI_KEY_F1 1

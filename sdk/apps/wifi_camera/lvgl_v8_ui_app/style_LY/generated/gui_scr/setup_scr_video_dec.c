@@ -15,29 +15,29 @@
 
 static const char *video_dec_imglist_1_imgs[2] = {
 #if LV_USE_GUIBUILDER_SIMULATOR
-    "A:\\project\\meter_ui_demo\\WL83_gitlab\\ac792\\ui_prj\\new_ui\\import\\image\\LY_UI\\dec\\video.png",
-    "A:\\project\\meter_ui_demo\\WL83_gitlab\\ac792\\ui_prj\\new_ui\\import\\image\\LY_UI\\dec\\photo.png"
+    "A:\\wl83_soundbox\\ac792\\ui_prj\\new_ui\\import\\image\\LY_UI\\dec\\video.png",
+    "A:\\wl83_soundbox\\ac792\\ui_prj\\new_ui\\import\\image\\LY_UI\\dec\\photo.png"
 #else
-    "mnt/sdfile/EXT_RESERVED/uipackres/ui/4b00006d.zip",
-    "mnt/sdfile/EXT_RESERVED/uipackres/ui/4b00006e.zip"
+    "mnt/sdfile/EXT_RESERVED/uipackres/ui/4b000070.zip",
+    "mnt/sdfile/EXT_RESERVED/uipackres/ui/4b000071.zip"
 #endif
 };
 static const char *video_dec_imglist_2_imgs[2] = {
 #if LV_USE_GUIBUILDER_SIMULATOR
-    "A:\\project\\meter_ui_demo\\WL83_gitlab\\ac792\\ui_prj\\new_ui\\import\\image\\LY_UI\\rec\\rec_scan\\card_offline.png",
-    "A:\\project\\meter_ui_demo\\WL83_gitlab\\ac792\\ui_prj\\new_ui\\import\\image\\LY_UI\\rec\\rec_scan\\card_online.png"
+    "A:\\wl83_soundbox\\ac792\\ui_prj\\new_ui\\import\\image\\LY_UI\\rec\\rec_scan\\card_offline.png",
+    "A:\\wl83_soundbox\\ac792\\ui_prj\\new_ui\\import\\image\\LY_UI\\rec\\rec_scan\\card_online.png"
 #else
-    "mnt/sdfile/EXT_RESERVED/uipackres/ui/4b00006f.zip",
-    "mnt/sdfile/EXT_RESERVED/uipackres/ui/4b000028.zip"
+    "mnt/sdfile/EXT_RESERVED/uipackres/ui/4b000072.zip",
+    "mnt/sdfile/EXT_RESERVED/uipackres/ui/4b00002b.zip"
 #endif
 };
 static const char *video_dec_imglist_3_imgs[2] = {
 #if LV_USE_GUIBUILDER_SIMULATOR
-    "A:\\project\\meter_ui_demo\\WL83_gitlab\\ac792\\ui_prj\\new_ui\\import\\image\\LY_UI\\dec\\play.png",
-    "A:\\project\\meter_ui_demo\\WL83_gitlab\\ac792\\ui_prj\\new_ui\\import\\image\\LY_UI\\dec\\pause.png"
+    "A:\\wl83_soundbox\\ac792\\ui_prj\\new_ui\\import\\image\\LY_UI\\dec\\play.png",
+    "A:\\wl83_soundbox\\ac792\\ui_prj\\new_ui\\import\\image\\LY_UI\\dec\\pause.png"
 #else
-    "mnt/sdfile/EXT_RESERVED/uipackres/ui/4b000070.zip",
-    "mnt/sdfile/EXT_RESERVED/uipackres/ui/4b000071.zip"
+    "mnt/sdfile/EXT_RESERVED/uipackres/ui/4b000073.zip",
+    "mnt/sdfile/EXT_RESERVED/uipackres/ui/4b000074.zip"
 #endif
 };
 
@@ -60,6 +60,7 @@ lv_obj_t *setup_scr_video_dec(lv_ui *ui)
     ui_style_set(ui_scr->video_dec, GUI_CTRL_SCR);
 
     //Set style for video_dec. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
+    lv_obj_set_style_bg_color(ui_scr->video_dec, lv_color_make(0x55, 0xaa, 0xa5), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_border_opa(ui_scr->video_dec, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     //Write codes video_dec_view_scan
@@ -100,6 +101,7 @@ lv_obj_t *setup_scr_video_dec(lv_ui *ui)
     lv_group_remove_obj(ui_scr->video_dec_edit_2);
     ui_style_set(ui_scr->video_dec_edit_2, GUI_CTRL_TEXTAREA);
     lv_textarea_set_text(ui_scr->video_dec_edit_2, "VID_0001.AVI");
+    lv_textarea_set_one_line(ui_scr->video_dec_edit_2, false);
 
     //Write codes video_dec_edit_3
     ui_scr->video_dec_edit_3 = lv_textarea_create(ui_scr->video_dec_view_scan);
@@ -110,6 +112,7 @@ lv_obj_t *setup_scr_video_dec(lv_ui *ui)
     lv_group_remove_obj(ui_scr->video_dec_edit_3);
     ui_style_set(ui_scr->video_dec_edit_3, GUI_CTRL_TEXTAREA);
     lv_textarea_set_text(ui_scr->video_dec_edit_3, "720P");
+    lv_textarea_set_one_line(ui_scr->video_dec_edit_3, false);
 
     //Write codes video_dec_imglist_2
     ui_scr->video_dec_imglist_2 = lv_imglist_create(ui_scr->video_dec_view_scan);
@@ -166,6 +169,7 @@ lv_obj_t *setup_scr_video_dec(lv_ui *ui)
     //Set style for video_dec_edit_1. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
     lv_obj_set_style_text_font(ui_scr->video_dec_edit_1, &lv_font_montserratMedium_20, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_textarea_set_text(ui_scr->video_dec_edit_1, "00:00 / 03:00");
+    lv_textarea_set_one_line(ui_scr->video_dec_edit_1, false);
 
     //Write codes video_dec_img_1
     ui_scr->video_dec_img_1 = lv_img_create(ui_scr->video_dec_view_scan);

@@ -207,10 +207,6 @@ void set_default_group_cb()
         lv_ui_page_map *ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_PAGE_MAP);
         gui_group_add_obj(guider_ui.default_group, ui_scr->page_map_btn_1, true);
         gui_group_add_obj(guider_ui.default_group, ui_scr->page_map_btn_2, true);
-    } else if (act_scr_id == GUI_SCREEN_PAGE_METER) {
-        lv_ui_page_meter *ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_PAGE_METER);
-        gui_group_add_obj(guider_ui.default_group, ui_scr->page_meter_btn_1, true);
-        gui_group_add_obj(guider_ui.default_group, ui_scr->page_meter_btn_2, true);
     } else if (act_scr_id == GUI_SCREEN_PAGE_MUSIC) {
         lv_ui_page_music *ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_PAGE_MUSIC);
         gui_group_add_obj(guider_ui.default_group, ui_scr->page_music_slider_1, true);

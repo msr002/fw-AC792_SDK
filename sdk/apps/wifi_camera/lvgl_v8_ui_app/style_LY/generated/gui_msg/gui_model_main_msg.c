@@ -63,7 +63,7 @@ void gui_model_main_msg_video_rec_digitclock_1_set_digit_clock_time_cb(lv_observ
 
     gui_msg_data_t *data = (gui_msg_data_t *)observer->user_data;
     struct tm time = data->value_time;
-    lv_label_set_text_fmt(obj, "%04d-%02d-%02d %02d:%02d:%02d", time.tm_year + 1900, time.tm_mon + 1, time.tm_mday, time.tm_hour, time.tm_min, time.tm_sec);
+    lv_label_set_text_fmt(obj, "%04d-%02d-%02d %02d:%02d:%02d", time.tm_year + 1900, GUI_TM_MON(time.tm_mon), time.tm_mday, time.tm_hour, time.tm_min, time.tm_sec);
 }
 void gui_model_main_msg_video_rec_img_bat_set_img_path_cb(lv_observer_t *observer, lv_subject_t *subject)
 {
@@ -94,7 +94,7 @@ void gui_model_main_msg_video_photo_digitclock_1_set_digit_clock_time_cb(lv_obse
 
     gui_msg_data_t *data = (gui_msg_data_t *)observer->user_data;
     struct tm time = data->value_time;
-    lv_label_set_text_fmt(obj, "%04d-%02d-%02d %02d:%02d:%02d", time.tm_year + 1900, time.tm_mon + 1, time.tm_mday, time.tm_hour, time.tm_min, time.tm_sec);
+    lv_label_set_text_fmt(obj, "%04d-%02d-%02d %02d:%02d:%02d", time.tm_year + 1900, GUI_TM_MON(time.tm_mon), time.tm_mday, time.tm_hour, time.tm_min, time.tm_sec);
 }
 
 GUI_WEAK int gui_model_main_msg_systime_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type)
@@ -145,25 +145,25 @@ GUI_WEAK int gui_model_main_msg_sys_prompt_show_cb(gui_msg_action_t access, gui_
 GUI_WEAK int gui_model_main_msg_show_del_btn_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type)
 {
     static lv_obj_flag_t show_del_btn_var = 0;
-    _gui_msg_obj_flag_cb((int32_t *)&show_del_btn_var, access, data);
+    _gui_msg_obj_flag_cb(&show_del_btn_var, access, data);
     return 0;
 }
 GUI_WEAK int gui_model_main_msg_hide_del_btn_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type)
 {
     static lv_obj_flag_t hide_del_btn_var = 0;
-    _gui_msg_obj_flag_cb((int32_t *)&hide_del_btn_var, access, data);
+    _gui_msg_obj_flag_cb(&hide_del_btn_var, access, data);
     return 0;
 }
 GUI_WEAK int gui_model_main_msg_show_home_btn_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type)
 {
     static lv_obj_flag_t show_home_btn_var = 0;
-    _gui_msg_obj_flag_cb((int32_t *)&show_home_btn_var, access, data);
+    _gui_msg_obj_flag_cb(&show_home_btn_var, access, data);
     return 0;
 }
 GUI_WEAK int gui_model_main_msg_hide_home_btn_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type)
 {
     static lv_obj_flag_t hide_home_btn_var = 0;
-    _gui_msg_obj_flag_cb((int32_t *)&hide_home_btn_var, access, data);
+    _gui_msg_obj_flag_cb(&hide_home_btn_var, access, data);
     return 0;
 }
 

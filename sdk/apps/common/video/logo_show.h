@@ -4,7 +4,6 @@
 #include "fs/fs.h"
 #include "server/video_server.h"
 #include "server/video_dec_server.h"
-#include "lcd_config.h"
 
 #ifndef MAX_FILE_NAME_LEN
 #define MAX_FILE_NAME_LEN 64

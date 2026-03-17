@@ -136,12 +136,17 @@ static void a2dp_player_callback(void *private_data, int event)
 #if TCFG_VOCAL_REMOVER_NODE_ENABLE
         musci_vocal_remover_update_parm();
 #endif
-#if 0 //v300默认流程不添加动态eq
+#if (SPATIAL_AUDIO_EFFECT_WITH_DYNAMIC_EQ || SPATIAL_AUDIO_EFFECT_WITH_PLATE_REVERB)
 #if ((defined TCFG_AUDIO_SPATIAL_EFFECT_ENABLE) && TCFG_AUDIO_SPATIAL_EFFECT_ENABLE)
         if (CONFIG_SPATIAL_EFFECT_VERSION == SPATIAL_EFFECT_V3) {
             //播歌打开时，设置spatial_eff_v300流程中的dynamic_eq状态
             u8 is_bypass = get_a2dp_spatial_audio_mode() ? 0 : 1;
+#if SPATIAL_AUDIO_EFFECT_WITH_DYNAMIC_EQ
             spatial_effect_dy_eq_bypass(is_bypass);
+#endif
+#if SPATIAL_AUDIO_EFFECT_WITH_PLATE_REVERB
+            spatial_effect_plate_reverb_bypass(is_bypass);
+#endif
         }
 #endif
 #endif

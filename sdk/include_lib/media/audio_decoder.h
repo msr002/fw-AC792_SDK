@@ -14,6 +14,9 @@ enum {
     AUDIO_IOCTRL_CMD_SET_DEST_PLAYPOS = 0x93,	// 设置指定位置播放
     AUDIO_IOCTRL_CMD_GET_PLAYPOS = 0x94,		// 获取毫秒级时间
 
+    AUDIO_IOCTRL_CMD_GET_BREAKPOINT_AB = 0xA1,  //获取断点信息用于保存
+    AUDIO_IOCTRL_CMD_RSET_BREAKPOINT_AB = 0xA2, //设置之前保存到的断点信息
+    AUDIO_IOCTRL_CMD_GET_BREAKPOINT_AB_SZIE = 0xA3, //获取保存断点信息需要buf大小
     //固件自定义命令(非解码器命令)
     AUDIO_IOCTRL_CMD_START_SILENCT_DROP = 0x1000,//开头静音数据丢弃处理
 };

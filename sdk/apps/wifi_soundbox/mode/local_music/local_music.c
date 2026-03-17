@@ -1190,8 +1190,9 @@ static int local_music_msg_handler(struct application *app, int *msg)
     case APP_MSG_LOCAL_MUSIC_PLAY_SWITCH_FOLDER:
         //path 传入不需要带根目录
         const char *path = (const char *)msg[1];
+        logo = (const char *)msg[2];
         log_info("play switch folder");
-        err = music_player_set_play_folder(__this->player_hd, path);
+        err = music_player_set_play_folder(__this->player_hd, path, logo);
         break;
     case APP_MSG_LOCAL_MUSIC_AUTO_NEXT_DEV:
     /* fall-through */

@@ -134,6 +134,15 @@ int avi_player_control(struct avi_player *avi, int cmd, int arg)
             }
         }
         break;
+    case AVI_PLAYER_CMD_SEEK:
+        avi->video_pts = arg;
+        avi->audio_pts = arg;
+        avi->current_offset = 0;
+        if (avi->current_audio_node) {
+            lbuf_free(avi->current_audio_node);
+            avi->current_audio_node = NULL;
+        }
+        break;
     default:
         printf("avi_player_control unknown cmd %d\n", cmd);
         return -1;

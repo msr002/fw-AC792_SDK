@@ -344,6 +344,20 @@ int eq_update_parm(u8 mode_index, char *node_name, u8 cfg_index)
     return -1;
 }
 
+int eq_update_seg_info(char *node_name, u8 is_bypass, float global_gain, int seg_num, struct eq_seg_info *seg_tab)
+{
+    //运行时，直接设置更新
+    struct eq_adj eff = {0};
+    eff.type = EQ_TAB_CMD;
+    eff.param.tab.is_bypass = is_bypass;
+    eff.param.tab.global_gain = global_gain;
+    eff.param.tab.seg_num = seg_num;
+    eff.param.tab.seg = seg_tab; //系数表指针赋值
+    int ret = jlstream_set_node_param(NODE_UUID_EQ, (const char *)node_name, &eff, sizeof(eff));
+    return ret;
+}
+
+
 /*
  * 该接口可直接更新整个EQ系数表及总增益，
  * 切换系数表时的po声表现优于调用eq_update_parm更新
@@ -361,18 +375,7 @@ int eq_update_tab_base(u8 mode_index, char *node_name, u8 cfg_index, u8 by_pass)
             return -1;
         }
 
-        //运行时，直接设置更新
-        struct eq_adj eff = {0};
-        eff.type = EQ_TAB_CMD;
-        eff.param.tab.is_bypass = tab->is_bypass;
-        if (by_pass != 0xff) {
-            eff.param.tab.is_bypass = by_pass; //重写by_pass状态
-        }
-        eff.param.tab.global_gain = tab->global_gain;
-        eff.param.tab.seg_num = tab->seg_num;
-        eff.param.tab.seg = tab->seg; //系数表指针赋值
-        ret = jlstream_set_node_param(NODE_UUID_EQ, node_name, &eff, sizeof(eff));
-
+        ret = eq_update_seg_info(node_name, (by_pass != 0xff) ? by_pass : tab->is_bypass, tab->global_gain, tab->seg_num, tab->seg);
         free(tab);
     }
     return ret;

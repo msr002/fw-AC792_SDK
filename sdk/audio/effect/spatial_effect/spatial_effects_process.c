@@ -254,7 +254,7 @@ void spatial_effect_eq_clk_set(u8 mode, u8 eq_index)
 /*需要切换参数的eq节点名字*/
 static const char spatial_eq_name[][16] = {"MusicEq", "SpatialEq1", "SpatialEq2", "SpatialEq3"};
 
-#if 0 //v300默认流程不添加动态eq
+#if SPATIAL_AUDIO_EFFECT_WITH_DYNAMIC_EQ
 static const char spatial_dy_eq_name[16] = "SpatialDyEq";
 int spatial_effect_dy_eq_bypass(u8 is_bypass)
 {
@@ -266,6 +266,14 @@ int spatial_effect_dy_eq_bypass(u8 is_bypass)
     }
     cfg.is_bypass = is_bypass;
     return jlstream_set_node_param(NODE_UUID_DYNAMIC_EQ_PRO, spatial_dy_eq_name, &cfg, sizeof(cfg));
+}
+#endif
+
+#if SPATIAL_AUDIO_EFFECT_WITH_PLATE_REVERB
+static const char spatial_dy_eq_name[16] = "SpatialPReverb";
+int spatial_effect_plate_reverb_bypass(u8 is_bypass)
+{
+    return plate_reverb_update_parm_base(0, (char *)spatial_dy_eq_name, 0, is_bypass);
 }
 #endif
 
@@ -288,11 +296,16 @@ void spatial_effect_change_eq(u8 mode)
         }
         spatial_effect_eq_clk_set(spatial_mode, i);
     }
-#if 0 //v300默认流程不添加动态eq
+#if (SPATIAL_AUDIO_EFFECT_WITH_DYNAMIC_EQ || SPATIAL_AUDIO_EFFECT_WITH_PLATE_REVERB)
     if (CONFIG_SPATIAL_EFFECT_VERSION == SPATIAL_EFFECT_V3) {
         /*v300版本流程中 dy_eq开关*/
         u8 is_bypass = mode ? 0 : 1;
+#if SPATIAL_AUDIO_EFFECT_WITH_DYNAMIC_EQ
         spatial_effect_dy_eq_bypass(is_bypass);
+#endif
+#if SPATIAL_AUDIO_EFFECT_WITH_PLATE_REVERB
+        spatial_effect_plate_reverb_bypass(is_bypass);
+#endif
     }
 #endif
 }

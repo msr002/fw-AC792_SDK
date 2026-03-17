@@ -9,12 +9,12 @@ const int config_sdfile_ext_enable = 0;
 
 const int config_clear_wdg_in_idle_hook = 1;
 
-const int config_wwdg_clear_by_tick_isr = 1;
-
 #ifdef CONFIG_IPMASK_ENABLE
 const int config_cpu_unmask_irq_enable = 1;
+const int config_wwdg_clear_by_tick_isr = 0;
 #else
 const int config_cpu_unmask_irq_enable = 0;
+const int config_wwdg_clear_by_tick_isr = 1;
 #endif
 
 ///打印是否时间打印信息

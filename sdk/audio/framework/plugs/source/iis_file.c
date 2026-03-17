@@ -12,7 +12,6 @@
 #include "app_config.h"
 #include "audio_dai/audio_iis.h"
 /* #include "sync/audio_clk_sync.h" //to compile*/
-#include "gpio.h"
 #include "audio_config.h"
 #include "audio_cvp.h"
 #include "effects/effects_adj.h"
@@ -56,11 +55,6 @@ struct iis_file_hdl {
     u8 channel_mode;
     u8 bit_width;
     u8 module_idx;
-
-
-
-
-
 };
 
 /*
@@ -106,6 +100,10 @@ static void iis_rx_handle(void *priv, void *buf, int len)
         hdl->received_data = 1;
     }
 
+    if (len == 0) {
+        log_error("iis rx length error");
+        return;
+    }
     if (hdl->start == 0) {
         return;
     }
@@ -159,7 +157,7 @@ static void iis_rx_handle(void *priv, void *buf, int len)
     if (hdl->cache_buf) {
         int wlen = cbuf_write(&hdl->cache_cbuffer, buf, len);
         if (wlen != len) {
-            log_debug("iis rx wlen %d != len %d\n", wlen, len);
+            log_debug("iis rx wlen %d != len %d", wlen, len);
         }
     }
 
@@ -196,12 +194,16 @@ static void iis_rx_handle(void *priv, void *buf, int len)
     }
 #endif
 
-    if (hdl->scene == STREAM_SCENE_ESCO) {	//cvp读dac 参考数据
+    //cvp读dac 参考数据
+    if ((hdl->scene == STREAM_SCENE_ESCO) ||
+        (hdl->scene == STREAM_SCENE_PC_MIC) ||
+        (hdl->scene == STREAM_SCENE_LEA_CALL) ||
+        (hdl->scene == STREAM_SCENE_VIR_DATA_TX)) {
         audio_cvp_phase_align();
     }
 }
 
-void iis_rx_start(struct iis_file_hdl *hdl)
+static void iis_rx_start(struct iis_file_hdl *hdl)
 {
     if (hdl && hdl->state == AUDIO_IIS_STATE_INIT) {
         hdl->value = 0;
@@ -221,12 +223,13 @@ void iis_rx_start(struct iis_file_hdl *hdl)
  * @return：iis_file_hdl 结构体指针
  * @note: 无
  */
-void iis_rx_init(struct iis_file_hdl *hdl)
+static void iis_rx_init(struct iis_file_hdl *hdl)
 {
     if (hdl == NULL) {
         return;
     }
-    log_debug(" --- iis_init ---\n");
+
+    log_debug("--- iis_init ---");
 
 #if 0 //使用wm8978模块作IIS输入
     u8 WM8978_Init(u8 dacen, u8 adcen);
@@ -236,7 +239,9 @@ void iis_rx_init(struct iis_file_hdl *hdl)
     struct audio_general_params *general_params = audio_general_get_param();
     // 初始化iis rx
     // IIS采样率有所差距，配置
-    hdl->sample_rate = general_params->sample_rate;	//默认采样率值
+    if (!hdl->sample_rate) {
+        hdl->sample_rate = general_params->sample_rate;	//默认采样率值
+    }
     jlstream_read_node_data_by_cfg_index(hdl->plug_uuid, hdl->node->subid, 0, (void *)&hdl->ch_idx, NULL);
     if (!iis_hdl[hdl->module_idx]) {
         struct alink_param params = {0};
@@ -248,12 +253,11 @@ void iis_rx_init(struct iis_file_hdl *hdl)
         iis_hdl[hdl->module_idx] = audio_iis_init(params);
     }
     if (!iis_hdl[hdl->module_idx]) {
-        log_debug("iis module_idx %d rx init err\n", hdl->module_idx);
+        log_error("iis module_idx %d rx init err", hdl->module_idx);
         return;
     }
     hdl->state = AUDIO_IIS_STATE_INIT;
 }
-
 
 /*
  * @description: iis file 初始化
@@ -263,9 +267,8 @@ void iis_rx_init(struct iis_file_hdl *hdl)
 static void *iis_file_init(void *source_node, struct stream_node *node)
 {
     struct iis_file_hdl *hdl = zalloc(sizeof(*hdl));
-    log_debug("--- iis_file_init ---\n");
 
-
+    log_debug("--- iis_file_init ---");
 
     hdl->source_node = source_node;
     hdl->node = node;
@@ -274,14 +277,21 @@ static void *iis_file_init(void *source_node, struct stream_node *node)
     hdl->bit_width = audio_general_in_dev_bit_width();
     hdl->plug_uuid = get_source_node_plug_uuid(source_node);
     hdl->module_idx = MODULE_IDX_SEL;
-    iis_rx_init(hdl);
+    /* iis_rx_init(hdl); */
     return hdl;
 }
 
 static void iis_ioc_get_fmt(struct iis_file_hdl *hdl, struct stream_fmt *fmt)
 {
-    log_debug("==========  iis_ioc_get_fmt  ========== \n");
+    log_debug("==========  iis_ioc_get_fmt  ==========");
+
     fmt->coding_type = AUDIO_CODING_PCM;	//默认PCM
+
+    if (!hdl->sample_rate) {
+        struct audio_general_params *general_params = audio_general_get_param();
+        hdl->sample_rate = general_params->sample_rate;	//默认采样率值
+    }
+
     switch (hdl->scene) {
     case STREAM_SCENE_ESCO:
         fmt->sample_rate = 16000;
@@ -291,6 +301,9 @@ static void iis_ioc_get_fmt(struct iis_file_hdl *hdl, struct stream_fmt *fmt)
         hdl->channel_mode   = AUDIO_CH_MIX;
         break;
     case STREAM_SCENE_MIC_EFFECT:
+        hdl->channel_mode   = AUDIO_CH_MIX;
+        break;
+    case STREAM_SCENE_PC_MIC:
         hdl->channel_mode   = AUDIO_CH_MIX;
         break;
     default:
@@ -304,7 +317,7 @@ static void iis_ioc_get_fmt(struct iis_file_hdl *hdl, struct stream_fmt *fmt)
 
 static int iis_ioc_set_fmt(struct iis_file_hdl *hdl, struct stream_fmt *fmt)
 {
-    log_debug("==========  iis_ioc_set_fmt  ==========\n");
+    log_debug("==========  iis_ioc_set_fmt  ==========");
     hdl->sample_rate = fmt->sample_rate;
     return 0;
 }
@@ -313,15 +326,8 @@ static void iis_file_start(struct iis_file_hdl *hdl)
 {
     if (hdl->start == 0) {
         hdl->start = 1;
-        if (hdl->state == AUDIO_IIS_STATE_INIT) {
-            log_debug(">>> %s, %d, iis state is AUDIO_IIS_STATE_INIT\n", __func__, __LINE__);
-            iis_rx_start(hdl);
-        } else if (hdl->state == AUDIO_IIS_STATE_CLOSE) {
-            log_debug(">>> %s, %d, iis state is AUDIO_IIS_STATE_CLOSE\n", __func__, __LINE__);
-
-            iis_rx_init(hdl);
-            iis_rx_start(hdl);
-        }
+        iis_rx_init(hdl);
+        iis_rx_start(hdl);
         hdl->dump_cnt = 0;
     }
 }
@@ -331,13 +337,12 @@ static void iis_file_stop(struct iis_file_hdl *hdl)
     if (hdl->start) {
         hdl->start = 0;
         //停止 IIS 接收
-        int ret = 0;
         hdl->output.ch_idx = hdl->ch_idx;
         audio_iis_del_rx_output_handler(iis_hdl[hdl->module_idx], &hdl->output);
         audio_iis_stop(iis_hdl[hdl->module_idx], hdl->ch_idx);
         // 释放IIS RX
         audio_iis_close(iis_hdl[hdl->module_idx]);
-        ret = audio_iis_uninit(iis_hdl[hdl->module_idx]);
+        int ret = audio_iis_uninit(iis_hdl[hdl->module_idx]);
         if (ret) {
             iis_hdl[hdl->module_idx] = NULL;
         }
@@ -353,6 +358,7 @@ static int iis_ioctl(void *_hdl, int cmd, int arg)
 {
     int ret = 0;
     struct iis_file_hdl *hdl = (struct iis_file_hdl *)_hdl;
+
     switch (cmd) {
     case NODE_IOC_GET_FMT:
         iis_ioc_get_fmt(hdl, (struct stream_fmt *)arg);
@@ -366,7 +372,7 @@ static int iis_ioctl(void *_hdl, int cmd, int arg)
     case NODE_IOC_SET_PRIV_FMT:
         hdl->irq_points = arg;
         /*iis rx 是固定双声道数据输入*/
-        log_debug("set iis rx irq points %d\n", hdl->irq_points);
+        log_debug("set iis rx irq points %d", hdl->irq_points);
         break;
     case NODE_IOC_START:
         iis_file_start(hdl);
@@ -379,6 +385,7 @@ static int iis_ioctl(void *_hdl, int cmd, int arg)
         hdl->force_dump = arg;
         break;
     }
+
     return ret;
 }
 
@@ -388,15 +395,14 @@ static int iis_ioctl(void *_hdl, int cmd, int arg)
  * @return：无
  * @note: 无
  */
-void iis_release(void *_hdl)
+static void iis_release(void *_hdl)
 {
     struct iis_file_hdl *hdl = (struct iis_file_hdl *)_hdl;
-    log_debug(" --- iis_release ---\n");
+
+    log_debug("--- iis_release ---");
 
     free(hdl);
     hdl = NULL;
-
-    log_debug(">>[%s] : iis rx release succ\n", __func__);
 }
 
 REGISTER_SOURCE_NODE_PLUG(iis_file_plug) = {
@@ -413,6 +419,3 @@ REGISTER_SOURCE_NODE_PLUG(iis1_file_plug) = {
 };
 
 #endif
-
-
-

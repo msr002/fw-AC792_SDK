@@ -82,49 +82,49 @@ GUI_WEAK int gui_model_global_subpage_msg_title_cb(gui_msg_action_t access, gui_
 GUI_WEAK int gui_model_global_subpage_msg_hide_funckey1_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type)
 {
     static lv_obj_flag_t hide_funckey1_var = LV_OBJ_FLAG_HIDDEN;
-    _gui_msg_obj_flag_cb((int32_t *)&hide_funckey1_var, access, data);
+    _gui_msg_obj_flag_cb(&hide_funckey1_var, access, data);
     return 0;
 }
 GUI_WEAK int gui_model_global_subpage_msg_hide_funckey2_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type)
 {
     static lv_obj_flag_t hide_funckey2_var = LV_OBJ_FLAG_HIDDEN;
-    _gui_msg_obj_flag_cb((int32_t *)&hide_funckey2_var, access, data);
+    _gui_msg_obj_flag_cb(&hide_funckey2_var, access, data);
     return 0;
 }
 GUI_WEAK int gui_model_global_subpage_msg_hide_funckey3_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type)
 {
     static lv_obj_flag_t hide_funckey3_var = LV_OBJ_FLAG_HIDDEN;
-    _gui_msg_obj_flag_cb((int32_t *)&hide_funckey3_var, access, data);
+    _gui_msg_obj_flag_cb(&hide_funckey3_var, access, data);
     return 0;
 }
 GUI_WEAK int gui_model_global_subpage_msg_hide_funckey4_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type)
 {
     static lv_obj_flag_t hide_funckey4_var = LV_OBJ_FLAG_HIDDEN;
-    _gui_msg_obj_flag_cb((int32_t *)&hide_funckey4_var, access, data);
+    _gui_msg_obj_flag_cb(&hide_funckey4_var, access, data);
     return 0;
 }
 GUI_WEAK int gui_model_global_subpage_msg_show_funckey1_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type)
 {
     static lv_obj_flag_t show_funckey1_var = 0;
-    _gui_msg_obj_flag_cb((int32_t *)&show_funckey1_var, access, data);
+    _gui_msg_obj_flag_cb(&show_funckey1_var, access, data);
     return 0;
 }
 GUI_WEAK int gui_model_global_subpage_msg_show_funckey2_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type)
 {
     static lv_obj_flag_t show_funckey2_var = 0;
-    _gui_msg_obj_flag_cb((int32_t *)&show_funckey2_var, access, data);
+    _gui_msg_obj_flag_cb(&show_funckey2_var, access, data);
     return 0;
 }
 GUI_WEAK int gui_model_global_subpage_msg_show_funckey3_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type)
 {
     static lv_obj_flag_t show_funckey3_var = 0;
-    _gui_msg_obj_flag_cb((int32_t *)&show_funckey3_var, access, data);
+    _gui_msg_obj_flag_cb(&show_funckey3_var, access, data);
     return 0;
 }
 GUI_WEAK int gui_model_global_subpage_msg_show_funckey4_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type)
 {
     static lv_obj_flag_t show_funckey4_var = 0;
-    _gui_msg_obj_flag_cb((int32_t *)&show_funckey4_var, access, data);
+    _gui_msg_obj_flag_cb(&show_funckey4_var, access, data);
     return 0;
 }
 GUI_WEAK int gui_model_global_subpage_msg_roller_opt_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type)
@@ -138,37 +138,37 @@ GUI_WEAK int gui_model_global_subpage_msg_roller_opt_cb(gui_msg_action_t access,
 GUI_WEAK int gui_model_global_subpage_msg_show_roller_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type)
 {
     static lv_obj_flag_t show_roller_var = LV_OBJ_FLAG_HIDDEN;
-    _gui_msg_obj_flag_cb((int32_t *)&show_roller_var, access, data);
+    _gui_msg_obj_flag_cb(&show_roller_var, access, data);
     return 0;
 }
 GUI_WEAK int gui_model_global_subpage_msg_hide_roller_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type)
 {
     static lv_obj_flag_t hide_roller_var = LV_OBJ_FLAG_HIDDEN;
-    _gui_msg_obj_flag_cb((int32_t *)&hide_roller_var, access, data);
+    _gui_msg_obj_flag_cb(&hide_roller_var, access, data);
     return 0;
 }
 GUI_WEAK int gui_model_global_subpage_msg_state_funkey1_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type)
 {
     static lv_state_t state_funkey1_var = LV_STATE_DEFAULT;
-    _gui_msg_state_cb((int32_t *)&state_funkey1_var, access, data);
+    _gui_msg_state_cb(&state_funkey1_var, access, data);
     return 0;
 }
 GUI_WEAK int gui_model_global_subpage_msg_state_funkey2_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type)
 {
     static lv_state_t state_funkey2_var = LV_STATE_DEFAULT;
-    _gui_msg_state_cb((int32_t *)&state_funkey2_var, access, data);
+    _gui_msg_state_cb(&state_funkey2_var, access, data);
     return 0;
 }
 GUI_WEAK int gui_model_global_subpage_msg_state_funkey3_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type)
 {
     static lv_state_t state_funkey3_var = LV_STATE_DEFAULT;
-    _gui_msg_state_cb((int32_t *)&state_funkey3_var, access, data);
+    _gui_msg_state_cb(&state_funkey3_var, access, data);
     return 0;
 }
 GUI_WEAK int gui_model_global_subpage_msg_state_funkey4_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type)
 {
     static lv_state_t state_funkey4_var = LV_STATE_DEFAULT;
-    _gui_msg_state_cb((int32_t *)&state_funkey4_var, access, data);
+    _gui_msg_state_cb(&state_funkey4_var, access, data);
     return 0;
 }
 

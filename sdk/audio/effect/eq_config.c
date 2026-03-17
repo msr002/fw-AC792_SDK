@@ -12,6 +12,7 @@
 #include "effects/effects_adj.h"
 #include "audio_config.h"
 #include "jlstream.h"
+#include "node_param_update.h"
 
 /*
  *双核EQ选配策略
@@ -204,39 +205,47 @@ int eq_mode_sw(void)
     }
 
     for (int i = 0; i < ARRAY_SIZE(music_eq_name); i++) {
-        //music eq运行时，直接设置更新
-        struct eq_adj eff = {0};
-        eff.type = EQ_GLOBAL_GAIN_CMD;
-        eff.param.global_gain =  global_gain_tab[eq_mode];
-        eff.fade_parm.fade_time = EQ_FADE_TIME;
-        eff.fade_parm.fade_step = EQ_FADE_STEP;
-        eff.fade_parm.f_fade_step = EQ_FADE_FREQ_STEP;
+        if (config_audio_eq_xfade_enable) {
+            int ret = eq_update_seg_info(music_eq_name[i], 0, global_gain_tab[eq_mode], nsection, seg);
+            if (ret == false) {
+                continue;
+            }
+        } else {
+            //music eq运行时，直接设置更新
+            struct eq_adj eff = {0};
+            eff.type = EQ_GLOBAL_GAIN_CMD;
+            eff.param.global_gain =  global_gain_tab[eq_mode];
+            eff.fade_parm.fade_time = EQ_FADE_TIME;
+            eff.fade_parm.fade_step = EQ_FADE_STEP;
+            eff.fade_parm.f_fade_step = EQ_FADE_FREQ_STEP;
 #if EQ_FADE_END_CALLBACK_EN
-        eff.fade_parm.priv = NULL;
-        eff.fade_parm.callback = audio_fade_end_callback;
+            eff.fade_parm.priv = NULL;
+            eff.fade_parm.callback = audio_fade_end_callback;
 #endif
 
-        int ret = jlstream_set_node_param(NODE_UUID_EQ, music_eq_name[i], &eff, sizeof(eff));
-        if (ret == false) {
-            continue ;
-        }
+            int ret = jlstream_set_node_param(NODE_UUID_EQ, music_eq_name[i], &eff, sizeof(eff));
+            if (ret == false) {
+                continue;
+            }
 
-        eff.type = EQ_SEG_NUM_CMD;
-        eff.param.seg_num = nsection ;
-        ret = jlstream_set_node_param(NODE_UUID_EQ, music_eq_name[i], &eff, sizeof(eff));
-        if (ret == false) {
-            continue ;
-        }
+            eff.type = EQ_SEG_NUM_CMD;
+            eff.param.seg_num = nsection;
+            ret = jlstream_set_node_param(NODE_UUID_EQ, music_eq_name[i], &eff, sizeof(eff));
+            if (ret == false) {
+                continue;
+            }
 
-        for (int j = 0; j < nsection; j++) {
-            eff.type = EQ_SEG_CMD;
-            memcpy(&eff.param.seg, &seg[j], sizeof(struct eq_seg_info));
-            jlstream_set_node_param(NODE_UUID_EQ, music_eq_name[i], &eff, sizeof(eff));
+            for (int j = 0; j < nsection; j++) {
+                eff.type = EQ_SEG_CMD;
+                memcpy(&eff.param.seg, &seg[j], sizeof(struct eq_seg_info));
+                jlstream_set_node_param(NODE_UUID_EQ, music_eq_name[i], &eff, sizeof(eff));
+            }
         }
     }
     use_eq_tab_mark = USE_SDK_DEFAULT_EQ_TAB;
     return 0;
 }
+
 //指定设置某个eq效果表
 int eq_mode_set(EQ_MODE mode)
 {
@@ -258,39 +267,47 @@ int eq_mode_set(EQ_MODE mode)
     }
 
     for (int i = 0; i < ARRAY_SIZE(music_eq_name); i++) {
-        //music eq运行时，直接设置更新
-        struct eq_adj eff = {0};
-        eff.type = EQ_GLOBAL_GAIN_CMD;
-        eff.param.global_gain =  global_gain_tab[eq_mode];
-        eff.fade_parm.fade_time = EQ_FADE_TIME;
-        eff.fade_parm.fade_step = EQ_FADE_STEP;
-        eff.fade_parm.f_fade_step = EQ_FADE_FREQ_STEP;
+        if (config_audio_eq_xfade_enable) {
+            int ret = eq_update_seg_info(music_eq_name[i], 0, global_gain_tab[eq_mode], nsection, seg);
+            if (ret == false) {
+                continue;
+            }
+        } else {
+            //music eq运行时，直接设置更新
+            struct eq_adj eff = {0};
+            eff.type = EQ_GLOBAL_GAIN_CMD;
+            eff.param.global_gain =  global_gain_tab[eq_mode];
+            eff.fade_parm.fade_time = EQ_FADE_TIME;
+            eff.fade_parm.fade_step = EQ_FADE_STEP;
+            eff.fade_parm.f_fade_step = EQ_FADE_FREQ_STEP;
 #if EQ_FADE_END_CALLBACK_EN
-        eff.fade_parm.priv = NULL;
-        eff.fade_parm.callback = audio_fade_end_callback;
+            eff.fade_parm.priv = NULL;
+            eff.fade_parm.callback = audio_fade_end_callback;
 #endif
 
-        int ret = jlstream_set_node_param(NODE_UUID_EQ, music_eq_name[i], &eff, sizeof(eff));
-        if (ret == false) {
-            continue ;
-        }
-        eff.type = EQ_SEG_NUM_CMD;
-        eff.param.seg_num = nsection ;
-        ret = jlstream_set_node_param(NODE_UUID_EQ, music_eq_name[i], &eff, sizeof(eff));
-        if (ret == false) {
-            continue ;
-        }
+            int ret = jlstream_set_node_param(NODE_UUID_EQ, music_eq_name[i], &eff, sizeof(eff));
+            if (ret == false) {
+                continue;
+            }
+            eff.type = EQ_SEG_NUM_CMD;
+            eff.param.seg_num = nsection;
+            ret = jlstream_set_node_param(NODE_UUID_EQ, music_eq_name[i], &eff, sizeof(eff));
+            if (ret == false) {
+                continue;
+            }
 
-        for (int j = 0; j < nsection; j++) {
-            eff.type = EQ_SEG_CMD;
-            memcpy(&eff.param.seg, &seg[j], sizeof(struct eq_seg_info));
-            jlstream_set_node_param(NODE_UUID_EQ, music_eq_name[i], &eff, sizeof(eff));
+            for (int j = 0; j < nsection; j++) {
+                eff.type = EQ_SEG_CMD;
+                memcpy(&eff.param.seg, &seg[j], sizeof(struct eq_seg_info));
+                jlstream_set_node_param(NODE_UUID_EQ, music_eq_name[i], &eff, sizeof(eff));
+            }
         }
     }
 
     use_eq_tab_mark = USE_SDK_DEFAULT_EQ_TAB;
     return 0;
 }
+
 //返回某个eq效果模式标号
 EQ_MODE eq_mode_get_cur(void)
 {
@@ -433,22 +450,30 @@ void set_global_gain(EQ_MODE mode, float global_gain)
     struct eq_adj eff = {0};
 
     for (int i = 0; i < ARRAY_SIZE(music_eq_name); i++) {
-        eff.type = EQ_GLOBAL_GAIN_CMD;
-        eff.param.global_gain =  global_gain_tab[mode];
-        eff.fade_parm.fade_time = EQ_FADE_TIME;
-        eff.fade_parm.fade_step = EQ_FADE_STEP;
-        eff.fade_parm.f_fade_step = EQ_FADE_FREQ_STEP;
+        if (config_audio_eq_xfade_enable) {
+            int ret = eq_update_seg_info(music_eq_name[i], 0, global_gain_tab[mode], eq_get_table_nsection(mode), (struct eq_seg_info *)eq_type_tab[mode]);
+            if (ret == false) {
+                continue;
+            }
+        } else {
+            eff.type = EQ_GLOBAL_GAIN_CMD;
+            eff.param.global_gain =  global_gain_tab[mode];
+            eff.fade_parm.fade_time = EQ_FADE_TIME;
+            eff.fade_parm.fade_step = EQ_FADE_STEP;
+            eff.fade_parm.f_fade_step = EQ_FADE_FREQ_STEP;
 #if EQ_FADE_END_CALLBACK_EN
-        eff.fade_parm.priv = NULL;
-        eff.fade_parm.callback = audio_fade_end_callback;
+            eff.fade_parm.priv = NULL;
+            eff.fade_parm.callback = audio_fade_end_callback;
 #endif
 
-        int ret = jlstream_set_node_param(NODE_UUID_EQ, music_eq_name[i], &eff, sizeof(eff));
-        if (ret == true) {
-            break;
+            int ret = jlstream_set_node_param(NODE_UUID_EQ, music_eq_name[i], &eff, sizeof(eff));
+            if (ret == true) {
+                break;
+            }
         }
     }
 }
+
 /*
  *获取指定偏移内的eq配置
  *info结构通过jlstream_read_form_node_info_base接口获取
@@ -474,29 +499,32 @@ void eq_file_cfg_update(char *name, struct cfg_info *info)
         printf("error:info->max_nsection(%d) > max(%d)\n", tab->seg_num, AUDIO_EQ_MAX_SECTION);
         return;
     }
-
-    //运行时，直接设置更新
-    struct eq_adj eff = {0};
-    eff.type = EQ_GLOBAL_GAIN_CMD;
-    eff.param.global_gain =  tab->global_gain;
-    eff.fade_parm.fade_time = EQ_FADE_TIME;
-    eff.fade_parm.fade_step = EQ_FADE_STEP;
-    eff.fade_parm.f_fade_step = EQ_FADE_FREQ_STEP;
+    if (config_audio_eq_xfade_enable) {
+        eq_update_seg_info(name, 0, tab->global_gain, tab->seg_num, tab->seg);
+    } else {
+        //运行时，直接设置更新
+        struct eq_adj eff = {0};
+        eff.type = EQ_GLOBAL_GAIN_CMD;
+        eff.param.global_gain =  tab->global_gain;
+        eff.fade_parm.fade_time = EQ_FADE_TIME;
+        eff.fade_parm.fade_step = EQ_FADE_STEP;
+        eff.fade_parm.f_fade_step = EQ_FADE_FREQ_STEP;
 #if EQ_FADE_END_CALLBACK_EN
-    eff.fade_parm.priv = NULL;
-    eff.fade_parm.callback = audio_fade_end_callback;
+        eff.fade_parm.priv = NULL;
+        eff.fade_parm.callback = audio_fade_end_callback;
 #endif
 
-    jlstream_set_node_param(NODE_UUID_EQ, name, &eff, sizeof(eff));
-
-    eff.type = EQ_SEG_NUM_CMD;
-    eff.param.seg_num = tab->seg_num;
-    jlstream_set_node_param(NODE_UUID_EQ, name, &eff, sizeof(eff));
-
-    for (int j = 0; j < tab->seg_num; j++) {
-        eff.type = EQ_SEG_CMD;
-        memcpy(&eff.param.seg, &tab->seg[j], sizeof(struct eq_seg_info));
         jlstream_set_node_param(NODE_UUID_EQ, name, &eff, sizeof(eff));
+
+        eff.type = EQ_SEG_NUM_CMD;
+        eff.param.seg_num = tab->seg_num;
+        jlstream_set_node_param(NODE_UUID_EQ, name, &eff, sizeof(eff));
+
+        for (int j = 0; j < tab->seg_num; j++) {
+            eff.type = EQ_SEG_CMD;
+            memcpy(&eff.param.seg, &tab->seg[j], sizeof(struct eq_seg_info));
+            jlstream_set_node_param(NODE_UUID_EQ, name, &eff, sizeof(eff));
+        }
     }
 
     free(tab);

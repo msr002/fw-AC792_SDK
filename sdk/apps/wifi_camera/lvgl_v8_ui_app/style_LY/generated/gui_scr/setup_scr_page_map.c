@@ -15,168 +15,165 @@
 
 static const char *page_map_imgList_gear_mode_imgs[3] = {
 #if LV_USE_GUIBUILDER_SIMULATOR
-    "A:\\project\\meter_ui_demo\\WL83_gitlab\\ac792\\ui_prj\\new_ui\\import\\image\\alarm\\SPORT.png",
-    "A:\\project\\meter_ui_demo\\WL83_gitlab\\ac792\\ui_prj\\new_ui\\import\\image\\alarm\\TTFAR.png",
-    "A:\\project\\meter_ui_demo\\WL83_gitlab\\ac792\\ui_prj\\new_ui\\import\\image\\alarm\\FREE.png"
+    "A:\\wl83_soundbox\\ac792\\ui_prj\\new_ui\\import\\image\\alarm\\SPORT.png",
+    "A:\\wl83_soundbox\\ac792\\ui_prj\\new_ui\\import\\image\\alarm\\TTFAR.png",
+    "A:\\wl83_soundbox\\ac792\\ui_prj\\new_ui\\import\\image\\alarm\\FREE.png"
 #else
-    "mnt/sdfile/EXT_RESERVED/uipackres/ui/4b000072.zip",
-    "mnt/sdfile/EXT_RESERVED/uipackres/ui/4b000073.zip",
-    "mnt/sdfile/EXT_RESERVED/uipackres/ui/4b000074.zip"
-#endif
-};
-static const char *page_map_imgList_bluetooth_imgs[2] = {
-#if LV_USE_GUIBUILDER_SIMULATOR
-    "A:\\project\\meter_ui_demo\\WL83_gitlab\\ac792\\ui_prj\\new_ui\\import\\image\\alarm\\Lamp_25.png",
-    "A:\\project\\meter_ui_demo\\WL83_gitlab\\ac792\\ui_prj\\new_ui\\import\\image\\alarm\\Lamp_26.png"
-#else
+    "mnt/sdfile/EXT_RESERVED/uipackres/ui/4b000075.zip",
     "mnt/sdfile/EXT_RESERVED/uipackres/ui/4b000076.zip",
     "mnt/sdfile/EXT_RESERVED/uipackres/ui/4b000077.zip"
 #endif
 };
+static const char *page_map_imgList_bluetooth_imgs[2] = {
+#if LV_USE_GUIBUILDER_SIMULATOR
+    "A:\\wl83_soundbox\\ac792\\ui_prj\\new_ui\\import\\image\\alarm\\Lamp_25.png",
+    "A:\\wl83_soundbox\\ac792\\ui_prj\\new_ui\\import\\image\\alarm\\Lamp_26.png"
+#else
+    "mnt/sdfile/EXT_RESERVED/uipackres/ui/4b000079.zip",
+    "mnt/sdfile/EXT_RESERVED/uipackres/ui/4b00007a.zip"
+#endif
+};
 static const char *page_map_imgList_phone_bl_imgs[2] = {
 #if LV_USE_GUIBUILDER_SIMULATOR
-    "A:\\project\\meter_ui_demo\\WL83_gitlab\\ac792\\ui_prj\\new_ui\\import\\image\\alarm\\Lamp_23.png",
-    "A:\\project\\meter_ui_demo\\WL83_gitlab\\ac792\\ui_prj\\new_ui\\import\\image\\alarm\\Lamp_24.png"
+    "A:\\wl83_soundbox\\ac792\\ui_prj\\new_ui\\import\\image\\alarm\\Lamp_23.png",
+    "A:\\wl83_soundbox\\ac792\\ui_prj\\new_ui\\import\\image\\alarm\\Lamp_24.png"
 #else
-    "mnt/sdfile/EXT_RESERVED/uipackres/ui/4b000078.zip",
-    "mnt/sdfile/EXT_RESERVED/uipackres/ui/4b000079.zip"
+    "mnt/sdfile/EXT_RESERVED/uipackres/ui/4b00007b.zip",
+    "mnt/sdfile/EXT_RESERVED/uipackres/ui/4b00007c.zip"
 #endif
 };
 static const char *page_map_imgList_gps_imgs[2] = {
 #if LV_USE_GUIBUILDER_SIMULATOR
-    "A:\\project\\meter_ui_demo\\WL83_gitlab\\ac792\\ui_prj\\new_ui\\import\\image\\alarm\\Lamp_29.png",
-    "A:\\project\\meter_ui_demo\\WL83_gitlab\\ac792\\ui_prj\\new_ui\\import\\image\\alarm\\Lamp_30.png"
+    "A:\\wl83_soundbox\\ac792\\ui_prj\\new_ui\\import\\image\\alarm\\Lamp_29.png",
+    "A:\\wl83_soundbox\\ac792\\ui_prj\\new_ui\\import\\image\\alarm\\Lamp_30.png"
 #else
-    "mnt/sdfile/EXT_RESERVED/uipackres/ui/4b00007a.zip",
-    "mnt/sdfile/EXT_RESERVED/uipackres/ui/4b00007b.zip"
+    "mnt/sdfile/EXT_RESERVED/uipackres/ui/4b00007d.zip",
+    "mnt/sdfile/EXT_RESERVED/uipackres/ui/4b00007e.zip"
 #endif
 };
 static const char *page_map_imgList_networksignal_imgs[2] = {
 #if LV_USE_GUIBUILDER_SIMULATOR
-    "A:\\project\\meter_ui_demo\\WL83_gitlab\\ac792\\ui_prj\\new_ui\\import\\image\\alarm\\Lamp_27.png",
-    "A:\\project\\meter_ui_demo\\WL83_gitlab\\ac792\\ui_prj\\new_ui\\import\\image\\alarm\\Lamp_28.png"
+    "A:\\wl83_soundbox\\ac792\\ui_prj\\new_ui\\import\\image\\alarm\\Lamp_27.png",
+    "A:\\wl83_soundbox\\ac792\\ui_prj\\new_ui\\import\\image\\alarm\\Lamp_28.png"
 #else
-    "mnt/sdfile/EXT_RESERVED/uipackres/ui/4b00007c.zip",
-    "mnt/sdfile/EXT_RESERVED/uipackres/ui/4b00007d.zip"
+    "mnt/sdfile/EXT_RESERVED/uipackres/ui/4b00007f.zip",
+    "mnt/sdfile/EXT_RESERVED/uipackres/ui/4b000080.zip"
 #endif
 };
 static const char *page_map_imgList_soc_beam_imgs[3] = {
 #if LV_USE_GUIBUILDER_SIMULATOR
-    "A:\\project\\meter_ui_demo\\WL83_gitlab\\ac792\\ui_prj\\new_ui\\import\\image\\alarm\\Lamp_20.png",
-    "A:\\project\\meter_ui_demo\\WL83_gitlab\\ac792\\ui_prj\\new_ui\\import\\image\\alarm\\Lamp_21.png",
-    "A:\\project\\meter_ui_demo\\WL83_gitlab\\ac792\\ui_prj\\new_ui\\import\\image\\alarm\\Lamp_22.png"
+    "A:\\wl83_soundbox\\ac792\\ui_prj\\new_ui\\import\\image\\alarm\\Lamp_20.png",
+    "A:\\wl83_soundbox\\ac792\\ui_prj\\new_ui\\import\\image\\alarm\\Lamp_21.png",
+    "A:\\wl83_soundbox\\ac792\\ui_prj\\new_ui\\import\\image\\alarm\\Lamp_22.png"
 #else
-    "mnt/sdfile/EXT_RESERVED/uipackres/ui/4b000080.zip",
-    "mnt/sdfile/EXT_RESERVED/uipackres/ui/4b000081.zip",
-    "mnt/sdfile/EXT_RESERVED/uipackres/ui/4b000082.zip"
+    "mnt/sdfile/EXT_RESERVED/uipackres/ui/4b000083.zip",
+    "mnt/sdfile/EXT_RESERVED/uipackres/ui/4b000084.zip",
+    "mnt/sdfile/EXT_RESERVED/uipackres/ui/4b000085.zip"
 #endif
 };
 static const char *page_map_imglist_bat_imgs[100] = {
 #if LV_USE_GUIBUILDER_SIMULATOR
-    "A:\\project\\meter_ui_demo\\WL83_gitlab\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_001.png",
-    "A:\\project\\meter_ui_demo\\WL83_gitlab\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_002.png",
-    "A:\\project\\meter_ui_demo\\WL83_gitlab\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_003.png",
-    "A:\\project\\meter_ui_demo\\WL83_gitlab\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_004.png",
-    "A:\\project\\meter_ui_demo\\WL83_gitlab\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_005.png",
-    "A:\\project\\meter_ui_demo\\WL83_gitlab\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_006.png",
-    "A:\\project\\meter_ui_demo\\WL83_gitlab\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_007.png",
-    "A:\\project\\meter_ui_demo\\WL83_gitlab\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_008.png",
-    "A:\\project\\meter_ui_demo\\WL83_gitlab\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_009.png",
-    "A:\\project\\meter_ui_demo\\WL83_gitlab\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_010.png",
-    "A:\\project\\meter_ui_demo\\WL83_gitlab\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_011.png",
-    "A:\\project\\meter_ui_demo\\WL83_gitlab\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_012.png",
-    "A:\\project\\meter_ui_demo\\WL83_gitlab\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_013.png",
-    "A:\\project\\meter_ui_demo\\WL83_gitlab\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_014.png",
-    "A:\\project\\meter_ui_demo\\WL83_gitlab\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_015.png",
-    "A:\\project\\meter_ui_demo\\WL83_gitlab\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_016.png",
-    "A:\\project\\meter_ui_demo\\WL83_gitlab\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_017.png",
-    "A:\\project\\meter_ui_demo\\WL83_gitlab\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_018.png",
-    "A:\\project\\meter_ui_demo\\WL83_gitlab\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_019.png",
-    "A:\\project\\meter_ui_demo\\WL83_gitlab\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_020.png",
-    "A:\\project\\meter_ui_demo\\WL83_gitlab\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_021.png",
-    "A:\\project\\meter_ui_demo\\WL83_gitlab\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_022.png",
-    "A:\\project\\meter_ui_demo\\WL83_gitlab\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_023.png",
-    "A:\\project\\meter_ui_demo\\WL83_gitlab\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_024.png",
-    "A:\\project\\meter_ui_demo\\WL83_gitlab\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_025.png",
-    "A:\\project\\meter_ui_demo\\WL83_gitlab\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_026.png",
-    "A:\\project\\meter_ui_demo\\WL83_gitlab\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_027.png",
-    "A:\\project\\meter_ui_demo\\WL83_gitlab\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_028.png",
-    "A:\\project\\meter_ui_demo\\WL83_gitlab\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_029.png",
-    "A:\\project\\meter_ui_demo\\WL83_gitlab\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_030.png",
-    "A:\\project\\meter_ui_demo\\WL83_gitlab\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_031.png",
-    "A:\\project\\meter_ui_demo\\WL83_gitlab\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_032.png",
-    "A:\\project\\meter_ui_demo\\WL83_gitlab\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_033.png",
-    "A:\\project\\meter_ui_demo\\WL83_gitlab\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_034.png",
-    "A:\\project\\meter_ui_demo\\WL83_gitlab\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_035.png",
-    "A:\\project\\meter_ui_demo\\WL83_gitlab\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_036.png",
-    "A:\\project\\meter_ui_demo\\WL83_gitlab\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_037.png",
-    "A:\\project\\meter_ui_demo\\WL83_gitlab\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_038.png",
-    "A:\\project\\meter_ui_demo\\WL83_gitlab\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_039.png",
-    "A:\\project\\meter_ui_demo\\WL83_gitlab\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_040.png",
-    "A:\\project\\meter_ui_demo\\WL83_gitlab\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_041.png",
-    "A:\\project\\meter_ui_demo\\WL83_gitlab\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_042.png",
-    "A:\\project\\meter_ui_demo\\WL83_gitlab\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_043.png",
-    "A:\\project\\meter_ui_demo\\WL83_gitlab\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_044.png",
-    "A:\\project\\meter_ui_demo\\WL83_gitlab\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_045.png",
-    "A:\\project\\meter_ui_demo\\WL83_gitlab\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_046.png",
-    "A:\\project\\meter_ui_demo\\WL83_gitlab\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_047.png",
-    "A:\\project\\meter_ui_demo\\WL83_gitlab\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_048.png",
-    "A:\\project\\meter_ui_demo\\WL83_gitlab\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_049.png",
-    "A:\\project\\meter_ui_demo\\WL83_gitlab\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_050.png",
-    "A:\\project\\meter_ui_demo\\WL83_gitlab\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_051.png",
-    "A:\\project\\meter_ui_demo\\WL83_gitlab\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_052.png",
-    "A:\\project\\meter_ui_demo\\WL83_gitlab\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_053.png",
-    "A:\\project\\meter_ui_demo\\WL83_gitlab\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_054.png",
-    "A:\\project\\meter_ui_demo\\WL83_gitlab\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_055.png",
-    "A:\\project\\meter_ui_demo\\WL83_gitlab\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_056.png",
-    "A:\\project\\meter_ui_demo\\WL83_gitlab\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_057.png",
-    "A:\\project\\meter_ui_demo\\WL83_gitlab\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_058.png",
-    "A:\\project\\meter_ui_demo\\WL83_gitlab\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_059.png",
-    "A:\\project\\meter_ui_demo\\WL83_gitlab\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_060.png",
-    "A:\\project\\meter_ui_demo\\WL83_gitlab\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_061.png",
-    "A:\\project\\meter_ui_demo\\WL83_gitlab\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_062.png",
-    "A:\\project\\meter_ui_demo\\WL83_gitlab\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_063.png",
-    "A:\\project\\meter_ui_demo\\WL83_gitlab\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_064.png",
-    "A:\\project\\meter_ui_demo\\WL83_gitlab\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_065.png",
-    "A:\\project\\meter_ui_demo\\WL83_gitlab\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_066.png",
-    "A:\\project\\meter_ui_demo\\WL83_gitlab\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_067.png",
-    "A:\\project\\meter_ui_demo\\WL83_gitlab\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_068.png",
-    "A:\\project\\meter_ui_demo\\WL83_gitlab\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_069.png",
-    "A:\\project\\meter_ui_demo\\WL83_gitlab\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_070.png",
-    "A:\\project\\meter_ui_demo\\WL83_gitlab\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_071.png",
-    "A:\\project\\meter_ui_demo\\WL83_gitlab\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_072.png",
-    "A:\\project\\meter_ui_demo\\WL83_gitlab\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_073.png",
-    "A:\\project\\meter_ui_demo\\WL83_gitlab\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_074.png",
-    "A:\\project\\meter_ui_demo\\WL83_gitlab\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_075.png",
-    "A:\\project\\meter_ui_demo\\WL83_gitlab\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_076.png",
-    "A:\\project\\meter_ui_demo\\WL83_gitlab\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_077.png",
-    "A:\\project\\meter_ui_demo\\WL83_gitlab\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_078.png",
-    "A:\\project\\meter_ui_demo\\WL83_gitlab\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_079.png",
-    "A:\\project\\meter_ui_demo\\WL83_gitlab\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_080.png",
-    "A:\\project\\meter_ui_demo\\WL83_gitlab\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_081.png",
-    "A:\\project\\meter_ui_demo\\WL83_gitlab\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_082.png",
-    "A:\\project\\meter_ui_demo\\WL83_gitlab\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_083.png",
-    "A:\\project\\meter_ui_demo\\WL83_gitlab\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_084.png",
-    "A:\\project\\meter_ui_demo\\WL83_gitlab\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_085.png",
-    "A:\\project\\meter_ui_demo\\WL83_gitlab\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_086.png",
-    "A:\\project\\meter_ui_demo\\WL83_gitlab\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_087.png",
-    "A:\\project\\meter_ui_demo\\WL83_gitlab\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_088.png",
-    "A:\\project\\meter_ui_demo\\WL83_gitlab\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_089.png",
-    "A:\\project\\meter_ui_demo\\WL83_gitlab\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_090.png",
-    "A:\\project\\meter_ui_demo\\WL83_gitlab\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_091.png",
-    "A:\\project\\meter_ui_demo\\WL83_gitlab\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_092.png",
-    "A:\\project\\meter_ui_demo\\WL83_gitlab\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_093.png",
-    "A:\\project\\meter_ui_demo\\WL83_gitlab\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_094.png",
-    "A:\\project\\meter_ui_demo\\WL83_gitlab\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_095.png",
-    "A:\\project\\meter_ui_demo\\WL83_gitlab\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_096.png",
-    "A:\\project\\meter_ui_demo\\WL83_gitlab\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_097.png",
-    "A:\\project\\meter_ui_demo\\WL83_gitlab\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_098.png",
-    "A:\\project\\meter_ui_demo\\WL83_gitlab\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_099.png",
-    "A:\\project\\meter_ui_demo\\WL83_gitlab\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_100.png"
+    "A:\\wl83_soundbox\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_001.png",
+    "A:\\wl83_soundbox\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_002.png",
+    "A:\\wl83_soundbox\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_003.png",
+    "A:\\wl83_soundbox\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_004.png",
+    "A:\\wl83_soundbox\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_005.png",
+    "A:\\wl83_soundbox\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_006.png",
+    "A:\\wl83_soundbox\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_007.png",
+    "A:\\wl83_soundbox\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_008.png",
+    "A:\\wl83_soundbox\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_009.png",
+    "A:\\wl83_soundbox\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_010.png",
+    "A:\\wl83_soundbox\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_011.png",
+    "A:\\wl83_soundbox\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_012.png",
+    "A:\\wl83_soundbox\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_013.png",
+    "A:\\wl83_soundbox\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_014.png",
+    "A:\\wl83_soundbox\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_015.png",
+    "A:\\wl83_soundbox\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_016.png",
+    "A:\\wl83_soundbox\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_017.png",
+    "A:\\wl83_soundbox\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_018.png",
+    "A:\\wl83_soundbox\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_019.png",
+    "A:\\wl83_soundbox\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_020.png",
+    "A:\\wl83_soundbox\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_021.png",
+    "A:\\wl83_soundbox\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_022.png",
+    "A:\\wl83_soundbox\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_023.png",
+    "A:\\wl83_soundbox\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_024.png",
+    "A:\\wl83_soundbox\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_025.png",
+    "A:\\wl83_soundbox\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_026.png",
+    "A:\\wl83_soundbox\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_027.png",
+    "A:\\wl83_soundbox\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_028.png",
+    "A:\\wl83_soundbox\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_029.png",
+    "A:\\wl83_soundbox\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_030.png",
+    "A:\\wl83_soundbox\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_031.png",
+    "A:\\wl83_soundbox\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_032.png",
+    "A:\\wl83_soundbox\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_033.png",
+    "A:\\wl83_soundbox\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_034.png",
+    "A:\\wl83_soundbox\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_035.png",
+    "A:\\wl83_soundbox\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_036.png",
+    "A:\\wl83_soundbox\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_037.png",
+    "A:\\wl83_soundbox\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_038.png",
+    "A:\\wl83_soundbox\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_039.png",
+    "A:\\wl83_soundbox\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_040.png",
+    "A:\\wl83_soundbox\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_041.png",
+    "A:\\wl83_soundbox\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_042.png",
+    "A:\\wl83_soundbox\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_043.png",
+    "A:\\wl83_soundbox\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_044.png",
+    "A:\\wl83_soundbox\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_045.png",
+    "A:\\wl83_soundbox\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_046.png",
+    "A:\\wl83_soundbox\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_047.png",
+    "A:\\wl83_soundbox\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_048.png",
+    "A:\\wl83_soundbox\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_049.png",
+    "A:\\wl83_soundbox\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_050.png",
+    "A:\\wl83_soundbox\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_051.png",
+    "A:\\wl83_soundbox\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_052.png",
+    "A:\\wl83_soundbox\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_053.png",
+    "A:\\wl83_soundbox\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_054.png",
+    "A:\\wl83_soundbox\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_055.png",
+    "A:\\wl83_soundbox\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_056.png",
+    "A:\\wl83_soundbox\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_057.png",
+    "A:\\wl83_soundbox\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_058.png",
+    "A:\\wl83_soundbox\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_059.png",
+    "A:\\wl83_soundbox\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_060.png",
+    "A:\\wl83_soundbox\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_061.png",
+    "A:\\wl83_soundbox\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_062.png",
+    "A:\\wl83_soundbox\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_063.png",
+    "A:\\wl83_soundbox\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_064.png",
+    "A:\\wl83_soundbox\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_065.png",
+    "A:\\wl83_soundbox\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_066.png",
+    "A:\\wl83_soundbox\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_067.png",
+    "A:\\wl83_soundbox\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_068.png",
+    "A:\\wl83_soundbox\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_069.png",
+    "A:\\wl83_soundbox\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_070.png",
+    "A:\\wl83_soundbox\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_071.png",
+    "A:\\wl83_soundbox\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_072.png",
+    "A:\\wl83_soundbox\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_073.png",
+    "A:\\wl83_soundbox\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_074.png",
+    "A:\\wl83_soundbox\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_075.png",
+    "A:\\wl83_soundbox\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_076.png",
+    "A:\\wl83_soundbox\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_077.png",
+    "A:\\wl83_soundbox\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_078.png",
+    "A:\\wl83_soundbox\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_079.png",
+    "A:\\wl83_soundbox\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_080.png",
+    "A:\\wl83_soundbox\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_081.png",
+    "A:\\wl83_soundbox\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_082.png",
+    "A:\\wl83_soundbox\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_083.png",
+    "A:\\wl83_soundbox\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_084.png",
+    "A:\\wl83_soundbox\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_085.png",
+    "A:\\wl83_soundbox\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_086.png",
+    "A:\\wl83_soundbox\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_087.png",
+    "A:\\wl83_soundbox\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_088.png",
+    "A:\\wl83_soundbox\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_089.png",
+    "A:\\wl83_soundbox\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_090.png",
+    "A:\\wl83_soundbox\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_091.png",
+    "A:\\wl83_soundbox\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_092.png",
+    "A:\\wl83_soundbox\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_093.png",
+    "A:\\wl83_soundbox\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_094.png",
+    "A:\\wl83_soundbox\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_095.png",
+    "A:\\wl83_soundbox\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_096.png",
+    "A:\\wl83_soundbox\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_097.png",
+    "A:\\wl83_soundbox\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_098.png",
+    "A:\\wl83_soundbox\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_099.png",
+    "A:\\wl83_soundbox\\ac792\\ui_prj\\new_ui\\import\\image\\battery\\bat_100.png"
 #else
-    "mnt/sdfile/EXT_RESERVED/uipackres/ui/4b000083.zip",
-    "mnt/sdfile/EXT_RESERVED/uipackres/ui/4b000084.zip",
-    "mnt/sdfile/EXT_RESERVED/uipackres/ui/4b000085.zip",
     "mnt/sdfile/EXT_RESERVED/uipackres/ui/4b000086.zip",
     "mnt/sdfile/EXT_RESERVED/uipackres/ui/4b000087.zip",
     "mnt/sdfile/EXT_RESERVED/uipackres/ui/4b000088.zip",
@@ -273,7 +270,10 @@ static const char *page_map_imglist_bat_imgs[100] = {
     "mnt/sdfile/EXT_RESERVED/uipackres/ui/4b0000e3.zip",
     "mnt/sdfile/EXT_RESERVED/uipackres/ui/4b0000e4.zip",
     "mnt/sdfile/EXT_RESERVED/uipackres/ui/4b0000e5.zip",
-    "mnt/sdfile/EXT_RESERVED/uipackres/ui/4b0000e6.zip"
+    "mnt/sdfile/EXT_RESERVED/uipackres/ui/4b0000e6.zip",
+    "mnt/sdfile/EXT_RESERVED/uipackres/ui/4b0000e7.zip",
+    "mnt/sdfile/EXT_RESERVED/uipackres/ui/4b0000e8.zip",
+    "mnt/sdfile/EXT_RESERVED/uipackres/ui/4b0000e9.zip"
 #endif
 };
 
@@ -295,7 +295,6 @@ lv_obj_t *setup_scr_page_map(lv_ui *ui)
     ui_style_set(ui_scr->page_map, GUI_CTRL_SCR);
 
     //Set style for page_map. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
-    lv_obj_set_style_bg_color(ui_scr->page_map, lv_color_make(0x00, 0x00, 0x00), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_border_color(ui_scr->page_map, lv_color_make(0xFF, 0xFF, 0xFF), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_border_opa(ui_scr->page_map, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
 
@@ -539,8 +538,6 @@ lv_obj_t *setup_scr_page_map(lv_ui *ui)
     ui_scr->page_map_timer_1 = lv_timer_create(page_map_timer_1_timer_cb, 50, "");
     lv_timer_set_repeat_count(ui_scr->page_map_timer_1, -1);
 
-#if 0  //move to ui_action_page_map.c
-
     //Write codes page_map_view_3
     ui_scr->page_map_view_3 = lv_obj_create(ui_scr->page_map);
     lv_obj_set_pos(ui_scr->page_map_view_3, 27, 125);
@@ -627,9 +624,6 @@ lv_obj_t *setup_scr_page_map(lv_ui *ui)
     lv_obj_add_flag(ui_scr->page_map_img_1, LV_OBJ_FLAG_CLICKABLE);
     ui_style_set(ui_scr->page_map_img_1, GUI_CTRL_IMG);
 
-#endif
-
-
     // Write Timer page_map_timer_2
     if (ui_scr->page_map_timer_2 != NULL) {
         lv_timer_del(ui_scr->page_map_timer_2);
@@ -652,7 +646,7 @@ lv_obj_t *setup_scr_page_map(lv_ui *ui)
     lv_obj_remove_style(ui_scr->page_map_btn_1, &gui_btn_main_focus_key_style, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
     ui_scr->page_map_btn_1_label = lv_label_create(ui_scr->page_map_btn_1);
     lv_label_set_text(ui_scr->page_map_btn_1_label, "back");
-    lv_obj_set_style_pad_all(ui_scr->page_map_btn_1, 0, LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_all(ui_scr->page_map_btn_1, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_align(ui_scr->page_map_btn_1_label, LV_ALIGN_CENTER, 0, 0);
 
     //Write codes page_map_btn_2
@@ -670,11 +664,9 @@ lv_obj_t *setup_scr_page_map(lv_ui *ui)
     lv_obj_remove_style(ui_scr->page_map_btn_2, &gui_btn_main_focus_key_style, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
     ui_scr->page_map_btn_2_label = lv_label_create(ui_scr->page_map_btn_2);
     lv_label_set_text(ui_scr->page_map_btn_2_label, "next");
-    lv_obj_set_style_pad_all(ui_scr->page_map_btn_2, 0, LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_all(ui_scr->page_map_btn_2, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_align(ui_scr->page_map_btn_2_label, LV_ALIGN_CENTER, 0, 0);
 
-
-#if 0   //Instrument cluster screen-casting performance information is not displayed
     //Write codes page_map_view_4
     ui_scr->page_map_view_4 = lv_obj_create(ui_scr->page_map);
     lv_obj_set_pos(ui_scr->page_map_view_4, 540, 74);
@@ -724,8 +716,8 @@ lv_obj_t *setup_scr_page_map(lv_ui *ui)
     ui_scr->page_map_lbl_7 = lv_label_create(ui_scr->page_map_view_4);
     lv_label_set_text(ui_scr->page_map_lbl_7, "0,0,0");
     lv_label_set_long_mode(ui_scr->page_map_lbl_7, LV_LABEL_LONG_WRAP);
-    lv_obj_set_pos(ui_scr->page_map_lbl_7, 42, 64);
-    lv_obj_set_size(ui_scr->page_map_lbl_7, 172, 28);
+    lv_obj_set_pos(ui_scr->page_map_lbl_7, 4, 69);
+    lv_obj_set_size(ui_scr->page_map_lbl_7, 230, 28);
     lv_obj_set_scrollbar_mode(ui_scr->page_map_lbl_7, LV_SCROLLBAR_MODE_OFF);
     ui_style_set(ui_scr->page_map_lbl_7, GUI_CTRL_LABEL);
 
@@ -737,7 +729,7 @@ lv_obj_t *setup_scr_page_map(lv_ui *ui)
 
     //Write codes page_map_lbl_8
     ui_scr->page_map_lbl_8 = lv_label_create(ui_scr->page_map_view_4);
-    lv_label_set_text(ui_scr->page_map_lbl_8, "bitrate:max,min,avg");
+    lv_label_set_text(ui_scr->page_map_lbl_8, "jpgsize:max,min,avg");
     lv_label_set_long_mode(ui_scr->page_map_lbl_8, LV_LABEL_LONG_WRAP);
     lv_obj_set_pos(ui_scr->page_map_lbl_8, 4, 96);
     lv_obj_set_size(ui_scr->page_map_lbl_8, 238, 34);
@@ -754,8 +746,8 @@ lv_obj_t *setup_scr_page_map(lv_ui *ui)
     ui_scr->page_map_lbl_9 = lv_label_create(ui_scr->page_map_view_4);
     lv_label_set_text(ui_scr->page_map_lbl_9, "0,0,0");
     lv_label_set_long_mode(ui_scr->page_map_lbl_9, LV_LABEL_LONG_WRAP);
-    lv_obj_set_pos(ui_scr->page_map_lbl_9, 42, 126);
-    lv_obj_set_size(ui_scr->page_map_lbl_9, 172, 28);
+    lv_obj_set_pos(ui_scr->page_map_lbl_9, 4, 127);
+    lv_obj_set_size(ui_scr->page_map_lbl_9, 230, 28);
     lv_obj_set_scrollbar_mode(ui_scr->page_map_lbl_9, LV_SCROLLBAR_MODE_OFF);
     ui_style_set(ui_scr->page_map_lbl_9, GUI_CTRL_LABEL);
 
@@ -779,8 +771,6 @@ lv_obj_t *setup_scr_page_map(lv_ui *ui)
     lv_obj_set_style_text_color(ui_scr->page_map_lbl_10, lv_color_make(0x00, 0x00, 0x00), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_font(ui_scr->page_map_lbl_10, &lv_font_montserratMedium_16, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_pad_top(ui_scr->page_map_lbl_10, 8, LV_PART_MAIN | LV_STATE_DEFAULT);
-#endif
-
 
     //Write codes page_map_img_2
     ui_scr->page_map_img_2 = lv_img_create(ui_scr->page_map);

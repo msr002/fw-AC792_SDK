@@ -206,6 +206,7 @@ __exit:
  */
 static int usb_control_transfers(struct usb_host_device *host_dev, struct ctlXfer *urb)
 {
+    int usb_mutex_pend(struct usb_host_device * host_dev, u32 timeout);
     usb_mutex_pend(host_dev, 0);
     int res = DEV_ERR_NONE;
     /*SETUP*/
@@ -253,7 +254,8 @@ static int usb_control_transfers(struct usb_host_device *host_dev, struct ctlXfe
     }
 
 __exit:
-    usb_mutex_post(host_dev, 0);
+    int usb_mutex_post(struct usb_host_device * host_dev);
+    usb_mutex_post(host_dev);
     return res;
 }
 

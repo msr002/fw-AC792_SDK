@@ -18,7 +18,7 @@
 #define IOCTL_SPI_READ_BYTE               _IOR(SPI_MAGIC, 4, u8 *)                   ///< 读取一个字节
 #define IOCTL_SPI_SEND_CMD_2BIT_MODE      _IOW(SPI_MAGIC, 5, spi_2bit_data_t *)      ///< 以2bit模式发命令
 #define IOCTL_SPI_SET_USE_SEM             _IOW(SPI_MAGIC, 6, u8)                     ///< 设置是否使用信号量,0:使用 非0:不使用
-#define IOCTL_SPI_SET_TRIGGER_WAIT_SEM_TIME_THRE    _IOW(SPI_MAGIC, 7, u32)          ///< 设置TX使用信号量的时间阈值
+// #define IOCTL_SPI_SET_TRIGGER_WAIT_SEM_TIME_THRE    _IOW(SPI_MAGIC, 7, u32)          ///< 设置TX使用信号量的时间阈值(该功能取消)
 #define IOCTL_SPI_SET_IRQ_FUNC            _IOW(SPI_MAGIC, 8, void (*)(void))         ///< 设置中断函数
 #define IOCTL_SPI_SET_ASYNC_SEND          _IOW(SPI_MAGIC, 9, u8)                     ///< 设置是否同步方式发包
 #define IOCTL_SPI_WAIT_ASYNC_SEND_END      _IO(SPI_MAGIC, 10)                        ///< 等待非同步发送结束

@@ -33,6 +33,7 @@ lv_obj_t *setup_scr_video_play(lv_ui *ui)
     ui_style_set(ui_scr->video_play, GUI_CTRL_SCR);
 
     //Set style for video_play. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
+    lv_obj_set_style_bg_color(ui_scr->video_play, lv_color_make(0x55, 0xaa, 0xa5), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_border_opa(ui_scr->video_play, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     //Write codes video_play_view_1
