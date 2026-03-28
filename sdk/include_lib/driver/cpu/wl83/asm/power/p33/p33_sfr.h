@@ -25,9 +25,17 @@ u8 P33_CON_GET(u16 addr);
 
 void P33_TX_NBIT(u16 addr, u8 data0, u8 en);
 
+#ifdef TEE_ENABLE
+void p33_lock_rom(void);
 
+void p33_unlock_rom(void);
+
+#define p33_cs_h(x)        do{p33_lock_rom();if(x&BIT(15)){JL_PMU->SPI_CON |= BIT(0)|BIT(8);}else{JL_PMU->SPI_CON &= ~BIT(8);JL_PMU->SPI_CON |= BIT(0);}}while(0)
+#define p33_cs_l           do{JL_PMU->SPI_CON &= ~(BIT(0)|BIT(8));p33_unlock_rom();}while(0)
+#else
 #define p33_cs_h(x)        do{p33_lock();if(x&BIT(15)){JL_PMU->SPI_CON |= BIT(0)|BIT(8);}else{JL_PMU->SPI_CON &= ~BIT(8);JL_PMU->SPI_CON |= BIT(0);}}while(0)
 #define p33_cs_l           do{JL_PMU->SPI_CON &= ~(BIT(0)|BIT(8));p33_unlock();}while(0)
+#endif
 
 #define __p33_cs_h(x)      do{if(x&BIT(15)){JL_PMU->SPI_CON |= BIT(0)|BIT(8);}else{JL_PMU->SPI_CON &= ~BIT(8);JL_PMU->SPI_CON |= BIT(0);}}while(0)
 #define __p33_cs_l         do{JL_PMU->SPI_CON &= ~(BIT(0)|BIT(8));}while(0)

@@ -29,6 +29,12 @@
 -I../../../../apps/common/net
 -I../../../../apps/common/net/testbox/include
 -I../../../../apps/common/rf_fcc_tool/include
+-I../../../../include_lib/net/sip/pjlib-util
+-I../../../../include_lib/net/sip/pjlib
+-I../../../../include_lib/net/sip/pjmedia
+-I../../../../include_lib/net/sip/pjnath
+-I../../../../include_lib/net/sip/pjsip
+-I../../../../apps/common/pjsip
 -I../../../../apps/common/third_party_profile/mijia
 -I../../../../apps/common/third_party_profile/mijia/mijia_ble_api
 -I../../../../apps/common/third_party_profile/mijia/mijia_ble_libs

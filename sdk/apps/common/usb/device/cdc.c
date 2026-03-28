@@ -445,6 +445,16 @@ u32 cdc_write_inir(const usb_dev usb_id, u8 *buf, u32 len)
 #endif
 }
 
+u8 *cdc_get_ep_in_addr(u8 usb_id)
+{
+    return cdc_hdl[usb_id]->bulk_ep_in_buffer;
+}
+
+u8 *cdc_get_ep_out_addr(u8 usb_id)
+{
+    return cdc_hdl[usb_id]->bulk_ep_out_buffer;
+}
+
 void cdc_register(const usb_dev usb_id)
 {
     struct usb_cdc_line_coding *lc;

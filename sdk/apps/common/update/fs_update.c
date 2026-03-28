@@ -166,6 +166,43 @@ static void fs_update_param_private_handle(UPDATA_PARM *p)
 }
 #endif
 
+/* 构造ota loader使用的usb结构体参数 */
+struct dev_loader_param_t {
+    u32 usb_id;
+    u32 dma_tx_addr;
+    u32 dma_rx_addr;
+    u32 epin;
+    u32 epin_max_packetsize;
+    u32 epout;
+    u32 epout_max_packetsize;
+};
+
+struct loader_param_t {
+    struct dev_loader_param_t dev0;
+    /* struct dev_loader_param_t dev1; */
+};
+
+extern u8 *cdc_get_ep_in_addr(u8 usb_id);
+extern u8 *cdc_get_ep_out_addr(u8 usb_id);
+
+static void ota_loader_jump(void *priv)
+{
+    /* demo构造cdc设备参数 */
+    /*,如果用户有其他类型设备或需要传给ota loader的变量,可以继续修改loader_param_t结构体*/
+    struct loader_param_t loader_param = {0};
+    loader_param.dev0.usb_id = 1;
+    loader_param.dev0.dma_rx_addr = (u32)cdc_get_ep_out_addr(loader_param.dev0.usb_id);
+    loader_param.dev0.dma_tx_addr = (u32)cdc_get_ep_in_addr(loader_param.dev0.usb_id);
+    loader_param.dev0.epin = CDC_DATA_EP_IN;
+    loader_param.dev0.epin_max_packetsize = MAXP_SIZE_CDC_BULKIN_FS;
+    loader_param.dev0.epout = CDC_DATA_EP_OUT;
+    loader_param.dev0.epout_max_packetsize = MAXP_SIZE_CDC_BULKOUT_FS;
+
+    /* ota loader升级检测并跳转 */
+    u8 jl_check_upgrade(void *update_parm, void *arg);
+    jl_check_upgrade(UPDATA_FLAG_ADDR, (void *)&loader_param);
+}
+
 static void fs_update_state_cbk(int type, u32 state, void *priv)
 {
     update_ret_code_t *ret_code = (update_ret_code_t *)priv;
@@ -181,15 +218,21 @@ static void fs_update_state_cbk(int type, u32 state, void *priv)
                 update_ram->magic = type;
                 update_result_set(UPDATA_SUCC);
                 printf(">>>>>>>>>>>>>>>>>>update ok , cpu reset ...\n");
+                system_soft_reset();
             } else {
 #ifndef CONFIG_DOUBLE_BANK_ENABLE
                 //单备份
                 memset(update_ram, 0, 32);
                 update_mode_api_v2(type, fs_update_param_private_handle, NULL);
 #endif
-                printf(">>>>>>>>>>>>>>>>>> cpu reset , uboot todo update ...\n");
+                if (type == USB_HID_UPDATA) {
+                    printf(">>>>>>>>>>>>>>>>>> jump ota loader!\n");
+                    os_task_create_affinity_core(ota_loader_jump, NULL, 26, 1024, 0, "ota_loader_jump", 0);
+                } else {
+                    printf(">>>>>>>>>>>>>>>>>> cpu reset , uboot todo update ...\n");
+                    system_soft_reset();
+                }
             }
-            system_soft_reset();
         } else {
             update_result_set(UPDATA_DEV_ERR);
             printf("\nupdate err : %d!!! \n", ret_code->err_code);
@@ -213,6 +256,7 @@ int fs_update_check(const char *path)
         return -1;
     }
     update_mode_info_t info = {
+#if !defined TEE_ENABLE || !TEE_ENABLE
 #if TCFG_UDISK_ENABLE
         .type = USB_UPDATA,
 #else
@@ -221,6 +265,9 @@ int fs_update_check(const char *path)
 #elif TCFG_SD1_ENABLE
         .type = SD1_UPDATA,
 #endif
+#endif
+#else
+        .type = USB_HID_UPDATA,
 #endif
         .state_cbk = fs_update_state_cbk,
         .p_op_api = &fs_update_opt,

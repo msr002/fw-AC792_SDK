@@ -208,6 +208,16 @@ void hid_set_report_desc(const usb_dev usb_id, const u8 *report_desc, u32 len)
 static u8 *hid_ep_in_dma[USB_MAX_HW_NUM];
 static u8 *hid_ep_out_dma[USB_MAX_HW_NUM];
 
+u8 *hid_get_ep_in_addr(u8 usb_id)
+{
+    return hid_ep_in_dma[usb_id];
+}
+
+u8 *hid_get_ep_out_addr(u8 usb_id)
+{
+    return hid_ep_out_dma[usb_id];
+}
+
 static void hid_rx_data(struct usb_device_t *usb_device, u32 ep)
 {
     /* const usb_dev usb_id = usb_device2id(usb_device); */

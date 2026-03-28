@@ -32,6 +32,7 @@
 
 
 extern void exception_irq_handler();
+extern void tee_exception_irq_handler();
 extern const char *os_current_task_rom();
 extern void log_output_release_deadlock(void);
 extern void __wdt_clear(void);
@@ -673,7 +674,11 @@ void exception_analyze(int *sp)
     unsigned int icfg = sp[21];
     unsigned int usp  = sp[22];
     unsigned int ssp  = sp[23];
+#if TEE_ENABLE
+    unsigned int _sp  = (u32)sp - 24;
+#else
     unsigned int _sp  = sp[24];
+#endif
 
     EXCEPTION_PRINTF("exception cpu %d info : ", cpu_id);
 
@@ -715,6 +720,7 @@ void exception_analyze(int *sp)
                 }
                 EXCEPTION_PRINTF("usp limit %x %x, ssp limit %x %x",
                                  q32DSP(cpu_id)->EMU_USP_L, q32DSP(cpu_id)->EMU_USP_H, q32DSP(cpu_id)->EMU_SSP_L, q32DSP(cpu_id)->EMU_SSP_H);
+                EXCEPTION_PRINTF("if you enable LV_USE_FREETYPE, you need to call sp_ovf_unen() at app_main() to disable sp over check");
             } else if (i == 4) {
                 EXCEPTION_PRINTF("PC_LIMIT0_L:0x%x, PC_LIMIT0_H:0x%x, PC_LIMIT1_L:0x%x, PC_LIMIT1_H:0x%x, PC_LIMIT2_L:0x%x, PC_LIMIT2_H:0x%x",
                                  q32DSP(cpu_id)->LIM_PC0_L, q32DSP(cpu_id)->LIM_PC0_H,
@@ -856,17 +862,23 @@ void exception_analyze(int *sp)
 #endif
 #ifdef SDTAP_DEBUG
     sdtap_init(2);//防止IO被占据,重新初始化SDTAP
-    while (1);
+    while (1) {
+        __asm__ volatile("idle");
+    }
 #endif
 #ifndef CONFIG_FPGA_ENABLE
     __cpu_reset();
-    while (1);
-#else
-    while (1);
 #endif
+    while (1) {
+        __asm__ volatile("idle");
+    }
 }
 
 void debug_register_isr(void)
 {
+#if TEE_ENABLE
+    request_irq(IRQ_EXCEPTION_IDX, 7, tee_exception_irq_handler, 0xff);
+#else
     request_irq(IRQ_EXCEPTION_IDX, 7, exception_irq_handler, 0xff);
+#endif
 }

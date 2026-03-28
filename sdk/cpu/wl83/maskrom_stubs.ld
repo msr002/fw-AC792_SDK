@@ -62,10 +62,10 @@
   LZ4_decompress_generic = ABSOLUTE(0xf9fc8);
   LZ4_decompress_safe_usingDict = ABSOLUTE(0xf9fcc);
   dec_isd_cfg_ini = ABSOLUTE(0xf9fd0);
-  /* pbkdf2_genkey = ABSOLUTE(0xf9fd4); */
-  /* sm4_set_decrypt_key = ABSOLUTE(0xf9fd8); */
-  /* sm4_cbc_decrypt = ABSOLUTE(0xf9fdc); */
-  /* pbkdf2_hmac_sm3_genkey = ABSOLUTE(0xf9fe0); */
+  pbkdf2_genkey = ABSOLUTE(0xf9fd4);
+  sm4_set_decrypt_key = ABSOLUTE(0xf9fd8);
+  sm4_cbc_decrypt = ABSOLUTE(0xf9fdc);
+  pbkdf2_hmac_sm3_genkey = ABSOLUTE(0xf9fe0);
   /* aes_set_decrypt_key = ABSOLUTE(0xf9fe4); */
   /* aes_cbc_decrypt = ABSOLUTE(0xf9fe8); */
   /* aes_ctr_encrypt = ABSOLUTE(0xf9fec); */

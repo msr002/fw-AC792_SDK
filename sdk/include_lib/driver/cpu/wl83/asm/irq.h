@@ -3,10 +3,14 @@
 
 #include "asm/hwi.h"
 
+#ifdef TEE_ENABLE
+#define ___interrupt
+#else
 #ifndef CPU_IRQ_USAGE_DEBUG
 #define ___interrupt 	__attribute__((interrupt("")))
 #else
 #define ___interrupt
+#endif
 #endif
 
 
@@ -26,7 +30,4 @@
 
 
 #endif
-
-
-
 

@@ -45,6 +45,13 @@ lv_obj_t *setup_scr_power_on(lv_ui *ui)
     lv_obj_add_flag(ui_scr->power_on_img_1, LV_OBJ_FLAG_CLICKABLE);
     ui_style_set(ui_scr->power_on_img_1, GUI_CTRL_IMG);
 
+    // Write Timer power_on_timer_1
+    if (ui_scr->power_on_timer_1 != NULL) {
+        lv_timer_del(ui_scr->power_on_timer_1);
+    }
+    ui_scr->power_on_timer_1 = lv_timer_create(power_on_timer_1_timer_cb, 1300, "");
+    lv_timer_set_repeat_count(ui_scr->power_on_timer_1, 1);
+
     lv_obj_update_layout(ui_scr->power_on);
     ui_scr->power_on_del = false;
     i18n_refresh_texts(GUI_SCREEN_POWER_ON);
@@ -55,7 +62,13 @@ lv_obj_t *setup_scr_power_on(lv_ui *ui)
 }
 void unload_scr_power_on(lv_ui *ui)
 {
+    lv_ui_power_on *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_POWER_ON);
+    if (ui_scr->power_on_timer_1 != NULL) {
+        lv_timer_del(ui_scr->power_on_timer_1);
+        ui_scr->power_on_timer_1 = NULL;
+    }
     ui_free_scr_ptr(ui, GUI_SCREEN_POWER_ON);
 }
 
 #endif
+

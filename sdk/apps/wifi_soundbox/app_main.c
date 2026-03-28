@@ -68,6 +68,10 @@ const struct task_info task_info_table[] = {
     { "sys_timer",            9,     SYS_TIMER_STK_SIZE,    SYS_TIMER_Q_SIZE,    sys_timer_tcb_stk_q },
     { "thread_fork_kill",    25,     256,      0 },
     { "dlog",                 1,     256,    128 },
+#if TEE_ENABLE
+    { "tee_core0",           22,    1024,      0 },
+    { "tee_core1",           23,    1024,      0 },
+#endif
 #ifdef CONFIG_MEDIA_ENABLE
 #if TCFG_ENC_AMR_16K_ENABLE //16k amr enc
     { "jlstream_",           25,    3072,      0 },

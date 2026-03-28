@@ -116,6 +116,8 @@ struct irq_info {
 #define IRQ_SOFT7_IDX      127
 
 
+extern u32 _TEE_USER_IRQ_BEGIN[];
+
 #define ISR_ENTRY          0x11fe00
 /* \} name */
 

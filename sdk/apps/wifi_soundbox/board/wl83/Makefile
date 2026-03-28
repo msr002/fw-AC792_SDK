@@ -118,6 +118,8 @@ DEFINES := \
 	-D_POSIX_SOURCE \
 	-DFIONREAD \
 	-DFIONBIO \
+	-DPJ_LINUX=1 \
+	-DPJ_M_I386=1 \
 	-DRLOTTIE_COMMIT_HASH=\"492fbb753924ae7cad27072a2b6ddedde88dc4bd\" \
 	-DFREETYPE_COMMIT_HASH=\"45903920b984540bb629bc89f4c010159c23a89a\" \
 	-DFT2_BUILD_LIBRARY \
@@ -728,6 +730,12 @@ c_SRC_FILES := \
 	../../../../apps/common/net/testbox/wbcp.c \
 	../../../../apps/common/net/voiceprint_cfg.c \
 	../../../../apps/common/net/wifi_conf.c \
+	../../../../apps/common/pjsip/pjsip_audio.c \
+	../../../../apps/common/pjsip/pjsip_core.c \
+	../../../../apps/common/pjsip/pjsip_lwip.c \
+	../../../../apps/common/pjsip/pjsip_media.c \
+	../../../../apps/common/pjsip/pjsip_platform.c \
+	../../../../apps/common/pjsip/pjsip_test.c \
 	../../../../apps/common/rf_fcc_tool/bt.c \
 	../../../../apps/common/rf_fcc_tool/rf_fcc_main.c \
 	../../../../apps/common/rf_fcc_tool/wifi_adaptivity.c \
@@ -1323,6 +1331,7 @@ LFLAGS := \
 	../../../../cpu/wl83/liba/lib_sound_wave.a \
 	../../../../cpu/wl83/liba/libqrcode.a \
 	../../../../cpu/wl83/liba/video.a \
+	../../../../cpu/wl83/liba/libsip.a \
 	../../../../cpu/wl83/liba/media.a \
 	../../../../cpu/wl83/liba/media/lib_mp3_dec.a \
 	../../../../cpu/wl83/liba/media/lib_m4a_dec.a \

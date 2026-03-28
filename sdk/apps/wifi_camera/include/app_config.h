@@ -191,6 +191,9 @@
 // #define CONFIG_SAVE_EXCEPTION_LOG_IN_FLASH   //保存异常打印信息到flash
 // #define MEM_LEAK_CHECK_ENABLE                //是否启用内存泄漏检查(需要包含mem_leak_test.h头文件)
 
+#if TCFG_LOWPOWER_FUNCTION == LOWPOWER_CLOSE
+#define CONFIG_WWDG_ENABLE
+#endif
 
 // #define CONFIG_AUTO_SHUTDOWN_ENABLE          //自动倒数关机
 // #define CONFIG_SYS_VDD_CLOCK_ENABLE          //系统可使用动态电源、时钟配置

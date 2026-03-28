@@ -52,6 +52,10 @@ u8 __attribute__((weak)) get_music_eq_preset_index(void)
 {
     return 0;
 }
+void __attribute__((weak)) bt_music_post_msg_to_ui(const char *msg, ...)
+{
+
+}
 
 float powf(float x, float y);
 static int get_pitchV(float pitch)

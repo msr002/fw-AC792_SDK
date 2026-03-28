@@ -38,7 +38,11 @@ AMONG_FILE_ALIGN = 2;//目录内的资源文件对齐处理,2^n
 
 //FORCE_VM_ALIGN=YES;
 #if (defined CONFIG_SFC_ENABLE) || (defined CONFIG_NO_SDRAM_ENABLE)
-ENTRY=0x8000120;                        [程序入口地址 SFC模式地址]
+#if TEE_ENABLE
+ENTRY=0x8000300;                        [程序入口地址 SFC模式地址]
+#else
+ENTRY=0x8000120;
+#endif
 #else
 ENTRY=0x18000120;                       [程序入口地址 SDRAM模式地址]
 #endif
@@ -98,6 +102,15 @@ EX_FLASH_IO=2_PA09_PA10_PA05_PA06_PA08;
 SPI_IO_HD=1_1_1_0_0_1;[主控Flash_SPI_IO强驱档位,0-3档可配,clk_d0_d1_d2_d3_cs]
 FLASH_QE_POS=0;[QE位置:0-常规(SR2-BIT1), 1-特殊(SR1-BIT6)。FLASH_QE_POS和FLASH_SPEC_QE_ID为'或'关系]
 FLASH_SPEC_QE_ID=C220XX_9D70XX_1C7019;[QE在SR1_BIT6的FlashID列表]
+//###电源配置====================================================================
+#if TCFG_POWER_DVD_DCV_SUPPLY_MODE
+DVD_DCV_MODE=1;[uboot阶段DVDD和DCVDD电源档位配置方式:0-固定档,1-频率决定电压档,为0时可由DVDD_LEV和DCVDD_LEV调整档位]
+#else
+DVD_DCV_MODE=0;[uboot阶段DVDD和DCVDD电源档位配置方式:0-固定档,1-频率决定电压档,为0时可由DVDD_LEV和DCVDD_LEV调整档位]
+DVDD_LEV=0;[uboot阶段DVDD电压档位:0-默认1.29V, 1-0.93V,2-0.96V,3-0.99V,4-1.02V,5-1.05V,6-1.08V,7-1.11V,8-1.14V,9-1.17V,10-1.20V,11-1.23V, 12-1.26V,13-1.29V,14-1.32V,15-1.35V,16-1.38V]
+DCVDD_LEV=0;[uboot阶段DCVDD电压档位:0-默认1.4V,1-1.25V,2-1.30V,3-1.35V,4-1.40V,5-1.45V,6-1.50V,7-1.55V,8-1.60V]
+#endif
+VDC14_MODE=0;[uboot阶段VDC14工作模式:0-DCDC模式,1-LDO模式]
 
 //###时钟配置====================================================================
 #if defined TCFG_OSC_FREQUENCY
@@ -317,6 +330,13 @@ BTIF_OPT=1;
 PRCT_ADR=0;
 PRCT_LEN=CODE_LEN;
 PRCT_OPT=2;
+
+#if TEE_ENABLE
+TA_FILE=ta_app.bin.sign.aes;
+TA_ADR=0x3ee000;
+TA_LEN=64K;
+TA_OPT=1;
+#endif
 
 //#烧录后不可升级的资源
 [RESERVED_EXPAND_CONFIG]

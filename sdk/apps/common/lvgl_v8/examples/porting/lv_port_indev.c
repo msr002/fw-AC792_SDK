@@ -82,6 +82,15 @@ static struct lv_scroll_throw lv_throw = {0};
  *   GLOBAL FUNCTIONS
  **********************/
 
+
+__attribute__((weak))
+void get_touch_x_y_status(uint16_t *x, uint16_t *y, uint8_t *status)
+{
+    *x = 0;
+    *y = 0;
+    *status = 0;
+}
+
 bool lv_indev_set_touch_timer_check(void)
 {
 
@@ -288,7 +297,6 @@ static void touchpad_read(lv_indev_drv_t *indev_drv, lv_indev_data_t *data)
 #endif
     } else {
         /* putchar('T'); */
-        extern void get_touch_x_y_status(uint16_t *x, uint16_t *y, uint8_t *status);
 
 #if LV_USE_SIM_INERTIAL_SLIDE
 

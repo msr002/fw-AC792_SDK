@@ -759,6 +759,16 @@
 /*Enable inertial sliding effect*/
 #define LV_USE_SIM_INERTIAL_SLIDE  0
 
+/*使用说明详见doc/文档/sdui资源加速功能使用说明*/
+#define LV_USE_SRC_INFO_FILE 0
+/* 脚本生成默认文件名为zip_info.bin,请定义正确路径如:"storage/sd0/C/ui/zip_info.bin" */
+/* 默认不定义路径，如果启用功能必须手动定义 */
+/* #define SRC_INFO_FILE_PATH "xxx/zip_info.bin"  //<-- 请填入路径并取消注释 */
+#if LV_USE_SRC_INFO_FILE == 1
+#ifndef SRC_INFO_FILE_PATH
+#error "已启用 LV_USE_SRC_INFO_FILE，必须定义 SRC_INFO_FILE_PATH 路径！"
+#endif
+#endif
 /*-----------
  * Others
  *----------*/

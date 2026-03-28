@@ -75,15 +75,10 @@
 //                              电源低功耗配置                                     //
 //*********************************************************************************//
 #define TCFG_POWER_MODE                     PWR_DCDC15
-#define TCFG_POWER_INTERNAL_VDDIO_ENABLE    1
 #define TCFG_POWER_AVDD18_ENABLE            1
 #define TCFG_POWER_AVDD28_ENABLE            1
 
-#if TCFG_POWER_INTERNAL_VDDIO_ENABLE
 #define TCFG_LOWPOWER_VDDIOM_LEVEL          VDDIOM_VOL_330V//强VDDIO电压档位
-#else
-#define TCFG_LOWPOWER_VDDIOM_LEVEL          VDDIOM_VOL_320V//强VDDIO电压档位，不要高于外部DCDC的电压
-#endif
 #define TCFG_LOWPOWER_VDDIOW_LEVEL          VDDIOW_VOL_200V //弱VDDIO电压档位
 #define TCFG_LOWPOWER_VDC14_LEVEL           DCVDD_VOL_140V
 #define TCFG_LOWPOWER_FUNCTION              LOWPOWER_CLOSE

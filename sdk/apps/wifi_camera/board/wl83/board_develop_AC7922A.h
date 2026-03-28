@@ -769,7 +769,6 @@
 //                              电源低功耗配置                                     //
 //*********************************************************************************//
 #define TCFG_POWER_MODE                     PWR_DCDC15
-#define TCFG_POWER_INTERNAL_VDDIO_ENABLE    1
 #define TCFG_POWER_AVDD18_ENABLE            1
 #define TCFG_POWER_AVDD28_ENABLE            1
 
@@ -777,21 +776,19 @@
 //行车记录仪不使用这宏
 //#define TCFG_LOW_POWER_AUTO_SHUTDOWN_ENABLE 1              //低电自动倒数关机
 #define TCFG_LOW_POWER_WARN_TIME            (60 * 1000)    //低电提醒时间，单位秒
+#define TCFG_POWER_DVD_DCV_SUPPLY_MODE      0              // 0-DVD和DCV短接 1-DVD和DCV内部独立供电
 
-#if TCFG_POWER_INTERNAL_VDDIO_ENABLE
-#define TCFG_LOW_POWER_SHUTDOWN             350            //低电直接关机电压, 如果VDDIO使用内部LDO供电, 建议低于3.6V关机
-#define TCFG_LOW_POWER_OFF_VAL              360            //低电关机电压
-#define TCFG_LOW_POWER_WARN_VAL             370            //低电提醒电压
-#define TCFG_LOWPOWER_VDDIOM_LEVEL          VDDIOM_VOL_340V//强VDDIO电压档位
-#else
 #define TCFG_LOW_POWER_SHUTDOWN             320            //低电直接关机电压, 如果VDDIO使用内部LDO供电, 建议低于3.6V关机
 #define TCFG_LOW_POWER_OFF_VAL              330            //低电关机电压
 #define TCFG_LOW_POWER_WARN_VAL             340            //低电提醒电压
-#define TCFG_LOWPOWER_VDDIOM_LEVEL          VDDIOM_VOL_320V//强VDDIO电压档位，不要高于外部DCDC的电压
-#endif
+#define TCFG_LOWPOWER_VDDIOM_LEVEL          VDDIOM_VOL_330V//强VDDIO电压档位，不要高于外部DCDC的电压
 
 #define TCFG_LOWPOWER_VDDIOW_LEVEL          VDDIOW_VOL_200V//弱VDDIO电压档位
-#define TCFG_LOWPOWER_VDC14_LEVEL           DCVDD_VOL_145V
+#if TCFG_POWER_DVD_DCV_SUPPLY_MODE
+#define TCFG_LOWPOWER_VDC14_LEVEL           DCVDD_VOL_155V
+#else
+#define TCFG_LOWPOWER_VDC14_LEVEL           DCVDD_VOL_140V
+#endif
 #define TCFG_LOWPOWER_FUNCTION              LOWPOWER_CLOSE
 #define TCFG_LOWPOWER_OSC_TYPE              OSC_TYPE_LRC
 

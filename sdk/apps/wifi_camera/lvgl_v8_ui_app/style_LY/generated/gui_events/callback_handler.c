@@ -16,7 +16,10 @@ void video_rec_timer_1_timer_cb(lv_timer_t *src)
     printf("enter time cb send msg\n");
 
     if (src->repeat_count == 0) {
-        ui_scr->video_rec_timer_1 = NULL;
+        ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_VIDEO_REC);
+        if (ui_scr != NULL && ui_scr->video_rec_timer_1 == src) {
+            ui_scr->video_rec_timer_1 = NULL;
+        }
     }
 
 }
@@ -36,7 +39,10 @@ void page_map_timer_1_timer_cb(lv_timer_t *src)
 #endif
 
     if (src->repeat_count == 0) {
-        ui_scr->page_map_timer_1 = NULL;
+        ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_PAGE_MAP);
+        if (ui_scr != NULL && ui_scr->page_map_timer_1 == src) {
+            ui_scr->page_map_timer_1 = NULL;
+        }
     }
 
 }
@@ -51,7 +57,10 @@ void page_map_timer_2_timer_cb(lv_timer_t *src)
 
 
     if (src->repeat_count == 0) {
-        ui_scr->page_map_timer_2 = NULL;
+        ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_PAGE_MAP);
+        if (ui_scr != NULL && ui_scr->page_map_timer_2 == src) {
+            ui_scr->page_map_timer_2 = NULL;
+        }
     }
 
 }
@@ -81,7 +90,10 @@ void page_music_timer_1_timer_cb(lv_timer_t *src)
 #endif
 
     if (src->repeat_count == 0) {
-        ui_scr->page_music_timer_1 = NULL;
+        ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_PAGE_MUSIC);
+        if (ui_scr != NULL && ui_scr->page_music_timer_1 == src) {
+            ui_scr->page_music_timer_1 = NULL;
+        }
     }
 
 }
@@ -122,7 +134,10 @@ void page_meter_timer_1_timer_cb(lv_timer_t *src)
 
 
     if (src->repeat_count == 0) {
-        ui_scr->page_meter_timer_1 = NULL;
+        ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_PAGE_METER);
+        if (ui_scr != NULL && ui_scr->page_meter_timer_1 == src) {
+            ui_scr->page_meter_timer_1 = NULL;
+        }
     }
 
 }
@@ -145,7 +160,10 @@ void page_meter_timer_2_timer_cb(lv_timer_t *src)
 
 
     if (src->repeat_count == 0) {
-        ui_scr->page_meter_timer_2 = NULL;
+        ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_PAGE_METER);
+        if (ui_scr != NULL && ui_scr->page_meter_timer_2 == src) {
+            ui_scr->page_meter_timer_2 = NULL;
+        }
     }
 
 }
@@ -230,9 +248,28 @@ void page_meter_timer_3_timer_cb(lv_timer_t *src)
     }
 
     if (src->repeat_count == 0) {
-        ui_scr->page_meter_timer_3 = NULL;
+        ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_PAGE_METER);
+        if (ui_scr != NULL && ui_scr->page_meter_timer_3 == src) {
+            ui_scr->page_meter_timer_3 = NULL;
+        }
+    }
+
+}
+// Generate power_on_timer_1 CallBack Handler
+void power_on_timer_1_timer_cb(lv_timer_t *src)
+{
+    lv_ui_power_on *ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_POWER_ON);
+    gui_scr_t *scr = ui_get_scr(GUI_SCREEN_PAGE_METER);
+    ui_load_scr_anim(&guider_ui, scr, LV_SCR_LOAD_ANIM_NONE, 0, 0, true, true, false);
+
+    if (src->repeat_count == 0) {
+        ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_POWER_ON);
+        if (ui_scr != NULL && ui_scr->power_on_timer_1 == src) {
+            ui_scr->power_on_timer_1 = NULL;
+        }
     }
 
 }
 
 #endif
+

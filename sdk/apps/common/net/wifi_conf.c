@@ -368,7 +368,12 @@ u8 *enter_wifi_rf_trim_region(u32 **start_of_region)
     code_movable_load(__rf_trim_movable_region_start, code_size, rf_trim_code_run_addr, __rf_trim_movable_slot_start, __rf_trim_movable_slot_end, start_of_region);
 #endif
 
+#if TEE_ENABLE
+    u32 halt_core(u32 core_id);
+    halt_core(!core_num());
+#else
     norflash_enter_spi_code(0);
+#endif
 
 #if defined CONFIG_RF_TRIM_CODE_MOVABLE && !defined CONFIG_NO_SDRAM_ENABLE
     icache_flush(rf_trim_code_run_addr, code_size);
@@ -386,7 +391,12 @@ void exit_wifi_rf_trim_region(u32 **start_of_region, u8 *rf_trim_code_run_addr)
     }
 #endif
 
+#if TEE_ENABLE
+    void wakeup_core(u32 core_id);
+    wakeup_core(!core_num());
+#else
     norflash_exit_spi_code(0);
+#endif
 
 #if defined CONFIG_RF_TRIM_CODE_MOVABLE
     code_movable_unload(__rf_trim_movable_region_start, __rf_trim_movable_slot_start, __rf_trim_movable_slot_end, start_of_region);

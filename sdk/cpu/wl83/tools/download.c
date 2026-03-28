@@ -305,6 +305,14 @@ if %FORMAT_ALL_ENABLE%A==1A set FORMAT=-format all
 set MEDIA_RES=stream.bin -tone %TONE_FILES%
 #endif
 
+#if TEE_ENABLE
+// del isd_config.ini
+// copy isd.fpga.txt isd_config.ini
+tee_tool.exe -sign-app bl_key1_private.pem app.bin tee_cfg.ini
+del app.bin
+rename app.bin.sign app.bin
+#endif
+
 REM set KEY_FILE=-key JL_792N-XXXX.key
 REM set KEY_FILE=-key1 JL_792N-XXXX.key1 -mkey JL_792N-XXXX.mkey
 

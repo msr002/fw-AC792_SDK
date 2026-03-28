@@ -32,16 +32,6 @@ void gui_timeline_power_on_img_1_1_init(struct _lv_anim_t *a)
     lv_img_set_zoom(var, 215);
 }
 
-void gui_timeline_power_on_img_1_1_2_deleted_cb(struct _lv_anim_t *a)
-{
-    lv_ui *ui = (lv_ui *)a->var;
-    lv_anim_timeline_t *src = gui_timeline_timeline.timeline;
-    lv_ui_power_on *ui_scr = ui_get_scr_ptr(ui, GUI_SCREEN_POWER_ON);
-    lv_obj_t *dest = ui_scr->power_on_img_1;
-    gui_scr_t *scr = ui_get_scr(GUI_SCREEN_PAGE_METER);
-    ui_load_scr_anim(&guider_ui, scr, LV_SCR_LOAD_ANIM_NONE, 0, 0, true, true, false);
-}
-
 void gui_timeline_timeline_end_cb(struct _lv_anim_t *a)
 {
     if (gui_timeline_timeline._repeat_count == -1) {
@@ -94,19 +84,13 @@ int32_t gui_timeline_timeline_init(lv_ui *ui)
     lv_anim_set_time(&power_on_img_1_top_1_0_a, 1050);
     lv_anim_timeline_add(gui_timeline_timeline.timeline, 0, &power_on_img_1_top_1_0_a);
 
-    lv_anim_t power_on_img_1_deleted_cb_code_1_2_a;
-    lv_anim_init(&power_on_img_1_deleted_cb_code_1_2_a);
-    lv_anim_set_time(&power_on_img_1_deleted_cb_code_1_2_a, 1);
-    lv_anim_set_var(&power_on_img_1_deleted_cb_code_1_2_a, ui);
-    lv_anim_set_deleted_cb(&power_on_img_1_deleted_cb_code_1_2_a, gui_timeline_power_on_img_1_1_2_deleted_cb);
-    lv_anim_timeline_add(gui_timeline_timeline.timeline, 1292, &power_on_img_1_deleted_cb_code_1_2_a);
-
     lv_anim_t timeline_end_a;
     lv_anim_init(&timeline_end_a);
     lv_anim_set_time(&timeline_end_a, gui_timeline_timeline._period);
     lv_anim_set_deleted_cb(&timeline_end_a, gui_timeline_timeline_end_cb);
-    lv_anim_timeline_add(gui_timeline_timeline.timeline, 1292, &timeline_end_a);
+    lv_anim_timeline_add(gui_timeline_timeline.timeline, 1050, &timeline_end_a);
     return 0;
 }
 
 #endif
+

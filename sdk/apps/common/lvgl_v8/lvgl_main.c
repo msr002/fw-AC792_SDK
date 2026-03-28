@@ -1012,6 +1012,10 @@ static void lvgl_v8_main_task(void *priv)
     lv_port_indev_init();
     lv_port_fs_init();
 
+#if LV_USE_SRC_INFO_FILE
+    lv_check_header_info_file(SRC_INFO_FILE_PATH);
+#endif
+
 #ifdef CONFIG_WIFI_SOUNDBOX_PROJECT_ENABLE
     //等待sd文件系统挂载完成
     while (!storage_device_ready()) {

@@ -149,6 +149,9 @@
 // #define CONFIG_DCACHE_EFFICIENCY_CALCULATE_ENABLE
 #endif
 
+#if TCFG_LOWPOWER_FUNCTION == LOWPOWER_CLOSE
+#define CONFIG_WWDG_ENABLE
+#endif
 // #define CONFIG_IPMASK_ENABLE                 //使能不可屏蔽中断
 #define CONFIG_CXX_SUPPORT                      //使能C++支持
 #define CONFIG_MPU_DEBUG_ENABLE
@@ -195,6 +198,8 @@
 #if TCFG_IPERF_ENABLE
 #define CONFIG_IPERF_ENABLE                     //iperf测试
 #endif
+
+#define TCFG_PJSIP_ENABLE                       0 //pjsip使能
 
 //==============网络配置.json--IP地址相关配置==============/
 #if TCFG_STATIC_IPADDR_ENABLE

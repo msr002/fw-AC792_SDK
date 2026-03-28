@@ -1,6 +1,9 @@
 // *INDENT-OFF*
 
 #include "app_config.h"
+#if TEE_ENABLE
+#include "tee.ld"
+#endif
 
 /******************************************************************
  *系统跑sdram或者ddr，配置在sdk_ld.c

@@ -2,6 +2,13 @@
 #include "generic/typedef.h"
 #include "gpio.h"
 
+
+#if TCFG_POWER_DVD_DCV_SUPPLY_MODE
+const int config_power_dvd_dcv_supply_mode = 1;
+#else
+const int config_power_dvd_dcv_supply_mode = 0;
+#endif
+
 //-------------------------------------------------------------------
 /*
  * 调试pdown进不去的场景，影响低功耗流程

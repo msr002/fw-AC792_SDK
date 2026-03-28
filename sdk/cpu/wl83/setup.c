@@ -58,8 +58,10 @@ void setup_arch(void)
     //让cpu0去初始化cpu1的icache, 或者run_cpu1 那边加, 否则CPU1跑不出来,BR27是把 cpu1_start 放内部ram, 但是WL83 icache代码没放mask, 所以浪费内部ram就算了
     IcuInitial(1);
 
+#if !defined TEE_ENABLE || !TEE_ENABLE
     extern void code_movable_init(void);
     code_movable_init();
+#endif
 
     power_early_flowing();
 
@@ -75,7 +77,9 @@ void setup_arch(void)
     video_clock_early_init(TCFG_VIDEO_CLK);
     video_eva_xbus_init();
     jlgpu_clock_early_init(TCFG_GPU_CLK);
+#if TCFG_POWER_DVD_DCV_SUPPLY_MODE
     clk_dvdd_vol_lev_update();
+#endif
 #endif
 
     debug_init();

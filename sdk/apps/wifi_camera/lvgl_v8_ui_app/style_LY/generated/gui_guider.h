@@ -566,6 +566,7 @@ typedef struct {
     lv_obj_t *power_on;
     bool      power_on_del;
     lv_obj_t *power_on_img_1;
+    lv_timer_t *power_on_timer_1;
 } lv_ui_power_on;
 
 // generate lv_ui gui_guider

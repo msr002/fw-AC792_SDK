@@ -582,6 +582,7 @@
 
 #define TCFG_LOW_POWER_WARN_TIME            (60 * 1000)    //低电提醒时间，单位秒
 #define TCFG_LOW_POWER_AUTO_SHUTDOWN_ENABLE 0              //空闲自动倒数关机
+#define TCFG_POWER_DVD_DCV_SUPPLY_MODE      0              // 0-DVD和DCV短接 1-DVD和DCV内部独立供电
 
 #define TCFG_LOW_POWER_SHUTDOWN             320            //低电直接关机电压
 #define TCFG_LOW_POWER_OFF_VAL              330            //低电关机电压
@@ -589,7 +590,11 @@
 #define TCFG_LOWPOWER_VDDIOM_LEVEL          VDDIOM_VOL_330V//强VDDIO电压档位，不要高于外部DCDC的电压
 
 #define TCFG_LOWPOWER_VDDIOW_LEVEL          VDDIOW_VOL_200V//弱VDDIO电压档位
+#if TCFG_POWER_DVD_DCV_SUPPLY_MODE
 #define TCFG_LOWPOWER_VDC14_LEVEL           DCVDD_VOL_155V
+#else
+#define TCFG_LOWPOWER_VDC14_LEVEL           DCVDD_VOL_140V
+#endif
 #define TCFG_LOWPOWER_FUNCTION              LOWPOWER_CLOSE
 #define TCFG_LOWPOWER_OSC_TYPE              OSC_TYPE_LRC
 

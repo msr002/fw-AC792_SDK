@@ -585,31 +585,24 @@ extern u32 cpu0_sstack_end[];
 extern u32 cpu1_sstack_begin[];
 extern u32 cpu1_sstack_end[];
 
+extern volatile char sp_ovf_enable;
+
 __attribute__((noinline))
 void sp_ovf_unen(void)
 {
-    int cpu_id = current_cpu_id();
-
-    q32DSP(cpu_id)->EMU_CON &= ~BIT(3);
-#if defined CONFIG_TRUSTZONE_ENABLE
-    q32DSP(cpu_id)->EMU_SSP_H = 0xffffffff;
-    q32DSP(cpu_id)->EMU_SSP_L = 0;
-#endif
+    sp_ovf_enable = 0;
+    __asm_csync();	//不能屏蔽，否则会有流水线问题
+    q32DSP(0)->EMU_CON &= ~BIT(3);
+    q32DSP(1)->EMU_CON &= ~BIT(3);
     __asm_csync();	//不能屏蔽，否则会有流水线问题
 }
 
 __attribute__((noinline))
 void sp_ovf_en(void)
 {
-    int cpu_id = current_cpu_id();
-#if defined CONFIG_TRUSTZONE_ENABLE
-    q32DSP(cpu_id)->EMU_SSP_L = cpu_id ? (u32)cpu1_sstack_begin : (u32)cpu0_sstack_begin;
-    q32DSP(cpu_id)->EMU_SSP_H = cpu_id ? (u32)cpu1_sstack_end : (u32)cpu0_sstack_end;
-#endif
-#ifndef SDTAP_DEBUG
-    q32DSP(cpu_id)->EMU_CON |= BIT(3); //如果用户使用setjmp longjmp, 或者使用sdtap gdb调试 务必要删掉这句话
+    sp_ovf_enable = 1;
+    //操作系统调度会自动使能堆栈检测
     __asm_csync();
-#endif
 }
 
 
@@ -765,10 +758,17 @@ void debug_msg_clear(void)
     q32DSP(1)->EMU_MSG = 0xffffffff;
 }
 
+extern const int config_wwdg_clear_by_tick_isr;
+
 SEC(.volatile_ram_code)
 static int wwdg_isr_callback(void)
 {
-    return 1;
+    if (config_wwdg_clear_by_tick_isr) {
+        log_error("wwdg reset at once !!!");
+        return 1;
+    } else {
+        return 1;
+    }
 }
 
 void debug_init(void)
@@ -787,9 +787,8 @@ void debug_init(void)
         debug_msg_clear();
 
         //初始化窗口看门狗
-        extern const int config_wwdg_clear_by_tick_isr;
         if (config_wwdg_clear_by_tick_isr) {
-            wwdg_init(0x74, 0x7f, NULL);
+            wwdg_init(0x74, 0x7f, wwdg_isr_callback);
         } else {
             wwdg_init(0x41, 0x7f, wwdg_isr_callback);
         }
@@ -799,8 +798,11 @@ void debug_init(void)
     }
 
     pc_rang_limit(&rom_text_code_begin, &rom_text_code_end,
+#if TEE_ENABLE
+                  (void *)0xf0000, (void *)0x120000,
+#else
                   (void *)0xf0000, &ram_text_code_end,
-                  /* &ram_text_code_begin, &ram_text_code_end, */
+#endif
 #ifndef CONFIG_NO_SDRAM_ENABLE
                   &sdram_text_code_begin, &sdram_text_code_end
 #else
@@ -808,12 +810,14 @@ void debug_init(void)
 #endif
                  );
 
+#if !defined TEE_ENABLE || !TEE_ENABLE
     q32DSP(cpu_id)->EMU_CON &= ~BIT(3);
     q32DSP(cpu_id)->EMU_SSP_L = cpu_id ? (u32)cpu1_sstack_begin : (u32)cpu0_sstack_begin;
     q32DSP(cpu_id)->EMU_SSP_H = cpu_id ? (u32)cpu1_sstack_end : (u32)cpu0_sstack_end;
     q32DSP(cpu_id)->EMU_USP_L = 0;
     q32DSP(cpu_id)->EMU_USP_H = 0xffffffff;
     q32DSP(cpu_id)->EMU_CON |= BIT(3);
+#endif
 
     log_info("cpu %d usp limit %x %x", cpu_id, q32DSP(cpu_id)->EMU_USP_L, q32DSP(cpu_id)->EMU_USP_H);
     log_info("cpu %d ssp limit %x %x", cpu_id, q32DSP(cpu_id)->EMU_SSP_L, q32DSP(cpu_id)->EMU_SSP_H);
@@ -858,6 +862,10 @@ void debug_init(void)
 #endif
 #ifdef CONFIG_DCACHE_EFFICIENCY_CALCULATE_ENABLE
     DcuReportEnable();
+#endif
+
+#if TEE_ENABLE
+    return;
 #endif
 
 #if defined CONFIG_TRUSTZONE_ENABLE
