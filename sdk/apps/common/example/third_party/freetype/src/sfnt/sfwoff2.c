@@ -4,7 +4,7 @@
  *
  *   WOFF2 format management (base).
  *
- * Copyright (C) 2019-2023 by
+ * Copyright (C) 2019-2026 by
  * Nikhil Ramakrishnan, David Turner, Robert Wilhelm, and Werner Lemberg.
  *
  * This file is part of the FreeType project, and may only be used,
@@ -18,6 +18,7 @@
 #include "sfwoff2.h"
 #include "woff2tags.h"
 #include <freetype/tttags.h>
+#include <freetype/internal/ftcalc.h>
 #include <freetype/internal/ftdebug.h>
 #include <freetype/internal/ftstream.h>
 
@@ -290,22 +291,16 @@ compute_ULong_sum(FT_Byte  *buf,
     FT_ULong  checksum     = 0;
     FT_ULong  aligned_size = size & ~3UL;
     FT_ULong  i;
-    FT_ULong  v;
+    FT_Int    shift;
 
 
-    for (i = 0; i < aligned_size; i += 4)
-        checksum += ((FT_ULong)buf[i    ] << 24) |
-                    ((FT_ULong)buf[i + 1] << 16) |
-                    ((FT_ULong)buf[i + 2] <<  8) |
-                    ((FT_ULong)buf[i + 3] <<  0);
+    for (i = 0; i < aligned_size; i += 4) {
+        checksum += FT_NEXT_ULONG(buf);
+    }
 
-    /* If size is not aligned to 4, treat as if it is padded with 0s. */
-    if (size != aligned_size) {
-        v = 0;
-        for (i = aligned_size ; i < size; ++i) {
-            v |= (FT_ULong)buf[i] << (24 - 8 * (i & 3));
-        }
-        checksum += v;
+    /* remaining bytes can be shifted and added one at a time */
+    for (shift = 24; i < size; i++, shift -= 8) {
+        checksum += (FT_UInt32)FT_NEXT_BYTE(buf) << shift;
     }
 
     return checksum;
@@ -913,7 +908,7 @@ reconstruct_glyf(FT_Stream    stream,
         substreams[i].offset = pos + offset;
         substreams[i].size   = substream_size;
 
-        FT_TRACE5(("  Substream %d: offset = %lu; size = %lu;\n",
+        FT_TRACE5(("  Substream %u: offset = %lu; size = %lu;\n",
                    i, substreams[i].offset, substreams[i].size));
         offset += substream_size;
     }
@@ -1061,7 +1056,6 @@ reconstruct_glyf(FT_Stream    stream,
             FT_ULong   total_n_points = 0;
             FT_UShort  n_points_contour;
             FT_UInt    j;
-            FT_ULong   flag_size;
             FT_ULong   triplet_size;
             FT_ULong   triplet_bytes_used;
             FT_Bool    have_overlap  = FALSE;
@@ -1110,8 +1104,8 @@ reconstruct_glyf(FT_Stream    stream,
             }
             substreams[N_POINTS_STREAM].offset = FT_STREAM_POS();
 
-            flag_size = total_n_points;
-            if (flag_size > substreams[FLAG_STREAM].size) {
+            points_size += total_n_points;
+            if (points_size > substreams[FLAG_STREAM].size) {
                 goto Fail;
             }
 
@@ -1130,8 +1124,7 @@ reconstruct_glyf(FT_Stream    stream,
             triplet_bytes_used = 0;
 
             /* Create array to store point information. */
-            points_size = total_n_points;
-            if (FT_QNEW_ARRAY(points, points_size)) {
+            if (FT_QNEW_ARRAY(points, total_n_points)) {
                 goto Fail;
             }
 
@@ -1144,7 +1137,7 @@ reconstruct_glyf(FT_Stream    stream,
                 goto Fail;
             }
 
-            substreams[FLAG_STREAM].offset  += flag_size;
+            substreams[FLAG_STREAM].offset  += total_n_points;
             substreams[GLYPH_STREAM].offset += triplet_bytes_used;
 
             if (FT_STREAM_SEEK(substreams[GLYPH_STREAM].offset) ||
@@ -1629,7 +1622,7 @@ reconstruct_font(FT_Byte      *transformed_buf,
         WOFF2_TableRec  table = *(indices[nn]);
 
 
-        FT_TRACE3(("Seeking to %ld with table size %ld.\n",
+        FT_TRACE3(("Seeking to %lu with table size %lu.\n",
                    table.src_offset, table.src_length));
         FT_TRACE3(("Table tag: %c%c%c%c.\n",
                    (FT_Char)(table.Tag >> 24),
@@ -1829,7 +1822,6 @@ woff2_open_font(FT_Stream  stream,
 
     FT_Byte   *sfnt        = NULL;
     FT_Stream  sfnt_stream = NULL;
-    FT_Byte   *sfnt_header;
     FT_ULong   sfnt_size;
 
     FT_Byte  *uncompressed_buf = NULL;
@@ -1884,6 +1876,7 @@ woff2_open_font(FT_Stream  stream,
     /* Miscellaneous checks. */
     if (woff2.length != stream->size                               ||
         woff2.num_tables == 0                                      ||
+        woff2.num_tables >  0xFFFU                                 ||
         48 + woff2.num_tables * 20UL >= woff2.length               ||
         (woff2.metaOffset == 0 && (woff2.metaLength != 0     ||
                                    woff2.metaOrigLength != 0)) ||
@@ -1977,7 +1970,7 @@ woff2_open_font(FT_Stream  stream,
         src_offset       += table->TransformLength;
         table->dst_offset = 0;
 
-        FT_TRACE2(("  %c%c%c%c  %08d  %08d   %08ld    %08ld    %08ld\n",
+        FT_TRACE2(("  %c%c%c%c  %08d  %08d   %08lu    %08lu    %08lu\n",
                    (FT_Char)(table->Tag >> 24),
                    (FT_Char)(table->Tag >> 16),
                    (FT_Char)(table->Tag >> 8),
@@ -2164,6 +2157,12 @@ woff2_open_font(FT_Stream  stream,
         WOFF2_TtcFont  ttc_font = woff2.ttc_fonts + face_index;
 
 
+        if (ttc_font->num_tables == 0 || ttc_font->num_tables > 0xFFFU) {
+            FT_ERROR(("woff2_open_font: invalid WOFF2 CollectionFontEntry\n"));
+            error = FT_THROW(Invalid_Table);
+            goto Exit;
+        }
+
         /* Create a temporary array. */
         if (FT_QNEW_ARRAY(temp_indices,
                           ttc_font->num_tables)) {
@@ -2225,25 +2224,15 @@ woff2_open_font(FT_Stream  stream,
         goto Exit;
     }
 
-    sfnt_header = sfnt;
+    {
+        FT_Byte  *sfnt_header = sfnt;
 
-    WRITE_ULONG(sfnt_header, woff2.flavor);
+        FT_Int  entrySelector = FT_MSB(woff2.num_tables);
+        FT_Int  searchRange   = (1 << entrySelector) * 16;
+        FT_Int  rangeShift    = woff2.num_tables * 16 - searchRange;
 
-    if (woff2.num_tables) {
-        FT_UInt  searchRange, entrySelector, rangeShift, x;
 
-
-        x             = woff2.num_tables;
-        entrySelector = 0;
-        while (x) {
-            x            >>= 1;
-            entrySelector += 1;
-        }
-        entrySelector--;
-
-        searchRange = (1 << entrySelector) * 16;
-        rangeShift  = (woff2.num_tables * 16) - searchRange;
-
+        WRITE_ULONG(sfnt_header, woff2.flavor);
         WRITE_USHORT(sfnt_header, woff2.num_tables);
         WRITE_USHORT(sfnt_header, searchRange);
         WRITE_USHORT(sfnt_header, entrySelector);

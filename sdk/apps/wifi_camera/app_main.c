@@ -350,7 +350,7 @@ static int device_event_handler(struct sys_event *e)
             it.action = ACTION_BACK;
             start_app(&it);
         }
-#ifdef USE_LVGL_V8_UI_DEMO
+#ifdef CONFIG_UI_ENABLE
         u8 time_out = 2;
         const char *image_path = NULL;
 #ifdef PRODUCT_TEST_ENABLE
@@ -593,7 +593,7 @@ void app_main()
 
 
 
-#ifdef USE_LVGL_V8_UI_DEMO
+#ifdef CONFIG_UI_ENABLE
     int lvgl_main_task_init(void);
     u8 time_out = 2; //播放开机动画时间
     const char *image_path = NULL;

@@ -6,102 +6,211 @@
 
 #ifdef USE_LVGL_V9_UI_DEMO
 
+#ifndef CONFIG_DEMO_UI_PROJECT_ENABLE
+
 /*********************
  *      INCLUDES
  *********************/
 #define BOOL_DEFINE_CONFLICT
+#include "app_config.h"
 #include "lv_port_disp.h"
+#include "os/os_api.h"
+#include "asm/dcache.h"
+#include <string.h>
+#include "src/core/lv_refr_private.h"
 #include "src/display/lv_display_private.h"
-#include "src/core/lv_global.h"
+#include "src/misc/lv_timer_private.h"
 #include "video/fb.h"
-#include "lcd_driver.h"
-
 
 /*********************
  *      DEFINES
  *********************/
 
-#define LV_DISP_DRV_MAX_NUM  (2)
+#define LV_DISP_DRV_MAX_NUM  2
 
-#define LV_LCD_DISP_BUF_NUM  (1) //屏幕显存数
 /**********************
  *      TYPEDEFS
  **********************/
-#if LV_COLOR_DEPTH==16
+
+#if LV_COLOR_DEPTH == 16
 #define LV_PIXEL_COLOR_T lv_color16_t
-#elif LV_COLOR_DEPTH==24
+#elif LV_COLOR_DEPTH == 24
 #define LV_PIXEL_COLOR_T lv_color_t
-#elif LV_COLOR_DEPTH==32
+#elif LV_COLOR_DEPTH == 32
 #define LV_PIXEL_COLOR_T lv_color32_t
 #endif
+
+struct lv_disp_user_data_t {
+    u8 id;
+    u16 disp_w;
+    u16 disp_h;
+    void *fb;
+    struct fb_map_user map[2];
+    lv_draw_buf_t draw_buf[2];
+};
+
 /**********************
  *  STATIC PROTOTYPES
  **********************/
 
-static void disp_init(uint8_t id);
-static void *lv_lcd_frame_end_hook_func(void);
+static void *_disp_init(u8 id, u16 w, u16 h);
+static void _lv_port_disp_prepare(u8 id, u16 disp_w, u16 disp_h);
+static void _lv_port_draw_buf_update(lv_draw_buf_t *draw_buf, lv_display_t *disp, void *buf);
+static void _lv_port_fill_color_key(void *buf, uint32_t pixel_cnt);
+static void _lv_port_draw_buf_user_config(void *buf1, void *buf2);
+static void _lv_port_redraw_all_now(void);
+static void _lv_fb_combine_task_handler(lv_display_t *disp);
+static void _lv_port_disp_event_cb(lv_event_t *e);
+static void _lv_lcd_swap_fb(lv_display_t *disp, uint8_t *px_map);
 static void disp_flush(lv_display_t *disp, const lv_area_t *area, uint8_t *px_map);
+extern int fb_combine_task(u8 id, void *priv);
 
 /**********************
  *  STATIC VARIABLES
  **********************/
 
-static u32 debug_draw_time_ms; //用于观察从开始渲染一帧开始到渲染完成一帧(推屏之前)需要的时间
-static u64 debug_lcd_latency_us;//用于观察每帧推屏引起的延迟,如果有开TE,等TE时间也会计算进入,如果单纯评估测试DMA造成的时延,请关闭TE测试
-static u32 debug_draw_max_time_ms;//用于观察记录从绘制完第一帧的第一片后开始推屏到绘制完最后一片消耗的历史最长时间
-static uint8_t first_render[LV_DISP_DRV_MAX_NUM];
-static uint32_t lcd_rotate_task_pid[LV_DISP_DRV_MAX_NUM];
-
-/**********************
- *      MACROS
- **********************/
-
-#define LV_UI_TRIPLE_BUFFER_EN   0//ui 3buffer使能 适配v9.3.0新特性
-
-struct lv_fb_t {
-    lv_display_t *disp;
-    LV_PIXEL_COLOR_T *fb;
-};
-volatile static struct lv_fb_t next_disp[LV_DISP_DRV_MAX_NUM];/* 下一帧待显示的next_fb地址 */
-
-static struct lv_fb_t rotate_disp_fh[LV_DISP_DRV_MAX_NUM];
-
-static void *lcd_dev[LV_DISP_DRV_MAX_NUM];
 static lv_display_t *lv_disp[LV_DISP_DRV_MAX_NUM];
-static uint8_t *lcd_disp_buffer[LV_DISP_DRV_MAX_NUM][LV_LCD_DISP_BUF_NUM];
-static uint16_t lcd_rotate[LV_DISP_DRV_MAX_NUM];
-static uint16_t lcd_format[LV_DISP_DRV_MAX_NUM];
-static volatile u8  g_dmm_line_period; //dmm读取一行所需时间
-static volatile u32 g_last_vsync_trig_time;
-static volatile u64 g_vsync_start_time;
-static volatile u16 g_dmm_line;
-static volatile u16 lcd_vert_total = 0;
-static OS_SEM rotate_sem[LV_DISP_DRV_MAX_NUM];
-
-#if LV_UI_TRIPLE_BUFFER_EN
-static OS_SEM triple_buf_sem[LV_DISP_DRV_MAX_NUM];
+#if (LV_DISP_UI_FB_NUM <= 1)
+static volatile u8 g_ui_flush_mode = LV_DISP_UI_FB_NUM;
+static char lvgl_send_fb_combine_event_remain_cnt[2] = {0, 0};
 #endif
+
 /**********************
  *   GLOBAL FUNCTIONS
  **********************/
+
+u8 lvgl_get_fb_num(void)
+{
+    return LV_DISP_UI_FB_NUM;
+}
+
+#if (LV_DISP_UI_FB_NUM <= 1)
+/*
+ * Keep the lvgl8 single-UI-buffer handshake available in lvgl9 so
+ * fb_combine can still drive the same UI/combine handshake in lvgl9.
+ */
+u8 lvgl_get_flush_mode(void)
+{
+    return g_ui_flush_mode;
+}
+
+void lvgl_set_flush_mode(u8 mode)
+{
+    g_ui_flush_mode = mode;
+}
+
+void lvgl_set_ui_flush_mode(u8 mode, void *buf1, void *buf2)
+{
+#if (LV_DISP_UI_FB_NUM == 0)
+    static uint8_t *_ui_draw_buf;
+    void *p1 = NULL;
+    void *p2 = NULL;
+
+    if (mode) {
+        if (buf1) {
+            p1 = buf1;
+            p2 = buf2;
+        } else if (buf2) {
+            p1 = buf2;
+        }
+    }
+
+    lvgl_set_flush_mode(mode);
+
+    if (mode) {
+        if (mode == 2) {
+            if (_ui_draw_buf == NULL) {
+                _ui_draw_buf = zalloc(LCD_W * LCD_H * LV_COLOR_DEPTH / 8);
+                printf("malloc ui draw buf %x\n", _ui_draw_buf);
+                ASSERT(_ui_draw_buf, "ui self flush mode buffer malloc err!");
+            }
+            _lv_port_draw_buf_user_config(_ui_draw_buf, NULL);
+        } else {
+            _lv_port_draw_buf_user_config(p1, p2);
+        }
+
+        if (lvgl_ui_is_suspended()) {
+            lvgl_ui_resume();
+        }
+    } else {
+        if (_ui_draw_buf) {
+            printf("free ui draw buf %x\n", _ui_draw_buf);
+            free(_ui_draw_buf);
+            _ui_draw_buf = NULL;
+        }
+        _lv_port_draw_buf_user_config(NULL, NULL);
+    }
+#else
+    (void)buf1;
+    (void)buf2;
+    lvgl_set_flush_mode(mode);
+#endif
+}
+
+static void _fb_combine_task(void *priv)
+{
+
+
+    /*
+     * In the lvgl9 no-fb0 port, dropping to mode 0 here strands the UI in
+     * external-refresh mode and the restore timer path never brings it back.
+     * Keep self-flush enabled so lv_timer_handler can continue driving UI timers.
+     */
+    fb_combine_task((u8)priv, NULL);
+    lvgl_send_fb_combine_event_remain_cnt[(u8)priv] = 0;
+}
+
+int lvgl_send_fb_combine_event(u8 id)
+{
+    char *task_name;
+    int err;
+    int msg[3];
+
+    if (lvgl_send_fb_combine_event_remain_cnt[id]) {
+        return -1;
+    }
+
+    lvgl_send_fb_combine_event_remain_cnt[id] = 1;
+
+    if (os_task_get_handle(LVGL_TASK_NAME) == NULL) {
+        task_name = "app_core";
+    } else {
+        task_name = LVGL_TASK_NAME;
+    }
+
+    msg[0] = (int)_fb_combine_task;
+    msg[1] = 1;
+    msg[2] = id;
+    err = os_taskq_post_type(task_name, Q_CALLBACK, ARRAY_SIZE(msg), msg);
+    if (err) {
+        lvgl_send_fb_combine_event_remain_cnt[id] = 0;
+        printf("lvgl_send_fb_combine_event err=%d\n", err);
+    }
+
+    return err;
+}
+#endif
+
 lv_display_t *lv_port_get_disp(uint8_t id)
 {
     lv_display_t *disp = lv_disp[id];
+
     if (disp == NULL) {
         return lv_disp[0];
     }
+
     return disp;
 }
+
 void lv_port_refr_now(lv_display_t *disp)
 {
     lv_timer_t tmr = {0};
-    /* lv_anim_refr_now(); */
+
     if (disp) {
         tmr.user_data = disp;
         lv_display_refr_timer(&tmr);
     } else {
-        lv_display_t *d;
-        d = lv_display_get_next(NULL);
+        lv_display_t *d = lv_display_get_next(NULL);
         while (d) {
             tmr.user_data = d;
             lv_display_refr_timer(&tmr);
@@ -110,66 +219,37 @@ void lv_port_refr_now(lv_display_t *disp)
     }
 }
 
+int fb_combine_output_handler(void *out, u32 in0_addr, u32 in1_addr)
+{
+#if (LV_DISP_UI_FB_NUM <= 1)
+    struct fb_map_user *omap = (struct fb_map_user *)out;
+    uint16_t bpp = dma2d_get_format_bpp(omap->format) >> 3;
+
+    (void)in0_addr;
+    (void)in1_addr;
+
+    if (lvgl_get_flush_mode()) {
+        DcuInvalidRegion(omap->baddr, omap->width * omap->height * bpp);
+        return 1;
+    }
+
+    DcuInvalidRegion(omap->baddr, omap->width * omap->height * bpp);
+    _lv_port_draw_buf_user_config((void *)omap->baddr, NULL);
+    _lv_port_redraw_all_now();
+    lv_timer_handler();
+#else
+    (void)out;
+    (void)in0_addr;
+    (void)in1_addr;
+#endif
+    return 0;
+}
+
 void lv_port_disp_init(void)
 {
-
-    lv_display_t *disp = NULL;
-    /*-------------------------
-     * Initialize your display
-     * -----------------------*/
-    disp_init(0);
-
-    /*------------------------------------
-     * Create a display and set a flush_cb
-     * -----------------------------------*/
-    disp = lv_display_create(LCD_W, LCD_H);
-    disp->disp_id = 0;
-    lv_disp[disp->disp_id] = disp;
-    first_render[disp->disp_id] = 1;
-    lv_display_set_flush_cb(disp, disp_flush);
-
-#if LV_USE_PERF_MONITOR == 0 //只是为了适应LVGL_V9的benchmark帧率统计
-    lv_timer_delete(disp->refr_timer);
-    disp->refr_timer = NULL;
-#endif
-
-    /* Example 3
-     * Two buffers screen sized buffer for double buffering.
-     * Both LV_DISPLAY_RENDER_MODE_DIRECT and LV_DISPLAY_RENDER_MODE_FULL works, see their comments*/
-    static LV_PIXEL_COLOR_T buf_3_1[LCD_W * LCD_H] __attribute__((aligned(32)));            /*A screen sized buffer*/
-    static LV_PIXEL_COLOR_T buf_3_2[LCD_W * LCD_H] __attribute__((aligned(32)));            /*Another screen sized buffer*/
-
-    //RGB/MIPI屏幕配置FB必须是屏幕大小，使得LVGL内部直接渲染到FB对应的绝对坐标 && 内部会同步双BUF脏矩阵区域
-    lv_display_set_buffers(disp, buf_3_1, buf_3_2, sizeof(buf_3_1), LV_DISPLAY_RENDER_MODE_DIRECT);
-
-
-#if LV_UI_TRIPLE_BUFFER_EN
-    static lv_draw_buf_t draw_buf3 = {0};
-    static LV_PIXEL_COLOR_T buf_3_3[LCD_W * LCD_H] __attribute__((aligned(32)));
-    lv_color_format_t cf = lv_display_get_color_format(disp);
-    uint32_t stride = lv_draw_buf_width_to_stride(LCD_W, cf);
-    lv_draw_buf_init(&draw_buf3, LCD_W, LCD_H, cf, stride, buf_3_3, sizeof(buf_3_3));
-    lv_display_set_3rd_draw_buffer(disp, &draw_buf3);
-    os_sem_create(&triple_buf_sem[disp->disp_id], 0);
-#endif
-
-
-#if TCFG_LCD_SUPPORT_MULTI_DRIVER_EN //双屏显示
-    disp_init(1);
-    disp = lv_display_create(LCD1_W, LCD1_H);
-    disp->disp_id = 1;
-    lv_disp[disp->disp_id] = disp;
-    first_render[disp->disp_id] = 1;
-    lv_display_set_flush_cb(disp, disp_flush);
-#if LV_USE_PERF_MONITOR == 0 //只是为了适应LVGL_V9的benchmark帧率统计
-    lv_timer_delete(disp->refr_timer);
-    disp->refr_timer = NULL;
-#endif
-    static LV_PIXEL_COLOR_T buf_2_1[LCD1_W * LCD1_H] __attribute__((aligned(32)));            /*A screen sized buffer*/
-    static LV_PIXEL_COLOR_T buf_2_2[LCD1_W * LCD1_H] __attribute__((aligned(32)));            /*Another screen sized buffer*/
-
-    lv_display_set_buffers(disp, buf_2_1, buf_2_2, sizeof(buf_2_1), LV_DISPLAY_RENDER_MODE_DIRECT);
-
+    _lv_port_disp_prepare(0, LCD_W, LCD_H);
+#if TCFG_LCD_SUPPORT_MULTI_DRIVER_EN
+    _lv_port_disp_prepare(1, LCD1_W, LCD1_H);
 #endif
 }
 
@@ -177,383 +257,334 @@ void lv_port_disp_init(void)
  *   STATIC FUNCTIONS
  **********************/
 
-
-static u16 __lcd_abs(int x, int y)
+static void _lv_port_draw_buf_update(lv_draw_buf_t *draw_buf, lv_display_t *disp, void *buf)
 {
-    if ((x) > (y)) {
-        return ((x) - (y)) ;
+    lv_color_format_t cf = lv_display_get_color_format(disp);
+    uint32_t stride = lv_draw_buf_width_to_stride(lv_display_get_horizontal_resolution(disp), cf);
+    uint32_t data_size = stride * lv_display_get_vertical_resolution(disp);
+
+    if (buf == NULL) {
+        return;
     }
-    return ((y) - (x));
+
+    lv_draw_buf_init(draw_buf,
+                     lv_display_get_horizontal_resolution(disp),
+                     lv_display_get_vertical_resolution(disp),
+                     cf,
+                     stride,
+                     buf,
+                     data_size);
 }
 
-static void *lv_lcd_frame_end_hook_func(void)
+static void _lv_port_draw_buf_user_config(void *buf1, void *buf2)
 {
-    u8 id = 0;
-    if (!next_disp[id].fb) {
-        return NULL; //软件还未渲染完整一帧，继续显示上一帧显存
-    }
-    lv_draw_buf_t *cur_fb = next_disp[id].fb;
-    next_disp[id].fb = NULL;
+    struct lv_disp_user_data_t *disp_fh = NULL;
+    lv_display_t *disp = lv_display_get_next(NULL);
 
-#if LV_UI_TRIPLE_BUFFER_EN
-    os_sem_post(&triple_buf_sem[id]);
-#endif
-    return cur_fb->data;
-}
-
-/**
- * @brief      获取到空闲的lcd显存
- * @param:     id: lcd id号
- * @param:     index: 当前正在使用的lcd buf 索引(0/1)
- *
- * @return:    返回空闲的lcd显存buffer
- **/
-static uint8_t *lv_get_lcd_idle_buf(u8 id, u8 index)
-{
-#if (LV_LCD_DISP_BUF_NUM == 2)
-    return lcd_disp_buffer[id][!index];
-#else
-    return lcd_disp_buffer[id][0];
-#endif
-}
-
-#if LV_UI_TRIPLE_BUFFER_EN
-//判断下一个渲染buffer是否繁忙(和推屏buffer冲突)
-static u8 is_display_buffer_busy(u8 id, lv_display_t *disp)
-{
-    u32 dmm_addr = 0;
-    dmm_addr = dmm_addr_base;
-    lv_draw_buf_t *next_act;
-    if (disp->buf_act == disp->buf_1) {
-        next_act = disp->buf_2;
-    } else if (disp->buf_act == disp->buf_2) {
-        next_act = disp->buf_3 ? disp->buf_3 : disp->buf_1;
-    } else {
-        next_act = disp->buf_1;
-    }
-    if (lcd_rotate[id]) {
-        if (next_act->data == (uint8_t *)rotate_disp_fh[id].fb) {
-            return 1;
-        }
-    } else {
-        if (next_act->data == (uint8_t *)CPU_ADDR(dmm_addr)) {
-            return 1;
-        }
+    if (disp == NULL) {
+        disp = lv_port_get_disp(0);
     }
 
-    return 0;
-}
-#endif
-
-#if (LV_LCD_DISP_BUF_NUM == 1)
-void dmm_vsync_int_handler(void)
-{
-    struct lcd_dev_drive *lcd = NULL;
-    struct imd_dev *imd;
-    struct mipi_dev *mipi;
-    static u32 dmm_frame_period = 16000; //先给一个最小周期的值,单位微秒
-    static u8 statistics_cnt = 0;
-    u8 id = 0; //默认mipi/lcd 屏id号是0
-    if (statistics_cnt < 10) {
-        /* 计算dmm 读取一行最小周期 */
-        ++statistics_cnt;
-        dmm_frame_period = get_system_us() - g_last_vsync_trig_time;
-        g_last_vsync_trig_time = get_system_us();
-        if (lcd_dev[id] && lcd_rotate[id]) {
-            dev_ioctl(lcd_dev[id], IOCTL_LCD_RGB_GET_LCD_HANDLE, (u32)&lcd);
-            lcd_vert_total = lcd->dev->imd.info.target_xres;
-            if (lcd->type == LCD_MIPI) {
-                mipi = &lcd->dev->mipi;
-                lcd_vert_total = mipi->video_timing.dsi_vdo_vsa_v + mipi->video_timing.dsi_vdo_vbp_v + mipi->video_timing.dsi_vdo_vact_v + mipi->video_timing.dsi_vdo_vfp_v;
-            } else if (lcd->type == LCD_RGB) {
-                imd = &lcd->dev->imd;
-                lcd_vert_total = imd->timing.vert_total;
-            }
-            if (lcd_vert_total) {
-                g_dmm_line_period = (dmm_frame_period + (lcd_vert_total / 2)) / lcd_vert_total;//四舍五入
-            }
-        }
-    }
-    g_vsync_start_time = get_system_us(); //记录Vsync起始时间点
-}
-#endif
-
-static void lcd_rotate_task(void *p)
-{
-#define CALC_CNT  60
-    struct lcd_dev_drive *lcd = NULL;
-    int ret = 0;
-    u32 rotate_start_time, rotate_use_time;
-    int msg[3] = {0};
-    struct lv_fb_t *fh = (struct lv_fb_t *)p;
-    uint8_t *frame_buffer = (uint8_t *)fh->fb;
-    u8 statistics_cnt = CALC_CNT;
-    u32 *rotate_times = NULL;
-    u8 err_cnt = 0;
-    lv_display_t *disp = fh->disp;
-    u8 id = disp->disp_id;
-    lv_draw_buf_t fb = {0};
-
-    u8 lcd_buf_index = 0; //记录当前显示的lcd buf是哪一块
-
-    u16 out_w = (lcd_rotate[id] == ROTATE_180) ? disp->hor_res : disp->ver_res;
-    u16 out_h = (lcd_rotate[id] == ROTATE_180) ? disp->ver_res : disp->hor_res;
-
-    dev_ioctl(lcd_dev[id], IOCTL_LCD_RGB_GET_LCD_HANDLE, (u32)&lcd);
-
-    os_sem_create(&rotate_sem[id], 1);
-    printf("lcd_rotate_task%d run...\n", id);
-    rotate_start_time = get_system_us();
-    fb_frame_buf_rotate(frame_buffer, lv_get_lcd_idle_buf(id, 0), disp->hor_res, disp->ver_res, 0, out_w, out_h, 0, lcd_rotate[id], 0, 0, lcd_format[id], lcd_format[id], 0);
-    rotate_use_time = get_system_us() - rotate_start_time;
-    if (g_dmm_line_period) {
-        g_dmm_line = __lcd_abs(lcd_vert_total, (rotate_use_time / g_dmm_line_period));
-    }
-    dmm_line_pend_init(g_dmm_line);
-    while (1) {
-        ret = os_taskq_pend_timeout(msg, ARRAY_SIZE(msg), 0);
-        if (ret == OS_TASKQ)  {
-            frame_buffer = msg[1];
-            rotate_disp_fh[id].fb = frame_buffer;
-#if (LV_LCD_DISP_BUF_NUM == 1)
-            //1. wait line pend
-            if (lcd->type == LCD_MIPI || lcd->type == LCD_RGB) {
-                if (lcd_dev[id]) {
-                    dev_ioctl(lcd_dev[id], IOCTL_LCD_RGB_WAIT_LINE_FINISH, (u32)0);
-                }
-            }
-            rotate_start_time = get_system_us();
-#endif
-            //2. rotate to lcd buffer
-            fb_frame_buf_rotate(frame_buffer, lv_get_lcd_idle_buf(id, lcd_buf_index), disp->hor_res, disp->ver_res, 0, out_w, out_h, 0, lcd_rotate[id], 0, 0, lcd_format[id], lcd_format[id], 0);
-
-#if (LV_LCD_DISP_BUF_NUM == 1)
-            rotate_use_time = get_system_us() - rotate_start_time;
-            //下面是旋转时间统计
-            if (statistics_cnt > 0) {
-                if (rotate_times == NULL) {
-                    rotate_times = (u32 *)malloc(CALC_CNT * sizeof(u32));
-                }
-                if (g_dmm_line_period) {
-                    rotate_times[statistics_cnt - 1]  = rotate_use_time;
-                    g_dmm_line = __lcd_abs(lcd_vert_total, (rotate_use_time / g_dmm_line_period));
-                    dmm_line_pend_init(g_dmm_line);
-                    statistics_cnt--;
-                    if (statistics_cnt == 0) {
-                        //去掉最大最小值并求平均
-                        int rotate_time_sum = 0;
-                        u32 max_rotate_time = 0;
-                        u32 min_rotate_time = 0xffffffff;
-                        for (int i = 0; i < CALC_CNT; i++) {
-                            if (min_rotate_time > rotate_times[i]) {
-                                min_rotate_time = rotate_times[i];
-                            } else if (max_rotate_time < rotate_times[i]) {
-                                max_rotate_time = rotate_times[i];
-                            }
-                            rotate_time_sum += rotate_times[i];
-                        }
-                        rotate_time_sum -= (min_rotate_time + max_rotate_time);
-                        g_dmm_line = __lcd_abs(lcd_vert_total, (rotate_time_sum / (CALC_CNT - 2) / g_dmm_line_period));
-                        printf("rotate_ava_use_time==%dus g_dmm_line_period=%d,g_dmm_line=%d\n", rotate_time_sum / (CALC_CNT - 2), g_dmm_line_period, g_dmm_line);
-                        dmm_line_pend_init(g_dmm_line);
-                        if (rotate_times) {
-                            free(rotate_times);
-                            rotate_times = NULL;
-                        }
-                    }
-                }
+    while (disp) {
+        disp_fh = lv_display_get_user_data(disp);
+        if (disp_fh) {
+            if (buf1) {
+                _lv_port_draw_buf_update(&disp_fh->draw_buf[0], disp, buf1);
             } else {
-                if (g_dmm_line_period) {
-                    u32 rotate_line = __lcd_abs(lcd_vert_total, (rotate_use_time / g_dmm_line_period));
-                    if (rotate_line > g_dmm_line + 3) {
-                        if (++err_cnt > 2) {
-                            g_dmm_line = rotate_line;
-                            dmm_line_pend_init(g_dmm_line);
-                        }
-                    } else {
-                        err_cnt = 0;
-                    }
-                }
+                memset(&disp_fh->draw_buf[0], 0, sizeof(disp_fh->draw_buf[0]));
             }
-            if (!(lcd->type == LCD_MIPI || lcd->type == LCD_RGB)) {
-                //mcu/spi屏
-                if (lcd_dev[id]) {
-                    dev_ioctl(lcd_dev[id], IOCTL_LCD_RGB_WAIT_FB_SWAP_FINISH, (u32)lcd_disp_buffer[id][0]);
-                }
+
+            if (buf2) {
+                _lv_port_draw_buf_update(&disp_fh->draw_buf[1], disp, buf2);
+            } else {
+                memset(&disp_fh->draw_buf[1], 0, sizeof(disp_fh->draw_buf[1]));
             }
-            rotate_disp_fh[id].fb = NULL;
-            os_sem_post(&rotate_sem[id]);
 
-#elif (LV_LCD_DISP_BUF_NUM == 2)
-
-            fb.data = lv_get_lcd_idle_buf(id, lcd_buf_index);
-            next_disp[id].fb = (LV_PIXEL_COLOR_T *)&fb;
-            dev_ioctl(lcd_dev[id], IOCTL_LCD_RGB_WAIT_FB_SWAP_FINISH, (u32)fb.data);
-            lcd_buf_index = !lcd_buf_index;
-            os_sem_post(&rotate_sem[id]);
-#endif
-
+            lv_display_set_draw_buffers(disp,
+                                        buf1 ? &disp_fh->draw_buf[0] : NULL,
+                                        buf2 ? &disp_fh->draw_buf[1] : NULL);
         }
+        disp = lv_display_get_next(disp);
     }
 }
-static void lv_lcd_swap_fb(lv_display_t *disp_drv, const lv_area_t *area, LV_PIXEL_COLOR_T *px_map)
+
+static void _lv_port_redraw_all_now(void)
 {
-    u8 id = disp_drv->disp_id;
-    char rotate_task_name[20];
-    if (first_render[id] == 1) { //LVGL首次启动渲染
-        first_render[id] = 0;
-        if (lcd_rotate[id] != 0) {
-            rotate_disp_fh[id].disp = disp_drv;
-            rotate_disp_fh[id].fb = px_map;
-            sprintf(rotate_task_name, "lcd_rotate_task%d", id);
-            thread_fork(rotate_task_name, 20, 1024, 256, &lcd_rotate_task_pid[id], lcd_rotate_task, (void *)&rotate_disp_fh[id]);
-        } else {
-            dev_ioctl(lcd_dev[id], IOCTL_LCD_RGB_SET_ISR_CB, (u32)lv_lcd_frame_end_hook_func);
-            dev_ioctl(lcd_dev[id], IOCTL_LCD_RGB_START_DISPLAY, (u32)LV_GLOBAL_DEFAULT()->disp_refresh->buf_act->data);
-        }
+    lv_display_t *disp = lv_display_get_next(NULL);
+
+    if (disp == NULL) {
+        disp = lv_port_get_disp(0);
+    }
+
+    while (disp) {
+        lv_area_t a;
+        lv_area_set(&a, 0, 0,
+                    lv_display_get_horizontal_resolution(disp) - 1,
+                    lv_display_get_vertical_resolution(disp) - 1);
+        lv_inv_area(disp, &a);
+        disp = lv_display_get_next(disp);
+    }
+}
+
+static void _lv_fb_combine_task_handler(lv_display_t *disp)
+{
+    lv_draw_buf_t *draw_buf;
+    struct lv_disp_user_data_t *disp_fh;
+
+    if (disp == NULL) {
+        disp = lv_refr_get_disp_refreshing();
+    }
+    if (disp == NULL) {
         return;
     }
-    if (lcd_rotate[id]) {
-        int msg[1];
-        msg[0] = (int)px_map;
-        sprintf(rotate_task_name, "lcd_rotate_task%d", id);
-#if LV_UI_TRIPLE_BUFFER_EN
-        if (is_display_buffer_busy(id, disp_drv)) {
-            os_sem_set(&rotate_sem[id], 0);
-            os_sem_pend(&rotate_sem[id], 0);
-        }
+
+    draw_buf = lv_display_get_buf_active(disp);
+    disp_fh = lv_display_get_user_data(disp);
+    if (draw_buf == NULL || draw_buf->data == NULL || disp_fh == NULL) {
+        return;
+    }
+
+    if (fb_combine_task(disp_fh->id, draw_buf->data) == 0) {
+        dma_memset_sync(NO_CACHE_ADDR(draw_buf->data), 0x00, draw_buf->data_size);
+        DcuInvalidRegion(draw_buf->data, draw_buf->data_size);
+    }
+}
+
+static void _lv_port_disp_event_cb(lv_event_t *e)
+{
+#if (LV_DISP_UI_FB_NUM == 0)
+    if (lv_event_get_code(e) == LV_EVENT_RENDER_START && lvgl_get_flush_mode()) {
+        _lv_fb_combine_task_handler(lv_event_get_target(e));
+    }
 #else
-        os_sem_pend(&rotate_sem[id], 0);
+    (void)e;
 #endif
-        os_taskq_post_type(rotate_task_name, Q_USER, ARRAY_SIZE(msg), msg);
+}
+
+static void _lv_port_fill_color_key(void *buf, uint32_t pixel_cnt)
+{
+    /* Keep UI background aligned with fb_combine's color key so camera stays visible below fb0. */
+#define LV_FB_COLOR_KEY_HEX  0x52aaa5
+
+    uint32_t i;
+    LV_PIXEL_COLOR_T *p = buf;
+    lv_color_t key = lv_color_hex(LV_FB_COLOR_KEY_HEX);
+
+    if (buf == NULL) {
         return;
     }
 
-#if LV_UI_TRIPLE_BUFFER_EN
-    if (is_display_buffer_busy(id, disp_drv)) {
-        os_sem_set(&triple_buf_sem[id], 0);
-        os_sem_pend(&triple_buf_sem[id], 0);
-    }
-#endif
-    next_disp[id].fb = LV_GLOBAL_DEFAULT()->disp_refresh->buf_act;
-    lv_draw_buf_t *cur_fb = next_disp[id].fb;
-
-#if (LV_UI_TRIPLE_BUFFER_EN == 0)
-    dev_ioctl(lcd_dev[id], IOCTL_LCD_RGB_WAIT_FB_SWAP_FINISH, (u32)cur_fb->data);
-#endif
-
-}
-/*Initialize your display and the required peripherals.*/
-void disp_init(uint8_t id)
-{
-    struct lcd_dev_drive *lcd = NULL;
-    uint8_t i = 0;
-    //yuv422,rgb565,rgb888,argb888
-    const u8 lcd_in_format[] = {
-        FB_COLOR_FORMAT_YUV422,
-        FB_COLOR_FORMAT_RGB565,
-        FB_COLOR_FORMAT_RGB888,
-        FB_COLOR_FORMAT_ARGB8888
+#if LV_COLOR_DEPTH == 16
+    LV_PIXEL_COLOR_T pixel = {
+        .red = key.red >> 3,
+        .green = key.green >> 2,
+        .blue = key.blue >> 3,
     };
-    if (lcd_dev[id] == NULL) {
-        lcd_dev[id] = dev_open("lcd", (void *)&id);
-        dev_ioctl(lcd_dev[id], IOCTL_LCD_RGB_GET_LCD_HANDLE, (u32)&lcd);
-        lcd_rotate[id] = lcd->dev->imd.info.rotate;
-        lcd_format[id] = lcd_in_format[lcd->dev->imd.info.in_fmt];
-        if (lcd_rotate[id] != 0) {
-            for (i = 0; i < LV_LCD_DISP_BUF_NUM; i++) {
-                if (lcd_disp_buffer[id][i] == NULL) {
-                    lcd_disp_buffer[id][i] = zalloc(lcd->dev->imd.info.target_xres * lcd->dev->imd.info.target_yres * sizeof(LV_PIXEL_COLOR_T));
-                    DcuFlushRegion((void *)lcd_disp_buffer[id][i], lcd->dev->imd.info.target_xres * lcd->dev->imd.info.target_yres * sizeof(LV_PIXEL_COLOR_T));
-                }
-                printf("lvgl v9 lcd disp buffer [%d],%d x %d, malloc %d bytes at 0x%x.", i, lcd->dev->imd.info.target_xres, lcd->dev->imd.info.target_yres, lcd->dev->imd.info.target_xres * lcd->dev->imd.info.target_yres * sizeof(LV_PIXEL_COLOR_T), lcd_disp_buffer[id][i]);
-            }
-            dev_ioctl(lcd_dev[id], IOCTL_LCD_RGB_SET_ISR_CB, (u32)lv_lcd_frame_end_hook_func);
-            dev_ioctl(lcd_dev[id], IOCTL_LCD_RGB_START_DISPLAY, (u32)lcd_disp_buffer[id][0]);
-            if (i == 1) {
-                os_time_dly(50); //为了稳定计算dmm读取一行所需时间
-            }
-        }
-    }
-}
-void disp_uninit(uint8_t id)
-{
-    if (lcd_dev[id]) {
-        dev_close(lcd_dev[id]);
-        lcd_dev[id] = NULL;
-    }
-    for (int i = 0; i < LV_LCD_DISP_BUF_NUM; i++) {
-        if (lcd_disp_buffer[id][i]) {
-            free(lcd_disp_buffer[id][i]);
-            lcd_disp_buffer[id][i] = NULL;
-        }
-    }
-    if (lcd_rotate_task_pid[id]) {
-        thread_kill(&lcd_rotate_task_pid[id], KILL_WAIT);
-        lcd_rotate_task_pid[id] = 0;
-    }
-    first_render[id] = 1;
-}
-
-/*Flush the content of the internal buffer the specific area on the display.
- *`px_map` contains the rendered image as raw pixel map and it should be copied to `area` on the display.
- *You can use DMA or any hardware acceleration to do this operation in the background but
- *'lv_display_flush_ready()' has to be called when it's finished.*/
-
-static void disp_flush(lv_display_t *disp_drv, const lv_area_t *area, uint8_t *px_map)
-{
-    u64 temp_system_us;
-    /* printf("[%d]disp_flush->0x%x,%d,%d,%d,%d", disp_drv->disp_id, px_map, area->x1, area->x2, area->y1, area->y2); */
-    if (LV_GLOBAL_DEFAULT()->disp_refresh->render_mode != LV_DISPLAY_RENDER_MODE_FULL) {
-
-        if (LV_GLOBAL_DEFAULT()->disp_refresh->flushing_last) {
-
-            u32 tmp_draw_time_ms = timer_get_ms() - lv_get_timer_handler_start_time_ms();
-            debug_draw_time_ms += tmp_draw_time_ms;
-            if (tmp_draw_time_ms > debug_draw_max_time_ms) {
-                debug_draw_max_time_ms = tmp_draw_time_ms;
-                printf("debug_draw_max_time_ms=%dms", debug_draw_max_time_ms);//注意由于中途打印,或者被其他高优先级任务抢占导致的统计不准
-            }
-
-            temp_system_us = get_system_us();
-            DcuFlushRegion(px_map, disp_drv->hor_res * disp_drv->ver_res * sizeof(LV_PIXEL_COLOR_T));//这个地方可以优化，仅flush脏矩形部分的区域即可(需要从LVGL内部获取得到), 但是二维的，因此最好cache那边封装一个接口出来用
-            //局部脏矩形刷新策略下，当一帧里面最后一个脏矩形被渲染完毕才切换帧BUF
-            lv_lcd_swap_fb(disp_drv, area, px_map);
-            debug_lcd_latency_us += (get_system_us() - temp_system_us);
-        }
-    } else {
-        if (lv_get_timer_handler_start_time_ms()) { //过滤第一帧引入初始化屏等东西导致的延时不准
-            u32 tmp_draw_time_ms = timer_get_ms() - lv_get_timer_handler_start_time_ms();
-            debug_draw_time_ms += tmp_draw_time_ms;
-            if (tmp_draw_time_ms > debug_draw_max_time_ms) {
-                debug_draw_max_time_ms = tmp_draw_time_ms;
-                printf("debug_draw_max_time_ms=%dms", debug_draw_max_time_ms);//注意由于中途打印,或者被其他高优先级任务抢占导致的统计不准
-            }
-        }
-        temp_system_us = get_system_us();
-        DcuFlushRegion(px_map, disp_drv->hor_res * disp_drv->ver_res * sizeof(LV_PIXEL_COLOR_T));
-        lv_lcd_swap_fb(disp_drv, area, px_map);
-        debug_lcd_latency_us += (get_system_us() - temp_system_us);
-    }
-
-    if (LV_GLOBAL_DEFAULT()->disp_refresh->flushing_last) {
-#if 1
-        static u32 time_lapse_hdl;
-        static u8 fps_cnt;
-        ++fps_cnt;
-        u32 tdiff = time_lapse(&time_lapse_hdl, 1000);
-        if (tdiff) {//注意由于中途打印,或者被其他高优先级任务抢占导致的统计不准
-            printf("lv9 render %u mspf, lcd_latency %u mspf, render+flush %d fps\n", debug_draw_time_ms / fps_cnt, (u32)((debug_lcd_latency_us) / 1000 / fps_cnt), fps_cnt *  1000 / tdiff);
-            debug_lcd_latency_us = 0;
-            fps_cnt = 0;
-            debug_draw_time_ms = 0;
-        }
+#elif LV_COLOR_DEPTH == 24
+    LV_PIXEL_COLOR_T pixel = key;
+#elif LV_COLOR_DEPTH == 32
+    LV_PIXEL_COLOR_T pixel = {
+        .red = key.red,
+        .green = key.green,
+        .blue = key.blue,
+        .alpha = 0xff,
+    };
 #endif
+
+    for (i = 0; i < pixel_cnt; i++) {
+        p[i] = pixel;
+    }
+}
+
+static void *_disp_init(u8 id, u16 w, u16 h)
+{
+    void *fb = NULL;
+    struct fb_draw_info info = {0};
+
+    info.name = "fb0";
+    info.fb_num = LV_DISP_UI_FB_NUM;
+    info.width = w;
+    info.height = h;
+    info.real_width = w;
+    info.real_height = h;
+    info.x = 0;
+    info.y = 0;
+    info.out_id = id;
+#if LV_COLOR_DEPTH == 32
+    info.format = FB_COLOR_FORMAT_ARGB8888;
+#elif LV_COLOR_DEPTH == 16
+#if LV_COLOR_DEPTH_EXTEN == 24
+    info.format = FB_COLOR_FORMAT_ARGB8565;
+#else
+    info.format = FB_COLOR_FORMAT_RGB565;
+#endif
+#else
+#error "FB NOT SUPPORT INFO_FORMAT"
+#endif
+    info.combine = 1;
+    info.z_order = 253;
+
+    fb = fb_draw_open(&info);
+    return fb;
+}
+
+static void _lv_port_disp_prepare(u8 id, u16 disp_w, u16 disp_h)
+{
+    struct lv_disp_user_data_t *disp_fh;
+    lv_display_t *disp;
+    void *buf1 = NULL;
+    void *buf2 = NULL;
+
+    disp_fh = zalloc(sizeof(*disp_fh));
+    ASSERT(disp_fh, "lvgl v9 display user data malloc err");
+
+    disp_fh->id = id;
+    disp_fh->disp_w = disp_w;
+    disp_fh->disp_h = disp_h;
+#if (LV_DISP_UI_FB_NUM != 0)
+    disp_fh->fb = _disp_init(id, disp_w, disp_h);
+    ASSERT(disp_fh->fb, "lvgl v9 fb0 open err");
+    /* Get both fb0 maps up front and hand them directly to LVGL as the draw buffers. */
+    fb_draw_getmap(disp_fh->fb, &disp_fh->map[1]);
+    buf2 = disp_fh->map[1].baddr;
+    if (buf2) {
+        fb_draw_putmap(disp_fh->fb, &disp_fh->map[1]);
     }
 
-    /*IMPORTANT!!!
-     *Inform the graphics library that you are ready with the flushing*/
-    lv_display_flush_ready(disp_drv);
+    fb_draw_getmap(disp_fh->fb, &disp_fh->map[0]);
+    buf1 = disp_fh->map[0].baddr;
+
+    if (buf1 == NULL) {
+        buf1 = buf2;
+        buf2 = NULL;
+        memcpy(&disp_fh->map[0], &disp_fh->map[1], sizeof(struct fb_map_user));
+        memset(&disp_fh->map[1], 0, sizeof(struct fb_map_user));
+    }
+
+    ASSERT(buf1, "lvgl v9 fb0 map get err");
+#endif
+
+    disp = lv_display_create(disp_w, disp_h);
+    ASSERT(disp, "lvgl v9 display create err");
+
+    disp->disp_id = id;
+    lv_disp[id] = disp;
+
+    lv_display_set_user_data(disp, disp_fh);
+    lv_display_set_flush_cb(disp, disp_flush);
+    lv_display_add_event_cb(disp, _lv_port_disp_event_cb, LV_EVENT_RENDER_START, NULL);
+
+#if (LV_DISP_UI_FB_NUM == 0)
+    lv_display_set_draw_buffers(disp, NULL, NULL);
+    lv_display_set_render_mode(disp, LV_DISPLAY_RENDER_MODE_FULL);
+    /*
+     * Match the lvgl8 no-fb0 startup ordering: register the display first,
+     * then open fb0 so fb_combine can bind the initial self-flush buffers
+     * onto an already-existing display instance.
+     */
+    disp_fh->fb = _disp_init(id, disp_w, disp_h);
+    ASSERT(disp_fh->fb, "lvgl v9 fb0 open err");
+#else
+    /* Start from the transparent key color; only widgets should become visible after compose. */
+    _lv_port_fill_color_key(buf1, disp_w * disp_h);
+    _lv_port_draw_buf_update(&disp_fh->draw_buf[0], disp, buf1);
+    if (buf2) {
+        _lv_port_fill_color_key(buf2, disp_w * disp_h);
+        _lv_port_draw_buf_update(&disp_fh->draw_buf[1], disp, buf2);
+    }
+
+    lv_display_set_draw_buffers(disp,
+                                &disp_fh->draw_buf[0],
+                                buf2 ? &disp_fh->draw_buf[1] : NULL);
+    /*
+     * Keep the v9 port aligned with the proven lvgl8 fb0 path:
+     * LVGL renders into full-screen fb0 buffers, and only swaps them on the
+     * last dirty chunk after fb_draw_putmap()/getmap() completes.
+     */
+    lv_display_set_render_mode(disp, LV_DISPLAY_RENDER_MODE_DIRECT);
+#endif
+
+    /* Match the lvgl8 port: the outer UI task owns refresh scheduling. */
+    lv_display_delete_refr_timer(disp);
 }
+
+static void _lv_lcd_swap_fb(lv_display_t *disp, uint8_t *px_map)
+{
+    struct lv_disp_user_data_t *disp_fh;
+    lv_draw_buf_t *draw_buf;
+    struct fb_map_user *map = NULL;
+    struct fb_map_user next_map = {0};
+
+    if (disp == NULL || px_map == NULL) {
+        return;
+    }
+
+    disp_fh = lv_display_get_user_data(disp);
+    if (disp_fh == NULL || disp_fh->fb == NULL) {
+        return;
+    }
+
+#if (LV_DISP_UI_FB_NUM == 0)
+    draw_buf = lv_display_get_buf_active(disp);
+    if (lvgl_get_flush_mode() && draw_buf && draw_buf->data == px_map) {
+        struct fb_map_user map_tmp = {0};
+
+        map_tmp.baddr = px_map;
+        map_tmp.transp = 1;
+        fb_draw_putmap(disp_fh->fb, &map_tmp);
+    }
+    return;
+#endif
+
+    if (disp->buf_1 && disp->buf_1->data == px_map) {
+        map = &disp_fh->map[0];
+        draw_buf = disp->buf_1;
+    } else if (disp->buf_2 && disp->buf_2->data == px_map) {
+        map = &disp_fh->map[1];
+        draw_buf = disp->buf_2;
+    }
+
+    if (map == NULL || draw_buf == NULL || map->baddr == NULL) {
+        return;
+    }
+
+    /* Return the frame just flushed, then fetch the matching fb0 buffer back for the next draw pass. */
+    fb_draw_putmap(disp_fh->fb, map);
+    if (fb_draw_getmap(disp_fh->fb, &next_map) == 0 && next_map.baddr) {
+        /*
+         * fb_draw normally rotates between the same fixed fb0 addresses like lvgl8.
+         * Only rebind the LVGL draw buffer if the driver hands back a different slot.
+         */
+        if (draw_buf->data != next_map.baddr) {
+            _lv_port_draw_buf_update(draw_buf, disp, next_map.baddr);
+        }
+        memcpy(map, &next_map, sizeof(next_map));
+    }
+}
+
+static void disp_flush(lv_display_t *disp, const lv_area_t *area, uint8_t *px_map)
+{
+    if (disp == NULL || px_map == NULL) {
+        if (disp) {
+            lv_display_flush_ready(disp);
+        }
+        return;
+    }
+
+#if (LV_DISP_UI_FB_NUM == 0)
+    DcuFlushRegion(px_map, disp->buf_act->data_size);
+    _lv_lcd_swap_fb(disp, px_map);
+#else
+    if (disp->flushing_last) {
+        /* DIRECT mode swaps fb0 only after LVGL finishes the last dirty chunk. */
+        DcuFlushRegion(px_map, disp->buf_act->data_size);
+        _lv_lcd_swap_fb(disp, px_map);
+    }
+#endif
+
+    lv_display_flush_ready(disp);
+}
+
+#endif
 
 #endif

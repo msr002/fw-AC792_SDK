@@ -4,7 +4,7 @@
  *
  *   Type 1 Glyph Loader (body).
  *
- * Copyright (C) 1996-2023 by
+ * Copyright (C) 1996-2026 by
  * David Turner, Robert Wilhelm, and Werner Lemberg.
  *
  * This file is part of the FreeType project, and may only be used,
@@ -69,10 +69,13 @@ T1_Parse_Glyph_And_Get_Char_String(T1_Decoder  decoder,
 
     /* For incremental fonts get the character data using the */
     /* callback function.                                     */
-    if (inc)
+    if (inc) {
+        /* So `free_glyph_data` knows whether to free it. */
+        char_string->pointer = NULL;
+
         error = inc->funcs->get_glyph_data(inc->object,
                                            glyph_index, char_string);
-    else
+    } else
 
 #endif /* FT_CONFIG_OPTION_INCREMENTAL */
 
@@ -149,6 +152,10 @@ T1_Parse_Glyph_And_Get_Char_String(T1_Decoder  decoder,
         decoder->builder.left_bearing.x = INT_TO_FIXED(metrics.bearing_x);
         decoder->builder.advance.x      = INT_TO_FIXED(metrics.advance);
         decoder->builder.advance.y      = INT_TO_FIXED(metrics.advance_v);
+    }
+
+    if (error && inc) {
+        inc->funcs->free_glyph_data(inc->object, char_string);
     }
 
 #endif /* FT_CONFIG_OPTION_INCREMENTAL */
@@ -289,7 +296,7 @@ T1_Get_Advances(FT_Face    t1face,         /* T1_Face */
         for (nn = 0; nn < count; nn++) {
             advances[nn] = 0;
 
-            FT_TRACE5(("  idx %d: advance height 0 font units\n",
+            FT_TRACE5(("  idx %u: advance height 0 font units\n",
                        first + nn));
         }
 
@@ -328,7 +335,7 @@ T1_Get_Advances(FT_Face    t1face,         /* T1_Face */
             advances[nn] = 0;
         }
 
-        FT_TRACE5(("  idx %d: advance width %ld font unit%s\n",
+        FT_TRACE5(("  idx %u: advance width %ld font unit%s\n",
                    first + nn,
                    advances[nn],
                    advances[nn] == 1 ? "" : "s"));
@@ -375,7 +382,7 @@ T1_Load_Glyph(FT_GlyphSlot  t1glyph,           /* T1_GlyphSlot */
         goto Exit;
     }
 
-    FT_TRACE1(("T1_Load_Glyph: glyph index %d\n", glyph_index));
+    FT_TRACE1(("T1_Load_Glyph: glyph index %u\n", glyph_index));
 
     FT_ASSERT((face->len_buildchar == 0) == (face->buildchar == NULL));
 
@@ -391,16 +398,12 @@ T1_Load_Glyph(FT_GlyphSlot  t1glyph,           /* T1_GlyphSlot */
         glyph->y_scale = 0x10000L;
     }
 
-    t1glyph->outline.n_points   = 0;
-    t1glyph->outline.n_contours = 0;
-
     hinting = FT_BOOL(!(load_flags & FT_LOAD_NO_SCALE) &&
                       !(load_flags & FT_LOAD_NO_HINTING));
     scaled  = FT_BOOL(!(load_flags & FT_LOAD_NO_SCALE));
 
     glyph->hint     = hinting;
     glyph->scaled   = scaled;
-    t1glyph->format = FT_GLYPH_FORMAT_OUTLINE;
 
     error = decoder_funcs->init(&decoder,
                                 t1glyph->face,
@@ -447,15 +450,11 @@ T1_Load_Glyph(FT_GlyphSlot  t1glyph,           /* T1_GlyphSlot */
 
     must_finish_decoder = FALSE;
 
-    /* now, set the metrics -- this is rather simple, as   */
-    /* the left side bearing is the xMin, and the top side */
-    /* bearing the yMax                                    */
     if (!error) {
-        t1glyph->outline.flags &= FT_OUTLINE_OWNER;
-        t1glyph->outline.flags |= FT_OUTLINE_REVERSE_FILL;
-
-        /* for composite glyphs, return only left side bearing and */
-        /* advance width                                           */
+        /* now, set the metrics -- this is rather simple, as   */
+        /* the left side bearing is the xMin, and the top side */
+        /* bearing the yMax; for composite glyphs, return only */
+        /* left side bearing and advance width                 */
         if (load_flags & FT_LOAD_NO_RECURSE) {
             FT_Slot_Internal  internal = t1glyph->internal;
 
@@ -472,6 +471,14 @@ T1_Load_Glyph(FT_GlyphSlot  t1glyph,           /* T1_GlyphSlot */
             FT_BBox            cbox;
             FT_Glyph_Metrics  *metrics = &t1glyph->metrics;
 
+
+            t1glyph->format = FT_GLYPH_FORMAT_OUTLINE;
+
+            t1glyph->outline.flags &= FT_OUTLINE_OWNER;
+            t1glyph->outline.flags |= FT_OUTLINE_REVERSE_FILL;
+            if (t1size && t1size->metrics.y_ppem < 24) {
+                t1glyph->outline.flags |= FT_OUTLINE_HIGH_PRECISION;
+            }
 
             /* copy the _unscaled_ advance width */
             metrics->horiAdvance =
@@ -490,12 +497,6 @@ T1_Load_Glyph(FT_GlyphSlot  t1glyph,           /* T1_GlyphSlot */
                     FIXED_TO_INT(decoder.builder.advance.y);
                 t1glyph->linearVertAdvance =
                     FIXED_TO_INT(decoder.builder.advance.y);
-            }
-
-            t1glyph->format = FT_GLYPH_FORMAT_OUTLINE;
-
-            if (t1size && t1size->metrics.y_ppem < 24) {
-                t1glyph->outline.flags |= FT_OUTLINE_HIGH_PRECISION;
             }
 
 #if 1

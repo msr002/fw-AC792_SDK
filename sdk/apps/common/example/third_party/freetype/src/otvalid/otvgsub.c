@@ -4,7 +4,7 @@
  *
  *   OpenType GSUB table validation (body).
  *
- * Copyright (C) 2004-2023 by
+ * Copyright (C) 2004-2026 by
  * David Turner, Robert Wilhelm, and Werner Lemberg.
  *
  * This file is part of the FreeType project, and may only be used,
@@ -53,7 +53,7 @@ otv_SingleSubst_validate(FT_Bytes       table,
     OTV_LIMIT_CHECK(2);
     SubstFormat = FT_NEXT_USHORT(p);
 
-    OTV_TRACE((" (format %d)\n", SubstFormat));
+    OTV_TRACE((" (format %u)\n", SubstFormat));
 
     switch (SubstFormat) {
     case 1: {   /* SingleSubstFormat1 */
@@ -98,7 +98,7 @@ otv_SingleSubst_validate(FT_Bytes       table,
         Coverage   = FT_NEXT_USHORT(p);
         GlyphCount = FT_NEXT_USHORT(p);
 
-        OTV_TRACE((" (GlyphCount = %d)\n", GlyphCount));
+        OTV_TRACE((" (GlyphCount = %u)\n", GlyphCount));
 
         otv_Coverage_validate(table + Coverage,
                               otvalid,
@@ -145,7 +145,7 @@ otv_MultipleSubst_validate(FT_Bytes       table,
     OTV_LIMIT_CHECK(2);
     SubstFormat = FT_NEXT_USHORT(p);
 
-    OTV_TRACE((" (format %d)\n", SubstFormat));
+    OTV_TRACE((" (format %u)\n", SubstFormat));
 
     switch (SubstFormat) {
     case 1:
@@ -185,7 +185,7 @@ otv_AlternateSubst_validate(FT_Bytes       table,
     OTV_LIMIT_CHECK(2);
     SubstFormat = FT_NEXT_USHORT(p);
 
-    OTV_TRACE((" (format %d)\n", SubstFormat));
+    OTV_TRACE((" (format %u)\n", SubstFormat));
 
     switch (SubstFormat) {
     case 1:
@@ -232,7 +232,7 @@ otv_Ligature_validate(FT_Bytes       table,
 
     CompCount = FT_NEXT_USHORT(p);
 
-    OTV_TRACE((" (CompCount = %d)\n", CompCount));
+    OTV_TRACE((" (CompCount = %u)\n", CompCount));
 
     if (CompCount == 0) {
         FT_INVALID_DATA;
@@ -261,7 +261,7 @@ otv_LigatureSubst_validate(FT_Bytes       table,
     OTV_LIMIT_CHECK(2);
     SubstFormat = FT_NEXT_USHORT(p);
 
-    OTV_TRACE((" (format %d)\n", SubstFormat));
+    OTV_TRACE((" (format %u)\n", SubstFormat));
 
     switch (SubstFormat) {
     case 1:
@@ -300,7 +300,7 @@ otv_ContextSubst_validate(FT_Bytes       table,
     OTV_LIMIT_CHECK(2);
     SubstFormat = FT_NEXT_USHORT(p);
 
-    OTV_TRACE((" (format %d)\n", SubstFormat));
+    OTV_TRACE((" (format %u)\n", SubstFormat));
 
     switch (SubstFormat) {
     case 1:
@@ -358,7 +358,7 @@ otv_ChainContextSubst_validate(FT_Bytes       table,
     OTV_LIMIT_CHECK(2);
     SubstFormat = FT_NEXT_USHORT(p);
 
-    OTV_TRACE((" (format %d)\n", SubstFormat));
+    OTV_TRACE((" (format %u)\n", SubstFormat));
 
     switch (SubstFormat) {
     case 1:
@@ -418,7 +418,7 @@ otv_ExtensionSubst_validate(FT_Bytes       table,
     OTV_LIMIT_CHECK(2);
     SubstFormat = FT_NEXT_USHORT(p);
 
-    OTV_TRACE((" (format %d)\n", SubstFormat));
+    OTV_TRACE((" (format %u)\n", SubstFormat));
 
     switch (SubstFormat) {
     case 1: {   /* ExtensionSubstFormat1 */
@@ -474,7 +474,7 @@ otv_ReverseChainSingleSubst_validate(FT_Bytes       table,
     OTV_LIMIT_CHECK(2);
     SubstFormat = FT_NEXT_USHORT(p);
 
-    OTV_TRACE((" (format %d)\n", SubstFormat));
+    OTV_TRACE((" (format %u)\n", SubstFormat));
 
     switch (SubstFormat) {
     case 1:     /* ReverseChainSingleSubstFormat1 */
@@ -482,7 +482,7 @@ otv_ReverseChainSingleSubst_validate(FT_Bytes       table,
         Coverage            = table + FT_NEXT_USHORT(p);
         BacktrackGlyphCount = FT_NEXT_USHORT(p);
 
-        OTV_TRACE((" (BacktrackGlyphCount = %d)\n", BacktrackGlyphCount));
+        OTV_TRACE((" (BacktrackGlyphCount = %u)\n", BacktrackGlyphCount));
 
         otv_Coverage_validate(Coverage, otvalid, -1);
 
@@ -494,7 +494,7 @@ otv_ReverseChainSingleSubst_validate(FT_Bytes       table,
 
         LookaheadGlyphCount = FT_NEXT_USHORT(p);
 
-        OTV_TRACE((" (LookaheadGlyphCount = %d)\n", LookaheadGlyphCount));
+        OTV_TRACE((" (LookaheadGlyphCount = %u)\n", LookaheadGlyphCount));
 
         OTV_LIMIT_CHECK(LookaheadGlyphCount * 2 + 2);
 
@@ -504,7 +504,7 @@ otv_ReverseChainSingleSubst_validate(FT_Bytes       table,
 
         GlyphCount = FT_NEXT_USHORT(p);
 
-        OTV_TRACE((" (GlyphCount = %d)\n", GlyphCount));
+        OTV_TRACE((" (GlyphCount = %u)\n", GlyphCount));
 
         if (GlyphCount != otv_Coverage_get_count(Coverage)) {
             FT_INVALID_DATA;

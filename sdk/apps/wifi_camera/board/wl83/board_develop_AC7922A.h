@@ -45,6 +45,13 @@
 */
 #define TCFG_SPITZ_WIDTH_CLKDIV_MODE_PORT   4_5_0_0
 
+/*
+#FLASH_QE_POS和FLASH_SPEC_QE_ID为'或'关系, 有一项条件符合，开机会按特殊QE位flash配置
+#TCFG_FLASH_QE_POS     —— QE位置, 0-常规(SR2-BIT1), 1-特殊(SR1-BIT6)
+#TCFG_FLASH_SPEC_QE_ID —— QE在SR1_BIT6的FlashID列表(最长128个字符, 'X'为通配符)
+*/
+#define TCFG_FLASH_QE_POS                   0
+#define TCFG_FLASH_SPEC_QE_ID               C220XX_9D70XX_1C7019
 
 //*********************************************************************************//
 //                                  sdram配置                                      //

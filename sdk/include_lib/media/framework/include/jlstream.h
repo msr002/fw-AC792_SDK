@@ -107,6 +107,7 @@ struct jlstream;
 #define NODE_IOC_GET_BP_AB          0x0002003e      //获取复读AB断点信息
 #define NODE_IOC_RSET_BP_AB         0x0002003f      //设置复读AB断点信息
 #define NODE_IOC_GET_BP_AB_SIZE     0x00020040      //获取复读AB断点信息需要的buff大小
+#define NODE_IOC_GET_CUR_TIME_MS  	0x00020041      //获取音乐播放当前时间,毫秒级别
 
 #define NODE_IOC_START              (0x00040000 | NODE_STA_RUN)
 #define NODE_IOC_PAUSE              (0x00040000 | NODE_STA_PAUSE)

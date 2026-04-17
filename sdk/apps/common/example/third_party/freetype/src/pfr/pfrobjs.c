@@ -4,7 +4,7 @@
  *
  *   FreeType PFR object methods (body).
  *
- * Copyright (C) 2002-2023 by
+ * Copyright (C) 2002-2026 by
  * David Turner, Robert Wilhelm, and Werner Lemberg.
  *
  * This file is part of the FreeType project, and may only be used,
@@ -332,7 +332,7 @@ pfr_slot_load(FT_GlyphSlot  pfrslot,          /* PFR_Slot */
     FT_ULong     gps_offset;
 
 
-    FT_TRACE1(("pfr_slot_load: glyph index %d\n", gindex));
+    FT_TRACE1(("pfr_slot_load: glyph index %u\n", gindex));
 
     if (gindex > 0) {
         gindex--;
@@ -360,11 +360,8 @@ pfr_slot_load(FT_GlyphSlot  pfrslot,          /* PFR_Slot */
         goto Exit;
     }
 
-    gchar               = face->phy_font.chars + gindex;
-    pfrslot->format     = FT_GLYPH_FORMAT_OUTLINE;
-    outline->n_points   = 0;
-    outline->n_contours = 0;
-    gps_offset          = face->header.gps_section_offset;
+    gchar      = face->phy_font.chars + gindex;
+    gps_offset = face->header.gps_section_offset;
 
     /* load the glyph outline (FT_LOAD_NO_RECURSE isn't supported) */
     error = pfr_glyph_load(&slot->glyph, face->root.stream,
@@ -375,10 +372,9 @@ pfr_slot_load(FT_GlyphSlot  pfrslot,          /* PFR_Slot */
         FT_Glyph_Metrics  *metrics = &pfrslot->metrics;
         FT_Pos             advance;
         FT_UInt            em_metrics, em_outline;
-        FT_Bool            scaling;
 
 
-        scaling = FT_BOOL(!(load_flags & FT_LOAD_NO_SCALE));
+        pfrslot->format = FT_GLYPH_FORMAT_OUTLINE;
 
         /* copy outline data */
         *outline = slot->glyph.loader->base.outline;
@@ -435,7 +431,7 @@ pfr_slot_load(FT_GlyphSlot  pfrslot,          /* PFR_Slot */
 #endif
 
         /* scale when needed */
-        if (scaling) {
+        if (!(load_flags & FT_LOAD_NO_SCALE)) {
             FT_Int      n;
             FT_Fixed    x_scale = pfrsize->metrics.x_scale;
             FT_Fixed    y_scale = pfrsize->metrics.y_scale;

@@ -4,7 +4,7 @@
  *
  *   Auto-fitter routines to compute global hinting values (body).
  *
- * Copyright (C) 2003-2023 by
+ * Copyright (C) 2003-2026 by
  * David Turner, Robert Wilhelm, and Werner Lemberg.
  *
  * This file is part of the FreeType project, and may only be used,
@@ -21,6 +21,11 @@
 #include "afshaper.h"
 #include "afws-decl.h"
 #include <freetype/internal/ftdebug.h>
+
+#ifdef FT_CONFIG_OPTION_USE_HARFBUZZ
+#  include "afgsub.h"
+#  include "ft-hb-ft.h"
+#endif
 
 
 /**************************************************************************
@@ -179,7 +184,7 @@ af_face_globals_compute_style_coverage(AF_FaceGlobals  globals)
                 if (gindex != 0                                                &&
                     gindex < globals->glyph_count                              &&
                     (gstyles[gindex] & AF_STYLE_MASK) == AF_STYLE_UNASSIGNED) {
-                    gstyles[gindex] = ss;
+                    gstyles[gindex] = ss | AF_HAS_CMAP_ENTRY;
                 }
 
                 for (;;) {
@@ -191,7 +196,7 @@ af_face_globals_compute_style_coverage(AF_FaceGlobals  globals)
 
                     if (gindex < globals->glyph_count                              &&
                         (gstyles[gindex] & AF_STYLE_MASK) == AF_STYLE_UNASSIGNED) {
-                        gstyles[gindex] = ss;
+                        gstyles[gindex] = ss | AF_HAS_CMAP_ENTRY;
                     }
                 }
             }
@@ -292,7 +297,7 @@ Exit:
                     FT_TRACE4((" "));
                 }
 
-                FT_TRACE4((" %d", idx));
+                FT_TRACE4((" %u", idx));
                 count++;
 
                 if (!(count % 10)) {
@@ -351,8 +356,18 @@ af_face_globals_new(FT_Face          face,
     globals->scale_down_factor         = 0;
 
 #ifdef FT_CONFIG_OPTION_USE_HARFBUZZ
-    globals->hb_font = hb_ft_font_create_(face, NULL);
-    globals->hb_buf  = hb_buffer_create();
+    if (ft_hb_enabled(globals)) {
+        globals->hb_font = ft_hb_ft_font_create(globals);
+        globals->hb_buf  = hb(buffer_create)();
+
+        af_parse_gsub(globals);
+    } else {
+        globals->hb_font = NULL;
+        globals->hb_buf  = NULL;
+
+        globals->gsub                          = NULL;
+        globals->gsub_lookups_single_alternate = NULL;
+    }
 #endif
 
     error = af_face_globals_compute_style_coverage(globals);
@@ -397,8 +412,13 @@ af_face_globals_free(void  *globals_)
         }
 
 #ifdef FT_CONFIG_OPTION_USE_HARFBUZZ
-        hb_font_destroy(globals->hb_font);
-        hb_buffer_destroy(globals->hb_buf);
+        if (ft_hb_enabled(globals)) {
+            hb(font_destroy)(globals->hb_font);
+            hb(buffer_destroy)(globals->hb_buf);
+
+            FT_FREE(globals->gsub);
+            FT_FREE(globals->gsub_lookups_single_alternate);
+        }
 #endif
 
         /* no need to free `globals->glyph_styles'; */

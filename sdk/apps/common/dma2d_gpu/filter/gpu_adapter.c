@@ -42,7 +42,7 @@ struct gpu_handle {
     u8 ref;
     u8 state;
     /* spinlock_t lock; */
-    u32  pid;
+    int  pid;
     u8  task_kill;
     u8 mirror;
     u8 enc_rotate;
@@ -275,7 +275,7 @@ static int check_channel_legal(pipe_plugin_t *plugin, u8 channel_max)
     return channel;
 }
 
-static int gpu_start(pipe_plugin_t *plugin)
+static int gpu_start(pipe_plugin_t *plugin, int source_channel)
 {
     ASSERT(plugin);
     struct gpu_handle *hdl = (struct gpu_handle *)plugin->private_data;
@@ -316,7 +316,7 @@ static int gpu_start(pipe_plugin_t *plugin)
 
 
 
-static int gpu_prepare(pipe_plugin_t *plugin)
+static int gpu_prepare(pipe_plugin_t *plugin, int source_channel)
 {
     ASSERT(plugin);
     struct gpu_handle *hdl = (struct gpu_handle *)plugin->private_data;
@@ -441,7 +441,7 @@ static int gpu_init(pipe_plugin_t *plugin)
     return 0;
 }
 
-static int gpu_stop(pipe_plugin_t *plugin)
+static int gpu_stop(pipe_plugin_t *plugin, int source_channel)
 {
     ASSERT(plugin);
     struct gpu_handle *hdl = (struct gpu_handle *)plugin->private_data;
@@ -518,7 +518,7 @@ static int gpu_reset(pipe_plugin_t *plugin, int source_channel)
 }
 
 
-static int gpu_get_parameter(pipe_plugin_t *plugin, int cmd, void *arg)
+static int gpu_get_parameter(pipe_plugin_t *plugin, int cmd, void *arg, int source_channel)
 {
     struct gpu_handle *hdl = (struct gpu_handle *)plugin->private_data;
     if (!hdl) {
@@ -532,7 +532,7 @@ static int gpu_get_parameter(pipe_plugin_t *plugin, int cmd, void *arg)
     return 0;
 }
 
-static int gpu_set_parameter(pipe_plugin_t *plugin, int cmd, void *arg)
+static int gpu_set_parameter(pipe_plugin_t *plugin, int cmd, void *arg, int source_channel)
 {
     struct gpu_handle *hdl = (struct gpu_handle *)plugin->private_data;
     if (!hdl) {

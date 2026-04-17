@@ -1,3 +1,4 @@
+
 /******************************************************************************
 * File:             fb_rotate.c
 *
@@ -15,10 +16,11 @@
 #include "asm/jlgpu_driver.h"
 #include "asm/gpu/jlvg.h"
 #include "asm/jlgpu_driver.h"
+#include <math.h>
 
 #if TCFG_LCD_ENABLE
 
-static unsigned char gRectSeg[] = {
+static unsigned char gRectSeg[] ALIGNE(4) = {
     0x00, 0x00, 0x80, 0x3f, 0x00, 0x00, 0x00, 0x00,
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
     0x00, 0x00, 0x80, 0xbf, 0x00, 0x00, 0xfa, 0x43,
@@ -37,13 +39,17 @@ struct gFrag_ckey_t {
     uint8_t ck_blue;
 };
 static struct gFrag_ckey_t g_ckey = {0};
+static volatile uint8_t g_blend_mode = VGHW_BLEND_SRC;
 
 #define MATRIX_COEFF_TO_FIXED(m)  (*(VGHWuint*)&(m))
 
+uint32_t get_system_us(void);
 static u32 run_time = 0;
 static int __gpu_out_cb_func(void)
 {
     run_time = get_system_us() - run_time;
+
+    return 0;
 }
 static void convertMatrixX9(float *matrix, VGHW_FragImage_TypeDef *gFragImage)
 {
@@ -184,10 +190,109 @@ static void getCmd(VGHW_CMD_TypeDef *cmd, VGHW_SEG_TypeDef *seg, int seg_len, VG
     cmd->act_y_min = win_y_min;
     cmd->act_x_max = win_x_max;
     cmd->act_y_max = win_y_max;
-    cmd->blend_mode = VGHW_BLEND_SRC;
+    // cmd->blend_mode = VGHW_BLEND_SRC;
+    cmd->blend_mode = g_blend_mode;
     cmd->gb_alpha = 128;
     cmd->frag_base_adr = (VGHWuint)fragimage;
     cmd->next_inst_adr = 0;
+}
+
+static int image_bg_copy(uint8_t *dst, int dst_w, int dst_h, int dst_stride, int dst_xoffset, int dst_yoffset, int dst_format, int rbs)
+{
+    static unsigned char _gRectSeg[] ALIGNE(4) = {
+        0x00, 0x00, 0x80, 0x3f, 0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x80, 0xbf, 0x00, 0x00, 0xfa, 0x43,
+        0xcd, 0x01, 0x00, 0x00, 0x00, 0x00, 0xf4, 0x01,
+        0x03, 0x00, 0xf4, 0x01, 0x04, 0x00, 0x00, 0x00,
+        0x03, 0x00, 0x00, 0x00, 0x04, 0x00, 0xf4, 0x01,
+        0xff
+    };
+
+
+    static VGHW_FragImage_TypeDef _gFragImage = { 0 };
+    static VGHW_CMD_TypeDef _gCmd = { 0 };
+    VGHW_SEG_TypeDef *seg = (VGHW_SEG_TypeDef *)&_gRectSeg;
+    VGHW_CMD_TypeDef *cmd = (VGHW_CMD_TypeDef *)&_gCmd;
+    VGHW_FragImage_TypeDef *fragimage = (VGHW_FragImage_TypeDef *)&_gFragImage;
+
+    float userToSurface[9] = { 1.0f, 0.0f, 0.0f,
+                               0.0f, 1.0f, 0.0f,
+                               0.0f, 0.0f, 1.0f
+                             };
+
+    float surfaceToImage[9];
+    jlvg_matrix_set_identity((jlvg_matrix_t *)surfaceToImage);
+
+    {
+        int coord = 0;
+
+        convertMatrixX6(userToSurface, seg);
+
+        seg->fill_rule = VGHW_NON_ZERO;
+
+        int offset = sizeof(VGHW_SEG_TypeDef) - 3;
+
+        int x = (VGHWuint)0 << 8;
+        int y = (VGHWuint)0 << 8;
+        int w = ((VGHWuint)dst_w) << 8;
+        int h = ((VGHWuint)dst_h) << 8;
+
+        // move to
+        coord = x;
+        _gRectSeg[offset + 1] = (coord >> 0) & 0xff;
+        _gRectSeg[offset + 2] = (coord >> 8) & 0xff;
+        _gRectSeg[offset + 3] = (coord >> 16) & 0xff;
+
+        coord = y + h;
+        _gRectSeg[offset + 4] = (coord >> 0) & 0xff;
+        _gRectSeg[offset + 5] = (coord >> 8) & 0xff;
+        _gRectSeg[offset + 6] = (coord >> 16) & 0xff;
+
+        // hline to
+        offset += 7;
+        coord = x + w;
+        _gRectSeg[offset + 1] = (coord >> 0) & 0xff;
+        _gRectSeg[offset + 2] = (coord >> 8) & 0xff;
+        _gRectSeg[offset + 3] = (coord >> 16) & 0xff;
+
+        // vline to
+        offset += 4;
+        coord = y;
+        _gRectSeg[offset + 1] = (coord >> 0) & 0xff;
+        _gRectSeg[offset + 2] = (coord >> 8) & 0xff;
+
+        _gRectSeg[offset + 3] = (coord >> 16) & 0xff;
+
+        // hline to
+        offset += 4;
+        coord = x;
+        _gRectSeg[offset + 1] = (coord >> 0) & 0xff;
+        _gRectSeg[offset + 2] = (coord >> 8) & 0xff;
+        _gRectSeg[offset + 3] = (coord >> 16) & 0xff;
+
+        // vline to
+        offset += 4;
+        coord = y + h;
+        _gRectSeg[offset + 1] = (coord >> 0) & 0xff;
+        _gRectSeg[offset + 2] = (coord >> 8) & 0xff;
+        _gRectSeg[offset + 3] = (coord >> 16) & 0xff;
+    }
+
+    setFragImage(fragimage, surfaceToImage, (VGHWuint)dst,
+                 dst_w,
+                 dst_h,
+                 dst_stride, dst_format,
+                 1, 1,
+                 rbs, VGHW_IMAGE_QUALITY_NONANTIALIASED);
+
+    getCmd(cmd, seg, sizeof(_gRectSeg), fragimage,
+           0, dst_w, 0, dst_h);
+
+    jlgpu_add_layer(cmd);
+
+
+    return 0;
 }
 
 static int image_rotate(uint8_t *dst, int dst_w, int dst_h, int dst_stride, int dst_xoffset, int dst_yoffset,
@@ -205,7 +310,7 @@ static int image_rotate(uint8_t *dst, int dst_w, int dst_h, int dst_stride, int 
 
     jlgpu_reset_all_regs();
 
-    jlgpu_set_out_window((VGHWuint)dst, 0, dst_w, 0, dst_h, dst_stride);
+    jlgpu_set_out_window((void *)dst, 0, dst_w, 0, dst_h, dst_stride);
 
     jlgpu_set_out_format(dst_format, 1, 1, out_rbs, 1);
 
@@ -213,6 +318,11 @@ static int image_rotate(uint8_t *dst, int dst_w, int dst_h, int dst_stride, int 
     jlgpu_set_max_bez_div(7);
     /* jlgpu_set_max_msaa_lvl(VGHW_RENDERING_QUALITY_MSAA_8X); */
     jlgpu_set_max_msaa_lvl(VGHW_RENDERING_QUALITY_NONANTIALIASED);
+
+    if (g_blend_mode != VGHW_BLEND_SRC) {
+        image_bg_copy(dst, dst_w, dst_h, dst_stride, dst_xoffset, dst_yoffset,
+                      dst_format, out_rbs);
+    }
 
     VGHW_SEG_TypeDef *seg = (VGHW_SEG_TypeDef *)&gRectSeg;
     VGHW_CMD_TypeDef *cmd = (VGHW_CMD_TypeDef *)&gCmd;
@@ -258,14 +368,14 @@ static int image_rotate(uint8_t *dst, int dst_w, int dst_h, int dst_stride, int 
         if (src_w != dst_h || src_h != dst_w) {
             float zoom_x = src_h * 1.0f * 256 / dst_w / 256;
             float zoom_y = src_w * 1.0f * 256 / dst_h / 256;
-            jlvg_matrix_scale(surfaceToImage, zoom_y, zoom_x);
+            jlvg_matrix_scale((jlvg_matrix_t *)surfaceToImage, zoom_y, zoom_x);
             quality = VGHW_IMAGE_QUALITY_BILINEAR; //双线性插值
         }
     } else if (degree == 180.0f) {
         if (src_w != dst_w || src_h != dst_h) {
             float zoom_x = src_w * 1.0f * 256 / dst_w / 256;
             float zoom_y = src_h * 1.0f * 256 / dst_h / 256;
-            jlvg_matrix_scale(surfaceToImage, zoom_x, zoom_y);
+            jlvg_matrix_scale((jlvg_matrix_t *)surfaceToImage, zoom_x, zoom_y);
             quality = VGHW_IMAGE_QUALITY_BILINEAR; //双线性插值
         }
     }
@@ -280,7 +390,7 @@ static int image_rotate(uint8_t *dst, int dst_w, int dst_h, int dst_stride, int 
         matrix[3] = 0.0f;
         matrix[4] = 1.0f;
         matrix[5] = 0.0f;
-        jlvg_matrix_multiply(&surfaceToImage, &matrix_out, &matrix);
+        jlvg_matrix_multiply((jlvg_matrix_t *)&surfaceToImage, (jlvg_matrix_t *)&matrix_out, (jlvg_matrix_t *)&matrix);
     }
 
     setRectSeg(seg, userToSurface, VGHW_NON_ZERO,
@@ -289,7 +399,7 @@ static int image_rotate(uint8_t *dst, int dst_w, int dst_h, int dst_stride, int 
                ((VGHWuint)dst_w) << 8,
                ((VGHWuint)dst_h) << 8);
 
-    setFragImage(fragimage, surfaceToImage, src,
+    setFragImage(fragimage, surfaceToImage, (VGHWuint)src,
                  src_w,
                  src_h,
                  src_stride, src_format,
@@ -328,7 +438,7 @@ static int image_scale(uint8_t *dst, int dst_w, int dst_h, int dst_stride, int d
 
     jlgpu_reset_all_regs();
 
-    jlgpu_set_out_window((VGHWuint)dst, 0, dst_w, 0, dst_h, dst_stride);
+    jlgpu_set_out_window((void *)dst, 0, dst_w, 0, dst_h, dst_stride);
 
     jlgpu_set_out_format(dst_format, 1, 0, 0, 1);
 
@@ -356,9 +466,9 @@ static int image_scale(uint8_t *dst, int dst_w, int dst_h, int dst_stride, int d
     float zoom_y = src_h * 1.0f * 256 / dst_h / 256;
 #if 1
     //jlvg_matrix_set_identity(surfaceToImage);
-    jlvg_matrix_translate(surfaceToImage, -src_w / 2, -src_h / 2);
-    jlvg_matrix_scale(surfaceToImage, zoom_x, zoom_y);
-    jlvg_matrix_translate(surfaceToImage, src_w / 2 * zoom_x, src_h / 2 * zoom_y);
+    jlvg_matrix_translate((jlvg_matrix_t *)surfaceToImage, -src_w / 2, -src_h / 2);
+    jlvg_matrix_scale((jlvg_matrix_t *)surfaceToImage, zoom_x, zoom_y);
+    jlvg_matrix_translate((jlvg_matrix_t *)surfaceToImage, src_w / 2 * zoom_x, src_h / 2 * zoom_y);
 
     if (mirror == 1) {
         //垂直镜像
@@ -370,7 +480,7 @@ static int image_scale(uint8_t *dst, int dst_w, int dst_h, int dst_stride, int d
         matrix[3] = 0.0f;
         matrix[4] = -1.0f;
         matrix[5] = dst_h;
-        jlvg_matrix_multiply(&surfaceToImage, &matrix_out, &matrix);
+        jlvg_matrix_multiply((jlvg_matrix_t *)&surfaceToImage, (jlvg_matrix_t *)&matrix_out, (jlvg_matrix_t *)&matrix);
     }
 #endif
 
@@ -381,7 +491,7 @@ static int image_scale(uint8_t *dst, int dst_w, int dst_h, int dst_stride, int d
                ((VGHWuint)dst_w) << 8,
                ((VGHWuint)dst_h) << 8);
 
-    setFragImage(fragimage, surfaceToImage, src,
+    setFragImage(fragimage, surfaceToImage, (VGHWuint)src,
                  src_w,
                  src_h,
                  src_stride, src_format,
@@ -413,6 +523,10 @@ void fb_frame_buf_rotate_set_colorkey(u8 ckey_en, uint8_t ckey_red, uint8_t ckey
     g_ckey.ck_blue = ckey_blue;
 }
 
+void fb_frame_buf_rotate_set_blend_mode(u8 blend_mode)
+{
+    g_blend_mode = blend_mode;
+}
 /**
  * @brief     图层帧buffer旋转
  * @param:    image_src  : 源头图层地址
@@ -527,7 +641,7 @@ int fb_frame_buf_mirror(uint8_t *image_src, uint8_t *image_dst, int src_width, i
 
     jlgpu_reset_all_regs();
 
-    jlgpu_set_out_window((VGHWuint)image_dst, 0, dst_width, 0, dst_height, dst_stride);
+    jlgpu_set_out_window((void *)image_dst, 0, dst_width, 0, dst_height, dst_stride);
 
     jlgpu_set_out_format(dst_format, 1, 0, out_rbs, 1);
 
@@ -585,7 +699,7 @@ int fb_frame_buf_mirror(uint8_t *image_src, uint8_t *image_dst, int src_width, i
                ((VGHWuint)dst_width) << 8,
                ((VGHWuint)dst_height) << 8);
 
-    setFragImage(fragimage, surfaceToImage, image_src,
+    setFragImage(fragimage, surfaceToImage, (VGHWuint)image_src,
                  src_width,
                  src_height,
                  src_stride, src_format,

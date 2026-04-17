@@ -5,7 +5,7 @@
 
 #include "os/os_api.h"
 #include "lcd_config.h"
-#if (defined USE_LVGL_V8_UI_DEMO)
+#if (defined CONFIG_UI_ENABLE)
 #include "lv_conf.h"
 #endif
 
@@ -31,7 +31,7 @@ int logo_get_state(void)
 
 static int logo_play_stop_ui(void)
 {
-#ifdef USE_LVGL_V8_UI_DEMO
+#ifdef CONFIG_UI_ENABLE
     if (os_task_get_handle(LVGL_TASK_NAME)) {
         void lvgl_ui_suspend(void);
         lvgl_ui_suspend();

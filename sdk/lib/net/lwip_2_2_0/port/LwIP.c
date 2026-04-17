@@ -46,6 +46,7 @@ extern err_t uart_ethernetif_init(struct netif *netif);
 extern void ntp_client_get_time(const char *host);
 extern int netdev_get_mac_addr(u8 *mac_addr);
 static void __lwip_renew(unsigned short parm);
+static u8 lwip_inited = 0;
 void lwip_etharp_cleanup_netif(u8_t lwip_netif);
 
 int __attribute__((weak)) lwip_event_cb(void *lwip_ctx, enum LWIP_EVENT event)
@@ -82,6 +83,13 @@ int __attribute__((weak)) socket_send_but_netif_busy_hook(int s, char type_udp)
 {
     return 0;
 }
+
+typedef enum {
+    WIFI_MODULE_UNKNOWN = 0,
+    WIFI_MODULE_RTL,
+    WIFI_MODULE_AIC,
+} wifi_module_t;
+
 
 static struct lan_setting wireless_lan_setting_info = {
     .WIRELESS_IP_ADDR0  = 192,
@@ -346,6 +354,8 @@ static int dhcp_timeout_msec = 15 * 1000;
 static u8 get_time_init;
 extern const u8 ntp_get_time_init;
 
+bool is_aic_driver = false;
+
 struct lan_setting *net_get_lan_info(u8_t lwip_netif)
 {
     if (lwip_netif == WIFI_NETIF) {
@@ -591,7 +601,7 @@ static void network_is_dhcp_bound(struct netif *netif)
         p_to = &wireless_dhcp_timeout_cnt;
     }
 #ifdef HAVE_EXT_WIRELESS_NETIF
-    if (netif == &ext_wireless_netif) {
+    if (netif == &ext_wireless_netif || is_aic_driver == TRUE) {
         p_to = &ext_wireless_dhcp_timeout_cnt;
     }
 #endif
@@ -621,7 +631,7 @@ static void network_is_dhcp_bound(struct netif *netif)
             parm = WIFI_NETIF;
         }
 #ifdef HAVE_EXT_WIRELESS_NETIF
-        else if (netif == &ext_wireless_netif) {
+        else if (netif == &ext_wireless_netif || is_aic_driver == TRUE) {
             ext_lwip_event_cb(NULL, LWIP_EXT_WIRELESS_DHCP_BOUND_TIMEOUT);
             parm = EXT_WIFI_NETIF;
         }
@@ -669,10 +679,12 @@ static void network_is_dhcp_bound(struct netif *netif)
                 }
             }
 #ifdef HAVE_EXT_WIRELESS_NETIF
-            else if (netif == &ext_wireless_netif) {
-                dns_local_removehost(LOCAL_EXT_WIRELESS_HOST_NAME, &ext_wireless_netif.ip_addr);
+            else if (netif == &ext_wireless_netif || is_aic_driver == TRUE) {
+                //dns_local_removehost(LOCAL_EXT_WIRELESS_HOST_NAME, &ext_wireless_netif.ip_addr);
+                dns_local_removehost(LOCAL_EXT_WIRELESS_HOST_NAME, &netif->ip_addr);
 
-                if (dns_local_addhost(LOCAL_EXT_WIRELESS_HOST_NAME, &ext_wireless_netif.ip_addr) != ERR_OK) {
+                if (dns_local_addhost(LOCAL_EXT_WIRELESS_HOST_NAME, &netif->ip_addr) != ERR_OK) {
+                    //if (dns_local_addhost(LOCAL_EXT_WIRELESS_HOST_NAME, &ext_wireless_netif.ip_addr) != ERR_OK) {
                     puts("dns_local_addhost err`.\n");
                 }
             }
@@ -710,7 +722,7 @@ static void network_is_dhcp_bound(struct netif *netif)
             }
 
 #ifdef HAVE_EXT_WIRELESS_NETIF
-            else if (netif == &ext_wireless_netif) {
+            else if (netif == &ext_wireless_netif || is_aic_driver == TRUE) {
                 ext_lwip_event_cb(NULL, LWIP_EXT_WIRELESS_DHCP_BOUND_SUCC);
             }
 #endif
@@ -1045,8 +1057,8 @@ static void __lwip_renew(unsigned short parm)
     if (!lan_setting_info) {
         return;
     }
-	
-	//清除arp缓存
+
+    //清除arp缓存
     lwip_etharp_cleanup_netif(lwip_netif);
 
 #if LWIP_NETIF_EXT_STATUS_CALLBACK
@@ -1101,6 +1113,8 @@ static void __lwip_renew(unsigned short parm)
         }
     }
 #ifdef HAVE_EXT_WIRELESS_NETIF
+
+#if 0
     else if (lwip_netif == EXT_WIFI_NETIF) {
         netdev_get_mac_addr(ext_wireless_netif.hwaddr);
 
@@ -1127,7 +1141,88 @@ static void __lwip_renew(unsigned short parm)
             Display_IPAddress();
         }
     }
+#else
+    else if (lwip_netif == EXT_WIFI_NETIF) {
+
+        struct netif *netif = NULL;
+
+        if (is_aic_driver) {
+            netif = fhost_to_net_if(0);
+            if (!netif) {
+                printf("AIC netif not ready\n");
+                return;
+            }
+        } else {
+            netif = &ext_wireless_netif;
+        }
+
+        netdev_get_mac_addr(netif->hwaddr);
+
+#if LWIP_IPV6
+        nd6_renew(netif);
 #endif
+
+        /* DHCP renew / static IP */
+        if (dhcp) {
+
+            if (!is_aic_driver) {
+                dhcp_renew_ipaddr(netif);
+            }
+
+            tcpip_untimeout(
+                (sys_timeout_handler)network_is_dhcp_bound,
+                netif
+            );
+
+            ext_wireless_dhcp_timeout_cnt = 0;
+
+            /* 重新启动 DHCP bound 检测 */
+            if (tcpip_timeout(
+                    DHCP_TMR_INTERVAL,
+                    (sys_timeout_handler)network_is_dhcp_bound,
+                    netif) != ERR_OK) {
+                LWIP_ASSERT(
+                    "failed to create timeout network_is_dhcp_bound",
+                    0
+                );
+            }
+
+        } else {
+
+            /* 静态 IP 分支 */
+            tcpip_untimeout(
+                (sys_timeout_handler)network_is_dhcp_bound,
+                netif
+            );
+
+            IP4_ADDR(&ipaddr,
+                     lan_setting_info->WIRELESS_IP_ADDR0,
+                     lan_setting_info->WIRELESS_IP_ADDR1,
+                     lan_setting_info->WIRELESS_IP_ADDR2,
+                     lan_setting_info->WIRELESS_IP_ADDR3);
+
+            IP4_ADDR(&netmask,
+                     lan_setting_info->WIRELESS_NETMASK0,
+                     lan_setting_info->WIRELESS_NETMASK1,
+                     lan_setting_info->WIRELESS_NETMASK2,
+                     lan_setting_info->WIRELESS_NETMASK3);
+
+            IP4_ADDR(&gw,
+                     lan_setting_info->WIRELESS_GATEWAY0,
+                     lan_setting_info->WIRELESS_GATEWAY1,
+                     lan_setting_info->WIRELESS_GATEWAY2,
+                     lan_setting_info->WIRELESS_GATEWAY3);
+
+            netif_set_addr(netif, &ipaddr, &netmask, &gw);
+
+            lwip_event_cb(NULL, LWIP_EXT_WIRELESS_DHCP_BOUND_SUCC);
+            Display_IPAddress();
+        }
+    }
+
+#endif
+#endif
+
 #ifdef HAVE_LTE_NETIF
     else if (lwip_netif == LTE_NETIF) {
         u8 *lte_module_get_mac_addr(void);
@@ -1290,9 +1385,14 @@ void Init_LwIP(u8_t lwip_netif)
 
 #ifdef HAVE_EXT_WIRELESS_NETIF
     case EXT_WIFI_NETIF:
-        netif = &ext_wireless_netif;
-        ethernetif_init = ext_wireless_ethernetif_init;
-        sprintf(host_name, "%s", LOCAL_EXT_WIRELESS_HOST_NAME);
+        if (is_aic_driver) {
+            /*aic8800驱动netif获取，不在此初始化 */
+            netif = fhost_to_net_if(0);
+        } else {
+            netif = &ext_wireless_netif;
+            ethernetif_init = ext_wireless_ethernetif_init;
+            sprintf(host_name, "%s", LOCAL_EXT_WIRELESS_HOST_NAME);
+        }
         break;
 #endif
 
@@ -1331,7 +1431,6 @@ void Init_LwIP(u8_t lwip_netif)
 
     printf("|Init_LwIP [%d]\n", lwip_netif);
 
-    static u8 lwip_inited;
     if (!lwip_inited) {
         if (sys_sem_new(&sem, 0) != ERR_OK) {
             LWIP_ASSERT("failed to create sem", 0);
@@ -1342,6 +1441,10 @@ void Init_LwIP(u8_t lwip_netif)
         sys_sem_free(&sem);
         LWIP_DEBUGF(TCPIP_DEBUG, ("tcpip_init: initialized\n"));
         lwip_inited = 1;
+    }
+
+    if (is_aic_driver) {
+        return ;
     }
 
     IP4_ADDR(&ipaddr, lan_setting_info->WIRELESS_IP_ADDR0, lan_setting_info->WIRELESS_IP_ADDR1, lan_setting_info->WIRELESS_IP_ADDR2, lan_setting_info->WIRELESS_IP_ADDR3);
@@ -1373,6 +1476,57 @@ void Init_LwIP(u8_t lwip_netif)
 
     Display_IPAddress();
 }
+
+void Unint_LwIP(u8_t id)
+{
+    struct netif *netif = NULL;
+    switch (id) {
+#ifdef HAVE_ETH_WIRE_NETIF
+    case ETH_NETIF:
+        netif = &wire_netif;
+        break;
+#endif
+    case WIFI_NETIF:
+        netif = &wireless_netif;
+        break;
+#ifdef HAVE_WRIELESS_RAW_NETIF
+    case WIFI_RAW_NETIF:
+        netif = &wireless_raw_netif;
+        break;
+#endif
+#ifdef HAVE_EXT_WIRELESS_NETIF
+    case EXT_WIFI_NETIF:
+        netif = &ext_wireless_netif;
+        break;
+#endif
+#ifdef HAVE_BT_NETIF
+    case BT_NETIF:
+        netif = &bt_netif;
+        break;
+#endif
+#ifdef HAVE_LTE_NETIF
+    case LTE_NETIF:
+        netif = &lte_netif;
+        break;
+#endif
+
+    default:
+        printf("no support netif = %d\n", id);
+        return;
+    }
+
+    netif_set_down(netif);
+    dns_local_removehost(NULL, NULL); //free all host entry
+    void sys_timeouts_uninit(void);
+    sys_timeouts_uninit(); //stop all cyclic timers
+
+    netif_remove(netif);
+    void tcpip_uninit(void);
+    tcpip_uninit();
+    memset(netif, 0x0, sizeof(struct netif));
+    lwip_inited = 0;
+}
+
 
 /*The gethostname function retrieves the standard host name for the local computer.*/
 int gethostname(char *name, int namelen)
@@ -1697,4 +1851,3 @@ void lwip_etharp_cleanup_netif(u8_t lwip_netif)
     }
     etharp_cleanup_netif(netif);
 }
-

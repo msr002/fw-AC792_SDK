@@ -124,7 +124,7 @@ int lvgl_key_event_handler_2(struct sys_event *event)
 
     int msg[2 + sizeof(struct key_event) / 4];
     //编码器旋钮
-    if (key->action == KEY_EVENT_RDEC_UP || KEY_EVENT_RDEC_DOWN) {
+    if (key->action == KEY_EVENT_RDEC_UP || key->action == KEY_EVENT_RDEC_DOWN) {
         msg[0] = UI_MSG_ENCODER;
         memcpy(&msg[1], key, sizeof(struct key_event));
         if (os_taskq_post_type(LVGL_TASK_NAME, Q_USER, ARRAY_SIZE(msg), msg)) {
@@ -467,7 +467,7 @@ void lvgl_main_task(void *priv)
     while (1) {
 
         ret = os_taskq_pend_timeout(msg, ARRAY_SIZE(msg), portMAX_DELAY);
-        if (ret != OS_TASKQ) {
+        if (ret != OS_TASKQ && ret != OS_TIMEOUT) {
             printf("lvgl_main_task os_taskq_pend err=%d %d\n", ret, msg[0]);
             continue;
         }

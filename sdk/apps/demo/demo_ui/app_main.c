@@ -68,9 +68,7 @@ void jl_gui_init(void)
 void app_main(void)
 {
     printf("\n\n\n ------------demo ui run %s-------------\n\n\n", __TIME__);
-#ifdef USE_LVGL_V8_UI_DEMO
     int lvgl_main_task_init(void);
     lvgl_main_task_init();
-#endif
 }
 

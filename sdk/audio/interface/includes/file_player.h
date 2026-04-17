@@ -180,6 +180,9 @@ int music_file_get_player_status(struct file_player *music_player);
 /* 获取音乐当前播放时间  */
 int music_file_get_cur_time(struct file_player *music_player);
 
+/* 获取音乐当前播放时间,ms级别,仅wav和mp3支持  */
+int music_file_get_cur_time_ms(struct file_player *music_player);
+
 /* 获取音乐播放总时长  */
 int music_file_get_total_time(struct file_player *music_player);
 

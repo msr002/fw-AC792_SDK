@@ -54,14 +54,6 @@
 #define FT_COMPONENT  cf2blues
 
 
-/*
- * For blue values, the FreeType parser produces an array of integers,
- * while the Adobe CFF engine produces an array of fixed.
- * Define a macro to convert FreeType to fixed.
- */
-#define cf2_blueToFixed( x )  cf2_intToFixed( x )
-
-
 FT_LOCAL_DEF(void)
 cf2_blues_init(CF2_Blues  blues,
                CF2_Font   font)
@@ -78,10 +70,10 @@ cf2_blues_init(CF2_Blues  blues,
     size_t  numFamilyBlues;
     size_t  numFamilyOtherBlues;
 
-    FT_Pos  *blueValues;
-    FT_Pos  *otherBlues;
-    FT_Pos  *familyBlues;
-    FT_Pos  *familyOtherBlues;
+    FT_Fixed  *blueValues;
+    FT_Fixed  *otherBlues;
+    FT_Fixed  *familyBlues;
+    FT_Fixed  *familyOtherBlues;
 
     size_t     i;
     CF2_Fixed  emBoxBottom, emBoxTop;
@@ -137,13 +129,13 @@ cf2_blues_init(CF2_Blues  blues,
         emBoxTop    = CF2_ICF_Top;
     }
 
-    if (cf2_getLanguageGroup(decoder) == 1                   &&
-        (numBlueValues == 0                                 ||
-         (numBlueValues == 4                             &&
-          cf2_blueToFixed(blueValues[0]) < emBoxBottom &&
-          cf2_blueToFixed(blueValues[1]) < emBoxBottom &&
-          cf2_blueToFixed(blueValues[2]) > emBoxTop    &&
-          cf2_blueToFixed(blueValues[3]) > emBoxTop))) {
+    if (cf2_getLanguageGroup(decoder) == 1     &&
+        (numBlueValues == 0                   ||
+         (numBlueValues == 4               &&
+          blueValues[0] < emBoxBottom      &&
+          blueValues[1] < emBoxBottom      &&
+          blueValues[2] > emBoxTop         &&
+          blueValues[3] > emBoxTop))) {
         /*
          * Construct hint edges suitable for synthetic ghost hints at top
          * and bottom of em box.  +-CF2_MIN_COUNTER allows for unhinted
@@ -186,10 +178,8 @@ cf2_blues_init(CF2_Blues  blues,
     /* copy `BlueValues' and `OtherBlues' to a combined array of top and */
     /* bottom zones                                                      */
     for (i = 0; i < numBlueValues; i += 2) {
-        blues->zone[blues->count].csBottomEdge =
-            cf2_blueToFixed(blueValues[i]);
-        blues->zone[blues->count].csTopEdge =
-            cf2_blueToFixed(blueValues[i + 1]);
+        blues->zone[blues->count].csBottomEdge = blueValues[i];
+        blues->zone[blues->count].csTopEdge    = blueValues[i + 1];
 
         zoneHeight = SUB_INT32(blues->zone[blues->count].csTopEdge,
                                blues->zone[blues->count].csBottomEdge);
@@ -228,10 +218,8 @@ cf2_blues_init(CF2_Blues  blues,
     }
 
     for (i = 0; i < numOtherBlues; i += 2) {
-        blues->zone[blues->count].csBottomEdge =
-            cf2_blueToFixed(otherBlues[i]);
-        blues->zone[blues->count].csTopEdge =
-            cf2_blueToFixed(otherBlues[i + 1]);
+        blues->zone[blues->count].csBottomEdge = otherBlues[i];
+        blues->zone[blues->count].csTopEdge    = otherBlues[i + 1];
 
         zoneHeight = SUB_INT32(blues->zone[blues->count].csTopEdge,
                                blues->zone[blues->count].csBottomEdge);
@@ -284,7 +272,7 @@ cf2_blues_init(CF2_Blues  blues,
 
             for (j = 0; j < numFamilyOtherBlues; j += 2) {
                 /* top edge */
-                flatFamilyEdge = cf2_blueToFixed(familyOtherBlues[j + 1]);
+                flatFamilyEdge = familyOtherBlues[j + 1];
 
                 diff = cf2_fixedAbs(SUB_INT32(flatEdge, flatFamilyEdge));
 
@@ -301,7 +289,7 @@ cf2_blues_init(CF2_Blues  blues,
             /* check the first member of FamilyBlues, which is a bottom zone */
             if (numFamilyBlues >= 2) {
                 /* top edge */
-                flatFamilyEdge = cf2_blueToFixed(familyBlues[1]);
+                flatFamilyEdge = familyBlues[1];
 
                 diff = cf2_fixedAbs(SUB_INT32(flatEdge, flatFamilyEdge));
 
@@ -319,7 +307,7 @@ cf2_blues_init(CF2_Blues  blues,
 
             for (j = 2; j < numFamilyBlues; j += 2) {
                 /* bottom edge */
-                flatFamilyEdge = cf2_blueToFixed(familyBlues[j]);
+                flatFamilyEdge = familyBlues[j];
 
                 /* adjust edges of top zone upward by twice darkening amount */
                 flatFamilyEdge += 2 * font->darkenY;      /* bottom edge */

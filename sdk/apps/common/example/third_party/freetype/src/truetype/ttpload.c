@@ -4,7 +4,7 @@
  *
  *   TrueType-specific tables loader (body).
  *
- * Copyright (C) 1996-2023 by
+ * Copyright (C) 1996-2026 by
  * David Turner, Robert Wilhelm, and Werner Lemberg.
  *
  * This file is part of the FreeType project, and may only be used,
@@ -104,7 +104,7 @@ tt_face_load_loca(TT_Face    face,
     face->num_locations = table_len >> shift;
 
     if (face->num_locations != (FT_ULong)face->root.num_glyphs + 1) {
-        FT_TRACE2(("glyph count mismatch!  loca: %ld, maxp: %ld\n",
+        FT_TRACE2(("glyph count mismatch!  loca: %lu, maxp: %ld\n",
                    face->num_locations - 1, face->root.num_glyphs));
 
         /* we only handle the case where `maxp' gives a larger value */
@@ -140,7 +140,7 @@ tt_face_load_loca(TT_Face    face,
                 face->num_locations = (FT_ULong)face->root.num_glyphs + 1;
                 table_len           = new_loca_len;
 
-                FT_TRACE2(("adjusting num_locations to %ld\n",
+                FT_TRACE2(("adjusting num_locations to %lu\n",
                            face->num_locations));
             } else {
                 face->root.num_glyphs = face->num_locations
@@ -210,7 +210,7 @@ tt_face_get_location(FT_Face    face,    /* TT_Face */
     /* Check broken location data. */
     if (pos1 > ttface->glyf_len) {
         FT_TRACE1(("tt_face_get_location:"
-                   " too large offset (0x%08lx) found for glyph index %d,\n",
+                   " too large offset (0x%08lx) found for glyph index %u,\n",
                    pos1, gindex));
         FT_TRACE1(("                     "
                    " exceeding the end of `glyf' table (0x%08lx)\n",
@@ -223,15 +223,15 @@ tt_face_get_location(FT_Face    face,    /* TT_Face */
         /* We try to sanitize the last `loca' entry. */
         if (gindex == ttface->num_locations - 2) {
             FT_TRACE1(("tt_face_get_location:"
-                       " too large size (%ld bytes) found for glyph index %d,\n",
+                       " too large size (%lu bytes) found for glyph index %u,\n",
                        pos2 - pos1, gindex));
             FT_TRACE1(("                     "
-                       " truncating at the end of `glyf' table to %ld bytes\n",
+                       " truncating at the end of `glyf' table to %lu bytes\n",
                        ttface->glyf_len - pos1));
             pos2 = ttface->glyf_len;
         } else {
             FT_TRACE1(("tt_face_get_location:"
-                       " too large offset (0x%08lx) found for glyph index %d,\n",
+                       " too large offset (0x%08lx) found for glyph index %u,\n",
                        pos2, gindex + 1));
             FT_TRACE1(("                     "
                        " exceeding the end of `glyf' table (0x%08lx)\n",
@@ -402,7 +402,7 @@ tt_face_load_fpgm(TT_Face    face,
             goto Exit;
         }
 
-        FT_TRACE2(("loaded, %12ld bytes\n", face->font_program_size));
+        FT_TRACE2(("loaded, %12lu bytes\n", face->font_program_size));
     }
 
 Exit:
@@ -463,7 +463,7 @@ tt_face_load_prep(TT_Face    face,
             goto Exit;
         }
 
-        FT_TRACE2(("loaded, %12ld bytes\n", face->cvt_program_size));
+        FT_TRACE2(("loaded, %12lu bytes\n", face->cvt_program_size));
     }
 
 Exit:

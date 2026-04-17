@@ -27,7 +27,7 @@
 #define LOG_DEBUG_ENABLE
 #define LOG_ERROR_ENABLE
 #include "debug.h"
-#if (defined USE_LVGL_V8_UI_DEMO)
+#if (defined USE_LVGL_V8_UI_DEMO || defined USE_LVGL_V9_UI_DEMO)
 #include "lv_conf.h"
 #endif
 
@@ -76,8 +76,13 @@ enum {
 int fb_frame_buf_rotate(uint8_t *image_src, uint8_t *image_dst, int src_width, int src_height, int src_stride,
                         int dst_width, int dst_height, int dst_stride, int degree, int xoffset, int yoffset,
                         int in_format, int out_format, uint8_t mirror);
+
+int fb_frame_buf_scale(uint8_t *dst, int dst_format, int dst_w, int dst_h,
+                       uint8_t *src, int src_format, int src_w, int src_h, uint8_t mirror);
+
 void fb_lcd_frame_buf_update(u8 id, u8 *frame_buffer);
 
+u8 *fb_combine_get_outbuf(u8 id);
 
 static void __fb_buf_clear(u8 *frame_buffer, u32 frame_size, u32 format)
 {
@@ -170,8 +175,8 @@ static int __fb_lcd_frame_swap_flush(u8 id, u8 *frame_buffer)
 //数据直接拷贝到lcd显存
 static int __fb_lcd_frame_copy_flush(u8 id, u8 wait_line, u8 *frame_buffer, u16 x, u16 y)
 {
-#define CALC_CNT  60
-    static u8 statistics_cnt = CALC_CNT;
+    u8 CALC_CNT = 60;
+    static u8 statistics_cnt = 60;
     static u32 *dma2d_copy_use_times = NULL;
     static u16 lcd_vert_total = 0;
     struct lcd_dev_drive *lcd = NULL;
@@ -262,8 +267,8 @@ static int __fb_lcd_frame_copy_flush(u8 id, u8 wait_line, u8 *frame_buffer, u16 
 static int __fb_lcd_frame_rotate_copy_flush(u8 id, u8 wait_line, u8 *frame_buffer, u8 *out_buffer)
 {
     static u8 rotate_slow = 0;  //0:旋转速度比推屏快  1:旋转速度比推屏慢 旋转90度出现耗时比推1帧时间多
-#define CALC_CNT  10
-    static u8 statistics_cnt = CALC_CNT;
+    u8 CALC_CNT = 10;
+    static u8 statistics_cnt = 10;
     u16 src_w = __this->interpolation_en ? __this->out_buf_h : __this->out_h;
     u16 src_h = __this->interpolation_en ? __this->out_buf_w : __this->out_w;
     static u16 lcd_vert_total = 0;
@@ -375,7 +380,8 @@ static int __fb_lcd_framerate_calc(u8 id)
 }
 #endif
 
-#if (defined USE_LVGL_V8_UI_DEMO)
+#if (defined USE_LVGL_V8_UI_DEMO || defined USE_LVGL_V9_UI_DEMO)
+#ifndef CONFIG_DEMO_UI_PROJECT_ENABLE
 void dmm_vsync_int_handler(void)
 {
     struct lcd_dev_drive *lcd = NULL;
@@ -415,6 +421,7 @@ void dmm_vsync_int_handler(void)
 #endif
     g_vsync_start_time = get_system_us(); //记录Vsync起始时间点
 }
+#endif
 #endif
 
 static void dump_frame_buffer(uint8_t *buffer, int buffer_size)
@@ -704,7 +711,7 @@ void fb_lcd_frame_buf_update(u8 id, u8 *frame_buffer)
             if (__this->rotate) {
                 u32 dmm_addr = dmm_addr_base;
                 dmm_addr = CPU_ADDR(dmm_addr);
-                if (__this->out_buf[__this->out_buf_index] == (u8 *)dmm_addr) {
+                if (__this->out_buf[__this->out_buf_index] == dmm_addr) {
                     __this->out_buf_index = !__this->out_buf_index;
                 }
                 __fb_lcd_frame_rotate_copy_flush(id, 0, frame_buffer, (u8 *)__this->out_buf[__this->out_buf_index]);
@@ -748,10 +755,11 @@ int fb_lcd_frame_async_wait(u8 id)
 int fb_lcd_frame_buf_update_async(u8 id, u8 *frame_buffer)
 {
     char async_lcd_task_name[20];
-    sprintf(async_lcd_task_name, "async_lcd_task%d", id);
+    int lcd_id = id;
+    sprintf(async_lcd_task_name, "async_lcd_task%d", lcd_id);
     if (__this->lcd_push_task_run == 0) {
         //创建线程,用于异步推屏线程
-        thread_fork(async_lcd_task_name, 20, 1024, 256, 0, __fb_lcd_async_push_task, (void *)id);
+        thread_fork(async_lcd_task_name, 20, 1024, 256, 0, __fb_lcd_async_push_task, (void *)lcd_id);
         __this->lcd_push_task_run = 1;
 
     }
@@ -764,7 +772,7 @@ int fb_lcd_frame_buf_update_async(u8 id, u8 *frame_buffer)
     int err;
     int msg[3];
     msg[0] = FB_LCD_MSG_ASYNC_UPDATE;
-    msg[1] = frame_buffer;
+    msg[1] = (int)frame_buffer;
     err =  os_taskq_post_type(async_lcd_task_name, Q_USER, ARRAY_SIZE(msg), msg);
     if (err) {
         os_sem_post(&__this->lcd_async_sem);
@@ -789,6 +797,7 @@ int fb_lcd_frame_buf_swap(u8 id, u8 *frame_buffer)
 #if FB_LCD_FRAME_RATE_DEBUG_EN
     __fb_lcd_framerate_calc(id);
 #endif
+    return ret;
 }
 /**
  * @brief   获取lcd是否插值显示
@@ -893,7 +902,7 @@ u32 fb_lcd_get_buf0(u8 id)
  **/
 void fb_lcd_set_buf0(u8 id, u8 *buffer)
 {
-    __this->out_buf[0] = buffer;
+    __this->out_buf[0] = (u32)buffer;
 }
 /**
  * @brief   设置lcd屏显显存buffer1
@@ -903,7 +912,7 @@ void fb_lcd_set_buf0(u8 id, u8 *buffer)
  **/
 void fb_lcd_set_buf1(u8 id, u8 *buffer)
 {
-    __this->out_buf[1] = buffer;
+    __this->out_buf[1] = (u32)buffer;
 }
 /**
  * @brief   获取lcd屏显显存buffer1
@@ -956,7 +965,7 @@ u8 *fb_lcd_buf_index_swap(u8 id)
 void fb_lcd_buf_clear(u8 id)
 {
     u16 format = fb_lcd_get_format(id);
-    u8 *addr = (u8 *)fb_combine_get_outbuf(); //获取fb合成输出的地址
+    u8 *addr = (u8 *)fb_combine_get_outbuf(id); //获取fb合成输出的地址
     u16 out_width  = fb_lcd_get_width(id);
     u16 out_height = fb_lcd_get_height(id);
     uint32_t fb_get_format_bpp(uint32_t format);
@@ -964,7 +973,7 @@ void fb_lcd_buf_clear(u8 id)
     u32 ysize = out_width * out_height;
     u32 color = 0x008080;
 
-    if (addr && (addr != 0x5a)) {
+    if (addr && ((u32)addr != 0x5a)) {
         switch (format) {
         case FB_COLOR_FORMAT_ARGB8888:
         case FB_COLOR_FORMAT_ARGB8565:

@@ -1436,5 +1436,46 @@ void update_list_local_addr(u8 *old_local_addr, u8 *new_local_addr);
 #define ble_op_set_leagcy_scan_priority(param)     \
 	ble_user_cmd_prepare(BLE_CMD_SET_LEAGCY_SCAN_PRIORITY, 1, param)
 
+/*************************************************************************************************/
+/*!
+ *  \brief      上层初始化CAS.
+ *
+ *  \param      [in] id.
+ *  \param      [in] callback.
+ *
+ *  \return     NULL
+ */
+/*************************************************************************************************/
+void ll_cag_tx_align_callback_register(uint8_t cag_group, const void *callback);
+
+/*************************************************************************************************/
+/*!
+ *  \brief      上层创建CAS.
+ *
+ *  \param      [in] id.
+ *  \param      [in] con_handle.
+ *  \param      [in] nse.
+ *  \param      [in] sduIntUs.
+ *  \param      [in] sync_delay.
+ *  \param      [in] tx_delay.
+ *
+ *  \return     NULL
+ */
+/*************************************************************************************************/
+void ll_create_cas_link(uint8_t cag_group, int con_handle, uint8_t nse, uint32_t sduIntUs, uint32_t sync_delay, uint32_t tx_delay);
+
+/*************************************************************************************************/
+/*!
+ *  \brief      上层调用CAS发数接口.
+ *
+ *  \param      [in] handle         发送handle.
+ *  \param      [in] packet         发送数据包地址.
+ *  \param      [in] len            发送数据包长度.
+ :w
+ *
+ */
+/*************************************************************************************************/
+void ll_vendor_send_cas_packet(int handle, u8 *packet, int size);
+
 #endif
 

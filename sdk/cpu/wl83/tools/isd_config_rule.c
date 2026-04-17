@@ -91,6 +91,12 @@ SPI=TCFG_SPITZ_WIDTH_CLKDIV_MODE_PORT;  [width_clkdiv_mode_port]
 #else
 SPI=2_2_0_0;                            [width_clkdiv_mode_port]
 #endif
+
+/* EX_FLASH = PB07_1A_PB10_1; */
+/* EX_FLASH_IO = 2_PB02_PB03_PB04_PB05_PB06; */
+/* EX_FLASH = PA04_1A_NULL_0; */
+/* EX_FLASH_IO = 4_PA09_PA10_PA05_PA06_PA08; */
+
 #if defined CONFIG_EXFLASH_ENABLE
 EX_FLASH=PA04_1B_PA07;
 #if TCFG_NORFLASH_SFC_DATA_WIDTH == 4
@@ -100,8 +106,16 @@ EX_FLASH_IO=2_PA09_PA10_PA05_PA06_PA08;
 #endif
 #endif
 SPI_IO_HD=1_1_1_0_0_1;[主控Flash_SPI_IO强驱档位,0-3档可配,clk_d0_d1_d2_d3_cs]
-FLASH_QE_POS=0;[QE位置:0-常规(SR2-BIT1), 1-特殊(SR1-BIT6)。FLASH_QE_POS和FLASH_SPEC_QE_ID为'或'关系]
-FLASH_SPEC_QE_ID=C220XX_9D70XX_1C7019;[QE在SR1_BIT6的FlashID列表]
+#if defined TCFG_FLASH_QE_POS
+FLASH_QE_POS=TCFG_FLASH_QE_POS;
+#else
+FLASH_QE_POS=0;
+#endif
+#if defined TCFG_FLASH_SPEC_QE_ID
+FLASH_SPEC_QE_ID=TCFG_FLASH_SPEC_QE_ID;
+#else
+FLASH_SPEC_QE_ID=C220XX_9D70XX_1C7019;
+#endif
 //###电源配置====================================================================
 #if TCFG_POWER_DVD_DCV_SUPPLY_MODE
 DVD_DCV_MODE=1;[uboot阶段DVDD和DCVDD电源档位配置方式:0-固定档,1-频率决定电压档,为0时可由DVDD_LEV和DCVDD_LEV调整档位]
@@ -434,6 +448,17 @@ UIPACKRES_ADR=CONFIG_UI_PACKRES_ADR;
 UIPACKRES_LEN=CONFIG_UI_PACKRES_LEN;
 UIPACKRES_OPT=1;
 #endif
+
+/* [EX_FLASH_CFG] */
+/* EXFS_FILE=fw.cfg; */
+/* EXFS_ADR=AUTO; */
+/* EXFS_LEN=0x1000; */
+/* EXFS_OPT=1; */
+/*  */
+/* EXFS1_FILE=local.db; */
+/* EXFS1_ADR=AUTO; */
+/* EXFS1_LEN=0x2000; */
+/* EXFS1_OPT=1; */
 
 [BURNER_CONFIG]
 SIZE=32;

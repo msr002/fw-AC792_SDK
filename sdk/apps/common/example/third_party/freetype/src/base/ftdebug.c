@@ -4,7 +4,7 @@
  *
  *   Debugging and logging component (body).
  *
- * Copyright (C) 1996-2023 by
+ * Copyright (C) 1996-2026 by
  * David Turner, Robert Wilhelm, and Werner Lemberg.
  *
  * This file is part of the FreeType project, and may only be used,
@@ -64,7 +64,7 @@
  *    with the actual log message if set to true.
  *
  * 5. The flag `ft_timestamp_flag` prints time along with the actual log
- *    message if set to ture.
+ *    message if set to true.
  *
  * 6. `ft_have_newline_char` is used to differentiate between a log
  *    message with and without a trailing newline character.
@@ -103,7 +103,7 @@ FT_Message(const char  *fmt,
 
 
     va_start(ap, fmt);
-    vprintf(fmt, ap);
+    vfprintf(stderr, fmt, ap);
     va_end(ap);
 }
 
@@ -118,7 +118,7 @@ FT_Panic(const char  *fmt,
 
 
     va_start(ap, fmt);
-    vprintf(fmt, ap);
+    vfprintf(stderr, fmt, ap);
     va_end(ap);
 
     exit(EXIT_FAILURE);
@@ -132,14 +132,14 @@ FT_Throw(FT_Error     error,
          int          line,
          const char  *file)
 {
-#if 1
+#if 0
     /* activating the code in this block makes FreeType very chatty */
-    printf(
-        "%s:%d: error 0x%02x: %s\n",
-        file,
-        line,
-        error,
-        FT_Error_String(error));
+    fprintf(stderr,
+            "%s:%d: error 0x%02x: %s\n",
+            file,
+            line,
+            error,
+            FT_Error_String(error));
 #else
     FT_UNUSED(error);
     FT_UNUSED(line);

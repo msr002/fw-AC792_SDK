@@ -4,7 +4,7 @@
  *
  *   ANSI-specific FreeType low-level system interface (body).
  *
- * Copyright (C) 1996-2023 by
+ * Copyright (C) 1996-2026 by
  * David Turner, Robert Wilhelm, and Werner Lemberg.
  *
  * This file is part of the FreeType project, and may only be used,
@@ -32,7 +32,6 @@
 #include <freetype/ftsystem.h>
 #include <freetype/fterrors.h>
 #include <freetype/fttypes.h>
-#include "fs/fs.h"
 
 
 /**************************************************************************
@@ -260,13 +259,7 @@ FT_Stream_Open(FT_Stream    stream,
     stream->read               = NULL;
     stream->close              = NULL;
 
-#ifdef CONFIG_JLFAT_ENABLE
-    char path[128];
-    path[long_file_name_encode(filepathname, (unsigned char *)path, sizeof(path))] = '\0';
-    file = ft_fopen(path, "r");
-#else
-    file = ft_fopen(filepathname, "r");
-#endif
+    file = ft_fopen(filepathname, "rb");
     if (!file) {
         FT_ERROR(("FT_Stream_Open:"
                   " could not open `%s'\n", filepathname));
@@ -274,7 +267,7 @@ FT_Stream_Open(FT_Stream    stream,
         return FT_THROW(Cannot_Open_Resource);
     }
 
-    /* ft_fseek(file, 0, SEEK_END); */
+    ft_fseek(file, 0, SEEK_END);
     stream->size = (unsigned long)ft_ftell(file);
     if (!stream->size) {
         FT_ERROR(("FT_Stream_Open:"));
@@ -282,14 +275,14 @@ FT_Stream_Open(FT_Stream    stream,
         ft_fclose(file);
         return FT_THROW(Cannot_Open_Stream);
     }
-    /* ft_fseek(file, 0, SEEK_SET); */
+    ft_fseek(file, 0, SEEK_SET);
 
     stream->descriptor.pointer = file;
     stream->read  = ft_ansi_stream_io;
     stream->close = ft_ansi_stream_close;
 
     FT_TRACE1(("FT_Stream_Open:"));
-    FT_TRACE1((" opened `%s' (%ld bytes) successfully\n",
+    FT_TRACE1((" opened `%s' (%lu bytes) successfully\n",
                filepathname, stream->size));
 
     return FT_Err_Ok;

@@ -4,6 +4,7 @@
 #pragma const_seg(".iis_file.text.const")
 #pragma code_seg(".iis_file.text")
 #endif
+
 #include "source_node.h"
 #include "media/audio_splicing.h"
 #include "audio_config.h"
@@ -11,8 +12,6 @@
 #include "iis_file.h"
 #include "app_config.h"
 #include "audio_dai/audio_iis.h"
-/* #include "sync/audio_clk_sync.h" //to compile*/
-#include "audio_config.h"
 #include "audio_cvp.h"
 #include "effects/effects_adj.h"
 #include "media/audio_general.h"
@@ -304,7 +303,11 @@ static void iis_ioc_get_fmt(struct iis_file_hdl *hdl, struct stream_fmt *fmt)
         hdl->channel_mode   = AUDIO_CH_MIX;
         break;
     case STREAM_SCENE_PC_MIC:
+#if MIC_CHANNEL == 2
+        hdl->channel_mode   = AUDIO_CH_LR;
+#else
         hdl->channel_mode   = AUDIO_CH_MIX;
+#endif
         break;
     default:
         hdl->channel_mode   = AUDIO_CH_LR;

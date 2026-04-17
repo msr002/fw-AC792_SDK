@@ -4,7 +4,7 @@
  *
  *   Auto-fitter module implementation (body).
  *
- * Copyright (C) 2003-2023 by
+ * Copyright (C) 2003-2026 by
  * David Turner, Robert Wilhelm, and Werner Lemberg.
  *
  * This file is part of the FreeType project, and may only be used,
@@ -143,7 +143,7 @@ af_property_set(FT_Module    ft_module,
         }
 
         if (!af_style_classes[ss]) {
-            FT_TRACE2(("af_property_set: Invalid value %d for property `%s'\n",
+            FT_TRACE2(("af_property_set: Invalid value %u for property `%s'\n",
                        *fallback_script, property_name));
             return FT_THROW(Invalid_Argument);
         }
@@ -394,6 +394,11 @@ af_autofitter_init(FT_Module  ft_module)        /* AF_Module */
     module->darken_params[6]  = CFF_CONFIG_OPTION_DARKENING_PARAMETER_X4;
     module->darken_params[7]  = CFF_CONFIG_OPTION_DARKENING_PARAMETER_Y4;
 
+#if defined( FT_CONFIG_OPTION_USE_HARFBUZZ )         && \
+    defined( FT_CONFIG_OPTION_USE_HARFBUZZ_DYNAMIC )
+    ft_hb_funcs_init(module);
+#endif
+
     return FT_Err_Ok;
 }
 
@@ -402,6 +407,11 @@ FT_CALLBACK_DEF(void)
 af_autofitter_done(FT_Module  ft_module)        /* AF_Module */
 {
     FT_UNUSED(ft_module);
+
+#if defined( FT_CONFIG_OPTION_USE_HARFBUZZ )         && \
+    defined( FT_CONFIG_OPTION_USE_HARFBUZZ_DYNAMIC )
+    ft_hb_funcs_done((AF_Module)ft_module);
+#endif
 
 #ifdef FT_DEBUG_AUTOFIT
     if (af_debug_hints_rec_->memory) {
@@ -421,7 +431,7 @@ af_autofitter_load_glyph(FT_AutoHinter  module_,
     AF_Module  module = (AF_Module)module_;
 
     FT_Error   error  = FT_Err_Ok;
-    FT_Memory  memory = module->root.library->memory;
+    FT_Memory  memory = module->root.memory;
 
 #ifdef FT_DEBUG_AUTOFIT
 

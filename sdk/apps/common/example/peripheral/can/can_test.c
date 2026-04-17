@@ -3,11 +3,12 @@
 #include "device/device.h"
 #include "asm/can.h"
 #include "asm/gpio.h"
+#include "asm/crc16.h"
 #include "irq.h"
 
 #ifdef	USE_CAN_TEST_DEMO
 
-/* #define CAN_REINIT_MODIFY_PARAMETERS	///< 演示demo-代码运行后修改can的参数 */
+#define CAN_REINIT_MODIFY_PARAMETERS	///< 演示demo-代码运行后修改can的参数
 #define CAN_RECV_BLOCK_ENABLE			///< 演示can阻塞式接收
 
 #define CAN_RX_CNT	3
@@ -77,32 +78,32 @@ static void can_rx_task(void *arg)
                 diff_rxcnt = new_rxcnt - old_rxcnt;
                 for (i = 0; i < diff_rxcnt; i++) {
                     __can_receive_data_operation(&data_priv[4 * (old_rxcnt + i)], &can_rxbuf);
-                    /* g_printf("%d: new_rxcnt = %d; old_rxcnt = %d; i = %d", __LINE__, new_rxcnt, old_rxcnt, i); */
+                    g_printf("%d: new_rxcnt = %d; old_rxcnt = %d; i = %d", __LINE__, new_rxcnt, old_rxcnt, i);
                     printf("id is -- %d  0x%x", can_rxbuf.id, can_rxbuf.id);
-                    /* printf("dlc is -- %d", can_rxbuf.dlc); */
-                    /* printf("rx_data: "); */
-                    /* put_buf(can_rxbuf.data, can_rxbuf.dlc); */
+                    printf("dlc is -- %d", can_rxbuf.dlc);
+                    printf("rx_data: ");
+                    put_buf(can_rxbuf.data, can_rxbuf.dlc);
                 }
                 old_rxcnt = new_rxcnt;
             } else if (old_rxcnt > new_rxcnt) {    //上一次接收帧数大于当前帧数，帧数回滚
                 diff_rxcnt = config_can_dma_ram_malloc_size - old_rxcnt;       //dma l2级缓存固定帧数
                 for (i = 0; i < diff_rxcnt; i++) {
                     __can_receive_data_operation(&data_priv[4 * (old_rxcnt + i)], &can_rxbuf);
-                    /* g_printf("%d: new_rxcnt = %d; old_rxcnt = %d; i = %d", __LINE__, new_rxcnt, old_rxcnt, i); */
+                    g_printf("%d: new_rxcnt = %d; old_rxcnt = %d; i = %d", __LINE__, new_rxcnt, old_rxcnt, i);
                     printf("id is -- %d  0x%x", can_rxbuf.id, can_rxbuf.id);
-                    /* printf("dlc is -- %d", can_rxbuf.dlc); */
-                    /* printf("rx_data: "); */
-                    /* put_buf(can_rxbuf.data, can_rxbuf.dlc); */
+                    printf("dlc is -- %d", can_rxbuf.dlc);
+                    printf("rx_data: ");
+                    put_buf(can_rxbuf.data, can_rxbuf.dlc);
                 }
                 old_rxcnt = 0;
                 diff_rxcnt = new_rxcnt;
                 for (i = 0; i < diff_rxcnt; i++) {
                     __can_receive_data_operation(&data_priv[4 * (old_rxcnt + i)], &can_rxbuf);
-                    /* g_printf("%d: new_rxcnt = %d; old_rxcnt = %d; i = %d", __LINE__, new_rxcnt, old_rxcnt, i); */
+                    g_printf("%d: new_rxcnt = %d; old_rxcnt = %d; i = %d", __LINE__, new_rxcnt, old_rxcnt, i);
                     printf("id is -- %d  0x%x", can_rxbuf.id, can_rxbuf.id);
-                    /* printf("dlc is -- %d", can_rxbuf.dlc); */
-                    /* printf("rx_data: "); */
-                    /* put_buf(can_rxbuf.data, can_rxbuf.dlc); */
+                    printf("dlc is -- %d", can_rxbuf.dlc);
+                    printf("rx_data: ");
+                    put_buf(can_rxbuf.data, can_rxbuf.dlc);
                 }
                 old_rxcnt = new_rxcnt;
             } else {
@@ -192,6 +193,7 @@ static void can_test_task(void *arg)
     can_tx_data[0].rtr 		 	= CAN_REQUEST_DATA_TYPE;
     can_tx_data[0].data_format  = CAN_FRAME_STANDARD_FORMAT;
     can_tx_data[0].id  		 	= 0x233;
+    can_tx_data[0].crc_en       = 1;
 
     can_tx_data[0].data[0]  =  0x18;
     can_tx_data[0].data[1]  =  0x27;
@@ -201,33 +203,49 @@ static void can_test_task(void *arg)
     can_tx_data[0].data[5]  =  0x63;
     can_tx_data[0].data[6]  =  0x72;
     can_tx_data[0].data[7]  =  0x81;
+    can_tx_data[0].crc      =  CRC16(&can_tx_data[0], sizeof(can_data_t) - 2);
 
     // 测试发送标准远程帧
     can_tx_data[1].dlc			 = 2;
     can_tx_data[1].rtr			 = CAN_REQUEST_REMOTE_TYPE;
     can_tx_data[1].data_format   = CAN_FRAME_STANDARD_FORMAT;
     can_tx_data[1].id			 = 0x456;
+    can_tx_data[1].crc_en        = 1;
+    can_tx_data[1].crc           =  CRC16(&can_tx_data[1], sizeof(can_data_t) - 2);
 
     // 测试发送扩展数据帧
     can_tx_data[2].dlc			 = 8;
     can_tx_data[2].rtr			 = CAN_REQUEST_DATA_TYPE;
     can_tx_data[2].data_format   = CAN_FRAME_EXTENDED_FORMAT;
     can_tx_data[2].id			 = 0x123456;
+    can_tx_data[2].crc_en        = 1;
 
-    can_tx_data[2].data[0]  =  0x11;
-    can_tx_data[2].data[1]  =  0x22;
-    can_tx_data[2].data[2]  =  0x33;
-    can_tx_data[2].data[3]  =  0x44;
-    can_tx_data[2].data[4]  =  0x55;
-    can_tx_data[2].data[5]  =  0x66;
-    can_tx_data[2].data[6]  =  0x77;
-    can_tx_data[2].data[7]  =  0x88;
+    can_tx_data[2].data[0]  =  0x05;
+    can_tx_data[2].data[1]  =  0x05;
+    can_tx_data[2].data[2]  =  0x05;
+    can_tx_data[2].data[3]  =  0x05;
+    can_tx_data[2].data[4]  =  0x05;
+    can_tx_data[2].data[5]  =  0x05;
+    can_tx_data[2].data[6]  =  0x05;
+    can_tx_data[2].data[7]  =  0x05;
+    can_tx_data[2].crc      =  CRC16(&can_tx_data[2], sizeof(can_data_t) - 2);
 
     // 测试发送扩展远程帧
-    can_tx_data[3].dlc			 = 2;
-    can_tx_data[3].rtr			 = CAN_REQUEST_REMOTE_TYPE;
-    can_tx_data[3].data_format	 = CAN_FRAME_EXTENDED_FORMAT;
-    can_tx_data[3].id			 = 0x12345678;
+    can_tx_data[3].dlc			 = 8;
+    can_tx_data[3].rtr			 = CAN_REQUEST_DATA_TYPE;
+    can_tx_data[3].data_format   = CAN_FRAME_EXTENDED_FORMAT;
+    can_tx_data[3].id			 = 0x423457;
+    can_tx_data[3].crc_en        = 1;
+
+    can_tx_data[3].data[0]  =  0x00;
+    can_tx_data[3].data[1]  =  0x00;
+    can_tx_data[3].data[2]  =  0x00;
+    can_tx_data[3].data[3]  =  0xB4;
+    can_tx_data[3].data[4]  =  0x00;
+    can_tx_data[3].data[5]  =  0x00;
+    can_tx_data[3].data[6]  =  0x00;
+    can_tx_data[3].data[7]  =  0x00;
+    can_tx_data[3].crc      =  CRC16(&can_tx_data[3], sizeof(can_data_t) - 2);
 
     dev_write(can_hdl, &can_tx_data, 4);
 
@@ -249,10 +267,9 @@ static void can_test_task(void *arg)
             put_buf(can_rx_data[cnt].data, can_rx_data[cnt].dlc);
         }
 #else
-        os_time_dly(100);
-        /* dev_ioctl(can_hdl, IOCTL_CAN_GET_PUT_REGISTER_INFO, 0); */
+        os_time_dly(20);
         printf("waiting recv...");
-        dev_write(can_hdl, &can_tx_data[1], 1);
+        dev_write(can_hdl, &can_tx_data[2], 2);
 #endif
 
 #ifdef CAN_REINIT_MODIFY_PARAMETERS
@@ -323,7 +340,8 @@ static int c_main_can(void)
 {
     /* request_irq(IRQ_CAN_IDX, 5, can_isr, 1); */
     printf("\n\n-----------------CAN_TEST_DEMO run %s---------------- \n\n", __TIME__);
-    os_task_create(can_test_task, NULL, 10, 1000, 0, "can_test_task");
+    //参考板级文件board_develop.c中CAN初始化结构体cpu_id的赋值，进行绑定发送线程至特定cpu核，CAN外设必须确保中断与外设访问为同一个cpu核心，否则会触发断言
+    os_task_create_affinity_core(can_test_task, NULL, 10, 1000, 0, "can_test_task", 1);
 #ifndef  CAN_RECV_BLOCK_ENABLE
     if (config_can_soft_enhanced_rx_mode_en) {
         thread_fork("can_rx_task", 24, 1024, 0, NULL, can_rx_task, NULL);

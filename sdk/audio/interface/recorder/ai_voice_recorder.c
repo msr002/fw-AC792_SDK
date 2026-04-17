@@ -112,8 +112,8 @@ void *ai_voice_recorder_open(struct ai_voice_param *param)
         fmt.coding_type = AUDIO_CODING_OPUS;
         break;
     case AUDIO_CODING_SPEEX:
-        enc_fmt.quality = param->quality;
-        enc_fmt.complexity = param->complexity; //0~9
+        enc_fmt.quality = param->quality; //0~9
+        enc_fmt.complexity = param->complexity; //0~2
         fmt.coding_type = AUDIO_CODING_SPEEX;
         break;
     case AUDIO_CODING_AAC:

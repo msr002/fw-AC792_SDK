@@ -153,8 +153,10 @@ typedef struct {
     u8 dlc			: 4;
     u8 data_format	: 1; 			///<  标准帧/扩展帧标记位
     u8 rtr			: 1;
-    u8 aligned		: 2;
+    u8 crc_en       : 1;
+    u8 aligned		: 1;
     u8 data[8];
+    u16 crc;
 } can_data_t;
 /* \} name */
 

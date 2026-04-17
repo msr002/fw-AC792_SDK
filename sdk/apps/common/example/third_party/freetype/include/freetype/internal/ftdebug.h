@@ -4,7 +4,7 @@
  *
  *   Debugging and logging component (specification).
  *
- * Copyright (C) 1996-2023 by
+ * Copyright (C) 1996-2026 by
  * David Turner, Robert Wilhelm, and Werner Lemberg.
  *
  * This file is part of the FreeType project, and may only be used,
@@ -338,7 +338,7 @@ FT_Trace_Enable(void);
 
 #ifdef FT_DEBUG_LEVEL_ERROR
 
-// #include "stdio.h"  [> for vfprintf() <]
+#include "stdio.h"  /* for vfprintf() */
 
 /* print a message */
 FT_BASE(void)

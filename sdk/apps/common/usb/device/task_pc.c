@@ -34,6 +34,10 @@
 #include "usb/device/custom_hid.h"
 #endif
 
+#if TCFG_USB_SLAVE_MIDI_ENABLE
+#include "usb/device/midi.h"
+#endif
+
 #define LOG_TAG_CONST       USB
 #define LOG_TAG             "[USB_TASK]"
 #define LOG_ERROR_ENABLE
@@ -210,6 +214,24 @@ static void custom_hid_rx_handler(const usb_dev usb_id, void *priv, u8 *buf, u32
 }
 #endif /* #if TCFG_USB_CUSTOM_HID_ENABLE */
 
+#if TCFG_USB_SLAVE_MIDI_ENABLE
+int midi_rx_buffer_read(const usb_dev usb_id)
+{
+    u8 buf[64];
+    u32 rlen;
+
+    rlen = midi_rx_data(usb_id, buf);
+    printf("%s() %d\n", __func__, usb_id);
+    put_buf((u8 *)buf, rlen);
+    return 0;
+}
+void midi_rx_handler(const usb_dev usb_id)
+{
+    //回调函数在中断中被调用，因此最好post到线程里面再读数据
+    /* midi_rx_buffer_read(usb_id); */
+}
+#endif
+
 /**
  * @brief      usb 进入从机模式
  * @param:     usbfd: usb 端口号 0: FUSB端口  1:HUSB端口
@@ -327,6 +349,12 @@ void usb_start(const usb_dev usbfd, u32 class)
         hid_pos_open(usbfd);
 #endif
         hid_control(usbfd, 1);
+#endif
+    }
+
+    if (class & MIDI_CLASS) {
+#if TCFG_USB_SLAVE_MIDI_ENABLE
+        midi_register_rx_notify(midi_rx_handler);
 #endif
     }
 }

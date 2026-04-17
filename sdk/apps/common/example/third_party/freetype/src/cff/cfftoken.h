@@ -4,7 +4,7 @@
  *
  *   CFF token definitions (specification only).
  *
- * Copyright (C) 1996-2023 by
+ * Copyright (C) 1996-2026 by
  * David Turner, Robert Wilhelm, and Werner Lemberg.
  *
  * This file is part of the FreeType project, and may only be used,
@@ -30,8 +30,8 @@ CFF_FIELD_STRING(3,     family_name,         "FamilyName")
 CFF_FIELD_STRING(4,     weight,              "Weight")
 CFF_FIELD_BOOL(0x101, is_fixed_pitch,      "isFixedPitch")
 CFF_FIELD_FIXED(0x102, italic_angle,        "ItalicAngle")
-CFF_FIELD_FIXED(0x103, underline_position,  "UnderlinePosition")
-CFF_FIELD_FIXED(0x104, underline_thickness, "UnderlineThickness")
+CFF_FIELD_NUM(0x103, underline_position,  "UnderlinePosition")
+CFF_FIELD_NUM(0x104, underline_thickness, "UnderlineThickness")
 CFF_FIELD_NUM(0x105, paint_type,          "PaintType")
 CFF_FIELD_NUM(0x106, charstring_type,     "CharstringType")
 CFF_FIELD_CALLBACK(0x107, font_matrix,         "FontMatrix")
@@ -80,10 +80,10 @@ CFF_FIELD_NUM(0x127, chameleon, "Chameleon")
 #undef  CFFCODE
 #define CFFCODE       CFF_CODE_PRIVATE
 
-CFF_FIELD_DELTA(6,     blue_values, 14,        "BlueValues")
-CFF_FIELD_DELTA(7,     other_blues, 10,        "OtherBlues")
-CFF_FIELD_DELTA(8,     family_blues, 14,       "FamilyBlues")
-CFF_FIELD_DELTA(9,     family_other_blues, 10, "FamilyOtherBlues")
+CFF_FIELD_DELTA_FIXED(6,     blue_values, 14,        "BlueValues")
+CFF_FIELD_DELTA_FIXED(7,     other_blues, 10,        "OtherBlues")
+CFF_FIELD_DELTA_FIXED(8,     family_blues, 14,       "FamilyBlues")
+CFF_FIELD_DELTA_FIXED(9,     family_other_blues, 10, "FamilyOtherBlues")
 CFF_FIELD_FIXED_1000(0x109, blue_scale,             "BlueScale")
 CFF_FIELD_NUM(0x10A, blue_shift,             "BlueShift")
 CFF_FIELD_NUM(0x10B, blue_fuzz,              "BlueFuzz")
@@ -129,10 +129,10 @@ CFF_FIELD_CALLBACK(0x107, font_matrix,  "FontMatrix")
 #undef  CFFCODE
 #define CFFCODE       CFF2_CODE_PRIVATE
 
-CFF_FIELD_DELTA(6,     blue_values, 14,        "BlueValues")
-CFF_FIELD_DELTA(7,     other_blues, 10,        "OtherBlues")
-CFF_FIELD_DELTA(8,     family_blues, 14,       "FamilyBlues")
-CFF_FIELD_DELTA(9,     family_other_blues, 10, "FamilyOtherBlues")
+CFF_FIELD_DELTA_FIXED(6,     blue_values, 14,        "BlueValues")
+CFF_FIELD_DELTA_FIXED(7,     other_blues, 10,        "OtherBlues")
+CFF_FIELD_DELTA_FIXED(8,     family_blues, 14,       "FamilyBlues")
+CFF_FIELD_DELTA_FIXED(9,     family_other_blues, 10, "FamilyOtherBlues")
 CFF_FIELD_FIXED_1000(0x109, blue_scale,             "BlueScale")
 CFF_FIELD_NUM(0x10A, blue_shift,             "BlueShift")
 CFF_FIELD_NUM(0x10B, blue_fuzz,              "BlueFuzz")

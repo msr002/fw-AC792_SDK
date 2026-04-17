@@ -4,7 +4,7 @@
  *
  *   OpenType GPOS table validation (body).
  *
- * Copyright (C) 2002-2023 by
+ * Copyright (C) 2002-2026 by
  * David Turner, Robert Wilhelm, and Werner Lemberg.
  *
  * This file is part of the FreeType project, and may only be used,
@@ -33,11 +33,11 @@
 
 static void
 otv_Anchor_validate(FT_Bytes       table,
-                    OTV_Validator  valid);
+                    OTV_Validator  otvalid);
 
 static void
 otv_MarkArray_validate(FT_Bytes       table,
-                       OTV_Validator  valid);
+                       OTV_Validator  otvalid);
 
 
 /*************************************************************************/
@@ -52,8 +52,8 @@ otv_MarkArray_validate(FT_Bytes       table,
 #define LigatureAttachFunc  otv_x_sxy
 #define Mark2ArrayFunc      otv_x_sxy
 
-/* uses valid->extra1 (counter)                             */
-/* uses valid->extra2 (boolean to handle NULL anchor field) */
+/* uses otvalid->extra1 (counter)                             */
+/* uses otvalid->extra2 (boolean to handle NULL anchor field) */
 
 static void
 otv_x_sxy(FT_Bytes       table,
@@ -69,7 +69,7 @@ otv_x_sxy(FT_Bytes       table,
 
     Count = FT_NEXT_USHORT(p);
 
-    OTV_TRACE((" (Count = %d)\n", Count));
+    OTV_TRACE((" (Count = %u)\n", Count));
 
     OTV_LIMIT_CHECK(Count * otvalid->extra1 * 2);
 
@@ -248,7 +248,7 @@ otv_Anchor_validate(FT_Bytes       table,
     OTV_LIMIT_CHECK(6);
     AnchorFormat = FT_NEXT_USHORT(p);
 
-    OTV_TRACE((" (format %d)\n", AnchorFormat));
+    OTV_TRACE((" (format %u)\n", AnchorFormat));
 
     p += 4;     /* skip XCoordinate and YCoordinate */
 
@@ -314,7 +314,7 @@ otv_MarkArray_validate(FT_Bytes       table,
     OTV_LIMIT_CHECK(2);
     MarkCount = FT_NEXT_USHORT(p);
 
-    OTV_TRACE((" (MarkCount = %d)\n", MarkCount));
+    OTV_TRACE((" (MarkCount = %u)\n", MarkCount));
 
     OTV_LIMIT_CHECK(MarkCount * 4);
 
@@ -352,7 +352,7 @@ otv_SinglePos_validate(FT_Bytes       table,
     OTV_LIMIT_CHECK(2);
     PosFormat = FT_NEXT_USHORT(p);
 
-    OTV_TRACE((" (format %d)\n", PosFormat));
+    OTV_TRACE((" (format %u)\n", PosFormat));
 
     otvalid->extra3 = table;
 
@@ -379,7 +379,7 @@ otv_SinglePos_validate(FT_Bytes       table,
         ValueFormat = FT_NEXT_USHORT(p);
         ValueCount  = FT_NEXT_USHORT(p);
 
-        OTV_TRACE((" (ValueCount = %d)\n", ValueCount));
+        OTV_TRACE((" (ValueCount = %u)\n", ValueCount));
 
         len_value = otv_value_length(ValueFormat);
 
@@ -432,7 +432,7 @@ otv_PairSet_validate(FT_Bytes       table,
     OTV_LIMIT_CHECK(2);
     PairValueCount = FT_NEXT_USHORT(p);
 
-    OTV_TRACE((" (PairValueCount = %d)\n", PairValueCount));
+    OTV_TRACE((" (PairValueCount = %u)\n", PairValueCount));
 
     value_len1 = otv_value_length(format1);
     value_len2 = otv_value_length(format2);
@@ -473,7 +473,7 @@ otv_PairPos_validate(FT_Bytes       table,
     OTV_LIMIT_CHECK(2);
     PosFormat = FT_NEXT_USHORT(p);
 
-    OTV_TRACE((" (format %d)\n", PosFormat));
+    OTV_TRACE((" (format %u)\n", PosFormat));
 
     switch (PosFormat) {
     case 1: {   /* PairPosFormat1 */
@@ -486,7 +486,7 @@ otv_PairPos_validate(FT_Bytes       table,
         ValueFormat2 = FT_NEXT_USHORT(p);
         PairSetCount = FT_NEXT_USHORT(p);
 
-        OTV_TRACE((" (PairSetCount = %d)\n", PairSetCount));
+        OTV_TRACE((" (PairSetCount = %u)\n", PairSetCount));
 
         otv_Coverage_validate(table + Coverage, otvalid, -1);
 
@@ -513,8 +513,8 @@ otv_PairPos_validate(FT_Bytes       table,
         ClassCount1  = FT_NEXT_USHORT(p);
         ClassCount2  = FT_NEXT_USHORT(p);
 
-        OTV_TRACE((" (ClassCount1 = %d)\n", ClassCount1));
-        OTV_TRACE((" (ClassCount2 = %d)\n", ClassCount2));
+        OTV_TRACE((" (ClassCount1 = %u)\n", ClassCount1));
+        OTV_TRACE((" (ClassCount2 = %u)\n", ClassCount2));
 
         len_value1 = otv_value_length(ValueFormat1);
         len_value2 = otv_value_length(ValueFormat2);
@@ -579,7 +579,7 @@ otv_CursivePos_validate(FT_Bytes       table,
     OTV_LIMIT_CHECK(2);
     PosFormat = FT_NEXT_USHORT(p);
 
-    OTV_TRACE((" (format %d)\n", PosFormat));
+    OTV_TRACE((" (format %u)\n", PosFormat));
 
     switch (PosFormat) {
     case 1: {   /* CursivePosFormat1 */
@@ -594,7 +594,7 @@ otv_CursivePos_validate(FT_Bytes       table,
         Coverage       = FT_NEXT_USHORT(p);
         EntryExitCount = FT_NEXT_USHORT(p);
 
-        OTV_TRACE((" (EntryExitCount = %d)\n", EntryExitCount));
+        OTV_TRACE((" (EntryExitCount = %u)\n", EntryExitCount));
 
         otv_Coverage_validate(table + Coverage,
                               otvalid,
@@ -656,7 +656,7 @@ otv_MarkBasePos_validate(FT_Bytes       table,
     OTV_LIMIT_CHECK(2);
     PosFormat = FT_NEXT_USHORT(p);
 
-    OTV_TRACE((" (format %d)\n", PosFormat));
+    OTV_TRACE((" (format %u)\n", PosFormat));
 
     switch (PosFormat) {
     case 1:
@@ -696,7 +696,7 @@ otv_MarkLigPos_validate(FT_Bytes       table,
     OTV_LIMIT_CHECK(2);
     PosFormat = FT_NEXT_USHORT(p);
 
-    OTV_TRACE((" (format %d)\n", PosFormat));
+    OTV_TRACE((" (format %u)\n", PosFormat));
 
     switch (PosFormat) {
     case 1:
@@ -736,7 +736,7 @@ otv_MarkMarkPos_validate(FT_Bytes       table,
     OTV_LIMIT_CHECK(2);
     PosFormat = FT_NEXT_USHORT(p);
 
-    OTV_TRACE((" (format %d)\n", PosFormat));
+    OTV_TRACE((" (format %u)\n", PosFormat));
 
     switch (PosFormat) {
     case 1:
@@ -776,7 +776,7 @@ otv_ContextPos_validate(FT_Bytes       table,
     OTV_LIMIT_CHECK(2);
     PosFormat = FT_NEXT_USHORT(p);
 
-    OTV_TRACE((" (format %d)\n", PosFormat));
+    OTV_TRACE((" (format %u)\n", PosFormat));
 
     switch (PosFormat) {
     case 1:
@@ -834,7 +834,7 @@ otv_ChainContextPos_validate(FT_Bytes       table,
     OTV_LIMIT_CHECK(2);
     PosFormat = FT_NEXT_USHORT(p);
 
-    OTV_TRACE((" (format %d)\n", PosFormat));
+    OTV_TRACE((" (format %u)\n", PosFormat));
 
     switch (PosFormat) {
     case 1:
@@ -894,7 +894,7 @@ otv_ExtensionPos_validate(FT_Bytes       table,
     OTV_LIMIT_CHECK(2);
     PosFormat = FT_NEXT_USHORT(p);
 
-    OTV_TRACE((" (format %d)\n", PosFormat));
+    OTV_TRACE((" (format %u)\n", PosFormat));
 
     switch (PosFormat) {
     case 1: {   /* ExtensionPosFormat1 */

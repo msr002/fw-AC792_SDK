@@ -4,7 +4,7 @@
  *
  *   Embedded resource forks accessor (body).
  *
- * Copyright (C) 2004-2023 by
+ * Copyright (C) 2004-2026 by
  * Masatake YAMATO and Redhat K.K.
  *
  * FT_Raccess_Get_HeaderInfo() and raccess_guess_darwin_hfsplus() are
@@ -288,13 +288,8 @@ FT_Raccess_Get_DataOffsets(FT_Library  library,
                  * According to Inside Macintosh: More Macintosh Toolbox,
                  * "Resource IDs" (1-46), there are some reserved IDs.
                  * However, FreeType2 is not a font synthesizer, no need
-                 * to check the acceptable resource ID.
+                 * to check the acceptable resource ID or its attributes.
                  */
-                if (temp < 0) {
-                    error = FT_THROW(Invalid_Table);
-                    goto Exit;
-                }
-
                 ref[j].offset = temp & 0xFFFFFFL;
 
                 FT_TRACE3(("             [%d]:"

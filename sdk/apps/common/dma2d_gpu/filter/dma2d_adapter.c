@@ -31,8 +31,6 @@
 #define DMA2D_MAX_CHANNEL  2
 #define DMA2D_MAX_BUF_NUM  1
 
-static int *g_dma2d_used[DMA2D_MAX_CHANNEL];
-
 struct dma2d_filter_handle {
     u8 dma2d_task_busy; //don't touch
 
@@ -66,6 +64,8 @@ struct dma2d_filter_handle {
     void *sticker;
     int rotate;
 };
+
+static struct dma2d_filter_handle *g_dma2d_used[DMA2D_MAX_CHANNEL];
 
 
 #ifdef USE_LVGL_V8_UI_DEMO
@@ -195,7 +195,7 @@ static void dma2d_filter_task(void *arg)
         buffer_meta_t *buffer_meta = buffer_in->read_data(buffer_in, 0);
         u8 *image_data = buffer_meta->ext_data;
 
-#ifdef USE_LVGL_V8_UI_DEMO
+#ifdef CONFIG_UI_ENABLE
         if (hdl->rotate) {
             log_debug("run dma2d rotate %d\n", hdl->rotate);
             int format = VGHW_FORMAT_YUV422_BT601;
@@ -223,10 +223,12 @@ static void dma2d_filter_task(void *arg)
         if (sticker) {
             log_info("dma2d filter data: %s  %x\n", (char *)sticker->addr, (unsigned int)image_data);
 
+#ifdef USE_LVGL_V8_UI_DEMO
             lv_img_dsc_t bin_dsc = {0};
             __get_sticker(sticker->addr, &bin_dsc);
             dma2d_filter_image_combine(sticker->x, sticker->y, bin_dsc.data, bin_dsc.header.w, bin_dsc.header.h,
                                        image_data, hdl->output_width, hdl->output_height);
+#endif
             /* dma2d_fliter_buffer_dump(image_data,hdl->output_width*hdl->output_height * 2); */
         }
 #else
@@ -268,7 +270,7 @@ static int check_channel_legal(pipe_plugin_t *plugin, u8 channel_max)
     return channel;
 }
 
-static int dma2d_filter_start(pipe_plugin_t *plugin)
+static int dma2d_filter_start(pipe_plugin_t *plugin, int source_channel)
 {
     ASSERT(plugin);
     struct dma2d_filter_handle *hdl = (struct dma2d_filter_handle *)plugin->private_data;
@@ -447,7 +449,7 @@ static int dma2d_filter_connect(pipe_plugin_t *prev_plugin, pipe_plugin_t *plugi
     info.ops = &api;
     buffer_t *buffer = buffer_init(plugin->name, &info);
     if (!buffer) {
-        return NULL;
+        return -1;
     }
     buffer->private_data = hdl;
 
@@ -505,7 +507,7 @@ static int dma2d_filter_init(pipe_plugin_t *plugin)
     return 0;
 }
 
-static int dma2d_filter_stop(pipe_plugin_t *plugin)
+static int dma2d_filter_stop(pipe_plugin_t *plugin, int source_channel)
 {
     ASSERT(plugin);
     struct dma2d_filter_handle *hdl = (struct dma2d_filter_handle *)plugin->private_data;
@@ -590,7 +592,7 @@ static int dma2d_filter_get_parameter(pipe_plugin_t *plugin, int cmd, void *arg)
     return 0;
 }
 
-static int dma2d_filter_set_parameter(pipe_plugin_t *plugin, int cmd, void *arg)
+static int dma2d_filter_set_parameter(pipe_plugin_t *plugin, int cmd, void *arg, int source_channel)
 {
     struct dma2d_filter_handle *hdl = (struct dma2d_filter_handle *)plugin->private_data;
     if (!hdl) {

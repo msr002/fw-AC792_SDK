@@ -40,6 +40,8 @@ char lvgl_ui_is_suspended(void);
 void lvgl_ui_suspend(void);
 void lvgl_ui_resume(void);
 
+void lvgl_set_ui_flush_mode(u8 mode, void *buf1, void *buf2);
+
 /**********************
  *      MACROS
  **********************/

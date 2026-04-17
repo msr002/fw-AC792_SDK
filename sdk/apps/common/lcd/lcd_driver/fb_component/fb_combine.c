@@ -15,6 +15,7 @@
 #include "asm/gpio.h"
 #include "app_config.h"
 #include "lcd_config.h"
+#include "asm/gpu/jlvg_utils.h"
 
 #if TCFG_LCD_ENABLE
 
@@ -24,7 +25,7 @@
 #define LOG_DEBUG_ENABLE
 #define LOG_ERROR_ENABLE
 #include "debug.h"
-#if (defined USE_LVGL_V8_UI_DEMO)
+#if (defined USE_LVGL_V8_UI_DEMO || defined USE_LVGL_V9_UI_DEMO)
 #include "lv_conf.h"
 #endif
 #ifdef CONFIG_VIDEO_ENABLE
@@ -85,12 +86,16 @@ u16 fb_lcd_get_height(u8 id);
 u16 fb_lcd_get_format(u8 id);
 u32 fb_lcd_get_buf0(u8 id);
 u32 fb_lcd_get_buf1(u8 id);
+void fb_lcd_set_buf0(u8 id, u8 *buffer);
+void fb_lcd_set_buf1(u8 id, u8 *buffer);
 u32 fb_lcd_get_idle_buf(u8 id);
 u8 fb_lcd_get_buf_num(u8 id);
 u16 fb_lcd_get_buf_width(u8 id);
 u16 fb_lcd_get_buf_height(u8 id);
 u8 fb_lcd_get_interpolation(u8 id);
 
+u8 *fb_lcd_buf_index_swap(u8 id);
+int fb_lcd_frame_async_wait(u8 id);
 int fb_lcd_buf_is_busy(u8 id, u8 *buf);
 int fb_frame_buf_scale(uint8_t *dst, int dst_format, int dst_w, int dst_h,
                        uint8_t *src, int src_format, int src_w, int src_h, uint8_t mirror);
@@ -98,8 +103,19 @@ int fb_frame_buf_rotate(uint8_t *image_src, uint8_t *image_dst, int src_width, i
                         int dst_width, int dst_height, int dst_stride, int degree, int xoffset, int yoffset,
                         int in_format, int out_format, uint8_t mirror);
 
+void fb_lcd_frame_buf_update(u8 id, u8 *frame_buffer);
+int fb_lcd_frame_buf_update_async(u8 id, u8 *frame_buffer);
+
+void fb_frame_buf_rotate_set_colorkey(u8 ckey_en, uint8_t ckey_red, uint8_t ckey_green, uint8_t ckey_blue);
+
+void fb_frame_buf_rotate_set_blend_mode(u8 blend_mode);
+
 int fb_frame_buf_mirror(uint8_t *image_src, uint8_t *image_dst, int src_width, int src_height, int dst_width, int dst_height, int mirror, int src_format, int dst_format);
 int fb_combine_task(u8 id, void *priv);
+
+int fb_combine_updata(struct fb_out_t *ep, struct fb_map_user *map);
+
+uint32_t get_system_ms_in_irq(void);
 /********************** DMA2D 图层合成接口 *****************************/
 typedef struct {
     uint8_t *addr; /* 图层数据地址 */
@@ -592,6 +608,19 @@ __dma2d_second:
                 //YUV图层不需要混合,直接做格式转换或直接拷贝
                 __dma2d_frame_buf_cover(&in[fb_nums - 1], out);
             } else {
+                if (other_process) {
+                    //如果有其他插入处理，先输出dma2d任务链表处理
+                    __dma2d_combine_run();
+
+                    fb_frame_buf_rotate_set_colorkey(1, 0x52, 0xaa, 0xa5); //过滤colorkey
+                    fb_frame_buf_rotate_set_blend_mode(1); //设置混合模式
+                    combine_layer_process(&in[fb_nums - 1], out, other_process);
+                    fb_frame_buf_rotate_set_colorkey(0, 0, 0, 0);
+                    fb_frame_buf_rotate_set_blend_mode(0); //设置混合模式
+                    fb_nums--;
+                    dma2d_reset_all_regs();
+                    continue;
+                }
                 __dma2d_frame_buf_combine(&in[fb_nums - 1], out, out);
             }
             fb_nums--;
@@ -628,6 +657,11 @@ __dma2d_second:
             }
             __dma2d_frame_buf_cover(&in[0], out);
         } else {
+            if (other_process) {
+                __dma2d_combine_run();
+                combine_layer_process(&in[0], out, other_process);
+                return 0;
+            }
             __dma2d_frame_buf_clear(out);
             __dma2d_frame_buf_combine(&in[0], out, out);
         }
@@ -668,7 +702,7 @@ static u8 __is_need_create_combine_task(u8 open_fb, struct fb_draw_info *info)
     u16 lcd_h = 0;
     u8 id = info->out_id;
 
-#if (defined CONFIG_UI_ENABLE && defined USE_LVGL_V8_UI_DEMO)
+#if (defined CONFIG_UI_ENABLE)
 #if (LV_DISP_UI_FB_NUM <= 1)
     __this->combine_task_run = FB_COMBINE_FUNC_RUN;
     return 0;
@@ -828,6 +862,7 @@ static int fb_check_gpu_plugin_is_busy(void)
         }
     }
 #endif
+    return 0;
 }
 static int dump_combine_frame_buffer(dma2d_layer_t in[], dma2d_layer_t *out, int fb_nums)
 {
@@ -866,6 +901,8 @@ static int dump_combine_frame_buffer(dma2d_layer_t in[], dma2d_layer_t *out, int
     return 0;
 }
 
+#if (LV_DISP_UI_FB_NUM <= 1)
+void lvgl_set_ui_flush_mode(u8 mode, void *buf1, void *buf2);
 static void ui_set_flush_mode_timer_cb(void *p)
 {
     struct fb_out_t *p_max = NULL;
@@ -893,8 +930,8 @@ static void ui_set_flush_mode_timer_cb(void *p)
             p_max->ready_combine = 1;
             u8 *cur_map_addr = p_max->map.baddr;
             for (int i = 0; i < p_max->buf_num; i++) {
-                if (p_max->buf_addr[i] != cur_map_addr) {
-                    __this->map_backup_baddr = p_max->buf_addr[i];
+                if (p_max->buf_addr[i] != (u32)cur_map_addr) {
+                    __this->map_backup_baddr = (u8 *)p_max->buf_addr[i];
                 }
             }
             //确保fb 2块buf有同一帧数据
@@ -914,14 +951,15 @@ static void ui_set_flush_mode_timer_cb(void *p)
         u32 dmm_addr = 0;
         dmm_addr = dmm_addr_base;
         dmm_addr = CPU_ADDR(dmm_addr);
-        if (buf1 == CPU_ADDR(dmm_addr)) {
-            dmm_addr = buf1;
+        if ((u32)buf1 == CPU_ADDR(dmm_addr)) {
+            dmm_addr = (u32)buf1;
             buf1 = buf0;
-            buf0 = dmm_addr;
+            buf0 = (u8 *)dmm_addr;
         }
     }
     lvgl_set_ui_flush_mode(mode, (void *)buf1, (void *)buf0); /* lvgl UI自己刷新 */
 }
+#endif
 
 int fb_combine_mutex_enter(u8 id)
 {
@@ -974,7 +1012,7 @@ void fb_combine_set_out_cb(u32 arg)
     fb_combine_out_cb_func = (void *)arg;
 }
 
-#if (defined USE_LVGL_V8_UI_DEMO)
+#if (defined CONFIG_UI_ENABLE)
 static void ui_timer_modify(u8 id)
 {
 #if (LV_DISP_UI_FB_NUM <= 1)
@@ -1127,7 +1165,7 @@ int fb_combine_task(u8 id, void *priv)
             if (p->map.baddr) {
                 if (p->ready_combine) {
                     need_combine++;
-#if (defined CONFIG_UI_ENABLE && defined USE_LVGL_V8_UI_DEMO)
+#if (defined CONFIG_UI_ENABLE)
 #if (LV_DISP_UI_FB_NUM != 0 || FB_LCD_BUF_NUM == 1)
                     p->ready_combine = 0;
 #endif
@@ -1171,7 +1209,7 @@ int fb_combine_task(u8 id, void *priv)
 #endif
 
         if (out.addr && fb_n && need_combine) {
-            if (out.addr == FB_COMBINE_OUT_USE_MAX_IMGBUF) {
+            if ((u32)out.addr == FB_COMBINE_OUT_USE_MAX_IMGBUF) {
                 if (fb_n == 1 && p1) {
                     if ((p1->fb_name[2] - '0' == 0) && p1->map.format == out.format) {
                         //只有一个UI图层需要合成时,并且格式和lcd一致可以直推lcd显示
@@ -1226,7 +1264,7 @@ int fb_combine_task(u8 id, void *priv)
                 omap.width = out.width;
                 omap.height = out.height;
                 omap.format = out.format;
-                if (out.addr != FB_COMBINE_OUT_USE_MAX_IMGBUF) {
+                if ((u32)out.addr != FB_COMBINE_OUT_USE_MAX_IMGBUF) {
                     //如果合成输出buf是单独的buf, 即UI不是直接在图像FB上绘制的情况，可以提前释放锁
                     fb_combine_mutex_exit(id);
                 }
@@ -1343,7 +1381,7 @@ void fb_combine_init(void)
 void fb_combine_prepare(struct fb_draw_info *info, u8 open_fb)
 {
     char fb_combine_task_name[20];
-    u8 id = info->out_id;
+    int id = info->out_id;
     fb_combine_mutex_enter(id);
     if (__is_need_create_combine_task(open_fb, info)) {
         if (__this->combine_task_run == FB_COMBINE_STOP) {
@@ -1359,7 +1397,9 @@ void fb_combine_prepare(struct fb_draw_info *info, u8 open_fb)
         if (info->fb_num == 1) { //单buffer
             __this->combine_task_run = FB_COMBINE_FUNC_RUN;
         } else if (info->fb_num == 0) {
-#if (defined CONFIG_UI_ENABLE && defined USE_LVGL_V8_UI_DEMO)
+#if (defined CONFIG_UI_ENABLE)
+
+#if (LV_DISP_UI_FB_NUM <= 1)
             u8 mode = 1; //使用lcd显存双buffer
             log_info("lvgl_set_ui_flush_mode: %x %x", __this->combine_out_buf[0], __this->combine_out_buf[1]);
             if (__this->combine_out_buf[0] == 0 && __this->combine_out_buf[1] == 0) {
@@ -1367,11 +1407,12 @@ void fb_combine_prepare(struct fb_draw_info *info, u8 open_fb)
             }
             lvgl_set_ui_flush_mode(mode, (void *)__this->combine_out_buf[0], (void *)__this->combine_out_buf[1]); /* lvgl UI自己刷新 */
 #endif
+#endif
 
         }
     } else {
 
-#if (defined CONFIG_UI_ENABLE && defined USE_LVGL_V8_UI_DEMO)
+#if (defined CONFIG_UI_ENABLE)
 #if (LV_DISP_UI_FB_NUM <= 1)
         if (__this->ui_timer_id == 0) {
             char *task_name;
@@ -1504,7 +1545,7 @@ int fb_combine_updata(struct fb_out_t *ep, struct fb_map_user *map)
     spin_unlock(&fb_lock[id]);
 
     if (need_combine) {
-#if (defined CONFIG_UI_ENABLE && defined USE_LVGL_V8_UI_DEMO)
+#if (defined CONFIG_UI_ENABLE)
 #if (LV_DISP_UI_FB_NUM <= 1)
 
 #if (FB_LCD_BUF_NUM == 1)
@@ -1549,7 +1590,7 @@ int fb_combine_updata(struct fb_out_t *ep, struct fb_map_user *map)
     }
 
     if (__this->combine_task_run == FB_COMBINE_STOP) {
-#if (defined CONFIG_UI_ENABLE && defined USE_LVGL_V8_UI_DEMO)
+#if (defined CONFIG_UI_ENABLE)
 #if (LV_DISP_UI_FB_NUM == 2 && FB_LCD_BUF_NUM == 1)
         if (map) {
             fb_lcd_frame_buf_update_async(id, map->baddr);

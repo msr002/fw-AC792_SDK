@@ -9,6 +9,7 @@
 #include "usb/device/slave_uvc.h"
 #include "usb/device/printer.h"
 #include "usb/device/cdc_rndis.h"
+#include "usb/device/midi.h"
 #include "irq.h"
 #include "init.h"
 #include "gpio.h"
@@ -135,6 +136,10 @@ int usb_device_mode(const usb_dev usb_id, const u32 class)
         custom_hid_release(usb_id);
 #endif
 
+#if TCFG_USB_SLAVE_MIDI_ENABLE
+        midi_release(usb_id);
+#endif
+
 #if TCFG_USB_SLAVE_PRINTER_ENABLE
         printer_release(usb_id);
 #endif
@@ -185,6 +190,14 @@ int usb_device_mode(const usb_dev usb_id, const u32 class)
         log_info("add desc std custom_hid");
         custom_hid_register(usb_id);
         usb_add_desc_config(usb_id, class_index++, custom_hid_desc_config);
+    }
+#endif
+
+#if TCFG_USB_SLAVE_MIDI_ENABLE
+    if (class & MIDI_CLASS) {
+        log_info("add desc midi");
+        usb_add_desc_config(usb_id, class_index++, midi_desc_config);
+        midi_register(usb_id);
     }
 #endif
 

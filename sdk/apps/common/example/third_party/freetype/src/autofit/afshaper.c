@@ -4,7 +4,7 @@
  *
  *   HarfBuzz interface for accessing OpenType features (body).
  *
- * Copyright (C) 2013-2023 by
+ * Copyright (C) 2013-2026 by
  * David Turner, Robert Wilhelm, and Werner Lemberg.
  *
  * This file is part of the FreeType project, and may only be used,
@@ -22,8 +22,8 @@
 #include "aftypes.h"
 #include "afshaper.h"
 
-#ifdef FT_CONFIG_OPTION_USE_HARFBUZZ
 
+#ifdef FT_CONFIG_OPTION_USE_HARFBUZZ
 
 /**************************************************************************
  *
@@ -88,16 +88,17 @@ static const hb_tag_t  *coverages[] = {
 #define SCRIPT( s, S, d, h, H, ss )  h,
 
 
-static const hb_script_t  scripts[] = {
+FT_LOCAL_ARRAY_DEF(hb_script_t)
+af_hb_scripts[] = {
 #include "afscript.h"
 };
 
 
-FT_Error
-af_shaper_get_coverage(AF_FaceGlobals  globals,
-                       AF_StyleClass   style_class,
-                       FT_UShort      *gstyles,
-                       FT_Bool         default_script)
+static FT_Error
+af_shaper_get_coverage_hb(AF_FaceGlobals  globals,
+                          AF_StyleClass   style_class,
+                          FT_UShort      *gstyles,
+                          FT_Bool         default_script)
 {
     hb_face_t  *face;
 
@@ -124,10 +125,10 @@ af_shaper_get_coverage(AF_FaceGlobals  globals,
         return FT_THROW(Invalid_Argument);
     }
 
-    face = hb_font_get_face(globals->hb_font);
+    face = hb(font_get_face)(globals->hb_font);
 
     coverage_tags = coverages[style_class->coverage];
-    script        = scripts[style_class->script];
+    script        = af_hb_scripts[style_class->script];
 
     /* Convert a HarfBuzz script tag into the corresponding OpenType */
     /* tag or tags -- some Indic scripts like Devanagari have an old */
@@ -137,19 +138,19 @@ af_shaper_get_coverage(AF_FaceGlobals  globals,
         hb_tag_t      tags[3];
 
 
-        hb_ot_tags_from_script_and_language(script,
-                                            HB_LANGUAGE_INVALID,
-                                            &tags_count,
-                                            tags,
-                                            NULL,
-                                            NULL);
+        hb(ot_tags_from_script_and_language)(script,
+                                             HB_LANGUAGE_INVALID,
+                                             &tags_count,
+                                             tags,
+                                             NULL,
+                                             NULL);
         script_tags[0] = tags_count > 0 ? tags[0] : HB_TAG_NONE;
         script_tags[1] = tags_count > 1 ? tags[1] : HB_TAG_NONE;
         script_tags[2] = tags_count > 2 ? tags[2] : HB_TAG_NONE;
     }
 
-    /* If the second tag is HB_OT_TAG_DEFAULT_SCRIPT, change that to     */
-    /* HB_TAG_NONE except for the default script.                        */
+    /* If the second tag is HB_OT_TAG_DEFAULT_SCRIPT, change that to */
+    /* HB_TAG_NONE except for the default script.                    */
     if (default_script) {
         if (script_tags[0] == HB_TAG_NONE) {
             script_tags[0] = HB_OT_TAG_DEFAULT_SCRIPT;
@@ -168,15 +169,15 @@ af_shaper_get_coverage(AF_FaceGlobals  globals,
         }
     }
 
-    gsub_lookups = hb_set_create();
-    hb_ot_layout_collect_lookups(face,
-                                 HB_OT_TAG_GSUB,
-                                 script_tags,
-                                 NULL,
-                                 coverage_tags,
-                                 gsub_lookups);
+    gsub_lookups = hb(set_create)();
+    hb(ot_layout_collect_lookups)(face,
+                                  HB_OT_TAG_GSUB,
+                                  script_tags,
+                                  NULL,
+                                  coverage_tags,
+                                  gsub_lookups);
 
-    if (hb_set_is_empty(gsub_lookups)) {
+    if (hb(set_is_empty)(gsub_lookups)) {
         goto Exit;    /* nothing to do */
     }
 
@@ -188,21 +189,21 @@ af_shaper_get_coverage(AF_FaceGlobals  globals,
     count = 0;
 #endif
 
-    gsub_glyphs = hb_set_create();
-    for (idx = HB_SET_VALUE_INVALID; hb_set_next(gsub_lookups, &idx);) {
+    gsub_glyphs = hb(set_create)();
+    for (idx = HB_SET_VALUE_INVALID; hb(set_next)(gsub_lookups, &idx);) {
 #ifdef FT_DEBUG_LEVEL_TRACE
-        FT_TRACE4((" %d", idx));
+        FT_TRACE4((" %u", idx));
         count++;
 #endif
 
         /* get output coverage of GSUB feature */
-        hb_ot_layout_lookup_collect_glyphs(face,
-                                           HB_OT_TAG_GSUB,
-                                           idx,
-                                           NULL,
-                                           NULL,
-                                           NULL,
-                                           gsub_glyphs);
+        hb(ot_layout_lookup_collect_glyphs)(face,
+                                            HB_OT_TAG_GSUB,
+                                            idx,
+                                            NULL,
+                                            NULL,
+                                            NULL,
+                                            gsub_glyphs);
     }
 
 #ifdef FT_DEBUG_LEVEL_TRACE
@@ -217,33 +218,33 @@ af_shaper_get_coverage(AF_FaceGlobals  globals,
                af_style_names[style_class->style]));
     FT_TRACE4((" "));
 
-    gpos_lookups = hb_set_create();
-    hb_ot_layout_collect_lookups(face,
-                                 HB_OT_TAG_GPOS,
-                                 script_tags,
-                                 NULL,
-                                 coverage_tags,
-                                 gpos_lookups);
+    gpos_lookups = hb(set_create)();
+    hb(ot_layout_collect_lookups)(face,
+                                  HB_OT_TAG_GPOS,
+                                  script_tags,
+                                  NULL,
+                                  coverage_tags,
+                                  gpos_lookups);
 
 #ifdef FT_DEBUG_LEVEL_TRACE
     count = 0;
 #endif
 
-    gpos_glyphs = hb_set_create();
-    for (idx = HB_SET_VALUE_INVALID; hb_set_next(gpos_lookups, &idx);) {
+    gpos_glyphs = hb(set_create)();
+    for (idx = HB_SET_VALUE_INVALID; hb(set_next)(gpos_lookups, &idx);) {
 #ifdef FT_DEBUG_LEVEL_TRACE
-        FT_TRACE4((" %d", idx));
+        FT_TRACE4((" %u", idx));
         count++;
 #endif
 
         /* get input coverage of GPOS feature */
-        hb_ot_layout_lookup_collect_glyphs(face,
-                                           HB_OT_TAG_GPOS,
-                                           idx,
-                                           NULL,
-                                           gpos_glyphs,
-                                           NULL,
-                                           NULL);
+        hb(ot_layout_lookup_collect_glyphs)(face,
+                                            HB_OT_TAG_GPOS,
+                                            idx,
+                                            NULL,
+                                            gpos_glyphs,
+                                            NULL,
+                                            NULL);
     }
 
 #ifdef FT_DEBUG_LEVEL_TRACE
@@ -277,12 +278,12 @@ af_shaper_get_coverage(AF_FaceGlobals  globals,
 
                 GET_UTF8_CHAR(ch, p);
 
-                for (idx = HB_SET_VALUE_INVALID; hb_set_next(gsub_lookups,
+                for (idx = HB_SET_VALUE_INVALID; hb(set_next)(gsub_lookups,
                         &idx);) {
                     hb_codepoint_t  gidx = FT_Get_Char_Index(globals->face, ch);
 
 
-                    if (hb_ot_layout_lookup_would_substitute(face, idx,
+                    if (hb(ot_layout_lookup_would_substitute)(face, idx,
                             &gidx, 1, 1)) {
                         found = 1;
                         break;
@@ -345,7 +346,7 @@ af_shaper_get_coverage(AF_FaceGlobals  globals,
      *
      */
     if (style_class->coverage != AF_COVERAGE_DEFAULT) {
-        hb_set_subtract(gsub_glyphs, gpos_glyphs);
+        hb(set_subtract)(gsub_glyphs, gpos_glyphs);
     }
 
 #ifdef FT_DEBUG_LEVEL_TRACE
@@ -353,14 +354,14 @@ af_shaper_get_coverage(AF_FaceGlobals  globals,
     count = 0;
 #endif
 
-    for (idx = HB_SET_VALUE_INVALID; hb_set_next(gsub_glyphs, &idx);) {
+    for (idx = HB_SET_VALUE_INVALID; hb(set_next)(gsub_glyphs, &idx);) {
 #ifdef FT_DEBUG_LEVEL_TRACE
         if (!(count % 10)) {
             FT_TRACE4(("\n"));
             FT_TRACE4(("   "));
         }
 
-        FT_TRACE4((" %d", idx));
+        FT_TRACE4((" %u", idx));
         count++;
 #endif
 
@@ -391,10 +392,10 @@ af_shaper_get_coverage(AF_FaceGlobals  globals,
 #endif
 
 Exit:
-    hb_set_destroy(gsub_lookups);
-    hb_set_destroy(gsub_glyphs);
-    hb_set_destroy(gpos_lookups);
-    hb_set_destroy(gpos_glyphs);
+    hb(set_destroy)(gsub_lookups);
+    hb(set_destroy)(gsub_glyphs);
+    hb(set_destroy)(gpos_lookups);
+    hb(set_destroy)(gpos_glyphs);
 
     return FT_Err_Ok;
 }
@@ -430,31 +431,33 @@ static const hb_feature_t  *features[] = {
 };
 
 
-void *
-af_shaper_buf_create(FT_Face  face)
+static void *
+af_shaper_buf_create_hb(AF_FaceGlobals  globals)
 {
-    FT_UNUSED(face);
+    FT_UNUSED(globals);
 
-    return (void *)hb_buffer_create();
+    return (void *)hb(buffer_create)();
 }
 
 
-void
-af_shaper_buf_destroy(FT_Face  face,
-                      void    *buf)
+static void
+af_shaper_buf_destroy_hb(AF_FaceGlobals  globals,
+                         void           *buf)
 {
-    FT_UNUSED(face);
+    FT_UNUSED(globals);
 
-    hb_buffer_destroy((hb_buffer_t *)buf);
+    hb(buffer_destroy)((hb_buffer_t *)buf);
 }
 
 
-const char *
-af_shaper_get_cluster(const char      *p,
-                      AF_StyleMetrics  metrics,
-                      void            *buf_,
-                      unsigned int    *count)
+static const char *
+af_shaper_get_cluster_hb(const char      *p,
+                         AF_StyleMetrics  metrics,
+                         void            *buf_,
+                         unsigned int    *count)
 {
+    AF_FaceGlobals  globals = metrics->globals;
+
     AF_StyleClass        style_class;
     const hb_feature_t  *feature;
     FT_Int               upem;
@@ -465,6 +468,8 @@ af_shaper_get_cluster(const char      *p,
     hb_font_t      *font;
     hb_codepoint_t  dummy;
 
+    FT_UNUSED(globals);
+
 
     upem        = (FT_Int)metrics->globals->face->units_per_EM;
     style_class = metrics->style_class;
@@ -473,7 +478,7 @@ af_shaper_get_cluster(const char      *p,
     font = metrics->globals->hb_font;
 
     /* we shape at a size of units per EM; this means font units */
-    hb_font_set_scale(font, upem, upem);
+    hb(font_set_scale)(font, upem, upem);
 
     while (*p == ' ') {
         p++;
@@ -487,15 +492,15 @@ af_shaper_get_cluster(const char      *p,
     len = (int)(q - p);
 
     /* feed character(s) to the HarfBuzz buffer */
-    hb_buffer_clear_contents(buf);
-    hb_buffer_add_utf8(buf, p, len, 0, len);
+    hb(buffer_clear_contents)(buf);
+    hb(buffer_add_utf8)(buf, p, len, 0, len);
 
     /* we let HarfBuzz guess the script and writing direction */
-    hb_buffer_guess_segment_properties(buf);
+    hb(buffer_guess_segment_properties)(buf);
 
     /* shape buffer, which means conversion from character codes to */
     /* glyph indices, possibly applying a feature                   */
-    hb_shape(font, buf, feature, feature ? 1 : 0);
+    hb(shape)(font, buf, feature, feature ? 1 : 0);
 
     if (feature) {
         hb_buffer_t  *hb_buf = metrics->globals->hb_buf;
@@ -511,13 +516,13 @@ af_shaper_get_cluster(const char      *p,
         /* glyph indices; otherwise the affected glyph or glyphs aren't     */
         /* available at all in the feature                                  */
 
-        hb_buffer_clear_contents(hb_buf);
-        hb_buffer_add_utf8(hb_buf, p, len, 0, len);
-        hb_buffer_guess_segment_properties(hb_buf);
-        hb_shape(font, hb_buf, NULL, 0);
+        hb(buffer_clear_contents)(hb_buf);
+        hb(buffer_add_utf8)(hb_buf, p, len, 0, len);
+        hb(buffer_guess_segment_properties)(hb_buf);
+        hb(shape)(font, hb_buf, NULL, 0);
 
-        ginfo    = hb_buffer_get_glyph_infos(buf, &gcount);
-        hb_ginfo = hb_buffer_get_glyph_infos(hb_buf, &hb_gcount);
+        ginfo    = hb(buffer_get_glyph_infos)(buf, &gcount);
+        hb_ginfo = hb(buffer_get_glyph_infos)(hb_buf, &hb_gcount);
 
         if (gcount == hb_gcount) {
             unsigned int  i;
@@ -530,12 +535,12 @@ af_shaper_get_cluster(const char      *p,
 
             if (i == gcount) {
                 /* both buffers have identical glyph indices */
-                hb_buffer_clear_contents(buf);
+                hb(buffer_clear_contents)(buf);
             }
         }
     }
 
-    *count = hb_buffer_get_length(buf);
+    *count = hb(buffer_get_length)(buf);
 
 #ifdef FT_DEBUG_LEVEL_TRACE
     if (feature && *count > 1)
@@ -547,23 +552,25 @@ af_shaper_get_cluster(const char      *p,
 }
 
 
-FT_ULong
-af_shaper_get_elem(AF_StyleMetrics  metrics,
-                   void            *buf_,
-                   unsigned int     idx,
-                   FT_Long         *advance,
-                   FT_Long         *y_offset)
+static FT_ULong
+af_shaper_get_elem_hb(AF_StyleMetrics  metrics,
+                      void            *buf_,
+                      unsigned int     idx,
+                      FT_Long         *advance,
+                      FT_Long         *y_offset)
 {
+    AF_FaceGlobals  globals = metrics->globals;
+
     hb_buffer_t          *buf = (hb_buffer_t *)buf_;
     hb_glyph_info_t      *ginfo;
     hb_glyph_position_t  *gpos;
     unsigned int          gcount;
 
-    FT_UNUSED(metrics);
+    FT_UNUSED(globals);
 
 
-    ginfo = hb_buffer_get_glyph_infos(buf, &gcount);
-    gpos  = hb_buffer_get_glyph_positions(buf, &gcount);
+    ginfo = hb(buffer_get_glyph_infos)(buf, &gcount);
+    gpos  = hb(buffer_get_glyph_positions)(buf, &gcount);
 
     if (idx >= gcount) {
         return 0;
@@ -580,14 +587,14 @@ af_shaper_get_elem(AF_StyleMetrics  metrics,
 }
 
 
-#else /* !FT_CONFIG_OPTION_USE_HARFBUZZ */
+#endif /* FT_CONFIG_OPTION_USE_HARFBUZZ */
 
 
-FT_Error
-af_shaper_get_coverage(AF_FaceGlobals  globals,
-                       AF_StyleClass   style_class,
-                       FT_UShort      *gstyles,
-                       FT_Bool         default_script)
+static FT_Error
+af_shaper_get_coverage_nohb(AF_FaceGlobals  globals,
+                            AF_StyleClass   style_class,
+                            FT_UShort      *gstyles,
+                            FT_Bool         default_script)
 {
     FT_UNUSED(globals);
     FT_UNUSED(style_class);
@@ -598,29 +605,29 @@ af_shaper_get_coverage(AF_FaceGlobals  globals,
 }
 
 
-void *
-af_shaper_buf_create(FT_Face  face)
+static void *
+af_shaper_buf_create_nohb(AF_FaceGlobals  globals)
 {
-    FT_UNUSED(face);
+    FT_UNUSED(globals);
 
     return NULL;
 }
 
 
-void
-af_shaper_buf_destroy(FT_Face  face,
-                      void    *buf)
+static void
+af_shaper_buf_destroy_nohb(AF_FaceGlobals  globals,
+                           void    *buf)
 {
-    FT_UNUSED(face);
+    FT_UNUSED(globals);
     FT_UNUSED(buf);
 }
 
 
-const char *
-af_shaper_get_cluster(const char      *p,
-                      AF_StyleMetrics  metrics,
-                      void            *buf_,
-                      unsigned int    *count)
+static const char *
+af_shaper_get_cluster_nohb(const char      *p,
+                           AF_StyleMetrics  metrics,
+                           void            *buf_,
+                           unsigned int    *count)
 {
     FT_Face    face      = metrics->globals->face;
     FT_ULong   ch, dummy = 0;
@@ -651,12 +658,12 @@ af_shaper_get_cluster(const char      *p,
 }
 
 
-FT_ULong
-af_shaper_get_elem(AF_StyleMetrics  metrics,
-                   void            *buf_,
-                   unsigned int     idx,
-                   FT_Long         *advance,
-                   FT_Long         *y_offset)
+static FT_ULong
+af_shaper_get_elem_nohb(AF_StyleMetrics  metrics,
+                        void            *buf_,
+                        unsigned int     idx,
+                        FT_Long         *advance,
+                        FT_Long         *y_offset)
 {
     FT_Face   face        = metrics->globals->face;
     FT_ULong  glyph_index = *(FT_ULong *)buf_;
@@ -680,7 +687,90 @@ af_shaper_get_elem(AF_StyleMetrics  metrics,
 }
 
 
-#endif /* !FT_CONFIG_OPTION_USE_HARFBUZZ */
+/********************************************************************/
+
+FT_Error
+af_shaper_get_coverage(AF_FaceGlobals  globals,
+                       AF_StyleClass   style_class,
+                       FT_UShort      *gstyles,
+                       FT_Bool         default_script)
+{
+#ifdef FT_CONFIG_OPTION_USE_HARFBUZZ
+    if (ft_hb_enabled(globals))
+        return af_shaper_get_coverage_hb(globals,
+                                         style_class,
+                                         gstyles,
+                                         default_script);
+    else
+#endif
+        return af_shaper_get_coverage_nohb(globals,
+                                           style_class,
+                                           gstyles,
+                                           default_script);
+}
+
+
+void *
+af_shaper_buf_create(AF_FaceGlobals  globals)
+{
+#ifdef FT_CONFIG_OPTION_USE_HARFBUZZ
+    if (ft_hb_enabled(globals)) {
+        return af_shaper_buf_create_hb(globals);
+    } else
+#endif
+        return af_shaper_buf_create_nohb(globals);
+}
+
+
+void
+af_shaper_buf_destroy(AF_FaceGlobals  globals,
+                      void           *buf)
+{
+#ifdef FT_CONFIG_OPTION_USE_HARFBUZZ
+    if (ft_hb_enabled(globals)) {
+        af_shaper_buf_destroy_hb(globals, buf);
+    } else
+#endif
+        af_shaper_buf_destroy_nohb(globals, buf);
+}
+
+
+const char *
+af_shaper_get_cluster(const char      *p,
+                      AF_StyleMetrics  metrics,
+                      void            *buf_,
+                      unsigned int    *count)
+{
+#ifdef FT_CONFIG_OPTION_USE_HARFBUZZ
+    if (ft_hb_enabled(metrics->globals)) {
+        return af_shaper_get_cluster_hb(p, metrics, buf_, count);
+    } else
+#endif
+        return af_shaper_get_cluster_nohb(p, metrics, buf_, count);
+}
+
+
+FT_ULong
+af_shaper_get_elem(AF_StyleMetrics  metrics,
+                   void            *buf_,
+                   unsigned int     idx,
+                   FT_Long         *advance,
+                   FT_Long         *y_offset)
+{
+#ifdef FT_CONFIG_OPTION_USE_HARFBUZZ
+    if (ft_hb_enabled(metrics->globals))
+        return af_shaper_get_elem_hb(metrics,
+                                     buf_,
+                                     idx,
+                                     advance,
+                                     y_offset);
+#endif
+    return af_shaper_get_elem_nohb(metrics,
+                                   buf_,
+                                   idx,
+                                   advance,
+                                   y_offset);
+}
 
 
 /* END */

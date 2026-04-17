@@ -116,7 +116,7 @@ DEFINES := \
 	-DVM_MAX_SECTOR_ALIGN_SIZE_CONFIG=64*1024 \
 	-DVM_ITEM_MAX_NUM=256 \
 	-DRLOTTIE_COMMIT_HASH=\"492fbb753924ae7cad27072a2b6ddedde88dc4bd\" \
-	-DFREETYPE_COMMIT_HASH=\"45903920b984540bb629bc89f4c010159c23a89a\" \
+	-DFREETYPE_COMMIT_HASH=\"ef54557bda3b17da1b7e42e8e207efd1842bcc05\" \
 	-DFT2_BUILD_LIBRARY \
 	-DLVGL_COMMIT_HASH=\"release_v9.3_c033a98afddd65aaafeebea625382a94020fe4a7\" \
 	-D_XOPEN_SOURCE=700 \
@@ -203,6 +203,7 @@ c_SRC_FILES := \
 	../../../../../apps/common/camera/gc1084_mipi/gc1084_mipi_ae.c \
 	../../../../../apps/common/camera/gc1084_mipi/gc1084_mipi_awb.c \
 	../../../../../apps/common/camera/gc1084_mipi/gc1084_mipi_iq.c \
+	../../../../../apps/common/camera/gc2145_mipi/gc2145_mipi.c \
 	../../../../../apps/common/camera/h63p_dvp/h63p_dvp.c \
 	../../../../../apps/common/camera/h63p_dvp/h63p_dvp_ae.c \
 	../../../../../apps/common/camera/h63p_dvp/h63p_dvp_awb.c \
@@ -490,6 +491,7 @@ c_SRC_FILES := \
 	../../../../../apps/common/lvgl_v9/examples/others/xml/lv_example_xml_1.c \
 	../../../../../apps/common/lvgl_v9/examples/others/xml/lv_example_xml_2.c \
 	../../../../../apps/common/lvgl_v9/examples/porting/lv_port_disp.c \
+	../../../../../apps/common/lvgl_v9/examples/porting/lv_port_disp_no_fb.c \
 	../../../../../apps/common/lvgl_v9/examples/porting/lv_port_fs.c \
 	../../../../../apps/common/lvgl_v9/examples/porting/lv_port_indev.c \
 	../../../../../apps/common/lvgl_v9/examples/porting/osal/lv_example_osal.c \

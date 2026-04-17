@@ -4,7 +4,7 @@
  *
  *   FreeType PFR glyph loader (body).
  *
- * Copyright (C) 2002-2023 by
+ * Copyright (C) 2002-2026 by
  * David Turner, Robert Wilhelm, and Werner Lemberg.
  *
  * This file is part of the FreeType project, and may only be used,
@@ -108,7 +108,7 @@ pfr_glyph_close_contour(PFR_Glyph  glyph)
 
     /* don't add empty contours */
     if (last >= first) {
-        outline->contours[outline->n_contours++] = (short)last;
+        outline->contours[outline->n_contours++] = (FT_UShort)last;
     }
 
     glyph->path_begun = 0;
@@ -175,8 +175,8 @@ pfr_glyph_curve_to(PFR_Glyph   glyph,
 
     error = FT_GLYPHLOADER_CHECK_POINTS(loader, 3, 0);
     if (!error) {
-        FT_Vector  *vec = outline->points         + outline->n_points;
-        FT_Byte    *tag = (FT_Byte *)outline->tags + outline->n_points;
+        FT_Vector  *vec = outline->points + outline->n_points;
+        FT_Byte    *tag = outline->tags   + outline->n_points;
 
 
         vec[0] = *control1;
@@ -186,7 +186,7 @@ pfr_glyph_curve_to(PFR_Glyph   glyph,
         tag[1] = FT_CURVE_TAG_CUBIC;
         tag[2] = FT_CURVE_TAG_ON;
 
-        outline->n_points = (FT_Short)(outline->n_points + 3);
+        outline->n_points += 3;
     }
 
 Exit:
@@ -373,7 +373,7 @@ Line1:
                 break;
 
             case 2:                                      /* horizontal line to */
-                FT_TRACE6(("- horizontal line to cx.%d", format_low));
+                FT_TRACE6(("- horizontal line to cx.%u", format_low));
                 if (format_low >= x_count) {
                     goto Failure;
                 }
@@ -384,7 +384,7 @@ Line1:
                 break;
 
             case 3:                                        /* vertical line to */
-                FT_TRACE6(("- vertical line to cy.%d", format_low));
+                FT_TRACE6(("- vertical line to cy.%u", format_low));
                 if (format_low >= y_count) {
                     goto Failure;
                 }
@@ -430,7 +430,7 @@ Line1:
                         goto Failure;
                     }
                     cur->x = glyph->x_control[idx];
-                    FT_TRACE7((" cx#%d", idx));
+                    FT_TRACE7((" cx#%u", idx));
                     break;
 
                 case 1:                           /* 16-bit absolute value */
@@ -460,7 +460,7 @@ Line1:
                         goto Failure;
                     }
                     cur->y = glyph->y_control[idx];
-                    FT_TRACE7((" cy#%d", idx));
+                    FT_TRACE7((" cy#%u", idx));
                     break;
 
                 case 1:                           /* 16-bit absolute value */
@@ -729,7 +729,7 @@ pfr_glyph_load_rec(PFR_Glyph  glyph,
 
         count = glyph->num_subs - old_count;
 
-        FT_TRACE4(("compound glyph with %d element%s (offset %lu):\n",
+        FT_TRACE4(("compound glyph with %u element%s (offset %lu):\n",
                    count,
                    count == 1 ? "" : "s",
                    offset));
@@ -740,7 +740,7 @@ pfr_glyph_load_rec(PFR_Glyph  glyph,
             PFR_SubGlyph  subglyph;
 
 
-            FT_TRACE4(("  subglyph %d:\n", n));
+            FT_TRACE4(("  subglyph %u:\n", n));
 
             subglyph   = glyph->subs + old_count + n;
             old_points = base->n_points;
@@ -780,7 +780,7 @@ pfr_glyph_load_rec(PFR_Glyph  glyph,
             /* proceed to next sub-glyph */
         }
 
-        FT_TRACE4(("end compound glyph with %d element%s\n",
+        FT_TRACE4(("end compound glyph with %u element%s\n",
                    count,
                    count == 1 ? "" : "s"));
     } else {

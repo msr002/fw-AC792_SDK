@@ -4,7 +4,7 @@
 #ifdef CONFIG_VIDEO_IQ_TOOLS_ENABLE
 #ifdef CONFIG_UI_ENABLE
 #include "os/os_api.h"
-#if (defined USE_LVGL_V8_UI_DEMO)
+#if (defined CONFIG_UI_ENABLE)
 #include "lv_conf.h"
 #endif
 #endif
@@ -49,7 +49,7 @@ SYS_EVENT_STATIC_HANDLER_REGISTER(lcd_tools_event, 0) = {
 
 static int lcd_tools_stop_ui(void)
 {
-#ifdef USE_LVGL_V8_UI_DEMO
+#ifdef CONFIG_UI_ENABLE
     if (os_task_get_handle(LVGL_TASK_NAME)) {
         void lvgl_ui_suspend(void);
         lvgl_ui_suspend();
@@ -59,7 +59,7 @@ static int lcd_tools_stop_ui(void)
 }
 static int lcd_tools_start_ui(void)
 {
-#ifdef USE_LVGL_V8_UI_DEMO
+#ifdef CONFIG_UI_ENABLE
     if (os_task_get_handle(LVGL_TASK_NAME)) {
         void lvgl_ui_resume(void);
         lvgl_ui_resume();

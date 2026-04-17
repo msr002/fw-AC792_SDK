@@ -282,6 +282,20 @@
 #define MAXP_SIZE_CUSTOM_HIDOUT     64
 #endif
 
+////////////MIDI Class
+#ifndef MIDI_EP_IN
+#define MIDI_EP_IN                  2
+#endif
+#ifndef MIDI_EP_OUT
+#define MIDI_EP_OUT                 2
+#endif
+#ifndef MAXP_SIZE_MIDI_EPIN
+#define MAXP_SIZE_MIDI_EPIN         64
+#endif
+#ifndef MAXP_SIZE_MIDI_EPOUT
+#define MAXP_SIZE_MIDI_EPOUT        64
+#endif
+
 //speaker host
 #ifndef HOST_SPK_AUDIO_RATE
 #define HOST_SPK_AUDIO_RATE         0	//建议不要使用44100采样率，有点数对齐问题

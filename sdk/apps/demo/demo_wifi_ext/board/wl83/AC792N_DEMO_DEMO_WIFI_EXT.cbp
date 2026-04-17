@@ -192,6 +192,8 @@
 <Unit filename="../../../../../apps/common/usb/device/hid.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../../apps/common/usb/device/hid_keyboard.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../../apps/common/usb/device/hid_pos.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="../../../../../apps/common/usb/device/midi.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="../../../../../apps/common/usb/device/midi.h" />
 <Unit filename="../../../../../apps/common/usb/device/msd.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../../apps/common/usb/device/msd_cdrom.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../../apps/common/usb/device/msd_upgrade.c"><Option compilerVer="CC"/></Unit>

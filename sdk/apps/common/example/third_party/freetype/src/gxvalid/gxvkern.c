@@ -4,7 +4,7 @@
  *
  *   TrueTypeGX/AAT kern table validation (body).
  *
- * Copyright (C) 2004-2023 by
+ * Copyright (C) 2004-2026 by
  * suzuki toshiya, Masatake YAMATO, Red Hat K.K.,
  * David Turner, Robert Wilhelm, and Werner Lemberg.
  *
@@ -873,7 +873,7 @@ gxv_kern_validate_generic(FT_Bytes          table,
     }
 
     for (i = 0; i < nTables; i++) {
-        GXV_TRACE(("validating subtable %d/%lu\n", i, nTables));
+        GXV_TRACE(("validating subtable %u/%lu\n", i, nTables));
         /* p should be 32bit-aligned? */
         gxv_kern_subtable_validate(p, 0, gxvalid);
         p += gxvalid->subtable_length;

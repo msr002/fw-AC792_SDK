@@ -231,9 +231,9 @@ static void app_task_handler(void *p)
 #endif
 
     // norflash关键区域添加擦写保护
-    norflash_key_addr_info_init();
-    norflash_protect_opt_register(norflash_protect_opt);
-    puts("flash core area protect init\n");
+    /* norflash_key_addr_info_init(); */
+    /* norflash_protect_opt_register(norflash_protect_opt); */
+    /* puts("flash core area protect init\n"); */
 
     __do_initcall(early_initcall);
     board_early_init();
@@ -241,6 +241,12 @@ static void app_task_handler(void *p)
     sdfile_ext_mount_init();
 #endif
     __do_initcall(platform_initcall);
+
+    // norflash关键区域添加擦写保护，需要放到vm初始化后进行
+    norflash_key_addr_info_init();
+    norflash_protect_opt_register(norflash_protect_opt);
+    puts("flash core area protect init\n");
+
     board_init();
 
 

@@ -5,7 +5,7 @@
  *   Auxiliary functions and data structures related to PostScript fonts
  *   (specification).
  *
- * Copyright (C) 1996-2023 by
+ * Copyright (C) 1996-2026 by
  * David Turner, Robert Wilhelm, and Werner Lemberg.
  *
  * This file is part of the FreeType project, and may only be used,
@@ -218,6 +218,7 @@ typedef enum  T1_FieldType_ {
 
 
 typedef enum  T1_FieldLocation_ {
+    T1_FIELD_LOCATION_NONE = 0,
     T1_FIELD_LOCATION_CID_INFO,
     T1_FIELD_LOCATION_FONT_DICT,
     T1_FIELD_LOCATION_FONT_EXTRA,
@@ -241,6 +242,7 @@ typedef void
 
 /* structure type used to model object fields */
 typedef struct  T1_FieldRec_ {
+    FT_UInt             len;          /* field identifier length        */
     const char         *ident;        /* field identifier               */
     T1_FieldLocation    location;
     T1_FieldType        type;         /* type of field                  */
@@ -265,8 +267,9 @@ typedef struct  T1_FieldRec_ {
 
 #define T1_NEW_SIMPLE_FIELD( _ident, _type, _fname, _dict ) \
           {                                                 \
+            sizeof ( _ident ) - 1,                          \
             _ident, T1CODE, _type,                          \
-            0,                                              \
+            NULL,                                           \
             FT_FIELD_OFFSET( _fname ),                      \
             FT_FIELD_SIZE( _fname ),                        \
             0, 0,                                           \
@@ -275,6 +278,7 @@ typedef struct  T1_FieldRec_ {
 
 #define T1_NEW_CALLBACK_FIELD( _ident, _reader, _dict ) \
           {                                             \
+            sizeof ( _ident ) - 1,                      \
             _ident, T1CODE, T1_FIELD_TYPE_CALLBACK,     \
             (T1_Field_ParseFunc)_reader,                \
             0, 0,                                       \
@@ -284,8 +288,9 @@ typedef struct  T1_FieldRec_ {
 
 #define T1_NEW_TABLE_FIELD( _ident, _type, _fname, _max, _dict ) \
           {                                                      \
+            sizeof ( _ident ) - 1,                               \
             _ident, T1CODE, _type,                               \
-            0,                                                   \
+            NULL,                                                \
             FT_FIELD_OFFSET( _fname ),                           \
             FT_FIELD_SIZE_DELTA( _fname ),                       \
             _max,                                                \
@@ -295,8 +300,9 @@ typedef struct  T1_FieldRec_ {
 
 #define T1_NEW_TABLE_FIELD2( _ident, _type, _fname, _max, _dict ) \
           {                                                       \
+            sizeof ( _ident ) - 1,                                \
             _ident, T1CODE, _type,                                \
-            0,                                                    \
+            NULL,                                                 \
             FT_FIELD_OFFSET( _fname ),                            \
             FT_FIELD_SIZE_DELTA( _fname ),                        \
             _max, 0,                                              \
@@ -345,6 +351,13 @@ typedef struct  T1_FieldRec_ {
 
 #define T1_FIELD_CALLBACK( _ident, _name, _dict )       \
           T1_NEW_CALLBACK_FIELD( _ident, _name, _dict )
+
+#define T1_FIELD_ZERO                                         \
+          {                                                   \
+            0,                                                \
+            NULL, T1_FIELD_LOCATION_NONE, T1_FIELD_TYPE_NONE, \
+            NULL, 0, 0, 0, 0, 0                               \
+          }
 
 
 /*************************************************************************/

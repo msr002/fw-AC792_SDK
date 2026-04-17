@@ -20,6 +20,16 @@ typedef struct sdfile_file_head {
     char name[SDFILE_NAME_LEN];
 } SDFILE_FILE_HEAD;
 
+enum part_table {
+    SDFILE_PART_NULL = 0,
+    SDFILE_APP_PART = 1,
+    SDFILE_RES_PART,
+    SDFILE_EXT_RES_PART,
+    SDFILE_EX_NANDFLASH_PART,
+    SDFILE_EX_SDCARD_PART,
+    SDFILE_EX_FLASH_PART,
+};
+
 #if 0
 ////////////////////////////sdfile_file_head成员详细说明///////////////////////////////////////
 typedef struct SDFILEJL_FILE_HEAD {
@@ -60,6 +70,7 @@ enum sdfile_err_table {
     SDFILE_VM_NOT_FIND,
     SDFILE_DATA_CRC_ERR,
     SDFILE_WRITE_AREA_NEED_ERASE_ERR,
+    SDFILE_PART_ERR,
     SDFILE_SUSS = 0,
     SDFILE_END,
 };

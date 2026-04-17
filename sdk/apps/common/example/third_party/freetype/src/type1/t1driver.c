@@ -4,7 +4,7 @@
  *
  *   Type 1 driver interface (body).
  *
- * Copyright (C) 1996-2023 by
+ * Copyright (C) 1996-2026 by
  * David Turner, Robert Wilhelm, and Werner Lemberg.
  *
  * This file is part of the FreeType project, and may only be used,
@@ -306,7 +306,6 @@ t1_ps_get_font_value(FT_Face       face,
             retval = ft_strlen(type1->glyph_names[idx]) + 1;
             if (value && value_len >= retval) {
                 ft_memcpy(value, (void *)(type1->glyph_names[idx]), retval);
-                ((FT_Char *)value)[retval - 1] = (FT_Char)'\0';
             }
         }
         break;
@@ -333,11 +332,9 @@ t1_ps_get_font_value(FT_Face       face,
         if (type1->encoding_type == T1_ENCODING_TYPE_ARRAY &&
             idx < (FT_UInt)type1->encoding.num_chars) {
             retval = ft_strlen(type1->encoding.char_name[idx]) + 1;
-            if (value && value_len >= retval) {
+            if (value && value_len >= retval)
                 ft_memcpy(value, (void *)(type1->encoding.char_name[idx]),
-                          retval - 1);
-                ((FT_Char *)value)[retval - 1] = (FT_Char)'\0';
-            }
+                          retval);
         }
         break;
 

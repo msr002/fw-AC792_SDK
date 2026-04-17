@@ -25,6 +25,18 @@
 #define LOG_ERROR_ENABLE
 #include "debug.h"
 
+void fb_combine_init(void);
+int fb_combine_close(u8 id);
+void fb_combine_prepare(struct fb_draw_info *info, u8 open_fb);
+void fb_combine_list_add(struct fb_out_t *ep);
+void fb_combine_list_del(struct fb_out_t *ep);
+int fb_combine_mutex_enter(u8 id);
+void fb_combine_mutex_exit(u8 id);
+int fb_combine_updata(struct fb_out_t *ep, struct fb_map_user *map);
+
+void *fb_lcd_device_open(struct fb_out_info *out_info);
+int fb_lcd_device_close(u8 id);
+
 static u8 _open_fb; /* 打开fb的个数 */
 static int fb_out_dev_init(const struct dev_node *node, void *_data)
 {
@@ -57,7 +69,7 @@ static int fb_out_dev_open(const char *name, struct device **device, void *arg)
         p->fb = info->priv;
         p->z_order = info->z_order;
         p->out_id = info->out_id;
-        err = dev_ioctl(p->fb, FBIOGET_ALLOC_FBUFFER, p->buf_addr);
+        err = dev_ioctl(p->fb, FBIOGET_ALLOC_FBUFFER, (u32)p->buf_addr);
         if (err) {
             p->buf_num = err;
             for (int i = 0; i < p->buf_num; i++) {
@@ -81,10 +93,10 @@ static int fb_out_dev_open(const char *name, struct device **device, void *arg)
         out_info.height = info->height; //高度
         out_info.format = info->format;
         out_info.out_id = info->out_id;
-        out_info.out_addr = (err > 1) ? p->buf_addr[1] : p->buf_addr[0];
+        out_info.out_addr = (err > 1) ? (u8 *)p->buf_addr[1] : (u8 *)p->buf_addr[0];
         p->out_id = out_info.out_id;
         if (err == 3) {
-            out_info.out_addr = p->buf_addr[2];
+            out_info.out_addr = (u8 *)p->buf_addr[2];
         }
         if (!fb_lcd_device_open(&out_info)) {
             ret = -1;

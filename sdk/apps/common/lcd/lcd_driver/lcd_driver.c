@@ -9,6 +9,7 @@
 #include "dma2d_common_api.h"
 #include "asm/jldma2d.h"
 #include "asm/dcache.h"
+#include "asm/dma2d_driver.h"
 
 
 #define LOG_TAG_CONST       LCD
@@ -516,6 +517,7 @@ static int lcd_open_send_code_port(struct lcd_dev_drive *lcd, struct lcd_board_c
 
     case LCD_MIPI:
         if (lcd->esd.esd_check_isr) {
+            void dsi_port_set_isr_en(u8 en);
             dsi_port_set_isr_en(1);
         }
         dsi_dev_init(&lcd->dev->mipi);
@@ -626,6 +628,8 @@ int lcd_reinit(u8 lcd_id)
         dsi_send_init_code(&lcd->dev->mipi);
         dsi_video_kick_start();
     }
+
+    return 0;
 }
 static int lcd_dev_init(const struct dev_node *node, void *pdata)
 {

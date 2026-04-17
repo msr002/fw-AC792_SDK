@@ -123,7 +123,7 @@ DEFINES := \
 	-DCONFIG_LMP_CONN_SUSPEND_ENABLE \
 	-DCONFIG_LMP_REFRESH_ENCRYPTION_KEY_ENABLE \
 	-DLVGL_COMMIT_HASH=\"release/v8.4_2409c8dfc6b8d9ae3f7970e1c333e743e0fd2911\" \
-	-DFREETYPE_COMMIT_HASH=\"45903920b984540bb629bc89f4c010159c23a89a\" \
+	-DFREETYPE_COMMIT_HASH=\"ef54557bda3b17da1b7e42e8e207efd1842bcc05\" \
 	-DFT2_BUILD_LIBRARY \
 	-D_POSIX_SOURCE \
 	-DFIONREAD \
@@ -295,6 +295,7 @@ c_SRC_FILES := \
 	../../../../apps/common/camera/gc1084_mipi/gc1084_mipi_ae.c \
 	../../../../apps/common/camera/gc1084_mipi/gc1084_mipi_awb.c \
 	../../../../apps/common/camera/gc1084_mipi/gc1084_mipi_iq.c \
+	../../../../apps/common/camera/gc2145_mipi/gc2145_mipi.c \
 	../../../../apps/common/camera/h63p_dvp/h63p_dvp.c \
 	../../../../apps/common/camera/h63p_dvp/h63p_dvp_ae.c \
 	../../../../apps/common/camera/h63p_dvp/h63p_dvp_awb.c \
@@ -933,6 +934,7 @@ c_SRC_FILES := \
 	../../../../apps/common/usb/device/hid.c \
 	../../../../apps/common/usb/device/hid_keyboard.c \
 	../../../../apps/common/usb/device/hid_pos.c \
+	../../../../apps/common/usb/device/midi.c \
 	../../../../apps/common/usb/device/msd.c \
 	../../../../apps/common/usb/device/msd_cdrom.c \
 	../../../../apps/common/usb/device/msd_upgrade.c \

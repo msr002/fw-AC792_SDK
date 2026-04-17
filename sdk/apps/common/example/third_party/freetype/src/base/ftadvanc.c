@@ -4,7 +4,7 @@
  *
  *   Quick computation of advance widths (body).
  *
- * Copyright (C) 2008-2023 by
+ * Copyright (C) 2008-2026 by
  * David Turner, Robert Wilhelm, and Werner Lemberg.
  *
  * This file is part of the FreeType project, and may only be used,
@@ -20,6 +20,7 @@
 
 #include <freetype/ftadvanc.h>
 #include <freetype/internal/ftobjs.h>
+#include <freetype/internal/ftcalc.h>
 
 
 static FT_Error
@@ -50,10 +51,42 @@ ft_face_scale_advances_(FT_Face    face,
     /* (see `FT_Load_Glyph' implementation in src/base/ftobjs.c)        */
 
     for (nn = 0; nn < count; nn++) {
-        advances[nn] = FT_MulDiv(advances[nn], scale, 64);
+        advances[nn] = FT_MulFix(1024 * advances[nn], scale);
     }
 
     return FT_Err_Ok;
+}
+
+/* loading (and hinting) to calculate the advances is slow  */
+/* unless TrueType hdmx table is provided as an accelerator */
+static FT_Error
+ft_load_advances(FT_Face   face,
+                 FT_UInt   gindex,
+                 FT_UInt   count,
+                 FT_Int32  flags,
+                 FT_Fixed  *padvances)
+{
+    FT_UInt   nn;
+    FT_Error  error   = FT_Err_Ok;
+    FT_Pos    factor  = flags & FT_LOAD_NO_SCALE ? 1 : 1024;
+    FT_Pos   *advance = flags & FT_LOAD_VERTICAL_LAYOUT
+                        ? &face->glyph->advance.y
+                        : &face->glyph->advance.x;
+
+
+    flags |= (FT_UInt32)FT_LOAD_ADVANCE_ONLY;
+
+    for (nn = 0; nn < count; nn++) {
+        error = FT_Load_Glyph(face, gindex + nn, flags);
+        if (error) {
+            break;
+        }
+
+        /* scale from 26.6 to 16.16, unless NO_SCALE was requested */
+        padvances[nn] = *advance * factor;
+    }
+
+    return error;
 }
 
 
@@ -110,7 +143,11 @@ FT_Get_Advance(FT_Face    face,
         }
     }
 
-    return FT_Get_Advances(face, gindex, 1, flags, padvance);
+    if (flags & FT_ADVANCE_FLAG_FAST_ONLY) {
+        return FT_THROW(Unimplemented_Feature);
+    }
+
+    return ft_load_advances(face, gindex, 1, flags, padvance);
 }
 
 
@@ -123,12 +160,9 @@ FT_Get_Advances(FT_Face    face,
                 FT_Int32   flags,
                 FT_Fixed  *padvances)
 {
-    FT_Error  error = FT_Err_Ok;
-
     FT_Face_GetAdvancesFunc  func;
 
-    FT_UInt  num, end, nn;
-    FT_Int   factor;
+    FT_UInt  num, end;
 
 
     if (!face) {
@@ -151,6 +185,9 @@ FT_Get_Advances(FT_Face    face,
 
     func = face->driver->clazz->get_advances;
     if (func && LOAD_ADVANCE_FAST_CHECK(face, flags)) {
+        FT_Error  error;
+
+
         error = func(face, start, count, flags, padvances);
         if (!error) {
             return ft_face_scale_advances_(face, padvances, count, flags);
@@ -161,27 +198,11 @@ FT_Get_Advances(FT_Face    face,
         }
     }
 
-    error = FT_Err_Ok;
-
     if (flags & FT_ADVANCE_FLAG_FAST_ONLY) {
         return FT_THROW(Unimplemented_Feature);
     }
 
-    flags |= (FT_UInt32)FT_LOAD_ADVANCE_ONLY;
-    factor = (flags & FT_LOAD_NO_SCALE) ? 1 : 1024;
-    for (nn = 0; nn < count; nn++) {
-        error = FT_Load_Glyph(face, start + nn, flags);
-        if (error) {
-            break;
-        }
-
-        /* scale from 26.6 to 16.16, unless NO_SCALE was requested */
-        padvances[nn] = (flags & FT_LOAD_VERTICAL_LAYOUT)
-                        ? face->glyph->advance.y * factor
-                        : face->glyph->advance.x * factor;
-    }
-
-    return error;
+    return ft_load_advances(face, start, count, flags, padvances);
 }
 
 

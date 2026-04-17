@@ -967,6 +967,7 @@
 #if TCFG_LCD_ENABLE
 #ifdef CONFIG_UI_ENABLE
 #define USE_LVGL_V8_UI_DEMO
+// #define USE_LVGL_V9_UI_DEMO
 #endif
 /* LV_DISP_UI_FB_NUM: LVGL UI绘制的FB帧显存个数 */
 /* 0:表示 LVGL UI直接在LCD显存上绘制,不需要额外的帧buffer (使用于UI刷新要求不高的方案)

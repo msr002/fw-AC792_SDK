@@ -6,6 +6,7 @@
 #define BT_BTSTACK_CLASSIC                   BIT(0)
 #define BT_BTSTACK_LE_ADV                    BIT(1)
 #define BT_BTSTACK_LE                        BIT(2)
+#define BT_BTSTACK_GATT_OVER_EDR             BIT(3)
 
 extern const int config_stack_modules;
 #define STACK_MODULES_IS_SUPPORT(x)         (config_stack_modules & (x))

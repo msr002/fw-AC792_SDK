@@ -5,7 +5,7 @@
  *   FreeType glyph image formats and default raster interface
  *   (specification).
  *
- * Copyright (C) 1996-2023 by
+ * Copyright (C) 1996-2026 by
  * David Turner, Robert Wilhelm, and Werner Lemberg.
  *
  * This file is part of the FreeType project, and may only be used,
@@ -20,6 +20,11 @@
  *
  * Note: A 'raster' is simply a scan-line converter, used to render
  *       `FT_Outline`s into `FT_Bitmap`s.
+ *
+ * Note: This file can be used for `STANDALONE_` compilation of raster
+ *       (B/W) and smooth (anti-aliased) renderers.  Therefore, it must
+ *       rely on standard variable types only instead of aliases in
+ *       `fttypes.h`.
  *
  */
 
@@ -259,6 +264,10 @@ typedef enum  FT_Pixel_Mode_ {
  *   *logical* one.  For example, if @FT_Pixel_Mode is set to
  *   `FT_PIXEL_MODE_LCD`, the logical width is a just a third of the
  *   physical one.
+ *
+ *   An empty bitmap with a NULL `buffer` is valid, with `rows` and/or
+ *   `pitch` also set to 0.  Such bitmaps might be produced while rendering
+ *   empty or degenerate outlines.
  */
 typedef struct  FT_Bitmap_ {
     unsigned int    rows;
@@ -314,7 +323,7 @@ typedef struct  FT_Bitmap_ {
  *
  *     If bit~2 is set, bits 5-7 contain the drop-out mode (as defined in
  *     the OpenType specification; the value is the same as the argument to
- *     the 'SCANMODE' instruction).
+ *     the 'SCANTYPE' instruction).
  *
  *     Bits 3 and~4 are reserved for internal purposes.
  *
@@ -336,14 +345,14 @@ typedef struct  FT_Bitmap_ {
  *   @FT_OUTLINE_INCLUDE_STUBS in `flags` is then overridden.
  */
 typedef struct  FT_Outline_ {
-    short       n_contours;      /* number of contours in glyph        */
-    short       n_points;        /* number of points in the glyph      */
+    unsigned short   n_contours;  /* number of contours in glyph        */
+    unsigned short   n_points;    /* number of points in the glyph      */
 
-    FT_Vector  *points;          /* the outline's points               */
-    char       *tags;            /* the points flags                   */
-    short      *contours;        /* the contour end points             */
+    FT_Vector       *points;      /* the outline's points               */
+    unsigned char   *tags;        /* the points flags                   */
+    unsigned short  *contours;    /* the contour end points             */
 
-    int         flags;           /* outline masks                      */
+    int              flags;       /* outline masks                      */
 
 } FT_Outline;
 
@@ -351,8 +360,8 @@ typedef struct  FT_Outline_ {
 
 /* Following limits must be consistent with */
 /* FT_Outline.{n_contours,n_points}         */
-#define FT_OUTLINE_CONTOURS_MAX  SHRT_MAX
-#define FT_OUTLINE_POINTS_MAX    SHRT_MAX
+#define FT_OUTLINE_CONTOURS_MAX  USHRT_MAX
+#define FT_OUTLINE_POINTS_MAX    USHRT_MAX
 
 
 /**************************************************************************
@@ -429,8 +438,8 @@ typedef struct  FT_Outline_ {
  *   rasterizer; see the `tags` field in @FT_Outline.
  *
  *   Please refer to the description of the 'SCANTYPE' instruction in the
- *   OpenType specification (in file `ttinst1.doc`) how simple drop-outs,
- *   smart drop-outs, and stubs are defined.
+ *   [OpenType specification](https://learn.microsoft.com/typography/opentype/spec/tt_instructions#scantype)
+ *   how simple drop-outs, smart drop-outs, and stubs are defined.
  */
 #define FT_OUTLINE_NONE             0x0
 #define FT_OUTLINE_OWNER            0x1
@@ -858,7 +867,7 @@ typedef enum  FT_Glyph_Format_ {
  *   that is, from completely transparent to completely opaque.
  */
 typedef struct  FT_Span_ {
-    short           x;
+    unsigned short  x;
     unsigned short  len;
     unsigned char   coverage;
 

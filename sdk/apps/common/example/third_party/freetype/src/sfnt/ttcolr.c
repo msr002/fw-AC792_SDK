@@ -4,7 +4,7 @@
  *
  *   TrueType and OpenType colored glyph layer support (body).
  *
- * Copyright (C) 2018-2023 by
+ * Copyright (C) 2018-2026 by
  * David Turner, Robert Wilhelm, Dominik Röttsches, and Werner Lemberg.
  *
  * Originally written by Shao Yu Zhang <shaozhang@fb.com>.
@@ -51,7 +51,7 @@
 #define COLOR_STOP_SIZE                   6U
 #define VAR_IDX_BASE_SIZE                 4U
 #define LAYER_SIZE                        4U
-/* https://docs.microsoft.com/en-us/typography/opentype/spec/colr#colr-header */
+/* https://learn.microsoft.com/typography/opentype/spec/colr#colr-header */
 /* 3 * uint16 + 2 * Offset32 */
 #define COLRV0_HEADER_SIZE               14U
 /* COLRV0_HEADER_SIZE + 5 * Offset32 */
@@ -210,21 +210,22 @@ tt_face_load_colr(TT_Face    face,
     colr->num_base_glyphs = FT_NEXT_USHORT(p);
     base_glyph_offset     = FT_NEXT_ULONG(p);
 
-    if (base_glyph_offset >= table_size) {
+    if (table_size <= base_glyph_offset) {
         goto InvalidTable;
     }
-    if (colr->num_base_glyphs * BASE_GLYPH_SIZE >
-        table_size - base_glyph_offset) {
+    if ((table_size - base_glyph_offset) / BASE_GLYPH_SIZE
+        < colr->num_base_glyphs) {
         goto InvalidTable;
     }
 
     layer_offset     = FT_NEXT_ULONG(p);
     colr->num_layers = FT_NEXT_USHORT(p);
 
-    if (layer_offset >= table_size) {
+    if (table_size <= layer_offset) {
         goto InvalidTable;
     }
-    if (colr->num_layers * LAYER_SIZE > table_size - layer_offset) {
+    if ((table_size - layer_offset) / LAYER_SIZE
+        < colr->num_layers) {
         goto InvalidTable;
     }
 
@@ -235,15 +236,17 @@ tt_face_load_colr(TT_Face    face,
 
         base_glyphs_offset_v1 = FT_NEXT_ULONG(p);
 
-        if (base_glyphs_offset_v1 >= table_size - 4) {
+        if (table_size - 4 <= base_glyphs_offset_v1) {
             goto InvalidTable;
         }
 
         p1                 = (FT_Byte *)(table + base_glyphs_offset_v1);
         num_base_glyphs_v1 = FT_PEEK_ULONG(p1);
 
-        if (num_base_glyphs_v1 * BASE_GLYPH_PAINT_RECORD_SIZE >
-            table_size - base_glyphs_offset_v1) {
+        /* Account for 4 byte numBaseGlyphPaintRecords at the beginning of */
+        /* the BaseGlyphPaintRecord array.                                 */
+        if ((table_size - base_glyphs_offset_v1 - 4) /
+            BASE_GLYPH_PAINT_RECORD_SIZE < num_base_glyphs_v1) {
             goto InvalidTable;
         }
 
@@ -252,20 +255,20 @@ tt_face_load_colr(TT_Face    face,
 
         layer_offset_v1 = FT_NEXT_ULONG(p);
 
-        if (layer_offset_v1 >= table_size) {
+        if (table_size <= layer_offset_v1) {
             goto InvalidTable;
         }
 
         if (layer_offset_v1) {
-            if (layer_offset_v1 >= table_size - 4) {
+            if (table_size - 4 <= layer_offset_v1) {
                 goto InvalidTable;
             }
 
             p1            = (FT_Byte *)(table + layer_offset_v1);
             num_layers_v1 = FT_PEEK_ULONG(p1);
 
-            if (num_layers_v1 * LAYER_V1_LIST_PAINT_OFFSET_SIZE >
-                table_size - layer_offset_v1) {
+            if ((table_size - layer_offset_v1) / LAYER_V1_LIST_PAINT_OFFSET_SIZE
+                < num_layers_v1) {
                 goto InvalidTable;
             }
 
@@ -287,7 +290,7 @@ tt_face_load_colr(TT_Face    face,
 
         clip_list_offset = FT_NEXT_ULONG(p);
 
-        if (clip_list_offset >= table_size) {
+        if (table_size <= clip_list_offset) {
             goto InvalidTable;
         }
 
@@ -321,7 +324,7 @@ tt_face_load_colr(TT_Face    face,
             }
 
             var_store_offset = FT_NEXT_ULONG(p);
-            if (var_store_offset >= table_size) {
+            if (table_size <= var_store_offset) {
                 goto InvalidTable;
             }
 
@@ -459,20 +462,14 @@ tt_face_get_colr_layer(TT_Face            face,
                        FT_UInt           *acolor_index,
                        FT_LayerIterator  *iterator)
 {
-    Colr            *colr = (Colr *)face->colr;
-    BaseGlyphRecord  glyph_record;
+    if (!iterator->p) {  /* first call to function */
+        Colr            *colr = (Colr *)face->colr;
+        BaseGlyphRecord  glyph_record;
 
 
-    if (!colr) {
-        return 0;
-    }
-
-    if (!iterator->p) {
-        FT_ULong  offset;
-
-
-        /* first call to function */
-        iterator->layer = 0;
+        if (!colr) {
+            return 0;
+        }
 
         if (!find_base_glyph_record(colr->base_glyphs,
                                     colr->num_base_glyphs,
@@ -481,23 +478,19 @@ tt_face_get_colr_layer(TT_Face            face,
             return 0;
         }
 
-        if (glyph_record.num_layers) {
-            iterator->num_layers = glyph_record.num_layers;
-        } else {
+        if (glyph_record.num_layers == 0                               ||
+            glyph_record.first_layer_index + glyph_record.num_layers >
+            colr->num_layers) {
             return 0;
         }
 
-        offset = LAYER_SIZE * glyph_record.first_layer_index;
-        if (offset + LAYER_SIZE * glyph_record.num_layers > colr->table_size) {
-            return 0;
-        }
-
-        iterator->p = colr->layers + offset;
+        iterator->num_layers = glyph_record.num_layers;
+        iterator->layer      = 0;
+        iterator->p          = colr->layers +
+                               LAYER_SIZE * glyph_record.first_layer_index;
     }
 
-    if (iterator->layer >= iterator->num_layers                     ||
-        iterator->p < colr->layers                                  ||
-        iterator->p >= ((FT_Byte *)colr->table + colr->table_size)) {
+    if (iterator->layer >= iterator->num_layers) {
         return 0;
     }
 
@@ -679,6 +672,7 @@ read_paint(TT_Face         face,
         FT_UInt32  first_layer_index;
 
 
+        ENSURE_READ_BYTES(5);
         num_layers = FT_NEXT_BYTE(p);
         if (num_layers > colr->num_layers_v1) {
             return 0;
@@ -1280,7 +1274,8 @@ find_base_glyph_v1_record(FT_Byte            *base_glyph_begin,
 
 
     while (min < max) {
-        FT_UInt  mid = min + (max - min) / 2;
+        FT_UInt    mid = min + (max - min) / 2;
+        FT_UShort  gid;
 
         /*
          * `base_glyph_begin` is the beginning of `BaseGlyphV1List`;
@@ -1289,8 +1284,7 @@ find_base_glyph_v1_record(FT_Byte            *base_glyph_begin,
          */
         FT_Byte  *p = base_glyph_begin + 4 + mid * BASE_GLYPH_PAINT_RECORD_SIZE;
 
-        FT_UShort  gid = FT_NEXT_USHORT(p);
-
+        gid = FT_NEXT_USHORT(p);
 
         if (gid < glyph_id) {
             min = mid + 1;
@@ -1767,7 +1761,6 @@ tt_face_colr_blend_layer(TT_Face       face,
     FT_UInt  x, y;
     FT_Byte  b, g, r, alpha;
 
-    FT_ULong  size;
     FT_Byte  *src;
     FT_Byte  *dst;
 
@@ -1784,14 +1777,10 @@ tt_face_colr_blend_layer(TT_Face       face,
         dstSlot->bitmap.pitch      = (int)dstSlot->bitmap.width * 4;
         dstSlot->bitmap.num_grays  = 256;
 
-        size = dstSlot->bitmap.rows * (unsigned int)dstSlot->bitmap.pitch;
-
-        error = ft_glyphslot_alloc_bitmap(dstSlot, size);
+        error = ft_glyphslot_alloc_bitmap(dstSlot);
         if (error) {
             return error;
         }
-
-        FT_MEM_ZERO(dstSlot->bitmap.buffer, size);
     } else {
         /* Resize destination if needed such that new component fits. */
         FT_Int  x_min, x_max, y_min, y_max;
@@ -1820,8 +1809,7 @@ tt_face_colr_blend_layer(TT_Face       face,
             FT_Byte  *q;
 
 
-            size  = rows * pitch;
-            if (FT_ALLOC(buf, size)) {
+            if (FT_ALLOC_MULT(buf, rows, pitch)) {
                 return error;
             }
 

@@ -377,6 +377,9 @@ PCF_Face_Init(FT_Stream      stream,
             }
 
             error = FT_CMap_New(&pcf_cmap_class, NULL, &charmap, NULL);
+            if (error) {
+                PCF_Face_Done(face);
+            }
         }
     }
 
@@ -454,7 +457,7 @@ PCF_Glyph_Load(FT_GlyphSlot  slot,
                FT_UInt       glyph_index,
                FT_Int32      load_flags)
 {
-    PCF_Face    face   = (PCF_Face)FT_SIZE_FACE(size);
+    PCF_Face    face   = (PCF_Face)size->face;
     FT_Stream   stream;
     FT_Error    error  = FT_Err_Ok;
     FT_Bitmap  *bitmap = &slot->bitmap;
@@ -462,7 +465,7 @@ PCF_Glyph_Load(FT_GlyphSlot  slot,
     FT_ULong    bytes;
 
 
-    FT_TRACE1(("PCF_Glyph_Load: glyph index %d\n", glyph_index));
+    FT_TRACE1(("PCF_Glyph_Load: glyph index %u\n", glyph_index));
 
     if (!face) {
         error = FT_THROW(Invalid_Face_Handle);
@@ -528,7 +531,7 @@ PCF_Glyph_Load(FT_GlyphSlot  slot,
     /* XXX: to do: are there cases that need repadding the bitmap? */
     bytes = (FT_ULong)bitmap->pitch * bitmap->rows;
 
-    error = ft_glyphslot_alloc_bitmap(slot, (FT_ULong)bytes);
+    error = ft_glyphslot_alloc_bitmap(slot);
     if (error) {
         goto Exit;
     }

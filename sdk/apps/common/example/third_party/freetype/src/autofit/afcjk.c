@@ -4,7 +4,7 @@
  *
  *   Auto-fitter hinting routines for CJK writing system (body).
  *
- * Copyright (C) 2006-2023 by
+ * Copyright (C) 2006-2026 by
  * David Turner, Robert Wilhelm, and Werner Lemberg.
  *
  * This file is part of the FreeType project, and may only be used,
@@ -90,12 +90,8 @@ af_cjk_metrics_init_widths(AF_CJKMetrics  metrics,
 
         /* If HarfBuzz is not available, we need a pointer to a single */
         /* unsigned long value.                                        */
-#ifdef FT_CONFIG_OPTION_USE_HARFBUZZ
-        void     *shaper_buf;
-#else
         FT_ULong  shaper_buf_;
         void     *shaper_buf = &shaper_buf_;
-#endif
 
         const char  *p;
 
@@ -105,9 +101,9 @@ af_cjk_metrics_init_widths(AF_CJKMetrics  metrics,
 
         p = script_class->standard_charstring;
 
-#ifdef FT_CONFIG_OPTION_USE_HARFBUZZ
-        shaper_buf = af_shaper_buf_create(face);
-#endif
+        if (ft_hb_enabled(metrics->root.globals)) {
+            shaper_buf = af_shaper_buf_create(metrics->root.globals);
+        }
 
         /* We check a list of standard characters.  The first match wins. */
 
@@ -146,7 +142,7 @@ af_cjk_metrics_init_widths(AF_CJKMetrics  metrics,
             }
         }
 
-        af_shaper_buf_destroy(face, shaper_buf);
+        af_shaper_buf_destroy(metrics->root.globals, shaper_buf);
 
         if (!glyph_index) {
             goto Exit;
@@ -156,7 +152,7 @@ af_cjk_metrics_init_widths(AF_CJKMetrics  metrics,
             goto Exit;
         }
 
-        FT_TRACE5(("standard character: U+%04lX (glyph index %ld)\n",
+        FT_TRACE5(("standard character: U+%04lX (glyph index %lu)\n",
                    ch, glyph_index));
 
         error = FT_Load_Glyph(face, glyph_index, FT_LOAD_NO_SCALE);
@@ -303,12 +299,8 @@ af_cjk_metrics_init_blues(AF_CJKMetrics  metrics,
 
     /* If HarfBuzz is not available, we need a pointer to a single */
     /* unsigned long value.                                        */
-#ifdef FT_CONFIG_OPTION_USE_HARFBUZZ
-    void     *shaper_buf;
-#else
     FT_ULong  shaper_buf_;
     void     *shaper_buf = &shaper_buf_;
-#endif
 
 
     /* we walk over the blue character strings as specified in the   */
@@ -319,9 +311,9 @@ af_cjk_metrics_init_blues(AF_CJKMetrics  metrics,
     FT_TRACE5(("==========================\n"));
     FT_TRACE5(("\n"));
 
-#ifdef FT_CONFIG_OPTION_USE_HARFBUZZ
-    shaper_buf = af_shaper_buf_create(face);
-#endif
+    if (ft_hb_enabled(metrics->root.globals)) {
+        shaper_buf = af_shaper_buf_create(metrics->root.globals);
+    }
 
     for (; bs->string != AF_BLUE_STRING_MAX; bs++) {
         const char  *p = &af_blue_strings[bs->string];
@@ -345,7 +337,7 @@ af_cjk_metrics_init_blues(AF_CJKMetrics  metrics,
             };
 
 
-            FT_TRACE5(("blue zone %d (%s):\n",
+            FT_TRACE5(("blue zone %u (%s):\n",
                        axis->blue_count,
                        cjk_blue_name[AF_CJK_IS_HORIZ_BLUE(bs) |
                                                               AF_CJK_IS_TOP_BLUE(bs)   ]));
@@ -537,7 +529,7 @@ af_cjk_metrics_init_blues(AF_CJKMetrics  metrics,
 
     } /* end for loop */
 
-    af_shaper_buf_destroy(face, shaper_buf);
+    af_shaper_buf_destroy(metrics->root.globals, shaper_buf);
 
     FT_TRACE5(("\n"));
 
@@ -556,23 +548,21 @@ af_cjk_metrics_check_digits(AF_CJKMetrics  metrics,
 
     /* If HarfBuzz is not available, we need a pointer to a single */
     /* unsigned long value.                                        */
-#ifdef FT_CONFIG_OPTION_USE_HARFBUZZ
-    void     *shaper_buf;
-#else
     FT_ULong  shaper_buf_;
     void     *shaper_buf = &shaper_buf_;
-#endif
 
     /* in all supported charmaps, digits have character codes 0x30-0x39 */
     const char   digits[] = "0 1 2 3 4 5 6 7 8 9";
     const char  *p;
 
+    FT_UNUSED(face);
+
 
     p = digits;
 
-#ifdef FT_CONFIG_OPTION_USE_HARFBUZZ
-    shaper_buf = af_shaper_buf_create(face);
-#endif
+    if (ft_hb_enabled(metrics->root.globals)) {
+        shaper_buf = af_shaper_buf_create(metrics->root.globals);
+    }
 
     while (*p) {
         FT_ULong      glyph_index;
@@ -605,7 +595,7 @@ af_cjk_metrics_check_digits(AF_CJKMetrics  metrics,
         }
     }
 
-    af_shaper_buf_destroy(face, shaper_buf);
+    af_shaper_buf_destroy(metrics->root.globals, shaper_buf);
 
     metrics->root.digits_have_same_width = same_width;
 }
@@ -686,7 +676,7 @@ af_cjk_metrics_scale_dim(AF_CJKMetrics  metrics,
             FT_Pos  delta1, delta2;
 
 
-            blue->ref.fit  = FT_PIX_ROUND(blue->ref.cur);
+            blue->ref.fit = FT_PIX_ROUND(blue->ref.cur);
 
             /* shoot is under shoot for cjk */
             delta1 = FT_DivFix(blue->ref.fit, scale) - blue->shoot.org;
@@ -717,7 +707,7 @@ af_cjk_metrics_scale_dim(AF_CJKMetrics  metrics,
 
             blue->shoot.fit = blue->ref.fit - delta2;
 
-            FT_TRACE5((">> active cjk blue zone %c%d[%ld/%ld]:\n",
+            FT_TRACE5((">> active cjk blue zone %c%u[%ld/%ld]:\n",
                        (dim == AF_DIMENSION_HORZ) ? 'H' : 'V',
                        nn, blue->ref.org, blue->shoot.org));
             FT_TRACE5(("     ref:   cur=%.2f fit=%.2f\n",
@@ -1351,7 +1341,7 @@ af_cjk_hints_compute_blue_edges(AF_GlyphHints  hints,
 }
 
 
-/* Initalize hinting engine. */
+/* Initialize hinting engine. */
 
 FT_LOCAL_DEF(FT_Error)
 af_cjk_hints_init(AF_GlyphHints    hints,
@@ -2144,7 +2134,7 @@ static void
 af_cjk_align_edge_points(AF_GlyphHints  hints,
                          AF_Dimension   dim)
 {
-    AF_AxisHints  axis       = & hints->axis[dim];
+    AF_AxisHints  axis       = &hints->axis[dim];
     AF_Edge       edges      = axis->edges;
     AF_Edge       edge_limit = FT_OFFSET(edges, axis->num_edges);
     AF_Edge       edge;

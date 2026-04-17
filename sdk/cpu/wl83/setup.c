@@ -9,6 +9,28 @@ static void video_eva_xbus_init(void)
     eva_xbus_wsel |= BIT(wid_imc_ch1) | BIT(wid_imc_ch0); //dmm独占eva xbus通道1
 }
 
+#define TO_STR_(x) #x
+#define TO_STR(x)  TO_STR_(x)
+#if defined TCFG_FLASH_QE_POS && defined TCFG_FLASH_SPEC_QE_ID
+void norflash_get_spec_qe_parm(u8 id, u8 *force_spec_qe, const char **id_table, u8 *tab_len)
+{
+    const char *spec_qe_table = TO_STR(TCFG_FLASH_SPEC_QE_ID);
+
+    if (id == 0) {
+        *force_spec_qe = TCFG_FLASH_QE_POS;
+        *id_table = spec_qe_table;
+        *tab_len = strlen(*id_table);
+    } else {
+        *force_spec_qe = 0;
+        *id_table = spec_qe_table;
+        *tab_len = strlen(*id_table);
+    }
+    // printf("force_spec_qe = %d\n", *force_spec_qe);
+    // printf("spec_qe_table = %s\n", spec_qe_table);
+    // printf("tab_len       = %d\n", *tab_len);
+}
+#endif
+
 void setup_arch(void)
 {
 #if 0

@@ -344,6 +344,26 @@ int music_file_get_cur_time(struct file_player *music_player)
     return -1;
 }
 
+int music_file_get_cur_time_ms(struct file_player *music_player) //获取ms级别当前播放时间,仅mp3,wav支持
+{
+    os_mutex_pend(&g_file_player.mutex, 0);
+    if (list_empty(&(g_file_player.head))) {          //先判断是否为空
+        os_mutex_post(&g_file_player.mutex);
+        return -1;
+    }
+    if (!music_player) {
+        music_player = list_first_entry(&(g_file_player.head), struct file_player, entry);
+    }
+    if (music_player && music_player->stream) {
+        u32 time_ms = -1;
+        jlstream_node_ioctl(music_player->stream, NODE_UUID_DECODER, NODE_IOC_GET_CUR_TIME_MS, (int)&time_ms);
+        os_mutex_post(&g_file_player.mutex);
+        return time_ms;
+    }
+    os_mutex_post(&g_file_player.mutex);
+    return -1;
+}
+
 int music_file_get_total_time(struct file_player *music_player)
 {
     os_mutex_pend(&g_file_player.mutex, 0);

@@ -4,7 +4,7 @@
  *
  *   FreeType's glyph color management (specification).
  *
- * Copyright (C) 2018-2023 by
+ * Copyright (C) 2018-2026 by
  * David Turner, Robert Wilhelm, and Werner Lemberg.
  *
  * This file is part of the FreeType project, and may only be used,
@@ -316,6 +316,15 @@ FT_Palette_Set_Foreground_Color(FT_Face   face,
  * @description:
  *   The functions described here allow access of colored glyph layer data
  *   in OpenType's 'COLR' tables.
+ *
+ *   Note that FreeType does *not* provide rendering in general of glyphs
+ *   that use a 'COLR' table!  While FreeType has very limited rendering
+ *   support for 'COLR' v0 tables (without a possibility to change the
+ *   color palette) via @FT_Render_Glyph, there is no such convenience
+ *   code for 'COLR' v1 tables -- while it appears that v1 is simply an
+ *   'improved' version of v0, this is not the case: it is a completely
+ *   different color font format, and you need a dedicated graphics
+ *   library like Skia or Cairo to handle a v1 table's drawing commands.
  */
 
 
@@ -357,7 +366,7 @@ typedef struct  FT_LayerIterator_ {
  *   iteratively retrieve the colored glyph layers associated with the
  *   current glyph slot.
  *
- *     https://docs.microsoft.com/en-us/typography/opentype/spec/colr
+ *     https://learn.microsoft.com/typography/opentype/spec/colr
  *
  *   The glyph layer data for a given glyph index, if present, provides an
  *   alternative, multi-color glyph representation: Instead of rendering
@@ -1490,7 +1499,7 @@ FT_Get_Color_Glyph_Paint(FT_Face                  face,
  *
  * @return:
  *   Value~1 if a clip box is found.  If no clip box is found or an error
- *   occured, value~0 is returned.
+ *   occurred, value~0 is returned.
  *
  * @note:
  *   To retrieve the clip box in font units, reset scale to units-per-em
@@ -1618,7 +1627,7 @@ FT_Get_Colorline_Stops(FT_Face                face,
  *
  * @return:
  *   Value~1 if everything is OK.  Value~0 if no details can be found for
- *   this paint or any other error occured.
+ *   this paint or any other error occurred.
  *
  * @since:
  *   2.13

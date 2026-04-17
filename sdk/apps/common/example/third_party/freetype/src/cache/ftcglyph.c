@@ -4,7 +4,7 @@
  *
  *   FreeType Glyph Image (FT_Glyph) cache (body).
  *
- * Copyright (C) 2000-2023 by
+ * Copyright (C) 2000-2026 by
  * David Turner, Robert Wilhelm, and Werner Lemberg.
  *
  * This file is part of the FreeType project, and may only be used,
@@ -181,7 +181,7 @@ FTC_GCache_Lookup(FTC_GCache   gcache,
 
     query->gindex = gindex;
 
-    FTC_MRULIST_LOOKUP(&cache->families, query, query->family, error);
+    FTC_MRULIST_LOOKUP(&gcache->families, query, query->family, error);
     if (!error) {
         FTC_Family  family = query->family;
 
@@ -193,7 +193,7 @@ FTC_GCache_Lookup(FTC_GCache   gcache,
         error = FTC_Cache_Lookup(FTC_CACHE(gcache), hash, query, anode);
 
         if (--family->num_nodes == 0) {
-            FTC_FAMILY_FREE(family, cache);
+            FTC_FAMILY_FREE(family, FTC_CACHE(gcache));
         }
     }
     return error;

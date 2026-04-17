@@ -21,6 +21,7 @@
 #define     CUSTOM_HID_CLASS    0x00000040
 #define     PRINTER_CLASS       0x00000080
 #define     RNDIS_CLASS         0x00000100
+#define     MIDI_CLASS          0x00000200
 
 #define     AUDIO_CLASS         (SPEAKER_CLASS|MIC_CLASS)
 
@@ -142,6 +143,13 @@
 #define TCFG_USB_CUSTOM_HID_ENABLE          1
 #else
 #define TCFG_USB_CUSTOM_HID_ENABLE          0
+#endif
+
+#if (USB_DEVICE_CLASS_CONFIG & MIDI_CLASS) || (USB_DEVICE_CLASS_CONFIG_2_0 & MIDI_CLASS)
+
+#define TCFG_USB_SLAVE_MIDI_ENABLE          1
+#else
+#define TCFG_USB_SLAVE_MIDI_ENABLE          0
 #endif
 
 

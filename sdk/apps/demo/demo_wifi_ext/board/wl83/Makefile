@@ -190,6 +190,7 @@ c_SRC_FILES := \
 	../../../../../apps/common/usb/device/hid.c \
 	../../../../../apps/common/usb/device/hid_keyboard.c \
 	../../../../../apps/common/usb/device/hid_pos.c \
+	../../../../../apps/common/usb/device/midi.c \
 	../../../../../apps/common/usb/device/msd.c \
 	../../../../../apps/common/usb/device/msd_cdrom.c \
 	../../../../../apps/common/usb/device/msd_upgrade.c \

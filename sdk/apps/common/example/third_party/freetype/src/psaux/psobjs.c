@@ -4,7 +4,7 @@
  *
  *   Auxiliary functions for PostScript fonts (body).
  *
- * Copyright (C) 1996-2023 by
+ * Copyright (C) 1996-2026 by
  * David Turner, Robert Wilhelm, and Werner Lemberg.
  *
  * This file is part of the FreeType project, and may only be used,
@@ -23,6 +23,7 @@
 
 #include "psobjs.h"
 #include "psconv.h"
+#include "psft.h"
 
 #include "psauxerr.h"
 #include "psauxmod.h"
@@ -202,7 +203,10 @@ ps_table_add(PS_Table     table,
     /* add the object to the base block and adjust offset */
     table->elements[idx] = FT_OFFSET(table->block, table->cursor);
     table->lengths [idx] = length;
-    FT_MEM_COPY(table->block + table->cursor, object, length);
+    /* length == 0 also implies a NULL destination, so skip the copy call */
+    if (length > 0) {
+        FT_MEM_COPY(table->block + table->cursor, object, length);
+    }
 
     table->cursor += length;
     return FT_Err_Ok;
@@ -450,6 +454,9 @@ skip_procedure(FT_Byte *  *acur,
 
         case '%':
             skip_comment(&cur, limit);
+            break;
+
+        default:
             break;
         }
     }
@@ -1128,7 +1135,7 @@ Store_Integer:
                 FT_ERROR(("ps_parser_load_field:"
                           " expected a name or string\n"));
                 FT_ERROR(("                     "
-                          " but found token of type %d instead\n",
+                          " but found token of type %u instead\n",
                           token.type));
                 error = FT_THROW(Invalid_File_Format);
                 goto Exit;
@@ -1205,7 +1212,7 @@ Store_Integer:
                                          temp + i * max_objects, 0);
                 if (result < 0 || (FT_UInt)result < max_objects) {
                     FT_ERROR(("ps_parser_load_field:"
-                              " expected %d integer%s in the %s subarray\n",
+                              " expected %u integer%s in the %s subarray\n",
                               max_objects, max_objects > 1 ? "s" : "",
                               i == 0 ? "first"
                               : (i == 1 ? "second"
@@ -1606,7 +1613,7 @@ t1_builder_add_point(T1_Builder  builder,
 
     if (builder->load_points) {
         FT_Vector  *point   = outline->points + outline->n_points;
-        FT_Byte    *control = (FT_Byte *)outline->tags + outline->n_points;
+        FT_Byte    *control = outline->tags   + outline->n_points;
 
 
         point->x = FIXED_TO_INT(x);
@@ -1656,9 +1663,9 @@ t1_builder_add_contour(T1_Builder  builder)
 
     error = FT_GLYPHLOADER_CHECK_POINTS(builder->loader, 0, 1);
     if (!error) {
-        if (outline->n_contours > 0)
-            outline->contours[outline->n_contours - 1] =
-                (short)(outline->n_points - 1);
+        if (outline->n_contours > 0) {
+            outline->contours[outline->n_contours - 1] = outline->n_points - 1;
+        }
 
         outline->n_contours++;
     }
@@ -1719,7 +1726,7 @@ t1_builder_close_contour(T1_Builder  builder)
     if (outline->n_points > 1) {
         FT_Vector  *p1      = outline->points + first;
         FT_Vector  *p2      = outline->points + outline->n_points - 1;
-        FT_Byte    *control = (FT_Byte *)outline->tags + outline->n_points - 1;
+        FT_Byte    *control = outline->tags   + outline->n_points - 1;
 
 
         /* `delete' last point only if it coincides with the first */
@@ -1736,9 +1743,9 @@ t1_builder_close_contour(T1_Builder  builder)
         if (first == outline->n_points - 1) {
             outline->n_contours--;
             outline->n_points--;
-        } else
-            outline->contours[outline->n_contours - 1] =
-                (short)(outline->n_points - 1);
+        } else {
+            outline->contours[outline->n_contours - 1] = outline->n_points - 1;
+        }
     }
 }
 
@@ -1873,7 +1880,7 @@ cff_builder_add_point(CFF_Builder  *builder,
 
     if (builder->load_points) {
         FT_Vector  *point   = outline->points + outline->n_points;
-        FT_Byte    *control = (FT_Byte *)outline->tags + outline->n_points;
+        FT_Byte    *control = outline->tags   + outline->n_points;
 
 #ifdef CFF_CONFIG_OPTION_OLD_ENGINE
         PS_Driver  driver   = (PS_Driver)FT_FACE_DRIVER(builder->face);
@@ -1929,9 +1936,9 @@ cff_builder_add_contour(CFF_Builder  *builder)
 
     error = FT_GLYPHLOADER_CHECK_POINTS(builder->loader, 0, 1);
     if (!error) {
-        if (outline->n_contours > 0)
-            outline->contours[outline->n_contours - 1] =
-                (short)(outline->n_points - 1);
+        if (outline->n_contours > 0) {
+            outline->contours[outline->n_contours - 1] = outline->n_points - 1;
+        }
 
         outline->n_contours++;
     }
@@ -1989,7 +1996,7 @@ cff_builder_close_contour(CFF_Builder  *builder)
     if (outline->n_points > 1) {
         FT_Vector  *p1      = outline->points + first;
         FT_Vector  *p2      = outline->points + outline->n_points - 1;
-        FT_Byte    *control = (FT_Byte *)outline->tags + outline->n_points - 1;
+        FT_Byte    *control = outline->tags   + outline->n_points - 1;
 
 
         /* `delete' last point only if it coincides with the first    */
@@ -2006,9 +2013,9 @@ cff_builder_close_contour(CFF_Builder  *builder)
         if (first == outline->n_points - 1) {
             outline->n_contours--;
             outline->n_points--;
-        } else
-            outline->contours[outline->n_contours - 1] =
-                (short)(outline->n_points - 1);
+        } else {
+            outline->contours[outline->n_contours - 1] = outline->n_points - 1;
+        }
     }
 }
 
@@ -2153,7 +2160,7 @@ ps_builder_add_point(PS_Builder  *builder,
 
     if (builder->load_points) {
         FT_Vector  *point   = outline->points + outline->n_points;
-        FT_Byte    *control = (FT_Byte *)outline->tags + outline->n_points;
+        FT_Byte    *control = outline->tags   + outline->n_points;
 
 #ifdef CFF_CONFIG_OPTION_OLD_ENGINE
         PS_Driver  driver   = (PS_Driver)FT_FACE_DRIVER(builder->face);
@@ -2225,9 +2232,9 @@ ps_builder_add_contour(PS_Builder  *builder)
 
     error = FT_GLYPHLOADER_CHECK_POINTS(builder->loader, 0, 1);
     if (!error) {
-        if (outline->n_contours > 0)
-            outline->contours[outline->n_contours - 1] =
-                (short)(outline->n_points - 1);
+        if (outline->n_contours > 0) {
+            outline->contours[outline->n_contours - 1] = outline->n_points - 1;
+        }
 
         outline->n_contours++;
     }
@@ -2285,7 +2292,7 @@ ps_builder_close_contour(PS_Builder  *builder)
     if (outline->n_points > 1) {
         FT_Vector  *p1      = outline->points + first;
         FT_Vector  *p2      = outline->points + outline->n_points - 1;
-        FT_Byte    *control = (FT_Byte *)outline->tags + outline->n_points - 1;
+        FT_Byte    *control = outline->tags   + outline->n_points - 1;
 
 
         /* `delete' last point only if it coincides with the first */
@@ -2302,9 +2309,9 @@ ps_builder_close_contour(PS_Builder  *builder)
         if (first == outline->n_points - 1) {
             outline->n_contours--;
             outline->n_points--;
-        } else
-            outline->contours[outline->n_contours - 1] =
-                (short)(outline->n_points - 1);
+        } else {
+            outline->contours[outline->n_contours - 1] = outline->n_points - 1;
+        }
     }
 }
 
@@ -2416,23 +2423,23 @@ t1_make_subfont(FT_Face      face,
 
     count = cpriv->num_blue_values = priv->num_blue_values;
     for (n = 0; n < count; n++) {
-        cpriv->blue_values[n] = (FT_Pos)priv->blue_values[n];
+        cpriv->blue_values[n] = cf2_intToFixed(priv->blue_values[n]);
     }
 
     count = cpriv->num_other_blues = priv->num_other_blues;
     for (n = 0; n < count; n++) {
-        cpriv->other_blues[n] = (FT_Pos)priv->other_blues[n];
+        cpriv->other_blues[n] = cf2_intToFixed(priv->other_blues[n]);
     }
 
     count = cpriv->num_family_blues = priv->num_family_blues;
     for (n = 0; n < count; n++) {
-        cpriv->family_blues[n] = (FT_Pos)priv->family_blues[n];
+        cpriv->family_blues[n] = cf2_intToFixed(priv->family_blues[n]);
     }
 
     count = cpriv->num_family_other_blues = priv->num_family_other_blues;
-    for (n = 0; n < count; n++) {
-        cpriv->family_other_blues[n] = (FT_Pos)priv->family_other_blues[n];
-    }
+    for (n = 0; n < count; n++)
+        cpriv->family_other_blues[n] =
+            cf2_intToFixed(priv->family_other_blues[n]);
 
     cpriv->blue_scale = priv->blue_scale;
     cpriv->blue_shift = (FT_Pos)priv->blue_shift;

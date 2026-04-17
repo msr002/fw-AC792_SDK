@@ -100,6 +100,9 @@ static void bt_status_init_ok(void)
 
     __this->init_ok = 1;
 
+    void set_edr_wait_conn_run_slot(u16 idle_run, u8 inquiry_scan_run, u8 page_scan_run, u8 random);
+    set_edr_wait_conn_run_slot(800, 0, 0, 0);
+
     bt_init_ok_search_index();
 
 #if TCFG_NORMAL_SET_DUT_MODE

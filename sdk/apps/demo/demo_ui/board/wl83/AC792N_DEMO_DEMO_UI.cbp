@@ -39,7 +39,7 @@
 <Add option="-DVM_MAX_SECTOR_ALIGN_SIZE_CONFIG=64*1024" />
 <Add option="-DVM_ITEM_MAX_NUM=256" />
 <Add option="-DRLOTTIE_COMMIT_HASH=\&quot;492fbb753924ae7cad27072a2b6ddedde88dc4bd\&quot;" />
-<Add option="-DFREETYPE_COMMIT_HASH=\&quot;45903920b984540bb629bc89f4c010159c23a89a\&quot;" />
+<Add option="-DFREETYPE_COMMIT_HASH=\&quot;ef54557bda3b17da1b7e42e8e207efd1842bcc05\&quot;" />
 <Add option="-DFT2_BUILD_LIBRARY" />
 <Add option="-DLVGL_COMMIT_HASH=\&quot;release_v9.3_c033a98afddd65aaafeebea625382a94020fe4a7\&quot;" />
 <Add option="-fno-unwind-tables" />
@@ -196,6 +196,7 @@
 <Unit filename="../../../../../apps/common/camera/gc1084_mipi/gc1084_mipi_awb.h" />
 <Unit filename="../../../../../apps/common/camera/gc1084_mipi/gc1084_mipi_iq.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../../apps/common/camera/gc1084_mipi/gc1084_mipi_iq.h" />
+<Unit filename="../../../../../apps/common/camera/gc2145_mipi/gc2145_mipi.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../../apps/common/camera/h63p_dvp/h63p_dvp.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../../apps/common/camera/h63p_dvp/h63p_dvp.h" />
 <Unit filename="../../../../../apps/common/camera/h63p_dvp/h63p_dvp_ae.c"><Option compilerVer="CC"/></Unit>
@@ -320,7 +321,6 @@
 <Unit filename="../../../../../apps/common/example/third_party/freetype/include/freetype/internal/ftrfork.h" />
 <Unit filename="../../../../../apps/common/example/third_party/freetype/include/freetype/internal/ftserv.h" />
 <Unit filename="../../../../../apps/common/example/third_party/freetype/include/freetype/internal/ftstream.h" />
-<Unit filename="../../../../../apps/common/example/third_party/freetype/include/freetype/internal/fttrace.h" />
 <Unit filename="../../../../../apps/common/example/third_party/freetype/include/freetype/internal/ftvalid.h" />
 <Unit filename="../../../../../apps/common/example/third_party/freetype/include/freetype/internal/psaux.h" />
 <Unit filename="../../../../../apps/common/example/third_party/freetype/include/freetype/internal/pshints.h" />
@@ -355,6 +355,7 @@
 <Unit filename="../../../../../apps/common/example/third_party/freetype/include/freetype/tttables.h" />
 <Unit filename="../../../../../apps/common/example/third_party/freetype/include/freetype/tttags.h" />
 <Unit filename="../../../../../apps/common/example/third_party/freetype/include/ft2build.h" />
+<Unit filename="../../../../../apps/common/example/third_party/freetype/src/autofit/afadjust.h" />
 <Unit filename="../../../../../apps/common/example/third_party/freetype/src/autofit/afblue.h" />
 <Unit filename="../../../../../apps/common/example/third_party/freetype/src/autofit/afcjk.h" />
 <Unit filename="../../../../../apps/common/example/third_party/freetype/src/autofit/afcover.h" />
@@ -374,6 +375,7 @@
 <Unit filename="../../../../../apps/common/example/third_party/freetype/src/autofit/afws-decl.h" />
 <Unit filename="../../../../../apps/common/example/third_party/freetype/src/autofit/afws-iter.h" />
 <Unit filename="../../../../../apps/common/example/third_party/freetype/src/autofit/autofit.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="../../../../../apps/common/example/third_party/freetype/src/autofit/ft-hb.h" />
 <Unit filename="../../../../../apps/common/example/third_party/freetype/src/base/ftbase.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../../apps/common/example/third_party/freetype/src/base/ftbase.h" />
 <Unit filename="../../../../../apps/common/example/third_party/freetype/src/base/ftbitmap.c"><Option compilerVer="CC"/></Unit>
@@ -382,7 +384,6 @@
 <Unit filename="../../../../../apps/common/example/third_party/freetype/src/base/ftinit.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../../apps/common/example/third_party/freetype/src/base/ftmm.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../../apps/common/example/third_party/freetype/src/base/ftsystem.c"><Option compilerVer="CC"/></Unit>
-<Unit filename="../../../../../apps/common/example/third_party/freetype/src/base/md5.h" />
 <Unit filename="../../../../../apps/common/example/third_party/freetype/src/bdf/bdf.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../../apps/common/example/third_party/freetype/src/bdf/bdf.h" />
 <Unit filename="../../../../../apps/common/example/third_party/freetype/src/bdf/bdfdrivr.h" />
@@ -507,6 +508,7 @@
 <Unit filename="../../../../../apps/common/example/third_party/freetype/src/sfnt/ttcmapc.h" />
 <Unit filename="../../../../../apps/common/example/third_party/freetype/src/sfnt/ttcolr.h" />
 <Unit filename="../../../../../apps/common/example/third_party/freetype/src/sfnt/ttcpal.h" />
+<Unit filename="../../../../../apps/common/example/third_party/freetype/src/sfnt/ttgpos.h" />
 <Unit filename="../../../../../apps/common/example/third_party/freetype/src/sfnt/ttkern.h" />
 <Unit filename="../../../../../apps/common/example/third_party/freetype/src/sfnt/ttload.h" />
 <Unit filename="../../../../../apps/common/example/third_party/freetype/src/sfnt/ttmtx.h" />
@@ -971,6 +973,7 @@
 <Unit filename="../../../../../apps/common/lvgl_v9/examples/others/xml/lv_example_xml_2.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../../apps/common/lvgl_v9/examples/porting/lv_port_disp.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../../apps/common/lvgl_v9/examples/porting/lv_port_disp.h" />
+<Unit filename="../../../../../apps/common/lvgl_v9/examples/porting/lv_port_disp_no_fb.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../../apps/common/lvgl_v9/examples/porting/lv_port_fs.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../../apps/common/lvgl_v9/examples/porting/lv_port_fs.h" />
 <Unit filename="../../../../../apps/common/lvgl_v9/examples/porting/lv_port_indev.c"><Option compilerVer="CC"/></Unit>

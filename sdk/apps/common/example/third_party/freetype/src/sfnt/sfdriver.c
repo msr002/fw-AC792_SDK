@@ -4,7 +4,7 @@
  *
  *   High-level SFNT driver interface (body).
  *
- * Copyright (C) 1996-2023 by
+ * Copyright (C) 1996-2026 by
  * David Turner, Robert Wilhelm, and Werner Lemberg.
  *
  * This file is part of the FreeType project, and may only be used,
@@ -47,6 +47,10 @@
 #ifdef TT_CONFIG_OPTION_BDF
 #include "ttbdf.h"
 #include <freetype/internal/services/svbdf.h>
+#endif
+
+#ifdef TT_CONFIG_OPTION_GPOS_KERNING
+#include "ttgpos.h"
 #endif
 
 #include "ttcmap.h"
@@ -888,7 +892,7 @@ sfnt_get_var_ps_name(TT_Face  face)
             FT_TRACE0(("sfnt_get_var_ps_name:"
                        " Shortening variation PS name prefix\n"));
             FT_TRACE0(("                     "
-                       " to %d characters\n", len));
+                       " to %u characters\n", len));
         }
 
         face->var_postscript_prefix     = result;
@@ -1133,12 +1137,7 @@ sfnt_get_charset_id(FT_Face       face,
     FT_Error         error;
 
 
-    /* XXX: I don't know whether this is correct, since
-     *      tt_face_find_bdf_prop only returns something correct if we have
-     *      previously selected a size that is listed in the BDF table.
-     *      Should we change the BDF table format to include single offsets
-     *      for `CHARSET_REGISTRY' and `CHARSET_ENCODING'?
-     */
+    /* We expect that a bitmap strike has been selected. */
     error = tt_face_find_bdf_prop(face, "CHARSET_REGISTRY", &registry);
     if (!error) {
         error = tt_face_find_bdf_prop(face, "CHARSET_ENCODING", &encoding);
@@ -1243,6 +1242,12 @@ sfnt_get_interface(FT_Module    module,
 #define PUT_PS_NAMES( a )  NULL
 #endif
 
+#ifdef TT_CONFIG_OPTION_GPOS_KERNING
+#define PUT_GPOS_KERNING( a )  a
+#else
+#define PUT_GPOS_KERNING( a )  NULL
+#endif
+
 FT_DEFINE_SFNT_INTERFACE(
     sfnt_interface,
 
@@ -1266,6 +1271,8 @@ FT_DEFINE_SFNT_INTERFACE(
     tt_face_free_name,      /* TT_Free_Table_Func      free_name       */
 
     tt_face_load_kern,      /* TT_Load_Table_Func      load_kern       */
+    PUT_GPOS_KERNING(tt_face_load_gpos),
+    /* TT_Load_Table_Func      load_gpos       */
     tt_face_load_gasp,      /* TT_Load_Table_Func      load_gasp       */
     tt_face_load_pclt,      /* TT_Load_Table_Func      load_init       */
 
@@ -1283,6 +1290,9 @@ FT_DEFINE_SFNT_INTERFACE(
 
     /* since version 2.1.8 */
     tt_face_get_kerning,    /* TT_Face_GetKerningFunc  get_kerning     */
+
+    PUT_GPOS_KERNING(tt_face_get_gpos_kerning),
+    /* TT_Face_GetKerningFunc  get_gpos_kerning */
 
     /* since version 2.2 */
     tt_face_load_font_dir,  /* TT_Load_Table_Func      load_font_dir   */
