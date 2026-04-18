@@ -1010,7 +1010,6 @@ void virtual_test()
     printf("------------virtual_test----------------");
     //初始化net buf
     u32 bufsize = 32 * 1024;
-    __this->net_buf = net_buf_init(&bufsize, NULL);
 
     __this->net_buf = net_buf_init(&bufsize, NULL);
     if (!__this->net_buf) {
