@@ -114,6 +114,7 @@ static const dev_tone_t device_tone[] = {
 #endif
 
 static int local_music_msg_handler(struct application *app, int *msg);
+static int music_device_tone_play(const char *logo);
 
 //*----------------------------------------------------------------------------*/
 /**@brief   music 模式首次播放

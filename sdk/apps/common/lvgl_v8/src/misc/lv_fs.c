@@ -307,6 +307,24 @@ lv_fs_res_t lv_fs_seek(lv_fs_file_t *file_p, uint32_t pos, lv_fs_whence_t whence
     return res;
 }
 
+lv_fs_res_t lv_fs_len(lv_fs_file_t *file_p, uint32_t *len)
+{
+    if (file_p->drv == NULL) {
+        *len = 0;
+        return LV_FS_RES_INV_PARAM;
+    }
+
+    if (file_p->drv->len_cb == NULL) {
+        *len = 0;
+        return LV_FS_RES_NOT_IMP;
+    }
+
+    lv_fs_res_t res;
+    res = file_p->drv->len_cb(file_p->drv, file_p->file_d, len);
+
+    return res;
+}
+
 lv_fs_res_t lv_fs_tell(lv_fs_file_t *file_p, uint32_t *pos)
 {
     if (file_p->drv == NULL) {

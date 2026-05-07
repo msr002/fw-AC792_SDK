@@ -33,7 +33,7 @@ static lv_fs_res_t fs_close(lv_fs_drv_t *drv, void *file_p);
 static lv_fs_res_t fs_read(lv_fs_drv_t *drv, void *file_p, void *buf, uint32_t btr, uint32_t *br);
 static lv_fs_res_t fs_write(lv_fs_drv_t *drv, void *file_p, const void *buf, uint32_t btw, uint32_t *bw);
 static lv_fs_res_t fs_seek(lv_fs_drv_t *drv, void *file_p, uint32_t pos, lv_fs_whence_t whence);
-static lv_fs_res_t fs_size(lv_fs_drv_t *drv, void *file_p, uint32_t *size_p);
+static lv_fs_res_t fs_len(lv_fs_drv_t *drv, void *file_p, uint32_t *len);
 static lv_fs_res_t fs_tell(lv_fs_drv_t *drv, void *file_p, uint32_t *pos_p);
 
 static void *fs_dir_open(lv_fs_drv_t *drv, const char *path);
@@ -78,6 +78,7 @@ void lv_port_fs_init(void)
     fs_drv.write_cb = fs_write;
     fs_drv.seek_cb = fs_seek;
     fs_drv.tell_cb = fs_tell;
+    fs_drv.len_cb = fs_len;
 
     fs_drv.dir_close_cb = fs_dir_close;
     fs_drv.dir_open_cb = fs_dir_open;
@@ -97,6 +98,7 @@ void lv_port_fs_init(void)
     fs_drv_m.write_cb = fs_write;
     fs_drv_m.seek_cb = fs_seek;
     fs_drv_m.tell_cb = fs_tell;
+    fs_drv.len_cb = fs_len;
 
     fs_drv_m.dir_close_cb = fs_dir_close;
     fs_drv_m.dir_open_cb = fs_dir_open;
@@ -244,6 +246,21 @@ static lv_fs_res_t fs_seek(lv_fs_drv_t *drv, void *file_p, uint32_t pos, lv_fs_w
 
     return res;
 }
+
+/**
+ * Give the len of the file
+ * @param drv       pointer to a driver where this function belongs
+ * @param file_p    pointer to a file_t variable.
+ * @param len       pointer to to store the result
+ * @return          LV_FS_RES_OK: no error or  any error from @lv_fs_res_t enum
+ */
+static lv_fs_res_t fs_len(lv_fs_drv_t *drv, void *file_p, uint32_t *len)
+{
+    *len = flen(file_p);
+
+    return LV_FS_RES_OK;
+}
+
 /**
  * Give the position of the read write pointer
  * @param drv       pointer to a driver where this function belongs

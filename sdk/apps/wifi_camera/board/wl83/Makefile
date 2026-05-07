@@ -1107,6 +1107,7 @@ c_SRC_FILES := \
 	../../../../apps/wifi_camera/wifi/media_file_list.c \
 	../../../../apps/wifi_camera/wifi/net_video_rec.c \
 	../../../../apps/wifi_camera/wifi/network_mssdp.c \
+	../../../../apps/wifi_camera/wifi/network_update_resume.c \
 	../../../../apps/wifi_camera/wifi/packet.c \
 	../../../../apps/wifi_camera/wifi/stream/video_rt_tcp.c \
 	../../../../apps/wifi_camera/wifi/stream/video_rt_udp.c \

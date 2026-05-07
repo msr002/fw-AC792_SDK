@@ -9,6 +9,8 @@
 #include "os/os_api.h"
 #include <string.h>
 #include "system/sys_time.h"
+#include "generic/jiffies.h"
+
 
 #define LWIP_DEBUG_SEM_CNT 0
 #define LWIP_DEBUG_MBOX_CNT 0
@@ -24,7 +26,6 @@ static int debug_mbox_post_cnt = 0;
 static int debug_mboxs_cnt = 0;
 #endif
 
-extern volatile unsigned long jiffies;
 /*----------------------------------------------------------------------------*/
 /*                      VARIABLES                                             */
 /*----------------------------------------------------------------------------*/
@@ -280,7 +281,8 @@ sys_arch_sem_wait(sys_sem_t *sem, u32_t timeout)
             timeout_new = timeout_new - timeout;
         } else {
             LWIP_ASSERT("sys_arch_sem_wait", timeout_new >= timeout);
-            timeout_new = 0xffffffff - timeout + timeout_new;
+            int offset = jiffies_msec2offset(timeout, timeout_new);
+            timeout_new = offset >= 0 ? offset : -offset;
         }
 
         /* timeout = (timeout_new * 1000 / OS_TICKS_PER_SEC + 1); //convert to milisecond 为什么加1？ */
@@ -454,7 +456,8 @@ u32_t sys_arch_mbox_fetch(sys_mbox_t *mbox, void **msg, u32_t timeout)
             timeout_new = timeout_new - timeout;
         } else {
             LWIP_ASSERT("sys_arch_mbox_fetch", timeout_new >= timeout);
-            timeout_new = 0xffffffff - timeout + timeout_new;
+            int offset = jiffies_msec2offset(timeout, timeout_new);
+            timeout_new = offset >= 0 ? offset : -offset;
         }
 
         /* timeout = timeout_new * 1000 / OS_TICKS_PER_SEC + 1; //convert to milisecond */

@@ -237,6 +237,10 @@ c_SRC_FILES := \
 	../../../../apps/common/example/third_party/freetype/src/type1/type1.c \
 	../../../../apps/common/example/third_party/freetype/src/type42/type42.c \
 	../../../../apps/common/example/third_party/freetype/src/winfonts/winfnt.c \
+	../../../../apps/common/example/third_party/littlefs/lfs.c \
+	../../../../apps/common/example/third_party/littlefs/lfs_test.c \
+	../../../../apps/common/example/third_party/littlefs/lfs_util.c \
+	../../../../apps/common/example/third_party/littlefs/port/wl83/port.c \
 	../../../../apps/common/example/third_party/rlottie_impl/src/vector/stb/rlottie_stb_image.c \
 	../../../../apps/common/example/third_party/sqlite/os_jl.c \
 	../../../../apps/common/example/third_party/sqlite/sqlite3.c \

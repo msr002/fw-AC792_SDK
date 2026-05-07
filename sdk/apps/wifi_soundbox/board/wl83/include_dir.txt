@@ -75,6 +75,7 @@
 -I../../../../apps/common/example/third_party/rlottie_impl/src/vector
 -I../../../../apps/common/example/third_party/rlottie_impl/src/vector/freetype
 -I../../../../apps/common/example/third_party/freetype/include
+-I../../../../apps/common/example/third_party/littlefs
 -I../../../../include_lib/system/ui
 -I../../../../include_lib/driver/cpu/wl83/asm
 -I../../../../apps/common/lvgl_v8

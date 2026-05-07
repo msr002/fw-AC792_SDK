@@ -26,7 +26,7 @@
 #define SUPPORT_MAX_CLIENT          1
 
 //---------------
-#define SEARCH_PROFILE_BUFSIZE      (512)
+#define SEARCH_PROFILE_BUFSIZE      (544)
 static u8 search_ram_buffer[SEARCH_PROFILE_BUFSIZE] __attribute__((aligned(4)));
 #define scan_buffer search_ram_buffer
 

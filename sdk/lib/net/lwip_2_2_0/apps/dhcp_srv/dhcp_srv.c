@@ -322,6 +322,7 @@ static u8_t parse_options(struct dhcp_msg *m, s16_t len)
     u8_t *end = optptr + len;
     s16_t type = 0;
     struct _dhcps_cli *cli;
+    u8_t is_dhcp_option_end = 0;
 
     dhcps_state = DHCPS_STATE_IDLE;
 
@@ -355,11 +356,18 @@ static u8_t parse_options(struct dhcp_msg *m, s16_t len)
             break;
 
         case DHCP_OPTION_END:
+            is_dhcp_option_end  = 1;
             break;
 
         default:
+            //should not happen
             break;
         }
+
+        if (is_dhcp_option_end) {
+            break;
+        }
+
         optptr += optptr[1] + 2;
     }
 

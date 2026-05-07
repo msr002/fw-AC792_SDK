@@ -385,6 +385,7 @@
 //                                  路径配置                                       //
 //*********************************************************************************//
 #define CONFIG_JLFAT_ENABLE
+// #define CONFIG_LITTLEFS_ENABLE
 
 #if defined CONFIG_UI_ENABLE
 #define TCFG_JLFAT_SUPPORT_OVERSECTOR_RW_ENABLE 1

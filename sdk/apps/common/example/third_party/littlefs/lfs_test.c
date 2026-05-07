@@ -1,487 +1,1014 @@
 #include "system/includes.h"
-#include "server/audio_server.h"
 #include "lfs.h"
 #include "fs/fs.h"
-
-#include "device/ioctl_cmds.h"
-#include "device/device.h"
-#include "generic/version.h"
-#include "stdarg.h"
 #include "string.h"
-#include "fs/fs.h"
-
-static u8 lfs_hdl_init;
-static u8 *prompt_buf;
-static int prompt_len = 2 * 1024 * 1024;
-static lfs_t lfs_hdl;
+#include "app_config.h"
 
 
+#ifdef CONFIG_LITTLEFS_ENABLE
 
-static void *audio_file_fopen(const char *path, const char *mode)
+/*
+ * littlefs -> VFS adapter (plus version)
+ *
+ * 说明：
+ * 1. 删除 audio/sdram 历史接口，仅保留 VFS 适配 littlefs。
+ * 2. 支持 fopen("w"/"w+") 自动创建多级目录。
+ * 3. 增加 frename / ftruncate / 按后缀过滤的 fscan。
+ * 4. 保留基础文件读写/删除/容量查询/递归扫描测试。
+ */
+
+#ifndef ARRAY_SIZE
+#define ARRAY_SIZE(a)   (sizeof(a) / sizeof((a)[0]))
+#endif
+
+#define LFS_VFS_NAME_MAX            128
+#define LFS_VFS_PATH_MAX            256
+#define LFS_VFS_SCAN_MAX_FILES      128
+#define LFS_VFS_EXT_MAX             16
+#define LFS_VFS_EXT_LEN             16
+
+#ifndef FNO_ERR
+#define FNO_ERR                     0
+#endif
+#ifndef FNO_FILE_NOT_EXIST
+#define FNO_FILE_NOT_EXIST          (-2)
+#endif
+#ifndef FNO_DIR_NOT_EXIST
+#define FNO_DIR_NOT_EXIST           (-3)
+#endif
+#ifndef FNO_DECODE_FAIL
+#define FNO_DECODE_FAIL             (-4)
+#endif
+
+typedef struct {
+    lfs_file_t file;
+    char path[LFS_VFS_PATH_MAX];
+    char name[LFS_VFS_NAME_MAX];
+    u8 opened;
+} lfs_vfs_file_ctx_t;
+
+typedef struct {
+    u16 file_total;
+    u16 file_index;
+    char root[LFS_VFS_PATH_MAX];
+    char names[LFS_VFS_SCAN_MAX_FILES][LFS_VFS_NAME_MAX];
+    char rel_paths[LFS_VFS_SCAN_MAX_FILES][LFS_VFS_PATH_MAX];
+} lfs_vfs_scan_ctx_t;
+
+static lfs_t *g_lfs;
+
+static int lfs_mode_convert(const char *mode)
 {
-    lfs_file_t *file = zalloc(sizeof(lfs_file_t));
+    if (!mode) {
+        return -1;
+    }
+
+    if (!strcmp(mode, "r")) {
+        return LFS_O_RDONLY;
+    }
+    if (!strcmp(mode, "w")) {
+        return LFS_O_WRONLY | LFS_O_CREAT | LFS_O_TRUNC;
+    }
+    if (!strcmp(mode, "w+")) {
+        return LFS_O_RDWR | LFS_O_CREAT | LFS_O_TRUNC;
+    }
+
+    printf("[lfs_vfs] unsupported mode=%s\n", mode);
+    return -1;
+}
+
+static int lfs_mode_need_create_dirs(const char *mode)
+{
+    if (!mode) {
+        return 0;
+    }
+    return (!strcmp(mode, "w") || !strcmp(mode, "w+"));
+}
+
+static const char *lfs_vfs_trim_path(const char *path)
+{
+    const char *p;
+
+    if (!path) {
+        return NULL;
+    }
+
+    if (!strcmp(path, "C") || !strcmp(path, "/C")) {
+        return "";
+    }
+
+    p = strstr(path, "/C/");
+    if (p) {
+        return p + 3;
+    }
+
+    p = strstr(path, "C/");
+    if (p == path || (p > path && *(p - 1) == '/')) {
+        return p + 2;
+    }
+
+    if (path[0] == '/') {
+        return path + 1;
+    }
+
+    return path;
+}
+
+static void lfs_vfs_get_basename(const char *path, char *name, u32 name_len)
+{
+    const char *base;
+
+    if (!name || !name_len) {
+        return;
+    }
+
+    name[0] = '\0';
+    if (!path || !path[0]) {
+        return;
+    }
+
+    base = strrchr(path, '/');
+    base = base ? (base + 1) : path;
+
+    strncpy(name, base, name_len - 1);
+    name[name_len - 1] = '\0';
+}
+
+static lfs_vfs_file_ctx_t *lfs_vfs_fp_ctx(FILE *file)
+{
     if (!file) {
         return NULL;
     }
-    lfs_file_open(&lfs_hdl, file, path, mode);
-    return (void *)file;
+    return (lfs_vfs_file_ctx_t *)file->private_data;
 }
 
-static int audio_file_fread(void *file, void *buf, u32 len)
+static int lfs_vfs_join_path(char *out, u32 out_len, const char *dir, const char *name)
 {
-    return lfs_file_read(&lfs_hdl, file, buf, len);
-}
-
-static int audio_file_fwrite(void *file, void *buf, u32 len)
-{
-    return lfs_file_write(&lfs_hdl, file, buf, len);
-}
-
-static int audio_file_fseek(void *file, u32 offset, int orig)
-{
-    return lfs_file_seek(&lfs_hdl, file, offset, orig);
-}
-
-static int audio_file_ftell(void *file)
-{
-    return lfs_file_tell(&lfs_hdl, file);
-}
-
-static int audio_file_flen(void *file)
-{
-    return lfs_file_size(&lfs_hdl, file);
-}
-
-static int audio_file_fclose(void *file)
-{
-    lfs_file_close(&lfs_hdl, file);
-    free(file);
-    return 0;
-}
-
-const struct audio_vfs_ops load_sdram_ops = {
-    .fopen  	= audio_file_fopen,
-    .fread  	= audio_file_fread,
-    .fwrite 	= audio_file_fwrite,
-    .fseek  	= audio_file_fseek,
-    .ftell  	= audio_file_ftell,
-    .flen   	= audio_file_flen,
-    .fclose 	= audio_file_fclose,
-};
-
-const struct audio_vfs_ops *get_load_sdram_ops(void)
-{
-    return &load_sdram_ops;
-}
-
-
-
-static int lfs_sdram_read(const struct lfs_config *c, lfs_block_t block,
-                          lfs_off_t off, void *buffer, lfs_size_t size)
-{
-    memcpy(buffer, (u32)c->context + block * c->block_size + off, size);
-    return 0;
-}
-
-static int lfs_sdram_prog(const struct lfs_config *c, lfs_block_t block,
-                          lfs_off_t off, const void *buffer, lfs_size_t size)
-{
-    memcpy((u32)c->context + block * c->block_size + off, buffer, size);
-    return 0;
-}
-
-static int lfs_sdram_erase(const struct lfs_config *c, lfs_block_t block)
-{
-    memset((u32)c->context + block * c->block_size, 0, c->block_size);
-    return 0;
-}
-
-static int lfs_sdram_sync(const struct lfs_config *c)
-{
-    return 0;
-}
-
-static struct lfs_config cfg = {
-    // block device operations
-    .read  = lfs_sdram_read,
-    .prog  = lfs_sdram_prog,
-    .erase = lfs_sdram_erase,
-    .sync  = lfs_sdram_sync,
-
-    // block device configuration
-    .read_size = 1,
-    .prog_size = 256,
-    .block_size = 4096,
-    .cache_size = 4096,
-    .block_cycles = 500,
-};
-
-void lfs_sdram_prompt_init()
-{
-    int ret;
-    lfs_file_t file;
-
-    if (lfs_hdl_init) {
-        return;
-    }
-
-    prompt_buf = zalloc(prompt_len);
-    if (!prompt_buf) {
-        printf("malloc prompt buf fail\n\r");
-        return;
-    }
-
-    // mount the filesystem
-    cfg.context = (void *)prompt_buf;
-    cfg.block_count = prompt_len / cfg.block_size;
-    cfg.lookahead_size = (cfg.block_count / 8) + (((cfg.block_count / 8) & 7) ? ((8) - ((cfg.block_count / 8) & 7)) : 0);
-
-    if (lfs_mount(&lfs_hdl, &cfg)) {
-        // reformat if we can't mount the filesystem
-        // this should only happen on the first boot
-        lfs_format(&lfs_hdl, &cfg);
-        if (lfs_mount(&lfs_hdl, &cfg)) {
-            free(prompt_buf);
-            puts("lfs_mount fail! \r\n");
-            return;
-        }
-
-    }
-    lfs_hdl_init = 1;
-}
-
-void lfs_sdram_prompt_load(char *path, char *name)
-{
-    int ret;
-    lfs_file_t lfs_file;
-    char fname[256] = {0};
-    int read_len = 4096;
-    u8 *read_buf = malloc(read_len);
-    if (!read_buf) {
-        printf("malloc, lfs file open %s fail\n\r", name);
-        return;
-    }
-    sprintf(fname, "%s%s", path, name);
-    FILE *f_file = fopen(fname, "r");
-    if (f_file) {
-        ret = lfs_file_open(&lfs_hdl, &lfs_file, name, LFS_O_RDWR | LFS_O_CREAT);
-        if (ret < 0) {
-            printf("lfs file open %s fail\n\r", name);
-            fclose(f_file);
-            free(read_buf);
-            return;
-        }
-        ret = 1;
-        while (ret > 0) {
-            ret = fread(read_buf, read_len, 1, f_file);
-            if (ret) {
-                lfs_file_write(&lfs_hdl, &lfs_file, read_buf, ret);
-            }
-        }
-        lfs_file_close(&lfs_hdl, &lfs_file);
-        fclose(f_file);
-        free(read_buf);
-    }
-}
-
-int lfs_sdram_prompt_check(char *fname)
-{
-    int ret;
-    lfs_file_t lfs_file;
-    ret = lfs_file_open(&lfs_hdl, &lfs_file, fname, LFS_O_RDONLY);
-    if (ret < 0) {
+    if (!out || !out_len) {
         return -1;
     }
-    lfs_file_close(&lfs_hdl, &lfs_file);
+
+    if (!dir || !dir[0]) {
+        snprintf(out, out_len, "%s", name ? name : "");
+    } else if (!name || !name[0]) {
+        snprintf(out, out_len, "%s", dir);
+    } else {
+        snprintf(out, out_len, "%s/%s", dir, name);
+    }
+
+    out[out_len - 1] = '\0';
     return 0;
 }
 
-void *lfs_sdram_prompt_open(char *fname)
+static char lfs_vfs_tolower(char c)
+{
+    if (c >= 'A' && c <= 'Z') {
+        return c - 'A' + 'a';
+    }
+    return c;
+}
+
+static int lfs_vfs_stricmp(const char *a, const char *b)
+{
+    char ca;
+    char cb;
+
+    if (!a || !b) {
+        return -1;
+    }
+
+    while (*a && *b) {
+        ca = lfs_vfs_tolower(*a++);
+        cb = lfs_vfs_tolower(*b++);
+        if (ca != cb) {
+            return (int)(unsigned char)ca - (int)(unsigned char)cb;
+        }
+    }
+
+    return (int)(unsigned char)lfs_vfs_tolower(*a) -
+           (int)(unsigned char)lfs_vfs_tolower(*b);
+}
+
+static void lfs_vfs_get_ext(const char *name, char *ext, u32 ext_len)
+{
+    const char *dot;
+
+    if (!ext || !ext_len) {
+        return;
+    }
+
+    ext[0] = '\0';
+    if (!name || !name[0]) {
+        return;
+    }
+
+    dot = strrchr(name, '.');
+    if (!dot || !dot[1]) {
+        return;
+    }
+
+    strncpy(ext, dot + 1, ext_len - 1);
+    ext[ext_len - 1] = '\0';
+}
+
+static int lfs_vfs_parse_ext_filters(const char *ftype,
+                                     char exts[LFS_VFS_EXT_MAX][LFS_VFS_EXT_LEN],
+                                     int *ext_num)
+{
+    int count = 0;
+    char token[LFS_VFS_EXT_LEN];
+    int ti = 0;
+    const char *p;
+
+    if (!ext_num) {
+        return -1;
+    }
+
+    *ext_num = 0;
+    if (!ftype || !ftype[0]) {
+        return 0;
+    }
+
+    memset(exts, 0, LFS_VFS_EXT_MAX * LFS_VFS_EXT_LEN);
+    memset(token, 0, sizeof(token));
+
+    for (p = ftype; ; p++) {
+        char c = *p;
+        int split = (c == '\0' || c == ',' || c == ';' || c == '|' || c == ' ' || c == '/');
+
+        if (!split) {
+            if (c == '.') {
+                continue;
+            }
+            if (ti < (int)sizeof(token) - 1) {
+                token[ti++] = lfs_vfs_tolower(c);
+            }
+            continue;
+        }
+
+        if (ti > 0) {
+            token[ti] = '\0';
+            strncpy(exts[count], token, LFS_VFS_EXT_LEN - 1);
+            exts[count][LFS_VFS_EXT_LEN - 1] = '\0';
+            count++;
+            if (count >= LFS_VFS_EXT_MAX) {
+                break;
+            }
+            memset(token, 0, sizeof(token));
+            ti = 0;
+        }
+
+        if (c == '\0') {
+            break;
+        }
+    }
+
+    *ext_num = count;
+    return 0;
+}
+
+static int lfs_vfs_match_ext(const struct vfscan *fsn, const char *name)
+{
+    char exts[LFS_VFS_EXT_MAX][LFS_VFS_EXT_LEN];
+    int ext_num = 0;
+    int i;
+    char file_ext[LFS_VFS_EXT_LEN];
+
+    if (!fsn || !fsn->ftype[0]) {
+        return 1;
+    }
+
+    if (lfs_vfs_parse_ext_filters(fsn->ftype, exts, &ext_num) < 0 || ext_num <= 0) {
+        return 1;
+    }
+
+    lfs_vfs_get_ext(name, file_ext, sizeof(file_ext));
+    if (!file_ext[0]) {
+        return 0;
+    }
+
+    for (i = 0; i < ext_num; i++) {
+        if (!lfs_vfs_stricmp(file_ext, exts[i])) {
+            return 1;
+        }
+    }
+
+    return 0;
+}
+
+static int lfs_vfs_ensure_dir(const char *dir)
 {
     int ret;
-    lfs_file_t *lfs_file = zalloc(sizeof(lfs_file_t));
-    if (!lfs_file) {
-        printf("%s, %d, malloc fail\n\r", __func__, __LINE__);
-        return NULL;
+    char tmp[LFS_VFS_PATH_MAX];
+    char *p;
+
+    if (!g_lfs || !dir) {
+        return -1;
     }
-    ret = lfs_file_open(&lfs_hdl, lfs_file, fname, LFS_O_RDONLY);
-    if (ret < 0) {
-        printf("%s, %d, lfs file open %s fail\n\r", __func__, __LINE__, fname);
-        free(lfs_file);
-        return NULL;
+
+    if (!dir[0] || !strcmp(dir, "/")) {
+        return 0;
     }
-    return lfs_file;
+
+    strncpy(tmp, dir, sizeof(tmp) - 1);
+    tmp[sizeof(tmp) - 1] = '\0';
+
+    if (tmp[0] == '/') {
+        memmove(tmp, tmp + 1, strlen(tmp));
+    }
+
+    for (p = tmp; *p; p++) {
+        if (*p != '/') {
+            continue;
+        }
+        *p = '\0';
+        if (tmp[0]) {
+            ret = lfs_mkdir(g_lfs, tmp);
+            if (ret < 0 && ret != LFS_ERR_EXIST) {
+                return ret;
+            }
+        }
+        *p = '/';
+    }
+
+    ret = lfs_mkdir(g_lfs, tmp);
+    if (ret < 0 && ret != LFS_ERR_EXIST) {
+        return ret;
+    }
+
+    return 0;
 }
 
-void lfs_sdram_prompt_close(void *lfs_file)
-{
-    lfs_file_close(&lfs_hdl, lfs_file);
-    free(lfs_file);
-}
-
-void close_avi_test(void *priv)
-{
-    printf(">>>>>>close_avi_test$$$$$$$$$$$$$$$$$$yuyu");
-
-}
-
-
-#if 0
-// entry point
-void lfs_test(void)
+static int lfs_vfs_ensure_parent_dirs(const char *file_path)
 {
     int ret;
-    lfs_file_t file;
+    char dir[LFS_VFS_PATH_MAX];
+    char *p;
 
-    lfs_hdl = lfs_dev_mount();
-    if (lfs_hdl == NULL) {
-        printf("lfs_test lfs_dev_mount fail! \r\n");
+    if (!file_path || !file_path[0]) {
+        return 0;
     }
 
-    // read current count
-    u32 boot_count = 0;
-    ret = lfs_file_open(lfs_hdl, &file, "boot_count", LFS_O_RDWR | LFS_O_CREAT);
+    strncpy(dir, file_path, sizeof(dir) - 1);
+    dir[sizeof(dir) - 1] = '\0';
+
+    p = strrchr(dir, '/');
+    if (!p) {
+        return 0;
+    }
+
+    *p = '\0';
+    if (!dir[0]) {
+        return 0;
+    }
+
+    ret = lfs_vfs_ensure_dir(dir);
     if (ret < 0) {
-        printf("lfs_test lfs_file_open fail! \r\n");
+        printf("[lfs_vfs] ensure_dir fail path=%s ret=%d\n", dir, ret);
+    }
+    return ret;
+}
+
+static int lfs_vfs_scan_collect(struct vfscan *fsn, lfs_vfs_scan_ctx_t *scan,
+                                const char *root, u8 max_depth)
+{
+    int ret;
+    lfs_dir_t dir;
+    struct lfs_info info;
+    char cur[LFS_VFS_PATH_MAX];
+    char rel[LFS_VFS_PATH_MAX];
+    u8 next_depth;
+
+    if (!scan || !g_lfs) {
+        return -1;
     }
 
-    lfs_file_read(lfs_hdl, &file, &boot_count, sizeof(boot_count));
+    strncpy(cur, root ? root : "", sizeof(cur) - 1);
+    cur[sizeof(cur) - 1] = '\0';
 
-    // update boot count
-    boot_count += 1;
-    lfs_file_rewind(lfs_hdl, &file);
-    lfs_file_write(lfs_hdl, &file, &boot_count, sizeof(boot_count));
+    ret = lfs_dir_open(g_lfs, &dir, cur[0] ? cur : "/");
+    if (ret < 0) {
+        ret = lfs_dir_open(g_lfs, &dir, cur);
+    }
+    if (ret < 0) {
+        return ret;
+    }
 
-    // remember the storage is not updated until the file is closed successfully
-    lfs_file_close(lfs_hdl, &file);
+    while (1) {
+        ret = lfs_dir_read(g_lfs, &dir, &info);
+        if (ret < 0) {
+            lfs_dir_close(g_lfs, &dir);
+            return ret;
+        }
+        if (ret == 0) {
+            break;
+        }
 
-    // print the boot count
-    printf("lfs_test boot_count: %d\n", boot_count);
+        if (!strcmp(info.name, ".") || !strcmp(info.name, "..")) {
+            continue;
+        }
 
-    //reboot the device
+        lfs_vfs_join_path(rel, sizeof(rel), cur, info.name);
+
+        if (info.type == LFS_TYPE_REG) {
+            if (!lfs_vfs_match_ext(fsn, info.name)) {
+                continue;
+            }
+            if (scan->file_total >= LFS_VFS_SCAN_MAX_FILES) {
+                break;
+            }
+            strncpy(scan->names[scan->file_total], info.name, LFS_VFS_NAME_MAX - 1);
+            scan->names[scan->file_total][LFS_VFS_NAME_MAX - 1] = '\0';
+            strncpy(scan->rel_paths[scan->file_total], rel, LFS_VFS_PATH_MAX - 1);
+            scan->rel_paths[scan->file_total][LFS_VFS_PATH_MAX - 1] = '\0';
+            scan->file_total++;
+            continue;
+        }
+
+        if (info.type == LFS_TYPE_DIR && max_depth > 0) {
+            next_depth = max_depth - 1;
+            ret = lfs_vfs_scan_collect(fsn, scan, rel, next_depth);
+            if (ret < 0) {
+                lfs_dir_close(g_lfs, &dir);
+                return ret;
+            }
+            if (scan->file_total >= LFS_VFS_SCAN_MAX_FILES) {
+                break;
+            }
+        }
+    }
+
+    lfs_dir_close(g_lfs, &dir);
+    return 0;
 }
-#endif
-
-
-#if 0
-lfs_file_t lfs_file;
-static lfs_t *lfs_h;
 
 static int __lfs_mount(struct imount *mt, int cache_num)
 {
+    struct vfs_partition *part;
 
-    printf("\n [lfs_msg] %s -note %d\n", __FUNCTION__, __LINE__);
-    int ret;
-    lfs_h = lfs_dev_mount();
-    if (lfs_h == NULL) {
-        printf("lfs_test lfs_dev_mount fail! \r\n");
+    (void)cache_num;
+
+    if (!mt) {
+        return -1;
     }
 
-    struct vfs_partition *part = &mt->part;
+    g_lfs = lfs_dev_mount();
+    if (!g_lfs) {
+        printf("[lfs_vfs] lfs_dev_mount fail\n");
+        return -1;
+    }
 
-    mt->part_num = 0;
+    part = &mt->part;
+    memset(part, 0, sizeof(*part));
+    mt->part_num = 1;
     part->offset = 0;
     part->dir[0] = 'C';
     part->dir[1] = '\0';
-
     return 0;
 }
 
-static int __lfs_fopen(FILE *_file, const char *path, const char *mode)
+static int __lfs_unmount(struct imount *mt)
 {
+    (void)mt;
+    g_lfs = NULL;
+    return 0;
+}
 
-    printf("\n [lfs_msg] %s -note %d\n", __FUNCTION__, __LINE__);
-    int ret = 0;
-    ret = lfs_file_open(lfs_h, &lfs_file, path, LFS_O_RDWR | LFS_O_CREAT);
-    if (ret < 0) {
-        printf("lfs_test lfs_file_open fail! \r\n");
+static int __lfs_fopen(FILE *file, const char *path, const char *mode)
+{
+    int ret;
+    int lfs_mode;
+    const char *real_path;
+    lfs_vfs_file_ctx_t *ctx;
+
+    if (!file || !path || !mode || !g_lfs) {
+        return -1;
     }
+
+    lfs_mode = lfs_mode_convert(mode);
+    if (lfs_mode < 0) {
+        return -1;
+    }
+
+    real_path = lfs_vfs_trim_path(path);
+    if (!real_path) {
+        return -1;
+    }
+
+    if (lfs_mode_need_create_dirs(mode)) {
+        ret = lfs_vfs_ensure_parent_dirs(real_path);
+        if (ret < 0) {
+            return -1;
+        }
+    }
+
+    ctx = zalloc(sizeof(*ctx));
+    if (!ctx) {
+        return -1;
+    }
+
+    strncpy(ctx->path, real_path, sizeof(ctx->path) - 1);
+    ctx->path[sizeof(ctx->path) - 1] = '\0';
+    lfs_vfs_get_basename(ctx->path, ctx->name, sizeof(ctx->name));
+
+    ret = lfs_file_open(g_lfs, &ctx->file, ctx->path, lfs_mode);
+    if (ret < 0) {
+        free(ctx);
+        return -1;
+    }
+
+    ctx->opened = 1;
+    file->private_data = ctx;
     return 0;
 }
 
-static int __lfs_fread(FILE *_file, void *buf, u32 len)
+static int __lfs_fread(FILE *file, void *buf, u32 len)
 {
-    printf("\n [lfs_msg] %s -note %d\n", __FUNCTION__, __LINE__);
-    return lfs_file_read(lfs_h, &lfs_file, buf, len);;
+    lfs_vfs_file_ctx_t *ctx = lfs_vfs_fp_ctx(file);
+
+    if (!ctx || !ctx->opened || !buf || !g_lfs) {
+        return -1;
+    }
+    return lfs_file_read(g_lfs, &ctx->file, buf, len);
 }
 
-static int __lfs_fwrite(FILE *_file, void *buf, u32 len)
+static int __lfs_fwrite(FILE *file, void *buf, u32 len)
 {
-    printf("\n [lfs_msg] %s -note %d\n", __FUNCTION__, __LINE__);
-    return lfs_file_write(lfs_h, &lfs_file, buf, len);
+    lfs_vfs_file_ctx_t *ctx = lfs_vfs_fp_ctx(file);
+
+    if (!ctx || !ctx->opened || !buf || !g_lfs) {
+        return -1;
+    }
+    return lfs_file_write(g_lfs, &ctx->file, buf, len);
 }
 
-static int __lfs_fseek(FILE *_file, int offset, int orig)
+static int __lfs_fseek(FILE *file, u32 offset, int orig)
 {
-    printf("\n [lfs_msg] %s -note %d\n", __FUNCTION__, __LINE__);
-    return lfs_file_seek(lfs_h, &lfs_file, offset, orig);
+    lfs_vfs_file_ctx_t *ctx = lfs_vfs_fp_ctx(file);
+
+    if (!ctx || !ctx->opened || !g_lfs) {
+        return -1;
+    }
+    return lfs_file_seek(g_lfs, &ctx->file, offset, orig);
 }
 
-static int __lfs_flen(FILE *_file)
+static u32 __lfs_flen(FILE *file)
 {
-    printf("\n [lfs_msg] %s -note %d\n", __FUNCTION__, __LINE__);
-    return lfs_file_size(lfs_h, &lfs_file);
+    lfs_vfs_file_ctx_t *ctx = lfs_vfs_fp_ctx(file);
+
+    if (!ctx || !ctx->opened || !g_lfs) {
+        return (u32) - 1;
+    }
+    return lfs_file_size(g_lfs, &ctx->file);
 }
 
-static int __lfs_fpos(FILE *_file)
+static u32 __lfs_fpos(FILE *file)
 {
-    printf("\n [lfs_msg] %s -note %d\n", __FUNCTION__, __LINE__);
-    return lfs_file_tell(lfs_h, &lfs_file);
+    lfs_vfs_file_ctx_t *ctx = lfs_vfs_fp_ctx(file);
+
+    if (!ctx || !ctx->opened || !g_lfs) {
+        return (u32) - 1;
+    }
+    return lfs_file_tell(g_lfs, &ctx->file);
 }
 
-static int __lfs_fclose(FILE *_file)
+static int __lfs_fclose(FILE *file)
 {
-    printf("\n [lfs_msg] %s -note %d\n", __FUNCTION__, __LINE__);
-    lfs_file_close(lfs_h, &lfs_file);
-    /*free(&lfs_file);*/
+    lfs_vfs_file_ctx_t *ctx = lfs_vfs_fp_ctx(file);
+
+    if (!ctx || !g_lfs) {
+        return -1;
+    }
+
+    if (ctx->opened) {
+        lfs_file_close(g_lfs, &ctx->file);
+        ctx->opened = 0;
+    }
+
+    free(ctx);
+    file->private_data = NULL;
     return 0;
 }
 
-static int __lfs_fscan(struct vfscan *fsn, const char *path)
+static int __lfs_fdelete(FILE *file)
 {
-    printf("\n [lfs_msg] %s -note %d\n", __FUNCTION__, __LINE__);
+    int ret;
+    char path[LFS_VFS_PATH_MAX];
+    lfs_vfs_file_ctx_t *ctx = lfs_vfs_fp_ctx(file);
+
+    if (!ctx || !g_lfs) {
+        return -1;
+    }
+
+    strncpy(path, ctx->path, sizeof(path) - 1);
+    path[sizeof(path) - 1] = '\0';
+
+    if (ctx->opened) {
+        lfs_file_close(g_lfs, &ctx->file);
+        ctx->opened = 0;
+    }
+
+    free(ctx);
+    file->private_data = NULL;
+    ret = lfs_remove(g_lfs, path);
+    return ret;
+}
+
+static int __lfs_frename(FILE *file, const char *path)
+{
+    int ret;
+    char old_path[LFS_VFS_PATH_MAX];
+    const char *new_path;
+    lfs_vfs_file_ctx_t *ctx = lfs_vfs_fp_ctx(file);
+
+    if (!ctx || !path || !g_lfs) {
+        return -1;
+    }
+
+    new_path = lfs_vfs_trim_path(path);
+    if (!new_path || !new_path[0]) {
+        return -1;
+    }
+
+    ret = lfs_vfs_ensure_parent_dirs(new_path);
+    if (ret < 0) {
+        return ret;
+    }
+
+    strncpy(old_path, ctx->path, sizeof(old_path) - 1);
+    old_path[sizeof(old_path) - 1] = '\0';
+
+    if (ctx->opened) {
+        ret = lfs_file_close(g_lfs, &ctx->file);
+        if (ret < 0) {
+            return ret;
+        }
+        ctx->opened = 0;
+    }
+
+    ret = lfs_rename(g_lfs, old_path, new_path);
+    if (ret < 0) {
+        return ret;
+    }
+
+    strncpy(ctx->path, new_path, sizeof(ctx->path) - 1);
+    ctx->path[sizeof(ctx->path) - 1] = '\0';
+    lfs_vfs_get_basename(ctx->path, ctx->name, sizeof(ctx->name));
     return 0;
 }
 
-static int __lfs_fsel(struct vfscan *fsn, int sel_mode, FILE *_file, int num)
+static int __lfs_ftruncate(FILE *file, u32 size)
 {
-    printf("\n [lfs_msg] %s -note %d\n", __FUNCTION__, __LINE__);
-    return 0;
-}
-static void __lfs_fscan_release(struct vfscan *fsn)
-{
-    printf("\n [lfs_msg] %s -note %d\n", __FUNCTION__, __LINE__);
+    lfs_vfs_file_ctx_t *ctx = lfs_vfs_fp_ctx(file);
+
+    if (!ctx || !ctx->opened || !g_lfs) {
+        return -1;
+    }
+    return lfs_file_truncate(g_lfs, &ctx->file, size);
 }
 
-static int __lfs_fget_name(FILE *_file, u8 *name, int len)
+static int __lfs_fget_name(FILE *file, u8 *name, int len)
 {
-    printf("\n [lfs_msg] %s -note %d\n", __FUNCTION__, __LINE__);
+    int n;
+    lfs_vfs_file_ctx_t *ctx = lfs_vfs_fp_ctx(file);
+
+    if (!ctx || !name || len <= 0) {
+        return -1;
+    }
+
+    n = strlen(ctx->name);
+    if (n >= len) {
+        n = len - 1;
+    }
+
+    memcpy(name, ctx->name, n);
+    name[n] = '\0';
+    return n;
+}
+
+static int __lfs_fget_path(FILE *file, struct vfscan *fsn, u8 *name, int len, u8 is_relative_path)
+{
+    int n;
+    char abs_path[LFS_VFS_PATH_MAX + 16];
+    lfs_vfs_file_ctx_t *ctx = lfs_vfs_fp_ctx(file);
+    const char *src;
+
+    (void)fsn;
+    if (!ctx || !name || len <= 0) {
+        return -1;
+    }
+
+    if (is_relative_path) {
+        src = ctx->path;
+    } else {
+        snprintf(abs_path, sizeof(abs_path), "C/%s", ctx->path);
+        src = abs_path;
+    }
+
+    n = strlen(src);
+    if (n >= len) {
+        n = len - 1;
+    }
+
+    memcpy(name, src, n);
+    name[n] = '\0';
+    return n;
+}
+
+static int __lfs_fget_attr(FILE *file, int *attr)
+{
+    (void)file;
+    if (!attr) {
+        return -1;
+    }
+    *attr = F_ATTR_ARC | F_ATTR_RW;
     return 0;
 }
 
-static int __lfs_fget_attr(FILE *_file, int *attr)
+static int __lfs_fget_attrs(FILE *file, struct vfs_attr *attr)
 {
-    printf("\n [lfs_msg] %s -note %d\n", __FUNCTION__, __LINE__);
-    return 0;
-}
+    if (!file || !attr) {
+        return -1;
+    }
 
-static int __lfs_fget_attrs(FILE *_file, struct vfs_attr *attr)
-{
-    printf("\n [lfs_msg] %s -note %d\n", __FUNCTION__, __LINE__);
+    memset(attr, 0, sizeof(*attr));
+    attr->attr = F_ATTR_ARC | F_ATTR_RW;
+    attr->fsize = __lfs_flen(file);
     return 0;
 }
 
 static int __lfs_fget_free_space(struct vfs_devinfo *dev, struct vfs_partition *part, u32 *space)
 {
-    printf("\n [ERROR] %s -jiji %d\n", __FUNCTION__, __LINE__);
+    lfs_ssize_t used_blocks;
+    u32 total_blocks;
+    u32 block_size;
+
+    (void)dev;
+    (void)part;
+
+    if (!g_lfs || !space || !g_lfs->cfg) {
+        return -1;
+    }
+
+    used_blocks = lfs_fs_size(g_lfs);
+    if (used_blocks < 0) {
+        *space = 0;
+        return -1;
+    }
+
+    total_blocks = g_lfs->cfg->block_count;
+    block_size = g_lfs->cfg->block_size;
+    if ((u32)used_blocks > total_blocks) {
+        used_blocks = total_blocks;
+    }
+
+    *space = (total_blocks - used_blocks) * block_size;
     return 0;
 }
 
-REGISTER_VFS_OPERATIONS(lfs_vfs_ops) = {
-    .fs_type = "lfs",
-    .mount 	= __lfs_mount,
-    .fopen 	= __lfs_fopen,
-    .fread 	= __lfs_fread,
-    .fwrite = __lfs_fwrite,
-    .fseek 	= __lfs_fseek,
-    .flen 	= __lfs_flen,
-    .fpos 	= __lfs_fpos,
-    .fclose = __lfs_fclose,
-    .fscan  = __lfs_fscan,
-    .fsel  = __lfs_fsel,
-    .fscan_release = __lfs_fscan_release,
-    .fget_free_space = __lfs_fget_free_space,
-    .fget_name = __lfs_fget_name,
-    .fget_attr = __lfs_fget_attr,
-    .fget_attrs = __lfs_fget_attrs,
-};
-
-static void Calculation_w_len_frame(u16 len)
+static int __lfs_fscan(struct vfscan *fsn, const char *path, u8 max_deepth)
 {
-    static u32 tstart = 0, tdiff = 0;
-    static u32 w_len = 0;
-    w_len += len ;
-    if (!tstart) {
-        tstart = timer_get_ms();
-    } else {
-        tdiff = timer_get_ms() - tstart;
-        if (tdiff >= 1000) {
-            printf("\n [MSG]lfs_w_len = %dKB/s\n", w_len *  1000 / tdiff / 1024);
-            tstart = 0;
-            w_len = 0;
-        }
+    int ret;
+    lfs_vfs_scan_ctx_t *scan;
+    const char *real_path;
+
+    if (!fsn || !g_lfs) {
+        return -1;
+    }
+
+    scan = zalloc(sizeof(*scan));
+    if (!scan) {
+        return -1;
+    }
+
+    real_path = lfs_vfs_trim_path(path ? path : "C");
+    strncpy(scan->root, real_path ? real_path : "", sizeof(scan->root) - 1);
+    scan->root[sizeof(scan->root) - 1] = '\0';
+
+    ret = lfs_vfs_scan_collect(fsn, scan, scan->root, max_deepth ? (max_deepth - 1) : 0);
+    if (ret < 0) {
+        free(scan);
+        return -1;
+    }
+
+    memset(fsn->filt_dir, 0, sizeof(fsn->filt_dir));
+    fsn->file_number = scan->file_total;
+    fsn->file_counter = 0;
+    fsn->priv = scan;
+    return 0;
+}
+
+static int __lfs_fscan_interrupt(struct vfscan *fsn, const char *path, u8 max_deepth,
+                                 int (*callback)(void))
+{
+    int ret = __lfs_fscan(fsn, path, max_deepth);
+    if (callback) {
+        callback();
+    }
+    return ret;
+}
+
+static void __lfs_fscan_release(struct vfscan *fsn)
+{
+    if (!fsn) {
+        return;
+    }
+    if (fsn->priv) {
+        free(fsn->priv);
+        fsn->priv = NULL;
     }
 }
 
-static u8 data_buf[1024] ALIGNE(4);
-static void lfs_to_flash_task(void *priv)
+static int __lfs_fsel(struct vfscan *fsn, int sel_mode, FILE *file, int num)
 {
+    int index = -1;
+    int ret;
+    char full_path[LFS_VFS_PATH_MAX + 16];
+    lfs_vfs_scan_ctx_t *scan;
+
+    if (!fsn || !file || !fsn->priv) {
+        return -1;
+    }
+
+    scan = (lfs_vfs_scan_ctx_t *)fsn->priv;
+    if (!scan->file_total) {
+        return -1;
+    }
+
+    switch (sel_mode) {
+    case FSEL_FIRST_FILE:
+        index = 0;
+        break;
+    case FSEL_LAST_FILE:
+        index = scan->file_total - 1;
+        break;
+    case FSEL_NEXT_FILE:
+        index = fsn->file_counter;
+        if (index >= scan->file_total) {
+            index = 0;
+        }
+        break;
+    case FSEL_PREV_FILE:
+        if (fsn->file_counter == 0) {
+            index = scan->file_total - 1;
+        } else {
+            index = fsn->file_counter - 1;
+        }
+        break;
+    case FSEL_CURR_FILE:
+        index = (fsn->file_counter < scan->file_total) ? fsn->file_counter : 0;
+        break;
+    case FSEL_BY_NUMBER:
+        if (num <= 0 || num > scan->file_total) {
+            return -1;
+        }
+        index = num - 1;
+        break;
+    default:
+        return -1;
+    }
+
+    snprintf(full_path, sizeof(full_path), "mnt/lfs/C/%s", scan->rel_paths[index]);
+    ret = __lfs_fopen(file, full_path, "r");
+    if (ret < 0) {
+        return -1;
+    }
+
+    fsn->file_counter = index;
+    return 0;
+}
+
+static int __lfs_ioctl(void *priv, int cmd, int arg)
+{
+    (void)priv;
+    (void)cmd;
+    (void)arg;
+    return -1;
+}
+
+REGISTER_VFS_OPERATIONS(lfs_vfs_ops) = {
+    .fs_type            = "lfs",
+    .mount              = __lfs_mount,
+    .unmount            = __lfs_unmount,
+    .fget_free_space    = __lfs_fget_free_space,
+    .fopen              = __lfs_fopen,
+    .fread              = __lfs_fread,
+    .fwrite             = __lfs_fwrite,
+    .fseek              = __lfs_fseek,
+    .flen               = __lfs_flen,
+    .fpos               = __lfs_fpos,
+    .fget_name          = __lfs_fget_name,
+    .fget_path          = __lfs_fget_path,
+    .frename            = __lfs_frename,
+    .fclose             = __lfs_fclose,
+    .fdelete            = __lfs_fdelete,
+    .fscan              = __lfs_fscan,
+    .fscan_interrupt    = __lfs_fscan_interrupt,
+    .fscan_release      = __lfs_fscan_release,
+    .fsel               = __lfs_fsel,
+    .fget_attr          = __lfs_fget_attr,
+    .fget_attrs         = __lfs_fget_attrs,
+    .ftruncate          = __lfs_ftruncate,
+    .ioctl              = __lfs_ioctl,
+};
+
+/* ---------------- minimal test code ---------------- */
+
+static void lfs_vfs_plus_test_task(void *priv)
+{
+    struct imount *mt;
+    FILE *fp;
+    FILE sel_fp = {0};
+    struct vfscan fsn = {0};
+    char buf[128];
+    u32 free_space = 0;
+    int ret;
+
+    (void)priv;
     os_time_dly(3);
 
-    FILE *fp;
-    FILE *fp1;
-    int ret = 0;
-    u8 buf[32] = {0};
-    u8 str[] = "lfsflash wr test";
-    u8 data = 0;
-
-    ret = mount(NULL, "mnt/lfs", "lfs", 0, NULL);
-    if (ret == 0) {
-        printf(">>>>>>>lfs mount fail, ret = %d\n", ret);
-        return;
-    } else {
-        printf(">>>>>>>lfs mount succ");
+    mt = mount(NULL, "mnt/lfs", "lfs", 0, NULL);
+    if (!mt) {
+        printf("[lfs_vfs] mount fail\n");
+        goto __exit;
     }
 
-    if (ret) {
-        fp = fopen("mnt/lfs/C/test.txt", "w+");
-        memset(buf, 0, sizeof(buf));
-        fread(buf, sizeof(buf), 1, fp);
-        printf("test.txt : %s\n", buf);
+    fp = fopen("mnt/lfs/C/dirA/dirB/dirC/test_auto.txt", "w+");
+    if (!fp) {
+        printf("[lfs_vfs] fopen auto mkdir fail\n");
+        goto __exit;
+    }
+
+    fwrite("auto mkdir ok\n1234567890\n", 1, strlen("auto mkdir ok\n1234567890\n"), fp);
+    fseek(fp, 0, SEEK_SET);
+    ret = ftruncate(fp, 14);
+    printf("[lfs_vfs] ftruncate ret=%d flen=%u\n", ret, flen(fp));
+    fclose(fp);
+
+    fp = fopen("mnt/lfs/C/dirA/dirB/dirC/test_auto.txt", "r");
+    if (!fp) {
+        printf("[lfs_vfs] reopen auto mkdir file fail\n");
+        goto __exit;
+    }
+
+    memset(buf, 0, sizeof(buf));
+    ret = fread(buf, 1, sizeof(buf) - 1, fp);
+    printf("[lfs_vfs] read ret=%d data=%s\n", ret, buf);
+
+    ret = frename(fp, "mnt/lfs/C/dirA/dirB/dirC/test_renamed.txt");
+    printf("[lfs_vfs] frename ret=%d\n", ret);
+    fclose(fp);
+
+    fp = fopen("mnt/lfs/C/dirA/dirB/dirC/other.bin", "w+");
+    if (fp) {
+        fwrite("bin-data", 1, 8, fp);
         fclose(fp);
+    }
 
-        fp = fopen("mnt/lfs/C/test.txt", "w+");
-        if (fp) {
-            printf("fopen succ\n");
-            fwrite(str, strlen(str), 1, fp);
-            printf("[msg]>>>>>>>>>>> fwrite");
-            fclose(fp);
-            printf("[msg]>>>>>>>>>>> fclose");
+    ret = fget_free_space("mnt/lfs", &free_space);
+    printf("[lfs_vfs] free_space ret=%d space=%u\n", ret, free_space);
 
+    memset(&fsn, 0, sizeof(fsn));
+    strncpy(fsn.ftype, "txt", sizeof(fsn.ftype) - 1);
+    ret = __lfs_fscan(&fsn, "mnt/lfs/C", 4);
+    printf("[lfs_vfs] txt fscan ret=%d file_number=%u\n", ret, fsn.file_number);
+    if (!ret && fsn.file_number) {
+        ret = __lfs_fsel(&fsn, FSEL_FIRST_FILE, &sel_fp, 0);
+        printf("[lfs_vfs] fsel first ret=%d\n", ret);
+        if (!ret) {
             memset(buf, 0, sizeof(buf));
-            fp = fopen("mnt/lfs/C/test.txt", "w+");
-            fread(buf, sizeof(buf), 1, fp);
-            printf("test.txt : %s\n", buf);
-            fclose(fp);
-        } else {
-            printf("[msg]>>>>>>>>>>> open fail");
+            ret = __lfs_fread(&sel_fp, buf, sizeof(buf) - 1);
+            printf("[lfs_vfs] selected txt read ret=%d data=%s\n", ret, buf);
+            __lfs_fclose(&sel_fp);
         }
-    } else {
-        printf("extflash mount failed!!!");
+        __lfs_fscan_release(&fsn);
     }
 
-#if 0
-    u16 w_len = 256;
-    if (ret) {
-        fp = fopen("mnt/lfs/C/test1.txt", "w+");
-        memset(data_buf, 0x55, 1024);
-        while (1) {
-            fwrite(data_buf, w_len, 1, fp);
-            Calculation_w_len_frame(w_len);
-            os_time_dly(1);
-        }
+    fp = fopen("mnt/lfs/C/dirA/dirB/dirC/test_renamed.txt", "r");
+    if (fp) {
+        ret = fdelete(fp);
+        printf("[lfs_vfs] fdelete txt ret=%d\n", ret);
     }
-#endif
+
+    fp = fopen("mnt/lfs/C/dirA/dirB/dirC/other.bin", "r");
+    if (fp) {
+        ret = fdelete(fp);
+        printf("[lfs_vfs] fdelete bin ret=%d\n", ret);
+    }
+
+__exit:
     while (1) {
         os_time_dly(100);
     }
 }
 
-static int lfs_to_flash_test(void)
+int lfs_vfs_plus_test(void)
 {
-    puts("lfs_to_flash_task \n\n");
-    return thread_fork("lfs_to_flash_task", 11, 1024, 32, 0, lfs_to_flash_task, NULL);
+    puts("lfs_vfs_plus_test\n");
+    return thread_fork("lfs_vfs_plus_test", 11, 3072, 32, 0,
+                       lfs_vfs_plus_test_task, NULL);
 }
 
-late_initcall(lfs_to_flash_test);
+/* late_initcall(lfs_vfs_plus_test); */
+
 #endif

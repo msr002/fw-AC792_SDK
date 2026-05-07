@@ -56,7 +56,7 @@
   /* spi_port_io_init = ABSOLUTE(0xf9fb0); */
   /* spi_port_io_uninit = ABSOLUTE(0xf9fb4); */
   /* usb_slave_mode = ABSOLUTE(0xf9fb8); */
-  /* doe = ABSOLUTE(0xf9fbc); */
+  doe = ABSOLUTE(0xf9fbc);
   LZ4_setStreamDecode = ABSOLUTE(0xf9fc0);
   LZ4_decompress_safe_continue = ABSOLUTE(0xf9fc4);
   LZ4_decompress_generic = ABSOLUTE(0xf9fc8);

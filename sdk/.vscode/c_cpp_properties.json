@@ -289,6 +289,7 @@
                 "${workspaceFolder}/apps/common/example/third_party/rlottie_impl/src/vector",
                 "${workspaceFolder}/apps/common/example/third_party/rlottie_impl/src/vector/freetype",
                 "${workspaceFolder}/apps/common/example/third_party/freetype/include",
+                "${workspaceFolder}/apps/common/example/third_party/littlefs",
                 "${workspaceFolder}/include_lib/system/ui",
                 "${workspaceFolder}/include_lib/driver/cpu/wl83/asm",
                 "${workspaceFolder}/apps/common/lvgl_v8",

@@ -131,6 +131,7 @@
 <Add directory="../../../../apps/common/example/third_party/rlottie_impl/src/vector" />
 <Add directory="../../../../apps/common/example/third_party/rlottie_impl/src/vector/freetype" />
 <Add directory="../../../../apps/common/example/third_party/freetype/include" />
+<Add directory="../../../../apps/common/example/third_party/littlefs" />
 <Add directory="../../../../include_lib/system/ui" />
 <Add directory="../../../../include_lib/driver/cpu/wl83/asm" />
 <Add directory="../../../../apps/common/lvgl_v8" />
@@ -861,6 +862,12 @@
 <Unit filename="../../../../apps/common/example/third_party/freetype/src/winfonts/fnterrs.h" />
 <Unit filename="../../../../apps/common/example/third_party/freetype/src/winfonts/winfnt.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/common/example/third_party/freetype/src/winfonts/winfnt.h" />
+<Unit filename="../../../../apps/common/example/third_party/littlefs/lfs.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="../../../../apps/common/example/third_party/littlefs/lfs.h" />
+<Unit filename="../../../../apps/common/example/third_party/littlefs/lfs_test.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="../../../../apps/common/example/third_party/littlefs/lfs_util.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="../../../../apps/common/example/third_party/littlefs/lfs_util.h" />
+<Unit filename="../../../../apps/common/example/third_party/littlefs/port/wl83/port.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/common/example/third_party/rlottie_impl/inc/config.h" />
 <Unit filename="../../../../apps/common/example/third_party/rlottie_impl/inc/rlottie.h" />
 <Unit filename="../../../../apps/common/example/third_party/rlottie_impl/inc/rlottie_capi.h" />

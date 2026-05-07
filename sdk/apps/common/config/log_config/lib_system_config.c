@@ -24,6 +24,8 @@ const int config_system_info   = 1;
 
 const int config_system_os_cpu_num = CPU_CORE_NUM;
 
+const int config_initcall_echo_fun_name = 0; // initcall是否打印函数名
+
 ///异常中断，asser打印开启
 #ifdef CONFIG_RELEASE_ENABLE
 const int config_asser         = 1;

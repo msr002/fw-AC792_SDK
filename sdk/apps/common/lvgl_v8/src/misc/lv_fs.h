@@ -76,6 +76,7 @@ typedef struct _lv_fs_drv_t {
     lv_fs_res_t (*read_cb)(struct _lv_fs_drv_t *drv, void *file_p, void *buf, uint32_t btr, uint32_t *br);
     lv_fs_res_t (*write_cb)(struct _lv_fs_drv_t *drv, void *file_p, const void *buf, uint32_t btw, uint32_t *bw);
     lv_fs_res_t (*seek_cb)(struct _lv_fs_drv_t *drv, void *file_p, uint32_t pos, lv_fs_whence_t whence);
+    lv_fs_res_t (*len_cb)(struct _lv_fs_drv_t *drv, void *file_p, uint32_t *len);
     lv_fs_res_t (*tell_cb)(struct _lv_fs_drv_t *drv, void *file_p, uint32_t *pos_p);
 
     void *(*dir_open_cb)(struct _lv_fs_drv_t *drv, const char *path);
@@ -189,6 +190,14 @@ lv_fs_res_t lv_fs_write(lv_fs_file_t *file_p, const void *buf, uint32_t btw, uin
  * @return          LV_FS_RES_OK or any error from lv_fs_res_t enum
  */
 lv_fs_res_t lv_fs_seek(lv_fs_file_t *file_p, uint32_t pos, lv_fs_whence_t whence);
+
+/**
+ * Give the len of the file
+ * @param file_p    pointer to a lv_fs_file_t variable
+ * @param len       pointer to store the position of the read write pointer
+ * @return          LV_FS_RES_OK or any error from 'fs_res_t'
+ */
+lv_fs_res_t lv_fs_len(lv_fs_file_t *file_p, uint32_t *len);
 
 /**
  * Give the position of the read write pointer

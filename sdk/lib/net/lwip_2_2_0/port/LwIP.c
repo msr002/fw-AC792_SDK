@@ -46,7 +46,9 @@ extern err_t uart_ethernetif_init(struct netif *netif);
 extern void ntp_client_get_time(const char *host);
 extern int netdev_get_mac_addr(u8 *mac_addr);
 static void __lwip_renew(unsigned short parm);
+
 static u8 lwip_inited = 0;
+
 void lwip_etharp_cleanup_netif(u8_t lwip_netif);
 
 int __attribute__((weak)) lwip_event_cb(void *lwip_ctx, enum LWIP_EVENT event)

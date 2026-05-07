@@ -3839,6 +3839,43 @@ static int cmd_get_generic_cmd(void *priv, char *content)
     return 0;
 }
 
+static int cmd_get_ota_request(void *priv, char *content)
+{
+    char buf[32];
+    json_object *new_obj = NULL;
+    json_object *parm = NULL;
+    json_object *tmp = NULL;
+
+    printf("ota req content: %s \n ", content);
+    new_obj = json_tokener_parse(content);
+    parm =  json_object_object_get(new_obj, "param");
+    tmp =  json_object_object_get(parm, "url");
+    const char *url = json_object_get_string(tmp);
+
+    if (url == NULL) {
+        printf("url is null \n");
+        return 0;
+    }
+    printf("url : %s\n", url);
+    snprintf(buf, sizeof(buf), "allow:%d", 1);  //1: 允许升级, 0: 拒绝
+    printf("OTA_REQUEST  GET\n");
+    CTP_CMD_COMBINED(priv, CTP_NO_ERR, "OTA_REQUEST", "NOTIFY", buf);  //回复allow
+
+    http_create_download_task(url);  //开始双备份OTA升级
+
+    return 0;
+}
+
+int cmd_put_ota_download_progress(int download_len, int total, int status)
+{
+    char buf[128];
+    snprintf(buf, sizeof(buf), "downloaded:%d,total:%d,status:%d", download_len, total, status);
+    printf("progress buf: %s\n", buf);
+    CTP_CMD_COMBINED(NULL, 0, "OTA_DOWNLOAD_PROGRESS", "NOTIFY", buf);
+
+    return 0;
+}
+
 
 static int cmd_put_ctp_cli_connected(void *priv, char *content)
 {
@@ -4469,6 +4506,7 @@ const struct ctp_map_entry ctp_system_cmd_tab[] SEC_USED(.ctp_system_cmd) = {
     {NULL, "CAMERA_CAPABILITY", cmd_get_camera_capability, NULL},   /* 设备能力集获取 */
     {NULL, "FILE_LOCK", NULL, cmd_put_file_lock},
     {NULL, "GENERIC_CMD", cmd_get_generic_cmd, cmd_put_generic_cmd},
+    {NULL, "OTA_REQUEST", cmd_get_ota_request, NULL, NULL},
 
     /**
        CDP控制命令,NULL类型的命令需要自己回复，系统级的命令就不管,已经做好了处理

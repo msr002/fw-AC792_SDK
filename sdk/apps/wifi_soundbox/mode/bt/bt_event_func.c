@@ -674,7 +674,7 @@ const char *bip_file_path_get(void)
         return NULL;
     }
 
-    return __bip_info->buffer;
+    return (const char *)__bip_info->buffer;
 }
 
 u32 bip_file_size_get(void)

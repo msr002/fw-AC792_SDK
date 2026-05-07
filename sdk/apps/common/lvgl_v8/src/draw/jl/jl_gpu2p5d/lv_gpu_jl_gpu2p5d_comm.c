@@ -72,7 +72,6 @@ jlvg_hw_imageformat_t lv_img_jl_gpu2p5d_get_color_format(lv_img_cf_t cf, bool *c
     case LV_IMG_CF_RGB565:
         jlvg_cf = VGHW_FORMAT_RGB565;
         break;
-#if 0   //这些格式暂未调试验证
     case LV_IMG_CF_ALPHA_8BIT:
         jlvg_cf = VGHW_FORMAT_A8;
         break;
@@ -85,7 +84,6 @@ jlvg_hw_imageformat_t lv_img_jl_gpu2p5d_get_color_format(lv_img_cf_t cf, bool *c
     case LV_IMG_CF_ALPHA_1BIT:
         jlvg_cf = VGHW_FORMAT_A1;
         break;
-#endif
     case LV_IMG_CF_INDEXED_1BIT:
         jlvg_cf = VGHW_FORMAT_L1;
         break;

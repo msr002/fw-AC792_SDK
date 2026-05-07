@@ -1934,6 +1934,7 @@
 <Unit filename="../../../../apps/wifi_camera/wifi/media_file_list.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/wifi_camera/wifi/net_video_rec.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/wifi_camera/wifi/network_mssdp.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="../../../../apps/wifi_camera/wifi/network_update_resume.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/wifi_camera/wifi/packet.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/wifi_camera/wifi/stream/video_rt_tcp.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/wifi_camera/wifi/stream/video_rt_udp.c"><Option compilerVer="CC"/></Unit>

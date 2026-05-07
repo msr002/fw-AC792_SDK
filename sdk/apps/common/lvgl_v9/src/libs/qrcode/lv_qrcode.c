@@ -225,6 +225,20 @@ lv_result_t lv_qrcode_update(lv_obj_t *obj, const void *data, uint32_t data_len)
     return LV_RESULT_OK;
 }
 
+void lv_qrcode_set_data(lv_obj_t *obj, const char *data)
+{
+    if (data == NULL) {
+        return;
+    }
+    lv_qrcode_update(obj, data, lv_strlen(data));
+}
+
+void lv_qrcode_set_quiet_zone(lv_obj_t *obj, bool enable)
+{
+    lv_qrcode_t *qrcode = (lv_qrcode_t *)obj;
+    qrcode->quiet_zone = enable;
+}
+
 /**********************
  *   STATIC FUNCTIONS
  **********************/

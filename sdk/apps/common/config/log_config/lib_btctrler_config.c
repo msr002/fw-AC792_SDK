@@ -42,6 +42,13 @@ const int CONFIG_ESCO_FORWARD_ENABLE                = 0;
 const int CONFIG_UPDATE_BT_LMP_EN                   = 0;
 const int CONFIG_AES_CCM_FOR_EDR_ENABLE             = 0;
 const int CONFIG_MPR_CLOSE_WHEN_ESCO                = 0;
+#ifdef CONFIG_BTCTRLER_7CONN
+const int CONFIG_LMP_SUPPORT_MULTI_CONN             = 1;
+const int CONFIG_LMP_CONNECTION_NUM                 = 7;
+const int CONFIG_LMP_CONNECTION_LIMIT_NUM           = 7;
+const int CONFIG_BT_MULT_SPP_MANAGER_ENABLE         = 1;
+#else
+const int CONFIG_BT_MULT_SPP_MANAGER_ENABLE         = 0;
 #if TCFG_BT_DUAL_CONN_ENABLE
 const int CONFIG_LMP_SUPPORT_MULTI_CONN             = 1;
 const int CONFIG_LMP_CONNECTION_NUM                 = 2;
@@ -50,6 +57,7 @@ const int CONFIG_LMP_CONNECTION_LIMIT_NUM           = 2;
 const int CONFIG_LMP_SUPPORT_MULTI_CONN             = 0;
 const int CONFIG_LMP_CONNECTION_NUM                 = 1;
 const int CONFIG_LMP_CONNECTION_LIMIT_NUM           = 1;
+#endif
 #endif
 const int CONFIG_LMP_NAME_REQ_ENABLE                = 1;
 const int CONFIG_LMP_PASSKEY_ENABLE                 = 0;

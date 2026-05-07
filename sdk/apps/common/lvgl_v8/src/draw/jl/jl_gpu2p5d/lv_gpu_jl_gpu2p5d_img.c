@@ -1020,7 +1020,12 @@ jlvg_begin:
 
 jlvg_quit:
     if (!done) {
-        lv_draw_sw_img_decoded(draw_ctx, dsc, coords, src_buf, cf);
+        if (draw_ctx->compress_type == LV_COMPRESS_RLE) {
+            LV_LOG_ERROR("jl_gpu2p5d_img_decoded rle error");
+            return;
+        } else {
+            lv_draw_sw_img_decoded(draw_ctx, dsc, coords, src_buf, cf);
+        }
     }
 }
 
