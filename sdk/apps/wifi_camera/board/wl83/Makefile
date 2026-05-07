@@ -1523,11 +1523,11 @@ LFLAGS := \
 	../../../../cpu/wl83/liba/media/lib_wanson_asr.a \
 	../../../../cpu/wl83/liba/libvad.a \
 	../../../../cpu/wl83/liba/event.a \
+	../../../../cpu/wl83/liba/update.a \
 	../../../../cpu/wl83/liba/cpu.a \
 	../../../../cpu/wl83/liba/system.a \
 	../../../../cpu/wl83/liba/fs.a \
 	../../../../cpu/wl83/liba/cfg_tool.a \
-	../../../../cpu/wl83/liba/update.a \
 	../../../../cpu/wl83/liba/common_lib.a \
 	../../../../cpu/wl83/liba/btstack.a  \
 	../../../../cpu/wl83/liba/btctrler.a  \

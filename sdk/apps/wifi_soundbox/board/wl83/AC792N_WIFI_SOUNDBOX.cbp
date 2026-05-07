@@ -394,9 +394,9 @@
 <Add option="../../../../cpu/wl83/liba/event.a" />
 <Add option="../../../../cpu/wl83/liba/fs.a" />
 <Add option="../../../../cpu/wl83/liba/cfg_tool.a" />
+<Add option="../../../../cpu/wl83/liba/update.a" />
 <Add option="../../../../cpu/wl83/liba/cpu.a" />
 <Add option="../../../../cpu/wl83/liba/system.a" />
-<Add option="../../../../cpu/wl83/liba/update.a" />
 <Add option="../../../../cpu/wl83/liba/common_lib.a" />
 <Add option="../../../../cpu/wl83/liba/lvgl_v8_extend.a" />
 <Add option="../../../../cpu/wl83/liba/video_dec_server.a" />
