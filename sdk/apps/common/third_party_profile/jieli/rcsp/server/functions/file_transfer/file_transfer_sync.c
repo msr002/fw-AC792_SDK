@@ -7,12 +7,17 @@
 #include "rcsp_config.h"
 #include "file_transfer.h"
 #include "file_transfer_sync.h"
-#include "rcsp_config.h"
 #include "app_power_manage.h"
 
 #if (RCSP_MODE && ((TCFG_DEV_MANAGER_ENABLE && RCSP_FILE_OPT) || RCSP_TONE_FILE_TRANSFER_ENABLE))
 
 #if (TCFG_USER_TWS_ENABLE)
+
+#if (RCSP_FILE_OPT_TWS_SYNC)
+#define sync_printf         log_error
+#else
+#define sync_printf         log_info
+#endif
 
 #define NO_SEM_PEND_TIME 200   //主机PEND等待时间，避免卡死
 #define CALC_CRC_PEND_TIME	1000	// crc超时时间
@@ -78,6 +83,7 @@ typedef struct file_trans_tws_opt_t {
 
 static u8 g_rcsp_tws_task_kill = 0;
 static ft_tws_opt *g_ft_tws_opt;
+const static u8 rcsp_file_opt_tws_sync_en = RCSP_FILE_OPT_TWS_SYNC;
 #define __this	(g_ft_tws_opt)
 
 extern int rcsp_file_tws_info_fill(file_trans_tws_op *ft_tws_op);
@@ -86,7 +92,7 @@ extern void tws_sniff_controle_check_disable(void);
 
 static int tws_file_trans_to_sibling(u8 *data, u16 len)
 {
-    if (!(tws_api_get_tws_state() & TWS_STA_SIBLING_CONNECTED)) {
+    if (!rcsp_file_opt_tws_sync_en || !(tws_api_get_tws_state() & TWS_STA_SIBLING_CONNECTED)) {
         return -1;
     }
     tws_api_tx_unsniff_req();
@@ -302,7 +308,7 @@ REGISTER_TWS_FUNC_STUB(file_transfer_sync_stub) = {
 
 u8 file_trans_request_sem(u8 cmd)
 {
-    if (0 == (tws_api_get_tws_state() & TWS_STA_SIBLING_CONNECTED)) {
+    if (!rcsp_file_opt_tws_sync_en || 0 == (tws_api_get_tws_state() & TWS_STA_SIBLING_CONNECTED)) {
         return 0;
     }
     if (TWS_ROLE_SLAVE == tws_api_get_role()) {
@@ -336,7 +342,7 @@ u8 file_trans_request_sem(u8 cmd)
 
 void file_trans_open_tws_sync_to_slave(const char *path, const char *mode)
 {
-    if (0 == (tws_api_get_tws_state() & TWS_STA_SIBLING_CONNECTED)) {
+    if (!rcsp_file_opt_tws_sync_en || 0 == (tws_api_get_tws_state() & TWS_STA_SIBLING_CONNECTED)) {
         return;
     }
     if (TWS_ROLE_SLAVE == tws_api_get_role()) {
@@ -371,7 +377,7 @@ u8 file_trans_open_tws_sync_pend(void)
 
 void file_trans_close_tws_sync_to_slave(void)
 {
-    if (0 == (tws_api_get_tws_state() & TWS_STA_SIBLING_CONNECTED)) {
+    if (!rcsp_file_opt_tws_sync_en || 0 == (tws_api_get_tws_state() & TWS_STA_SIBLING_CONNECTED)) {
         return;
     }
     if (TWS_ROLE_SLAVE == tws_api_get_role()) {
@@ -411,7 +417,7 @@ u8 file_trans_close_tws_sync_pend(void)
 
 void file_trans_erase_tws_sync_to_slave(u32 erase_addr, u32 erase_size)
 {
-    if (0 == (tws_api_get_tws_state() & TWS_STA_SIBLING_CONNECTED)) {
+    if (!rcsp_file_opt_tws_sync_en || 0 == (tws_api_get_tws_state() & TWS_STA_SIBLING_CONNECTED)) {
         return;
     }
     if (TWS_ROLE_SLAVE == tws_api_get_role()) {
@@ -447,7 +453,7 @@ u8 file_trans_erase_tws_sync_pend(void)
 
 void file_trans_write_tws_sync_to_slave(void *buf, u32 size, u32 count)
 {
-    if (0 == (tws_api_get_tws_state() & TWS_STA_SIBLING_CONNECTED)) {
+    if (!rcsp_file_opt_tws_sync_en || 0 == (tws_api_get_tws_state() & TWS_STA_SIBLING_CONNECTED)) {
         return;
     }
     if (TWS_ROLE_SLAVE == tws_api_get_role()) {
@@ -485,7 +491,7 @@ u8 file_trans_write_tws_sync_pend(void)
 
 void file_trans_calc_crc_tws_sync_to_slave(u16 crc, u32 size)
 {
-    if (0 == (tws_api_get_tws_state() & TWS_STA_SIBLING_CONNECTED)) {
+    if (!rcsp_file_opt_tws_sync_en || 0 == (tws_api_get_tws_state() & TWS_STA_SIBLING_CONNECTED)) {
         return;
     }
     if (TWS_ROLE_SLAVE == tws_api_get_role()) {
@@ -524,7 +530,7 @@ u8 file_trans_calc_crc_tws_sync_pend(void)
 
 void file_trans_slave_calc_crc_tws_sync_post(u8 reason)
 {
-    if (0 == (tws_api_get_tws_state() & TWS_STA_SIBLING_CONNECTED)) {
+    if (!rcsp_file_opt_tws_sync_en || 0 == (tws_api_get_tws_state() & TWS_STA_SIBLING_CONNECTED)) {
         return;
     }
     if (TWS_ROLE_MASTER == tws_api_get_role()) {
@@ -541,7 +547,7 @@ void file_trans_slave_calc_crc_tws_sync_post(u8 reason)
 extern void bt_sniff_enable();
 u8 file_trans_init_tws_sync(void)
 {
-    if (0 == (tws_api_get_tws_state() & TWS_STA_SIBLING_CONNECTED)) {
+    if (!rcsp_file_opt_tws_sync_en || 0 == (tws_api_get_tws_state() & TWS_STA_SIBLING_CONNECTED)) {
         return 0;
     }
     if (TWS_ROLE_SLAVE == tws_api_get_role()) {
@@ -585,7 +591,7 @@ u8 file_trans_init_tws_sync(void)
 
 u8 file_trans_special_flag_tws_sync(u8 flag)
 {
-    if (0 == (tws_api_get_tws_state() & TWS_STA_SIBLING_CONNECTED)) {
+    if (!rcsp_file_opt_tws_sync_en || 0 == (tws_api_get_tws_state() & TWS_STA_SIBLING_CONNECTED)) {
         return 0;
     }
     if (TWS_ROLE_SLAVE == tws_api_get_role()) {
@@ -625,7 +631,7 @@ u8 file_trans_special_flag_tws_sync(u8 flag)
 
 u8 file_trans_seek_tws_sync(int file_offset, int orig)
 {
-    if (0 == (tws_api_get_tws_state() & TWS_STA_SIBLING_CONNECTED)) {
+    if (!rcsp_file_opt_tws_sync_en || 0 == (tws_api_get_tws_state() & TWS_STA_SIBLING_CONNECTED)) {
         return 0;
     }
     if (TWS_ROLE_SLAVE == tws_api_get_role()) {
@@ -668,7 +674,7 @@ u8 file_trans_seek_tws_sync(int file_offset, int orig)
 
 u8 file_trans_parm_extra_tws_sync(u8 *data, u16 len)
 {
-    if (0 == (tws_api_get_tws_state() & TWS_STA_SIBLING_CONNECTED)) {
+    if (!rcsp_file_opt_tws_sync_en || 0 == (tws_api_get_tws_state() & TWS_STA_SIBLING_CONNECTED)) {
         return 0;
     }
     if (TWS_ROLE_SLAVE == tws_api_get_role()) {
@@ -842,7 +848,7 @@ _ERR_RET:
 u32 file_trans_start(void *priv, u8 OpCode_SN, u8 *data, u16 len, u16 ble_con_handle, u8 *spp_remote_addr)
 {
     u32 ret = 0;
-    if (0 == (tws_api_get_tws_state() & TWS_STA_SIBLING_CONNECTED)) {
+    if (!rcsp_file_opt_tws_sync_en || 0 == (tws_api_get_tws_state() & TWS_STA_SIBLING_CONNECTED)) {
         rcsp_file_transfer_download_start(priv, OpCode_SN, data, len, ble_con_handle, spp_remote_addr);
         goto _ERR_RET;
     }
@@ -875,7 +881,7 @@ u32 file_trans_start(void *priv, u8 OpCode_SN, u8 *data, u16 len, u16 ble_con_ha
     }
 _ERR_RET:
     if (ret) {
-        log_error("%s err:%x", __func__, ret);
+        sync_printf("%s err:%x", __func__, ret);
     }
     return ret;
 }
@@ -883,7 +889,7 @@ _ERR_RET:
 u32 file_trans_end(u8 status, u8 *data, u16 len, u16 ble_con_handle, u8 *spp_remote_addr)
 {
     u32 ret = 0;
-    if (0 == (tws_api_get_tws_state() & TWS_STA_SIBLING_CONNECTED)) {
+    if (!rcsp_file_opt_tws_sync_en || 0 == (tws_api_get_tws_state() & TWS_STA_SIBLING_CONNECTED)) {
         rcsp_file_transfer_download_end(status, data, len, ble_con_handle, spp_remote_addr);
         goto _ERR_RET;
     }
@@ -917,7 +923,7 @@ u32 file_trans_end(u8 status, u8 *data, u16 len, u16 ble_con_handle, u8 *spp_rem
     }
 _ERR_RET:
     if (ret) {
-        log_error("%s err:%x", __func__, ret);
+        sync_printf("%s err:%x", __func__, ret);
     }
     return ret;
 }
@@ -925,7 +931,7 @@ _ERR_RET:
 u32 file_trans_handle(u8 *data, u16 len, u16 ble_con_handle, u8 *spp_remote_addr)
 {
     u32 ret = 0;
-    if (0 == (tws_api_get_tws_state() & TWS_STA_SIBLING_CONNECTED)) {
+    if (!rcsp_file_opt_tws_sync_en || 0 == (tws_api_get_tws_state() & TWS_STA_SIBLING_CONNECTED)) {
         rcsp_file_transfer_download_doing(data, len, ble_con_handle, spp_remote_addr);
         goto _ERR_RET;
     }
@@ -959,7 +965,7 @@ u32 file_trans_handle(u8 *data, u16 len, u16 ble_con_handle, u8 *spp_remote_addr
     }
 _ERR_RET:
     if (ret) {
-        log_error("%s err:%x", __func__, ret);
+        sync_printf("%s err:%x", __func__, ret);
     }
     return ret;
 }
@@ -967,7 +973,7 @@ _ERR_RET:
 u32 file_trans_rename(u8 status, u8 *data, u16 len, u16 ble_con_handle, u8 *spp_remote_addr)
 {
     u32 ret = 0;
-    if (0 == (tws_api_get_tws_state() & TWS_STA_SIBLING_CONNECTED)) {
+    if (!rcsp_file_opt_tws_sync_en || 0 == (tws_api_get_tws_state() & TWS_STA_SIBLING_CONNECTED)) {
         rcsp_file_transfer_file_rename(status, data, len, ble_con_handle, spp_remote_addr);
         goto _ERR_RET;
     }
@@ -1001,7 +1007,7 @@ u32 file_trans_rename(u8 status, u8 *data, u16 len, u16 ble_con_handle, u8 *spp_
     }
 _ERR_RET:
     if (ret) {
-        log_error("%s err:%x", __func__, ret);
+        sync_printf("%s err:%x", __func__, ret);
     }
     return ret;
 }
@@ -1009,7 +1015,7 @@ _ERR_RET:
 u32 file_trans_parm_extra(u8 OpCode_SN, u8 *data, u16 len, u16 ble_con_handle, u8 *spp_remote_addr)
 {
     u32 ret = 0;
-    if (0 == (tws_api_get_tws_state() & TWS_STA_SIBLING_CONNECTED)) {
+    if (!rcsp_file_opt_tws_sync_en || 0 == (tws_api_get_tws_state() & TWS_STA_SIBLING_CONNECTED)) {
         rcsp_file_transfer_download_parm_extra(OpCode_SN, data, len, ble_con_handle, spp_remote_addr);
         goto _ERR_RET;
     }
@@ -1043,7 +1049,7 @@ u32 file_trans_parm_extra(u8 OpCode_SN, u8 *data, u16 len, u16 ble_con_handle, u
     }
 _ERR_RET:
     if (ret) {
-        log_error("%s err:%x", __func__, ret);
+        sync_printf("%s err:%d", __func__, ret);
     }
     return ret;
 }
@@ -1051,7 +1057,7 @@ _ERR_RET:
 u32 file_trans_init(u8 type, u16 ble_con_handle, u8 *spp_remote_addr)
 {
     u32 ret = 0;
-    if (0 == (tws_api_get_tws_state() & TWS_STA_SIBLING_CONNECTED)) {
+    if (!rcsp_file_opt_tws_sync_en || 0 == (tws_api_get_tws_state() & TWS_STA_SIBLING_CONNECTED)) {
         rcsp_file_transfer_init(NULL, ble_con_handle, spp_remote_addr);
         rcsp_file_transfer_special_flag_set(type);
         goto _ERR_RET;

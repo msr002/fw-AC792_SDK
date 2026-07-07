@@ -23,6 +23,7 @@
 #include "JL_rcsp_api.h"
 #include "rcsp_config.h"
 #include "le_connected.h"
+#include "app_le_connected.h"
 #include "btstack_rcsp_user.h"
 #include "app_ble_spp_api.h"
 #include "update/error_code.h"
@@ -83,6 +84,7 @@ typedef struct _rcsp_update_param_t {
 
 extern const int support_dual_bank_update_en;
 extern void rcsp_clear_all_buffer(void);
+extern void doe(u16 k, void *pBuf, u32 lenIn, u32 addr);
 
 static rcsp_update_param_t	rcsp_update_param;
 #define __this (&rcsp_update_param)
@@ -95,6 +97,9 @@ static u8 rcsp_seek_type = 0;
 static u8 g_rcsp_ancs_state_flag = 0;
 static u32 rcsp_offset_addr = 0;
 static u16 g_cis_conn_handle = 0;
+static u16 g_cis_rcsp_adv_info_timer;
+static u16 g_cis_rcsp_encrypt_key;
+static spinlock_t g_cis_rcsp_encrypt_lock;
 
 //NOTE:测试盒的定义和本sdk文件系统的seek_type定义不一样;
 enum {
@@ -555,10 +560,25 @@ void rcsp_update_loader_download_init(int update_type, void (*result_cbk)(void *
 #endif
 }
 
-#if ((TCFG_LE_AUDIO_APP_CONFIG & (LE_AUDIO_UNICAST_SINK_EN | LE_AUDIO_JL_UNICAST_SINK_EN)))
+#if (TCFG_LE_AUDIO_APP_CONFIG & LE_AUDIO_JL_UNICAST_SINK_EN)
+
+_WEAK_
+cig_parameter_t *get_cig_params(void)
+{
+    ASSERT(0, "function get_cig_params() undefined!!!");
+    return NULL;
+}
+
 void cis_rcsp_recv_handle(u16 conn_handle, const void *const buf, size_t length, void *priv)
 {
     if (conn_handle) {
+#if RCSP_ADV_OVER_ONLINE_CFG_TOOL
+        if (g_cis_rcsp_encrypt_key) {
+            spin_lock(&g_cis_rcsp_encrypt_lock);
+            doe(g_cis_rcsp_encrypt_key, (void *)buf, length, 0);
+            spin_unlock(&g_cis_rcsp_encrypt_lock);
+        }
+#endif
         printf("rcsp_cis_rx(%d)", (int)length);
         put_buf(buf, length);
         u8 custem_buf[] = {0x4A, 0x4C, 0xFF, 0xED};
@@ -580,20 +600,72 @@ void cis_rcsp_recv_handle(u16 conn_handle, const void *const buf, size_t length,
 int bt_rcsp_data_send_filter(u16 ble_con_hdl, u8 *remote_addr, u8 *buf, u16 len)
 {
     int ret = 0;
+    u32 packet_len;
+    u32 packet_offset = 0;
+    u8 head_buf[64];
+    u8 is_head = 1;
+    u16 crc_value;
+    cig_parameter_t *cig_param = get_cig_params();
+    u32 aclMaxPduPToC = cig_param->vdr.aclMaxPduPToC;
     if (g_cis_conn_handle) {
         if (!JL_rcsp_get_auth_flag_with_bthdl(g_cis_conn_handle, NULL)) {
             if (!rcsp_protocol_head_check(buf, len)) {
-                connected_send_acl_data(g_cis_conn_handle, buf, len);
+                printf("rcsp_cis_tx(%d)", len);
+                put_buf(buf, len);
             }
         } else {
-            connected_send_acl_data(g_cis_conn_handle, buf, len);
+            printf("rcsp_cis_tx(%d)", len);
+            put_buf(buf, len);
         }
+#if RCSP_ADV_OVER_ONLINE_CFG_TOOL
+        if (classic_update_task_exist_flag_get()) {
+            //加了加解密，接收端解密的长度要跟发送端加密的长度一致才正常。ota
+            //数据的分包大小要小于等于acl底层的分包大小，避免底层发送分包，引起
+            //解密出错。connected_iso_recv_handle()里设置了aclMaxPduPToC
+            aclMaxPduPToC = 251;
+        }
+        //分包发送
+        while (packet_offset < len) {
+            if (is_head) {
+                is_head = 0;
+                packet_len = MIN(len - packet_offset, aclMaxPduPToC - 6);
+                packet_len = MIN(sizeof(head_buf) - 6, packet_len);
+                head_buf[0] = 0x55;
+                head_buf[1] = 0xAA;
+                head_buf[2] = len & 0xff;
+                head_buf[3] = len >> 8;
+                crc_value = CRC16(buf, len);
+                head_buf[4] = crc_value & 0xff;
+                head_buf[5] = crc_value >> 8;
+                memcpy(&head_buf[6], buf, packet_len);
+                if (g_cis_rcsp_encrypt_key) {
+                    spin_lock(&g_cis_rcsp_encrypt_lock);
+                    doe(g_cis_rcsp_encrypt_key, head_buf, 6 + packet_len, 0);
+                    spin_unlock(&g_cis_rcsp_encrypt_lock);
+                }
+                connected_send_acl_data(g_cis_conn_handle, head_buf, 6 + packet_len);
+                packet_offset += packet_len;
+            } else {
+                packet_len = MIN(len - packet_offset, aclMaxPduPToC);
+                if (g_cis_rcsp_encrypt_key) {
+                    spin_lock(&g_cis_rcsp_encrypt_lock);
+                    doe(g_cis_rcsp_encrypt_key, buf + packet_offset, packet_len, 0);
+                    spin_unlock(&g_cis_rcsp_encrypt_lock);
+                }
+                connected_send_acl_data(g_cis_conn_handle, buf + packet_offset, packet_len);
+                packet_offset += packet_len;
+            }
+        }
+#else
+        //不分包，不加密发送，兼容旧dongle SDK
+        connected_send_acl_data(g_cis_conn_handle, buf, len);
+#endif
         ret = 1;
     }
     return ret;
 }
 
-u16 cis_rcsp_update_flag(void)
+u16 cis_rcsp_conn_flag(void)
 {
     return g_cis_conn_handle;
 }
@@ -605,12 +677,37 @@ static int app_connected_conn_status_event_handler(int *msg)
     switch (event[0]) {
     case CIG_EVENT_ACL_CONNECT:
         acl_info = (cis_acl_info_t *)&event[1];
-        if (rcsp_get_auth_support() && acl_info) {
-            JL_rcsp_reset_bthdl_auth(acl_info->acl_hdl, NULL);
+        if (acl_info) {
+            rcsp_protocol_bound(acl_info->acl_hdl, NULL);
+            if (rcsp_get_auth_support()) {
+                JL_rcsp_reset_bthdl_auth(acl_info->acl_hdl, NULL);
+            }
+#if RCSP_ADV_OVER_ONLINE_CFG_TOOL
+            extern void cis_rcsp_adv_info_notify(void *priv);
+            g_cis_rcsp_adv_info_timer = sys_timer_add(NULL, cis_rcsp_adv_info_notify, 1000);
+            struct {
+                u8 remote_addr[6];
+                u8 local_addr[6];
+            } acl_conn_addr;
+            memcpy(acl_conn_addr.remote_addr, (u8 *)&acl_info->pri_ch, 6);
+            memcpy(acl_conn_addr.local_addr, le_audio_adv_local_mac_get(), 6);
+            /* printf("%s() addr(remote + local):\n", __func__); */
+            /* put_buf((u8 *)&acl_conn_addr, sizeof(acl_conn_addr)); */
+            g_cis_rcsp_encrypt_key = CRC16((u8 *)&acl_conn_addr, sizeof(acl_conn_addr));
+#endif
         }
         break;
     case CIG_EVENT_ACL_DISCONNECT:
+        acl_info = (cis_acl_info_t *)&event[1];
+        if (acl_info) {
+            rcsp_protocol_reset_bound(acl_info->acl_hdl, NULL);
+            if (g_cis_rcsp_adv_info_timer) {
+                sys_timer_del(g_cis_rcsp_adv_info_timer);
+                g_cis_rcsp_adv_info_timer = 0;
+            }
+        }
         g_cis_conn_handle = 0;
+        g_cis_rcsp_encrypt_key = 0;
         break;
     };
     return 0;

@@ -272,6 +272,8 @@ struct mjpg_d_attr {
     struct jpg_q_table *qt;
     u8 *thumbnails;
     int thumb_len;
+    int thumb_width;
+    int thumb_height;
 };
 
 struct icap_auxiliary_mem {

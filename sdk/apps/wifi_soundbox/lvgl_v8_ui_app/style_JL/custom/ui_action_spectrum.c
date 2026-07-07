@@ -296,4 +296,3 @@ void ui_music_update_spectrum_with_magnitude(void)
 }
 
 #endif
-

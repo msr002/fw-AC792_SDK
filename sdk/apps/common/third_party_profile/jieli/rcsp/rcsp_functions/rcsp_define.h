@@ -74,7 +74,8 @@
 #define    JL_OPCODE_1T2_DEVICE_EDR_INFO_LIST						0x31
 #define    JL_OPCODE_TRANSLATOR                                     0x34//翻译功能
 #define    JL_OPCODE_PUBLIC_SET_CMD                                 0x33
-#define    JL_OPTCODE_AURACAST_CMD                                  0x35
+#define    JL_OPCODE_AURACAST_CMD                                   0x35
+#define    JL_OPCODE_OVER_ONLINE_CFG_TOOL_CMD                       0x36
 
 #define    JL_OPCODE_SPORTS_DATA_INFO_GET							0xA0
 #define    JL_OPCODE_SPORTS_DATA_INFO_SET							0xA1
@@ -95,7 +96,7 @@
 #define    JL_OPCODE_GET_MD5										0xD4
 #define    JL_OPCODE_LOW_LATENCY_PARAM								0xD5
 #define    JL_OPCODE_EXTRA_FLASH_INFO								0XD6
-#define    JL_OPCODE_GET_DEVICE_CONFIG_INFO                         0XD9
+#define    JL_OPCODE_DEVICE_CONFIG_GET                              0xD9
 
 #define    JL_OPCODE_GET_DEVICE_UPDATE_FILE_INFO_OFFSET				0xE1
 #define    JL_OPCODE_INQUIRE_DEVICE_IF_CAN_UPDATE					0xE2

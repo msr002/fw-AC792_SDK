@@ -24,32 +24,36 @@ char *gui_get_res_path(int32_t id)
 {
 #if LV_USE_GUIBUILDER_SIMULATOR
     switch (id) {
-    case GUI_RES_FANGZHENGKAITIJIANTI_1_TTF_SD:
-        return "D:\\wl83_soundbox\\ac792\\ui_prj\\wifi_soundbox_800x480\\import\\font\\FangZhengKaiTiJianTi_1.ttf";
+    case GUI_RES_FANGZHENGKAITIJIANTI_1_12_TTF_FLASH:
+        return "D:\\wl83\\ac792\\ui_prj\\wifi_soundbox_800x480\\sdk\\ui_res\\flash\\rle\\font\\35000000.rle";
+    case GUI_RES_FANGZHENGKAITIJIANTI_1_24_TTF_FLASH:
+        return "D:\\wl83\\ac792\\ui_prj\\wifi_soundbox_800x480\\sdk\\ui_res\\flash\\rle\\font\\35000001.rle";
+    case GUI_RES_FANGZHENGKAITIJIANTI_1_32_TTF_FLASH:
+        return "D:\\wl83\\ac792\\ui_prj\\wifi_soundbox_800x480\\sdk\\ui_res\\flash\\rle\\font\\35000002.rle";
     case GUI_RES_IMAGE_4225207_0_PNG:
-        return "A:\\wl83_soundbox\\ac792\\ui_prj\\wifi_soundbox_800x480\\import\\image\\icon_02itzp4fqyho\\image_4225207_0.png";
+        return "A:\\wl83\\ac792\\ui_prj\\wifi_soundbox_800x480\\import\\image\\icon_02itzp4fqyho\\image_4225207_0.png";
     case GUI_RES_IMAGE_4225207_1_PNG:
-        return "A:\\wl83_soundbox\\ac792\\ui_prj\\wifi_soundbox_800x480\\import\\image\\icon_02itzp4fqyho\\image_4225207_1.png";
+        return "A:\\wl83\\ac792\\ui_prj\\wifi_soundbox_800x480\\import\\image\\icon_02itzp4fqyho\\image_4225207_1.png";
     case GUI_RES_IMAGE_4225207_2_PNG:
-        return "A:\\wl83_soundbox\\ac792\\ui_prj\\wifi_soundbox_800x480\\import\\image\\icon_02itzp4fqyho\\image_4225207_2.png";
+        return "A:\\wl83\\ac792\\ui_prj\\wifi_soundbox_800x480\\import\\image\\icon_02itzp4fqyho\\image_4225207_2.png";
     case GUI_RES_IMAGE_4225207_3_PNG:
-        return "A:\\wl83_soundbox\\ac792\\ui_prj\\wifi_soundbox_800x480\\import\\image\\icon_02itzp4fqyho\\image_4225207_3.png";
+        return "A:\\wl83\\ac792\\ui_prj\\wifi_soundbox_800x480\\import\\image\\icon_02itzp4fqyho\\image_4225207_3.png";
     case GUI_RES_IMAGE_4225532_4_PNG:
-        return "A:\\wl83_soundbox\\ac792\\ui_prj\\wifi_soundbox_800x480\\import\\image\\icon_02itzp4fqyho\\image_4225532_4.png";
+        return "A:\\wl83\\ac792\\ui_prj\\wifi_soundbox_800x480\\import\\image\\icon_02itzp4fqyho\\image_4225532_4.png";
     case GUI_RES_IMAGE_4150274_3_PNG:
-        return "A:\\wl83_soundbox\\ac792\\ui_prj\\wifi_soundbox_800x480\\import\\image\\icon_02itzp4fqyho\\image_4150274_3.png";
+        return "A:\\wl83\\ac792\\ui_prj\\wifi_soundbox_800x480\\import\\image\\icon_02itzp4fqyho\\image_4150274_3.png";
     case GUI_RES_WIFI_PNG:
-        return "A:\\wl83_soundbox\\ac792\\ui_prj\\wifi_soundbox_800x480\\import\\image\\icon_02itzp4fqyho\\wifi.png";
+        return "A:\\wl83\\ac792\\ui_prj\\wifi_soundbox_800x480\\import\\image\\icon_02itzp4fqyho\\wifi.png";
     case GUI_RES_IMAGE_4150274_5_PNG:
-        return "A:\\wl83_soundbox\\ac792\\ui_prj\\wifi_soundbox_800x480\\import\\image\\icon_02itzp4fqyho\\image_4150274_5.png";
+        return "A:\\wl83\\ac792\\ui_prj\\wifi_soundbox_800x480\\import\\image\\icon_02itzp4fqyho\\image_4150274_5.png";
     case GUI_RES_IMAGE_4150274_8_PNG:
-        return "A:\\wl83_soundbox\\ac792\\ui_prj\\wifi_soundbox_800x480\\import\\image\\icon_02itzp4fqyho\\image_4150274_8.png";
+        return "A:\\wl83\\ac792\\ui_prj\\wifi_soundbox_800x480\\import\\image\\icon_02itzp4fqyho\\image_4150274_8.png";
     case GUI_RES_SHEZHI_PNG:
-        return "A:\\wl83_soundbox\\ac792\\ui_prj\\wifi_soundbox_800x480\\import\\image\\icon_02itzp4fqyho\\shezhi.png";
+        return "A:\\wl83\\ac792\\ui_prj\\wifi_soundbox_800x480\\import\\image\\icon_02itzp4fqyho\\shezhi.png";
     case GUI_RES_IMAGE_4161193_1_PNG:
-        return "A:\\wl83_soundbox\\ac792\\ui_prj\\wifi_soundbox_800x480\\import\\image\\icon_02itzp4fqyho\\image_4161193_1.png";
+        return "A:\\wl83\\ac792\\ui_prj\\wifi_soundbox_800x480\\import\\image\\icon_02itzp4fqyho\\image_4161193_1.png";
     case GUI_RES_IMAGE_4161390_0_PNG:
-        return "A:\\wl83_soundbox\\ac792\\ui_prj\\wifi_soundbox_800x480\\import\\image\\icon_02itzp4fqyho\\image_4161390_0.png";
+        return "A:\\wl83\\ac792\\ui_prj\\wifi_soundbox_800x480\\import\\image\\icon_02itzp4fqyho\\image_4161390_0.png";
     default:
         return NULL;
     }
@@ -216,3 +220,4 @@ GUI_WEAK void spectrum_draw_event_cb2(lv_event_t *e)
 GUI_WEAK void spectrum_delete_event_cb(lv_event_t *e)
 {
 }
+

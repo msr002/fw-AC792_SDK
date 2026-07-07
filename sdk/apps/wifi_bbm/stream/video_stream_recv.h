@@ -37,6 +37,33 @@ int video_stream_recv_acquire_frame_block(struct video_stream_recv_hdl *recv_hdl
         u8 **frame_buf, int *frame_len, FRAME_TYPE frame_type, int timeout_ms);
 void video_stream_recv_release_frame(struct video_stream_recv_hdl *recv_hdl, u8 *frame_buf);
 
+/**
+ * 录像接口: 将指定设备的音视频流封装为 AVI 文件
+ *
+ * @param recv_hdl         video_stream_recv 句柄
+ * @param ip_addr          远端设备 IP（网络字节序）
+ * @param file_path        AVI 文件完整路径
+ * @param video_width      视频宽度
+ * @param video_height     视频高度
+ * @param fps              视频帧率
+ * @param audio_sample_rate 音频采样率 (0 表示不录制音频)
+ * @param audio_channels   音频通道数
+ * @param audio_bits       音频位深
+ * @return 0 成功, <0 失败
+ */
+int video_stream_recv_rec_start(struct video_stream_recv_hdl *recv_hdl, u32 ip_addr,
+                                const char *file_path, int video_width, int video_height,
+                                double fps, int audio_sample_rate, int audio_channels, int audio_bits);
+
+/**
+ * 停止录像
+ *
+ * @param recv_hdl         video_stream_recv 句柄
+ * @param ip_addr          远端设备 IP（网络字节序）
+ * @return 0 成功, <0 失败
+ */
+int video_stream_recv_rec_stop(struct video_stream_recv_hdl *recv_hdl, u32 ip_addr);
+
 
 #endif // VIDEO_STREAM_RECV_H
 

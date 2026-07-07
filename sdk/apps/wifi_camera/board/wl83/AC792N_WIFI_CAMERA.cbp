@@ -256,6 +256,7 @@
 <Add option="../../../../cpu/wl83/liba/http_server.a" />
 <Add option="../../../../cpu/wl83/liba/iperf.a" />
 <Add option="../../../../cpu/wl83/liba/ai_server.a" />
+<Add option="../../../../cpu/wl83/liba/libcurl.a" />
 <Add option="../../../../cpu/wl83/liba/lwip_2_2_0.a" />
 <Add option="../../../../cpu/wl83/liba/libmbedtls_3_4_0.a" />
 <Add option="../../../../cpu/wl83/liba/json.a" />
@@ -389,8 +390,6 @@
 <Add option="../../../../cpu/wl83/liba/lib_sig_mesh.a " />
 <Add option="../../../../cpu/wl83/liba/rcsp_stack.a" />
 <Add option="../../../../cpu/wl83/liba/lvgl_v8_extend.a" />
-<Add option="../../../../cpu/wl83/liba/libcurl.a" />
-<Add option="../../../../cpu/wl83/liba/libmbedtls_3_4_0.a " />
 <Add option="../../../../include_lib/newlib/pi32v2-lib/libm.a" />
 <Add option="../../../../include_lib/newlib/pi32v2-lib/libc.a" />
 <Add option="../../../../include_lib/newlib/pi32v2-lib/libcompiler_rt.a" />
@@ -467,6 +466,7 @@
 <Unit filename="../../../../apps/common/camera/h63p_mipi/h63p_mipi_iq.h" />
 <Unit filename="../../../../apps/common/camera/isp_scenes.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/common/camera/isp_tools.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="../../../../apps/common/camera/nt99141.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/common/camera/ov2659/ov2659.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/common/camera/sc1245_dvp/sc1245.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/common/camera/sc1245_dvp/sc1245.h" />
@@ -2804,6 +2804,7 @@
 <Unit filename="../../../../include_lib/utils/fs/sdfile.h" />
 <Unit filename="../../../../include_lib/utils/lyrics/lyrics.h" />
 <Unit filename="../../../../include_lib/utils/syscfg/syscfg_id.h" />
+<Unit filename="../../../../include_lib/utils/uthash/uthash.h" />
 <Unit filename="../../../../include_lib/utils/version.z.S" />
 <Unit filename="../../../../include_lib/utils/yuv_soft_scalling.h" />
 <Unit filename="../../../../include_lib/utils/yuv_to_rgb.h" />

@@ -815,7 +815,7 @@
 #define TCFG_USER_BT_CLASSIC_ENABLE             1   //经典蓝牙功能
 #define TCFG_USER_BLE_ENABLE                    1   //BLE功能使能
 #define TCFG_USER_EMITTER_ENABLE                0   //蓝牙发射功能
-#define TCFG_BT_DUAL_CONN_ENABLE                1   //经典蓝牙支持同时连接2台设备
+#define TCFG_BT_DUAL_CONN_ENABLE                0   //经典蓝牙支持同时连接2台设备
 
 #endif
 

@@ -7,9 +7,6 @@
 #include "app_config.h"
 #include "ui.h"
 #include "fs/fs.h"
-#endif
-
-#if !LV_USE_GUIBUILDER_SIMULATOR
 #include "./lyrics_anim_effect.h"
 #include "../../lv_examples.h"
 
@@ -121,7 +118,7 @@ static float get_char_width_coefficient(char_type_t type)
 }
 
 // 精确计算文本宽度
-static lv_coord_t calculate_exact_width(const uint32_t *letters, uint16_t count, uint16_t font_size)
+lv_coord_t calculate_exact_width(const uint32_t *letters, uint16_t count, uint16_t font_size)
 {
     if (!letters || count == 0) {
         return 0;
@@ -237,7 +234,7 @@ static uint16_t find_optimal_split_point(const uint32_t *letters, uint16_t count
 }
 
 // 解析UTF-8文本为Unicode数组
-static uint32_t *parse_unicode_text(const char *text, uint16_t *char_count)
+uint32_t *parse_unicode_text(const char *text, uint16_t *char_count)
 {
     if (!text) {
         *char_count = 0;
@@ -273,6 +270,7 @@ static uint32_t *parse_unicode_text(const char *text, uint16_t *char_count)
 static void lyrics_0_delete_event_cb(lv_event_t *e)
 {
     if (lv_event_get_code(e) == LV_EVENT_DELETE) {
+        lv_anim_del(curr_obj_0, NULL);
         curr_obj_0 = NULL;
         printf("[lyrics 0] Object deleted\n");
     }
@@ -280,19 +278,9 @@ static void lyrics_0_delete_event_cb(lv_event_t *e)
 static void lyrics_1_delete_event_cb(lv_event_t *e)
 {
     if (lv_event_get_code(e) == LV_EVENT_DELETE) {
+        lv_anim_del(curr_obj_1, NULL);
         curr_obj_1 = NULL;
         printf("[lyrics 1] Object deleted\n");
-    }
-}
-
-// 安全的歌词删除回调
-static void safe_lyrics_delete_cb(lv_event_t *e)
-{
-    lv_obj_t *obj = lv_event_get_target(e);
-    if (obj) {
-        // 停止所有相关动画
-        lv_anim_del(obj, NULL);
-        printf("[INFO] Stopped animations for deleted lyrics object %p\n", obj);
     }
 }
 
@@ -305,8 +293,6 @@ void lyrics_example_clean(void)
     if (curr_obj_0 != NULL) {
         // 先停止动画
         lv_anim_del(curr_obj_0, NULL);
-
-
         // 然后销毁对象
         lv_lyrics_destructor(curr_obj_0);
         curr_obj_0 = NULL;
@@ -318,10 +304,11 @@ void lyrics_example_clean(void)
         curr_obj_1 = NULL;
     }
 }
+
 // 修改创建歌词的函数
-static lv_obj_t *create_lyrics_line(lv_obj_t *parent, const char *font_file,
-                                    uint16_t font_size, uint32_t *letter_buf,
-                                    uint16_t letter_count, lv_coord_t x, lv_coord_t y)
+lv_obj_t *create_lyrics_line(lv_obj_t *parent, const char *font_file,
+                             uint16_t font_size, uint32_t *letter_buf,
+                             uint16_t letter_count, lv_coord_t x, lv_coord_t y)
 {
     if (!letter_buf || letter_count == 0) {
         printf("[ERROR] create_lyrics_line: invalid parameters\n");
@@ -331,8 +318,9 @@ static lv_obj_t *create_lyrics_line(lv_obj_t *parent, const char *font_file,
     lv_obj_t *lyrics_obj = lv_lyrics_create(parent, font_file, font_size, 0,
                                             letter_buf, letter_count);
 
-    if (!lyrics_obj) {
+    if (lyrics_obj == NULL) {
         printf("[ERROR] Failed to create lyrics object\n");
+        lv_lyrics_destructor(lyrics_obj);
         return NULL;
     }
 
@@ -344,18 +332,12 @@ static lv_obj_t *create_lyrics_line(lv_obj_t *parent, const char *font_file,
     jlvg_color_t color = {0xff, 0xff, 0xff, 0xff};
     lv_lyrics_set_color(lyrics_obj, color);
 
-    // 添加删除事件回调
-    lv_obj_add_event_cb(lyrics_obj, safe_lyrics_delete_cb, LV_EVENT_DELETE, NULL);
-
     // 设置位置
     lv_lyrics_set_pos(lyrics_obj, x, y);
 
     return lyrics_obj;
 }
 
-
-
-// 在你的歌词显示函数中使用
 static void lv_example_lyrics_letter(lv_obj_t *dest_scr, const char *text,
                                      uint16_t font_size, const char *font_file)
 {
@@ -463,7 +445,6 @@ static void lv_example_lyrics_letter(lv_obj_t *dest_scr, const char *text,
 
 //更新歌词
 void lv_example_lyrics_text_input(char *new_text)
-
 {
 
     if (!lyrics_path_init_flag) {
@@ -490,13 +471,10 @@ void lv_example_lyrics_text_input(char *new_text)
     lyrics_example_text[text_len] = '\0';
     free(new_text);
     lv_ui_music_player *ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_MUSIC_PLAYER);
-
+    if (!ui_scr) {
+        return;
+    }
     lv_example_lyrics_letter(ui_scr->music_player_view_lyrics, lyrics_example_text, 48, CONFIG_FONT_TTF_PATH);
 }
-
-
-
+#endif //LV_USE_LYRICS
 #endif
-
-#endif
-

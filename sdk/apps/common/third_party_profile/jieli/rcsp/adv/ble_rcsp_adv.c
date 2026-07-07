@@ -52,7 +52,7 @@
 #include "bt_tws.h"
 #include "classic/tws_api.h"
 #endif
-#if (TCFG_LE_AUDIO_RCSP_USE_SAME_ACL)
+#if (TCFG_LE_AUDIO_APP_CONFIG & (LE_AUDIO_UNICAST_SINK_EN | LE_AUDIO_JL_UNICAST_SINK_EN))
 #include "app_le_connected.h"
 #endif
 
@@ -63,6 +63,10 @@
 #endif
 
 /* #include "asm/charge.h" */
+
+#if (THIRD_PARTY_PROTOCOLS_SEL & BRAGI_EN)
+#include "bragi_config.h"
+#endif
 
 // 设备类型
 #define RCSP_ADV_DEV_TYPE_SOUNDBOX              (0x00) //音箱类型
@@ -144,6 +148,15 @@ static void rcsp_adv_fill_mac_addr(u8 *mac_addr_buf)
 extern int JL_AES_BASE_BT;
 int JL_AES_BASE_BT = (int)JL_AES;	// add for btcon_hash, by lingxuanfeng, 20220517
 #endif
+
+#if (THIRD_PARTY_PROTOCOLS_SEL & BRAGI_EN)
+u8 ble_bragi_adv_data[29] = {
+    0x41, 0x02, 0x06, 0x02, 0x01, 0xff, 0xff, 0xff, 0xff, 0xff,
+    0xff, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+};
+#endif
+
 int rcsp_make_set_adv_data(void)
 {
     u8 *buf = adv_data;
@@ -208,7 +221,19 @@ int rcsp_make_set_adv_data(void)
     buf[offset++] = (android_connect_way << 1) | (ios_connect_way << 4) | BIT(7);
 
     // CFG 2
+#if (TCFG_LE_AUDIO_APP_CONFIG & (LE_AUDIO_UNICAST_SINK_EN | LE_AUDIO_JL_UNICAST_SINK_EN))
+    u8 ble_rcsp_cfg2 = 0;
+    ble_rcsp_cfg2 |= BIT(0);  // BIT0: 是否支持Le Audio功能
+    if (is_cig_phone_conn()) {
+        ble_rcsp_cfg2 |= BIT(1);          // BIT1: Le Audio是否已连接
+    }
+#if (TCFG_LE_AUDIO_RCSP_USE_SAME_ACL)
+    ble_rcsp_cfg2 |= BIT(2);  // BIT2: RCSP是否复用LE Audio地址
+#endif
+    buf[offset++] = ble_rcsp_cfg2;
+#else
     buf[offset++] = 0;
+#endif
 
     adv_data_len = offset;
     buf[0] = adv_data_len - 1;
@@ -304,6 +329,15 @@ int rcsp_make_set_adv_data(void)
 #error "RCSP_ADV_VERSION unsupport"
 #endif
     __this->modify_flag = 0;
+
+#if (THIRD_PARTY_PROTOCOLS_SEL & BRAGI_EN)
+    offset = 0;
+    u8  tag_len = sizeof(ble_bragi_adv_data);
+    // /* ble_op_set_adv_data(31, buf); */
+    offset += make_eir_packet_data(&buf[offset], offset, HCI_EIR_DATATYPE_MANUFACTURER_SPECIFIC_DATA, (void *)ble_bragi_adv_data, tag_len); //发送客户指定的广播包
+    adv_data_len = offset;
+    printf("adv_data_len:%d\n", adv_data_len);
+#endif
 
     /* ble_op_set_adv_data(31, buf); */
 #if !TCFG_THIRD_PARTY_PROTOCOLS_SIMPLIFIED
@@ -767,10 +801,12 @@ static void bt_ble_rcsp_adv_enable_do(void *priv)
 
     log_info("adv modify!!!!!!\n");
     __this->modify_flag = 0;
+#if !(TCFG_THIRD_PARTY_PROTOCOLS_SIMPLIFIED && (RCSP_CHANNEL_SEL == RCSP_USE_GATT_OVER_EDR))
     rcsp_bt_ble_adv_enable(0);
     rcsp_make_set_adv_data();
     rcsp_make_set_rsp_data();
     rcsp_bt_ble_adv_enable(1);
+#endif
 }
 
 void bt_ble_rcsp_adv_enable(void)
@@ -778,6 +814,25 @@ void bt_ble_rcsp_adv_enable(void)
     if (ble_timer_handle == 0) {
         ble_timer_handle = sys_timer_add(NULL, bt_ble_rcsp_adv_enable_do, BLE_TIMER_SET);
     }
+}
+
+void cis_rcsp_adv_info_notify(void *priv)
+{
+    u8 modify_flag = 0;
+#if ((TCFG_LE_AUDIO_APP_CONFIG & LE_AUDIO_JL_UNICAST_SINK_EN) && (RCSP_UPDATE_EN))
+    // battery
+    if (update_dev_battery_level()) {
+        modify_flag = 1;
+    }
+    extern u16 cis_rcsp_conn_flag(void);
+    extern u8 adv_info_notify(u8 * buf, u8 len);
+    if (JL_rcsp_get_auth_flag() && cis_rcsp_conn_flag() && modify_flag) {
+        //通知电量变更
+        u8 data[18];
+        update_adv_data(data);
+        adv_info_notify(data, 18);
+    }
+#endif
 }
 
 u8 *ble_get_scan_rsp_ptr(u16 *len)
@@ -1056,9 +1111,9 @@ static void tws_disconn_ble(void *priv)
 void adv_role_switch_handle(u8 role)
 {
 #if TCFG_USER_TWS_ENABLE
-#if !TCFG_THIRD_PARTY_PROTOCOLS_SIMPLIFIED
     // 当充电入仓的时候，入仓的主机设备role是1但tws_api_get_role()是0；
     log_debug("adv_role_switch_handle rcsp role change:%d, %d, %d\n", role, tws_api_get_role(), bt_rcsp_device_conn_num());
+#if !TCFG_THIRD_PARTY_PROTOCOLS_SIMPLIFIED
     log_debug("tws state %x, spp num %x, ble num %x, att num %x\n", tws_api_get_tws_state(), bt_rcsp_spp_conn_num(), bt_rcsp_ble_conn_num(), bt_rcsp_edr_att_conn_num());
     if (tws_api_get_tws_state()) {
         // 设备连接后，主从切换需要spp手机app来请求固件信息
@@ -1102,7 +1157,13 @@ void adv_role_switch_handle(u8 role)
             set_ble_adv_notify(1);
             bt_ble_rcsp_adv_enable();
         }
-        if (rcsp_ble_con_handle_get() && (tws_api_get_role() == TWS_ROLE_SLAVE)) {
+#if (RCSP_CHANNEL_SEL == RCSP_USE_GATT_OVER_EDR)
+        if (bt_rcsp_device_conn_num()) {
+            u8 adv_cmd = 0x4;
+            adv_info_device_request(&adv_cmd, sizeof(adv_cmd));
+        }
+#else
+        if (rcsp_ble_con_handle_get() && (tws_api_get_role() != TWS_ROLE_SLAVE)) {
             // 旧主机让手机回连同时断开ble
             u8 adv_cmd = 0x3;
             adv_info_device_request(&adv_cmd, sizeof(adv_cmd));
@@ -1112,6 +1173,7 @@ void adv_role_switch_handle(u8 role)
             u8 adv_cmd = 0x4;
             adv_info_device_request(&adv_cmd, sizeof(adv_cmd));             //主从切换spp让手机来请求固件信息
         }
+#endif
     }
 
 #endif // !TCFG_THIRD_PARTY_PROTOCOLS_SIMPLIFIED

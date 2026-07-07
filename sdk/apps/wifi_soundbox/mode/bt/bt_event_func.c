@@ -476,6 +476,13 @@ void map_get_time_data(char *time, int status)
     }
 }
 
+void map_phone_date_and_time_feedback(u8 *data, u16 len)
+{
+    if (data && len > 0) {
+        log_info("map time : %s", data);
+    }
+}
+
 #endif
 
 
@@ -530,6 +537,12 @@ static void bt_function_select_init(void)
 #endif
 #if (defined(TCFG_BT_SUPPORT_MSBC) && TCFG_BT_SUPPORT_MSBC)
     bt_set_support_msbc_flag(TCFG_BT_SUPPORT_MSBC);
+#if (defined(TCFG_USER_EMITTER_ENABLE) && TCFG_USER_EMITTER_ENABLE)
+#if (defined(TCFG_BT_SUPPORT_PROFILE_HFP_AG) && !TCFG_BT_SUPPORT_PROFILE_HFP_AG)
+    log_error("BT_EMITTER needs to support HFP_AG");
+#endif
+    bt_set_hfp_ag_support_msbc_flag(TCFG_BT_SUPPORT_MSBC);
+#endif
 #endif
 
 #if (defined(TCFG_BT_SUPPORT_AAC) && TCFG_BT_SUPPORT_AAC)

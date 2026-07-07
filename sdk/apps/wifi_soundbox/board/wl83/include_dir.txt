@@ -67,6 +67,7 @@
 -I../../../../apps/wifi_soundbox/mode
 -I../../../../apps/wifi_soundbox/mode/local_music
 -I../../../../apps/common/third_party_profile/common
+-I../../../../apps/common/third_party_profile/jieli/rcsp/server/functions/rcsp_over_online_cfg_tool
 -I../../../../apps/common/lcd/include
 -I../../../../include_lib/driver/device/video/pipeline
 -I../../../../include_lib/driver/device/video/pipeline/buffer
@@ -94,6 +95,10 @@
 -I../../../../apps/common/lvgl_v8/demos/amap/gps
 -I../../../../apps/common/lvgl_v8/demos/amap
 -I../../../../apps/common/lvgl_v8/src/draw/jl/jl_dma2d
+-I../../../../include_lib/net/curl
+-I../../../../include_lib/net/lwip_2_2_0/lwip/src/include/compat/posix
+-I../../../../include_lib/net/lwip_2_2_0/lwip/src/include/compat/stdc
+-I../../../../apps/common/video/net_avi_player
 -I../../../../apps/wifi_soundbox/lvgl_v8_ui_app/style_JL/generated
 -I../../../../apps/wifi_soundbox/lvgl_v8_ui_app/style_JL/generated/gui_events
 -I../../../../apps/wifi_soundbox/lvgl_v8_ui_app/style_JL/generated/gui_fonts

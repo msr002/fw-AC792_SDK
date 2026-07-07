@@ -311,6 +311,7 @@ c_SRC_FILES := \
 	../../../../apps/common/camera/h63p_mipi/h63p_mipi_iq.c \
 	../../../../apps/common/camera/isp_scenes.c \
 	../../../../apps/common/camera/isp_tools.c \
+	../../../../apps/common/camera/nt99141.c \
 	../../../../apps/common/camera/ov2659/ov2659.c \
 	../../../../apps/common/camera/sc1245_dvp/sc1245.c \
 	../../../../apps/common/camera/sc1245_dvp/sc1245_ae.c \
@@ -1403,6 +1404,7 @@ LFLAGS := \
 	../../../../cpu/wl83/liba/http_server.a \
 	../../../../cpu/wl83/liba/iperf.a \
 	../../../../cpu/wl83/liba/ai_server.a \
+	../../../../cpu/wl83/liba/libcurl.a \
 	../../../../cpu/wl83/liba/lwip_2_2_0.a \
 	../../../../cpu/wl83/liba/libmbedtls_3_4_0.a \
 	../../../../cpu/wl83/liba/json.a \
@@ -1536,8 +1538,6 @@ LFLAGS := \
 	../../../../cpu/wl83/liba/lib_sig_mesh.a  \
 	../../../../cpu/wl83/liba/rcsp_stack.a \
 	../../../../cpu/wl83/liba/lvgl_v8_extend.a \
-	../../../../cpu/wl83/liba/libcurl.a \
-	../../../../cpu/wl83/liba/libmbedtls_3_4_0.a  \
 	../../../../include_lib/newlib/pi32v2-lib/libm.a \
 	../../../../include_lib/newlib/pi32v2-lib/libc.a \
 	../../../../include_lib/newlib/pi32v2-lib/libcompiler_rt.a \

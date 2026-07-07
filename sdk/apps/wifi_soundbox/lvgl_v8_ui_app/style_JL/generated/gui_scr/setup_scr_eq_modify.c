@@ -308,8 +308,7 @@ lv_obj_t *setup_scr_eq_modify(lv_ui *ui)
 
     //Write codes eq_modify_ddlist_1
     ui_scr->eq_modify_ddlist_1 = lv_dropdown_create(ui_scr->eq_modify);
-    lv_dropdown_set_options(ui_scr->eq_modify_ddlist_1,
-                            "普通模式\n摇滚模式\n流行模式\n古典模式\n爵士模式\n乡村模式\n自定义模式");
+    lv_dropdown_set_options(ui_scr->eq_modify_ddlist_1, "普通模式\n摇滚模式\n流行模式\n古典模式\n爵士模式\n乡村模式\n自定义模式");
     lv_dropdown_set_dir(ui_scr->eq_modify_ddlist_1, LV_DIR_BOTTOM);
     lv_dropdown_set_symbol(ui_scr->eq_modify_ddlist_1, LV_SYMBOL_DOWN);
     lv_dropdown_set_symbol(ui_scr->eq_modify_ddlist_1, NULL);
@@ -322,34 +321,25 @@ lv_obj_t *setup_scr_eq_modify(lv_ui *ui)
     //Set style state: LV_STATE_CHECKED for style_eq_modify_ddlist_1_extra_list_selected_checked
     static lv_style_t style_eq_modify_ddlist_1_extra_list_selected_checked;
     ui_init_style(&style_eq_modify_ddlist_1_extra_list_selected_checked);
-    lv_obj_add_style(lv_dropdown_get_list(ui_scr->eq_modify_ddlist_1), &gui_ddlist_selected_checked_style,
-                     LV_PART_SELECTED | LV_STATE_CHECKED);
-    lv_obj_add_style(lv_dropdown_get_list(ui_scr->eq_modify_ddlist_1),
-                     &style_eq_modify_ddlist_1_extra_list_selected_checked, LV_PART_SELECTED | LV_STATE_CHECKED);
+    lv_obj_add_style(lv_dropdown_get_list(ui_scr->eq_modify_ddlist_1), &gui_ddlist_selected_checked_style, LV_PART_SELECTED | LV_STATE_CHECKED);
+    lv_obj_add_style(lv_dropdown_get_list(ui_scr->eq_modify_ddlist_1), &style_eq_modify_ddlist_1_extra_list_selected_checked, LV_PART_SELECTED | LV_STATE_CHECKED);
 
     //Set style state: LV_STATE_DEFAULT for style_eq_modify_ddlist_1_extra_list_main_default
     static lv_style_t style_eq_modify_ddlist_1_extra_list_main_default;
     ui_init_style(&style_eq_modify_ddlist_1_extra_list_main_default);
-    lv_obj_add_style(lv_dropdown_get_list(ui_scr->eq_modify_ddlist_1), &gui_ddlist_dropdown_list_default_style,
-                     LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_add_style(lv_dropdown_get_list(ui_scr->eq_modify_ddlist_1), &style_eq_modify_ddlist_1_extra_list_main_default,
-                     LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_add_style(lv_dropdown_get_list(ui_scr->eq_modify_ddlist_1), &gui_ddlist_dropdown_list_default_style, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_add_style(lv_dropdown_get_list(ui_scr->eq_modify_ddlist_1), &style_eq_modify_ddlist_1_extra_list_main_default, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     //Set style state: LV_STATE_DEFAULT for style_eq_modify_ddlist_1_extra_list_scrollbar_default
     static lv_style_t style_eq_modify_ddlist_1_extra_list_scrollbar_default;
     ui_init_style(&style_eq_modify_ddlist_1_extra_list_scrollbar_default);
-    lv_obj_add_style(lv_dropdown_get_list(ui_scr->eq_modify_ddlist_1), &gui_ddlist_scrollbar_default_style,
-                     LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
-    lv_obj_add_style(lv_dropdown_get_list(ui_scr->eq_modify_ddlist_1),
-                     &style_eq_modify_ddlist_1_extra_list_scrollbar_default, LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
+    lv_obj_add_style(lv_dropdown_get_list(ui_scr->eq_modify_ddlist_1), &gui_ddlist_scrollbar_default_style, LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
+    lv_obj_add_style(lv_dropdown_get_list(ui_scr->eq_modify_ddlist_1), &style_eq_modify_ddlist_1_extra_list_scrollbar_default, LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
 
     //Delete extra default style for eq_modify_ddlist_1
-    lv_obj_remove_style(ui_scr->eq_modify_ddlist_1, &gui_ddlist_selected_checked_style,
-                        LV_PART_SELECTED | LV_STATE_CHECKED);
-    lv_obj_remove_style(ui_scr->eq_modify_ddlist_1, &gui_ddlist_dropdown_list_default_style,
-                        LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_remove_style(ui_scr->eq_modify_ddlist_1, &gui_ddlist_scrollbar_default_style,
-                        LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
+    lv_obj_remove_style(ui_scr->eq_modify_ddlist_1, &gui_ddlist_selected_checked_style, LV_PART_SELECTED | LV_STATE_CHECKED);
+    lv_obj_remove_style(ui_scr->eq_modify_ddlist_1, &gui_ddlist_dropdown_list_default_style, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_remove_style(ui_scr->eq_modify_ddlist_1, &gui_ddlist_scrollbar_default_style, LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
 
     //Write codes eq_modify_btn_1
     ui_scr->eq_modify_btn_1 = lv_btn_create(ui_scr->eq_modify);

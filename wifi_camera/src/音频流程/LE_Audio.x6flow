@@ -1,7 +1,7 @@
 {
  "name": "pipeline-LE_Audio",
  "uuid": "0x99AA",
- "enable": true,
+ "enable": false,
  "childrenGroup": [
   {
    "id": "id_1729672265831_25",

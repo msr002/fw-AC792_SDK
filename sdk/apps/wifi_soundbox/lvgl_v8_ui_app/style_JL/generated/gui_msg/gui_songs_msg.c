@@ -1,5 +1,6 @@
 /*Generate Code, Do NOT Edit!*/
 #include "./gui_songs_msg.h"
+
 #if LV_USE_OBSERVER
 
 static lv_ll_t subs_ll;
@@ -72,14 +73,12 @@ GUI_WEAK int gui_songs_msg_music_artist_cb(gui_msg_action_t access, gui_msg_data
     _gui_msg_char_array_cb(&music_artist_var, music_artist_init_var, &music_artist_is_init, access, data);
     return 0;
 }
-GUI_WEAK int gui_songs_msg_music_artist_and_name_cb(gui_msg_action_t access, gui_msg_data_t *data,
-        gui_msg_data_type_t type)
+GUI_WEAK int gui_songs_msg_music_artist_and_name_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type)
 {
     char music_artist_and_name_init_var[] = "歌手-歌名";
     static bool music_artist_and_name_is_init = false;
     static char *music_artist_and_name_var = NULL;
-    _gui_msg_char_array_cb(&music_artist_and_name_var, music_artist_and_name_init_var, &music_artist_and_name_is_init,
-                           access, data);
+    _gui_msg_char_array_cb(&music_artist_and_name_var, music_artist_and_name_init_var, &music_artist_and_name_is_init, access, data);
     return 0;
 }
 GUI_WEAK int gui_songs_msg_player_volume_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type)
@@ -171,44 +170,22 @@ void gui_songs_msg_init_events()
     lv_subject_t *subject_music_process = gui_msg_get_subject(GUI_SONGS_MSG_ID_MUSIC_PROCESS);
     lv_subject_t *subject_cur_time = gui_msg_get_subject(GUI_SONGS_MSG_ID_CUR_TIME);
     lv_subject_t *subject_tol_time = gui_msg_get_subject(GUI_SONGS_MSG_ID_TOL_TIME);
-    lv_subject_t *subject_music_name = gui_msg_get_subject(GUI_SONGS_MSG_ID_MUSIC_NAME);
-    lv_subject_t *subject_music_artist = gui_msg_get_subject(GUI_SONGS_MSG_ID_MUSIC_ARTIST);
     lv_subject_t *subject_lyrics_show = gui_msg_get_subject(GUI_SONGS_MSG_ID_LYRICS_SHOW);
     lv_subject_t *subject_album_pic_show = gui_msg_get_subject(GUI_SONGS_MSG_ID_ALBUM_PIC_SHOW);
     lv_subject_t *subject_player_volume = gui_msg_get_subject(GUI_SONGS_MSG_ID_PLAYER_VOLUME);
-    lv_subject_t *subject_music_artist_and_name = gui_msg_get_subject(GUI_SONGS_MSG_ID_MUSIC_ARTIST_AND_NAME);
     if (guider_ui.music_player) {
         lv_ui_music_player *ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_MUSIC_PLAYER);
-        gui_msg_setup_component(true, false, subject_music_state, ui_scr->music_player_imgbtn_1, &guider_msg_data,
-                                gui_msg_set_control_state_by_int32_cb, GUI_SONGS_MSG_ID_MUSIC_STATE, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
+        gui_msg_setup_component(true, false, subject_music_state, ui_scr->music_player_imgbtn_1, &guider_msg_data, gui_msg_set_control_state_by_int32_cb, GUI_SONGS_MSG_ID_MUSIC_STATE, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
 
-        gui_msg_setup_component(true, true, subject_music_process, ui_scr->music_player_slider_1, &guider_msg_data,
-                                gui_msg_set_slider_starting_value_by_int32_cb, GUI_SONGS_MSG_ID_MUSIC_PROCESS, GUI_MSG_ACCESS_GET, VALUE_INT,
-                                gui_msg_change_slider_starting_value_cb);
+        gui_msg_setup_component(true, true, subject_music_process, ui_scr->music_player_slider_1, &guider_msg_data, gui_msg_set_slider_starting_value_by_int32_cb, GUI_SONGS_MSG_ID_MUSIC_PROCESS, GUI_MSG_ACCESS_GET, VALUE_INT, gui_msg_change_slider_starting_value_cb);
 
-        gui_msg_setup_component(true, false, subject_cur_time, ui_scr->music_player_lbl_2, &guider_msg_data,
-                                gui_msg_set_label_text_by_string_cb, GUI_SONGS_MSG_ID_CUR_TIME, GUI_MSG_ACCESS_GET, VALUE_STRING, NULL);
+        gui_msg_setup_component(true, false, subject_cur_time, ui_scr->music_player_lbl_2, &guider_msg_data, gui_msg_set_label_text_by_string_cb, GUI_SONGS_MSG_ID_CUR_TIME, GUI_MSG_ACCESS_GET, VALUE_STRING, NULL);
 
-        gui_msg_setup_component(true, false, subject_tol_time, ui_scr->music_player_lbl_3, &guider_msg_data,
-                                gui_msg_set_label_text_by_string_cb, GUI_SONGS_MSG_ID_TOL_TIME, GUI_MSG_ACCESS_GET, VALUE_STRING, NULL);
+        gui_msg_setup_component(true, false, subject_tol_time, ui_scr->music_player_lbl_3, &guider_msg_data, gui_msg_set_label_text_by_string_cb, GUI_SONGS_MSG_ID_TOL_TIME, GUI_MSG_ACCESS_GET, VALUE_STRING, NULL);
 
-        gui_msg_setup_component(true, false, subject_music_name, ui_scr->music_player_lbl_1, &guider_msg_data,
-                                gui_msg_set_label_text_by_string_cb, GUI_SONGS_MSG_ID_MUSIC_NAME, GUI_MSG_ACCESS_GET, VALUE_STRING, NULL);
+        gui_msg_setup_component(true, false, subject_lyrics_show, ui_scr->music_player_view_lyrics, &guider_msg_data, gui_msg_set_visible_by_bool_cb, GUI_SONGS_MSG_ID_LYRICS_SHOW, GUI_MSG_ACCESS_GET, VALUE_BOOL, NULL);
 
-        gui_msg_setup_component(true, false, subject_music_artist, ui_scr->music_player_lbl_4, &guider_msg_data,
-                                gui_msg_set_label_text_by_string_cb, GUI_SONGS_MSG_ID_MUSIC_ARTIST, GUI_MSG_ACCESS_GET, VALUE_STRING, NULL);
-
-        gui_msg_setup_component(true, false, subject_lyrics_show, ui_scr->music_player_view_lyrics, &guider_msg_data,
-                                gui_msg_set_visible_by_bool_cb, GUI_SONGS_MSG_ID_LYRICS_SHOW, GUI_MSG_ACCESS_GET, VALUE_BOOL, NULL);
-
-        gui_msg_setup_component(true, false, subject_music_name, ui_scr->music_player_lbl_6, &guider_msg_data,
-                                gui_msg_set_label_text_by_string_cb, GUI_SONGS_MSG_ID_MUSIC_NAME, GUI_MSG_ACCESS_GET, VALUE_STRING, NULL);
-
-        gui_msg_setup_component(true, false, subject_music_artist, ui_scr->music_player_lbl_7, &guider_msg_data,
-                                gui_msg_set_label_text_by_string_cb, GUI_SONGS_MSG_ID_MUSIC_ARTIST, GUI_MSG_ACCESS_GET, VALUE_STRING, NULL);
-
-        gui_msg_setup_component(true, false, subject_album_pic_show, ui_scr->music_player_view_1, &guider_msg_data,
-                                gui_msg_set_visible_by_bool_cb, GUI_SONGS_MSG_ID_ALBUM_PIC_SHOW, GUI_MSG_ACCESS_GET, VALUE_BOOL, NULL);
+        gui_msg_setup_component(true, false, subject_album_pic_show, ui_scr->music_player_view_1, &guider_msg_data, gui_msg_set_visible_by_bool_cb, GUI_SONGS_MSG_ID_ALBUM_PIC_SHOW, GUI_MSG_ACCESS_GET, VALUE_BOOL, NULL);
 
 
         for (int i = 0; i < 12; i++) {
@@ -224,12 +201,6 @@ void gui_songs_msg_init_events()
             if (status[i].msg_id == GUI_SONGS_MSG_ID_TOL_TIME) {
                 status[i].is_subscribe = 1;
             }
-            if (status[i].msg_id == GUI_SONGS_MSG_ID_MUSIC_NAME) {
-                status[i].is_subscribe = 1;
-            }
-            if (status[i].msg_id == GUI_SONGS_MSG_ID_MUSIC_ARTIST) {
-                status[i].is_subscribe = 1;
-            }
             if (status[i].msg_id == GUI_SONGS_MSG_ID_LYRICS_SHOW) {
                 status[i].is_subscribe = 1;
             }
@@ -240,22 +211,13 @@ void gui_songs_msg_init_events()
     }
     if (guider_ui.sys_menu) {
         lv_ui_sys_menu *ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_SYS_MENU);
-        gui_msg_setup_component(true, true, subject_player_volume, ui_scr->sys_menu_slider_1, &guider_msg_data,
-                                gui_msg_set_slider_starting_value_by_int32_cb, GUI_SONGS_MSG_ID_PLAYER_VOLUME, GUI_MSG_ACCESS_GET, VALUE_INT,
-                                gui_msg_change_slider_starting_value_cb);
+        gui_msg_setup_component(true, true, subject_player_volume, ui_scr->sys_menu_slider_1, &guider_msg_data, gui_msg_set_slider_starting_value_by_int32_cb, GUI_SONGS_MSG_ID_PLAYER_VOLUME, GUI_MSG_ACCESS_GET, VALUE_INT, gui_msg_change_slider_starting_value_cb);
 
-        gui_msg_setup_component(true, false, subject_music_artist_and_name, ui_scr->sys_menu_lbl_7, &guider_msg_data,
-                                gui_msg_set_label_text_by_string_cb, GUI_SONGS_MSG_ID_MUSIC_ARTIST_AND_NAME, GUI_MSG_ACCESS_GET, VALUE_STRING, NULL);
-
-        gui_msg_setup_component(true, false, subject_music_state, ui_scr->sys_menu_imgbtn_4, &guider_msg_data,
-                                gui_msg_set_control_state_by_int32_cb, GUI_SONGS_MSG_ID_MUSIC_STATE, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
+        gui_msg_setup_component(true, false, subject_music_state, ui_scr->sys_menu_imgbtn_4, &guider_msg_data, gui_msg_set_control_state_by_int32_cb, GUI_SONGS_MSG_ID_MUSIC_STATE, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
 
 
         for (int i = 0; i < 12; i++) {
             if (status[i].msg_id == GUI_SONGS_MSG_ID_PLAYER_VOLUME) {
-                status[i].is_subscribe = 1;
-            }
-            if (status[i].msg_id == GUI_SONGS_MSG_ID_MUSIC_ARTIST_AND_NAME) {
                 status[i].is_subscribe = 1;
             }
             if (status[i].msg_id == GUI_SONGS_MSG_ID_MUSIC_STATE) {

@@ -1,4 +1,5 @@
 #include "video_stream_recv.h"
+#include "video_stream_recorder.h"
 #include "sock_api/sock_api.h"
 #include "rt_stream_pkg.h"
 
@@ -45,6 +46,7 @@ struct stream_dev {
     OS_SEM audio_sem;
     u8 received_video_frame;
     u8 received_audio_frame;
+    struct video_rec_ctx rec_ctx;
 };
 
 
@@ -282,6 +284,48 @@ void video_stream_recv_release_frame(struct video_stream_recv_hdl *recv_hdl, u8 
     lbuf_free(head);
 }
 
+int video_stream_recv_rec_start(struct video_stream_recv_hdl *recv_hdl, u32 ip_addr,
+                                const char *file_path, int video_width, int video_height,
+                                double fps, int audio_sample_rate, int audio_channels, int audio_bits)
+{
+    if (!recv_hdl || !file_path) {
+        log_error("rec_start: invalid params\n");
+        return -1;
+    }
+
+    struct stream_dev *dev = find_stream_dev_by_ip(recv_hdl, ip_addr);
+    if (!dev) {
+        log_error("rec_start: device not found for ip:%s\n", inet_ntoa(ip_addr));
+        return -1;
+    }
+
+    /* 设置录制参数 */
+    dev->rec_ctx.video_width = video_width;
+    dev->rec_ctx.video_height = video_height;
+    dev->rec_ctx.video_fps = fps;
+    dev->rec_ctx.audio_sample_rate = audio_sample_rate;
+    dev->rec_ctx.audio_channels = audio_channels;
+    dev->rec_ctx.audio_bits = audio_bits;
+
+    return video_stream_rec_start(&dev->rec_ctx, file_path);
+}
+
+int video_stream_recv_rec_stop(struct video_stream_recv_hdl *recv_hdl, u32 ip_addr)
+{
+    if (!recv_hdl) {
+        log_error("rec_stop: invalid params\n");
+        return -1;
+    }
+
+    struct stream_dev *dev = find_stream_dev_by_ip(recv_hdl, ip_addr);
+    if (!dev) {
+        log_error("rec_stop: device not found for ip:%s\n", inet_ntoa(ip_addr));
+        return -1;
+    }
+
+    return video_stream_rec_stop(&dev->rec_ctx);
+}
+
 static void stream_recv_task(void *priv)
 {
     struct video_stream_recv_hdl *recv_hdl = (struct video_stream_recv_hdl *)priv;
@@ -435,6 +479,7 @@ static struct stream_dev *stream_dev_create(u32 ip_addr)
 
     dev->ip_addr = ip_addr;
     INIT_LIST_HEAD(&dev->entry);
+    video_rec_ctx_init(&dev->rec_ctx);
     return dev;
 }
 
@@ -442,6 +487,11 @@ static void stream_dev_destroy(struct stream_dev *dev)
 {
     if (!dev) {
         return;
+    }
+
+    /* 如果正在录像，先停止 */
+    if (dev->rec_ctx.is_recording) {
+        video_stream_rec_stop(&dev->rec_ctx);
     }
 
     list_del(&dev->entry);
@@ -479,6 +529,12 @@ static int video_queue_push(struct stream_dev *dev, u8 *buf, int len)
     memcpy(head->data, buf, len);
     lbuf_push(head, BIT(0));
     os_sem_post(&dev->video_sem);
+
+    /* 录像钩子: 将视频帧写入 AVI 文件 */
+    if (dev->rec_ctx.is_recording) {
+        video_stream_recorder_write_frame(&dev->rec_ctx, buf, len, VIDEO_FRAME);
+    }
+
     return 0;
 }
 
@@ -506,6 +562,12 @@ static int audio_queue_push(struct stream_dev *dev, u8 *buf, int len)
     memcpy(head->data, buf, len);
     lbuf_push(head, BIT(0));
     os_sem_post(&dev->audio_sem);
+
+    /* 录像钩子: 将音频帧写入 AVI 文件 */
+    if (dev->rec_ctx.is_recording) {
+        video_stream_recorder_write_frame(&dev->rec_ctx, buf, len, AUDIO_FRAME);
+    }
+
     return 0;
 }
 

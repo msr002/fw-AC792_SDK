@@ -40,7 +40,11 @@ RCSP_BTMATE_EN
 #else // (!defined(RCSP_MODE) || (RCSP_MODE == 0))
 
 #undef TCFG_USER_BLE_ENABLE
+#if (TCFG_THIRD_PARTY_PROTOCOLS_SIMPLIFIED && (RCSP_CHANNEL_SEL == RCSP_USE_GATT_OVER_EDR))
+#define TCFG_USER_BLE_ENABLE	      							0		//BLE功能使能
+#else
 #define TCFG_USER_BLE_ENABLE	      							1		//BLE功能使能
+#endif
 
 // 音箱SDK RCSP功能配置
 #if (RCSP_MODE == RCSP_MODE_SOUNDBOX)
@@ -60,12 +64,16 @@ RCSP_BTMATE_EN
 #define UPDATE_MD5_ENABLE            							1		//升级是否支持MD5校验
 #define RCSP_FILE_OPT				 						    1
 #define TCFG_BS_DEV_PATH_EN			 							1
-#define RCSP_APP_RTC_EN											1		// 闹钟功能
+#define RCSP_APP_RTC_EN											1		//闹钟功能
 
 #if TCFG_APP_RTC_EN
 // 0 - 旧闹钟，只支持提示音闹铃
 // 1 - 新闹钟，可选择提示音或者设备音乐作为闹铃
 #define CUR_RTC_ALARM_MODE										1
+#endif
+
+#if RCSP_FILE_OPT && TCFG_USER_TWS_ENABLE
+#define RCSP_FILE_OPT_TWS_SYNC                                  0       //TWS文件同步功能
 #endif
 
 // 默认的功能模块使能
@@ -189,7 +197,7 @@ RCSP_BTMATE_EN
 #undef OTA_TWS_SAME_TIME_NEW
 #endif
 
-#if CONFIG_DOUBLE_BANK_ENABLE              						//双备份才能打开同步升级流程
+#if CONFIG_DOUBLE_BANK_ENABLE && RCSP_UPDATE_EN              			//双备份才能打开同步升级流程
 #define OTA_TWS_SAME_TIME_ENABLE     		 TCFG_USER_TWS_ENABLE		//是否支持TWS同步升级
 #define OTA_TWS_SAME_TIME_NEW        		 TCFG_USER_TWS_ENABLE		//使用新的tws ota流程
 #define OTA_TWS_SAME_TIME_NEW_LESS           CONFIG_DOUBLE_BANK_LESS	//使用tws ota 升级app1区域更小结构（压缩/差分）
@@ -220,6 +228,7 @@ RCSP_BTMATE_EN
 #define RCSP_ADV_AI_NO_PICK										0		// 智能免摘
 #define RCSP_ADV_TRANSLATOR                                     0       // 翻译功能
 #define RCSP_ADV_ASSISTED_HEARING								0		// 辅听，注意开启辅听后，需要关闭ANC相关功能
+#define RCSP_ADV_OVER_ONLINE_CFG_TOOL                           0       // 透传在线调音协议
 
 #if !RCSP_ADV_ASSISTED_HEARING
 #define RCSP_ADV_ANC_VOICE     					CONFIG_ANC_ENABLE		// 主动降噪
@@ -241,9 +250,15 @@ RCSP_BTMATE_EN
 #define RCSP_TONE_FILE_TRANSFER_ENABLE                          0       //提示音传输至预留区域功能
 #define RCSP_UPDATE_EN		         							0		//是否支持rcsp升级
 
+#if CONFIG_DOUBLE_BANK_ENABLE && RCSP_UPDATE_EN              			//双备份才能打开同步升级流程
+#define OTA_TWS_SAME_TIME_ENABLE     		 TCFG_USER_TWS_ENABLE		//是否支持TWS同步升级
+#define OTA_TWS_SAME_TIME_NEW        		 TCFG_USER_TWS_ENABLE		//使用新的tws ota流程
+#define UPDATE_MD5_ENABLE            							0		//升级是否支持MD5校验
+#else
 #define OTA_TWS_SAME_TIME_ENABLE     							0		//是否支持TWS同步升级
 #define OTA_TWS_SAME_TIME_NEW        							0		//使用新的tws ota流程
 #define UPDATE_MD5_ENABLE            							0		//升级是否支持MD5校验
+#endif      //CONFIG_DOUBLE_BANK_ENABLE
 
 #define RCSP_ADV_NAME_SET_ENABLE        						0		// 蓝牙名设置
 #define RCSP_ADV_KEY_SET_ENABLE         						0		// 按键设置
@@ -289,7 +304,11 @@ RCSP_BTMATE_EN
 
 // RCSP 支持 AURACAST
 #if (TCFG_LE_AUDIO_APP_CONFIG & LE_AUDIO_AURACAST_SINK_EN)
+#if defined(TCFG_AURACAST_SINK_CONNECT_MODE) && (TCFG_AURACAST_SINK_CONNECT_MODE != 0)
+#define RCSP_ADV_AURCAST_SINK								    0
+#else
 #define RCSP_ADV_AURCAST_SINK								    1
+#endif
 #endif
 
 #if (defined CONFIG_CPU_BR21)
@@ -323,11 +342,6 @@ RCSP_BTMATE_EN
 #define		RCSP_SDK_TYPE		RCSP_SDK_TYPE_MANIFEST_SOUNDBOX
 #endif
 
-// 这个版本没有灯光配置
-#undef RCSP_ADV_LED_SET_ENABLE
-#define RCSP_ADV_LED_SET_ENABLE         						0
-#undef RCSP_ADV_COLOR_LED_SET_ENABLE
-#define RCSP_ADV_COLOR_LED_SET_ENABLE   						0
 
 #if TCFG_RCSP_DUAL_CONN_ENABLE
 // RCSP一拖二需要关闭功能
@@ -409,6 +423,10 @@ RCSP_BTMATE_EN
 
 #ifndef RCSP_ADV_TRANSLATOR
 #define RCSP_ADV_TRANSLATOR                                     0
+#endif
+
+#ifndef RCSP_ADV_OVER_ONLINE_CFG_TOOL
+#define RCSP_ADV_OVER_ONLINE_CFG_TOOL                           0
 #endif
 
 #ifndef RCSP_ADV_SCENE_NOISE_REDUCTION
@@ -529,6 +547,10 @@ RCSP_BTMATE_EN
 
 #ifndef RCSP_ADV_AURCAST_SOURCE
 #define RCSP_ADV_AURCAST_SOURCE								    0
+#endif
+
+#ifndef RCSP_FILE_OPT_TWS_SYNC
+#define RCSP_FILE_OPT_TWS_SYNC                                  0
 #endif
 
 #endif // __RCSP_CFG_H__

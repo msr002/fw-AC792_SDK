@@ -164,6 +164,7 @@ const struct task_info task_info_table[] = {
 #endif
     {"wl80_test",            1,     2048,   64    },
 
+    {"video_server",        16,      768,   128   },
     {"video_engine_server", 10,     1024,   1024  },
     {"video_engine_task",   10,     2048,   0     },
 

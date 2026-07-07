@@ -34,6 +34,7 @@
 #include "adv_wind_noise_detection.h"
 #include "adv_voice_enhancement_mode.h"
 #include "adv_1t2_setting.h"
+#include "rcsp_color_led_setting.h"
 
 #if RCSP_MODE && RCSP_DEVICE_STATUS_ENABLE
 

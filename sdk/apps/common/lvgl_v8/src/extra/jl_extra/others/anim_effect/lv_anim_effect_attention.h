@@ -27,3 +27,4 @@ void lv_anim_effect_attention_wobble(lv_obj_t *obj, lv_anim_effect_args_t *anim_
 #endif
 
 #endif
+

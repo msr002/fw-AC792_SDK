@@ -90,6 +90,7 @@ struct voice_aec_hdl_t {
     u8 in_tmpbuf[3][512];
     u8 *hw_ref_tmpbuf[HW_REF_BUF_NUM];
     u8 *ref_tmpbuf;
+    u8 *adc_tmpbuf;
     int ref_tmpbuf_len;
     int last_data_len;
     u8 bit_width;
@@ -128,14 +129,15 @@ static int audio_smart_voice_aec_run(void *priv, s16 *data, int len)
 
         if (voice->adc_ref_en && voice->adc_ref_mic_ch) {
             s16 *tmp_refbuf = (s16 *)voice_aec_hdl->ref_tmpbuf;
+            s16 *adc_buf = (s16 *)voice_aec_hdl->adc_tmpbuf;
             if (voice->adc_ref_mic_ch == AUDIO_ADC_MIC_0) {
                 for (u32 i = 0; i < len / 2; ++i) {
                     tmp_refbuf[i] = data[i * 2];
-                    data[i] = data[i * 2 + 1];
+                    adc_buf[i] = data[i * 2 + 1];
                 }
             } else {
                 for (u32 i = 0; i < len / 2; ++i) {
-                    data[i] = data[i * 2];
+                    adc_buf[i] = data[i * 2];
                     tmp_refbuf[i] = data[i * 2 + 1];
                 }
             }
@@ -157,7 +159,7 @@ static int audio_smart_voice_aec_run(void *priv, s16 *data, int len)
             }
 
             int wlen = 0;
-            wlen = cbuf_write(&voice_aec_hdl->aec_cbuf, data, len);
+            wlen = cbuf_write(&voice_aec_hdl->aec_cbuf, adc_buf, len);
             if (wlen != len) {
                 log_error("smart aec inbuf cbuf write error");
             }
@@ -268,6 +270,7 @@ int audio_smart_voice_aec_open(void)
     }
 
     hdl->ref_tmpbuf = zalloc(hdl->ref_tmpbuf_len);
+    hdl->adc_tmpbuf = zalloc(hdl->ref_tmpbuf_len);
     cbuf_init(&hdl->aec_cbuf, hdl->aec_data_buf, sizeof(hdl->aec_data_buf));
     if (__this->adc_ref_en && __this->adc_ref_mic_ch) {
         hdl->aec_hw_ref_data_buf = malloc(640 * HW_REF_BUF_NUM);
@@ -291,6 +294,7 @@ void audio_smart_voice_aec_close(void)
     if (voice_aec_hdl) {
         audio_aec_close();
         free(voice_aec_hdl->ref_tmpbuf);
+        free(voice_aec_hdl->adc_tmpbuf);
         if (__this->adc_ref_en && __this->adc_ref_mic_ch) {
             free(voice_aec_hdl->aec_hw_ref_data_buf);
             for (int i = 0; i < HW_REF_BUF_NUM; i++) {

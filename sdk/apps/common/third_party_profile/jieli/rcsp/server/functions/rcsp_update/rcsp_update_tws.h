@@ -2,6 +2,7 @@
 #define RCSP_UPDATE_TWS_H
 
 #include "app_config.h"
+#include "rcsp_cfg.h"
 
 #if ((RCSP_MODE == RCSP_MODE_SOUNDBOX) && OTA_TWS_SAME_TIME_ENABLE)
 
@@ -69,7 +70,7 @@ enum {
 int tws_ota_init(void);
 int tws_ota_close(void);
 
-int tws_ota_open(struct __tws_ota_para *para);
+int tws_ota_open(void *para);
 void tws_ota_stop(u8 reason);
 
 u16 tws_ota_enter_verify(void *priv);
@@ -81,9 +82,7 @@ int tws_ota_err_callback(u8 reason);
 int tws_ota_data_send_m_to_s(u8 *buf, u16 len);
 int tws_ota_sync_cmd(int reason);
 void tws_ota_app_event_deal(u8 event);
-u8 dual_bank_update_burn_boot_info_callback(u8 ret);
-int bt_ota_event_handler(struct bt_event *bt);
-void tws_ota_event_post(u32 type, u8 event);
+int dual_bank_update_burn_boot_info_callback(int ret);
 
 u8 tws_ota_control(int type, ...);
 

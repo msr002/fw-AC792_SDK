@@ -12,8 +12,8 @@
 
 //VGA:640x480 SVGA:800x600 UXGA:1900x1200 QVGA:1280x960 HDTV:1920x1080
 //无黑边最高只能到1400x1100
-#define GC2145_INPUT_W  1400
-#define GC2145_INPUT_H  1100
+#define GC2145_INPUT_W  1600
+#define GC2145_INPUT_H  1200
 
 //MAX:1616x1232
 #define GC2145_ISP_OUT_W    (1600 + 16)
@@ -809,12 +809,13 @@ const Sensor_reg_ini GC2145_MIPI_INI_REG[] = {
     {0x0f, ((GC2145_ISP_OUT_W) >> 8) & 0xff},
     {0x10, (GC2145_ISP_OUT_W) & 0xff},
 
+#if 0
     //awb window
     {0xec, 0x06},
     {0xed, 0x04},
     {0xee, 0x60},
     {0xef, 0x90},
-
+#endif
     //AEC en
     {0xb6, 0x01},
 
@@ -824,6 +825,7 @@ const Sensor_reg_ini GC2145_MIPI_INI_REG[] = {
     //时钟分频
     {0xfa, 0x11},
 
+#if 0
     // 开启 Crop,去掉黑边
     {0x90, 0x01},
     //win_y
@@ -834,7 +836,7 @@ const Sensor_reg_ini GC2145_MIPI_INI_REG[] = {
     {0x94, 0x5e},   //L
     //缩放器
     /* {0xfd, 0x01}, */
-
+#endif
     //输出大小
     {0x95, (GC2145_INPUT_H >> 8) & 0xff},
     {0x96, GC2145_INPUT_H & 0xff},
@@ -851,7 +853,7 @@ const Sensor_reg_ini GC2145_MIPI_INI_REG[] = {
 
     //PAGE:1
     {0xfe, 0x01},
-
+#if 0
     //AEC测量窗口
     {0x01, 0x04},
     {0x02, 0xc0},
@@ -861,7 +863,7 @@ const Sensor_reg_ini GC2145_MIPI_INI_REG[] = {
     {0x06, 0x90},
     {0x07, 0x30},
     {0x08, 0x80},
-
+#endif
     //PAGE:3
     {0xfe, 0x03},
 

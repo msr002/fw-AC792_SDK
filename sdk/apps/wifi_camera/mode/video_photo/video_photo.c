@@ -733,6 +733,8 @@ static int camera_take_photo(void)
         thumbnails.enable = 1;
         thumbnails.buf = __this->cap_buf + img_buf_size - IMAGE_THUMB_BUF_SIZE;
         thumbnails.len = IMAGE_THUMB_BUF_SIZE;
+        thumbnails.width = THUMBNAIL_W;
+        thumbnails.height = THUMBNAIL_H;
         req.icap.thumbnails = &thumbnails;
 #endif
         //发送拍照请求

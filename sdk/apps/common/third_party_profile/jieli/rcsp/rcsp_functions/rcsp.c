@@ -18,6 +18,7 @@
 #include "rcsp_setting_opt.h"
 #include "adv_1t2_setting.h"
 #include "rcsp_ch_loader_download.h"
+#include "rcsp_over_online_cfg_tool.h"
 
 #if TCFG_USER_TWS_ENABLE
 #include "bt_tws.h"
@@ -98,16 +99,6 @@ bool JL_rcsp_protocol_can_send(void)
 
 static void rcsp_process(void *p)
 {
-    ///从vm获取相关配置
-    rcsp_setting_init();
-#if TCFG_RCSP_DUAL_CONN_ENABLE
-    rcsp_1t2_setting_reset();
-#endif
-
-#if RCSP_UPDATE_EN
-    rcsp_clean_update_hdl_for_end_update(0, NULL);
-#endif
-
     while (1) {
         os_sem_pend(&__this->sem, 0);
         JL_send_packet_process();
@@ -212,11 +203,25 @@ void rcsp_init(void)
 
     os_sem_create(&__this->sem, 0);
 
+    //从vm获取相关配置
+    rcsp_setting_init();
+#if TCFG_RCSP_DUAL_CONN_ENABLE
+    rcsp_1t2_setting_reset();
+#endif
+
+#if RCSP_UPDATE_EN
+    rcsp_clean_update_hdl_for_end_update(0, NULL);
+#endif
+
+#if RCSP_ADV_OVER_ONLINE_CFG_TOOL
+    JL_rcsp_over_online_cfg_tool_init();
+#endif
+
     int err = task_create(rcsp_process, (void *)rcspModel, RCSP_TASK_NAME);
     if (err) {
         rcsp_printf("rcsp create fail %x\n", err);
     }
-#if ((TCFG_LE_AUDIO_APP_CONFIG & (LE_AUDIO_UNICAST_SINK_EN | LE_AUDIO_JL_UNICAST_SINK_EN)) && (RCSP_UPDATE_EN))
+#if ((TCFG_LE_AUDIO_APP_CONFIG & LE_AUDIO_JL_UNICAST_SINK_EN) && (RCSP_UPDATE_EN))
     rcsp_cis_update_init();
 #endif
 }
@@ -243,6 +248,10 @@ static void rcsp_exit_in_app_core_task(void)
 #if RCSP_UPDATE_EN
     rcsp_update_resume();
 #endif
+#if RCSP_ADV_OVER_ONLINE_CFG_TOOL
+    JL_rcsp_over_online_cfg_tool_deinit();
+#endif
+
 }
 
 void rcsp_exit(void)

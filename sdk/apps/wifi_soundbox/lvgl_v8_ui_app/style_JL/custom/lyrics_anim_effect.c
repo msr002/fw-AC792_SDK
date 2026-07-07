@@ -1,5 +1,6 @@
 #include "lyrics_anim_effect.h"
-
+#if !LV_USE_GUIBUILDER_SIMULATOR
+#if LV_USE_LYRICS
 // 配置参数
 #define LYRIC_ANIM_ZOOM_BASE 256  // 256表示100%缩放
 #define LYRIC_ANIM_MOVE_DISTANCE 100  // 底部上移距离
@@ -408,4 +409,5 @@ void lyrics_anim_effect_cleanup(void)
         }
     }
 }
-
+#endif
+#endif

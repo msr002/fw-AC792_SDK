@@ -12,6 +12,9 @@
 #include "ota_impl.h"
 #include "btstack/avctp_user.h"
 #include "asm/power_interface.h"
+#if (THIRD_PARTY_PROTOCOLS_SEL & RCSP_MODE_EN)
+#include "rcsp_cfg.h"
+#endif
 
 #define LOG_TAG "[APP-UPDATE]"
 #define LOG_INFO_ENABLE
@@ -295,6 +298,19 @@ static void update_init_common_handle(int type)
     if (UPDATE_DUAL_BANK_IS_SUPPORT()) {
 #if TCFG_AUTO_SHUT_DOWN_TIME
         sys_auto_shut_down_disable();
+#endif
+
+#if OTA_TWS_SAME_TIME_ENABLE
+        if ((BT_UPDATA != type)) {
+            // 关闭page_scan
+            lmp_hci_write_scan_enable((0 << 1) | 0);
+            // 退出sniff并关闭sniff
+            update_start_exit_sniff();
+            // 关闭主从切换
+            tws_api_auto_role_switch_disable();
+            tws_sync_update_api_register(get_tws_update_api());
+            tws_ota_init();
+        }
 #endif
     }
 }

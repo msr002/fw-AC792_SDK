@@ -1,5 +1,6 @@
-#include "app_config.h"
 #include "system/includes.h"
+#include "asm/power/power_api.h"
+#include "app_config.h"
 #include "media/includes.h"
 #include "audio_config.h"
 #include "media/audio_def.h"
@@ -53,7 +54,7 @@ const int config_audio_dac_noisefloor_optimize_enable = BIT(0) | BIT(2);
 const int config_audio_dac_noisefloor_optimize_enable = 0;//BIT(1);
 #endif/*TCFG_MIC_EFFECT_ENABLE*/
 
-#if TCFG_LOWPOWER_FUNCTION
+#if TCFG_LOWPOWER_FUNCTION != LOWPOWER_CLOSE
 const int config_audio_dac_delay_off_ms = 300;
 #else
 const int config_audio_dac_delay_off_ms = 0;

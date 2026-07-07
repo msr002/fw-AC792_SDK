@@ -214,6 +214,7 @@ c_SRC_FILES := \
 	../../../../../apps/common/camera/h63p_mipi/h63p_mipi_iq.c \
 	../../../../../apps/common/camera/isp_scenes.c \
 	../../../../../apps/common/camera/isp_tools.c \
+	../../../../../apps/common/camera/nt99141.c \
 	../../../../../apps/common/camera/ov2659/ov2659.c \
 	../../../../../apps/common/camera/sc1245_dvp/sc1245.c \
 	../../../../../apps/common/camera/sc1245_dvp/sc1245_ae.c \

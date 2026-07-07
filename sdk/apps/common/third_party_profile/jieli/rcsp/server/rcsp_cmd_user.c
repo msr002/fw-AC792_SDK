@@ -8,6 +8,11 @@
 #include "app_config.h"
 #include "ble_rcsp_server.h"
 
+#if (THIRD_PARTY_PROTOCOLS_SEL & BRAGI_EN)
+#include "bragi_config.h"
+#include "bragi_app.h"
+#endif
+
 #if RCSP_MODE
 
 /* #define RCSP_DEBUG_EN */
@@ -40,6 +45,10 @@ void rcsp_user_cmd_recieve(void *priv, u8 OpCode, u8 OpCode_SN, u8 *data, u16 le
     rcsp_user_cmd_send(test_send_buf, sizeof(test_send_buf));
 #endif
 
+#if (THIRD_PARTY_PROTOCOLS_SEL & BRAGI_EN)
+    rcsp_printf("%s, %d", __FUNCTION__, __LINE__);
+    rcsp_bragi_costum_data_deal(data, len);
+#endif
     JL_CMD_response_send(OpCode, JL_PRO_STATUS_SUCCESS, OpCode_SN, NULL, 0, ble_con_handle, spp_remote_addr);
 
 }

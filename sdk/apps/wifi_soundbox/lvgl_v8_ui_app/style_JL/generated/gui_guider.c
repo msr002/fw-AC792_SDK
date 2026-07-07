@@ -17,7 +17,7 @@ void scr_push_stack_loaded_handler(lv_event_t *e)
         gui_scr_stack_push(scr);
     }
 }
-void ui_load_scr_anim(lv_ui *ui, gui_scr_t *screen, lv_scr_load_anim_t anim_type,   uint32_t time,
+void ui_load_scr_anim(lv_ui *ui, gui_scr_t *screen, lv_scr_load_anim_t anim_type,	uint32_t time,
                       uint32_t delay, bool is_clean, bool auto_del, bool is_push_satck)
 {
     if (screen == NULL) {
@@ -60,12 +60,15 @@ gui_scr_t *ui_get_scr(int32_t scr_id)
         return screen;
     }
 
-    if (scr_id == GUI_SCREEN_MUSIC_PLAYER) return gui_scr_create(GUI_SCREEN_MUSIC_PLAYER, "music_player", NULL,
-                (gui_scr_setup_cb_t)setup_scr_music_player, (gui_scr_unload_cb_t)unload_scr_music_player);
-    if (scr_id == GUI_SCREEN_SYS_MENU) return gui_scr_create(GUI_SCREEN_SYS_MENU, "sys_menu", NULL,
-                (gui_scr_setup_cb_t)setup_scr_sys_menu, (gui_scr_unload_cb_t)unload_scr_sys_menu);
-    if (scr_id == GUI_SCREEN_EQ_MODIFY) return gui_scr_create(GUI_SCREEN_EQ_MODIFY, "eq_modify", NULL,
-                (gui_scr_setup_cb_t)setup_scr_eq_modify, (gui_scr_unload_cb_t)unload_scr_eq_modify);
+    if (scr_id == GUI_SCREEN_MUSIC_PLAYER) {
+        return gui_scr_create(GUI_SCREEN_MUSIC_PLAYER, "music_player", NULL, (gui_scr_setup_cb_t)setup_scr_music_player, (gui_scr_unload_cb_t)unload_scr_music_player);
+    }
+    if (scr_id == GUI_SCREEN_SYS_MENU) {
+        return gui_scr_create(GUI_SCREEN_SYS_MENU, "sys_menu", NULL, (gui_scr_setup_cb_t)setup_scr_sys_menu, (gui_scr_unload_cb_t)unload_scr_sys_menu);
+    }
+    if (scr_id == GUI_SCREEN_EQ_MODIFY) {
+        return gui_scr_create(GUI_SCREEN_EQ_MODIFY, "eq_modify", NULL, (gui_scr_setup_cb_t)setup_scr_eq_modify, (gui_scr_unload_cb_t)unload_scr_eq_modify);
+    }
     return NULL;
 }
 

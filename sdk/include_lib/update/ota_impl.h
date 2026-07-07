@@ -65,6 +65,7 @@ update_err_t dual_bank_passive_update_init(u32 fw_crc, u32 fw_size, u16 max_pkt_
 update_err_t dual_bank_passive_update_exit(void *priv);
 update_err_t dual_bank_update_allow_check(u32 fw_size);
 update_err_t dual_bank_update_write(void *data, u16 len, int (*write_complete_cb)(void *priv));
+update_err_t dual_bank_update_write_with_tws(void *data, u16 len, int (*write_complete_cb)(void *priv));
 update_err_t dual_bank_update_burn_boot_info(int (*burn_boot_info_result_hdl)(int err));
 update_err_t flash_update_clr_boot_info(u8 type);
 update_err_t dual_bank_update_verify(void (*crc_init_hdl)(void), u32(*crc_calc_hdl)(u32 init_crc, const void *data, u32 len), int (*verify_result_hdl)(int calc_crc));

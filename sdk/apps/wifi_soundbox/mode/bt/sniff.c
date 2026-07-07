@@ -37,7 +37,7 @@ bool bt_is_sniff_close(void)
     return sniff_timer == 0;
 }
 
-static void bt_check_exit_sniff(void)
+void bt_check_exit_sniff(void)
 {
     if (tws_api_get_role() == TWS_ROLE_SLAVE) {
         return;
@@ -101,7 +101,7 @@ static void bt_check_enter_sniff(void *p)
 #endif
 }
 
-static void sys_auto_sniff_controle(u8 enable, u8 *addr)
+void sys_auto_sniff_controle(u8 enable, u8 *addr)
 {
     if (addr) {
         if (bt_api_conn_mode_check(enable, addr) == 0) {

@@ -25,7 +25,13 @@
 #if (THIRD_PARTY_PROTOCOLS_SEL & MULTI_BOX_ADV_EN)
 #include "multi_box_adv/multi_box_adv.h"
 #endif
+#if (THIRD_PARTY_PROTOCOLS_SEL & RCSP_MODE_EN)
+#include "rcsp_cfg.h"
+#endif
 
+#if (defined(RCSP_ADV_AURCAST_SINK) && RCSP_ADV_AURCAST_SINK)
+#include "rcsp_auracast/rcsp_auracast.h"
+#endif
 /**************************************************************************************************
   Macros
 **************************************************************************************************/
@@ -219,6 +225,9 @@ static const auracast_user_config_t user_config = {
     .config_sampling_frequency = AURACAST_BIS_SAMPLING_RATE,
     .config_variant = AURACAST_BIS_VARIANT,
     .encryption = AURACAST_BIS_ENCRYPTION_ENABLE,
+#if AURACAST_BIS_ENCRYPTION_ENABLE
+    .broadcast_code = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16},
+#endif
     .broadcast_id = 0x123456,
     .broadcast_name = "JL_AC792N_AURACAST",
 };
@@ -762,6 +771,13 @@ static void auracast_sync_info_report(uint8_t *packet, uint16_t length)
     }
 }
 
+#if (defined(RCSP_ADV_AURCAST_SINK) && RCSP_ADV_AURCAST_SINK)
+static int app_auracast_app_notify_listening_status(u8 status, u8 error)
+{
+    return auracast_app_notify_listening_status(status, error);
+}
+#endif
+
 static int auracast_sink_sync_create(uint8_t *packet, uint16_t length)
 {
     auracast_sink_source_info_t *config = (auracast_sink_source_info_t *)packet;
@@ -796,6 +812,10 @@ static int auracast_sink_sync_create(uint8_t *packet, uint16_t length)
     log_info("bis_num:%d, big_hdl:0x%x, config->Num_BIS:%d", app_auracast.bis_num, app_auracast.big_hdl, config->Num_BIS);
 
     auracast_sink_media_open(config->Connection_Handle[0], packet, length);
+
+#if (defined(RCSP_ADV_AURCAST_SINK) && RCSP_ADV_AURCAST_SINK)
+    app_auracast_app_notify_listening_status(AURACAST_SINK_SYNC_STATE_SYNC_COMPLETE, AURACAST_SINK_SYNC_NO_ERROR);
+#endif
 
     if (app_auracast.bis_num > 1) {
         for (u8 i = 0; i < g_sink_bn; i++) {
@@ -858,6 +878,21 @@ static int auracast_sink_sync_terminate(uint8_t *packet, uint16_t length)
  */
 static void auracast_sink_source_info_report_event_deal(uint8_t *packet, uint16_t length)
 {
+#if (defined(RCSP_ADV_AURCAST_SINK) && RCSP_ADV_AURCAST_SINK)
+    struct auracast_source_item_t src = {0};
+    auracast_sink_source_info_t *param = (auracast_sink_source_info_t *)packet;
+
+    u8 name_len = strlen((const char *)param->broadcast_name);
+    if (0 != name_len) {
+        memcpy(src.broadcast_name, param->broadcast_name, name_len);
+    }
+    memcpy(src.adv_address, param->source_mac_addr, 6);
+    src.broadcast_features = param->feature;
+    src.broadcast_id[0] = param->broadcast_id & 0xFF;
+    src.broadcast_id[1] = (param->broadcast_id >> 8) & 0xFF;
+    src.broadcast_id[2] = (param->broadcast_id >> 16) & 0xFF;
+    auracast_app_notify_source_list(&src);
+#endif
     auracast_sync_info_report(packet, length);
 }
 
@@ -906,10 +941,15 @@ static void auracast_sink_event_callback(uint16_t event, uint8_t *packet, uint16
         multi_box_bis_role_change(MULTI_BOX_ROLE_SLAVE);
         app_auracast_mutex_post(&mutex, __LINE__);
 #endif
+#if ((!(THIRD_PARTY_PROTOCOLS_SEL & RCSP_MODE_EN)) || RCSP_CHANNEL_SEL == RCSP_USE_BLE)
+        //rcsp通过spp或者att连接时不能断蓝牙
         app_send_message(APP_MSG_BT_DISCONNECT, 0);
+#endif
         auracast_sink_sync_create(packet, length);
         //le_auracast_audio_open(packet, length);
-        //app_auracast_app_notify_listening_status(2, 0);
+#if (defined(RCSP_ADV_AURCAST_SINK) && RCSP_ADV_AURCAST_SINK)
+        app_auracast_app_notify_listening_status(AURACAST_SINK_SYNC_STATE_SYNC_COMPLETE, AURACAST_SINK_SYNC_NO_ERROR);
+#endif
         break;
     case AURACAST_SINK_BIG_SYNC_TERMINATE_EVENT:
         //主动解除同步
@@ -919,7 +959,9 @@ static void auracast_sink_event_callback(uint16_t event, uint8_t *packet, uint16
     case AURACAST_SINK_BIG_SYNC_LOST_EVENT:
         log_warn("big lost or fail");
         auracast_sink_sync_terminate(packet, length);
-        //app_auracast_app_notify_listening_status(0, 2);
+#if (defined(RCSP_ADV_AURCAST_SINK) && RCSP_ADV_AURCAST_SINK)
+        app_auracast_app_notify_listening_status(AURACAST_SINK_SYNC_STATE_IDLE, AURACAST_SINK_SYNC_LOST);
+#endif
         if (cur_listening_source_info) {
             free(cur_listening_source_info);
             cur_listening_source_info = NULL;
@@ -961,14 +1003,14 @@ static void auracast_sink_event_callback(uint16_t event, uint8_t *packet, uint16
     }
 }
 
-static void app_auracast_sink_init(void)
+void app_auracast_sink_init(void)
 {
     log_info("app_auracast_sink_init");
 
     auracast_sink_init(AURACAST_SINK_API_VERSION);
     auracast_sink_event_callback_register(auracast_sink_event_callback);
 
-    //le_audio_bass_event_callback_register(app_auracast_bass_server_event_callback);
+    /* le_audio_bass_event_callback_register(app_auracast_bass_server_event_callback); */
 }
 
 static int __app_auracast_sink_big_sync_terminate(void)
@@ -984,6 +1026,9 @@ static int __app_auracast_sink_big_sync_terminate(void)
             sys_timeout_del(auracast_sink_sync_timeout_hdl);
             auracast_sink_sync_timeout_hdl = 0;
         }
+#if (defined(RCSP_ADV_AURCAST_SINK) && RCSP_ADV_AURCAST_SINK)
+        app_auracast_app_notify_listening_status(AURACAST_SINK_SYNC_STATE_IDLE, AURACAST_SINK_SYNC_NO_ERROR);
+#endif
     }
     return ret;
 }
@@ -1025,7 +1070,9 @@ static void auracast_sink_sync_timeout_handler(void *priv)
         auracast_sink_scan_stop();
         auracast_sink_big_sync_terminate();
     }
-    //app_auracast_app_notify_listening_status(0, 2);
+#if (defined(RCSP_ADV_AURCAST_SINK) && RCSP_ADV_AURCAST_SINK)
+    app_auracast_app_notify_listening_status(AURACAST_SINK_SYNC_STATE_IDLE, AURACAST_SINK_SYNC_TIMEOUT);
+#endif
     auracast_sink_sync_timeout_hdl = 0;
 }
 
@@ -1085,6 +1132,9 @@ int app_auracast_sink_big_sync_create(auracast_sink_source_info_t *param)
     /* #endif */
     /* } */
 
+#if AURACAST_BIS_ENCRYPTION_ENABLE
+    auracast_sink_set_broadcast_code(user_config.broadcast_code);
+#endif
     return __app_auracast_sink_big_sync_create(param, 0);
 }
 
@@ -1179,6 +1229,9 @@ int app_auracast_sink_close(u8 status)
     os_time_dly(10);
     auracast_sink_uninit();
     auracast_sink_media_close();
+#if (defined(RCSP_ADV_AURCAST_SINK) && RCSP_ADV_AURCAST_SINK)
+    app_auracast_app_notify_listening_status(AURACAST_SINK_SYNC_STATE_IDLE, AURACAST_SINK_SYNC_NO_ERROR);
+#endif
 
     app_auracast.status = status;
     app_auracast.bis_num = 0;

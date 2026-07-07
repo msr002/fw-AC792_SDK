@@ -17,20 +17,22 @@ extern "C" {
 
 #define CONV_RES_ID(id) (((id) >> 24) | ((id) & 0x00FFFFFF) << 8)
 typedef enum {
-    GUI_RES_FANGZHENGKAITIJIANTI_1_TTF_SD = 0x30100000,   //D:\wl83_soundbox\ac792\ui_prj\wifi_soundbox_800x480\import\font\FangZhengKaiTiJianTi_1.ttf
+    GUI_RES_FANGZHENGKAITIJIANTI_1_12_TTF_FLASH = 0x35000000,   //D:\wl83\ac792\ui_prj\wifi_soundbox_800x480\sdk\ui_res\flash\rle\font\35000000.rle
+    GUI_RES_FANGZHENGKAITIJIANTI_1_24_TTF_FLASH = 0x35000001,   //D:\wl83\ac792\ui_prj\wifi_soundbox_800x480\sdk\ui_res\flash\rle\font\35000001.rle
+    GUI_RES_FANGZHENGKAITIJIANTI_1_32_TTF_FLASH = 0x35000002,   //D:\wl83\ac792\ui_prj\wifi_soundbox_800x480\sdk\ui_res\flash\rle\font\35000002.rle
 
-    GUI_RES_IMAGE_4225207_0_PNG = 0x4B000000,   //D:\wl83_soundbox\ac792\ui_prj\wifi_soundbox_800x480\import\image\icon_02itzp4fqyho\image_4225207_0.png
-    GUI_RES_IMAGE_4225207_1_PNG = 0x4B000001,   //D:\wl83_soundbox\ac792\ui_prj\wifi_soundbox_800x480\import\image\icon_02itzp4fqyho\image_4225207_1.png
-    GUI_RES_IMAGE_4225207_2_PNG = 0x4B000002,   //D:\wl83_soundbox\ac792\ui_prj\wifi_soundbox_800x480\import\image\icon_02itzp4fqyho\image_4225207_2.png
-    GUI_RES_IMAGE_4225207_3_PNG = 0x4B000003,   //D:\wl83_soundbox\ac792\ui_prj\wifi_soundbox_800x480\import\image\icon_02itzp4fqyho\image_4225207_3.png
-    GUI_RES_IMAGE_4225532_4_PNG = 0x4B000004,   //D:\wl83_soundbox\ac792\ui_prj\wifi_soundbox_800x480\import\image\icon_02itzp4fqyho\image_4225532_4.png
-    GUI_RES_IMAGE_4150274_3_PNG = 0x4B000005,   //D:\wl83_soundbox\ac792\ui_prj\wifi_soundbox_800x480\import\image\icon_02itzp4fqyho\image_4150274_3.png
-    GUI_RES_WIFI_PNG = 0x4B000006,   //D:\wl83_soundbox\ac792\ui_prj\wifi_soundbox_800x480\import\image\icon_02itzp4fqyho\wifi.png
-    GUI_RES_IMAGE_4150274_5_PNG = 0x4B000007,   //D:\wl83_soundbox\ac792\ui_prj\wifi_soundbox_800x480\import\image\icon_02itzp4fqyho\image_4150274_5.png
-    GUI_RES_IMAGE_4150274_8_PNG = 0x4B000008,   //D:\wl83_soundbox\ac792\ui_prj\wifi_soundbox_800x480\import\image\icon_02itzp4fqyho\image_4150274_8.png
-    GUI_RES_SHEZHI_PNG = 0x4B000009,   //D:\wl83_soundbox\ac792\ui_prj\wifi_soundbox_800x480\import\image\icon_02itzp4fqyho\shezhi.png
-    GUI_RES_IMAGE_4161193_1_PNG = 0x4B00000A,   //D:\wl83_soundbox\ac792\ui_prj\wifi_soundbox_800x480\import\image\icon_02itzp4fqyho\image_4161193_1.png
-    GUI_RES_IMAGE_4161390_0_PNG = 0x4B00000B,   //D:\wl83_soundbox\ac792\ui_prj\wifi_soundbox_800x480\import\image\icon_02itzp4fqyho\image_4161390_0.png
+    GUI_RES_IMAGE_4225207_0_PNG = 0x4B000003,   //D:\wl83\ac792\ui_prj\wifi_soundbox_800x480\import\image\icon_02itzp4fqyho\image_4225207_0.png
+    GUI_RES_IMAGE_4225207_1_PNG = 0x4B000004,   //D:\wl83\ac792\ui_prj\wifi_soundbox_800x480\import\image\icon_02itzp4fqyho\image_4225207_1.png
+    GUI_RES_IMAGE_4225207_2_PNG = 0x4B000005,   //D:\wl83\ac792\ui_prj\wifi_soundbox_800x480\import\image\icon_02itzp4fqyho\image_4225207_2.png
+    GUI_RES_IMAGE_4225207_3_PNG = 0x4B000006,   //D:\wl83\ac792\ui_prj\wifi_soundbox_800x480\import\image\icon_02itzp4fqyho\image_4225207_3.png
+    GUI_RES_IMAGE_4225532_4_PNG = 0x4B000007,   //D:\wl83\ac792\ui_prj\wifi_soundbox_800x480\import\image\icon_02itzp4fqyho\image_4225532_4.png
+    GUI_RES_IMAGE_4150274_3_PNG = 0x4B000008,   //D:\wl83\ac792\ui_prj\wifi_soundbox_800x480\import\image\icon_02itzp4fqyho\image_4150274_3.png
+    GUI_RES_WIFI_PNG = 0x4B000009,   //D:\wl83\ac792\ui_prj\wifi_soundbox_800x480\import\image\icon_02itzp4fqyho\wifi.png
+    GUI_RES_IMAGE_4150274_5_PNG = 0x4B00000A,   //D:\wl83\ac792\ui_prj\wifi_soundbox_800x480\import\image\icon_02itzp4fqyho\image_4150274_5.png
+    GUI_RES_IMAGE_4150274_8_PNG = 0x4B00000B,   //D:\wl83\ac792\ui_prj\wifi_soundbox_800x480\import\image\icon_02itzp4fqyho\image_4150274_8.png
+    GUI_RES_SHEZHI_PNG = 0x4B00000C,   //D:\wl83\ac792\ui_prj\wifi_soundbox_800x480\import\image\icon_02itzp4fqyho\shezhi.png
+    GUI_RES_IMAGE_4161193_1_PNG = 0x4B00000D,   //D:\wl83\ac792\ui_prj\wifi_soundbox_800x480\import\image\icon_02itzp4fqyho\image_4161193_1.png
+    GUI_RES_IMAGE_4161390_0_PNG = 0x4B00000E,   //D:\wl83\ac792\ui_prj\wifi_soundbox_800x480\import\image\icon_02itzp4fqyho\image_4161390_0.png
 } GUI_RES_ID;
 
 typedef enum {
@@ -67,3 +69,4 @@ extern void spectrum_delete_event_cb(lv_event_t *e);
 }
 #endif
 #endif
+

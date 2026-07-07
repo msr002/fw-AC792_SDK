@@ -10,6 +10,7 @@
 #include "rcsp_extra_flash_cmd.h"
 #include "sensor_log_notify.h"
 #include "rcsp_translator.h"
+#include "rcsp_over_online_cfg_tool.h"
 
 ///>>>>>>>>>>>>>收到APP发来不需要响应的命令处理
 
@@ -41,6 +42,11 @@ void rcsp_cmd_recieve_no_respone(void *priv, u8 OpCode, u8 *data, u16 len, u16 b
 #endif
 #if JL_RCSP_SENSORS_DATA_OPT
     if (0 == JL_rcsp_sensors_log_notify(priv, OpCode, data, len)) {
+        return;
+    }
+#endif
+#if RCSP_ADV_OVER_ONLINE_CFG_TOOL
+    if (0 == JL_rcsp_over_online_cfg_tool_cmd_receive(priv, OpCode, 0, data, len, ble_con_handle, spp_remote_addr)) {
         return;
     }
 #endif

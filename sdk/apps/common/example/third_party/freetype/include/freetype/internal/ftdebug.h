@@ -338,7 +338,7 @@ FT_Trace_Enable(void);
 
 #ifdef FT_DEBUG_LEVEL_ERROR
 
-#include "stdio.h"  /* for vfprintf() */
+//#include "stdio.h"  /* for vfprintf() */
 
 /* print a message */
 FT_BASE(void)

@@ -28,4 +28,3 @@ void lyrics_anim_effect_cleanup(void);
 #endif
 
 #endif /* LYRIC_ANIM_EFFECT_H */
-

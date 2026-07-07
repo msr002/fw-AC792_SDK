@@ -305,6 +305,7 @@ u16 rcsp_adv_anc_voice_value_get(u8 mode)
     return (anc_ptr[0] << 8 | anc_ptr[1]);
 }
 
+#define RCSP_ANC_GAIN_OFFSET 9
 int anc_voice_setting_sync()
 {
     int ret = 0;
@@ -327,7 +328,7 @@ int anc_voice_setting_sync()
     anc_info[2] = ((u8 *)&transparent)[1];
     anc_info[3] = ((u8 *)&transparent)[0];
 
-    u8 offset = 9;
+    u8 offset = RCSP_ANC_GAIN_OFFSET;
 #if TCFG_USER_TWS_ENABLE
     if ('R' == bt_tws_get_local_channel()) {
         offset += 2;
@@ -347,6 +348,18 @@ int anc_voice_setting_sync()
         memcpy(g_anc_info + tmp_value, anc_info + 2, 2);
         tmp_value += 4;
         memcpy(g_anc_info + tmp_value, anc_info + 2, 2);
+#if TCFG_USER_TWS_ENABLE
+        if ('U' == bt_tws_get_local_channel()) {
+            tmp_value = RCSP_ANC_GAIN_OFFSET + 2;
+            memcpy(g_anc_info + tmp_value, anc_info, 2);
+            tmp_value += 4;
+            memcpy(g_anc_info + tmp_value, anc_info, 2);
+            tmp_value += 4;
+            memcpy(g_anc_info + tmp_value, anc_info + 2, 2);
+            tmp_value += 4;
+            memcpy(g_anc_info + tmp_value, anc_info + 2, 2);
+        }
+#endif
     }
 
 #if TCFG_USER_TWS_ENABLE

@@ -14,7 +14,11 @@ const int config_cpu_unmask_irq_enable = 1;
 const int config_wwdg_clear_by_tick_isr = 0;
 #else
 const int config_cpu_unmask_irq_enable = 0;
+#ifdef CONFIG_WWDG_ENABLE
 const int config_wwdg_clear_by_tick_isr = 1;
+#else
+const int config_wwdg_clear_by_tick_isr = 0;
+#endif
 #endif
 
 ///打印是否时间打印信息
@@ -87,6 +91,16 @@ const int device_bulk_read_async_enable = 0;
 const int LZ4_DATA_CODE_ENABLE = 1;
 #else
 const int LZ4_DATA_CODE_ENABLE = 0;
+#endif
+
+
+//================================================//
+//                  外挂扩展内存管理              //
+//================================================//
+#if defined CONFIG_EXT_MEMORY_POWEROFF_ENABLE
+const int config_ext_memory_manager_enable = 1;
+#else
+const int config_ext_memory_manager_enable = 0;
 #endif
 
 // 是否使能 dlog 功能
@@ -219,6 +233,12 @@ const char log_tag_const_d_HEAP_MEM AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(FALSE)
 const char log_tag_const_i_HEAP_MEM AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(TRUE);
 const char log_tag_const_w_HEAP_MEM AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(TRUE);
 const char log_tag_const_e_HEAP_MEM AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(TRUE);
+
+const char log_tag_const_v_EXT_HEAP_MEM AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(FALSE);
+const char log_tag_const_d_EXT_HEAP_MEM AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(FALSE);
+const char log_tag_const_i_EXT_HEAP_MEM AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(TRUE);
+const char log_tag_const_w_EXT_HEAP_MEM AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(TRUE);
+const char log_tag_const_e_EXT_HEAP_MEM AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(TRUE);
 
 const char log_tag_const_v_V_MEM AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(FALSE);
 const char log_tag_const_d_V_MEM AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIB(FALSE);

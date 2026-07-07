@@ -7,6 +7,7 @@
 #include "avctp_user.h"
 #include "video/logo_show.h"
 
+
 static u32 toltal_time = 0;
 static void img_cleanup_cb(lv_event_t *e);
 
@@ -54,13 +55,18 @@ void res_event_lyrics_album_view_change(lv_event_t *e)
     if (!ui_scr || ui_scr->music_player_del) {
         return;
     }
+    gui_msg_data_t *name_data = gui_msg_get(GUI_SONGS_MSG_ID_MUSIC_NAME);
+    gui_msg_data_t *artist_data = gui_msg_get(GUI_SONGS_MSG_ID_MUSIC_ARTIST);
+
     lv_obj_t *view_pic = ui_scr->music_player_view_1;
     lv_obj_t *view_lyrics = ui_scr->music_player_view_lyrics;
     if (lv_obj_has_flag(view_lyrics, LV_OBJ_FLAG_HIDDEN)) {
+        //显示歌词
         user_spectrum_advance_set_bypass(1);
         lvgl_module_msg_send_value(GUI_SONGS_MSG_ID_ALBUM_PIC_SHOW, 0, 0);
         lvgl_module_msg_send_value(GUI_SONGS_MSG_ID_LYRICS_SHOW, 1, 0);
     } else if (lv_obj_has_flag(view_pic, LV_OBJ_FLAG_HIDDEN)) {
+        //显示专辑、频谱
         user_spectrum_advance_set_bypass(0);
         lvgl_module_msg_send_value(GUI_SONGS_MSG_ID_LYRICS_SHOW, 0, 0);
         lvgl_module_msg_send_value(GUI_SONGS_MSG_ID_ALBUM_PIC_SHOW, 1, 0);
@@ -360,14 +366,8 @@ static void img_cleanup_cb(lv_event_t *e)
 
 void ui_music_artist_handler(char *song_info)
 {
+
     if (!song_info) {
-        return;
-    }
-    FILE *fd = fopen(CONFIG_FONT_TTF_PATH, "r");
-    if (fd) {
-        fclose(fd);
-    } else {
-        printf("Open font fft path error 30100000.ttf  or no exit font fft resource 30100000.ttf !!!!!\n");
         return;
     }
 
@@ -377,8 +377,6 @@ void ui_music_artist_handler(char *song_info)
     }
     strncpy(artist_and_name, song_info, strlen(song_info));
     artist_and_name[strlen(song_info)] = '\0';
-
-    // 创建副本，用于查找
     char *copy_str = strdup(artist_and_name);
     if (!copy_str) {
         free(artist_and_name);
@@ -392,19 +390,13 @@ void ui_music_artist_handler(char *song_info)
     char *last_slash = strrchr(copy_str, '/');
 
     if (last_slash) {
-        // 分割字符串
-        *last_slash = '\0';  // 临时结束字符串
-
-        // artist 是最后一个 '/' 之前的部分
+        *last_slash = '\0';
         artist = strdup(copy_str);
-        // title 是最后一个 '/' 之后的部分
         title = strdup(last_slash + 1);
-
         *last_slash = '/';
     } else {
-        // 没有 '/'，整个字符串作为 artist
-        artist = strdup(copy_str);
-        title = strdup("");
+        title = strdup(copy_str);
+        artist = strdup("");
     }
 
     free(copy_str);
@@ -412,27 +404,23 @@ void ui_music_artist_handler(char *song_info)
     if (artist && title) {
         printf("Artist: %s, Title: %s\n", artist, title);
 
-        // 为artist分配内存并复制
-        char *artist_copy = lvgl_module_msg_get_ptr(GUI_SONGS_MSG_ID_MUSIC_ARTIST, strlen(artist) + 1);
-        if (artist_copy) {
-            strcpy(artist_copy, artist);
-            lvgl_module_msg_send_ptr(artist_copy, 0);
-        } else {
-            printf("Failed to allocate memory for artist\n");
-        }
+        char *song_name = (char *)malloc(strlen(title) + 1);
+        strncpy(song_name, title, strlen(title));
+        song_name[strlen(title)] = '\0';
+        char *song_artist = (char *)malloc(strlen(artist) + 1);
+        strncpy(song_artist, artist, strlen(artist));
+        song_artist[strlen(artist)] = '\0';
 
-        // 为title分配内存并复制
-        char *title_copy = lvgl_module_msg_get_ptr(GUI_SONGS_MSG_ID_MUSIC_NAME, strlen(title) + 1);
-        if (title_copy) {
-            strcpy(title_copy, title);
-            lvgl_module_msg_send_ptr(title_copy, 0);
-        } else {
-            printf("Failed to allocate memory for title\n");
-        }
-
-        // 释放本地临时内存
         free(artist);
         free(title);
+
+        // 使用 lyrics 方式显示歌名和歌手
+        int ret = lvgl_rpc_post_func(music_player_song_info_update, 2, song_name, song_artist); //title, artist);
+        if (ret != 0) {
+            free(song_name);
+            free(song_artist);
+            return;
+        }
     } else {
         if (artist) {
             free(artist);
@@ -443,6 +431,7 @@ void ui_music_artist_handler(char *song_info)
         printf("Failed to parse song info\n");
     }
     lvgl_module_msg_send_ptr(artist_and_name, 0); //最后再发送字符串，发送成功后内部会释放指针，无需再释放
+    return;
 }
 
 void ui_music_lyrics_handler(char *song_lyrics)
@@ -506,6 +495,10 @@ static int gui_src_action_music_player(int action)
             logo_stop(NULL);
         }
 #endif
+#if LV_USE_LYRICS
+        lyrics_example_clean();
+        music_player_song_info_lyrics_clean();
+#endif
         break;
     }
 }
@@ -523,9 +516,23 @@ static int gui_src_action_sys_menu(int action)
         if (bt_get_total_connect_dev() > 0) {
             bt_cmd_prepare(USER_CTRL_AVCTP_OPID_GET_PLAY_TIME, 0, NULL); //获取音乐播放等信息更新状态栏
             bt_cmd_prepare(USER_CTRL_BIP_GET_IMAGE, 0, NULL);//获取专辑照片更新状态栏
+
+            gui_msg_data_t *song_data = gui_msg_get(GUI_SONGS_MSG_ID_MUSIC_ARTIST_AND_NAME);
+            if (song_data) { //name_data->value_string != NULL)
+                if (song_data->value_string != NULL) {
+                    char *song_info = (char *)malloc(strlen(song_data->value_string) + 1);
+                    strncpy(song_info, song_data->value_string, strlen(song_data->value_string));
+                    song_info[strlen(song_data->value_string)] = '\0';
+                    sys_menu_song_info_update(song_info);
+                }
+            }
         }
         break;
     case GUI_SCREEN_ACTION_UNLOAD:
+#if LV_USE_LYRICS
+        sys_menu_song_info_lyrics_clean();
+#endif
+
         break;
     }
 }

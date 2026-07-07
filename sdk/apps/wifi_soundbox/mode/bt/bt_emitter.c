@@ -9,6 +9,7 @@
 #include "asm/rf_coexistence_config.h"
 #include "system/timer.h"
 #include "os/os_api.h"
+#include "syscfg_id.h"
 
 #define LOG_TAG             "[BT_EMITTER]"
 #define LOG_ERROR_ENABLE
@@ -20,6 +21,7 @@
 #if TCFG_USER_EMITTER_ENABLE
 
 #define BT_EMITTER_TEST         0
+#define BT_EMITTER_PAGE_CNT_MAX 30
 
 #define SEARCH_BD_ADDR_LIMITED 0
 #define SEARCH_BD_NAME_LIMITED 1
@@ -27,6 +29,11 @@
 #define SEARCH_NULL_LIMITED    3
 
 #define SEARCH_LIMITED_MODE  SEARCH_BD_NAME_LIMITED
+
+#define REMOTE_SUP_HFP_HF   BIT(4)
+#define REMOTE_SUP_HFP_AG   BIT(0)
+#define REMOTE_SUP_AUDIO_SINK     BIT(5)
+#define REMOTE_SUP_AUDIO_SOURCE   BIT(1)
 
 typedef enum {
     AVCTP_OPID_VOLUME_UP   = 0x41,
@@ -49,14 +56,19 @@ struct inquiry_noname_remote {
     u32 class;
 };
 
+u8 connect_last_sink_device_from_vm(void);
+u8 connect_last_source_device_from_vm(void);
 u8 restore_remote_device_info_profile(bd_addr_t mac_addr, u8 device_num, u8 id, u8 profile);
+int get_support_profile(bd_addr_t bd_addr, u8 id);
 bool get_bt_connction_enable_status(void);
 
 static OS_MUTEX mutex;
+static u8 esco_pp_flag;
 static u8 bt_search_busy;
 static u8 read_name_start;
 static u8 a2dp_source_open_flag;
 static u16 bt_search_device_timer;
+static u16 bt_emitter_page_timer;
 
 extern void dual_conn_user_bt_connect(u8 *addr);
 
@@ -88,6 +100,7 @@ void bt_search_device(void)
     }
 #endif
 
+    esco_pp_flag = 0;
     read_name_start = 0;
     bt_search_busy = 1;
 
@@ -105,9 +118,10 @@ void bt_search_stop(void)
         bt_search_device_timer = 0;
     }
 
-    bt_cmd_prepare(USER_CTRL_INQUIRY_CANCEL, 0, NULL);
+    bt_emitter_cmd_prepare(USER_CTRL_INQUIRY_CANCEL, 0, NULL);
 
     bt_search_busy = 0;
+    esco_pp_flag = 0;
 }
 
 static void bt_search_device_timer_callback(void *p)
@@ -168,7 +182,7 @@ static u8 search_bd_addr_filt(const u8 *addr)
 static const char *bd_name_filt[] = {
     "wifi_soundbox_487B",
     "JL-AC79XX-AF0B",
-    "Xiaomi Speaker Portable-0024",
+    "Xiaomi Speaker Portable-0025",
     "CAR MULTIMEDIA",
     "MTU-Android",
     "GEELY_BT",
@@ -357,19 +371,56 @@ __find_next:
     os_mutex_post(&mutex);
 }
 
+static void bt_emitter_conn_page_timeout(void *priv)
+{
+    static u8 page_cnt = 0;
+
+    putchar('e');
+    if (bt_emitter_get_connect_status() != BT_STATUS_WAITINT_CONN) {
+        //发射器已回连成功，清除
+        if (bt_emitter_page_timer) {
+            sys_timer_del(bt_emitter_page_timer);
+            bt_emitter_page_timer = 0;
+        }
+        page_cnt = 0;
+        return;
+    }
+
+    page_cnt++;
+    if (page_cnt > BT_EMITTER_PAGE_CNT_MAX) {
+        log_info("BT_EMITTER connect last_sink_device fail. Open WRITE_CONN");
+        bt_emitter_cmd_prepare(USER_CTRL_WRITE_CONN_ENABLE, 0, NULL);
+        if (bt_emitter_page_timer) {
+            sys_timer_del(bt_emitter_page_timer);
+            bt_emitter_page_timer = 0;
+        }
+        page_cnt = 0;
+    }
+}
+
 static void bt_emitter_init(void)
 {
     os_mutex_create(&mutex);
     INIT_LIST_HEAD(&inquiry_noname_list);
     bt_inquiry_result_handle_register(emitter_search_result);
-    /* lmp_set_sniff_establish_by_remote(1); */
-    /* bt_emitter_set_enable_flag(1); */
     bt_a2dp_source_init(NULL, 0, 1);
 #if TCFG_BT_SUPPORT_PROFILE_HFP_AG
     bt_hfp_ag_buf_init(NULL, 0, 1);
 #endif
-#if (BT_EMITTER_TEST || TCFG_POWER_ON_ENABLE_EMITTER)
-    bt_search_device();
+    bt_set_emitter_pin_code_flag(0);
+#if TCFG_POWER_ON_ENABLE_EMITTER
+    lmp_set_sniff_establish_by_remote(1);
+    bt_emitter_set_enable_flag(1);
+
+    if (!connect_last_sink_device_from_vm()) {
+        //无连接记录
+        bt_search_device();
+    } else {
+        //有连接记录，创建连接超时函数
+        if (!bt_emitter_page_timer) {
+            bt_emitter_page_timer = sys_timer_add(NULL, bt_emitter_conn_page_timeout, 1000);
+        }
+    }
 #endif
 }
 
@@ -407,10 +458,7 @@ void emitter_search_stop(u8 result)
 
     if (wait_connect_flag) {
         if (!result) {
-            if (!bt_search_device_timer) {
-                if (bt_get_total_connect_dev() == 0) {
-                    bt_cmd_prepare(USER_CTRL_WRITE_CONN_ENABLE, 0, NULL);
-                }
+            if (!bt_search_device_timer && bt_emitter_get_connect_status() == BT_STATUS_WAITINT_CONN) {
                 bt_search_device_timer = sys_timeout_add(NULL, bt_search_device_timer_callback, 1500);
             }
         }
@@ -579,12 +627,29 @@ void emitter_rx_vol_change(u8 vol) //属于库的弱函数重写
     log_info("vol_change: %d", vol);
 }
 
+////回链耳机音箱
+u8 connect_last_sink_device_from_vm(void)
+{
+    bd_addr_t mac_addr = {0};
+    u8 flag = 0;
+    flag = restore_remote_device_info_profile(mac_addr, 1, get_remote_dev_info_index(), REMOTE_SINK);
+    if (flag && bt_get_connect_state_for_addr(mac_addr) != BT_STATUS_CONNECTING) {
+        //connect last conn
+        log_info("last source device addr from vm:");
+        log_info_hexdump(mac_addr, 6);
+        bt_emitter_cmd_prepare(USER_CTRL_START_CONNEC_VIA_ADDR, 6, mac_addr);
+    }
+
+    return flag;
+}
+
 ////回链手机
 u8 connect_last_source_device_from_vm(void)
 {
     bd_addr_t mac_addr = {0};
     u8 flag = restore_remote_device_info_profile(mac_addr, 1, get_remote_dev_info_index(), REMOTE_SOURCE);
-    if (flag) {
+
+    if (flag && bt_get_connect_state_for_addr(mac_addr) != BT_STATUS_CONNECTING) {
         //connect last conn
         log_info("last source device addr from vm:");
         put_buf(mac_addr, 6);
@@ -610,6 +675,17 @@ static int bt_emitter_btstack_event_handler(void *msg)
             }
         }
         break;
+    case BT_STATUS_FIRST_CONNECTED:
+#if TCFG_BT_DUAL_CONN_ENABLE && TCFG_POWER_ON_ENABLE_EMITTER
+        log_info("EMITTER BT_STATUS_FIRST_CONNECTED");
+        int profile = get_support_profile(bt->args, get_remote_dev_info_index());
+        if (profile & (REMOTE_SUP_AUDIO_SINK | REMOTE_SUP_HFP_HF)) { //耳机音箱端
+            sys_timeout_add(NULL, (void (*)(void *))connect_last_source_device_from_vm, 2000);
+        } else if (profile & (REMOTE_SUP_AUDIO_SOURCE | REMOTE_SUP_HFP_AG)) { //手机端
+            sys_timeout_add(NULL, (void (*)(void *))connect_last_sink_device_from_vm, 2000);
+        }
+#endif
+        break;
     }
     return 0;
 }
@@ -629,6 +705,18 @@ static int bt_emitter_hci_event_handler(void *msg)
         log_info("HCI_EVENT_INQUIRY_COMPLETE");
         emitter_search_stop(bt->value);
         break;
+    case HCI_EVENT_USER_CONFIRMATION_REQUEST:
+        u8 en = 1;
+        bt_emitter_cmd_prepare(USER_CTRL_PAIR, 1, &en);
+        break;
+    case HCI_EVENT_CONNECTION_COMPLETE:
+        switch (bt->value) {
+        case ERROR_CODE_SUCCESS:
+            log_info("CONNECTION SUCCESS");
+            break;
+        default:
+            break;
+        }
     default:
         break;
     }
@@ -642,6 +730,33 @@ REGISTER_APP_EVENT_HANDLER(bt_emitter_hci_event) = {
     .handler    = bt_emitter_hci_event_handler,
 };
 
+void bt_emitter_esco_pp(void)
+{
+    if (bt_get_total_connect_dev() == 0) {
+        return;
+    }
+    if (!(bt_emitter_get_curr_channel_state() & HFP_AG_CH)) {
+        return;
+    }
+    if (!esco_pp_flag) {
+        esco_pp_flag = 1;
+        if (bt_get_call_status() == BT_CALL_HANGUP) {
+            bt_emitter_pp(0);
+            bt_emitter_cmd_prepare(USER_CTRL_HFP_CALL_LAST_NO, 0, NULL);
+            os_time_dly(5);
+            bt_emitter_cmd_prepare(USER_CTRL_HFP_CALL_ANSWER, 0, NULL);
+        }
+    } else {
+        esco_pp_flag = 0;
+        if (bt_get_call_status() == BT_CALL_INCOMING) {
+            bt_emitter_pp(0);
+            bt_emitter_cmd_prepare(USER_CTRL_HFP_CALL_ANSWER, 0, NULL);
+        } else if (bt_get_call_status() != BT_CALL_HANGUP) {
+            bt_emitter_cmd_prepare(USER_CTRL_HFP_CALL_HANGUP, 0, NULL);
+        }
+    }
+}
+
 static int bt_emitter_key_triple_click_event(struct key_event *key)
 {
     int ret = FALSE;
@@ -649,6 +764,11 @@ static int bt_emitter_key_triple_click_event(struct key_event *key)
     switch (key->value) {
     case KEY_OK:
         bt_search_busy ? bt_search_stop() : bt_search_device();
+        ret = TRUE;
+        break;
+    case KEY_ENC:
+    case KEY_POWER:
+        bt_emitter_esco_pp();
         ret = TRUE;
         break;
     default:

@@ -193,6 +193,7 @@
 <Add directory="../../../../include_lib/media/aispeech/enc" />
 <Add directory="../../../../audio/cpu/wl83/audio_dai" />
 <Add directory="../../../../audio/cpu/wl83/audio_common" />
+<Add directory="../../../../apps/wifi_bbm/avilib" />
 </Compiler>
 <Linker>
 <Add option="--plugin-opt=-pi32v2-always-use-itblock=false" />
@@ -443,6 +444,7 @@
 <Unit filename="../../../../apps/common/camera/h63p_mipi/h63p_mipi_iq.h" />
 <Unit filename="../../../../apps/common/camera/isp_scenes.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/common/camera/isp_tools.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="../../../../apps/common/camera/nt99141.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/common/camera/ov2659/ov2659.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/common/camera/sc1245_dvp/sc1245.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/common/camera/sc1245_dvp/sc1245.h" />
@@ -1704,6 +1706,10 @@
 <Unit filename="../../../../apps/wifi_bbm/audio/scene_switch.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/wifi_bbm/audio/tone_table.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/wifi_bbm/audio/vol_sync.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="../../../../apps/wifi_bbm/avilib/avilib.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="../../../../apps/wifi_bbm/avilib/avilib.h" />
+<Unit filename="../../../../apps/wifi_bbm/avilib/platform.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="../../../../apps/wifi_bbm/avilib/platform.h" />
 <Unit filename="../../../../apps/wifi_bbm/board/wl83/board_config.h" />
 <Unit filename="../../../../apps/wifi_bbm/board/wl83/board_develop.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/wifi_bbm/board/wl83/board_develop_AC7925B.h" />
@@ -1810,6 +1816,8 @@
 <Unit filename="../../../../apps/wifi_bbm/stream/video_pipeline.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/wifi_bbm/stream/video_pipeline.h" />
 <Unit filename="../../../../apps/wifi_bbm/stream/video_stream_common.h" />
+<Unit filename="../../../../apps/wifi_bbm/stream/video_stream_recorder.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="../../../../apps/wifi_bbm/stream/video_stream_recorder.h" />
 <Unit filename="../../../../apps/wifi_bbm/stream/video_stream_recv.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/wifi_bbm/stream/video_stream_recv.h" />
 <Unit filename="../../../../apps/wifi_bbm/stream/video_stream_request.c"><Option compilerVer="CC"/></Unit>
@@ -2578,6 +2586,9 @@
 <Unit filename="../../../../include_lib/net/wifi/wifi_def.h" />
 <Unit filename="../../../../include_lib/newlib/include/_ansi.h" />
 <Unit filename="../../../../include_lib/newlib/include/assert.h" />
+<Unit filename="../../../../include_lib/newlib/include/fcntl.h" />
+<Unit filename="../../../../include_lib/newlib/include/machine/_default_types.h" />
+<Unit filename="../../../../include_lib/newlib/include/machine/_types.h" />
 <Unit filename="../../../../include_lib/newlib/include/machine/ieeefp.h" />
 <Unit filename="../../../../include_lib/newlib/include/machine/malloc.h" />
 <Unit filename="../../../../include_lib/newlib/include/machine/time.h" />
@@ -2585,11 +2596,17 @@
 <Unit filename="../../../../include_lib/newlib/include/malloc.h" />
 <Unit filename="../../../../include_lib/newlib/include/newlib.h" />
 <Unit filename="../../../../include_lib/newlib/include/strings.h" />
+<Unit filename="../../../../include_lib/newlib/include/sys/_default_fcntl.h" />
 <Unit filename="../../../../include_lib/newlib/include/sys/_stdint.h" />
 <Unit filename="../../../../include_lib/newlib/include/sys/_timespec.h" />
 <Unit filename="../../../../include_lib/newlib/include/sys/_timeval.h" />
+<Unit filename="../../../../include_lib/newlib/include/sys/_types.h" />
+<Unit filename="../../../../include_lib/newlib/include/sys/cdefs.h" />
 <Unit filename="../../../../include_lib/newlib/include/sys/config.h" />
+<Unit filename="../../../../include_lib/newlib/include/sys/fcntl.h" />
 <Unit filename="../../../../include_lib/newlib/include/sys/features.h" />
+<Unit filename="../../../../include_lib/newlib/include/sys/lock.h" />
+<Unit filename="../../../../include_lib/newlib/include/sys/stat.h" />
 <Unit filename="../../../../include_lib/newlib/include/sys/time.h" />
 <Unit filename="../../../../include_lib/newlib/include/sys/timespec.h" />
 <Unit filename="../../../../include_lib/newlib/include/sys/types.h" />
@@ -2668,6 +2685,7 @@
 <Unit filename="../../../../include_lib/utils/fs/sdfile.h" />
 <Unit filename="../../../../include_lib/utils/lyrics/lyrics.h" />
 <Unit filename="../../../../include_lib/utils/syscfg/syscfg_id.h" />
+<Unit filename="../../../../include_lib/utils/uthash/uthash.h" />
 <Unit filename="../../../../include_lib/utils/version.z.S" />
 <Unit filename="../../../../include_lib/utils/yuv_to_rgb.h" />
 <Unit filename="../../../../lib/net/version.z.S" />

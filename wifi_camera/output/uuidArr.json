@@ -1,7 +1,7 @@
 [
  {
-  "uuid": 1000000,
-  "defaultValue": 1000000
+  "uuid": 2000000,
+  "defaultValue": "2000000"
  },
  {
   "defaultValue": "              CLK          CMD       SD0         SD1          SD2          SD3 \nA组IO：PD07       PD06       PD05       PD04       PD03       PD02 \nB组IO：PA07       PA06        PA05       PA08       PA09       PA10 \nC组IO：PE06        PE05        PE04       PE07        PE08       PE09 \nD组IO：PB07       PB06       PB05       PB04       PB03       PB02"
@@ -22,8 +22,8 @@
   "defaultValue": "0x12345678"
  },
  {
-  "uuid": "wifi_soundbox_",
-  "defaultValue": "wifi_soundbox_"
+  "uuid": "wifi_camera_",
+  "defaultValue": "wifi_camera_"
  },
  {
   "uuid": [
@@ -37,8 +37,8 @@
   "defaultValue": "FF FF FF FF FF FF"
  },
  {
-  "uuid": "wifi_soundbox(BLE)",
-  "defaultValue": "wifi_soundbox(BLE)"
+  "uuid": "wifi_camera(BLE)",
+  "defaultValue": "wifi_camera(BLE)"
  },
  {
   "uuid": [

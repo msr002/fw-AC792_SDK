@@ -1,5 +1,6 @@
 /*Generate Code, Do NOT Edit!*/
 #include "./gui_sys_model_msg.h"
+
 #if LV_USE_OBSERVER
 
 static lv_ll_t subs_ll;

@@ -547,6 +547,61 @@ static int video_call_msg_handler(struct application *app, int *msg)
     return 0;
 }
 
+static u32 g_recording_ip = 0;
+
+static void test_rec_start(void)
+{
+    const char *file_path = "storage/sd0/C/VID_****.avi";
+    log_debug("KEY2 CLICK: rec_start\n");
+    if (g_recording_ip != 0) {
+        log_info("already recording ip:%s\n", inet_ntoa(g_recording_ip));
+    }
+    /* 找一个远端设备 */
+    u32 target_ip = 0;
+    for (int i = 0; i < g_video_call_hdl.render_count; i++) {
+        if (g_video_call_hdl.render_table[i] != 0) {
+            target_ip = g_video_call_hdl.render_table[i];
+            break;
+        }
+    }
+    if (target_ip == 0) {
+        log_info("no remote device to record\n");
+    }
+    if (!g_video_call_hdl.stream_recv) {
+        log_info("stream_recv not ready\n");
+    }
+    int ret = video_stream_recv_rec_start(g_video_call_hdl.stream_recv, target_ip,
+                                          file_path,
+                                          STREAM_VIDEO_WIDTH, STREAM_VIDEO_HEIGHT,
+                                          STREAM_VIDEO_FPS,
+                                          STREAM_AUDIO_SAMPLE_RATE,
+                                          STREAM_AUDIO_CHANNEL, 16);
+    if (ret == 0) {
+        g_recording_ip = target_ip;
+        log_info("rec_start success, ip:%s, file:%s\n", inet_ntoa(target_ip), file_path);
+    } else {
+        log_error("rec_start failed, ret:%d\n", ret);
+    }
+}
+
+static void test_rec_stop(void)
+{
+    log_debug("KEY3 CLICK: rec_stop\n");
+    if (g_recording_ip == 0) {
+        log_info("not recording\n");
+    }
+    if (!g_video_call_hdl.stream_recv) {
+        log_info("stream_recv not ready\n");
+    }
+    int ret = video_stream_recv_rec_stop(g_video_call_hdl.stream_recv, g_recording_ip);
+    if (ret == 0) {
+        log_info("rec_stop success, ip:%s\n", inet_ntoa(g_recording_ip));
+    } else {
+        log_error("rec_stop failed, ret:%d\n", ret);
+    }
+    g_recording_ip = 0;
+}
+
 static int video_call_state_machine(struct application *app, enum app_state state, struct intent *it)
 {
     int ret = 0;
@@ -620,15 +675,16 @@ static int video_call_key_event_handler(struct key_event *key)
         ret = true;
         if (key->action == KEY_EVENT_CLICK) {
             log_debug("KEY2 CLICK\n");
-            video_call_txrate_loop_set();
+            //video_call_txrate_loop_set();
+            test_rec_start();
         }
         break;
     case KEY_UP:
         ret = true;
         if (key->action == KEY_EVENT_CLICK) {
             log_debug("KEY3 CLICK\n");
-            //切换渲染窗口测试
-            video_call_switch_render_window();
+            // video_call_switch_render_window();
+            test_rec_stop();
         }
         break;
     case KEY_DOWN:

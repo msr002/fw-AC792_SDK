@@ -109,7 +109,7 @@
  */
 
 
-#include <stdio.h>
+/*#include <stdio.h>*/
 
 #define FT_FILE      FILE
 #define ft_fclose    fclose

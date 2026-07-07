@@ -81,6 +81,7 @@ static const int mode_remap_table[][2] = {
     RCSP_TRANSLATOR_MODE_A2DP_TRANSLATION,          AI_TRANSLATOR_MODE_A2DP_TRANSLATION,
     RCSP_TRANSLATOR_MODE_FACE_TO_FACE_TRANSLATION,  AI_TRANSLATOR_MODE_FACE_TO_FACE_TRANSLATION,
     RCSP_TRANSLATOR_MODE_CALL_TRANSLATION_STEREO_ENC, AI_TRANSLATOR_MODE_CALL_TRANSLATION_STEREO_ENC,
+    RCSP_TRANSLATOR_MODE_CALL_RECORD_STEREO_ENC,    AI_TRANSLATOR_MODE_CALL_RECORD_STEREO_ENC,
 };
 
 static int __mode_a2r_remap(int ai_mode)
@@ -226,6 +227,15 @@ static int translator_send_ch_for_a2dp(u8 *buf, u32 len)
 int JL_rcsp_translator_whether_play_by_ai_rx()
 {
 #if AI_AUDIO_TRANSLATION_RECV_CHANNEL_ENABLE
+    return 1;
+#else
+    return 0;
+#endif
+}
+
+int JL_rcsp_translator_whether_a2dp_translate_play()
+{
+#if AI_AUDIO_A2DP_TRANSLATION_RECV_ENABLE
     return 1;
 #else
     return 0;
@@ -434,11 +444,14 @@ static int _translator_op_send_audio_data(u8 *buf, u32 len, u32 offset, u32 priv
         break;
     case RCSP_TRANSLATOR_MODE_CALL_TRANSLATION:
     case RCSP_TRANSLATOR_MODE_CALL_TRANSLATION_STEREO_ENC:
+    case RCSP_TRANSLATOR_MODE_CALL_RECORD_STEREO_ENC:
     case RCSP_TRANSLATOR_MODE_A2DP_TRANSLATION:
     case RCSP_TRANSLATOR_MODE_FACE_TO_FACE_TRANSLATION:
         if (minfo.mode == RCSP_TRANSLATOR_MODE_CALL_TRANSLATION) {
             op03_fmt.source = RCSP_TRANSLATOR_AUDIO_SOURCE_ESCO_UPSTREAM;
         } else if (minfo.mode == RCSP_TRANSLATOR_MODE_CALL_TRANSLATION_STEREO_ENC) {
+            op03_fmt.source = RCSP_TRANSLATOR_AUDIO_SOURCE_ESCO_MIX;
+        } else if (minfo.mode == RCSP_TRANSLATOR_MODE_CALL_RECORD_STEREO_ENC) {
             op03_fmt.source = RCSP_TRANSLATOR_AUDIO_SOURCE_ESCO_MIX;
         } else if (minfo.mode == RCSP_TRANSLATOR_MODE_A2DP_TRANSLATION) {
             op03_fmt.source = RCSP_TRANSLATOR_AUDIO_SOURCE_MSBC;

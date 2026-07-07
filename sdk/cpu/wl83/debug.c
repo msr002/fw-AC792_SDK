@@ -806,7 +806,7 @@ void debug_init(void)
 #ifndef CONFIG_NO_SDRAM_ENABLE
                   &sdram_text_code_begin, &sdram_text_code_end
 #else
-                  NULL, NULL
+                  &ram_text_code_end, (void *)0x120000
 #endif
                  );
 

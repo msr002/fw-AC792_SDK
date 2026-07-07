@@ -22,7 +22,10 @@ void music_player_timer_1_timer_cb(lv_timer_t *src)
 #endif
 
     if (src->repeat_count == 0) {
-        ui_scr->music_player_timer_1 = NULL;
+        ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_MUSIC_PLAYER);
+        if (ui_scr != NULL && ui_scr->music_player_timer_1 == src) {
+            ui_scr->music_player_timer_1 = NULL;
+        }
     }
 
 }

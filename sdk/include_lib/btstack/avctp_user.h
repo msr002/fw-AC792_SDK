@@ -653,6 +653,8 @@ extern void bt_set_bt_mac_addr(u8 *addr);
 extern void bt_set_host_name(const char *name, u8 len);
 /*用户调试设置pin code*/
 extern void bt_set_pin_code(const char *code);
+/*用户设置蓝牙发射器是否使用pin code配对方式*/
+extern void bt_set_emitter_pin_code_flag(bool flag);
 /*该接口用于设置上电回连需要依次搜索设备的个数。*/
 extern void bt_set_auto_conn_device_num(u8 num);
 
@@ -682,6 +684,8 @@ extern void bt_set_stack_exiting(u8 exit);
 extern void bt_set_hid_independent_flag(bool flag);
 /*配置通话使用16k的msbc还是8k的cvsd*/
 extern void bt_set_support_msbc_flag(bool flag);
+/*配置蓝牙发射器主机通话使用16k的msbc还是8k的cvsd*/
+extern void bt_set_hfp_ag_support_msbc_flag(bool flag);
 /*配置协议栈使用支持AAC的信息*/
 extern void bt_set_support_aac_flag(bool flag);
 /*配置协议栈使用支持LHDC的信息*/

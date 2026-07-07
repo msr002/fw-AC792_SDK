@@ -62,7 +62,7 @@ const int CONFIG_LMP_CONNECTION_LIMIT_NUM           = 1;
 const int CONFIG_LMP_NAME_REQ_ENABLE                = 1;
 const int CONFIG_LMP_PASSKEY_ENABLE                 = 0;
 const int CONFIG_LMP_OOB_ENABLE                     = 0;
-#if TCFG_BT_BQB_PROFILE_TEST_ENABLE
+#if (TCFG_BT_BQB_PROFILE_TEST_ENABLE) || ((defined (TCFG_USER_EMITTER_ENABLE) && TCFG_USER_EMITTER_ENABLE) && (defined (TCFG_BT_SUPPORT_PROFILE_HFP_AG) && TCFG_BT_SUPPORT_PROFILE_HFP_AG))
 const int CONFIG_LMP_MASTER_ESCO_ENABLE             = 1;
 #else
 const int CONFIG_LMP_MASTER_ESCO_ENABLE             = 0;

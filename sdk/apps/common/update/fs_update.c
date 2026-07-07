@@ -227,7 +227,9 @@ static void fs_update_state_cbk(int type, u32 state, void *priv)
 #endif
                 if (type == USB_HID_UPDATA) {
                     printf(">>>>>>>>>>>>>>>>>> jump ota loader!\n");
+#if TCFG_USB_SLAVE_CDC_ENABLE
                     os_task_create_affinity_core(ota_loader_jump, NULL, 26, 1024, 0, "ota_loader_jump", 0);
+#endif
                 } else {
                     printf(">>>>>>>>>>>>>>>>>> cpu reset , uboot todo update ...\n");
                     system_soft_reset();

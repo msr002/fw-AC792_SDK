@@ -107,8 +107,7 @@ gui_msg_data_t *gui_msg_get_guider(int32_t msg_id)
         gui_msg_entry_table[index].cb(GUI_MSG_ACCESS_GET, &guider_msg_data, gui_msg_entry_table[index].type);
         return &guider_msg_data;
     } else {
-        for (int i = GUI_MSG_ID_CUSTOM_END - GUI_MSG_ID_CUSTOM_START + 1;
-             i < sizeof(gui_msg_entry_table) / sizeof(gui_msg_entry_table[0]); i++) {
+        for (int i = GUI_MSG_ID_CUSTOM_END - GUI_MSG_ID_CUSTOM_START + 1; i < sizeof(gui_msg_entry_table) / sizeof(gui_msg_entry_table[0]); i++) {
             if (msg_id == gui_msg_entry_table[i].msg_id) {
                 gui_msg_entry_table[i].cb(GUI_MSG_ACCESS_GET, &guider_msg_data, gui_msg_entry_table[i].type);
                 return &guider_msg_data;
@@ -137,13 +136,11 @@ gui_msg_data_t *gui_msg_get_guider(int32_t msg_id)
 #endif
 #endif
 }
-GUI_WEAK void gui_msg_action_change(int32_t msg_id, gui_msg_action_t access, gui_msg_data_t *data,
-                                    gui_msg_data_type_t type)
+GUI_WEAK void gui_msg_action_change(int32_t msg_id, gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type)
 {
     gui_msg_action_change_guider(msg_id, access, data, type);
 }
-void gui_msg_action_change_guider(int32_t msg_id, gui_msg_action_t access, gui_msg_data_t *data,
-                                  gui_msg_data_type_t type)
+void gui_msg_action_change_guider(int32_t msg_id, gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type)
 {
 #if LV_USE_OBSERVER
 #if !LV_USE_GUIBUILDER_SIMULATOR
@@ -151,8 +148,7 @@ void gui_msg_action_change_guider(int32_t msg_id, gui_msg_action_t access, gui_m
         int32_t index = msg_id - GUI_MSG_ID_CUSTOM_START;
         gui_msg_entry_table[index].cb(access, data, type);
     } else {
-        for (int i = GUI_MSG_ID_CUSTOM_END - GUI_MSG_ID_CUSTOM_START + 1;
-             i < sizeof(gui_msg_entry_table) / sizeof(gui_msg_entry_table[0]); i++) {
+        for (int i = GUI_MSG_ID_CUSTOM_END - GUI_MSG_ID_CUSTOM_START + 1; i < sizeof(gui_msg_entry_table) / sizeof(gui_msg_entry_table[0]); i++) {
             if (msg_id == gui_msg_entry_table[i].msg_id) {
                 gui_msg_entry_table[i].cb(access, data, type);
                 return;
@@ -293,8 +289,7 @@ gui_msg_data_type_t gui_msg_get_data_type(int32_t msg_id)
     if (msg_id >= GUI_MSG_ID_CUSTOM_START && msg_id <= GUI_MSG_ID_CUSTOM_END) {
         return gui_msg_entry_table[msg_id - GUI_MSG_ID_CUSTOM_START].type;
     } else {
-        for (int i = GUI_MSG_ID_CUSTOM_END - GUI_MSG_ID_CUSTOM_START + 1;
-             i < sizeof(gui_msg_entry_table) / sizeof(gui_msg_entry_table[0]); i++) {
+        for (int i = GUI_MSG_ID_CUSTOM_END - GUI_MSG_ID_CUSTOM_START + 1; i < sizeof(gui_msg_entry_table) / sizeof(gui_msg_entry_table[0]); i++) {
             if (msg_id == gui_msg_entry_table[i].msg_id) {
                 return gui_msg_entry_table[i].type;
             }
@@ -337,9 +332,7 @@ bool gui_msg_has_observer(lv_subject_t *subject, lv_observer_cb_t cb, lv_obj_t *
     }
     return false;
 }
-void gui_msg_setup_component(bool subscribe_enabled, bool event_enabled, lv_subject_t *subject, lv_obj_t *target_obj,
-                             gui_msg_data_t *msg_data, lv_observer_cb_t observer_cb, int32_t msg_id, gui_msg_action_t msg_action,
-                             gui_msg_data_type_t data_type, lv_event_cb_t event_cb)
+void gui_msg_setup_component(bool subscribe_enabled, bool event_enabled, lv_subject_t *subject, lv_obj_t *target_obj, gui_msg_data_t *msg_data, lv_observer_cb_t observer_cb, int32_t msg_id, gui_msg_action_t msg_action, gui_msg_data_type_t data_type, lv_event_cb_t event_cb)
 {
     if (subject == NULL || subject->type == LV_SUBJECT_TYPE_INVALID) {
         return;
@@ -430,8 +423,7 @@ void _gui_msg_state_cb(lv_state_t *var_ptr, gui_msg_action_t access, gui_msg_dat
     data->value_int = (int32_t) * var_ptr;
     return;
 }
-void _gui_msg_char_array_cb(char **var_ptr, const char *init_value, bool *is_init, gui_msg_action_t access,
-                            gui_msg_data_t *data)
+void _gui_msg_char_array_cb(char **var_ptr, const char *init_value, bool *is_init, gui_msg_action_t access, gui_msg_data_t *data)
 {
     if (*is_init == false) {
         *var_ptr = lv_mem_alloc(strlen(init_value) + 1);

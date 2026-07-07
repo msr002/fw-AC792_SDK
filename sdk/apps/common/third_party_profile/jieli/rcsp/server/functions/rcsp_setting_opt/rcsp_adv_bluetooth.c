@@ -44,7 +44,7 @@ static u8 adv_setting_result = 0;
 static u8 adv_set_deal_one_attr(u8 *buf, u8 size, u8 offset)
 {
     u8 rlen = buf[offset];
-    if ((offset + rlen + 1) > (size - offset)) {
+    if ((offset + rlen + 1) > (size)) {
         log_info("deal attr end!");
         return rlen;
     }

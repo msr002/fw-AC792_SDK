@@ -8,25 +8,27 @@
 #include <stdint.h>
 #include <string.h>
 
+#include "rcsp_config.h"
 #include "generic/circular_buf.h"
 #include "os/os_api.h"
 #include "update_loader_download.h"
 #include "system/task.h"
 #include "system/timer.h"
 #include "init.h"
+#include "update/ota_impl.h"
 #include "rcsp_update_tws.h"
-/* #include "dual_bank_updata_api.h" */
+#include "event/bt_event.h"
 #include "bt_tws.h"
-#include "app_config.h"
 #include "btstack/avctp_user.h"
 #include "update.h"
-/* #include "app_main.h" */
+#include "app_msg.h"
 
-#if ((RCSP_MODE == RCSP_MODE_SOUNDBOX) && 0) //OTA_TWS_SAME_TIME_ENABLE)
+
+#if ((RCSP_MODE == RCSP_MODE_SOUNDBOX) && OTA_TWS_SAME_TIME_ENABLE)
 
 //#define LOG_TAG_CONST       EARPHONE
 #define LOG_TAG             "[UPDATE_TWS]"
-#define log_errorOR_ENABLE
+#define LOG_ERROR_ENABLE
 #define LOG_DEBUG_ENABLE
 #define LOG_INFO_ENABLE
 /* #define LOG_DUMP_ENABLE */
@@ -34,18 +36,7 @@
 #include "debug.h"
 
 #define THIS_TASK_NAME	            "tws_ota"
-#define SLAVE_REV_BUF_LEN           1024*2
-
-enum {
-    TWS_UPDATE_START,
-    TWS_UPDATE_RESULT_EXCHANGE,
-    TWS_UPDATE_RESULT_EXCHANGE_RES,
-    TWS_UPDATE_OVER,
-    TWS_UPDATE_OVER_CONFIRM,
-    TWS_UPDATE_OVER_CONFIRM_REQ,
-    TWS_UPDATE_OVER_CONFIRM_RES,
-    TWS_UPDATE_VERIFY,
-};
+#define SLAVE_REV_BUF_LEN           1024 * 3
 
 extern void sys_enter_soft_poweroff(void *priv);
 
@@ -56,6 +47,7 @@ struct __tws_ota_var {
     OS_SEM slave_sem;
     OS_SEM confirm_sem;
     struct __tws_ota_para para;
+    u8 task_kill_flag;
     u8 ota_type;
     u8 ota_status;
     u8 ota_remote_status;
@@ -70,13 +62,11 @@ struct __tws_ota_var {
 struct __tws_ota_var tws_ota_var;
 #define __this (&tws_ota_var)
 
-void tws_ota_event_post(u32 type, u8 event)
+static void tws_ota_event_post(u8 event)
 {
-    struct sys_event e;
-    e.type = SYS_BT_EVENT;
-    e.arg  = (void *)type;
-    e.u.bt.event = event;
-    sys_event_notify(&e);
+    struct bt_event bt = {0};
+    bt.event = event;
+    bt_event_notify(BT_EVENT_FROM_OTA, &bt);
 }
 
 u8 tws_ota_control(int type, ...)
@@ -131,13 +121,14 @@ u8 tws_ota_control(int type, ...)
 
 int tws_ota_init(void)
 {
+    tws_api_auto_role_switch_disable();
     memset((u8 *)__this, 0, sizeof(struct __tws_ota_var));
     __this->ota_status = OTA_INIT;
     __this->ota_type = OTA_TWS;
 
-    if (a2dp_get_status() == BT_MUSIC_STATUS_STARTING) {
+    if (bt_a2dp_get_status() == BT_MUSIC_STATUS_STARTING) {
         /* log_info("try pause a2dp music"); */
-        user_send_cmd_prepare(USER_CTRL_AVCTP_OPID_PAUSE, 0, NULL);
+        bt_cmd_prepare(USER_CTRL_AVCTP_OPID_PAUSE, 0, NULL);
     }
     return 0;
 }
@@ -146,14 +137,15 @@ int tws_ota_init(void)
 static void tws_ota_data_read_s_from_m(void *_data, u16 len, bool rx)
 {
     if (rx && __this->ota_status == OTA_START && __this->slave_r_buf) {
-        /* r_log_info("Offset:%x r_len:%d\n",__this->ota_data_len,len); */
+        /* log_info("Offset:%x r_len:%d",__this->ota_data_len,len); */
         /* put_buf(_data, len); */
         __this->ota_data_len += len;
         if (cbuf_is_write_able(&(__this->cbuffer), len)) {
             cbuf_write(&(__this->cbuffer), _data, len);
         } else {
-            log_info("ota cbuf write err\n");
+            log_info("ota cbuf write err");
         }
+        os_sem_set(&__this->slave_sem, 0);
         os_sem_post(&__this->slave_sem);
     }
 }
@@ -179,7 +171,7 @@ int tws_ota_data_send_m_to_s(u8 *buf, u16 len)
 
 int tws_ota_err_callback(u8 reason)
 {
-    tws_ota_event_post(SYS_BT_OTA_EVENT_TYPE_STATUS, OTA_UPDATE_ERR);
+    tws_ota_event_post(OTA_UPDATE_ERR);
     return 0;
 }
 
@@ -192,29 +184,34 @@ static void tws_ota_update_loop(void *priv)
 
     u8 sniff_wait_exit_timeout = 30;//3s
 
-    log_info("tws_ota_update_loop\n");
+    log_info("tws_ota_update_loop");
 
     while (1) {
         os_sem_pend(&__this->slave_sem, 0);
+        if (__this->task_kill_flag) {
+            log_info("%s: task kill...", __func__);
+            return;
+        }
 
         if (sniff_wait_exit_timeout) {
             //wait slave exit sniff
             extern u8 btstcak_get_bt_mode(void);
             while (btstcak_get_bt_mode() && sniff_wait_exit_timeout--) {
-                log_info("wait sniff exit \n");
+                log_info("wait sniff exit");
                 os_time_dly(10);
             }
-            log_info(">>>>>>>sniff timeout:%d \n", sniff_wait_exit_timeout);
+            log_info(">>>>>>>sniff timeout:%d", sniff_wait_exit_timeout);
 
             if (!sniff_wait_exit_timeout) {
-                log_info(">>>>>>wait sniff exit timeout !!!! \n");
+                log_info(">>>>>>wait sniff exit timeout !!!!");
             }
             sniff_wait_exit_timeout = 0;
-            dual_bank_passive_update_init(__this->para.fm_crc16, __this->para.fm_size, __this->para.max_pkt_len, NULL);
+            ret = dual_bank_passive_update_init(__this->para.fm_crc, __this->para.fm_size, __this->para.max_pkt_len, NULL);
+            /* log_info("%s: ret = %d; crc = %d; size = %d; len = %d", __func__, ret, __this->para.fm_crc, __this->para.fm_size, __this->para.max_pkt_len); */
             ret = dual_bank_update_allow_check(__this->para.fm_size);
             if (ret) {
-                log_info("fm_size:%x can't update\n", __this->para.fm_size);
-                tws_ota_event_post(SYS_BT_OTA_EVENT_TYPE_STATUS, OTA_UPDATE_ERR);
+                log_error("fm_size:%x can't update", __this->para.fm_size);
+                tws_ota_event_post(OTA_UPDATE_ERR);
                 continue;
             }
             tws_api_sync_call_by_uuid(0xA2E22223, SYNC_CMD_START_UPDATE, 400);
@@ -222,7 +219,7 @@ static void tws_ota_update_loop(void *priv)
         }
 
         total_len = cbuf_get_data_size(&(__this->cbuffer));
-        /* log_info("total_len : %d\n",total_len); */
+        /* log_info("total_len : %d",total_len); */
         while (total_len) {
             if (total_len > get_dual_bank_passive_update_max_buf()) {
                 len =  get_dual_bank_passive_update_max_buf();
@@ -237,13 +234,13 @@ static void tws_ota_update_loop(void *priv)
             if (tmp_buf) {
                 if (cbuf_read(&(__this->cbuffer), tmp_buf, len) == len) {
                     putchar('D');
-                    dual_bank_update_write(tmp_buf, len, NULL);
+                    dual_bank_update_write_with_tws(tmp_buf, len, NULL);
                 } else {
-                    log_error("read err\n");
+                    log_error("read err");
                 }
                 free(tmp_buf);
             } else {
-                log_error("malloc err\n");
+                log_error("malloc err");
             }
             total_len -= len;
         }
@@ -252,20 +249,19 @@ static void tws_ota_update_loop(void *priv)
 
 static void ota_finish_confirm(void *priv)
 {
-    log_info("ota_finish_confirm:%d\n", __this->ota_confirm);
+    log_info("ota_finish_confirm:%d", __this->ota_confirm);
     if (!__this->ota_confirm) {
         //ota tws confirm err,earse boot info
         flash_update_clr_boot_info(CLEAR_APP_UPDATE_BANK);
-        /* ASSERT(0, "ota tws confirm err\n"); */
+        /* ASSERT(0, "ota tws confirm err"); */
     }
-    tws_ota_event_post(SYS_BT_OTA_EVENT_TYPE_STATUS, OTA_UPDATE_SUCC);
-
+    tws_ota_event_post(OTA_UPDATE_SUCC);
 }
 
 u16 tws_ota_enter_verify(void *priv)
 {
     if (tws_api_get_tws_state() & TWS_STA_SIBLING_DISCONNECTED) {
-        log_info("tws_disconn in verify\n");
+        log_info("tws_disconn in verify");
         db_update_notify_fail_to_phone();
         return -1;
     }
@@ -301,12 +297,12 @@ __RESTART:
     tws_ota_send_data_to_sibling(TWS_UPDATE_RESULT_EXCHANGE, (u8 *)&tws_ota_result, 2);
 
     if ((result & BIT(TWS_ROLE_SLAVE)) && (result & BIT(TWS_ROLE_SLAVE))) {
-        log_info("tws already ota succ1\n");
+        log_info("tws already ota succ1");
         os_sem_set(&__this->master_sem, 0);
-        tws_ota_event_post(SYS_BT_OTA_EVENT_TYPE_STATUS, OTA_UPDATE_OVER);
+        tws_ota_event_post(OTA_UPDATE_OVER);
         return 1;
     } else if (__this->ota_remote_status ==  OTA_VERIFY_END || __this->ota_remote_status ==  OTA_OVER) {
-        tws_ota_event_post(SYS_BT_OTA_EVENT_TYPE_STATUS, OTA_UPDATE_ERR);
+        tws_ota_event_post(OTA_UPDATE_ERR);
         return 0;
     } else {
         os_sem_pend(&__this->master_sem, 200);
@@ -317,7 +313,7 @@ __RESTART:
 
 u16 tws_ota_updata_boot_info_over(void *priv)
 {
-    log_info("master update_burn_boot_info succ\n");
+    log_info("master update_burn_boot_info succ");
     if (tws_api_get_tws_state() & TWS_STA_SIBLING_DISCONNECTED) {
         log_info("tws_disconn, ota open fail");
         db_update_notify_fail_to_phone();
@@ -345,18 +341,18 @@ u16 tws_ota_updata_boot_info_over(void *priv)
         log_info("-------mz03");
         //ota tws confirm err,earse boot info
         flash_update_clr_boot_info(CLEAR_APP_UPDATE_BANK);
-        /* ASSERT(0, "ota tws confirm err\n"); */
+        /* ASSERT(0, "ota tws confirm err"); */
         return -1;
     }
-    /* tws_ota_event_post(SYS_BT_OTA_EVENT_TYPE_STATUS,OTA_UPDATE_SUCC); //主机等手机发重启命令*/
     return 0;
 
 }
 
-int tws_ota_open(struct __tws_ota_para *para)
+int tws_ota_open(void *priv)
 {
     int ret = 0;
-    log_info("tws_ota_open\n");
+    struct __tws_ota_para *para = (struct __tws_ota_para *)priv;
+    log_info("tws_ota_open");
 
     if (tws_api_get_tws_state() & TWS_STA_SIBLING_DISCONNECTED) {
         log_info("tws_disconn, ota open fail");
@@ -373,8 +369,7 @@ int tws_ota_open(struct __tws_ota_para *para)
         bt_check_exit_sniff();
         //master 发命令给slave启动升级
 
-
-        log_info("master updata info: crc16:%x size:%x max_pkt_len:%d\n", para->fm_crc16, para->fm_size, para->max_pkt_len);
+        log_info("master updata info: crc16:%x size:%x max_pkt_len:%d", para->fm_crc, para->fm_size, para->max_pkt_len);
         if (__this->ota_type == OTA_TWS) {
             tws_ota_send_data_to_sibling(TWS_UPDATE_START, (u8 *)para, sizeof(struct __tws_ota_para));
             log_info("sem pend in ...");
@@ -391,10 +386,10 @@ int tws_ota_open(struct __tws_ota_para *para)
             }
         }
     } else {
-        log_info("slave updata info: crc16:%x size:%x max_pkt_len:%d\n", para->fm_crc16, para->fm_size, para->max_pkt_len);
+        log_info("slave updata info: crc16:%x size:%x max_pkt_len:%d", para->fm_crc, para->fm_size, para->max_pkt_len);
 
         /* tws_api_sync_call_by_uuid('T', SYNC_CMD_START_UPDATE, 100); */
-        tws_ota_event_post(SYS_BT_OTA_EVENT_TYPE_STATUS, OTA_START_UPDATE_READY);
+        tws_ota_event_post(OTA_START_UPDATE_READY);
     }
     return ret;
 }
@@ -406,23 +401,23 @@ int tws_ota_close(void)
     if (__this->slave_r_buf) {
         free(__this->slave_r_buf);
         __this->slave_r_buf = 0;
-        task_kill(THIS_TASK_NAME);
+        __this->task_kill_flag = 1;
     }
     return ret;
 }
 
 static void ota_verify_timeout(void *priv)
 {
-    log_info("ota_verify_timeout:%x %x\n", __this->para.fm_size, __this->ota_data_len);
+    log_info("ota_verify_timeout:%x %x", __this->para.fm_size, __this->ota_data_len);
     if (__this->ota_data_len == __this->para.fm_size) {
         /* tws_api_sync_call_by_uuid('T', SYNC_CMD_START_VERIFY, 100); */
-        tws_ota_event_post(SYS_BT_OTA_EVENT_TYPE_STATUS, OTA_START_VERIFY);
+        tws_ota_event_post(OTA_START_VERIFY);
         return;
     }
 
     if (__this->ota_verify_cnt > 4) {
-        log_info("code len err\n");
-        tws_ota_event_post(SYS_BT_OTA_EVENT_TYPE_STATUS, OTA_UPDATE_ERR);
+        log_info("code len err");
+        tws_ota_event_post(OTA_UPDATE_ERR);
         sys_timeout_del(__this->ota_timer_id);
         __this->ota_timer_id = 0;
         return;
@@ -438,8 +433,8 @@ int tws_ota_get_data_from_sibling(u8 opcode, u8 *data, u8 len)
     u8 tws_ota_result[2];
     switch (opcode) {
     //master->slave
-    case  TWS_UPDATE_START:
-        log_info("TWS_AI_START_UPDATE:%d\n", opcode);
+    case TWS_UPDATE_START:
+        log_info("TWS_AI_START_UPDATE:%d", opcode);
         if (tws_api_get_role() == TWS_ROLE_SLAVE) {
             if (__this->slave_r_buf) {
                 tws_ota_close();
@@ -452,22 +447,22 @@ int tws_ota_get_data_from_sibling(u8 opcode, u8 *data, u8 len)
 
     //master->slave
     case TWS_UPDATE_RESULT_EXCHANGE:
-        log_info("TWS_UPDATE_RESULT_EXCHANGE:%d %d\n", data[0], data[1]);
+        log_info("TWS_UPDATE_RESULT_EXCHANGE:%d %d", data[0], data[1]);
         __this->ota_remote_status = data[1];
         tws_ota_control(OTA_RESULT_SET, (data[0] & BIT(TWS_ROLE_MASTER) ? 1 : 0), TWS_ROLE_MASTER);
 
         tws_ota_result[0] = __this->ota_result;
         tws_ota_result[1] = __this->ota_status;
         tws_ota_send_data_to_sibling(TWS_UPDATE_RESULT_EXCHANGE_RES, (u8 *)tws_ota_result, 2);
-        log_info("master ota result:%x %d\n", tws_ota_control(OTA_RESULT_GET), __this->ota_status);
+        log_info("master ota result:%x %d", tws_ota_control(OTA_RESULT_GET), __this->ota_status);
         break;
 
     //slave->master
     case TWS_UPDATE_RESULT_EXCHANGE_RES:
-        log_info("TWS_UPDATE_RESULT_EXCHANGE_RES:%d %d\n", data[0], data[1]);
+        log_info("TWS_UPDATE_RESULT_EXCHANGE_RES:%d %d", data[0], data[1]);
         __this->ota_remote_status = data[1];
         tws_ota_control(OTA_RESULT_SET, (data[0] & BIT(TWS_ROLE_SLAVE) ? 1 : 0), TWS_ROLE_SLAVE);
-        log_info("slave ota result:%x %d\n", tws_ota_control(OTA_RESULT_GET), __this->ota_status);
+        log_info("slave ota result:%x %d", tws_ota_control(OTA_RESULT_GET), __this->ota_status);
 
         if (tws_ota_control(OTA_RESULT_GET) & BIT(TWS_ROLE_SLAVE)) {
             os_sem_post(&__this->master_sem);
@@ -476,18 +471,18 @@ int tws_ota_get_data_from_sibling(u8 opcode, u8 *data, u8 len)
 
     //master->slave
     case TWS_UPDATE_VERIFY:
-        log_info("TWS_UPDATE_VERIFY\n");
-        tws_ota_event_post(SYS_BT_OTA_EVENT_TYPE_STATUS, OTA_START_VERIFY);
+        log_info("TWS_UPDATE_VERIFY");
+        tws_ota_event_post(OTA_START_VERIFY);
         break;
 
     case TWS_UPDATE_OVER:
-        log_info("TWS_AI_UPDATE_OVER:%d\n", opcode);
+        log_info("TWS_AI_UPDATE_OVER:%d", opcode);
         __this->ota_status = OTA_OVER;
         break;
 
     //slave to master
     case TWS_UPDATE_OVER_CONFIRM:
-        log_info("TWS_UPDATE_OVER_CONFIRM\n");
+        log_info("TWS_UPDATE_OVER_CONFIRM");
         __this->ota_confirm = 1;
         if (tws_api_get_role() == TWS_ROLE_MASTER) {
             log_info("1------post");
@@ -496,7 +491,7 @@ int tws_ota_get_data_from_sibling(u8 opcode, u8 *data, u8 len)
         break;
     //master->slave
     case TWS_UPDATE_OVER_CONFIRM_REQ:
-        log_info("TWS_UPDATE_OVER_CONFIRM_REQ\n");
+        log_info("TWS_UPDATE_OVER_CONFIRM_REQ");
         if (tws_api_get_role() == TWS_ROLE_SLAVE) {
             __this->ota_confirm = 1;
             tws_ota_send_data_to_sibling(TWS_UPDATE_OVER_CONFIRM_RES, NULL, 0);
@@ -506,7 +501,7 @@ int tws_ota_get_data_from_sibling(u8 opcode, u8 *data, u8 len)
         break;
     //slave->master
     case TWS_UPDATE_OVER_CONFIRM_RES:
-        log_info("TWS_UPDATE_OVER_CONFIRM_RES\n");
+        log_info("TWS_UPDATE_OVER_CONFIRM_RES");
         if (tws_api_get_role() == TWS_ROLE_MASTER) {
             log_info("3------post");
             os_sem_post(&__this->confirm_sem);
@@ -518,18 +513,16 @@ int tws_ota_get_data_from_sibling(u8 opcode, u8 *data, u8 len)
 
 void tws_ota_send_data_to_sibling(u8 opcode, u8 *data, u8 len)
 {
-    extern void tws_data_to_sibling_send(u8 opcode, u8 * data, u8 len);
+    int tws_data_to_sibling_send(u8 opcode, u8 * data, u8 len);
     tws_data_to_sibling_send(opcode, data, len);
 }
 
-
-
-u8 dual_bank_update_burn_boot_info_callback(u8 ret)
+int dual_bank_update_burn_boot_info_callback(int ret)
 {
     if (ret) {
-        log_info("update_burn_boot_info err\n");
+        log_info("update_burn_boot_info err");
     } else {
-        log_info("slave update_burn_boot_info succ\n");
+        log_info("slave update_burn_boot_info succ");
         tws_ota_send_data_to_sibling(TWS_UPDATE_OVER_CONFIRM, NULL, 0);
 
         //not recive master confirm
@@ -540,14 +533,14 @@ u8 dual_bank_update_burn_boot_info_callback(u8 ret)
         if (!__this->ota_confirm) {
             //ota tws confirm err,earse boot info
             flash_update_clr_boot_info(CLEAR_APP_UPDATE_BANK);
-            /* ASSERT(0, "ota tws confirm err\n"); */
+            /* ASSERT(0, "ota tws confirm err"); */
             return 0;
         }
 
         //确保从机的回复命令送达到主机
         os_time_dly(50);
 
-        tws_ota_event_post(SYS_BT_OTA_EVENT_TYPE_STATUS, OTA_UPDATE_SUCC);
+        tws_ota_event_post(OTA_UPDATE_SUCC);
         return 0;
     }
 
@@ -563,7 +556,7 @@ static sint32_t gma_ota_slave_result(int crc_res)
 
     tws_ota_control(OTA_RESULT_SET, crc_res, TWS_ROLE_SLAVE);
 
-    log_info("gma_ota_slave_result:%d %d\n", crc_res, tws_ota_control(OTA_STATUS_GET));
+    log_info("gma_ota_slave_result:%d %d", crc_res, tws_ota_control(OTA_STATUS_GET));
     return 0;
 }
 
@@ -574,10 +567,9 @@ int tws_ota_sync_cmd(int reason)
     switch (reason) {
     //slave request
     case SYNC_CMD_START_UPDATE:
-        log_info("SYNC_CMD_START_UPDATE\n");
+        log_info("SYNC_CMD_START_UPDATE");
 
         if (__this->ota_status != OTA_INIT) {
-            log_info("tws ota no init");
             break;
         }
         __this->ota_status = OTA_START;
@@ -591,7 +583,7 @@ int tws_ota_sync_cmd(int reason)
 
     //slave request
     case SYNC_CMD_START_VERIFY:
-        log_info("SYNC_CMD_START_VERIFY\n");
+        log_info("SYNC_CMD_START_VERIFY");
         __this->ota_status = OTA_VERIFY_ING;
         __this->ota_remote_status = OTA_VERIFY_ING;
 
@@ -604,25 +596,24 @@ int tws_ota_sync_cmd(int reason)
 
     //master request
     case SYNC_CMD_UPDATE_OVER:
-        log_info("SYNC_CMD_UPDATE_OVER\n");
+        log_info("SYNC_CMD_UPDATE_OVER");
 
         __this->ota_status = OTA_OVER;
         __this->ota_remote_status = OTA_OVER;
         if ((__this->ota_result & BIT(TWS_ROLE_MASTER)) && (__this->ota_result & BIT(TWS_ROLE_SLAVE))) {
-            log_info("OTA SUCCESS\n");
+            log_info("OTA SUCCESS");
             //update boot info
             if (tws_api_get_role() == TWS_ROLE_SLAVE) {
                 dual_bank_update_burn_boot_info(dual_bank_update_burn_boot_info_callback);
             }
         } else {
-            log_info("OTA ERR\n");
-            /* tws_ota_event_post(SYS_BT_OTA_EVENT_TYPE_STATUS,OTA_UPDATE_SUCC); */
+            log_info("OTA ERR");
         }
         break;
 
     //slave request
     case SYNC_CMD_UPDATE_ERR:
-        log_info("SYNC_CMD_UPDATE_ERR\n");
+        log_info("SYNC_CMD_UPDATE_ERR");
         if (tws_api_get_role() == TWS_ROLE_MASTER) {
         } else {
             tws_ota_stop(OTA_STOP_UPDATE_OVER_ERR);
@@ -646,7 +637,7 @@ void tws_ota_app_event_deal(u8 event)
     case TWS_EVENT_CONNECTION_DETACH:
     /* case TWS_EVENT_PHONE_LINK_DETACH: */
     case TWS_EVENT_REMOVE_PAIRS:
-        log_info("stop ota : %d --1\n", event);
+        log_info("stop ota : %d --1", event);
         tws_ota_stop(OTA_STOP_LINK_DISCONNECT);
         break;
     default:
@@ -678,36 +669,42 @@ void tws_ota_stop(u8 reason)
 
         tws_ota_close();
         dual_bank_passive_update_exit(NULL);
+#if RCSP_UPDATE_EN
         extern void rcsp_db_update_fail_deal(); //双备份升级失败处理
         rcsp_db_update_fail_deal();
+#endif
     }
 }
 
-int bt_ota_event_handler(struct bt_event *bt)
+static int bt_ota_event_handler(void *msg)
 {
-    int ret = 0;
+    struct bt_event *bt = (struct bt_event *)msg;
+
     switch (bt->event) {
     case OTA_START_UPDATE:
-        log_info("OTA_START_UPDATE\n");
+        log_info("OTA_START_UPDATE");
         tws_api_sync_call_by_uuid(0xA2E22223, SYNC_CMD_START_UPDATE, 400);
         break;
     case OTA_START_UPDATE_READY:
-        log_info("OTA_START_UPDATE_READY:%x %x %d\n", __this->para.fm_crc16, __this->para.fm_size, __this->para.max_pkt_len);
+        log_info("OTA_START_UPDATE_READY:%x %x %d", __this->para.fm_crc, __this->para.fm_size, __this->para.max_pkt_len);
         extern void rcsp_before_enter_db_update_mode();
+#if(RCSP_UPDATE_EN)
         rcsp_before_enter_db_update_mode();
+#endif
         if (__this->slave_r_buf) {
-            ASSERT(0, "tws_ota_update_loop already exit\n");
+            ASSERT(0, "tws_ota_update_loop already exit");
         }
-        task_create(tws_ota_update_loop, NULL, THIS_TASK_NAME);
+        __this->task_kill_flag = 0;
+        thread_fork(THIS_TASK_NAME, 10, 256, 0, NULL, tws_ota_update_loop, NULL);
         __this->slave_r_buf = malloc(SLAVE_REV_BUF_LEN);
-        ASSERT(__this->slave_r_buf, "slave_r_buf malloc err\n");
+        ASSERT(__this->slave_r_buf, "slave_r_buf malloc err");
         cbuf_init(&(__this->cbuffer), __this->slave_r_buf, SLAVE_REV_BUF_LEN);
 
         os_sem_post(&__this->slave_sem);
-        /* tws_ota_event_post(SYS_BT_OTA_EVENT_TYPE_STATUS,OTA_START_UPDATE); */
+        tws_ota_event_post(OTA_START_UPDATE);
         break;
     case OTA_START_VERIFY:
-        log_info("OTA_START_VERIFY\n");
+        log_info("OTA_START_VERIFY");
         if (__this->ota_data_len == __this->para.fm_size) {
             tws_api_sync_call_by_uuid(0xA2E22223, SYNC_CMD_START_VERIFY, 1000);
         } else {
@@ -719,29 +716,55 @@ int bt_ota_event_handler(struct bt_event *bt)
         }
         break;
     case OTA_UPDATE_OVER:
-        log_info("OTA_UPDATE_OVER\n");
+        log_info("OTA_UPDATE_OVER");
         tws_api_sync_call_by_uuid(0xA2E22223, SYNC_CMD_UPDATE_OVER, 400);
         break;
     case OTA_UPDATE_ERR:
-        log_info("OTA_UPDATE_ERR\n");
+        log_info("OTA_UPDATE_ERR");
         tws_api_sync_call_by_uuid(0xA2E22223, SYNC_CMD_UPDATE_ERR, 400);
         break;
     case OTA_UPDATE_SUCC:
-        log_info("OTA_UPDATE_SUCC\n");
+        log_info("OTA_UPDATE_SUCC");
         update_result_set(UPDATA_SUCC);
         dual_bank_passive_update_exit(NULL);
 
         /* update_result_set(UPDATA_SUCC); */
-        /* extern void cpu_reset(); */
-        /* cpu_reset(); */
+        void system_soft_reset(void);
+        sys_timeout_add_to_task("app_core", NULL, system_soft_reset, 3000);
         //user_ctl.shutdown_need_adv = 0;
-        sys_enter_soft_poweroff((void *)1);
+        /* sys_enter_soft_poweroff((void *)1); */
         break;
     default:
         break;
     }
 
     return 0;
+}
+
+REGISTER_APP_EVENT_HANDLER(bt_ota_event) = {
+    .event      = SYS_BT_EVENT,
+    .from       = BT_EVENT_FROM_OTA,
+    .handler    = bt_ota_event_handler,
+};
+
+static const update_op_tws_api_t update_tws_api = {
+    .tws_ota_start = tws_ota_open,
+    .tws_ota_data_send = tws_ota_data_send_m_to_s,
+    .tws_ota_err = tws_ota_err_callback,
+    .enter_verfiy_hdl = tws_ota_enter_verify,
+    .exit_verify_hdl = tws_ota_exit_verify,
+    .update_boot_info_hdl =  tws_ota_updata_boot_info_over,
+    .tws_ota_result_hdl = NULL,
+    .tws_ota_data_send_pend = NULL,
+};
+
+update_op_tws_api_t *get_tws_update_api(void)
+{
+    if (tws_api_get_tws_state() & TWS_STA_SIBLING_CONNECTED) {
+        return (update_op_tws_api_t *)&update_tws_api;
+    } else {
+        return NULL;
+    }
 }
 
 static void rcsp_tws_ota_sync_handler(int reason, int err)
@@ -755,5 +778,60 @@ TWS_SYNC_CALL_REGISTER(rcsp_tws_ota_sync) = {
     .func = rcsp_tws_ota_sync_handler,
 };
 
+static int tws_data_to_sibling_send(u8 opcode, u8 *data, u8 len)
+{
+    u8 send_data[len + 2];
+    log_info(">>>>>>>>>>send data to sibling");
+    send_data[0] = opcode;
+    send_data[1] = len;
+    memcpy(send_data + 2, data, len);
+
+    return tws_api_send_data_to_sibling(send_data, sizeof(send_data), TWS_FUNC_ID_AI_SYNC);
+}
+
+static void __ai_tws_rx_from_sibling(u8 *data)
+{
+#if (OTA_TWS_SAME_TIME_ENABLE && (RCSP_BTMATE_EN || RCSP_ADV_EN || (RCSP_MODE || SMART_BOX_EN)))
+    u8 len = data[1];
+    u8 opcode = data[0];
+    const void *rx_data = data + 2;
+    tws_ota_get_data_from_sibling(opcode, rx_data, len);
+#endif
+
+    free(data);
+}
+
+static void ai_tws_rx_from_sibling(void *_data, u16 len, bool rx)
+{
+    if (rx) {
+        log_info(">>>%s ", __func__);
+        log_info("len :%d", len);
+        put_buf(_data, len);
+        u8 *rx_data = malloc(len);
+        if (!rx_data) {
+            log_info("ai_tws_rx_from_sibling malloc fail");
+            return ;
+        }
+        memcpy(rx_data, _data, len);
+
+        int msg[4];
+        msg[0] = (int)__ai_tws_rx_from_sibling;
+        msg[1] = 1;
+        msg[2] = (int)rx_data;
+        int err = os_taskq_post_type("app_core", Q_CALLBACK, 3, msg);
+        if (err) {
+            log_info("tws rx post fail");
+            //post fail , need free
+            free(rx_data);
+        }
+        //cppcheck-suppress memleak
+    }
+}
+
+//发送给对耳
+REGISTER_TWS_FUNC_STUB(app_vol_sync_stub) = {
+    .func_id = TWS_FUNC_ID_AI_SYNC,
+    .func    = ai_tws_rx_from_sibling,
+};
 #endif
 

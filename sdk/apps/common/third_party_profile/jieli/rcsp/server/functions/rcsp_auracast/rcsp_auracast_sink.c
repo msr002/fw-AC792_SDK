@@ -6,6 +6,7 @@
 #endif
 
 #include "rcsp_auracast.h"
+#include "app_le_auracast.h"
 
 #if (defined(RCSP_ADV_AURCAST_SINK) && RCSP_ADV_AURCAST_SINK)
 
@@ -191,7 +192,12 @@ int auracast_app_recv_scan_control_deal(u8 opcode, u8 sn, u8 *payload, u32 paylo
     case 0x01:      // 开始搜索
         printf("start scan");
         status = JL_PRO_STATUS_SUCCESS;
-        app_auracast_sink_scan_start();
+        if (get_auracast_status() == APP_AURACAST_STATUS_STOP) {
+            app_auracast_init();
+            app_auracast_sink_open();
+        } else {
+            app_auracast_sink_scan_start();
+        }
         if (auracast_sink_big_state_get()) {
             tbuf[1] = AURACAST_SINK_SCAN_STATUS_IS_LISTENING;    // status
         } else {
@@ -263,6 +269,7 @@ static int auracast_app_source_control_add(u8 opcode, u8 sn, u8 action, u8 *payl
     }
 
     memcpy(temp_info.source_mac_addr, src.adv_address, 6);
+    memcpy(temp_info.broadcast_code, temp_broadcast_code, 16);
     temp_info.broadcast_id = src.broadcast_id[0] + (src.broadcast_id[1] << 8) + (src.broadcast_id[2] << 16);
     temp_info.feature = src.broadcast_features;
     name_len = strlen((const char *)src.broadcast_name);
@@ -279,7 +286,6 @@ static int auracast_app_source_control_add(u8 opcode, u8 sn, u8 action, u8 *payl
         app_auracast_sink_big_sync_terminate();
     }
 
-    auracast_sink_set_broadcast_code(temp_broadcast_code);
     ret = app_auracast_sink_big_sync_create(&temp_info);
     if (ret != 0) {
         tbuf[0] = AURACAST_APP_OPCODE_RECV_LISTENING_CONTROL;

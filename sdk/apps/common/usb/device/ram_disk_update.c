@@ -5,19 +5,13 @@
 #include "system/task.h"
 #include "net_update.h"
 #include "update/update_loader_download.h"
-#include "dual_bank_updata_api.h"
-#include "generic/errno-base.h"
 #include "update.h"
-#include "timer.h"
 #include "fs/fs.h"
 #include "os/os_api.h"
 #include "device/device.h"
 #include "system/task.h"
 #include "asm/crc16.h"
-#include "asm/efuse.h"
-#include "dual_bank_updata_api.h"
-#include "asm/wdt.h"
-#include "generic/log.h"
+
 
 #define LOG_TAG_CONST       USB
 #define LOG_TAG             "[RAM_DISK]"
@@ -47,6 +41,8 @@ struct usb_update_hdl {
     u32 fileSize;
     u32 firstSectorNum;
     void *fd;
+    u8 *verify_buf;
+    u32 verify_buf_size;
 };
 
 #define BLOCK_SIZE 512u
@@ -87,6 +83,17 @@ static int usb_update_check(JL_FILE_HEAD *head, const u8 *buf, const u32 len)
     }
 
     return -1;
+}
+
+static void ram_disk_update_verify(void *priv)
+{
+    struct usb_update_hdl *hdl = (struct usb_update_hdl *)priv;
+    net_fwrite(hdl->fd, hdl->verify_buf, hdl->verify_buf_size, 0);
+    net_fclose(hdl->fd, 0);
+    free(hdl->verify_buf);
+    clean_usb_update(hdl);
+    free(hdl);
+    usb_update = NULL;
 }
 
 int ram_disk_update(const u8 *buf, const u32 len, const u32 offset)
@@ -138,7 +145,6 @@ int ram_disk_update(const u8 *buf, const u32 len, const u32 offset)
         }
 
         usb_update->firstSectorNum = offset;
-
     }
 
     if (usb_update && usb_update->updateFlag) {
@@ -148,11 +154,6 @@ int ram_disk_update(const u8 *buf, const u32 len, const u32 offset)
 
         if (offset == (usb_update->firstSectorNum + total_sector_num - 1)) {
             wLen = usb_update->fileSize - ((total_sector_num - 1) * BLOCK_SIZE);
-        }
-
-        err = net_fwrite(usb_update->fd, wBuf, wLen, 0);
-        if (err != wLen) {
-            goto __err_;
         }
 
         if (firstBlock) {
@@ -168,11 +169,22 @@ int ram_disk_update(const u8 *buf, const u32 len, const u32 offset)
                 goto __err_;
             }
 
-            /* put_buf(wBuf, BLOCK_SIZE);	 */
-            net_fclose(usb_update->fd, 0);
-            clean_usb_update(usb_update);
-            free(usb_update);
-            usb_update = NULL;
+            usb_update->verify_buf = malloc(wLen);
+            if (!usb_update->verify_buf) {
+                goto __err_;
+            }
+
+            memcpy(usb_update->verify_buf, wBuf, wLen);
+            usb_update->verify_buf_size = wLen;
+
+            if (0 != thread_fork("ram_disk_update_verify", 21, 512, 0, NULL, ram_disk_update_verify, usb_update)) {
+                goto __err_;
+            }
+        } else {
+            err = net_fwrite(usb_update->fd, wBuf, wLen, 0);
+            if (err != wLen) {
+                goto __err_;
+            }
         }
 
         return 0;

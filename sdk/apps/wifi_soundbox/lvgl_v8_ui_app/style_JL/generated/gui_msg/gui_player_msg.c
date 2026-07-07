@@ -1,5 +1,6 @@
 /*Generate Code, Do NOT Edit!*/
 #include "./gui_player_msg.h"
+
 #if LV_USE_OBSERVER
 
 static lv_ll_t subs_ll;
@@ -166,48 +167,27 @@ void gui_player_msg_init_events()
     lv_subject_t *subject_save_mode = gui_msg_get_subject(GUI_PLAYER_MSG_ID_SAVE_MODE);
     if (guider_ui.eq_modify) {
         lv_ui_eq_modify *ui_scr = ui_get_scr_ptr(&guider_ui, GUI_SCREEN_EQ_MODIFY);
-        gui_msg_setup_component(true, true, subject_eq_1, ui_scr->eq_modify_slider_1, &guider_msg_data,
-                                gui_msg_set_slider_starting_value_by_int32_cb, GUI_PLAYER_MSG_ID_EQ_1, GUI_MSG_ACCESS_GET, VALUE_INT,
-                                gui_msg_change_slider_starting_value_cb);
+        gui_msg_setup_component(true, true, subject_eq_1, ui_scr->eq_modify_slider_1, &guider_msg_data, gui_msg_set_slider_starting_value_by_int32_cb, GUI_PLAYER_MSG_ID_EQ_1, GUI_MSG_ACCESS_GET, VALUE_INT, gui_msg_change_slider_starting_value_cb);
 
-        gui_msg_setup_component(true, true, subject_eq_2, ui_scr->eq_modify_slider_2, &guider_msg_data,
-                                gui_msg_set_slider_starting_value_by_int32_cb, GUI_PLAYER_MSG_ID_EQ_2, GUI_MSG_ACCESS_GET, VALUE_INT,
-                                gui_msg_change_slider_starting_value_cb);
+        gui_msg_setup_component(true, true, subject_eq_2, ui_scr->eq_modify_slider_2, &guider_msg_data, gui_msg_set_slider_starting_value_by_int32_cb, GUI_PLAYER_MSG_ID_EQ_2, GUI_MSG_ACCESS_GET, VALUE_INT, gui_msg_change_slider_starting_value_cb);
 
-        gui_msg_setup_component(true, true, subject_eq_3, ui_scr->eq_modify_slider_3, &guider_msg_data,
-                                gui_msg_set_slider_starting_value_by_int32_cb, GUI_PLAYER_MSG_ID_EQ_3, GUI_MSG_ACCESS_GET, VALUE_INT,
-                                gui_msg_change_slider_starting_value_cb);
+        gui_msg_setup_component(true, true, subject_eq_3, ui_scr->eq_modify_slider_3, &guider_msg_data, gui_msg_set_slider_starting_value_by_int32_cb, GUI_PLAYER_MSG_ID_EQ_3, GUI_MSG_ACCESS_GET, VALUE_INT, gui_msg_change_slider_starting_value_cb);
 
-        gui_msg_setup_component(true, true, subject_eq_4, ui_scr->eq_modify_slider_4, &guider_msg_data,
-                                gui_msg_set_slider_starting_value_by_int32_cb, GUI_PLAYER_MSG_ID_EQ_4, GUI_MSG_ACCESS_GET, VALUE_INT,
-                                gui_msg_change_slider_starting_value_cb);
+        gui_msg_setup_component(true, true, subject_eq_4, ui_scr->eq_modify_slider_4, &guider_msg_data, gui_msg_set_slider_starting_value_by_int32_cb, GUI_PLAYER_MSG_ID_EQ_4, GUI_MSG_ACCESS_GET, VALUE_INT, gui_msg_change_slider_starting_value_cb);
 
-        gui_msg_setup_component(true, true, subject_eq_5, ui_scr->eq_modify_slider_5, &guider_msg_data,
-                                gui_msg_set_slider_starting_value_by_int32_cb, GUI_PLAYER_MSG_ID_EQ_5, GUI_MSG_ACCESS_GET, VALUE_INT,
-                                gui_msg_change_slider_starting_value_cb);
+        gui_msg_setup_component(true, true, subject_eq_5, ui_scr->eq_modify_slider_5, &guider_msg_data, gui_msg_set_slider_starting_value_by_int32_cb, GUI_PLAYER_MSG_ID_EQ_5, GUI_MSG_ACCESS_GET, VALUE_INT, gui_msg_change_slider_starting_value_cb);
 
-        gui_msg_setup_component(true, true, subject_eq_6, ui_scr->eq_modify_slider_6, &guider_msg_data,
-                                gui_msg_set_slider_starting_value_by_int32_cb, GUI_PLAYER_MSG_ID_EQ_6, GUI_MSG_ACCESS_GET, VALUE_INT,
-                                gui_msg_change_slider_starting_value_cb);
+        gui_msg_setup_component(true, true, subject_eq_6, ui_scr->eq_modify_slider_6, &guider_msg_data, gui_msg_set_slider_starting_value_by_int32_cb, GUI_PLAYER_MSG_ID_EQ_6, GUI_MSG_ACCESS_GET, VALUE_INT, gui_msg_change_slider_starting_value_cb);
 
-        gui_msg_setup_component(true, true, subject_eq_7, ui_scr->eq_modify_slider_7, &guider_msg_data,
-                                gui_msg_set_slider_starting_value_by_int32_cb, GUI_PLAYER_MSG_ID_EQ_7, GUI_MSG_ACCESS_GET, VALUE_INT,
-                                gui_msg_change_slider_starting_value_cb);
+        gui_msg_setup_component(true, true, subject_eq_7, ui_scr->eq_modify_slider_7, &guider_msg_data, gui_msg_set_slider_starting_value_by_int32_cb, GUI_PLAYER_MSG_ID_EQ_7, GUI_MSG_ACCESS_GET, VALUE_INT, gui_msg_change_slider_starting_value_cb);
 
-        gui_msg_setup_component(true, true, subject_eq_8, ui_scr->eq_modify_slider_8, &guider_msg_data,
-                                gui_msg_set_slider_starting_value_by_int32_cb, GUI_PLAYER_MSG_ID_EQ_8, GUI_MSG_ACCESS_GET, VALUE_INT,
-                                gui_msg_change_slider_starting_value_cb);
+        gui_msg_setup_component(true, true, subject_eq_8, ui_scr->eq_modify_slider_8, &guider_msg_data, gui_msg_set_slider_starting_value_by_int32_cb, GUI_PLAYER_MSG_ID_EQ_8, GUI_MSG_ACCESS_GET, VALUE_INT, gui_msg_change_slider_starting_value_cb);
 
-        gui_msg_setup_component(true, true, subject_eq_9, ui_scr->eq_modify_slider_9, &guider_msg_data,
-                                gui_msg_set_slider_starting_value_by_int32_cb, GUI_PLAYER_MSG_ID_EQ_9, GUI_MSG_ACCESS_GET, VALUE_INT,
-                                gui_msg_change_slider_starting_value_cb);
+        gui_msg_setup_component(true, true, subject_eq_9, ui_scr->eq_modify_slider_9, &guider_msg_data, gui_msg_set_slider_starting_value_by_int32_cb, GUI_PLAYER_MSG_ID_EQ_9, GUI_MSG_ACCESS_GET, VALUE_INT, gui_msg_change_slider_starting_value_cb);
 
-        gui_msg_setup_component(true, true, subject_eq_10, ui_scr->eq_modify_slider_10, &guider_msg_data,
-                                gui_msg_set_slider_starting_value_by_int32_cb, GUI_PLAYER_MSG_ID_EQ_10, GUI_MSG_ACCESS_GET, VALUE_INT,
-                                gui_msg_change_slider_starting_value_cb);
+        gui_msg_setup_component(true, true, subject_eq_10, ui_scr->eq_modify_slider_10, &guider_msg_data, gui_msg_set_slider_starting_value_by_int32_cb, GUI_PLAYER_MSG_ID_EQ_10, GUI_MSG_ACCESS_GET, VALUE_INT, gui_msg_change_slider_starting_value_cb);
 
-        gui_msg_setup_component(true, false, subject_save_mode, ui_scr->eq_modify_btn_1, &guider_msg_data,
-                                gui_msg_set_control_state_by_int32_cb, GUI_PLAYER_MSG_ID_SAVE_MODE, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
+        gui_msg_setup_component(true, false, subject_save_mode, ui_scr->eq_modify_btn_1, &guider_msg_data, gui_msg_set_control_state_by_int32_cb, GUI_PLAYER_MSG_ID_SAVE_MODE, GUI_MSG_ACCESS_GET, VALUE_INT, NULL);
 
 
         for (int i = 0; i < 12; i++) {

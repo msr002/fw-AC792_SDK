@@ -149,6 +149,8 @@ static void can_test_task(void *arg)
     }
     dev_ioctl(can_hdl, IOCTL_CAN_SET_RECV_NON_BLOCK_ENABLE, (u32)&can_rx_data);
 #endif
+    //初始化完成，复位CAN，确保原子性
+    dev_ioctl(can_hdl, IOCTL_CAN_SET_RESTART, 0);
 
 #if (TCFG_CAN_MODE == 0) //basic can
     can_tx_data[0].id   = 0x233;

@@ -20,6 +20,7 @@
 #define RCSP_TRANSLATOR_MODE_A2DP_TRANSLATION                   0x04
 #define RCSP_TRANSLATOR_MODE_FACE_TO_FACE_TRANSLATION           0x05
 #define RCSP_TRANSLATOR_MODE_CALL_TRANSLATION_STEREO_ENC        0x06
+#define RCSP_TRANSLATOR_MODE_CALL_RECORD_STEREO_ENC             0x07
 
 //encode type
 #define RCSP_TRANSLATOR_ENCODE_TYPE_PCM                         0x00
@@ -84,5 +85,10 @@ int JL_rcsp_translator_functions(void *priv, u8 OpCode, u8 OpCode_SN, u8 *data, 
   * @note
   */
 int JL_rcsp_translator_whether_play_by_ai_rx();
+/** @brief      RCSP音视频翻译是否播报翻译后语音
+  * @return     1 播报，0 不播报
+  * @note
+  */
+int JL_rcsp_translator_whether_a2dp_translate_play();
 
 #endif

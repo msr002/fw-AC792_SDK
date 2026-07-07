@@ -7,7 +7,16 @@ extern "C"
 
 #include <stdint.h>
 #include <stdbool.h>
-#include "lvgl.h"
+
+typedef struct _lv_anim_effect_args_t {
+    int32_t duration; // 效果时长
+    int32_t delay;    // 延时
+    // uint16_t repeat_cnt;   // 0:一直重复
+    // uint32_t repeat_delay; // 重复延时时间 （重复间隔）
+    // uint8_t early_apply;   // 动画是否加载的时候就执行
+} lv_anim_effect_args_t;
+
+#include "../../../../lvgl.h"
 
 #if LV_USE_ANIM_EFFECT
 
@@ -19,8 +28,6 @@ void lv_anim_effect_translate_x(lv_obj_t *obj, int32_t x);
 void lv_anim_effect_scale_y(lv_obj_t *obj, int32_t scale);
 void lv_anim_effect_scale_x(lv_obj_t *obj, int32_t scale);
 void lv_anim_effect_scale(lv_obj_t *obj, int32_t scale);
-void lv_anim_effect_scale_center_x(lv_obj_t *obj, int32_t scale);
-void lv_anim_effect_scale_center_y(lv_obj_t *obj, int32_t scale);
 void lv_anim_effect_rotate_center(lv_obj_t *obj, int32_t deg);
 void lv_anim_effect_rotate_top_center(lv_obj_t *obj, int32_t deg);
 void lv_anim_effect_rotate_top_left(lv_obj_t *obj, int32_t deg);
@@ -36,3 +43,4 @@ uint32_t lv_anim_effect_get_time(int32_t duration, int16_t percent);
 #endif
 
 #endif /*LV_ANIM_EFFECT_GLOBAL_H*/
+

@@ -13,6 +13,7 @@ enum bt_event_from {
     BT_EVENT_FROM_AI,
     BT_EVENT_FROM_BLE,
     BT_EVENT_FROM_RCSP,
+    BT_EVENT_FROM_OTA,
     BT_EVENT_FROM_USER,
 };
 

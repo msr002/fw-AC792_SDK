@@ -123,6 +123,7 @@
 <Add directory="../../../../apps/wifi_soundbox/mode" />
 <Add directory="../../../../apps/wifi_soundbox/mode/local_music" />
 <Add directory="../../../../apps/common/third_party_profile/common" />
+<Add directory="../../../../apps/common/third_party_profile/jieli/rcsp/server/functions/rcsp_over_online_cfg_tool" />
 <Add directory="../../../../apps/common/lcd/include" />
 <Add directory="../../../../include_lib/driver/device/video/pipeline" />
 <Add directory="../../../../include_lib/driver/device/video/pipeline/buffer" />
@@ -150,6 +151,10 @@
 <Add directory="../../../../apps/common/lvgl_v8/demos/amap/gps" />
 <Add directory="../../../../apps/common/lvgl_v8/demos/amap" />
 <Add directory="../../../../apps/common/lvgl_v8/src/draw/jl/jl_dma2d" />
+<Add directory="../../../../include_lib/net/curl" />
+<Add directory="../../../../include_lib/net/lwip_2_2_0/lwip/src/include/compat/posix" />
+<Add directory="../../../../include_lib/net/lwip_2_2_0/lwip/src/include/compat/stdc" />
+<Add directory="../../../../apps/common/video/net_avi_player" />
 <Add directory="../../../../apps/wifi_soundbox/lvgl_v8_ui_app/style_JL/generated" />
 <Add directory="../../../../apps/wifi_soundbox/lvgl_v8_ui_app/style_JL/generated/gui_events" />
 <Add directory="../../../../apps/wifi_soundbox/lvgl_v8_ui_app/style_JL/generated/gui_fonts" />
@@ -276,6 +281,7 @@
 <Add option="../../../../cpu/wl83/liba/http_server.a" />
 <Add option="../../../../cpu/wl83/liba/iperf.a" />
 <Add option="../../../../cpu/wl83/liba/ai_server.a" />
+<Add option="../../../../cpu/wl83/liba/libcurl.a" />
 <Add option="../../../../cpu/wl83/liba/lwip_2_2_0.a" />
 <Add option="../../../../cpu/wl83/liba/libmbedtls_3_4_0.a" />
 <Add option="../../../../cpu/wl83/liba/json.a" />
@@ -284,7 +290,6 @@
 <Add option="../../../../cpu/wl83/liba/zliblite.a" />
 <Add option="../../../../cpu/wl83/liba/lib_sound_wave.a" />
 <Add option="../../../../cpu/wl83/liba/libqrcode.a" />
-<Add option="../../../../cpu/wl83/liba/video.a" />
 <Add option="../../../../cpu/wl83/liba/libsip.a" />
 <Add option="../../../../cpu/wl83/liba/media.a" />
 <Add option="../../../../cpu/wl83/liba/media/lib_mp3_dec.a" />
@@ -399,6 +404,7 @@
 <Add option="../../../../cpu/wl83/liba/system.a" />
 <Add option="../../../../cpu/wl83/liba/common_lib.a" />
 <Add option="../../../../cpu/wl83/liba/lvgl_v8_extend.a" />
+<Add option="../../../../cpu/wl83/liba/video.a" />
 <Add option="../../../../cpu/wl83/liba/video_dec_server.a" />
 <Add option="--whole-archive" />
 <Add option="../../../../apps/common/third_party_profile/upay_t_head_v2/3rdparty/protobuf-c/lib/lib3rdparty_protobuf-c_pi32_jl.a" />
@@ -515,6 +521,7 @@
 <Unit filename="../../../../apps/common/camera/h63p_mipi/h63p_mipi_iq.h" />
 <Unit filename="../../../../apps/common/camera/isp_scenes.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/common/camera/isp_tools.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="../../../../apps/common/camera/nt99141.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/common/camera/ov2659/ov2659.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/common/camera/sc1245_dvp/sc1245.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/common/camera/sc1245_dvp/sc1245.h" />
@@ -1040,6 +1047,7 @@
 <Unit filename="../../../../apps/common/iic/iic_api.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/common/iic/software_iic.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/common/include/bt_common.h" />
+<Unit filename="../../../../apps/common/include/cfg_tool.h" />
 <Unit filename="../../../../apps/common/include/dma2d_common_api.h" />
 <Unit filename="../../../../apps/common/include/hci_event.h" />
 <Unit filename="../../../../apps/common/key/adkey.c"><Option compilerVer="CC"/></Unit>
@@ -1878,6 +1886,8 @@
 <Unit filename="../../../../apps/common/third_party_profile/jieli/rcsp/server/functions/rcsp_auracast/rcsp_auracast.h" />
 <Unit filename="../../../../apps/common/third_party_profile/jieli/rcsp/server/functions/rcsp_auracast/rcsp_auracast_sink.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/common/third_party_profile/jieli/rcsp/server/functions/rcsp_auracast/rcsp_auracast_source.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="../../../../apps/common/third_party_profile/jieli/rcsp/server/functions/rcsp_over_online_cfg_tool/rcsp_over_online_cfg_tool.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="../../../../apps/common/third_party_profile/jieli/rcsp/server/functions/rcsp_over_online_cfg_tool/rcsp_over_online_cfg_tool.h" />
 <Unit filename="../../../../apps/common/third_party_profile/jieli/rcsp/server/functions/rcsp_setting_opt/rcsp_adv_bluetooth.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/common/third_party_profile/jieli/rcsp/server/functions/rcsp_setting_opt/rcsp_adv_bluetooth.h" />
 <Unit filename="../../../../apps/common/third_party_profile/jieli/rcsp/server/functions/rcsp_setting_opt/rcsp_setting_opt.c"><Option compilerVer="CC"/></Unit>
@@ -2140,6 +2150,17 @@
 <Unit filename="../../../../apps/common/video/get_yuv_data.h" />
 <Unit filename="../../../../apps/common/video/logo_show.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/common/video/logo_show.h" />
+<Unit filename="../../../../apps/common/video/net_avi_player/avi_parse.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="../../../../apps/common/video/net_avi_player/avi_parse.h" />
+<Unit filename="../../../../apps/common/video/net_avi_player/avi_player.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="../../../../apps/common/video/net_avi_player/avi_player.h" />
+<Unit filename="../../../../apps/common/video/net_avi_player/curl_get_data.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="../../../../apps/common/video/net_avi_player/curl_get_data.h" />
+<Unit filename="../../../../apps/common/video/net_avi_player/net_avi_player.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="../../../../apps/common/video/net_avi_player/net_avi_player.h" />
+<Unit filename="../../../../apps/common/video/net_avi_player/pipeline_jpeg_dec.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="../../../../apps/common/video/net_avi_player/pipeline_jpeg_dec.h" />
+<Unit filename="../../../../apps/common/video/net_avi_player/play_demo.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/common/video/page_turning_detect.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/common/video/qr_code_net_config.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/common/video/simple_avi_unpkg.c"><Option compilerVer="CC"/></Unit>
@@ -2175,6 +2196,8 @@
 <Unit filename="../../../../apps/wifi_soundbox/lvgl_v8_ui_app/style_JL/custom/ui_action_jpeg_decode.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/wifi_soundbox/lvgl_v8_ui_app/style_JL/custom/ui_action_music_lyrics.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/wifi_soundbox/lvgl_v8_ui_app/style_JL/custom/ui_action_music_player.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="../../../../apps/wifi_soundbox/lvgl_v8_ui_app/style_JL/custom/ui_action_song_info.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="../../../../apps/wifi_soundbox/lvgl_v8_ui_app/style_JL/custom/ui_action_song_info.h" />
 <Unit filename="../../../../apps/wifi_soundbox/lvgl_v8_ui_app/style_JL/custom/ui_action_spectrum.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/wifi_soundbox/lvgl_v8_ui_app/style_JL/custom/ui_music_eq.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../apps/wifi_soundbox/lvgl_v8_ui_app/style_JL/generated/common.h" />
@@ -2896,6 +2919,15 @@
 <Unit filename="../../../../include_lib/media/tech_lib/jlsp_vad.h" />
 <Unit filename="../../../../include_lib/media/tech_lib/spatial_imp_ctrl.h" />
 <Unit filename="../../../../include_lib/media/tws/jl_tws.h" />
+<Unit filename="../../../../include_lib/net/curl/curl/curl.h" />
+<Unit filename="../../../../include_lib/net/curl/curl/curlver.h" />
+<Unit filename="../../../../include_lib/net/curl/curl/easy.h" />
+<Unit filename="../../../../include_lib/net/curl/curl/header.h" />
+<Unit filename="../../../../include_lib/net/curl/curl/multi.h" />
+<Unit filename="../../../../include_lib/net/curl/curl/options.h" />
+<Unit filename="../../../../include_lib/net/curl/curl/system.h" />
+<Unit filename="../../../../include_lib/net/curl/curl/urlapi.h" />
+<Unit filename="../../../../include_lib/net/curl/curl/websockets.h" />
 <Unit filename="../../../../include_lib/net/http/http_cli.h" />
 <Unit filename="../../../../include_lib/net/json_c/arraylist.h" />
 <Unit filename="../../../../include_lib/net/json_c/json.h" />
@@ -2916,6 +2948,7 @@
 <Unit filename="../../../../include_lib/net/lwip_2_2_0/lwip/port/arch/cpu.h" />
 <Unit filename="../../../../include_lib/net/lwip_2_2_0/lwip/port/lwip.h" />
 <Unit filename="../../../../include_lib/net/lwip_2_2_0/lwip/port/lwipopts.h" />
+<Unit filename="../../../../include_lib/net/lwip_2_2_0/lwip/src/include/compat/posix/sys/socket.h" />
 <Unit filename="../../../../include_lib/net/lwip_2_2_0/lwip/src/include/lwip/arch.h" />
 <Unit filename="../../../../include_lib/net/lwip_2_2_0/lwip/src/include/lwip/debug.h" />
 <Unit filename="../../../../include_lib/net/lwip_2_2_0/lwip/src/include/lwip/def.h" />
@@ -3108,6 +3141,7 @@
 <Unit filename="../../../../include_lib/utils/fs/virfat_flash.h" />
 <Unit filename="../../../../include_lib/utils/lyrics/lyrics.h" />
 <Unit filename="../../../../include_lib/utils/syscfg/syscfg_id.h" />
+<Unit filename="../../../../include_lib/utils/uthash/uthash.h" />
 <Unit filename="../../../../include_lib/utils/version.z.S" />
 <Unit filename="../../../../include_lib/utils/yuv_soft_scalling.h" />
 <Unit filename="../../../../include_lib/utils/yuv_to_rgb.h" />

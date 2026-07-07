@@ -100,8 +100,7 @@ int lv_i18n_set_locale(const char *l_name)
 }
 
 
-static const char *__lv_i18n_get_text_core(const char *const *msg_id_array, const char *const *trans_array,
-        const char *msg_id)
+static const char *__lv_i18n_get_text_core(const char *const *msg_id_array, const char *const *trans_array, const char *msg_id)
 {
     uint16_t i;
     for (i = 0; msg_id_array[i] != NULL; i++) {

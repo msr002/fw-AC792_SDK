@@ -146,14 +146,11 @@ extern GUI_WEAKREF gui_msg_data_t *gui_msg_get(int32_t msg_id);
 #endif
 extern gui_msg_data_t *gui_msg_get_guider(int32_t msg_id);
 #if LV_USE_GUIBUILDER_SIMULATOR && LV_USE_CUSTOM_MSG_ACTION_CHANGE
-extern void gui_msg_action_change(int32_t msg_id, gui_msg_action_t access, gui_msg_data_t *data,
-                                  gui_msg_data_type_t type);
+extern void gui_msg_action_change(int32_t msg_id, gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type);
 #else
-extern GUI_WEAKREF void gui_msg_action_change(int32_t msg_id, gui_msg_action_t access, gui_msg_data_t *data,
-        gui_msg_data_type_t type);
+extern GUI_WEAKREF void gui_msg_action_change(int32_t msg_id, gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type);
 #endif
-extern void gui_msg_action_change_guider(int32_t msg_id, gui_msg_action_t access, gui_msg_data_t *data,
-        gui_msg_data_type_t type);
+extern void gui_msg_action_change_guider(int32_t msg_id, gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type);
 #if LV_USE_GUIBUILDER_SIMULATOR && LV_USE_CUSTOM_MSG_SUBSCRIBE_CHANGE
 extern void gui_msg_subscribe_change(int32_t msg_id, gui_msg_subscribe_t sub_type);
 #else
@@ -168,9 +165,7 @@ extern gui_msg_data_type_t gui_msg_get_data_type(int32_t msg_id);
 extern gui_msg_array_type_t gui_msg_get_data_array_type(int32_t msg_id);
 extern char *gui_msg_get_name(int32_t msg_id);
 extern bool gui_msg_has_observer(lv_subject_t *subject, lv_observer_cb_t cb, lv_obj_t *obj, void *user_data);
-extern void gui_msg_setup_component(bool subscribe_enabled, bool event_enabled, lv_subject_t *subject,
-                                    lv_obj_t *target_obj, gui_msg_data_t *msg_data, lv_observer_cb_t observer_cb, int32_t msg_id,
-                                    gui_msg_action_t msg_action, gui_msg_data_type_t data_type, lv_event_cb_t event_cb);
+extern void gui_msg_setup_component(bool subscribe_enabled, bool event_enabled, lv_subject_t *subject, lv_obj_t *target_obj, gui_msg_data_t *msg_data, lv_observer_cb_t observer_cb, int32_t msg_id, gui_msg_action_t msg_action, gui_msg_data_type_t data_type, lv_event_cb_t event_cb);
 
 extern void gui_msg_set_control_state_by_int32_cb(lv_observer_t *observer, lv_subject_t *subject);
 extern void gui_msg_set_slider_starting_value_by_int32_cb(lv_observer_t *observer, lv_subject_t *subject);
@@ -179,8 +174,7 @@ extern void gui_msg_set_label_text_by_string_cb(lv_observer_t *observer, lv_subj
 extern void gui_msg_set_visible_by_bool_cb(lv_observer_t *observer, lv_subject_t *subject);
 extern void _gui_msg_int32_cb(int32_t *var_ptr, gui_msg_action_t access, gui_msg_data_t *data);
 extern void _gui_msg_state_cb(lv_state_t *var_ptr, gui_msg_action_t access, gui_msg_data_t *data);
-extern void _gui_msg_char_array_cb(char **var_ptr, const char *init_value, bool *is_init, gui_msg_action_t access,
-                                   gui_msg_data_t *data);
+extern void _gui_msg_char_array_cb(char **var_ptr, const char *init_value, bool *is_init, gui_msg_action_t access, gui_msg_data_t *data);
 extern void _gui_msg_bool_cb(bool *var_ptr, gui_msg_action_t access, gui_msg_data_t *data);
 extern void _gui_msg_tm_cb(struct tm *var_ptr, bool is_systime, gui_msg_action_t access, gui_msg_data_t *data);
 #if LV_USE_OBSERVER
@@ -209,8 +203,7 @@ extern int gui_songs_msg_music_state_cb(gui_msg_action_t access, gui_msg_data_t 
 extern int gui_songs_msg_music_process_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type);
 extern int gui_songs_msg_music_name_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type);
 extern int gui_songs_msg_music_artist_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type);
-extern int gui_songs_msg_music_artist_and_name_cb(gui_msg_action_t access, gui_msg_data_t *data,
-        gui_msg_data_type_t type);
+extern int gui_songs_msg_music_artist_and_name_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type);
 extern int gui_songs_msg_player_volume_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type);
 extern int gui_songs_msg_music_lyrics_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type);
 extern int gui_songs_msg_lyrics_show_cb(gui_msg_action_t access, gui_msg_data_t *data, gui_msg_data_type_t type);

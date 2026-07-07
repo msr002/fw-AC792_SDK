@@ -55,7 +55,7 @@ int auracast_app_packet_response(u8 status, u8 opcode, u8 sn, u8 *payload, u32 p
 
 int auracast_app_packet_cmd(u8 *payload, u32 payload_len)
 {
-    JL_CMD_send(JL_OPTCODE_AURACAST_CMD, payload, payload_len, JL_NOT_NEED_RESPOND, 0, NULL);
+    JL_CMD_send(JL_OPCODE_AURACAST_CMD, payload, payload_len, JL_NOT_NEED_RESPOND, 0, NULL);
     return 0;
 }
 

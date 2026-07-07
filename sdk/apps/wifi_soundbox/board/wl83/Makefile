@@ -167,6 +167,7 @@ c_SRC_FILES := \
 	../../../../apps/common/camera/h63p_mipi/h63p_mipi_iq.c \
 	../../../../apps/common/camera/isp_scenes.c \
 	../../../../apps/common/camera/isp_tools.c \
+	../../../../apps/common/camera/nt99141.c \
 	../../../../apps/common/camera/ov2659/ov2659.c \
 	../../../../apps/common/camera/sc1245_dvp/sc1245.c \
 	../../../../apps/common/camera/sc1245_dvp/sc1245_ae.c \
@@ -796,6 +797,7 @@ c_SRC_FILES := \
 	../../../../apps/common/third_party_profile/jieli/rcsp/server/functions/rcsp_auracast/rcsp_auracast.c \
 	../../../../apps/common/third_party_profile/jieli/rcsp/server/functions/rcsp_auracast/rcsp_auracast_sink.c \
 	../../../../apps/common/third_party_profile/jieli/rcsp/server/functions/rcsp_auracast/rcsp_auracast_source.c \
+	../../../../apps/common/third_party_profile/jieli/rcsp/server/functions/rcsp_over_online_cfg_tool/rcsp_over_online_cfg_tool.c \
 	../../../../apps/common/third_party_profile/jieli/rcsp/server/functions/rcsp_setting_opt/rcsp_adv_bluetooth.c \
 	../../../../apps/common/third_party_profile/jieli/rcsp/server/functions/rcsp_setting_opt/rcsp_setting_opt.c \
 	../../../../apps/common/third_party_profile/jieli/rcsp/server/functions/rcsp_setting_opt/rcsp_setting_sync.c \
@@ -943,6 +945,12 @@ c_SRC_FILES := \
 	../../../../apps/common/usb/usb_host_config.c \
 	../../../../apps/common/video/get_yuv_data.c \
 	../../../../apps/common/video/logo_show.c \
+	../../../../apps/common/video/net_avi_player/avi_parse.c \
+	../../../../apps/common/video/net_avi_player/avi_player.c \
+	../../../../apps/common/video/net_avi_player/curl_get_data.c \
+	../../../../apps/common/video/net_avi_player/net_avi_player.c \
+	../../../../apps/common/video/net_avi_player/pipeline_jpeg_dec.c \
+	../../../../apps/common/video/net_avi_player/play_demo.c \
 	../../../../apps/common/video/page_turning_detect.c \
 	../../../../apps/common/video/qr_code_net_config.c \
 	../../../../apps/common/video/simple_avi_unpkg.c \
@@ -961,6 +969,7 @@ c_SRC_FILES := \
 	../../../../apps/wifi_soundbox/lvgl_v8_ui_app/style_JL/custom/ui_action_jpeg_decode.c \
 	../../../../apps/wifi_soundbox/lvgl_v8_ui_app/style_JL/custom/ui_action_music_lyrics.c \
 	../../../../apps/wifi_soundbox/lvgl_v8_ui_app/style_JL/custom/ui_action_music_player.c \
+	../../../../apps/wifi_soundbox/lvgl_v8_ui_app/style_JL/custom/ui_action_song_info.c \
 	../../../../apps/wifi_soundbox/lvgl_v8_ui_app/style_JL/custom/ui_action_spectrum.c \
 	../../../../apps/wifi_soundbox/lvgl_v8_ui_app/style_JL/custom/ui_music_eq.c \
 	../../../../apps/wifi_soundbox/lvgl_v8_ui_app/style_JL/generated/gui_events/callback_handler.c \
@@ -1328,6 +1337,7 @@ LFLAGS := \
 	../../../../cpu/wl83/liba/http_server.a \
 	../../../../cpu/wl83/liba/iperf.a \
 	../../../../cpu/wl83/liba/ai_server.a \
+	../../../../cpu/wl83/liba/libcurl.a \
 	../../../../cpu/wl83/liba/lwip_2_2_0.a \
 	../../../../cpu/wl83/liba/libmbedtls_3_4_0.a \
 	../../../../cpu/wl83/liba/json.a \
@@ -1336,7 +1346,6 @@ LFLAGS := \
 	../../../../cpu/wl83/liba/zliblite.a \
 	../../../../cpu/wl83/liba/lib_sound_wave.a \
 	../../../../cpu/wl83/liba/libqrcode.a \
-	../../../../cpu/wl83/liba/video.a \
 	../../../../cpu/wl83/liba/libsip.a \
 	../../../../cpu/wl83/liba/media.a \
 	../../../../cpu/wl83/liba/media/lib_mp3_dec.a \
@@ -1451,6 +1460,7 @@ LFLAGS := \
 	../../../../cpu/wl83/liba/system.a \
 	../../../../cpu/wl83/liba/common_lib.a \
 	../../../../cpu/wl83/liba/lvgl_v8_extend.a \
+	../../../../cpu/wl83/liba/video.a \
 	../../../../cpu/wl83/liba/video_dec_server.a \
 	--whole-archive \
 	../../../../apps/common/third_party_profile/upay_t_head_v2/3rdparty/protobuf-c/lib/lib3rdparty_protobuf-c_pi32_jl.a \

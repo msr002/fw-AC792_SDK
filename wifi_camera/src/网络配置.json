@@ -91,7 +91,7 @@
        "label": "第三方平台profile由杰理服务器分配",
        "tag": "el-switch",
        "tagIcon": "switch",
-       "defaultValue": 1,
+       "defaultValue": 0,
        "span": 7,
        "showLabel": true,
        "labelWidth": 250,
@@ -292,7 +292,7 @@
        "label": "DLNA音乐播放",
        "tag": "el-switch",
        "tagIcon": "switch",
-       "defaultValue": 1,
+       "defaultValue": 0,
        "span": 7,
        "showLabel": true,
        "labelWidth": 250,
@@ -393,7 +393,7 @@
        "label": "初始MAC地址分配",
        "tag": "el-switch",
        "tagIcon": "switch",
-       "defaultValue": 1,
+       "defaultValue": 0,
        "span": 7,
        "showLabel": true,
        "labelWidth": 150,
@@ -451,5 +451,6 @@
  "version": {
   "code": 1,
   "tool": "4.4.0"
- }
+ },
+ "maxFormId": 300
 }

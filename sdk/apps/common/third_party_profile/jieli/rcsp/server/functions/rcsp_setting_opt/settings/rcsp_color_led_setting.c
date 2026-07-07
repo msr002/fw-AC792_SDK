@@ -1,4 +1,4 @@
-#ifdef RCSP_SUPPORT_MS_EXTENSIONS
+#ifdef SUPPORT_MS_EXTENSIONS
 #pragma bss_seg(".rcsp_color_led_setting.data.bss")
 #pragma data_seg(".rcsp_color_led_setting.data")
 #pragma const_seg(".rcsp_color_led_setting.text.const")
@@ -12,24 +12,34 @@
 #include "rcsp_setting_sync.h"
 #include "rcsp_setting_opt.h"
 
-#include "ui_manage.h"
+#if TCFG_COLORLED_ENABLE
+//#include "ui_manage.h"
 #include "color_led_app.h"
+#endif
+
 #define IS_COLOR_LED_LEGAL(color_led) \
-	((color_led.open_status <= 2) && \
-	 (color_led.mode <= 2) && \
-	 (color_led.fre_mode <= 3))
+	((color_led.open_status < COLOR_LED_STATUS_MAX) && \
+	 (color_led.mode < MODE_MAX))
 
 enum {
-    OPEN_STATUS_CLOSE 		= 0,
-    OPEN_STATUS_OPEN 		= 1,
-    OPEN_STATUS_SETTING		= 2,
+    COLOR_LED_STATUS_CLOSE,             //关闭
+    COLOR_LED_STATUS_OPEN,              //打开
+    COLOR_LED_STATUS_SETTING,           //设置
+    COLOR_LED_STATUS_RESUME,            //恢复
+    COLOR_LED_STATUS_MAX
 };
 enum {
-    MODE_LIGHT				= 0,
-    MODE_TWINKLE			= 1,
-    MODE_USER				= 2,
+    MODE_LIGHT,                         //常量（纯色）模式
+    MODE_TWINKLE,                       //闪烁模式
+    MODE_USER,                          //情景模式
+    MODE_BREATHE,                       //呼吸模式
+    MODE_CYCLIC_COLOR,                  //循环变色模式
+    MODE_MUSICAL_RHYTHM,                //音乐律动模式
+    MODE_MAX
 };
+#if TCFG_COLORLED_ENABLE
 const u32 twinkle_color_table[] = {
+    //COLOR_COLORFUL_TWINKLE,
     COLOR_RED,
     COLOR_ORANGE,
     COLOR_YELLOW,
@@ -38,22 +48,31 @@ const u32 twinkle_color_table[] = {
     COLOR_BLUE,
     COLOR_PURPLE,
 };
+#endif
 
 typedef struct {
     u8 open_status  : 2;//0:关闭  1：打开  2：设置模式
-    u8 mode			: 3;//0:彩色  2：闪烁  3：情景模式
+    u8 mode			: 3;//参考枚举值MODE_LIGHT
     u8 reseved		: 3;
     u8 red;
     u8 green;
     u8 blue;
-    u8 twinkle_mode;
-    u8 fre_mode;
-    u8 user_mode;
+    u8 twinkle_mode;    //闪烁模式选择
+    //speed字段
+    //闪烁模式时,表示闪烁频率：
+    //  0：快闪
+    //  1：慢闪
+    //  2：缓闪
+    //  3：音乐闪烁
+    //呼吸模式、循环变色模式时，表示更新间隔：
+    //  取值范围：[10, 100]
+    u8 speed;
+    u8 user_mode;       //情景模式选择
     u16 hue;
     u8 saturation;
     u8 lightness;
 } __attribute__((packed)) color_led_t;
-static color_led_t color_led;
+static color_led_t g_color_led;
 
 #define COLOR_LED_PROTOCOL_DATA_LEN		 	(sizeof(color_led_t))
 
@@ -68,13 +87,34 @@ static void set_color_led_setting(u8 *color_led_setting_info)
     /* put_buf(color_led_setting_info, COLOR_LED_PROTOCOL_DATA_LEN); */
     color_led_t color_led_cur;
     memcpy((u8 *)&color_led_cur, color_led_setting_info, sizeof(color_led_t));
+
+    printf("set color led info:\n"
+           "status: %u\n"
+           "mode: %u\n"
+           "R: %u, G: %u, B: %u\n"
+           "twinkle_mode: %u\n"
+           "speed: %u\n"
+           "usr_mode: %u\n"
+           "hue: %u\n"
+           "saturation: %u\n"
+           "lightness: %u\n",
+           color_led_cur.open_status,
+           color_led_cur.mode,
+           color_led_cur.red, color_led_cur.green, color_led_cur.blue,
+           color_led_cur.twinkle_mode,
+           color_led_cur.speed,
+           color_led_cur.user_mode,
+           color_led_cur.hue,
+           color_led_cur.saturation,
+           color_led_cur.lightness);
+
     if ((color_led_cur.open_status == 0) || (color_led_cur.open_status == 1)) {
         //switch active,not set other_status
-        color_led.open_status = color_led_cur.open_status;
+        g_color_led.open_status = color_led_cur.open_status;
         return;
     }
 
-    memcpy((u8 *)&color_led, color_led_setting_info, sizeof(color_led_t));
+    memcpy((u8 *)&g_color_led, color_led_setting_info, sizeof(color_led_t));
 }
 
 static int get_color_led_setting(u8 *color_led_setting_info)
@@ -125,18 +165,19 @@ static void color_led_flash(void)
         return;
     }
 
+#if TCFG_COLORLED_ENABLE
     u8 mode = 0;
-    u8 fre_mode = 0;
+    u8 speed = 0;
     u32 color = 0;
 
-    if (color_led_cur.open_status == OPEN_STATUS_CLOSE) {
+    if (color_led_cur.open_status == COLOR_LED_STATUS_CLOSE) {
         mode = COLOR_LED_MODE_LIGHT;
         color = COLOR_BLACK;
-        color_led_set_api(mode, fre_mode, color);
+        color_led_set_api(mode, speed, color);
         return;
     }
 
-    fre_mode = color_led_cur.fre_mode;
+    speed = color_led_cur.speed;
     color = color_led_cur.red + ((int)color_led_cur.green << 8) + ((int)color_led_cur.blue << 16);
     switch (color_led_cur.mode) {
     case MODE_LIGHT:
@@ -157,8 +198,9 @@ static void color_led_flash(void)
         break;
     }
 
-    printf("mode:%d fre_mode:%d color:0x%x \n", mode, fre_mode, color);
-    color_led_set_api(mode, fre_mode, color);
+    printf("mode:%d fre_mode:%d color:0x%x \n", mode, speed, color);
+    color_led_set_api(mode, speed, color);
+#endif
 }
 
 static void deal_color_led_setting(u8 *color_led_setting_info, u8 write_vm, u8 tws_sync)
@@ -185,10 +227,11 @@ static int rcsp_color_led_init(void)
     color_led_t color_led_cur;
     int len = syscfg_read(VM_COLOR_LED_SETTING, (u8 *)&color_led_cur, COLOR_LED_PROTOCOL_DATA_LEN);
 
-    if ((!IS_COLOR_LED_LEGAL(color_led)) || (len != COLOR_LED_PROTOCOL_DATA_LEN)) {
+    if ((!IS_COLOR_LED_LEGAL(color_led_cur)) || (len != COLOR_LED_PROTOCOL_DATA_LEN)) {
         printf("first time start device,reset color led data \n");
         memset((u8 *)&color_led_cur, 0x00, sizeof(color_led_cur));
-        color_led_cur.open_status = OPEN_STATUS_SETTING;
+#if 0
+        color_led_cur.open_status = COLOR_LED_STATUS_SETTING;
         color_led_cur.mode = MODE_USER;
         color_led_cur.red = 64;
         color_led_cur.green = 191;
@@ -196,9 +239,18 @@ static int rcsp_color_led_init(void)
         color_led_cur.hue = 180;
         color_led_cur.saturation = 50;
         color_led_cur.lightness = 50;
-        color_led_set_api(COLOR_LED_MODE_RAINBOW + color_led_cur.user_mode, 0, 0);
+
+#else
+        color_led_cur.open_status = COLOR_LED_STATUS_CLOSE;
+        color_led_cur.mode = MODE_LIGHT;
+        color_led_cur.red = 0;
+        color_led_cur.green = 0;
+        color_led_cur.blue = 255;
+        color_led_cur.hue = 0;
+        color_led_cur.saturation = 0;
+        color_led_cur.lightness = 0;
+#endif
         syscfg_write(VM_COLOR_LED_SETTING, (u8 *)&color_led_cur, COLOR_LED_PROTOCOL_DATA_LEN);
-        color_led = color_led_cur;
     }
 
     set_color_led_setting((u8 *)&color_led_cur);

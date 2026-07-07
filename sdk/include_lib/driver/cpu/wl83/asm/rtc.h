@@ -103,62 +103,69 @@ void poweroff_save_rtc_time(void);
 
 /**
  * @brief 设置PR口的方向
- * @param gpio 参考宏IO_PORT_PR_0X
- * @param dir 1: 输入       0: 输出
+ * @param port 参考宏IO_PORT_PR_0X
+ * @param dir 1: 输入  0: 输出
  * @return 0: 成功  非0: 失败
  */
 int rtc_port_pr_dir(int port, u8 dir);
 
 /**
  * @brief 获取PR口输入电平
- * @param gpio 参考宏IO_PORT_PR_0X
+ * @param port 参考宏IO_PORT_PR_0X
  * @return 0: 低电平  1: 高电平
  */
 int rtc_port_pr_read(int port);
 
 /**
  * @brief 设置PR口的输出电平
- * @param gpio 参考宏IO_PORT_PR_0X
- * @param on 1: 高电平       0: 低电平
+ * @param port 参考宏IO_PORT_PR_0X
+ * @param on 1: 高电平  0: 低电平
  * @return 0: 成功  非0: 失败
  */
 int rtc_port_pr_out(int port, u8 on);
 
 /**
  * @brief 设置PR口的强驱
- * @param gpio 参考宏IO_PORT_PR_0X
- * @param on 1: 打开       0: 关闭
+ * @param port 参考宏IO_PORT_PR_0X
+ * @param on 1: 打开  0: 关闭
  * @return 0: 成功  非0: 失败
  */
 int rtc_port_pr_hd(int port, u8 on);
 
 /**
  * @brief 设置PR口的上拉电阻
- * @param gpio 参考宏IO_PORT_PR_0X
- * @param on 1: 打开       0: 关闭
+ * @param port 参考宏IO_PORT_PR_0X
+ * @param on 1: 打开  0: 关闭
  * @return 0: 成功  非0: 失败
  */
 int rtc_port_pr_pu(int port, u8 on);
 
 /**
  * @brief 设置PR口的下拉电阻
- * @param gpio 参考宏IO_PORT_PR_0X
- * @param on 1: 打开       0: 关闭
+ * @param port 参考宏IO_PORT_PR_0X
+ * @param on 1: 打开  0: 关闭
  * @return 0: 成功  非0: 失败
  */
 int rtc_port_pr_pd(int port, u8 on);
 
 /**
  * @brief 设置PR口的数字输入功能
- * @param gpio 参考宏IO_PORT_PR_0X
- * @param on 1: 打开       0: 关闭
+ * @param port 参考宏IO_PORT_PR_0X
+ * @param on 1: 打开  0: 关闭
  * @return 0: 成功  非0: 失败
  */
 int rtc_port_pr_die(int port, u8 on);
 
 /**
+ * @brief 设置PR口为高阻态
+ * @param port 参考宏IO_PORT_PR_0X
+ * @return 0: 成功  非0: 失败
+ */
+int rtc_port_pr_deinit(int port);
+
+/**
  * @brief 设置PR口的唤醒功能
- * @param gpio 参考宏IO_PORT_PR_0X
+ * @param port 参考宏IO_PORT_PR_0X
  * @param wkup_edge 唤醒边沿
  * @param flt_cfg 唤醒滤波时间
  * @return 0: 成功  非0: 失败
@@ -167,7 +174,7 @@ int rtc_port_pr_wkup_cfg(int port, pr_io_wkup_edge_t wkup_edge, pr_io_wkup_flt_t
 
 /**
  * @brief 关闭PR口的唤醒功能
- * @param gpio 参考宏IO_PORT_PR_0X
+ * @param port 参考宏IO_PORT_PR_0X
  * @return 0: 成功  非0: 失败
  */
 int rtc_port_pr_wkup_disable(int port);

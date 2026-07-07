@@ -281,6 +281,7 @@
                 "${workspaceFolder}/apps/wifi_soundbox/mode",
                 "${workspaceFolder}/apps/wifi_soundbox/mode/local_music",
                 "${workspaceFolder}/apps/common/third_party_profile/common",
+                "${workspaceFolder}/apps/common/third_party_profile/jieli/rcsp/server/functions/rcsp_over_online_cfg_tool",
                 "${workspaceFolder}/apps/common/lcd/include",
                 "${workspaceFolder}/include_lib/driver/device/video/pipeline",
                 "${workspaceFolder}/include_lib/driver/device/video/pipeline/buffer",
@@ -308,6 +309,10 @@
                 "${workspaceFolder}/apps/common/lvgl_v8/demos/amap/gps",
                 "${workspaceFolder}/apps/common/lvgl_v8/demos/amap",
                 "${workspaceFolder}/apps/common/lvgl_v8/src/draw/jl/jl_dma2d",
+                "${workspaceFolder}/include_lib/net/curl",
+                "${workspaceFolder}/include_lib/net/lwip_2_2_0/lwip/src/include/compat/posix",
+                "${workspaceFolder}/include_lib/net/lwip_2_2_0/lwip/src/include/compat/stdc",
+                "${workspaceFolder}/apps/common/video/net_avi_player",
                 "${workspaceFolder}/apps/wifi_soundbox/lvgl_v8_ui_app/style_JL/generated",
                 "${workspaceFolder}/apps/wifi_soundbox/lvgl_v8_ui_app/style_JL/generated/gui_events",
                 "${workspaceFolder}/apps/wifi_soundbox/lvgl_v8_ui_app/style_JL/generated/gui_fonts",
@@ -549,7 +554,8 @@
                 "${workspaceFolder}/audio/effect/spatial_effect",
                 "${workspaceFolder}/include_lib/media/aispeech/enc",
                 "${workspaceFolder}/audio/cpu/wl83/audio_dai",
-                "${workspaceFolder}/audio/cpu/wl83/audio_common"
+                "${workspaceFolder}/audio/cpu/wl83/audio_common",
+                "${workspaceFolder}/apps/wifi_bbm/avilib"
             ],
             "intelliSenseMode": "clang-x86",
             "name": "AC792N_WIFI_BBM"

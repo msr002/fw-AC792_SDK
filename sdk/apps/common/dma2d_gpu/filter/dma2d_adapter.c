@@ -51,6 +51,7 @@ struct dma2d_filter_handle {
     u16 line_cnt;
 
     OS_SEM task_sem;
+    OS_SEM frame_done_sem;
 
     buffer_meta_t buffer_meta[DMA2D_MAX_BUF_NUM];
     u8 *buf_ptr[DMA2D_MAX_BUF_NUM];
@@ -63,6 +64,10 @@ struct dma2d_filter_handle {
 
     void *sticker;
     int rotate;
+    int photo_mode;
+    int thumb_mode;
+    int online;
+    int wait_post_frame_sem;
 };
 
 static struct dma2d_filter_handle *g_dma2d_used[DMA2D_MAX_CHANNEL];
@@ -237,6 +242,14 @@ static void dma2d_filter_task(void *arg)
         if (buffer_out->type == FAST_BUFFER || buffer_out->type == GENERAL_BUFFER) {
             int out_height = hdl->line_cnt ? hdl->line_cnt : hdl->output_height;
             message_request(plugin->port, REP_COMPOSITE_BUF_NOTIFY | MESSAGE_NEXT, (void *)image_data);
+
+            //联动缩略图
+            if (hdl->online && hdl->thumb_mode && hdl->photo_mode) {
+                err = os_sem_pend(&hdl->frame_done_sem, 0);
+                if (!err) {
+                    message_request(plugin->port, REP_COMPOSITE_BUF_NOTIFY | MESSAGE_NEXT, (void *)image_data);
+                }
+            }
         }
         hdl->dma2d_task_busy = 0;
 
@@ -286,6 +299,11 @@ static int dma2d_filter_start(pipe_plugin_t *plugin, int source_channel)
         return 0;
     }
 
+    //联动缩略图, imc只出一帧
+    if (hdl->online && hdl->thumb_mode && hdl->photo_mode) {
+        message_request(plugin->port, IMC_PHOTO_MODE | MESSAGE_PREV, NULL);
+    }
+
     sprintf(task_name, "dma2d_filter%d_task", hdl->channel);
     thread_fork(task_name, 20, 2048, 0, &hdl->pid, dma2d_filter_task, plugin);
 
@@ -309,6 +327,7 @@ static int dma2d_filter_prepare(pipe_plugin_t *plugin, int source_channel)
     }
 
     os_sem_create(&hdl->task_sem, 0);
+    os_sem_create(&hdl->frame_done_sem, 0);
 
     hdl->state = PLUGIN_READY;
 
@@ -526,6 +545,7 @@ static int dma2d_filter_stop(pipe_plugin_t *plugin, int source_channel)
 
     hdl->task_kill = true;
     os_sem_post(&hdl->task_sem);
+    os_sem_post(&hdl->frame_done_sem);
     thread_kill(&hdl->pid, KILL_WAIT);
     hdl->task_kill = false;
 
@@ -565,6 +585,7 @@ static int dma2d_filter_reset(pipe_plugin_t *plugin, int source_channel)
     plugin->private_data = NULL;
 
     os_sem_del(&hdl->task_sem, OS_DEL_ALWAYS);
+    os_sem_del(&hdl->frame_done_sem, OS_DEL_ALWAYS);
 
     for (int i = 0; i < hdl->block_num; i++) {
         if (hdl->buf_ptr[i]) {
@@ -600,6 +621,18 @@ static int dma2d_filter_set_parameter(pipe_plugin_t *plugin, int cmd, void *arg,
     }
 
     switch (cmd) {
+    case PIPELINE_SET_IMAGE_PHOTO:
+        hdl->photo_mode = 1;
+        log_info("photo mode \n");
+        break;
+    case VIDIOC_SET_D_ATTR:
+        struct video_enc_attr *attr;
+        attr = (struct video_enc_attr *)arg;
+        if (attr->format == VID_PIX_FMT_MJPG) {
+            log_info("dma2d thumb enable \n");
+            hdl->thumb_mode = 1;
+        }
+        break;
     case PIPELINE_SET_BUFFER_LINE:
         /* hdl->line_cnt = *(int *)arg; */
         break;
@@ -610,6 +643,7 @@ static int dma2d_filter_set_parameter(pipe_plugin_t *plugin, int cmd, void *arg,
         log_debug("dma2d rotate:%d\n", hdl->rotate);
         hdl->input_format = FORMAT_YUV422_YUYV;
         hdl->output_format = FORMAT_YUV422_YUYV;
+        hdl->online = f->online;
         break;
     default:
         break;
@@ -645,6 +679,15 @@ static int dma2d_filter_message_callback(pipe_plugin_t *plugin, int cmd, void *a
     case IMC_FRAME_DONE:
         /* os_sem_set(&hdl->task_sem, 0); */
         /* os_sem_post(&hdl->task_sem); */
+        break;
+    case IMC_SET_SCALE:
+        hdl->wait_post_frame_sem = 1;
+        break;
+    case IMC_UP_BUFFER:
+        if (hdl->wait_post_frame_sem) {
+            os_sem_post(&hdl->frame_done_sem);
+            hdl->wait_post_frame_sem = 0;
+        }
         break;
     default:
         ret = message_request(plugin->port, cmd, arg);

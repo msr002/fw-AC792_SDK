@@ -3,15 +3,15 @@
 
 #if (!defined CONFIG_DEBUG_ENABLE || defined CONFIG_SYS_DEBUG_DISABLE)
 //关闭系统自带打印信息
-int putchar(int a)
+int (putchar)(int a)
 {
     return a;
 }
-int puts(const char *out)
+int (puts)(const char *out)
 {
     return 0;
 }
-int printf(const char *format, ...)
+int (printf)(const char *format, ...)
 {
     return 0;
 }
@@ -19,7 +19,7 @@ int vprintf(const char *restrict format, va_list arg)
 {
     return 0;
 }
-void put_buf(const u8 *buf, int len)
+void (put_buf)(const u8 *buf, int len)
 {
 }
 void put_u8hex(u8 dat)

@@ -215,6 +215,7 @@
 <Unit filename="../../../../../apps/common/camera/h63p_mipi/h63p_mipi_iq.h" />
 <Unit filename="../../../../../apps/common/camera/isp_scenes.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../../apps/common/camera/isp_tools.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="../../../../../apps/common/camera/nt99141.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../../apps/common/camera/ov2659/ov2659.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../../apps/common/camera/sc1245_dvp/sc1245.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="../../../../../apps/common/camera/sc1245_dvp/sc1245.h" />
@@ -2014,6 +2015,7 @@
 <Unit filename="../../../../../include_lib/utils/fs/fs_file_name.h" />
 <Unit filename="../../../../../include_lib/utils/fs/sdfile.h" />
 <Unit filename="../../../../../include_lib/utils/syscfg/syscfg_id.h" />
+<Unit filename="../../../../../include_lib/utils/uthash/uthash.h" />
 <Unit filename="../../../../../include_lib/utils/version.z.S" />
 <Unit filename="../../../../../include_lib/utils/yuv_to_rgb.h" />
 <Unit filename="../../../../../lib/utils/version.z.S" />

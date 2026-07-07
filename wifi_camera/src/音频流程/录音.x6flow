@@ -1,5 +1,5 @@
 {
- "enable": true,
+ "enable": false,
  "name": "pipeline-recoder",
  "uuid": "0x49EC",
  "childrenGroup": [
@@ -13,7 +13,8 @@
      "title": "标准",
      "id": "id_1726047780025_9",
      "selected": "A",
-     "preset": ""
+     "preset": "",
+     "disable": false
     }
    ],
    "curTab": "id_1726047780025_9"
@@ -3856,5 +3857,6 @@
  "version": {
   "code": 1,
   "tool": "4.4.0"
- }
+ },
+ "abFlow": false
 }

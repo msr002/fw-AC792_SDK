@@ -85,6 +85,8 @@ lv_res_t lv_get_img_dsc_bin_header(const char *src, lv_img_header_t *header, JLB
 lv_img_src_t lv_get_img_src_type(const char *src);
 uint8_t lv_get_compress_type(const void *src);
 u32 lv_get_flash_src_addr(const char *src);
+lv_res_t lv_release_flash_src_addr(const char *src);
+lv_res_t lv_release_all_flash_src_addr(void);
 /**********************
  *      MACROS
  **********************/

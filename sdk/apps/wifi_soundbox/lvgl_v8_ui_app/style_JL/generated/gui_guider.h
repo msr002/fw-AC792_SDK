@@ -53,10 +53,6 @@ typedef struct {
     lv_obj_t *music_player_lbl_3;
     lv_timer_t *music_player_timer_1;
     lv_obj_t *music_player_view_lyrics;
-    lv_obj_t *music_player_lbl_1;
-    lv_obj_t *music_player_lbl_4;
-    lv_obj_t *music_player_lbl_6;
-    lv_obj_t *music_player_lbl_7;
     lv_obj_t *music_player_view_1;
     lv_obj_t *music_player_img_1;
 } lv_ui_music_player;
@@ -86,7 +82,6 @@ typedef struct {
     lv_obj_t *sys_menu_img_7;
     lv_obj_t *sys_menu_view_6;
     lv_obj_t *sys_menu_lbl_6;
-    lv_obj_t *sys_menu_lbl_7;
     lv_obj_t *sys_menu_lbl_8;
     lv_obj_t *sys_menu_imgbtn_4;
     lv_obj_t *sys_menu_imgbtn_4_label;
@@ -95,6 +90,7 @@ typedef struct {
     lv_obj_t *sys_menu_imgbtn_6;
     lv_obj_t *sys_menu_imgbtn_6_label;
     lv_obj_t *sys_menu_img_8;
+    lv_obj_t *sys_menu_view_song_info;
 } lv_ui_sys_menu;
 
 typedef struct {
@@ -141,7 +137,7 @@ typedef struct {
     lv_group_t *default_group;
 } lv_ui;
 
-void ui_load_scr_anim(lv_ui *ui, gui_scr_t *screen, lv_scr_load_anim_t anim_type,   uint32_t time,
+void ui_load_scr_anim(lv_ui *ui, gui_scr_t *screen, lv_scr_load_anim_t anim_type,	uint32_t time,
                       uint32_t delay, bool is_clean, bool auto_del, bool is_push_satck);
 
 void ui_scr_stack_pop_anim(lv_ui *ui, lv_scr_load_anim_t anim_type, uint32_t time, uint32_t delay,

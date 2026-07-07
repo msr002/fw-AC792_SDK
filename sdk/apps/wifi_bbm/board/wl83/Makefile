@@ -272,6 +272,7 @@ INCLUDES := \
 	-I../../../../include_lib/media/aispeech/enc \
 	-I../../../../audio/cpu/wl83/audio_dai \
 	-I../../../../audio/cpu/wl83/audio_common \
+	-I../../../../apps/wifi_bbm/avilib \
 
 
 # 需要编译的 .c 文件
@@ -306,6 +307,7 @@ c_SRC_FILES := \
 	../../../../apps/common/camera/h63p_mipi/h63p_mipi_iq.c \
 	../../../../apps/common/camera/isp_scenes.c \
 	../../../../apps/common/camera/isp_tools.c \
+	../../../../apps/common/camera/nt99141.c \
 	../../../../apps/common/camera/ov2659/ov2659.c \
 	../../../../apps/common/camera/sc1245_dvp/sc1245.c \
 	../../../../apps/common/camera/sc1245_dvp/sc1245_ae.c \
@@ -978,6 +980,8 @@ c_SRC_FILES := \
 	../../../../apps/wifi_bbm/audio/scene_switch.c \
 	../../../../apps/wifi_bbm/audio/tone_table.c \
 	../../../../apps/wifi_bbm/audio/vol_sync.c \
+	../../../../apps/wifi_bbm/avilib/avilib.c \
+	../../../../apps/wifi_bbm/avilib/platform.c \
 	../../../../apps/wifi_bbm/board/wl83/board_develop.c \
 	../../../../apps/wifi_bbm/board/wl83/sdk_config.c \
 	../../../../apps/wifi_bbm/ctp/cdp_client.c \
@@ -1030,6 +1034,7 @@ c_SRC_FILES := \
 	../../../../apps/wifi_bbm/stream/multi_media_renderer.c \
 	../../../../apps/wifi_bbm/stream/udp_stream.c \
 	../../../../apps/wifi_bbm/stream/video_pipeline.c \
+	../../../../apps/wifi_bbm/stream/video_stream_recorder.c \
 	../../../../apps/wifi_bbm/stream/video_stream_recv.c \
 	../../../../apps/wifi_bbm/stream/video_stream_request.c \
 	../../../../apps/wifi_bbm/stream/video_stream_send.c \

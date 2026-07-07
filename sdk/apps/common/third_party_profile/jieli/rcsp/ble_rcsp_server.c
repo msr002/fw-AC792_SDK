@@ -71,6 +71,11 @@
 #endif
 #endif
 
+#if (THIRD_PARTY_PROTOCOLS_SEL & BRAGI_EN)
+#include "sdk_config.h"
+#include "bragi_config.h"
+#endif
+
 #if (THIRD_PARTY_PROTOCOLS_SEL & RCSP_MODE_EN)
 
 const u8 rcsp_link_key_data[16] = {0x06, 0x77, 0x5f, 0x87, 0x91, 0x8d, 0xd4, 0x23, 0x00, 0x5d, 0xf1, 0xd8, 0xcf, 0x0c, 0x14, 0x2b};
@@ -113,7 +118,9 @@ static u8 att_ram_buffer[ATT_RAM_BUFSIZE] __attribute__((aligned(4)));
 #if (ATT_RAM_BUFSIZE < 64)
 #error "adv_data & rsp_data buffer error!!!!!!!!!!!!"
 #endif
-#endif
+static void connection_update_complete_success(u8 *packet);
+#endif // TCFG_THIRD_PARTY_PROTOCOLS_SIMPLIFIED
+
 static char *gap_device_name = "JL_ble_test";
 static u8 gap_device_name_len = 0;
 
@@ -166,6 +173,10 @@ static void (*upay_recv_callback)(const uint8_t *data, u16 len);
 static void upay_ble_new_adv_enable(u8 en);
 #endif
 
+#if (TCFG_THIRD_PARTY_PROTOCOLS_SIMPLIFIED && (RCSP_CHANNEL_SEL == RCSP_USE_GATT_OVER_EDR))
+extern u16 bt_get_att_over_edr_mtu(u16 conn_handle);
+extern u16 get_ble_link_handle(void);
+#endif
 static void (*app_recieve_callback)(void *priv, void *buf, u16 len) = NULL;
 static void (*ble_resume_send_wakeup)(void) = NULL;
 static u32 channel_priv;
@@ -176,6 +187,7 @@ extern const int config_le_gatt_client_num;
 
 //------------------------------------------------------
 //ANCS
+extern int app_ble_set_ancs_connection_flag(void *_hdl, u8 flag);
 #if TRANS_ANCS_EN
 //profile event
 #define ANCS_SUBEVENT_CLIENT_CONNECTED                              0xF0
@@ -263,7 +275,7 @@ void notify_update_connect_parameter(u8 table_index)
 #if !TCFG_THIRD_PARTY_PROTOCOLS_SIMPLIFIED
     if (app_ble_get_hdl_con_handle(rcsp_server_ble_hdl)) {
         temp_con_handle = app_ble_get_hdl_con_handle(rcsp_server_ble_hdl);
-    } else if (app_ble_get_hdl_con_handle(rcsp_server_ble_hdl)) {
+    } else if (app_ble_get_hdl_con_handle(rcsp_server_ble_hdl1)) {
         temp_con_handle = app_ble_get_hdl_con_handle(rcsp_server_ble_hdl1);
     } else {
         return;
@@ -289,23 +301,7 @@ void notify_update_connect_parameter(u8 table_index)
 }
 
 
-#if TCFG_THIRD_PARTY_PROTOCOLS_SIMPLIFIED
-
-static void connection_update_complete_success(u8 *packet)
-{
-    int con_handle, conn_interval, conn_latency, conn_timeout;
-
-    con_handle = hci_subevent_le_connection_update_complete_get_connection_handle(packet);
-    conn_interval = hci_subevent_le_connection_update_complete_get_conn_interval(packet);
-    conn_latency = hci_subevent_le_connection_update_complete_get_conn_latency(packet);
-    conn_timeout = hci_subevent_le_connection_update_complete_get_supervision_timeout(packet);
-
-    log_info("conn_interval = %d", conn_interval);
-    log_info("conn_latency = %d", conn_latency);
-    log_info("conn_timeout = %d", conn_timeout);
-}
-
-#else
+#if !TCFG_THIRD_PARTY_PROTOCOLS_SIMPLIFIED
 
 /**
  * @brief 断开指定的ble
@@ -503,22 +499,14 @@ void rcsp_ble_adv_enable_with_con_dev()
     log_debug("%s, %d, max:%d, conn_num:%d", __FUNCTION__, __LINE__, max_con_dev, conn_num);
 #if TCFG_USER_TWS_ENABLE
     if (TWS_ROLE_SLAVE != tws_api_get_role()) {
-#if TCFG_THIRD_PARTY_PROTOCOLS_SIMPLIFIED
         if (conn_num >= max_con_dev) {
-#else
-        if ((conn_num >= max_con_dev) && (bt_rcsp_edr_att_conn_num() == 0)) {
-#endif
             rcsp_bt_ble_adv_enable(0);
         } else {
             ble_module_enable(1);
         }
     }
 #else
-#if TCFG_THIRD_PARTY_PROTOCOLS_SIMPLIFIED
     if (conn_num >= max_con_dev) {
-#else
-    if ((conn_num >= max_con_dev) && (bt_rcsp_edr_att_conn_num() == 0)) {
-#endif
         rcsp_bt_ble_adv_enable(0);
     } else {
         ble_module_enable(1);
@@ -572,8 +560,17 @@ void rcsp_cbk_packet_handler(uint8_t packet_type, uint16_t channel, uint8_t *pac
                 bt_rcsp_set_conn_info(con_handle, NULL, true);
 #else
                 rcsp_ble_con_handle = little_endian_read_16(packet, 4);
+#if (RCSP_CHANNEL_SEL == RCSP_USE_GATT_OVER_EDR)
+                rcsp_ble_con_handle_tws_sync();
+#endif
 
+#if (TCFG_THIRD_PARTY_PROTOCOLS_SIMPLIFIED && (RCSP_CHANNEL_SEL == RCSP_USE_GATT_OVER_EDR))
+                if (rcsp_ble_con_handle < get_ble_link_handle()) {
+                    ble_op_att_set_send_mtu(bt_get_att_over_edr_mtu(rcsp_ble_con_handle));
+                }
+#else
                 ble_op_set_rxmaxbuf(con_handle, 255);
+#endif
                 rcsp_protocol_bound(con_handle, NULL);
                 if (rcsp_get_auth_support()) {
                     JL_rcsp_reset_bthdl_auth(rcsp_ble_con_handle, NULL);
@@ -609,12 +606,24 @@ void rcsp_cbk_packet_handler(uint8_t packet_type, uint16_t channel, uint8_t *pac
                 bt_rcsp_set_conn_info(dis_con_handle, NULL, false);
             }
 #else
+#if (RCSP_CHANNEL_SEL == RCSP_USE_GATT_OVER_EDR)
+            /* if (!app_var.goto_poweroff_flag) { */
+            rcsp_protocol_reset_bound(dis_con_handle, NULL);
+            if (rcsp_get_auth_support()) {
+                JL_rcsp_reset_bthdl_auth(dis_con_handle, NULL);
+            }
+            rcsp_ble_con_handle = 0;
+            rcsp_ble_con_handle_tws_sync();
+            ble_user_cmd_prepare(BLE_CMD_ATT_SEND_INIT, 4, rcsp_ble_con_handle, 0, 0, 0);
+            /* } */
+#else
             rcsp_protocol_reset_bound(dis_con_handle, NULL);
             if (rcsp_get_auth_support()) {
                 JL_rcsp_reset_bthdl_auth(dis_con_handle, NULL);
             }
             rcsp_ble_con_handle = 0;
             ble_user_cmd_prepare(BLE_CMD_ATT_SEND_INIT, 4, rcsp_ble_con_handle, 0, 0, 0);
+#endif
 #endif
 #if RCSP_UPDATE_EN
             rcsp_clean_update_hdl_for_end_update(dis_con_handle, NULL);
@@ -811,6 +820,27 @@ uint16_t rcsp_att_read_callback(hci_con_handle_t connection_handle, uint16_t att
         att_value_len = 2;
         break;
 
+#if (THIRD_PARTY_PROTOCOLS_SEL & BRAGI_EN)
+    case ATT_CHARACTERISTIC_77730843_F791_429D_A9BC_6EBCEEDC59F7_01_VALUE_HANDLE:
+        printf("ATT_CHARACTERISTIC_77730843_F791_429D_A9BC_6EBCEEDC59F7_01_VALUE_HANDLE\n");
+        break;
+    case ATT_CHARACTERISTIC_77730843_F792_429D_A9BC_6EBCEEDC59F7_01_VALUE_HANDLE:
+        printf("ATT_CHARACTERISTIC_77730843_F792_429D_A9BC_6EBCEEDC59F7_01_VALUE_HANDLE\n");
+        break;
+    case ATT_CHARACTERISTIC_77730843_F792_429D_A9BC_6EBCEEDC59F7_01_CLIENT_CONFIGURATION_HANDLE:
+        printf("ATT_CHARACTERISTIC_77730843_F792_429D_A9BC_6EBCEEDC59F7_01_CLIENT_CONFIGURATION_HANDLE\n");
+        break;
+    case ATT_CHARACTERISTIC_77730843_F793_429D_A9BC_6EBCEEDC59F7_01_VALUE_HANDLE:
+        printf("ATT_CHARACTERISTIC_77730843_F793_429D_A9BC_6EBCEEDC59F7_01_VALUE_HANDLE\n");
+        break;
+    case ATT_CHARACTERISTIC_77730843_F794_429D_A9BC_6EBCEEDC59F7_01_VALUE_HANDLE:
+        printf("ATT_CHARACTERISTIC_77730843_F794_429D_A9BC_6EBCEEDC59F7_01_VALUE_HANDLE\n");
+        break;
+    case ATT_CHARACTERISTIC_77730843_F795_429D_A9BC_6EBCEEDC59F7_01_VALUE_HANDLE:
+        printf("ATT_CHARACTERISTIC_77730843_F795_429D_A9BC_6EBCEEDC59F7_01_VALUE_HANDLE\n");
+        break;
+#endif
+
     default:
         break;
     }
@@ -821,7 +851,7 @@ uint16_t rcsp_att_read_callback(hci_con_handle_t connection_handle, uint16_t att
 int rcsp_att_write_callback(hci_con_handle_t connection_handle, uint16_t att_handle, uint16_t transaction_mode, uint16_t offset, uint8_t *buffer, uint16_t buffer_size)
 {
     /* log_info("write_callback, connection_handle:%0x, att_handle= 0x%04x", connection_handle, att_handle); */
-
+    u16 ble_con_handle = 0;
     switch (att_handle) {
     case ATT_CHARACTERISTIC_2a00_01_VALUE_HANDLE:
         u16 tmp16 = BT_NAME_LEN_MAX;
@@ -860,7 +890,7 @@ int rcsp_att_write_callback(hci_con_handle_t connection_handle, uint16_t att_han
         /* printf("ble_rx(%d):", buffer_size); */
         /* printf_buf(buffer, buffer_size); */
 #if !TCFG_THIRD_PARTY_PROTOCOLS_SIMPLIFIED
-        u16 ble_con_handle = app_ble_get_hdl_con_handle(rcsp_server_ble_hdl);
+        ble_con_handle = app_ble_get_hdl_con_handle(rcsp_server_ble_hdl);
         if (ble_con_handle == connection_handle) {
             bt_rcsp_recieve_callback(rcsp_server_ble_hdl, NULL, buffer, buffer_size);
         }
@@ -904,6 +934,28 @@ int rcsp_att_write_callback(hci_con_handle_t connection_handle, uint16_t att_han
 #endif
 
         break;
+
+#if (THIRD_PARTY_PROTOCOLS_SEL & BRAGI_EN)
+    case ATT_CHARACTERISTIC_77730843_F791_429D_A9BC_6EBCEEDC59F7_01_VALUE_HANDLE:
+        printf("ATT_CHARACTERISTIC_77730843_F791_429D_A9BC_6EBCEEDC59F7_01_VALUE_HANDLE\n");
+        break;
+    case ATT_CHARACTERISTIC_77730843_F792_429D_A9BC_6EBCEEDC59F7_01_VALUE_HANDLE:
+        printf("ATT_CHARACTERISTIC_77730843_F792_429D_A9BC_6EBCEEDC59F7_01_VALUE_HANDLE\n");
+        break;
+    case ATT_CHARACTERISTIC_77730843_F792_429D_A9BC_6EBCEEDC59F7_01_CLIENT_CONFIGURATION_HANDLE:
+        printf("ATT_CHARACTERISTIC_77730843_F792_429D_A9BC_6EBCEEDC59F7_01_CLIENT_CONFIGURATION_HANDLE\n");
+        break;
+    case ATT_CHARACTERISTIC_77730843_F793_429D_A9BC_6EBCEEDC59F7_01_VALUE_HANDLE:
+        printf("ATT_CHARACTERISTIC_77730843_F793_429D_A9BC_6EBCEEDC59F7_01_VALUE_HANDLE\n");
+        break;
+    case ATT_CHARACTERISTIC_77730843_F794_429D_A9BC_6EBCEEDC59F7_01_VALUE_HANDLE:
+        printf("ATT_CHARACTERISTIC_77730843_F794_429D_A9BC_6EBCEEDC59F7_01_VALUE_HANDLE\n");
+        break;
+    case ATT_CHARACTERISTIC_77730843_F795_429D_A9BC_6EBCEEDC59F7_01_VALUE_HANDLE:
+        printf("ATT_CHARACTERISTIC_77730843_F795_429D_A9BC_6EBCEEDC59F7_01_VALUE_HANDLE\n");
+        break;
+#endif
+
     default:
         break;
     }
@@ -949,6 +1001,9 @@ u8 *ble_get_gatt_profile_data(u16 *len)
 //广播参数设置
 static void advertisements_setup_init()
 {
+#if (TCFG_THIRD_PARTY_PROTOCOLS_SIMPLIFIED && (RCSP_CHANNEL_SEL == RCSP_USE_GATT_OVER_EDR))
+    return;
+#endif
     uint8_t adv_type = APP_ADV_IND;
     uint8_t adv_channel = 7;
     int   ret = 0;
@@ -1036,6 +1091,10 @@ void rcsp_ble_profile_init(const uint8_t *rcsp_profile_data)
         gatt_client_init();
     }
 
+#if TRANS_ANCS_EN || TRANS_AMS_EN
+    app_ble_set_ancs_connection_flag(rcsp_server_ble_hdl, 1);
+#endif
+
 #if TRANS_ANCS_EN
     log_info("ANCS init...");
     //setup ANCS clent
@@ -1064,6 +1123,10 @@ void rcsp_ble_profile_init(const uint8_t *rcsp_profile_data)
 
 static int set_adv_enable(void *priv, u32 en)
 {
+#if (TCFG_THIRD_PARTY_PROTOCOLS_SIMPLIFIED && (RCSP_CHANNEL_SEL == RCSP_USE_GATT_OVER_EDR))
+    bt_ble_rcsp_adv_enable();
+    return 0;
+#endif
     uint32_t rets_addr;
     __asm__ volatile("%0 = rets ;" : "=r"(rets_addr));
     log_debug("%s, en:%d, rets=0x%x", __FUNCTION__, en, rets_addr);
@@ -1124,6 +1187,7 @@ static int set_adv_enable(void *priv, u32 en)
 #if (TCFG_LE_AUDIO_RCSP_USE_SAME_ACL)
         if (is_cig_phone_conn()) {
             app_ble_adv_enable(rcsp_server_ble_hdl, en);
+            bt_ble_rcsp_adv_enable();
             return APP_BLE_NO_ERROR;
         }
 #endif
@@ -1162,7 +1226,6 @@ static int ble_disconnect(void *priv)
         return APP_BLE_OPERATION_ERROR;
     }
 #else
-    log_info("LXFA %s, %s, %d", __FILE__, __FUNCTION__, __LINE__);
     if (rcsp_ble_con_handle) {
         if (BLE_ST_SEND_DISCONN != rcsp_get_ble_work_state()) {
             log_info(">>>ble send disconnect");
@@ -1326,6 +1389,19 @@ void rcsp_ble_app_disconnect(void)
 
 #if TCFG_THIRD_PARTY_PROTOCOLS_SIMPLIFIED
 
+static void connection_update_complete_success(u8 *packet)
+{
+    int con_handle, conn_interval, conn_latency, conn_timeout;
+
+    con_handle = hci_subevent_le_connection_update_complete_get_connection_handle(packet);
+    conn_interval = hci_subevent_le_connection_update_complete_get_conn_interval(packet);
+    conn_latency = hci_subevent_le_connection_update_complete_get_conn_latency(packet);
+    conn_timeout = hci_subevent_le_connection_update_complete_get_supervision_timeout(packet);
+
+    log_info("conn_interval = %d\n", conn_interval);
+    log_info("conn_latency = %d\n", conn_latency);
+    log_info("conn_timeout = %d\n", conn_timeout);
+}
 
 u8 bt_rcsp_ble_conn_num(void)
 {
@@ -1337,7 +1413,71 @@ u16 rcsp_ble_con_handle_get()
     return rcsp_ble_con_handle;
 }
 
+#if (RCSP_CHANNEL_SEL == RCSP_USE_GATT_OVER_EDR)
+
+#if TCFG_USER_TWS_ENABLE
+/**
+ * @brief Gatt ble_con_handle连接信息主从同步
+ */
+void rcsp_ble_con_handle_tws_sync(void)
+{
+    printf("%s: %d, hdl:%d\n", __FUNCTION__, __LINE__, rcsp_ble_con_handle);
+    int err = tws_api_send_data_to_sibling((void *)&rcsp_ble_con_handle, sizeof(u16), 0x73482C5D);
+    if (err) {
+        printf("rcsp_ble_con_handle_tws_sync_err:%d, %d\n", err, __LINE__);
+    }
+}
+
+static void rcsp_ble_con_handle_tws_sync_in_task(int _rcsp_ble_con_handle)
+{
+    if (rcsp_ble_con_handle != _rcsp_ble_con_handle) {
+        rcsp_ble_con_handle = (u16)_rcsp_ble_con_handle;
+        printf("rcsp_ble_con_handle_tws_sync_in_task:%d\n", rcsp_ble_con_handle);
+        if (rcsp_ble_con_handle) {
+            ble_user_cmd_prepare(BLE_CMD_ATT_SEND_INIT, 4, rcsp_ble_con_handle, att_ram_buffer, ATT_RAM_BUFSIZE, ATT_LOCAL_PAYLOAD_SIZE);
+#if GATT_OVER_EDR_DEMO_EN
+            if (rcsp_ble_con_handle < get_ble_link_handle()) {
+                ble_op_att_set_send_mtu(bt_get_att_over_edr_mtu(rcsp_ble_con_handle));
+            }
 #endif
+        }
+    }
+}
+
+static void rcsp_ble_con_handle_tws_sync_in_irq(void *_data, u16 len, bool rx)
+{
+    u16 *u8_data = (u16 *)_data;
+    u16 _rcsp_ble_con_handle = (u16) * u8_data;
+    printf("rcsp_ble_con_handle_tws_sync_in_irq:%d\n", _rcsp_ble_con_handle);
+    if ((tws_api_get_role() == TWS_ROLE_SLAVE)) {
+        int argv[3];
+        argv[0] = (int)rcsp_ble_con_handle_tws_sync_in_task;
+        argv[1] = 1;
+        argv[2] = (int)_rcsp_ble_con_handle;
+        int ret = os_taskq_post_type("app_core", Q_CALLBACK, 3, argv);
+        if (ret) {
+            rcsp_ble_con_handle = _rcsp_ble_con_handle;
+            printf("%s err, %d\n", __FUNCTION__, __LINE__);
+        }
+    }
+}
+
+REGISTER_TWS_FUNC_STUB(le_auracast_scan_state_sync) = {
+    .func_id = 0x73482C5D,
+    .func = rcsp_ble_con_handle_tws_sync_in_irq,
+};
+
+#else
+
+void rcsp_ble_con_handle_tws_sync(void)
+{
+}
+
+#endif // TCFG_USER_TWS_ENABLE
+
+#endif // (RCSP_CHANNEL_SEL == RCSP_USE_GATT_OVER_EDR)
+
+#endif // TCFG_THIRD_PARTY_PROTOCOLS_SIMPLIFIED
 
 #if TRANS_ANCS_EN
 void hangup_ans_call_handle(u8 en)

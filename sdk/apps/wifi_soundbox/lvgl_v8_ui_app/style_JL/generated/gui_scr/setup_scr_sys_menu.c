@@ -201,16 +201,13 @@ lv_obj_t *setup_scr_sys_menu(lv_ui *ui)
     //Set style for sys_menu_slider_2. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
     lv_obj_set_style_radius(ui_scr->sys_menu_slider_2, 15, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_color(ui_scr->sys_menu_slider_2, lv_color_make(0xE9, 0xE9, 0xE9), LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_shadow_color(ui_scr->sys_menu_slider_2, lv_color_make(0x21, 0x95, 0xF6),
-                                  LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_shadow_color(ui_scr->sys_menu_slider_2, lv_color_make(0x21, 0x95, 0xF6), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_shadow_opa(ui_scr->sys_menu_slider_2, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_outline_color(ui_scr->sys_menu_slider_2, lv_color_make(0x21, 0x95, 0xF6),
-                                   LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_outline_color(ui_scr->sys_menu_slider_2, lv_color_make(0x21, 0x95, 0xF6), LV_PART_MAIN | LV_STATE_DEFAULT);
 
     //Set style for sys_menu_slider_2. Part: LV_PART_INDICATOR, State: LV_STATE_DEFAULT
     lv_obj_set_style_radius(ui_scr->sys_menu_slider_2, 15, LV_PART_INDICATOR | LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_color(ui_scr->sys_menu_slider_2, lv_color_make(0x7E, 0x7E, 0x7E),
-                              LV_PART_INDICATOR | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(ui_scr->sys_menu_slider_2, lv_color_make(0x7E, 0x7E, 0x7E), LV_PART_INDICATOR | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_opa(ui_scr->sys_menu_slider_2, 77, LV_PART_INDICATOR | LV_STATE_DEFAULT);
 
     //Set style for sys_menu_slider_2. Part: LV_PART_KNOB, State: LV_STATE_DEFAULT
@@ -233,16 +230,13 @@ lv_obj_t *setup_scr_sys_menu(lv_ui *ui)
     //Set style for sys_menu_slider_1. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
     lv_obj_set_style_radius(ui_scr->sys_menu_slider_1, 15, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_color(ui_scr->sys_menu_slider_1, lv_color_make(0xE9, 0xE9, 0xE9), LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_shadow_color(ui_scr->sys_menu_slider_1, lv_color_make(0x21, 0x95, 0xF6),
-                                  LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_shadow_color(ui_scr->sys_menu_slider_1, lv_color_make(0x21, 0x95, 0xF6), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_shadow_opa(ui_scr->sys_menu_slider_1, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_outline_color(ui_scr->sys_menu_slider_1, lv_color_make(0x21, 0x95, 0xF6),
-                                   LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_outline_color(ui_scr->sys_menu_slider_1, lv_color_make(0x21, 0x95, 0xF6), LV_PART_MAIN | LV_STATE_DEFAULT);
 
     //Set style for sys_menu_slider_1. Part: LV_PART_INDICATOR, State: LV_STATE_DEFAULT
     lv_obj_set_style_radius(ui_scr->sys_menu_slider_1, 15, LV_PART_INDICATOR | LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_color(ui_scr->sys_menu_slider_1, lv_color_make(0x7E, 0x7E, 0x7E),
-                              LV_PART_INDICATOR | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(ui_scr->sys_menu_slider_1, lv_color_make(0x7E, 0x7E, 0x7E), LV_PART_INDICATOR | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_opa(ui_scr->sys_menu_slider_1, 77, LV_PART_INDICATOR | LV_STATE_DEFAULT);
 
     //Set style for sys_menu_slider_1. Part: LV_PART_KNOB, State: LV_STATE_DEFAULT
@@ -298,20 +292,6 @@ lv_obj_t *setup_scr_sys_menu(lv_ui *ui)
     lv_obj_set_style_text_align(ui_scr->sys_menu_lbl_6, LV_TEXT_ALIGN_LEFT, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_pad_top(ui_scr->sys_menu_lbl_6, 8, LV_PART_MAIN | LV_STATE_DEFAULT);
 
-    //Write codes sys_menu_lbl_7
-    ui_scr->sys_menu_lbl_7 = lv_label_create(ui_scr->sys_menu_view_6);
-    lv_label_set_text(ui_scr->sys_menu_lbl_7, "林俊杰-当你");
-    lv_label_set_long_mode(ui_scr->sys_menu_lbl_7, LV_LABEL_LONG_SCROLL_CIRCULAR);
-    lv_obj_set_pos(ui_scr->sys_menu_lbl_7, 241, 40);
-    lv_obj_set_size(ui_scr->sys_menu_lbl_7, 218, 29);
-    lv_obj_set_scrollbar_mode(ui_scr->sys_menu_lbl_7, LV_SCROLLBAR_MODE_OFF);
-    lv_obj_add_flag(ui_scr->sys_menu_lbl_7, LV_OBJ_FLAG_EVENT_BUBBLE);
-    ui_style_set(ui_scr->sys_menu_lbl_7, GUI_CTRL_LABEL);
-
-    //Set style for sys_menu_lbl_7. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
-    lv_obj_set_style_text_color(ui_scr->sys_menu_lbl_7, lv_color_make(0x00, 0x00, 0x00), LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_text_align(ui_scr->sys_menu_lbl_7, LV_TEXT_ALIGN_LEFT, LV_PART_MAIN | LV_STATE_DEFAULT);
-
     //Write codes sys_menu_lbl_8
     ui_scr->sys_menu_lbl_8 = lv_label_create(ui_scr->sys_menu_view_6);
     lv_label_set_text(ui_scr->sys_menu_lbl_8, "退出");
@@ -335,30 +315,22 @@ lv_obj_t *setup_scr_sys_menu(lv_ui *ui)
     ui_style_set(ui_scr->sys_menu_imgbtn_4, GUI_CTRL_IMGBTN);
 
     //Set style for sys_menu_imgbtn_4. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
-    lv_obj_set_style_img_recolor(ui_scr->sys_menu_imgbtn_4, lv_color_make(0x00, 0x00, 0x00),
-                                 LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_img_recolor(ui_scr->sys_menu_imgbtn_4, lv_color_make(0x00, 0x00, 0x00), LV_PART_MAIN | LV_STATE_DEFAULT);
 
     //Set style for sys_menu_imgbtn_4. Part: LV_PART_MAIN, State: LV_STATE_FOCUSED
     lv_obj_add_style(ui_scr->sys_menu_imgbtn_4, &gui_imgbtn_main_focused_style, LV_PART_MAIN | LV_STATE_FOCUSED);
 
     //Set style for sys_menu_imgbtn_4. Part: LV_PART_MAIN, State: LV_STATE_PRESSED
-    lv_obj_set_style_text_font(ui_scr->sys_menu_imgbtn_4, &lv_font_FangZhengKaiTiJianTi_1_24,
-                               LV_PART_MAIN | LV_STATE_PRESSED);
-    lv_obj_set_style_img_recolor(ui_scr->sys_menu_imgbtn_4, lv_color_make(0x00, 0x00, 0x00),
-                                 LV_PART_MAIN | LV_STATE_PRESSED);
+    lv_obj_set_style_text_font(ui_scr->sys_menu_imgbtn_4, &lv_font_FangZhengKaiTiJianTi_1_24, LV_PART_MAIN | LV_STATE_PRESSED);
+    lv_obj_set_style_img_recolor(ui_scr->sys_menu_imgbtn_4, lv_color_make(0x00, 0x00, 0x00), LV_PART_MAIN | LV_STATE_PRESSED);
     lv_obj_set_style_img_recolor_opa(ui_scr->sys_menu_imgbtn_4, 0, LV_PART_MAIN | LV_STATE_PRESSED);
 
     //Set style for sys_menu_imgbtn_4. Part: LV_PART_MAIN, State: LV_STATE_CHECKED
-    lv_obj_set_style_text_font(ui_scr->sys_menu_imgbtn_4, &lv_font_FangZhengKaiTiJianTi_1_24,
-                               LV_PART_MAIN | LV_STATE_CHECKED);
-    lv_imgbtn_set_src(ui_scr->sys_menu_imgbtn_4, LV_IMGBTN_STATE_RELEASED, NULL,
-                      gui_get_res_path(GUI_RES_IMAGE_4225207_0_PNG), NULL);
-    lv_imgbtn_set_src(ui_scr->sys_menu_imgbtn_4, LV_IMGBTN_STATE_PRESSED, NULL,
-                      gui_get_res_path(GUI_RES_IMAGE_4225207_0_PNG), NULL);
-    lv_imgbtn_set_src(ui_scr->sys_menu_imgbtn_4, LV_IMGBTN_STATE_CHECKED_RELEASED, NULL,
-                      gui_get_res_path(GUI_RES_IMAGE_4225207_1_PNG), NULL);
-    lv_imgbtn_set_src(ui_scr->sys_menu_imgbtn_4, LV_IMGBTN_STATE_CHECKED_PRESSED, NULL,
-                      gui_get_res_path(GUI_RES_IMAGE_4225207_1_PNG), NULL);
+    lv_obj_set_style_text_font(ui_scr->sys_menu_imgbtn_4, &lv_font_FangZhengKaiTiJianTi_1_24, LV_PART_MAIN | LV_STATE_CHECKED);
+    lv_imgbtn_set_src(ui_scr->sys_menu_imgbtn_4, LV_IMGBTN_STATE_RELEASED, NULL, gui_get_res_path(GUI_RES_IMAGE_4225207_0_PNG), NULL);
+    lv_imgbtn_set_src(ui_scr->sys_menu_imgbtn_4, LV_IMGBTN_STATE_PRESSED, NULL, gui_get_res_path(GUI_RES_IMAGE_4225207_0_PNG), NULL);
+    lv_imgbtn_set_src(ui_scr->sys_menu_imgbtn_4, LV_IMGBTN_STATE_CHECKED_RELEASED, NULL, gui_get_res_path(GUI_RES_IMAGE_4225207_1_PNG), NULL);
+    lv_imgbtn_set_src(ui_scr->sys_menu_imgbtn_4, LV_IMGBTN_STATE_CHECKED_PRESSED, NULL, gui_get_res_path(GUI_RES_IMAGE_4225207_1_PNG), NULL);
     lv_obj_add_flag(ui_scr->sys_menu_imgbtn_4, LV_OBJ_FLAG_CHECKABLE);
     ui_scr->sys_menu_imgbtn_4_label = lv_label_create(ui_scr->sys_menu_imgbtn_4);
     lv_label_set_text(ui_scr->sys_menu_imgbtn_4_label, "");
@@ -374,14 +346,10 @@ lv_obj_t *setup_scr_sys_menu(lv_ui *ui)
 
     //Set style for sys_menu_imgbtn_5. Part: LV_PART_MAIN, State: LV_STATE_PRESSED
     lv_obj_set_style_bg_color(ui_scr->sys_menu_imgbtn_5, lv_color_make(0xAA, 0xAA, 0xAA), LV_PART_MAIN | LV_STATE_PRESSED);
-    lv_imgbtn_set_src(ui_scr->sys_menu_imgbtn_5, LV_IMGBTN_STATE_RELEASED, NULL,
-                      gui_get_res_path(GUI_RES_IMAGE_4225207_2_PNG), NULL);
-    lv_imgbtn_set_src(ui_scr->sys_menu_imgbtn_5, LV_IMGBTN_STATE_PRESSED, NULL,
-                      gui_get_res_path(GUI_RES_IMAGE_4225207_2_PNG), NULL);
-    lv_imgbtn_set_src(ui_scr->sys_menu_imgbtn_5, LV_IMGBTN_STATE_CHECKED_RELEASED, NULL,
-                      gui_get_res_path(GUI_RES_IMAGE_4225207_2_PNG), NULL);
-    lv_imgbtn_set_src(ui_scr->sys_menu_imgbtn_5, LV_IMGBTN_STATE_CHECKED_PRESSED, NULL,
-                      gui_get_res_path(GUI_RES_IMAGE_4225207_2_PNG), NULL);
+    lv_imgbtn_set_src(ui_scr->sys_menu_imgbtn_5, LV_IMGBTN_STATE_RELEASED, NULL, gui_get_res_path(GUI_RES_IMAGE_4225207_2_PNG), NULL);
+    lv_imgbtn_set_src(ui_scr->sys_menu_imgbtn_5, LV_IMGBTN_STATE_PRESSED, NULL, gui_get_res_path(GUI_RES_IMAGE_4225207_2_PNG), NULL);
+    lv_imgbtn_set_src(ui_scr->sys_menu_imgbtn_5, LV_IMGBTN_STATE_CHECKED_RELEASED, NULL, gui_get_res_path(GUI_RES_IMAGE_4225207_2_PNG), NULL);
+    lv_imgbtn_set_src(ui_scr->sys_menu_imgbtn_5, LV_IMGBTN_STATE_CHECKED_PRESSED, NULL, gui_get_res_path(GUI_RES_IMAGE_4225207_2_PNG), NULL);
     lv_obj_add_flag(ui_scr->sys_menu_imgbtn_5, LV_OBJ_FLAG_CHECKABLE);
     ui_scr->sys_menu_imgbtn_5_label = lv_label_create(ui_scr->sys_menu_imgbtn_5);
     lv_label_set_text(ui_scr->sys_menu_imgbtn_5_label, "");
@@ -394,14 +362,10 @@ lv_obj_t *setup_scr_sys_menu(lv_ui *ui)
     lv_obj_set_size(ui_scr->sys_menu_imgbtn_6, 64, 64);
     lv_obj_set_scrollbar_mode(ui_scr->sys_menu_imgbtn_6, LV_SCROLLBAR_MODE_OFF);
     ui_style_set(ui_scr->sys_menu_imgbtn_6, GUI_CTRL_IMGBTN);
-    lv_imgbtn_set_src(ui_scr->sys_menu_imgbtn_6, LV_IMGBTN_STATE_RELEASED, NULL,
-                      gui_get_res_path(GUI_RES_IMAGE_4225207_3_PNG), NULL);
-    lv_imgbtn_set_src(ui_scr->sys_menu_imgbtn_6, LV_IMGBTN_STATE_PRESSED, NULL,
-                      gui_get_res_path(GUI_RES_IMAGE_4225207_3_PNG), NULL);
-    lv_imgbtn_set_src(ui_scr->sys_menu_imgbtn_6, LV_IMGBTN_STATE_CHECKED_RELEASED, NULL,
-                      gui_get_res_path(GUI_RES_IMAGE_4225207_3_PNG), NULL);
-    lv_imgbtn_set_src(ui_scr->sys_menu_imgbtn_6, LV_IMGBTN_STATE_CHECKED_PRESSED, NULL,
-                      gui_get_res_path(GUI_RES_IMAGE_4225207_3_PNG), NULL);
+    lv_imgbtn_set_src(ui_scr->sys_menu_imgbtn_6, LV_IMGBTN_STATE_RELEASED, NULL, gui_get_res_path(GUI_RES_IMAGE_4225207_3_PNG), NULL);
+    lv_imgbtn_set_src(ui_scr->sys_menu_imgbtn_6, LV_IMGBTN_STATE_PRESSED, NULL, gui_get_res_path(GUI_RES_IMAGE_4225207_3_PNG), NULL);
+    lv_imgbtn_set_src(ui_scr->sys_menu_imgbtn_6, LV_IMGBTN_STATE_CHECKED_RELEASED, NULL, gui_get_res_path(GUI_RES_IMAGE_4225207_3_PNG), NULL);
+    lv_imgbtn_set_src(ui_scr->sys_menu_imgbtn_6, LV_IMGBTN_STATE_CHECKED_PRESSED, NULL, gui_get_res_path(GUI_RES_IMAGE_4225207_3_PNG), NULL);
     lv_obj_add_flag(ui_scr->sys_menu_imgbtn_6, LV_OBJ_FLAG_CHECKABLE);
     ui_scr->sys_menu_imgbtn_6_label = lv_label_create(ui_scr->sys_menu_imgbtn_6);
     lv_label_set_text(ui_scr->sys_menu_imgbtn_6_label, "");
@@ -412,11 +376,24 @@ lv_obj_t *setup_scr_sys_menu(lv_ui *ui)
     ui_scr->sys_menu_img_8 = lv_img_create(ui_scr->sys_menu_view_6);
     lv_obj_set_pos(ui_scr->sys_menu_img_8, 18, 7);
     lv_obj_set_size(ui_scr->sys_menu_img_8, 200, 200);
+    lv_obj_add_flag(ui_scr->sys_menu_img_8, LV_OBJ_FLAG_CLICKABLE);
     ui_style_set(ui_scr->sys_menu_img_8, GUI_CTRL_IMG);
 
     //Set style for sys_menu_img_8. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
     lv_obj_set_style_img_recolor(ui_scr->sys_menu_img_8, lv_color_make(0xff, 0xff, 0xff), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_img_recolor_opa(ui_scr->sys_menu_img_8, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    //Write codes sys_menu_view_song_info
+    ui_scr->sys_menu_view_song_info = lv_obj_create(ui_scr->sys_menu_view_6);
+    lv_obj_set_pos(ui_scr->sys_menu_view_song_info, 233, 24);
+    lv_obj_set_size(ui_scr->sys_menu_view_song_info, 218, 59);
+    lv_obj_set_scrollbar_mode(ui_scr->sys_menu_view_song_info, LV_SCROLLBAR_MODE_OFF);
+    ui_style_set(ui_scr->sys_menu_view_song_info, GUI_CTRL_CONT);
+
+    //Set style for sys_menu_view_song_info. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
+    lv_obj_set_style_radius(ui_scr->sys_menu_view_song_info, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(ui_scr->sys_menu_view_song_info, lv_color_make(0xff, 0xff, 0xff), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(ui_scr->sys_menu_view_song_info, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     lv_obj_update_layout(ui_scr->sys_menu);
     ui_scr->sys_menu_del = false;

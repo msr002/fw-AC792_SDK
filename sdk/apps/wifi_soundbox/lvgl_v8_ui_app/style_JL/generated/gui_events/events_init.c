@@ -28,7 +28,7 @@ static void music_player_event_handler(lv_event_t *e)
         if (dir & LV_DIR_LEFT) {
             gui_scr_t *screen = ui_get_scr(GUI_SCREEN_SYS_MENU);
             if (screen != NULL) {
-                ui_load_scr_anim(&guider_ui, screen, LV_SCR_LOAD_ANIM_FADE_IN, 0, 0, true, true, false);
+                ui_load_scr_anim(&guider_ui, screen, LV_SCR_LOAD_ANIM_FADE_IN, 0, 0, false, true, false);
             }
         }
     }
@@ -166,7 +166,7 @@ static void sys_menu_event_handler(lv_event_t *e)
         if (dir & LV_DIR_RIGHT) {
             gui_scr_t *screen = ui_get_scr(GUI_SCREEN_MUSIC_PLAYER);
             if (screen != NULL) {
-                ui_load_scr_anim(&guider_ui, screen, LV_SCR_LOAD_ANIM_FADE_IN, 0, 0, true, true, false);
+                ui_load_scr_anim(&guider_ui, screen, LV_SCR_LOAD_ANIM_FADE_IN, 0, 0, false, true, false);
             }
         }
     }
@@ -183,7 +183,7 @@ static void sys_menu_view_1_event_handler(lv_event_t *e)
     case LV_EVENT_CLICKED: {
         gui_scr_t *screen = ui_get_scr(GUI_SCREEN_MUSIC_PLAYER);
         if (screen != NULL) {
-            ui_load_scr_anim(&guider_ui, screen, LV_SCR_LOAD_ANIM_NONE, 0, 0, true, true, false);
+            ui_load_scr_anim(&guider_ui, screen, LV_SCR_LOAD_ANIM_NONE, 0, 0, false, true, false);
         }
     }
     break;
@@ -228,7 +228,7 @@ static void sys_menu_view_6_event_handler(lv_event_t *e)
     case LV_EVENT_CLICKED: {
         gui_scr_t *screen = ui_get_scr(GUI_SCREEN_MUSIC_PLAYER);
         if (screen != NULL) {
-            ui_load_scr_anim(&guider_ui, screen, LV_SCR_LOAD_ANIM_NONE, 0, 0, true, true, false);
+            ui_load_scr_anim(&guider_ui, screen, LV_SCR_LOAD_ANIM_NONE, 0, 0, false, true, false);
         }
     }
     break;

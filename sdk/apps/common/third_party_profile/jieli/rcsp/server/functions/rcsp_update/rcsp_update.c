@@ -356,7 +356,7 @@ int JL_rcsp_update_cmd_resp(void *priv, u8 OpCode, u8 OpCode_SN, u8 *data, u16 l
             u8 can_update_flag = UPDATE_FLAG_FW_INFO_ERR;
             set_curr_update_type(data[0]);
 #if (TCFG_USER_TWS_ENABLE && OTA_TWS_SAME_TIME_ENABLE)
-            int get_bt_tws_connect_status();
+            bool get_bt_tws_connect_status(void);
             if (get_bt_tws_connect_status() || (!support_dual_bank_update_en)) {
                 can_update_flag = UPDATE_FLAG_OK;
             } else {
@@ -858,9 +858,9 @@ void rcsp_before_enter_db_update_mode() //进入双备份升级前
 {
     log_info("%s", __func__);
     rcsp_update_flag = 1;
-    void sys_auto_shut_down_disable(void);
     if (bt_get_total_connect_dev() == 0) {
-        sys_auto_shut_down_disable();
+        log_error("sys auto shut down disable");
+        /* sys_auto_shut_down_disable(); */
     }
 #if TCFG_USER_TWS_ENABLE
     int tws_api_get_role(void);
@@ -874,14 +874,14 @@ void rcsp_before_enter_db_update_mode() //进入双备份升级前
 #endif
 }
 
-extern void sys_auto_shut_down_enable(void);
 void rcsp_db_update_fail_deal() //双备份升级失败处理
 {
     log_info("%s", __func__);
     if (rcsp_update_flag) {
         rcsp_update_flag = 0;
         if (bt_get_total_connect_dev() == 0) {
-            sys_auto_shut_down_enable();
+            log_error("sys auto shut down disable");
+            /* sys_auto_shut_down_enable(); */
         }
     }
     /* cpu_reset(); //升级失败直接复位 */

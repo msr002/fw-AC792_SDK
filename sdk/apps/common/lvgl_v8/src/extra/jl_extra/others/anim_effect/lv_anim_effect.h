@@ -12,17 +12,6 @@ extern "C"
  * 否则，旋转和缩放都会显示异常；
  */
 #if LV_USE_ANIM_EFFECT
-
-typedef struct _lv_anim_effect_args_t {
-    int32_t duration; // 效果时长
-    int32_t delay;    // 延时
-    // uint16_t repeat_cnt;   // 0:一直重复
-    // uint32_t repeat_delay; // 重复延时时间 （重复间隔）
-    // uint8_t early_apply;   // 动画是否加载的时候就执行
-} lv_anim_effect_args_t;
-
-
-
 #include "lv_anim_effect_global.h"
 #include "lv_anim_effect_attention.h"
 #include "lv_anim_effect_bounce.h"
@@ -38,3 +27,4 @@ typedef struct _lv_anim_effect_args_t {
 #endif
 
 #endif /*LV_ANIM_EFFECT_H*/
+

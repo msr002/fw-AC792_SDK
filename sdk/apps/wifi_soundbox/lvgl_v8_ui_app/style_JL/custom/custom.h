@@ -21,12 +21,11 @@ extern "C" {
 #include "video.h"
 #include "yuv_to_rgb.h"
 #include "yuv_soft_scalling.h"
+#include "ui_action_song_info.h"
 #endif
-
 #define CONFIG_FONT_TTF_NAME                "30100000.ttf"
 #define CONFIG_FONT_TTF_PATH                CONFIG_ROOT_PATH\
                                             CONFIG_FONT_TTF_NAME
-
 #define MAX_SPECTRUM_SECTION_NUM    32
 #define USE_SPECTRUM_SECTION_NUM    16
 
@@ -60,4 +59,3 @@ void ui_music_spectrum_set_bg_avg_color(uint8_t r, uint8_t g, uint8_t b);
 }
 #endif
 #endif /* EVENT_CB_H_ */
-
